@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
@@ -162,6 +163,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           IconButton(
             icon: Icon(Icons.lightbulb_outline_rounded),
             onPressed: () {
+              HapticFeedback.lightImpact();
               showAppBottomSheet(
                 context: context,
                 builder: (_) => const Padding(
@@ -173,14 +175,20 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           ),
           IconButton(
             icon: Icon(Icons.grid_view_rounded),
-            onPressed: () => context.push('/progress/yearly-activity'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.push('/progress/yearly-activity');
+            },
           ),
           if (_selectedMetric != MetricType.bmi &&
               _selectedMetric != MetricType.calories &&
               _selectedMetric != MetricType.protein)
             IconButton(
               icon: Icon(Icons.add_rounded),
-              onPressed: _openManualEntry,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _openManualEntry();
+              },
             ),
         ],
       ),

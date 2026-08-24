@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/layout_insets.dart';
@@ -87,18 +88,26 @@ class AppSheet extends StatelessWidget {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * maxHeightFactor,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(kSheetRadius),
         ),
-        decoration: BoxDecoration(
-          color: context.colors.card,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(kSheetRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * maxHeightFactor,
+            ),
+            decoration: BoxDecoration(
+              color: context.colors.card.withValues(alpha: 0.85),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(kSheetRadius),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: content,
           ),
         ),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-        child: content,
       ),
     );
   }

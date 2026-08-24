@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/home/meal_detail_screen.dart';
@@ -357,20 +359,24 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: context.colors.card,
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(color: context.colors.border.withValues(alpha: 0.6)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colors.textDark.withValues(alpha: 0.12),
-                        blurRadius: 20,
-                        offset: Offset(0, 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: context.colors.card.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(color: context.colors.border.withValues(alpha: 0.6)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.colors.textDark.withValues(alpha: 0.12),
+                            blurRadius: 20,
+                            offset: Offset(0, 10),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -397,6 +403,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                       ),
                     ],
                   ),
+                ),
+                ),
                 ),
               ],
             ),
