@@ -492,6 +492,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 await ref.read(profileProvider.notifier).updateGeminiKey(key);
                 
                 if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text('AI settings saved successfully'),
+                      backgroundColor: context.colors.green,
+                    ),
+                  );
                   Navigator.of(ctx).pop();
                 }
               },

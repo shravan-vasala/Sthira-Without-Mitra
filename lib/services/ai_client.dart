@@ -40,9 +40,8 @@ class AiClient {
   final AiClientCircuitBreaker _circuitBreaker = AiClientCircuitBreaker();
   
   static const modelsToTry = [
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
   ];
 
   AiClient({this.cache});

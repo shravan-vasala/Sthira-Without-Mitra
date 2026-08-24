@@ -630,8 +630,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           final total = validSteps.reduce((a, b) => a + b);
           final avg = total ~/ validSteps.length;
           final maxVal = validSteps.reduce((a, b) => a > b ? a : b);
-          labels = ['AVERAGE\n(${validSteps.length} days)', 'TOTAL', 'MAX'];
-          values = [avg.toString(), total.toInt().toString(), maxVal.toInt().toString()];
+          final avgFmt = NumberFormat('#,###').format(avg);
+          final maxFmt = NumberFormat('#,###').format(maxVal.toInt());
+          final totalFmt = total >= 10000 
+              ? '${(total / 1000).toStringAsFixed(1)}k' 
+              : NumberFormat('#,###').format(total.toInt());
+              
+          labels = ['AVERAGE', 'TOTAL', 'MAX'];
+          values = [avgFmt, totalFmt, maxFmt];
         }
       } else {
         final vals = validData.map((d) => d.value).toList();
@@ -641,16 +647,16 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         
         if (_selectedMetric == MetricType.weight) {
           final unit = useKg ? 'kg' : 'lb';
-          labels = ['AVERAGE\n(${vals.length} days)', 'MAX', 'MIN'];
+          labels = ['AVERAGE', 'MAX', 'MIN'];
           values = ['${avg.toStringAsFixed(1)} $unit', '${maxVal.toStringAsFixed(1)} $unit', '${minVal.toStringAsFixed(1)} $unit'];
         } else if (_selectedMetric == MetricType.sleep || _selectedMetric == MetricType.screenTime) {
-          labels = ['AVERAGE\n(${vals.length} days)', 'MAX', 'MIN'];
+          labels = ['AVERAGE', 'MAX', 'MIN'];
           values = ['${avg.toStringAsFixed(1)}h', '${maxVal.toStringAsFixed(1)}h', '${minVal.toStringAsFixed(1)}h'];
         } else if (_selectedMetric == MetricType.bmi) {
-          labels = ['AVERAGE\n(${vals.length} days)', 'MAX', 'MIN'];
+          labels = ['AVERAGE', 'MAX', 'MIN'];
           values = [avg.toStringAsFixed(1), maxVal.toStringAsFixed(1), minVal.toStringAsFixed(1)];
         } else if (_selectedMetric == MetricType.bodyFat) {
-          labels = ['AVERAGE\n(${vals.length} days)', 'MAX', 'MIN'];
+          labels = ['AVERAGE', 'MAX', 'MIN'];
           values = ['${avg.toStringAsFixed(1)}%', '${maxVal.toStringAsFixed(1)}%', '${minVal.toStringAsFixed(1)}%'];
         }
       }
@@ -721,8 +727,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       final avg = sum ~/ validCalories.length;
       final maxVal = validCalories.reduce((a, b) => a > b ? a : b);
       final minVal = validCalories.reduce((a, b) => a < b ? a : b);
-      labels = ['AVERAGE\n(${validCalories.length} days)', 'MAX', 'MIN'];
-      values = [avg.toString(), maxVal.toString(), minVal.toString()];
+      labels = ['AVERAGE', 'MAX', 'MIN'];
+      values = [NumberFormat('#,###').format(avg), NumberFormat('#,###').format(maxVal), NumberFormat('#,###').format(minVal)];
     }
 
     ChartTimeFormat format;
@@ -775,7 +781,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (validPoints.isNotEmpty) {
       final avg = validPoints.reduce((a, b) => a + b) / validPoints.length;
       final maxVal = validPoints.reduce((a, b) => a > b ? a : b);
-      labels = ['AVERAGE\n(${validPoints.length} days)', 'MAX'];
+      labels = ['AVERAGE', 'MAX'];
       values = ['${avg.toStringAsFixed(0)}g', '${maxVal.toStringAsFixed(0)}g'];
     }
 

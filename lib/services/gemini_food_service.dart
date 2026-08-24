@@ -240,7 +240,7 @@ Return ONLY a JSON object with the exact following structure. Do NOT include mar
 
     try {
       final response = await client.models.generateContent(
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         request: GenerateContentRequest(
           contents: [Content.text("Respond exactly with 'OK'")],
         ),
@@ -265,9 +265,8 @@ Return ONLY a JSON object with the exact following structure. Do NOT include mar
     Future<Map<String, dynamic>?> Function(String model, bool useFirebase) call,
   ) async {
     const modelsToTry = [
-      'gemini-1.5-pro',
-      'gemini-1.5-flash',
-      'gemini-1.5-flash-8b',
+      'gemini-2.5-pro',
+      'gemini-2.5-flash',
     ];
 
     final hasManualKey = apiKey != null && apiKey!.isNotEmpty;

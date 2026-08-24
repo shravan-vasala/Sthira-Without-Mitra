@@ -56,8 +56,7 @@ class SharedChartCard extends StatelessWidget {
 
   bool get _isCount => isSteps || isCalories || isProtein;
 
-  /// Daily totals read clearer as bars; body metrics stay as lines.
-  bool get _useBars => _isCount;
+  bool get _useBars => _isCount && timeFormat != ChartTimeFormat.sixMonths;
 
   String _unitSuffix() {
     if (isSteps) return ' steps';
