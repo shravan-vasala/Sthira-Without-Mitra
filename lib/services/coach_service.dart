@@ -113,7 +113,7 @@ Return ONLY a valid JSON object with the exact following structure:
         "Morning, $n! Today is a blank canvas. Let's crush it! 🎨",
         "Wakey wakey, $n! Time to get those endorphins flowing. ⚡",
         "Good morning! Let's start the day with a healthy choice, $n. 🍎",
-        "A new day is a new opportunity, $n. Go get 'em! 🚀",
+        "A new day is a new opportunity, $n. Go get 'em!",
         "Morning, $n! Take a deep breath and let's tackle your goals. 🧘"
       ];
     } else if (hour < 18) {

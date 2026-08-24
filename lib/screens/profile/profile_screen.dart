@@ -252,7 +252,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 'Made with ❤️ for Bodamma',
                 style: TextStyle(
                   fontSize: 12,
-                  color: context.colors.textLight,
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.primary,
                 ),
               ),
               if (_appVersion.isNotEmpty) ...[

@@ -67,7 +67,7 @@ class BadgeRepository {
         category: 'streak',
         title: 'Unstoppable',
         description: 'Workout 7 days in a row',
-        iconEmoji: '🚀',
+        iconEmoji: '🔥',
         requiredProgress: 7,
       ),
     ];

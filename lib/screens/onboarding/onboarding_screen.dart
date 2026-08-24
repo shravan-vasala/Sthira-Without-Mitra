@@ -330,7 +330,7 @@ class _NavButtons extends StatelessWidget {
             ),
           SizedBox(width: 8),
           _PrimaryButton(
-            label: _isLastPage ? 'Get Started 🚀' : 'Next',
+            label: _isLastPage ? 'Get Started' : 'Next',
             onPressed: onNext,
           ),
         ],
@@ -395,7 +395,7 @@ class _WelcomePage extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(32),
             child: Image.asset(
-              'assets/icon/app_logo.png',
+              'assets/icon/app_icon.png',
               width: 200,
               height: 200,
               fit: BoxFit.cover,
@@ -452,24 +452,30 @@ class _WelcomePage extends StatelessWidget {
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।',
-                        style: TextStyle(
-                          color: context.colors.textMedium,
-                          fontSize: 16,
-                          height: 1.5,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।',
+                          style: TextStyle(
+                            color: context.colors.textMedium,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 8),
-                      Text(
-                        'మా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
-                        style: TextStyle(
-                          color: context.colors.textMedium,
-                          fontSize: 16,
-                          height: 1.5,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'మా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
+                          style: TextStyle(
+                            color: context.colors.textMedium,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),

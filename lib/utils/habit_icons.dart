@@ -18,6 +18,9 @@ class HabitIcons {
     (id: 'run', icon: Icons.directions_run_outlined),
     (id: 'smoke_free', icon: Icons.smoke_free_outlined),
     (id: 'greens', icon: Icons.eco_outlined),
+    (id: 'amla', icon: Icons.local_drink_outlined),
+    (id: 'skin', icon: Icons.face_retouching_natural_outlined),
+    (id: 'hair', icon: Icons.spa_outlined),
   ];
 
   static IconData resolve(String keyOrEmoji) {
@@ -58,6 +61,12 @@ class HabitIcons {
       case '🥦':
       case 'greens':
         return Icons.eco_outlined;
+      case 'amla':
+        return Icons.local_drink_outlined;
+      case 'skin':
+        return Icons.face_retouching_natural_outlined;
+      case 'hair':
+        return Icons.spa_outlined;
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.icon;
@@ -93,6 +102,12 @@ class HabitIcons {
         return 'smoke_free';
       case '🥦':
         return 'greens';
+      case 'amla':
+        return 'amla';
+      case 'skin':
+        return 'skin';
+      case 'hair':
+        return 'hair';
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.id;
