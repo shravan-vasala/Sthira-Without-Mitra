@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -438,6 +439,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 prefixIcon: Icon(Icons.key_rounded),
                 filled: true,
                 fillColor: context.colors.inputFill,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Get your Gemini API Key here',
+                  style: TextStyle(
+                    color: context.colors.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),
