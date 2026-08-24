@@ -33,6 +33,7 @@ class SharedChartCard extends StatelessWidget {
     this.emptyMessage = 'No data available for this period',
     this.targetValue,
     this.onPointLongPress,
+    this.expandChart = false,
   });
 
   final String title;
@@ -51,6 +52,7 @@ class SharedChartCard extends StatelessWidget {
   final String emptyMessage;
   final double? targetValue;
   final void Function(DateTime date, double value)? onPointLongPress;
+  final bool expandChart;
 
   bool get _isCount => isSteps || isCalories || isProtein;
 
@@ -67,82 +69,213 @@ class SharedChartCard extends StatelessWidget {
     return '';
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: context.colors.card,
-            borderRadius: BorderRadius.circular(kCardRadius),
-            boxShadow: [
-              BoxShadow(
-                color: context.colors.primary.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+  Widget _buildHeader(BuildContext context) {
+    if (timeFormat != ChartTimeFormat.sixMonths || data.isEmpty) {
+      return Row(
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: context.colors.textDark,
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
-                    ),
+          Spacer(),
+          if (showKgLbToggle)
+            GestureDetector(
+              onTap: onToggleUnit,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colors.lavenderCard,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  useKg ? 'KG' : 'LB',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.primary,
                   ),
-                  Spacer(),
-                  if (showKgLbToggle)
-                    GestureDetector(
-                      onTap: onToggleUnit,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.colors.lavenderCard,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          useKg ? 'KG' : 'LB',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.primary,
-                          ),
-                        ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
+    final startVal = sorted.first.value;
+    final currentVal = sorted.last.value;
+    final allVals = sorted.map((d) => d.value).toList();
+    final minVal = allVals.reduce(min);
+    final maxVal = allVals.reduce(max);
+    final change = currentVal - startVal;
+    final pctChange = startVal == 0 ? 0.0 : (change / startVal) * 100;
+    
+    final unit = _unitSuffix();
+    final fmt = (double v) => _isCount ? v.toInt().toString() : v.toStringAsFixed(1);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+           children: [
+              Text(
+                '$title — 6 Month Trend',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: context.colors.textDark,
+                ),
+              ),
+              Spacer(),
+              if (showKgLbToggle)
+                GestureDetector(
+                  onTap: onToggleUnit,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.colors.lavenderCard,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      useKg ? 'KG' : 'LB',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.primary,
                       ),
                     ),
-                ],
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                height: 200,
-                child: data.isEmpty
-                    ? Center(
-                        child: Text(
-                          emptyMessage,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: context.colors.textLight,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      )
-                    : _useBars
-                        ? _buildBarChart(context)
-                        : _buildLineChart(context),
-              ),
-            ],
-          ),
+                  ),
+                ),
+           ]
         ),
+        SizedBox(height: 16),
+        Row(
+          children: [
+            _buildStatBox(context, 'Start', '${fmt(startVal)}$unit'),
+            _buildStatBox(context, 'Current', '${fmt(currentVal)}$unit'),
+            _buildStatBox(context, 'Range (Min-Max)', '${fmt(minVal)} - ${fmt(maxVal)}'),
+            _buildStatBox(
+              context, 
+              'Change', 
+              '${change > 0 ? '+' : ''}${fmt(change)}',
+              subtitle: '${change > 0 ? '+' : ''}${pctChange.toStringAsFixed(1)}%',
+              valueColor: change > 0 ? context.colors.primary : (change < 0 ? context.colors.red : context.colors.textDark),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatBox(BuildContext context, String label, String value, {String? subtitle, Color? valueColor}) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(right: 6),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.colors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(fontSize: 9, color: context.colors.textLight),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? context.colors.textDark,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor ?? context.colors.textMedium,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chartArea = data.isEmpty
+        ? Center(
+            child: Text(
+              emptyMessage,
+              style: TextStyle(
+                fontSize: 14,
+                color: context.colors.textLight,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+        : _useBars
+            ? _buildBarChart(context)
+            : _buildLineChart(context);
+
+    if (!expandChart) {
+      chartArea = SizedBox(height: 200, child: chartArea);
+    } else {
+      chartArea = Expanded(child: chartArea);
+    }
+
+    Widget mainContainer = Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.colors.card,
+        borderRadius: BorderRadius.circular(kCardRadius),
+        boxShadow: [
+          BoxShadow(
+            color: context.colors.primary.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context),
+          SizedBox(height: 20),
+          chartArea,
+        ],
+      ),
+    );
+
+    if (expandChart) {
+      mainContainer = Expanded(child: mainContainer);
+    }
+
+    return Column(
+      children: [
+        mainContainer,
         SizedBox(height: 16),
         if (statLabels.isNotEmpty && statValues.isNotEmpty)
           Container(
@@ -234,10 +367,11 @@ class SharedChartCard extends StatelessWidget {
     return (minY, maxY);
   }
 
-  ExtraLinesData? _goalExtraLines(BuildContext context) {
-    if (targetValue == null) return null;
-    return ExtraLinesData(
-      horizontalLines: [
+  ExtraLinesData? _buildExtraLines(BuildContext context, {List<FlSpot>? spots}) {
+    final lines = <HorizontalLine>[];
+    
+    if (targetValue != null) {
+      lines.add(
         HorizontalLine(
           y: targetValue!,
           color: context.colors.orange.withValues(alpha: 0.85),
@@ -262,8 +396,48 @@ class SharedChartCard extends StatelessWidget {
             },
           ),
         ),
-      ],
-    );
+      );
+    }
+    
+    if (timeFormat == ChartTimeFormat.sixMonths && spots != null && spots.isNotEmpty) {
+       final minY_data = spots.map((s) => s.y).reduce(min);
+       final maxY_data = spots.map((s) => s.y).reduce(max);
+       
+       lines.add(
+         HorizontalLine(
+           y: maxY_data,
+           color: Colors.transparent,
+           strokeWidth: 0,
+           label: HorizontalLineLabel(
+             show: true,
+             alignment: Alignment.topLeft,
+             padding: const EdgeInsets.only(left: 4, bottom: 2),
+             style: TextStyle(fontSize: 10, color: context.colors.primary, fontWeight: FontWeight.bold),
+             labelResolver: (_) => 'Max ${maxY_data.toStringAsFixed(1)}'
+           )
+         )
+       );
+       
+       if (minY_data != maxY_data) {
+         lines.add(
+           HorizontalLine(
+             y: minY_data,
+             color: Colors.transparent,
+             strokeWidth: 0,
+             label: HorizontalLineLabel(
+               show: true,
+               alignment: Alignment.bottomRight,
+               padding: const EdgeInsets.only(right: 4, top: 2),
+               style: TextStyle(fontSize: 10, color: context.colors.red, fontWeight: FontWeight.bold),
+               labelResolver: (_) => 'Min ${minY_data.toStringAsFixed(1)}'
+             )
+           )
+         );
+       }
+    }
+    
+    if (lines.isEmpty) return null;
+    return ExtraLinesData(horizontalLines: lines);
   }
 
   Widget _bottomTitle(BuildContext context, double value, TitleMeta meta) {
@@ -288,6 +462,9 @@ class SharedChartCard extends StatelessWidget {
           date.day == lastDay;
       if (!show) return const SizedBox.shrink();
       label = date.day.toString();
+    } else if (timeFormat == ChartTimeFormat.sixMonths) {
+      if (date.day != 1) return const SizedBox.shrink();
+      label = DateFormat('MMM\nyy').format(date);
     } else {
       if (date.day != 1) return const SizedBox.shrink();
       label = DateFormat('MMM').format(date);
@@ -443,7 +620,7 @@ class SharedChartCard extends StatelessWidget {
             dashArray: [4, 4],
           ),
         ),
-        extraLinesData: _goalExtraLines(context),
+        extraLinesData: _buildExtraLines(context),
         titlesData: _titlesData(context),
         borderData: FlBorderData(show: false),
         barGroups: groups,
@@ -500,8 +677,32 @@ class SharedChartCard extends StatelessWidget {
           barWidth: spots.length > 31 ? 1.5 : 2.5, // Thinner line for dense data
           isStrokeCapRound: true,
           dotData: FlDotData(
-            show: showDots || segment.length == 1,
+            show: true,
+            checkToShowDot: (spot, barData) {
+              if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
+                 final minY_data = spots.map((s) => s.y).reduce(min);
+                 final maxY_data = spots.map((s) => s.y).reduce(max);
+                 if (spot.y == minY_data || spot.y == maxY_data || spot.x == barData.spots.last.x) {
+                    return true;
+                 }
+                 return false;
+              }
+              return showDots || segment.length == 1;
+            },
             getDotPainter: (spot, percent, bar, index) {
+              if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
+                 final minY_data = spots.map((s) => s.y).reduce(min);
+                 final maxY_data = spots.map((s) => s.y).reduce(max);
+                 if (spot.y == minY_data && spot.y != maxY_data) {
+                    return FlDotCirclePainter(radius: 4.5, color: context.colors.red, strokeWidth: 1.5, strokeColor: context.colors.card);
+                 }
+                 if (spot.y == maxY_data) {
+                    return FlDotCirclePainter(radius: 4.5, color: context.colors.primary, strokeWidth: 1.5, strokeColor: context.colors.card);
+                 }
+                 if (spot.x == barData.spots.last.x) {
+                    return FlDotCirclePainter(radius: 4.5, color: context.colors.primary, strokeWidth: 1.5, strokeColor: context.colors.card);
+                 }
+              }
               return FlDotCirclePainter(
                 radius: 3.5,
                 color: primary,
@@ -515,10 +716,15 @@ class SharedChartCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                primary.withValues(alpha: 0.22),
-                primary.withValues(alpha: 0.0),
-              ],
+              colors: timeFormat == ChartTimeFormat.sixMonths
+                ? [
+                    primary.withValues(alpha: 0.65),
+                    primary.withValues(alpha: 0.05),
+                  ]
+                : [
+                    primary.withValues(alpha: 0.22),
+                    primary.withValues(alpha: 0.0),
+                  ],
             ),
           ),
         ),
@@ -539,7 +745,7 @@ class SharedChartCard extends StatelessWidget {
             dashArray: [4, 4],
           ),
         ),
-        extraLinesData: _goalExtraLines(context),
+        extraLinesData: _buildExtraLines(context, spots: spots),
         titlesData: _titlesData(context),
         borderData: FlBorderData(show: false),
         lineTouchData: LineTouchData(

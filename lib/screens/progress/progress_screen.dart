@@ -160,6 +160,18 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             : null,
         actions: [
           IconButton(
+            icon: Icon(Icons.lightbulb_outline_rounded),
+            onPressed: () {
+              showAppBottomSheet(
+                context: context,
+                builder: (_) => const Padding(
+                  padding: EdgeInsets.only(bottom: 24),
+                  child: InsightsCard(),
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.grid_view_rounded),
             onPressed: () => context.push('/progress/yearly-activity'),
           ),
@@ -279,33 +291,26 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           SizedBox(height: 8),
 
           Expanded(
-            child: SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+            child: Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: Column(
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 350),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      );
-                    },
-                    child: KeyedSubtree(
-                      key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}'),
-                      child: _selectedMetric == MetricType.calories
-                          ? _buildCaloriesChart(startStr, endStr, profile)
-                          : _selectedMetric == MetricType.protein
-                            ? _buildProteinChart(startStr, endStr, profile)
-                            : _buildChart(logs, profile.useKg, profile),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const InsightsCard(),
-                ],
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}'),
+                  child: _selectedMetric == MetricType.calories
+                      ? _buildCaloriesChart(startStr, endStr, profile)
+                      : _selectedMetric == MetricType.protein
+                        ? _buildProteinChart(startStr, endStr, profile)
+                        : _buildChart(logs, profile.useKg, profile),
+                ),
               ),
             ),
           ),
@@ -676,6 +681,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               : (profile.targetWeight as double) * 2.20462)
           : null,
       onPointLongPress: _handlePointLongPress,
+      expandChart: true,
     );
   }
 
@@ -736,6 +742,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       emptyMessage: 'No calories logged yet.',
       targetValue: profile.targetCalories.toDouble(),
       onPointLongPress: null,
+      expandChart: true,
     );
   }
 
@@ -790,6 +797,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       emptyMessage: 'No protein logged yet.',
       targetValue: profile.targetProteinG.toDouble(),
       onPointLongPress: null,
+      expandChart: true,
     );
   }
 

@@ -107,14 +107,15 @@ class _BadgeItem extends StatelessWidget {
           color: isUnlocked ? context.colors.primary.withOpacity(0.3) : context.colors.border,
         ),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Opacity(
             opacity: isUnlocked ? 1.0 : 0.3,
             child: Text(
               badge.iconEmoji,
-              style: const TextStyle(fontSize: 32),
+              style: const TextStyle(fontSize: 28), // Slightly smaller emoji to save space
             ),
           ),
           const SizedBox(height: 8),
@@ -124,7 +125,8 @@ class _BadgeItem extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10, // Reduced from 11
+              height: 1.1, // Tighter line height
               fontWeight: isUnlocked ? FontWeight.bold : FontWeight.normal,
               color: isUnlocked ? context.colors.textDark : context.colors.textMedium,
             ),

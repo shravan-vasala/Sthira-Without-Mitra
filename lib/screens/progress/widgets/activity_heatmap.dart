@@ -31,28 +31,7 @@ class ActivityHeatmap extends ConsumerWidget {
         final totalCells = 365 + startWeekday;
         final totalColumns = (totalCells / 7).ceil();
         
-        // Pre-calculate month labels
-        final monthLabels = <Widget>[];
         int lastMonth = -1;
-        for (int col = 0; col < totalColumns; col++) {
-          final dayOffset = (col * 7) - startWeekday;
-          final d = startDate.add(Duration(days: dayOffset >= 0 ? dayOffset : 0));
-          if (d.month != lastMonth) {
-            monthLabels.add(
-              Container(
-                width: 14.0 * 4, // Approx 4 columns width to prevent overlap
-                padding: const EdgeInsets.only(left: 2),
-                child: Text(
-                  DateFormat('MMM').format(d),
-                  style: TextStyle(fontSize: 10, color: context.colors.textLight),
-                ),
-              )
-            );
-            lastMonth = d.month;
-          } else {
-            monthLabels.add(const SizedBox(width: 14));
-          }
-        }
         
         return Container(
           padding: const EdgeInsets.all(20),
@@ -91,87 +70,109 @@ class ActivityHeatmap extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 24),
+              // Day Headers (Fixed at top)
               Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // Day Labels (Fixed on left)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0, top: 16.0), // top padding to align with grid below month labels
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const SizedBox(height: 14), // Mon
-                        Text('Mon', style: TextStyle(fontSize: 10, color: context.colors.textLight, height: 1.4)),
-                        const SizedBox(height: 14), // Tue
-                        const SizedBox(height: 14), // Wed
-                        Text('Wed', style: TextStyle(fontSize: 10, color: context.colors.textLight, height: 1.4)),
-                        const SizedBox(height: 14), // Thu
-                        const SizedBox(height: 14), // Fri
-                        Text('Fri', style: TextStyle(fontSize: 10, color: context.colors.textLight, height: 1.4)),
-                        const SizedBox(height: 14), // Sat
-                        const SizedBox(height: 14), // Sun
-                      ],
-                    ),
-                  ),
-                  
-                  // Scrollable Heatmap
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      reverse: true, // Scroll to the end (today) by default
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Month Labels
-                          Row(
-                            children: monthLabels,
-                          ),
-                          const SizedBox(height: 4),
-                          // Grid
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: List.generate(totalColumns, (colIndex) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: List.generate(7, (rowIndex) {
-                                  final cellIndex = colIndex * 7 + rowIndex;
-                                  final dayOffset = cellIndex - startWeekday;
-                                  
-                                  if (dayOffset < 0 || dayOffset >= 365) {
-                                    return Container(
-                                      width: 12,
-                                      height: 12,
-                                      margin: const EdgeInsets.all(1),
-                                    );
-                                  }
-                                  
-                                  final currentDate = startDate.add(Duration(days: dayOffset));
-                                  final score = heatmapData[currentDate] ?? 0;
-                                  final dateStr = DateFormat('MMM dd, yyyy').format(currentDate);
-                                  
-                                  return Tooltip(
-                                    message: '\$dateStr\nScore: \$score',
-                                    child: Container(
-                                      width: 12,
-                                      height: 12,
-                                      margin: const EdgeInsets.all(1),
-                                      decoration: BoxDecoration(
-                                        color: _getColorForScore(context, score),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    ),
-                                  );
-                                }),
-                              );
-                            }),
-                          ),
-                        ],
+                  const SizedBox(width: 40), // Space for month labels
+                  ...['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => 
+                    Container(
+                      width: 12,
+                      margin: const EdgeInsets.symmetric(horizontal: 1),
+                      alignment: Alignment.center,
+                      child: Text(
+                        day, 
+                        style: TextStyle(
+                          fontSize: 10, 
+                          fontWeight: FontWeight.bold,
+                          color: context.colors.textMedium
+                        ),
                       ),
-                    ),
+                    )
+                  )
+                ]
+              ),
+              const SizedBox(height: 8),
+              
+              // Scrollable Vertical Heatmap
+              SizedBox(
+                height: 350, // Fixed height for vertical scrolling within bottom sheet
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  reverse: true, // Scroll to bottom (today)
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: List.generate(totalColumns, (rowIndex) {
+                      // Check if a new month starts in this row
+                      String monthLabel = '';
+                      for (int colIndex = 0; colIndex < 7; colIndex++) {
+                        final cellIndex = rowIndex * 7 + colIndex;
+                        final dayOffset = cellIndex - startWeekday;
+                        if (dayOffset >= 0 && dayOffset < 365) {
+                          final currentDate = startDate.add(Duration(days: dayOffset));
+                          if (currentDate.month != lastMonth) {
+                            monthLabel = DateFormat('MMM').format(currentDate);
+                            lastMonth = currentDate.month;
+                            break; // found the first month boundary in this row
+                          }
+                        }
+                      }
+
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Minimal Month Hinting
+                          SizedBox(
+                            width: 32,
+                            child: monthLabel.isNotEmpty 
+                              ? Text(
+                                  monthLabel,
+                                  style: TextStyle(
+                                    fontSize: 10, 
+                                    fontWeight: FontWeight.w600,
+                                    color: context.colors.textLight
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ) 
+                              : null,
+                          ),
+                          const SizedBox(width: 8),
+                          
+                          // Grid Row (1 Week)
+                          ...List.generate(7, (colIndex) {
+                            final cellIndex = rowIndex * 7 + colIndex;
+                            final dayOffset = cellIndex - startWeekday;
+                            
+                            if (dayOffset < 0 || dayOffset >= 365) {
+                              return Container(
+                                width: 12,
+                                height: 12,
+                                margin: const EdgeInsets.all(1),
+                              );
+                            }
+                            
+                            final currentDate = startDate.add(Duration(days: dayOffset));
+                            final score = heatmapData[currentDate] ?? 0;
+                            final dateStr = DateFormat('MMM dd, yyyy').format(currentDate);
+                            
+                            return Tooltip(
+                              message: '$dateStr\nScore: $score',
+                              child: Container(
+                                width: 12,
+                                height: 12,
+                                margin: const EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: _getColorForScore(context, score),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      );
+                    }),
                   ),
-                ],
+                ),
               ),
             ],
           ),
