@@ -699,7 +699,7 @@ class SharedChartCard extends StatelessWidget {
                  if (spot.y == maxY_data) {
                     return FlDotCirclePainter(radius: 4.5, color: context.colors.primary, strokeWidth: 1.5, strokeColor: context.colors.card);
                  }
-                 if (spot.x == barData.spots.last.x) {
+                 if (spot.x == bar.spots.last.x) {
                     return FlDotCirclePainter(radius: 4.5, color: context.colors.primary, strokeWidth: 1.5, strokeColor: context.colors.card);
                  }
               }
