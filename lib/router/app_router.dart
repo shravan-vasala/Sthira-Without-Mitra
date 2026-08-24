@@ -21,8 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
 import '../providers/reminders_provider.dart';
 import '../widgets/badge_overlay_host.dart';
-import '../screens/testing/mitra_debug_screen.dart';
-import '../mitra/integration/mitra_companion_overlay.dart';
+
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -81,10 +80,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),
-      GoRoute(
-        path: '/mitra-debug',
-        builder: (context, state) => const MitraDebugScreen(),
-      ),
+
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return ScaffoldWithNavBar(navigationShell: navigationShell);

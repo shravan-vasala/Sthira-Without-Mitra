@@ -58,10 +58,7 @@ flutter:
   assets:
     - assets/data/
     - assets/icon/
-    - assets/mitra/canonical/
-    - assets/mitra/peacock/
-    - assets/sunflower/
-    - MITRA-Mit/
+
 flutter_launcher_icons:
   android: true
   ios: false

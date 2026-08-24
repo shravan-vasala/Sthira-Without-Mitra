@@ -25,7 +25,7 @@ import 'water_entry_dialog.dart';
 import 'package:confetti/confetti.dart';
 import '../../providers/gamification_provider.dart';
 import 'share_preview_sheet.dart';
-import '../../mitra/integration/mitra_companion_overlay.dart';
+
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -334,12 +334,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ),
         
-        // Mitra + Sunflower Transparent Overlay (LIVES ON THE UI)
-        const Positioned.fill(
-          child: MitraCompanionOverlay(
-            isHomeScreen: true,
-          ),
-        ),
+
 
         Align(
           alignment: Alignment.topCenter,
