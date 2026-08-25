@@ -69,156 +69,40 @@ class SharedChartCard extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    if (timeFormat != ChartTimeFormat.sixMonths || data.isEmpty) {
-      return Row(
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: context.colors.textDark,
+    return Row(
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: context.colors.textDark,
+          ),
+        ),
+        Spacer(),
+        if (showKgLbToggle)
+          GestureDetector(
+            onTap: onToggleUnit,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: context.colors.lavenderCard,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                useKg ? 'KG' : 'LB',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.primary,
+                ),
+              ),
             ),
           ),
-          Spacer(),
-          if (showKgLbToggle)
-            GestureDetector(
-              onTap: onToggleUnit,
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: context.colors.lavenderCard,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  useKg ? 'KG' : 'LB',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.primary,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      );
-    }
-
-    final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
-    final startVal = sorted.first.value;
-    final currentVal = sorted.last.value;
-    final allVals = sorted.map((d) => d.value).toList();
-    final minVal = allVals.reduce(min);
-    final maxVal = allVals.reduce(max);
-    final change = currentVal - startVal;
-    final pctChange = startVal == 0 ? 0.0 : (change / startVal) * 100;
-    
-    final unit = _unitSuffix();
-    final fmt = (double v) => _isCount ? v.toInt().toString() : v.toStringAsFixed(1);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-           children: [
-              Text(
-                '$title — 6 Month Trend',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
-              ),
-              Spacer(),
-              if (showKgLbToggle)
-                GestureDetector(
-                  onTap: onToggleUnit,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: context.colors.lavenderCard,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      useKg ? 'KG' : 'LB',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-           ]
-        ),
-        SizedBox(height: 16),
-        Row(
-          children: [
-            _buildStatBox(context, 'Start', '${fmt(startVal)}$unit'),
-            _buildStatBox(context, 'Current', '${fmt(currentVal)}$unit'),
-            _buildStatBox(context, 'Range (Min-Max)', '${fmt(minVal)} - ${fmt(maxVal)}'),
-            _buildStatBox(
-              context, 
-              'Change', 
-              '${change > 0 ? '+' : ''}${fmt(change)}',
-              subtitle: '${change > 0 ? '+' : ''}${pctChange.toStringAsFixed(1)}%',
-              valueColor: change > 0 ? context.colors.primary : (change < 0 ? context.colors.red : context.colors.textDark),
-            ),
-          ],
-        ),
       ],
-    );
-  }
-
-  Widget _buildStatBox(BuildContext context, String label, String value, {String? subtitle, Color? valueColor}) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.only(right: 6),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: context.colors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 9, color: context.colors.textLight),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: valueColor ?? context.colors.textDark,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  color: valueColor ?? context.colors.textMedium,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ]
-          ],
-        ),
-      ),
     );
   }
 
