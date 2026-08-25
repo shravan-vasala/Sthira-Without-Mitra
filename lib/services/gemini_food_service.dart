@@ -238,24 +238,38 @@ Return ONLY a JSON object with the exact following structure. Do NOT include mar
       ),
     );
 
+    final modelsToTry = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+    ];
+
+    String lastError = '';
+
     try {
-      final response = await client.models.generateContent(
-        model: 'gemini-2.5-flash',
-        request: GenerateContentRequest(
-          contents: [Content.text("Respond exactly with 'OK'")],
-        ),
-      );
-      if (response.text == null || response.text!.isEmpty) {
-        throw Exception("Received empty response from Gemini API.");
+      for (final model in modelsToTry) {
+        try {
+          final response = await client.models.generateContent(
+            model: model,
+            request: GenerateContentRequest(
+              contents: [Content.text("Respond exactly with 'OK'")],
+            ),
+          );
+          if (response.text != null && response.text!.isNotEmpty) {
+            return; // Success!
+          }
+        } catch (e) {
+          final errorString = e.toString();
+          if (errorString.contains('403') || errorString.contains('API_KEY_INVALID') || errorString.contains('forbidden')) {
+            throw Exception('Your API Key is invalid or expired.');
+          } else if (errorString.contains('429') || errorString.contains('quota')) {
+            throw Exception('You are sending too many requests or exceeded your quota! Please wait a minute.');
+          }
+          lastError = errorString;
+          continue; // Try next model on 404 etc.
+        }
       }
-    } catch (e) {
-      final errorString = e.toString();
-      if (errorString.contains('403') || errorString.contains('API_KEY_INVALID') || errorString.contains('forbidden')) {
-        throw Exception('Your API Key is invalid or expired.');
-      } else if (errorString.contains('429') || errorString.contains('quota')) {
-        throw Exception('You are sending too many requests or exceeded your quota! Please wait a minute.');
-      }
-      rethrow;
+      throw Exception("Failed to verify API key with all models. Last error: $lastError");
     } finally {
       client.close();
     }
@@ -265,8 +279,10 @@ Return ONLY a JSON object with the exact following structure. Do NOT include mar
     Future<Map<String, dynamic>?> Function(String model, bool useFirebase) call,
   ) async {
     const modelsToTry = [
-      'gemini-2.5-pro',
       'gemini-2.5-flash',
+      'gemini-2.5-pro',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
     ];
 
     final hasManualKey = apiKey != null && apiKey!.isNotEmpty;
