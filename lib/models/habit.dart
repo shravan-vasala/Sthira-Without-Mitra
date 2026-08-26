@@ -114,7 +114,7 @@ class Habit {
         type: HabitType.autoSleep,
         unit: 'hours',
         target: 8.0,
-        createdAt: DateTime.parse('2020-01-01'),
+        initialCreatedAt: DateTime.parse('2020-01-01'),
         order: 0),
     Habit(
         id: 'walk',

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:isar/isar.dart';
 import '../repositories/coach_note_repository.dart';
 import '../repositories/workout_repository.dart';
 import '../repositories/meal_repository.dart';
@@ -48,16 +49,17 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
 });
 
 final onboardingCompletedProvider = StateNotifierProvider<OnboardingCompletedNotifier, bool>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  return OnboardingCompletedNotifier(prefs);
+  return OnboardingCompletedNotifier(ref.watch(sharedPreferencesProvider));
 });
 
 class OnboardingCompletedNotifier extends StateNotifier<bool> {
+  static const String _onboardingKey = 'onboarding_completed';
   final SharedPreferences _prefs;
-  OnboardingCompletedNotifier(this._prefs) : super(_prefs.getBool('onboarding_completed') ?? false);
+
+  OnboardingCompletedNotifier(this._prefs) : super(_prefs.getBool(_onboardingKey) ?? false);
 
   Future<void> completeOnboarding() async {
-    await _prefs.setBool('onboarding_completed', true);
+    await _prefs.setBool(_onboardingKey, true);
     state = true;
   }
 }
@@ -117,7 +119,7 @@ final csvExportServiceProvider = Provider<CsvExportService>((ref) {
 });
 
 final aiCacheProvider = Provider<AiCache>((ref) {
-  return AiCache(ref.watch(sharedPreferencesProvider));
+  return AiCache();
 });
 
 final aiClientProvider = Provider<AiClient>((ref) {

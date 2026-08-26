@@ -42,7 +42,7 @@ class MealPlanComplete {
 
     final items = planned.items.map((item) {
       final itemShare =
-          planned.calories > 0 ? item.calories / planned.calories : 0.0;
+          planned.calories > 0 ? (item.calories ?? 0.0) / planned.calories : 0.0;
       return MealItemLog(
         name: item.name,
         portion: item.quantity,

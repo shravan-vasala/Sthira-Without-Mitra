@@ -66,6 +66,12 @@ class HabitRepository {
     return _isar.habitCompletions.where().dateEqualTo(date).findFirstSync() ?? HabitCompletion(date: date);
   }
 
+  Stream<HabitCompletion?> watchCompletions(String date) {
+    return _isar.habitCompletions.where().dateEqualTo(date).watch(fireImmediately: true).map((comps) {
+      return comps.isNotEmpty ? comps.first : null;
+    });
+  }
+
   Future<void> saveCompletion(HabitCompletion completion) async {
     final updatedCompletion = HabitCompletion(
       date: completion.date,

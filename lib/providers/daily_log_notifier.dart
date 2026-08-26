@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/daily_log.dart';
 import '../models/habit.dart';
@@ -8,8 +9,21 @@ import 'app_providers.dart';
 class DailyLogNotifier extends StateNotifier<DailyLog> {
   final DailyLogRepository _repo;
   final Ref _ref;
+  StreamSubscription? _sub;
 
-  DailyLogNotifier(this._repo, String date, this._ref) : super(_repo.getOrCreate(date));
+  DailyLogNotifier(this._repo, String date, this._ref) : super(_repo.getOrCreate(date)) {
+    _sub = _repo.watchLog(date).listen((log) {
+      if (mounted) {
+        state = log ?? _repo.getOrCreate(date);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
 
   Future<void> updateWeight(double weight) async {
     await _repo.updateWeight(state.date, weight);

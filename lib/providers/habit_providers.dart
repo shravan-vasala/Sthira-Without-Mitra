@@ -13,6 +13,13 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
   HabitCompletion build() {
     final repo = ref.watch(habitRepoProvider);
     final date = ref.watch(dateStringProvider);
+    
+    final sub = repo.watchCompletions(date).listen((completion) {
+      state = completion ?? repo.getCompletions(date);
+    });
+    
+    ref.onDispose(() => sub.cancel());
+    
     return repo.getCompletions(date);
   }
 

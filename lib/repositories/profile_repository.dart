@@ -29,6 +29,12 @@ class ProfileRepository {
     return _isar.userProfiles.where().findFirstSync() ?? UserProfile();
   }
 
+  Stream<UserProfile?> watchProfile() {
+    return _isar.userProfiles.where().watch(fireImmediately: true).map((profiles) {
+      return profiles.isNotEmpty ? profiles.first : null;
+    });
+  }
+
   Future<void> saveProfile(UserProfile profile) async {
     await _isar.writeTxn(() async {
       await _isar.userProfiles.put(profile);

@@ -334,7 +334,7 @@ class AiClient {
         contents: [Content.text(prompt)],
       );
 
-      return _cachedClient!.models.generateContentStream(
+      return _cachedClient!.models.streamGenerateContent(
         model: modelName,
         request: request,
       ).map((res) => res.text).timeout(const Duration(seconds: 20));

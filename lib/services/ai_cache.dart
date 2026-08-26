@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:isar/isar.dart';
+import '../models/ai_cache_entry.dart';
 
 class AiCache {
-  final SharedPreferences _prefs;
+  late final Isar _isar;
   final Duration defaultTtl = const Duration(hours: 24);
 
-  AiCache(this._prefs);
+  AiCache() {
+    _isar = Isar.getInstance()!;
+  }
 
   String _hash(String prompt, String? imageContext) {
     var raw = prompt;
@@ -18,29 +21,39 @@ class AiCache {
 
   Map<String, dynamic>? get(String prompt, [String? imageContext]) {
     final key = _hash(prompt, imageContext);
-    final data = _prefs.getString(key);
-    if (data == null) return null;
+    final entry = _isar.aiCacheEntrys.where().cacheKeyEqualTo(key).findFirstSync();
+    
+    if (entry == null) return null;
 
+    if (DateTime.now().difference(entry.timestamp) > defaultTtl) {
+      _isar.writeTxnSync(() {
+        _isar.aiCacheEntrys.deleteSync(entry.id);
+      });
+      return null;
+    }
+    
     try {
-      final map = jsonDecode(data) as Map<String, dynamic>;
-      final timestamp = DateTime.parse(map['timestamp'] as String);
-      if (DateTime.now().difference(timestamp) > defaultTtl) {
-        _prefs.remove(key); // Expired
-        return null;
-      }
-      return map['result'] as Map<String, dynamic>;
+      return jsonDecode(entry.cachedResponse) as Map<String, dynamic>;
     } catch (e) {
-      _prefs.remove(key);
+      _isar.writeTxnSync(() {
+        _isar.aiCacheEntrys.deleteSync(entry.id);
+      });
       return null;
     }
   }
 
   Future<void> set(String prompt, Map<String, dynamic> result, [String? imageContext]) async {
     final key = _hash(prompt, imageContext);
-    final data = jsonEncode({
-      'timestamp': DateTime.now().toIso8601String(),
-      'result': result,
+    final data = jsonEncode(result);
+    
+    final entry = AiCacheEntry(
+      cacheKey: key,
+      cachedResponse: data,
+      timestamp: DateTime.now(),
+    );
+    
+    _isar.writeTxnSync(() {
+      _isar.aiCacheEntrys.putSync(entry);
     });
-    await _prefs.setString(key, data);
   }
 }

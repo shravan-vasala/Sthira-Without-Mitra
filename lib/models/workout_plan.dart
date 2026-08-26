@@ -41,7 +41,7 @@ class WorkoutDay {
 
   int? get weekday {
     if (dayId == null) return null;
-    switch (dayId.toLowerCase()) {
+    switch (dayId?.toLowerCase()) {
       case 'monday': return DateTime.monday;
       case 'tuesday': return DateTime.tuesday;
       case 'wednesday': return DateTime.wednesday;

@@ -282,7 +282,6 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
       target: target,
       step: step,
       unit: unit,
-      createdAt: isNew ? DateTime.now() : widget.habit!.createdAt,
       order: isNew ? ref.read(habitsProvider).length : widget.habit!.order,
     );
 

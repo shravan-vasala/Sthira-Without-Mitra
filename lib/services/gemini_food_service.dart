@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart' as vertex;
+import 'package:isar/isar.dart';
+import '../models/food_search_cache.dart';
 import '../providers/app_providers.dart';
 import '../interfaces/i_ai_food_service.dart';
 
@@ -141,6 +143,21 @@ $_jsonShape
       throw Exception('Please describe what you ate.');
     }
 
+    final normalizedQuery = trimmed.toLowerCase();
+    final isar = Isar.getInstance()!;
+    final cached = isar.foodSearchCaches
+        .where()
+        .normalizedQueryEqualTo(normalizedQuery)
+        .findFirstSync();
+
+    if (cached != null) {
+      try {
+        return jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
+      } catch (_) {
+        // Fallback to API if cache is corrupted
+      }
+    }
+
     final prompt = '''
 Estimate nutritional content for this home-cooked meal description.
 $_cuisineHint
@@ -150,17 +167,28 @@ $trimmed
 """
 $_jsonShape
 ''';
-    return aiClient.generateJson(
+    final response = await aiClient.generateJson(
       prompt: prompt,
       systemInstruction: _systemInstruction,
       useFirebase: isSignedIn,
       apiKey: apiKey,
     );
+
+    if (response != null) {
+      isar.writeTxnSync(() {
+        isar.foodSearchCaches.putSync(FoodSearchCache(
+          normalizedQuery: normalizedQuery,
+          cachedResponseJson: jsonEncode(response),
+        ));
+      });
+    }
+
+    return response;
   }
 
   /// Suggest a meal that fits within the remaining daily macros.
   @override
-  Future<Map<String, dynamic>?> suggestMeal({
+  Stream<String> suggestMealStream({
     required int remainingCalories,
     required double remainingProtein,
     required double remainingCarbs,
@@ -168,7 +196,7 @@ $_jsonShape
     String? mealName,
     int? mealsLeft,
     List<String>? previousMeals,
-  }) async {
+  }) async* {
     _ensureApiKey();
 
     String mealContext = '';
@@ -203,23 +231,21 @@ $historyContext
 $_cuisineHint
 
 Suggest ONE specific simple, home-cooked meal, prioritizing protein. If the target calories for this meal are very low (e.g. < 150), suggest a small healthy snack.
-Return ONLY a JSON object with the exact following structure. Do NOT include markdown blocks or any other text.
-{
-  "dish_name": "Name of the suggested dish (string)",
-  "portion": "Recommended portion size (string, e.g. 1 bowl, 2 pieces)",
-  "reason": "Short explanation of why this fits their macros for this meal (string)",
-  "calories": 0,
-  "protein_g": 0.0,
-  "carbs_g": 0.0,
-  "fat_g": 0.0
-}
+Keep it brief and friendly. Provide the meal name, portion, and approximate macros.
+Do NOT use markdown formatting (no asterisks).
+Do NOT use JSON.
 ''';
-    return aiClient.generateJson(
+    
+    final stream = aiClient.generateTextStream(
       prompt: prompt,
-      systemInstruction: _systemInstruction,
+      systemInstruction: 'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
       useFirebase: isSignedIn,
       apiKey: apiKey,
     );
+    
+    await for (final chunk in stream) {
+      yield chunk;
+    }
   }
 
   void _ensureApiKey() {

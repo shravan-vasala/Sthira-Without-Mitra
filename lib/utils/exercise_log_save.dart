@@ -1,102 +1,101 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/exercise_log.dart';
 import '../models/workout_plan.dart';
+import '../models/exercise_log.dart';
+import '../models/exercise_pr.dart';
 import '../providers/app_providers.dart';
-import '../utils/pr_calculator.dart';
-import '../utils/workout_completion.dart';
 
-String parseRepTarget(String rep) {
-  if (rep.contains('-')) {
-    final parts = rep.split('-');
-    if (parts.length == 2) return parts[1].trim();
+Future<PrUpdateResult> saveExerciseAsPlanned({
+  required WidgetRef ref,
+  required Exercise exercise,
+}) async {
+  final dateStr = ref.read(dateStringProvider);
+  final repo = ref.read(exerciseLogRepoProvider);
+  final profile = ref.read(profileProvider);
+
+  // Parse planned reps
+  int reps = 0;
+  final numMatch = RegExp(r'\d+').firstMatch(exercise.repsDisplay);
+  if (numMatch != null) reps = int.parse(numMatch.group(0)!);
+
+  // Build sets (copying weight from last log if needed)
+  final lastLog = repo.getLastLog(exercise.name ?? '');
+  List<SetLog> sets = [];
+  for (int i = 0; i < exercise.setCount; i++) {
+    double weight = exercise.weightKg ?? 0.0;
+    if (exercise.weightKg == null && lastLog != null && i < lastLog.sets.length) {
+      weight = lastLog.sets[i].weight ?? 0.0;
+    }
+    sets.add(SetLog(setNumber: i + 1, reps: reps, weight: weight));
   }
-  return rep;
+
+  final newLog = ExerciseLog(
+    date: dateStr,
+    exerciseName: exercise.name ?? '',
+    sets: sets,
+  );
+
+  await repo.saveLog(newLog);
+
+  // --- Check PR ---
+  final isCompletedSet = sets;
+  if (isCompletedSet.isEmpty) return PrUpdateResult(hasAnyNewPr: false, newPr: ExercisePr(exerciseName: ''));
+
+  final maxWeight = isCompletedSet.map((s) => s.weight ?? 0.0).reduce((a, b) => a > b ? a : b);
+  final maxReps = isCompletedSet.map((s) => s.reps ?? 0).reduce((a, b) => a > b ? a : b);
+  final totalVolume = isCompletedSet.fold(0.0, (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)));
+  final oneRM = isCompletedSet.map((s) => (s.weight ?? 0.0) * (1 + ((s.reps ?? 0) / 30))).reduce((a, b) => a > b ? a : b);
+
+  final currentPr = repo.getPr(exercise.name ?? '');
+
+  bool newW = false, newR = false, newV = false, new1RM = false;
+  var updatedPr = currentPr ?? ExercisePr(exerciseName: exercise.name ?? '');
+
+  if (maxWeight > updatedPr.maxWeight) { updatedPr = updatedPr.copyWith(maxWeight: maxWeight); newW = true; }
+  if (maxReps > updatedPr.maxReps) { updatedPr = updatedPr.copyWith(maxReps: maxReps); newR = true; }
+  if (totalVolume > updatedPr.maxVolume) { updatedPr = updatedPr.copyWith(maxVolume: totalVolume); newV = true; }
+  if (oneRM > updatedPr.estimated1RM) { updatedPr = updatedPr.copyWith(estimated1RM: oneRM); new1RM = true; }
+
+  final hasAnyNewPr = newW || newR || newV || new1RM;
+  if (hasAnyNewPr) {
+    await repo.savePr(updatedPr);
+  }
+
+  // Auto-complete workout if this is the last exercise
+  // Handled elsewhere or wait, we don't have selectedWorkoutProvider anymore in Isar.
+
+  return PrUpdateResult(
+    hasAnyNewPr: hasAnyNewPr,
+    isNewMaxWeight: newW,
+    isNewMaxReps: newR,
+    isNewMaxVolume: newV,
+    isNew1RM: new1RM,
+    newPr: updatedPr,
+  );
 }
 
-List<SetLog> buildPlannedSets(Exercise exercise, ExerciseLog? lastLog) {
-  return List.generate(exercise.setCount, (i) {
-    final reps = int.tryParse(parseRepTarget(exercise.reps[i])) ?? 0;
-    double weight = exercise.weightKg ?? 0;
-    if (weight <= 0 && lastLog != null && i < lastLog.sets.length) {
-      weight = lastLog.sets[i].weight;
-    }
-    return SetLog(setNumber: i + 1, reps: reps, weight: weight);
+class PrUpdateResult {
+  final bool hasAnyNewPr;
+  final bool isNewMaxWeight;
+  final bool isNewMaxReps;
+  final bool isNewMaxVolume;
+  final bool isNew1RM;
+  final ExercisePr newPr;
+
+  PrUpdateResult({
+    this.hasAnyNewPr = false,
+    this.isNewMaxWeight = false,
+    this.isNewMaxReps = false,
+    this.isNewMaxVolume = false,
+    this.isNew1RM = false,
+    required this.newPr,
   });
 }
 
-ExerciseLog? mostRecentPriorLog({
-  required List<ExerciseLog> allLogs,
-  required String beforeDate,
-}) {
-  final beforeToday =
-      allLogs.where((l) => l.date.compareTo(beforeDate) < 0).toList();
-  if (beforeToday.isEmpty) return null;
-  beforeToday.sort((a, b) => a.date.compareTo(b.date));
-  return beforeToday.last;
-}
-
-/// Saves an exercise log and applies PR / day-complete / rest-timer side effects.
-Future<PrCalculationResult> saveExerciseSets({
-  required WidgetRef ref,
-  required Exercise exercise,
-  required List<SetLog> sets,
-  bool startRestTimer = true,
-}) async {
-  final dateStr = ref.read(dateStringProvider);
+Map<String, dynamic> getExerciseChartData(WidgetRef ref, Exercise exercise) {
   final repo = ref.read(exerciseLogRepoProvider);
-  final currentPr = repo.getPr(exercise.name);
-
-  final log = ExerciseLog(
-    date: dateStr,
-    exerciseName: exercise.name,
-    sets: sets,
-  );
-  await repo.saveLog(log);
-
-  final prResult = PrCalculator.calculateNewPr(log, currentPr);
-  if (prResult.hasAnyNewPr) {
-    await repo.savePr(prResult.newPr);
-  }
-
-  final plan = ref.read(workoutPlanProvider);
-  if (plan != null && plan.days.isNotEmpty) {
-    final date = DateTime.parse(dateStr);
-    final day = WorkoutCompletion.resolveWorkoutDay(plan, date);
-    if (!WorkoutCompletion.isRestDay(day, date) &&
-        WorkoutCompletion.isTrainingDayCompleteWithRepo(dateStr, day, repo)) {
-      final dailyLog = ref.read(dailyLogProvider);
-      if (!dailyLog.workoutCompleted) {
-        await ref.read(dailyLogProvider.notifier).markWorkoutCompleted(day.dayId);
-      }
-    }
-  }
-
-  ref.read(exerciseLogsUpdateProvider.notifier).state++;
-  ref.invalidate(dailyScoreProvider);
-  ref.invalidate(dailyLogProvider);
-
-  if (startRestTimer && exercise.restSecondsAfterSet > 0) {
-    ref.read(restTimerProvider.notifier).startTimer(
-          exercise.restSecondsAfterSet,
-          exerciseName: exercise.name,
-        );
-  }
-
-  HapticFeedback.mediumImpact();
-  return prResult;
-}
-
-Future<PrCalculationResult> saveExerciseAsPlanned({
-  required WidgetRef ref,
-  required Exercise exercise,
-}) async {
-  final dateStr = ref.read(dateStringProvider);
-  final repo = ref.read(exerciseLogRepoProvider);
-  final lastLog = mostRecentPriorLog(
-    allLogs: repo.getLogsForExercise(exercise.name),
-    beforeDate: dateStr,
-  );
-  final sets = buildPlannedSets(exercise, lastLog);
-  return saveExerciseSets(ref: ref, exercise: exercise, sets: sets);
+  return {
+    'allLogs': repo.getLogsForExercise(exercise.name ?? ''),
+    'pr': repo.getPr(exercise.name ?? ''),
+  };
 }

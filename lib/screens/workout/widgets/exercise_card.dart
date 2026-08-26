@@ -24,16 +24,16 @@ class ExerciseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pr = ref.watch(exercisePrProvider(exercise.name));
+    final pr = ref.watch(exercisePrProvider(exercise.name ?? ''));
     final logRepo = ref.watch(exerciseLogRepoProvider);
     final dateStr = ref.watch(dateStringProvider);
-    final log = logRepo.getLog(dateStr, exercise.name);
+    final log = logRepo.getLog(dateStr, exercise.name ?? '');
     final isCompleted = log != null;
     
     String? loggedText;
     if (log != null && log.sets.isNotEmpty) {
       final repsList = log.sets.map((s) {
-        if (s.weight > 0) return '${s.reps}x${s.weight.toInt()}kg';
+        if ((s.weight ?? 0) > 0) return '${s.reps}x${(s.weight ?? 0).toInt()}kg';
         return '${s.reps}';
       }).join(', ');
       loggedText = 'Done: $repsList';
@@ -53,17 +53,17 @@ class ExerciseCard extends ConsumerWidget {
               children: [
                 // YouTube Thumbnail
                 Semantics(
-                  label: 'Play ${exercise.displayName ?? exercise.name} video tutorial',
+                  label: 'Play ${exercise.displayName ?? exercise.name ?? ''} video tutorial',
                   button: true,
                   child: GestureDetector(
                   onTap: () async {
                     final videoId = exercise.youtubeVideoId;
                     if (videoId != null && videoId != 'XXXX' && videoId.isNotEmpty) {
                       context.push(
-                        '/youtube-player?videoId=$videoId&title=${Uri.encodeComponent(exercise.displayName ?? exercise.name)}&subtitle=${Uri.encodeComponent(exercise.name)}&reps=${Uri.encodeComponent(exercise.repsDisplay)}',
+                        '/youtube-player?videoId=$videoId&title=${Uri.encodeComponent(exercise.displayName ?? exercise.name ?? '')}&subtitle=${Uri.encodeComponent(exercise.name ?? '')}&reps=${Uri.encodeComponent(exercise.repsDisplay ?? '')}',
                       );
                     } else {
-                      final query = Uri.encodeComponent('${exercise.displayName ?? exercise.name} exercise tutorial');
+                      final query = Uri.encodeComponent('${exercise.displayName ?? exercise.name ?? ''} exercise tutorial');
                       final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
                       if (await canLaunchUrl(url)) {
                         await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -98,9 +98,9 @@ class ExerciseCard extends ConsumerWidget {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                if (exercise.thumbnailUrl.isNotEmpty)
+                                if (exercise.thumbnailUrl?.isNotEmpty ?? false)
                                   CachedNetworkImage(
-                                    imageUrl: exercise.thumbnailUrl,
+                                    imageUrl: exercise.thumbnailUrl!,
                                     fit: BoxFit.cover,
                                     placeholder: (ctx, url) => Center(
                                       child: Icon(
@@ -156,7 +156,7 @@ class ExerciseCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        exercise.displayName ?? exercise.name,
+                        exercise.displayName ?? exercise.name ?? '',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -201,7 +201,7 @@ class ExerciseCard extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          if (exercise.sideInfo != 'None') ...[
+                          if (exercise.sideInfo != 'None' && exercise.sideInfo != null) ...[
                             SizedBox(width: 6),
                             Container(
                               padding: EdgeInsets.symmetric(
@@ -211,7 +211,7 @@ class ExerciseCard extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                exercise.sideInfo,
+                                exercise.sideInfo ?? '',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -264,7 +264,7 @@ class ExerciseCard extends ConsumerWidget {
 
                 // Checkmark
                 Semantics(
-                  label: 'Mark ${exercise.displayName ?? exercise.name} as ${isCompleted ? 'incomplete' : 'complete'}',
+                  label: 'Mark ${exercise.displayName ?? exercise.name ?? ''} as ${isCompleted ? 'incomplete' : 'complete'}',
                   button: true,
                   child: GestureDetector(
                     onTap: () {
@@ -301,7 +301,7 @@ class ExerciseCard extends ConsumerWidget {
           ),
 
           // Coach note
-          if (exercise.note.isNotEmpty)
+          if (exercise.note?.isNotEmpty ?? false)
             Padding(
               padding: EdgeInsets.fromLTRB(14, 0, 14, 10),
               child: Container(
@@ -322,7 +322,7 @@ class ExerciseCard extends ConsumerWidget {
                     SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        exercise.note,
+                        exercise.note ?? '',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -364,7 +364,7 @@ class ExerciseCard extends ConsumerWidget {
                     label: 'Progress',
                     onPressed: () {
                       context.push(
-                        '/exercise-progress?name=${Uri.encodeComponent(exercise.name)}',
+                        '/exercise-progress?name=${Uri.encodeComponent(exercise.name ?? '')}',
                       );
                     },
                   ),

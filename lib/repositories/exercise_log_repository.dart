@@ -28,12 +28,11 @@ class ExerciseLogRepository {
   }
 
   ExerciseLog? getLog(String date, String exerciseName) {
-    final key = '${date}_$exerciseName';
-    return _isar.exerciseLogs.where().keyEqualTo(key).findFirstSync();
+    return _isar.exerciseLogs.filter().dateEqualTo(date).and().exerciseNameEqualTo(exerciseName).findFirstSync();
   }
 
   Future<void> saveLog(ExerciseLog log) async {
-    final existing = _isar.exerciseLogs.where().keyEqualTo(log.key).findFirstSync();
+    final existing = getLog(log.date, log.exerciseName);
     if (existing != null) log.id = existing.id;
     await _isar.writeTxn(() async {
       await _isar.exerciseLogs.put(log);
@@ -47,19 +46,26 @@ class ExerciseLogRepository {
 
   List<ExerciseLog> getLogsForExercise(String exerciseName) {
     // Isar doesn't have a good endswith query out of the box, but we can query all and filter, or use filter().keyEndsWith()
-    return _isar.exerciseLogs.filter().keyEndsWith('_$exerciseName').sortByDate().findAllSync();
+    return _isar.exerciseLogs.filter().exerciseNameEqualTo(exerciseName).sortByDate().findAllSync();
   }
 
   List<ExerciseLog> getLogsForDate(String date) {
     return _isar.exerciseLogs.filter().dateEqualTo(date).findAllSync();
   }
 
+  ExerciseLog? getLastLog(String exerciseName) {
+    final logs = getLogsForExercise(exerciseName);
+    if (logs.isEmpty) return null;
+    logs.sort((a, b) => b.date.compareTo(a.date));
+    return logs.first;
+  }
+
   // ── Cloud sync helpers ──
 
   Future<void> importLogsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (_isar.exerciseLogs.where().keyEqualTo(entry.key).findFirstSync() == null) {
-        final log = ExerciseLog.fromJson(entry.value);
+      final log = ExerciseLog.fromJson(entry.value);
+      if (getLog(log.date, log.exerciseName) == null) {
         await _isar.writeTxn(() async {
           await _isar.exerciseLogs.put(log);
         });

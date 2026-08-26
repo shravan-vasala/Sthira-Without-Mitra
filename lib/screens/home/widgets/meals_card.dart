@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
@@ -148,7 +149,7 @@ class MealsCard extends ConsumerWidget {
                     fontWeight: FontWeight.w600,
                     color: context.colors.textMedium,
                   ),
-            ),
+            ).animate(key: ValueKey('$completedMeals-$completedCal')).fade().scale(begin: const Offset(0.95, 0.95)),
             SizedBox(height: 8),
             Row(
               children: [
@@ -156,19 +157,19 @@ class MealsCard extends ConsumerWidget {
                   label: 'P',
                   value: '${dailyLog.totalProtein.toStringAsFixed(0)}g',
                   color: context.colors.green,
-                ),
+                ).animate(key: ValueKey(dailyLog.totalProtein)).scale(begin: const Offset(0.9, 0.9)),
                 SizedBox(width: 6),
                 _MacroPill(
                   label: 'C',
                   value: '${dailyLog.totalCarbs.toStringAsFixed(0)}g',
                   color: context.colors.orange,
-                ),
+                ).animate(key: ValueKey(dailyLog.totalCarbs)).scale(begin: const Offset(0.9, 0.9)),
                 SizedBox(width: 6),
                 _MacroPill(
                   label: 'F',
                   value: '${dailyLog.totalFat.toStringAsFixed(0)}g',
                   color: context.colors.primary,
-                ),
+                ).animate(key: ValueKey(dailyLog.totalFat)).scale(begin: const Offset(0.9, 0.9)),
               ],
             ),
 

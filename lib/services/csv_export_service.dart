@@ -83,7 +83,7 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null; // Only headers
-    return const ListToCsvConverter().convert(rows);
+    return csv.encode(rows);
   }
 
   Future<String?> _exportExerciseLogs(Isar isar, DateTime? startDate) async {
@@ -109,7 +109,7 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return const ListToCsvConverter().convert(rows);
+    return csv.encode(rows);
   }
 
   Future<String?> _exportHabitCompletions(Isar isar, DateTime? startDate) async {
@@ -146,7 +146,7 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return const ListToCsvConverter().convert(rows);
+    return csv.encode(rows);
   }
 
   Future<String?> _exportBodyStats(Isar isar, DateTime? startDate) async {
@@ -175,7 +175,7 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return const ListToCsvConverter().convert(rows);
+    return csv.encode(rows);
   }
 
   Future<String?> _exportMeals(Isar isar, DateTime? startDate) async {
@@ -207,6 +207,6 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return const ListToCsvConverter().convert(rows);
+    return csv.encode(rows);
   }
 }

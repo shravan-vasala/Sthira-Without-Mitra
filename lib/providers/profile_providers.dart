@@ -19,6 +19,17 @@ class ProfileNotifier extends Notifier<UserProfile> {
   UserProfile build() {
     final repo = ref.watch(profileRepoProvider);
     final initialKey = ref.watch(initialGeminiKeyProvider);
+    
+    final sub = repo.watchProfile().listen((profile) {
+      if (profile != null) {
+        state = profile.copyWith(
+          geminiApiKey: initialKey.isNotEmpty ? initialKey : null
+        );
+      }
+    });
+    
+    ref.onDispose(() => sub.cancel());
+    
     return repo.getProfile().copyWith(
       geminiApiKey: initialKey.isNotEmpty ? initialKey : null
     );

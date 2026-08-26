@@ -30,13 +30,14 @@ class AIMealSuggestionCard extends ConsumerStatefulWidget {
 
 class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
   bool _isLoading = false;
-  Map<String, dynamic>? _suggestion;
+  String? _suggestionText;
   String? _error;
 
   Future<void> _fetchSuggestion() async {
     setState(() {
       _isLoading = true;
       _error = null;
+      _suggestionText = null;
     });
 
     try {
@@ -48,11 +49,11 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
       final previousMeals = todayLogs
           .expand((l) => l.customSlots.values)
           .expand((slot) => slot.items)
-          .map((i) => i.name)
+          .map((i) => i.name ?? '')
           .where((name) => name.isNotEmpty)
           .toList();
 
-      final result = await service.suggestMeal(
+      final stream = service.suggestMealStream(
         remainingCalories: widget.remainingCalories,
         remainingProtein: widget.remainingProtein,
         remainingCarbs: widget.remainingCarbs,
@@ -61,17 +62,26 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         mealsLeft: widget.mealsLeft,
         previousMeals: previousMeals,
       );
+      
       setState(() {
-        _suggestion = result;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
-    } finally {
-      setState(() {
+        _suggestionText = '';
         _isLoading = false;
       });
+
+      await for (final chunk in stream) {
+        if (mounted) {
+          setState(() {
+            _suggestionText = (_suggestionText ?? '') + chunk;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -138,42 +148,15 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                   child: CircularProgressIndicator(),
                 ),
               )
-            else if (_suggestion != null) ...[
+            else if (_suggestionText != null) ...[
               Text(
-                _suggestion!['dish_name'] ?? 'Unknown Dish',
+                _suggestionText!,
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: context.colors.textDark,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Portion: ${_suggestion!['portion']}',
-                style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: context.colors.primary,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _suggestion!['reason'] ?? '',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.colors.textMedium,
+                  color: context.colors.textDark,
                   height: 1.4,
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _MacroItem(label: 'Kcal', value: '${_suggestion!['calories']}'),
-                  _MacroItem(label: 'Protein', value: '${_suggestion!['protein_g']}g'),
-                  _MacroItem(label: 'Carbs', value: '${_suggestion!['carbs_g']}g'),
-                  _MacroItem(label: 'Fat', value: '${_suggestion!['fat_g']}g'),
-                ],
               ),
               const SizedBox(height: 16),
               SizedBox(
@@ -213,37 +196,6 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MacroItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _MacroItem({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: context.colors.textDark,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: context.colors.textMedium,
-          ),
-        ),
-      ],
     );
   }
 }

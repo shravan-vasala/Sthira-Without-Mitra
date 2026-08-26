@@ -1,9 +1,10 @@
 import 'package:health/health.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:isar/isar.dart';
 import '../repositories/daily_log_repository.dart';
 import '../repositories/habit_repository.dart';
+import '../models/app_config.dart';
 
 import '../models/feature_availability.dart';
 
@@ -13,11 +14,11 @@ class HealthConnectService {
   static const String _backfillDoneKey = 'health_connect_backfill_done';
 
   final Health _health = Health();
-  late SharedPreferences _prefs;
+  late final Isar _isar;
   bool _configured = false;
 
   Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+    _isar = Isar.getInstance()!;
   }
 
   Future<void> _ensureConfigured() async {
@@ -137,7 +138,10 @@ class HealthConnectService {
   }
 
   /// Whether the 90-day backfill has already been done.
-  bool get isBackfillDone => _prefs.getBool(_backfillDoneKey) ?? false;
+  bool get isBackfillDone {
+    final config = _isar.appConfigs.where().keyEqualTo(_backfillDoneKey).findFirstSync();
+    return config?.value == 'true';
+  }
 
   /// Helper to update steps and handle habit auto-completion logic.
   Future<void> _syncStepValueAndHabit(
@@ -201,7 +205,9 @@ class HealthConnectService {
       }
     }
 
-    await _prefs.setBool(_backfillDoneKey, true);
+    _isar.writeTxnSync(() {
+      _isar.appConfigs.putSync(AppConfig(key: _backfillDoneKey, value: 'true'));
+    });
     return count;
   }
 
@@ -282,4 +288,3 @@ class HealthConnectService {
     }
   }
 }
-

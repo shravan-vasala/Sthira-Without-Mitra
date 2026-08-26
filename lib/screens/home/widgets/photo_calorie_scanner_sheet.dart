@@ -396,10 +396,10 @@ class _PhotoCalorieScannerSheetState
     double carbs = 0;
     double f = 0;
     for (final i in _items) {
-      c += i.calories;
-      p += i.proteinG;
-      carbs += i.carbsG;
-      f += i.fatG;
+      c += i.calories ?? 0;
+      p += i.proteinG ?? 0.0;
+      carbs += i.carbsG ?? 0.0;
+      f += i.fatG ?? 0.0;
     }
     _totalCalories = c;
     _totalProtein = p;
@@ -894,7 +894,7 @@ class _PhotoCalorieScannerSheetState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.name,
+                                item.name ?? '',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,

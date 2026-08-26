@@ -70,6 +70,12 @@ class MealRepository {
     return _isar.dailyMealLogs.where().dateEqualTo(date).findFirstSync() ?? DailyMealLog(date: date);
   }
 
+  Stream<DailyMealLog?> watchDailyLog(String date) {
+    return _isar.dailyMealLogs.where().dateEqualTo(date).watch(fireImmediately: true).map((logs) {
+      return logs.isNotEmpty ? logs.first : null;
+    });
+  }
+
   List<DailyMealLog> getLogsInRange(String start, String end) {
     return _isar.dailyMealLogs.filter()
       .dateGreaterThan(start, include: true)

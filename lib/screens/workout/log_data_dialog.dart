@@ -6,9 +6,16 @@ import '../../providers/app_providers.dart';
 import '../../models/workout_plan.dart';
 import '../../models/exercise_log.dart';
 import '../../utils/exercise_log_save.dart';
-import '../../utils/pr_calculator.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
+
+String parseRepTarget(String rep) {
+  if (rep.contains('-')) {
+    final parts = rep.split('-');
+    if (parts.length == 2) return parts[1].trim();
+  }
+  return rep;
+}
 
 class LogDataDialog extends ConsumerStatefulWidget {
   const LogDataDialog({super.key, required this.exercise});
@@ -30,7 +37,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     final setCount = widget.exercise.setCount;
     _repsControllers = List.generate(setCount, (i) {
       return TextEditingController(
-        text: parseRepTarget(widget.exercise.reps[i]),
+        text: parseRepTarget(widget.exercise.repsDisplay ?? ''),
       );
     });
     _weightControllers = List.generate(setCount, (i) {
@@ -45,22 +52,19 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   void _loadExistingData() {
     final dateStr = ref.read(dateStringProvider);
     final repo = ref.read(exerciseLogRepoProvider);
-    final existing = repo.getLog(dateStr, widget.exercise.name);
+    final existing = repo.getLog(dateStr, widget.exercise.name ?? '');
 
     if (existing != null) {
       for (int i = 0; i < existing.sets.length && i < _repsControllers.length; i++) {
-        _repsControllers[i].text = existing.sets[i].reps.toString();
+        _repsControllers[i].text = (existing.sets[i].reps ?? 0).toString();
         _weightControllers[i].text =
-            existing.sets[i].weight > 0 ? existing.sets[i].weight.toString() : '';
+            (existing.sets[i].weight ?? 0.0) > 0 ? (existing.sets[i].weight ?? 0.0).toString() : '';
       }
     } else {
-      _lastLog = mostRecentPriorLog(
-        allLogs: repo.getLogsForExercise(widget.exercise.name),
-        beforeDate: dateStr,
-      );
+      _lastLog = repo.getLastLog(widget.exercise.name ?? '');
       if (_lastLog != null) {
         for (int i = 0; i < _lastLog!.sets.length && i < _weightControllers.length; i++) {
-          final w = _lastLog!.sets[i].weight;
+          final w = _lastLog!.sets[i].weight ?? 0.0;
           if (w > 0) {
             _weightControllers[i].text = w.toString();
           }
@@ -85,8 +89,8 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     try {
       final dt = DateTime.parse(_lastLog!.date);
       final dateStr = DateFormat('MMM d').format(dt);
-      final weight = _lastLog!.sets.first.weight;
-      final reps = _lastLog!.sets.map((s) => s.reps).join(', ');
+      final weight = _lastLog!.sets.first.weight ?? 0.0;
+      final reps = _lastLog!.sets.map((s) => s.reps ?? 0).join(', ');
       return 'Last time ($dateStr): ${weight > 0 ? '${weight}kg × ' : ''}$reps';
     } catch (_) {
       return null;
@@ -96,12 +100,12 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   void _fillFromPlan() {
     setState(() {
       for (int i = 0; i < widget.exercise.setCount; i++) {
-        _repsControllers[i].text = parseRepTarget(widget.exercise.reps[i]);
+        _repsControllers[i].text = parseRepTarget(widget.exercise.repsDisplay ?? '');
         final planned = widget.exercise.weightKg;
         if (planned != null && planned > 0) {
           _weightControllers[i].text = planned.toString();
-        } else if (_lastLog != null && i < _lastLog!.sets.length && _lastLog!.sets[i].weight > 0) {
-          _weightControllers[i].text = _lastLog!.sets[i].weight.toString();
+        } else if (_lastLog != null && i < _lastLog!.sets.length && (_lastLog!.sets[i].weight ?? 0.0) > 0) {
+          _weightControllers[i].text = (_lastLog!.sets[i].weight ?? 0.0).toString();
         }
       }
     });
@@ -112,7 +116,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     final subtitle = _getSubtitle();
 
     return AppSheet(
-      title: 'Log: ${widget.exercise.name}',
+      title: 'Log: ${widget.exercise.name ?? ''}',
       subtitle: subtitle ??
           '${widget.exercise.setCount} set${widget.exercise.setCount > 1 ? 's' : ''}',
       child: Column(
@@ -196,7 +200,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                           isDense: true,
                           hintText: _lastLog != null &&
                                   i < _lastLog!.sets.length
-                              ? _lastLog!.sets[i].weight.toString()
+                              ? (_lastLog!.sets[i].weight ?? 0.0).toString()
                               : '0',
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 8,
@@ -218,7 +222,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
               onPressed: () async {
                 _fillFromPlan();
                 await _persistAndClose(
-                  buildPlannedSets(widget.exercise, _lastLog),
+                  widget.exercise,
                 );
               },
               child: Text('Log as planned'),
@@ -243,14 +247,22 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
       final weight = double.tryParse(_weightControllers[i].text) ?? 0;
       sets.add(SetLog(setNumber: i + 1, reps: reps, weight: weight));
     }
-    await _persistAndClose(sets);
+    
+    final repo = ref.read(exerciseLogRepoProvider);
+    final dateStr = ref.read(dateStringProvider);
+    final newLog = ExerciseLog(
+      date: dateStr,
+      exerciseName: widget.exercise.name ?? '',
+      sets: sets,
+    );
+    await repo.saveLog(newLog);
+    await _persistAndClose(widget.exercise);
   }
 
-  Future<void> _persistAndClose(List<SetLog> sets) async {
-    final prResult = await saveExerciseSets(
+  Future<void> _persistAndClose(Exercise exercise) async {
+    final prResult = await saveExerciseAsPlanned(
       ref: ref,
-      exercise: widget.exercise,
-      sets: sets,
+      exercise: exercise,
     );
 
     if (!mounted) return;
@@ -258,8 +270,8 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     _showResultSnack(prResult);
   }
 
-  void _showResultSnack(PrCalculationResult prResult) {
-    String msg = 'Logged ${widget.exercise.name}';
+  void _showResultSnack(PrUpdateResult prResult) {
+    String msg = 'Logged ${widget.exercise.name ?? ''}';
     if (prResult.hasAnyNewPr) {
       if (prResult.isNewMaxWeight) {
         msg = 'New PR! ${prResult.newPr.maxWeight}kg';

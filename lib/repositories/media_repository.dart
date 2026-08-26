@@ -95,7 +95,7 @@ class MediaRepository {
   }
 
   List<String> getProgressPhotos(String date) {
-    return _isar.progressPhotos.where().dateEqualTo(date).findAllSync().map((p) => p.path).toList();
+    return _isar.progressPhotos.filter().dateEqualTo(date).findAllSync().map((p) => p.path).toList();
   }
 
   List<MapEntry<String, List<String>>> getAllProgressPhotos() {

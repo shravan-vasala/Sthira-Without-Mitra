@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
@@ -164,7 +165,7 @@ class CoachNotesCard extends ConsumerWidget {
                     fontWeight: FontWeight.w500,
                     height: 1.4,
                   ),
-                ),
+                ).animate(key: ValueKey(note.note)).fade(duration: 500.ms).slideY(begin: 0.1, end: 0, duration: 500.ms, curve: Curves.easeOut),
                 if (note.isAi) ...[
                   SizedBox(height: 12),
                   Row(

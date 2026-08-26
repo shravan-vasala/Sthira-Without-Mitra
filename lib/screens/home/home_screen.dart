@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/layout_insets.dart';
 import '../../providers/app_providers.dart';
@@ -35,17 +36,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
-    with WidgetsBindingObserver, TickerProviderStateMixin {
+    with WidgetsBindingObserver {
   late ConfettiController _confettiController;
   final _habitsKey = GlobalKey();
   final _mealsKey = GlobalKey();
   final _progressKey = GlobalKey();
-
-  // Staggered entrance animations
-  late final AnimationController _staggerController;
-  static const int _sectionCount = 7;
-  late final List<Animation<double>> _fadeAnims;
-  late final List<Animation<Offset>> _slideAnims;
 
   @override
   void initState() {
@@ -56,35 +51,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       duration: const Duration(seconds: 3),
     );
 
-    // Stagger: total 700ms, each section gets a 80ms offset window
-    _staggerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeAnims = List.generate(_sectionCount, (i) {
-      final start = (i * 0.1).clamp(0.0, 0.7);
-      final end = (start + 0.4).clamp(0.0, 1.0);
-      return CurvedAnimation(
-        parent: _staggerController,
-        curve: Interval(start, end, curve: Curves.easeOut),
-      );
-    });
-    _slideAnims = List.generate(_sectionCount, (i) {
-      final start = (i * 0.1).clamp(0.0, 0.7);
-      final end = (start + 0.4).clamp(0.0, 1.0);
-      return Tween<Offset>(
-        begin: const Offset(0, 0.08),
-        end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _staggerController,
-        curve: Interval(start, end, curve: Curves.easeOut),
-      ));
-    });
-
     // Initial sync when screen first loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncSteps(isManualRefresh: true);
-      _staggerController.forward();
     });
   }
 
@@ -92,7 +61,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _confettiController.dispose();
-    _staggerController.dispose();
     super.dispose();
   }
 
@@ -188,13 +156,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _staggerWrap(int index, Widget child) {
-    return FadeTransition(
-      opacity: _fadeAnims[index],
-      child: SlideTransition(
-        position: _slideAnims[index],
-        child: child,
-      ),
-    );
+    return child.animate(delay: (index * 80).ms)
+      .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+      .slideY(begin: 0.08, end: 0, duration: 400.ms, curve: Curves.easeOut);
   }
 
   @override
@@ -597,9 +561,9 @@ class _WorkoutsSection extends ConsumerWidget {
         );
         if (isCompleted) completedCount++;
 
-        String title = (i == 0) ? day.dayId : sec.title;
-        if (sec.title.toLowerCase().contains('cooldown') ||
-            sec.title.toLowerCase().contains('cool down')) {
+        String title = (i == 0) ? (day.dayId ?? '') : (sec.title ?? '');
+        if ((sec.title?.toLowerCase() ?? '').contains('cooldown') ||
+            (sec.title?.toLowerCase() ?? '').contains('cool down')) {
           title = 'Cool down';
         }
 

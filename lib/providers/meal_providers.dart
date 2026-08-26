@@ -17,6 +17,13 @@ class DailyMealLogNotifier extends Notifier<DailyMealLog> {
   DailyMealLog build() {
     final repo = ref.watch(mealRepoProvider);
     final date = ref.watch(dateStringProvider);
+    
+    final sub = repo.watchDailyLog(date).listen((log) {
+      state = log ?? repo.getDailyLog(date);
+    });
+    
+    ref.onDispose(() => sub.cancel());
+    
     return repo.getDailyLog(date);
   }
 

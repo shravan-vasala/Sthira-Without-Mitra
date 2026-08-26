@@ -35,11 +35,11 @@ class ExerciseLog {
       };
 
   double get maxWeight =>
-      sets.isEmpty ? 0 : sets.map((s) => s.weight).reduce((a, b) => a > b ? a : b);
+      sets.isEmpty ? 0 : sets.map((s) => s.weight ?? 0.0).reduce((a, b) => a > b ? a : b);
 
-  int get totalReps => sets.fold(0, (sum, s) => sum + s.reps);
+  int get totalReps => sets.fold(0, (sum, s) => sum + (s.reps ?? 0));
 
-  double get totalVolume => sets.fold(0.0, (sum, s) => sum + (s.weight * s.reps));
+  double get totalVolume => sets.fold(0.0, (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)));
 
   String get key => '${date}_$exerciseName';
 }

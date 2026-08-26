@@ -29,6 +29,7 @@ dependencies:
   cached_network_image: ^3.4.1
   googleai_dart: ^11.0.0
   flutter_secure_storage: ^10.3.1
+  shared_preferences: ^2.2.3
   health: ^13.3.1
   permission_handler: ^11.3.1
   url_launcher: ^6.3.0
@@ -36,7 +37,6 @@ dependencies:
   archive: ^4.0.9
   file_picker: 8.3.7
   share_plus: ^12.0.2
-  shared_preferences: ^2.5.5
   image_cropper: ^12.2.1
   flutter_local_notifications: ^17.1.2
   timezone: ^0.9.2
@@ -47,6 +47,7 @@ dependencies:
   flutter_timezone: ^5.1.0
   confetti: ^0.8.0
   wakelock_plus: ^1.2.8
+  flutter_animate: ^4.5.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

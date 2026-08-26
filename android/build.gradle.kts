@@ -36,6 +36,18 @@ subprojects {
         } catch (_: Exception) {
             // ignore
         }
+        try {
+            val getNamespace = android.javaClass.methods.firstOrNull { it.name == "getNamespace" }
+            val setNamespace = android.javaClass.methods.firstOrNull { it.name == "setNamespace" && it.parameterCount == 1 }
+            if (getNamespace != null && setNamespace != null) {
+                val currentNs = getNamespace.invoke(android)
+                if (currentNs == null) {
+                    setNamespace.invoke(android, project.group.toString())
+                }
+            }
+        } catch (_: Exception) {
+            // ignore
+        }
     }
 }
 

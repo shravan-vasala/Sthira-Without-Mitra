@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
@@ -383,7 +384,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 fontWeight: FontWeight.w500,
                 color: context.colors.textMedium,
               ),
-            ),
+            ).animate(key: ValueKey(stepsSubtitle)).fade().scale(begin: const Offset(0.95, 0.95)),
             if (sourceHint != null) ...[
               SizedBox(height: 2),
               Text(
@@ -527,7 +528,7 @@ class _ProgressCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: context.colors.textMedium,
                 ),
-              ),
+              ).animate(key: ValueKey(subtitle)).fade().scale(begin: const Offset(0.95, 0.95)),
           ],
         ),
       ),

@@ -20,7 +20,6 @@ import 'services/schema_migration_service.dart';
 import 'providers/app_providers.dart';
 import 'providers/reminders_provider.dart';
 import 'router/app_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
 import 'services/auth_service.dart';
@@ -41,6 +40,9 @@ import 'models/exercise_pr.dart';
 import 'models/coach_note.dart';
 import 'models/body_stats.dart';
 import 'models/badge.dart';
+import 'models/app_config.dart';
+import 'models/ai_cache_entry.dart';
+import 'models/food_search_cache.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +62,7 @@ Future<void> main() async {
   );
 
   final dir = await getApplicationDocumentsDirectory();
-  final isar = await Isar.open(
+  final isar = Isar.openSync(
     [
       UserProfileSchema,
       DailyLogSchema,
@@ -77,12 +79,14 @@ Future<void> main() async {
       CoachNoteSchema,
       BodyStatsSchema,
       BadgeSchema,
+      AppConfigSchema,
+      AiCacheEntrySchema,
+      FoodSearchCacheSchema,
     ],
     directory: dir.path,
   );
   
-  final prefs = await SharedPreferences.getInstance();
-  await SchemaMigrationService.runStartupMigrations(prefs);
+  SchemaMigrationService.runStartupMigrations(isar);
 
   // Initialize all repositories
   final workoutRepo = WorkoutRepository();
@@ -152,7 +156,6 @@ Future<void> main() async {
         coachNoteRepoProvider.overrideWithValue(coachNoteRepo),
         badgeRepoProvider.overrideWithValue(badgeRepo),
         healthConnectServiceProvider.overrideWithValue(healthConnectService),
-        sharedPreferencesProvider.overrideWithValue(prefs),
         initialGeminiKeyProvider.overrideWithValue(initialGeminiKey ?? ''),
       ],
       child: const TruFitApp(),

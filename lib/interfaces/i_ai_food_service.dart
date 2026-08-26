@@ -9,7 +9,7 @@ abstract class IAiFoodService {
 
   Future<Map<String, dynamic>?> analyzeFoodText(String description);
 
-  Future<Map<String, dynamic>?> suggestMeal({
+  Stream<String> suggestMealStream({
     required int remainingCalories,
     required double remainingProtein,
     required double remainingCarbs,

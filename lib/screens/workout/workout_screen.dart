@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/workout_plan.dart';
@@ -77,7 +78,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     final totalExercises = workoutDay.sections
         .fold<int>(0, (sum, s) => sum + s.exercises.length);
     final completedExercises = workoutDay.sections
-        .fold<int>(0, (sum, s) => sum + s.exercises.where((e) => logRepo.hasLog(dateStr, e.name)).length);
+        .fold<int>(0, (sum, s) => sum + s.exercises.where((e) => logRepo.hasLog(dateStr, e.name ?? '')).length);
     
     final isFinished =
         ref.watch(workoutRepoProvider).isWorkoutFinished(dateStr, widget.dayId);
@@ -92,8 +93,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
     // Title: use section name when filtered, day label when showing all
     final String appBarTitle = isFiltered
-        ? workoutDay.sections[_activeSectionIndex!].title
-        : workoutDay.label ?? workoutDay.dayId;
+        ? workoutDay.sections[_activeSectionIndex!].title ?? ''
+        : workoutDay.label ?? workoutDay.dayId ?? '';
 
     // Progress counts for current view
     final viewExercises = isFiltered
@@ -101,7 +102,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         : totalExercises;
     final viewCompleted = isFiltered
         ? workoutDay.sections[_activeSectionIndex!].exercises
-            .where((e) => logRepo.hasLog(dateStr, e.name))
+            .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
             .length
         : completedExercises;
 
@@ -280,7 +281,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     section: section,
                     sectionIndex: sectionIndex,
                     dayId: widget.dayId,
-                  );
+                  ).animate(delay: (listIndex * 100).ms)
+                   .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+                   .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut);
                 },
               ),
             ),
@@ -530,7 +533,7 @@ class _SectionWidget extends StatelessWidget {
                 ),
                 SizedBox(width: 10),
                 Text(
-                  section.title.toUpperCase(),
+                  section.title?.toUpperCase() ?? '',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -557,7 +560,7 @@ class _SectionWidget extends StatelessWidget {
               if (exercise.restSecondsAfterSet > 0) {
                 return RestTimerLabel(
                   seconds: exercise.restSecondsAfterSet,
-                  exerciseName: exercise.name,
+                  exerciseName: exercise.name ?? '',
                 );
               }
               return SizedBox(height: 4);

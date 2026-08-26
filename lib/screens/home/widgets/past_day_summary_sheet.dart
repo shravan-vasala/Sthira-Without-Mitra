@@ -67,7 +67,7 @@ class PastDaySummarySheet extends ConsumerWidget {
         totalExercises = workoutDay.sections.expand((s) => s.exercises).length;
         completedExercises = workoutDay.sections
             .expand((s) => s.exercises)
-            .where((e) => logRepo.hasLog(dateStr, e.name))
+            .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
             .length;
       }
     }

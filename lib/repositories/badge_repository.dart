@@ -13,9 +13,9 @@ class BadgeRepository {
       _sync!.streamCollection('badges').listen((data) async {
         for (final entry in data.entries) {
           final b = Badge.fromJson(entry.value);
-          final existing = _isar.badges.where().idStrEqualTo(entry.key).findFirstSync();
+          final existing = _isar.badges.where().idEqualTo(entry.key).findFirstSync();
           if (existing == null || jsonEncode(existing.toJson()) != jsonEncode(b.toJson())) {
-            if (existing != null) b.id = existing.id;
+            if (existing != null) b.idInternal = existing.idInternal;
             await _isar.writeTxn(() async {
               await _isar.badges.put(b);
             });
@@ -33,7 +33,7 @@ class BadgeRepository {
   Future<void> _seedDefaultBadges() async {
     final defaults = [
       Badge(
-        idStr: 'first_workout',
+        id: 'first_workout',
         category: 'workout',
         title: 'Welcome to the Iron',
         description: 'Log your first workout',
@@ -41,7 +41,7 @@ class BadgeRepository {
         requiredProgress: 1,
       ),
       Badge(
-        idStr: 'workout_10',
+        id: 'workout_10',
         category: 'workout',
         title: 'Consistency Key',
         description: 'Log 10 workouts',
@@ -49,7 +49,7 @@ class BadgeRepository {
         requiredProgress: 10,
       ),
       Badge(
-        idStr: 'workout_50',
+        id: 'workout_50',
         category: 'workout',
         title: 'Iron Lifter',
         description: 'Log 50 workouts',
@@ -57,7 +57,7 @@ class BadgeRepository {
         requiredProgress: 50,
       ),
       Badge(
-        idStr: 'streak_3',
+        id: 'streak_3',
         category: 'streak',
         title: 'Momentum',
         description: 'Workout 3 days in a row',
@@ -65,7 +65,7 @@ class BadgeRepository {
         requiredProgress: 3,
       ),
       Badge(
-        idStr: 'streak_7',
+        id: 'streak_7',
         category: 'streak',
         title: 'Unstoppable',
         description: 'Workout 7 days in a row',
@@ -76,7 +76,7 @@ class BadgeRepository {
 
     await _isar.writeTxn(() async {
       for (final b in defaults) {
-        if (_isar.badges.where().idStrEqualTo(b.idStr).findFirstSync() == null) {
+        if (_isar.badges.where().idEqualTo(b.id).findFirstSync() == null) {
           await _isar.badges.put(b);
         }
       }
@@ -87,19 +87,21 @@ class BadgeRepository {
     return _isar.badges.where().findAllSync();
   }
 
-  Badge? getBadge(String idStr) {
-    return _isar.badges.where().idStrEqualTo(idStr).findFirstSync();
+  Badge? getBadge(String id) {
+    return _isar.badges.where().idEqualTo(id).findFirstSync();
   }
 
   Future<void> saveBadge(Badge badge) async {
-    final existing = getBadge(badge.idStr);
+    final existing = getBadge(badge.id);
     if (existing != null) {
-      badge.id = existing.id;
+      badge.idInternal = existing.idInternal;
     }
+
     await _isar.writeTxn(() async {
       await _isar.badges.put(badge);
     });
-    _sync?.syncToCloud('badges', badge.idStr, badge.toJson());
+
+    _sync?.syncToCloud('badges', badge.id, badge.toJson());
   }
 
   /// Bulk import from Firestore (used on new-device sign-in).
@@ -116,21 +118,33 @@ class BadgeRepository {
         final localDate = localBadge.unlockedAt ?? DateTime.parse('2000-01-01');
         final cloudDate = cloudBadge.unlockedAt ?? DateTime.parse('2000-01-01');
         if (cloudDate.isAfter(localDate) || (cloudBadge.currentProgress > localBadge.currentProgress && localBadge.unlockedAt == null)) {
-          cloudBadge.id = localBadge.id;
-          await _isar.writeTxn(() async {
-            await _isar.badges.put(cloudBadge);
-          });
+          cloudBadge.idInternal = localBadge.idInternal;
         }
+        await _isar.writeTxn(() async {
+          await _isar.badges.put(cloudBadge);
+        });
       }
     }
   }
 
-  /// Export all local data as a map for bulk cloud upload.
+  /// Bulk export to Firestore (used on manual backup or sync).
   Map<String, Map<String, dynamic>> exportForCloud() {
     final result = <String, Map<String, dynamic>>{};
     final badges = getAllBadges();
     for (final badge in badges) {
-      result[badge.idStr] = badge.toJson();
+      if (badge.isUnlocked) {
+        result[badge.id] = badge.toJson();
+      } else if (badge.currentProgress > 0) {
+        result[badge.id] = Badge(
+          id: badge.id,
+          category: badge.category,
+          title: badge.title,
+          description: badge.description,
+          iconEmoji: badge.iconEmoji,
+          requiredProgress: badge.requiredProgress,
+          currentProgress: badge.currentProgress,
+        ).toJson();
+      }
     }
     return result;
   }
@@ -139,7 +153,7 @@ class BadgeRepository {
     final badges = getAllBadges();
     for (final badge in badges) {
       final newBadge = Badge(
-        idStr: badge.idStr,
+        id: badge.id,
         category: badge.category,
         title: badge.title,
         description: badge.description,
@@ -148,7 +162,7 @@ class BadgeRepository {
         currentProgress: 0,
         unlockedAt: null,
       );
-      newBadge.id = badge.id;
+      newBadge.idInternal = badge.idInternal;
       await _isar.writeTxn(() async {
         await _isar.badges.put(newBadge);
       });

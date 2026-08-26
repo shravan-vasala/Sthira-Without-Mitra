@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
@@ -536,7 +537,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
                 color: textColor,
                 letterSpacing: -0.2,
               ),
-            ),
+            ).animate(key: ValueKey(score)).shake(hz: 3, curve: Curves.easeInOut).scale(begin: const Offset(1.2, 1.2), end: const Offset(1, 1)),
           ],
         ),
       ),

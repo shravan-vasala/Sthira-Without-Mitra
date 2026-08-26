@@ -34,6 +34,12 @@ class DailyLogRepository {
     return _isar.dailyLogs.where().dateEqualTo(date).findFirstSync();
   }
 
+  Stream<DailyLog?> watchLog(String date) {
+    return _isar.dailyLogs.where().dateEqualTo(date).watch(fireImmediately: true).map((logs) {
+      return logs.isNotEmpty ? logs.first : null;
+    });
+  }
+
   DailyLog getOrCreate(String date) {
     return getLog(date) ?? DailyLog(date: date);
   }
