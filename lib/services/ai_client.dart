@@ -4,7 +4,15 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'package:crypto/crypto.dart';
 import 'ai_cache.dart';
+import 'dart:async';
 import 'image_preprocessor.dart';
+
+class AiException implements Exception {
+  final String message;
+  AiException(this.message);
+  @override
+  String toString() => message;
+}
 
 class AiClientCircuitBreaker {
   int consecutiveFailures = 0;
@@ -40,13 +48,21 @@ class AiClient {
   final AiClientCircuitBreaker _circuitBreaker = AiClientCircuitBreaker();
   
   static const modelsToTry = [
-    'gemini-2.5-flash',
-    'gemini-2.5-pro',
     'gemini-2.0-flash',
     'gemini-1.5-flash',
+    'gemini-1.5-pro',
   ];
 
+  GoogleAIClient? _cachedClient;
+  String? _cachedApiKey;
+
   AiClient({this.cache});
+
+  void dispose() {
+    _cachedClient?.close();
+    _cachedClient = null;
+    _cachedApiKey = null;
+  }
 
   Future<Map<String, dynamic>?> generateJson({
     required String prompt,
@@ -58,7 +74,7 @@ class AiClient {
     bool skipCache = false,
   }) async {
     if (_circuitBreaker.isOpen) {
-      throw Exception('Service temporarily unavailable due to repeated failures. Please try again later.');
+      throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
     }
 
     String? imageContext;
@@ -106,25 +122,31 @@ class AiClient {
           debugPrint('AiClient: Failed with $modelName: $e');
           final errorString = e.toString();
           
-          if (errorString.contains('403') || errorString.contains('API_KEY_INVALID') || errorString.contains('forbidden') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
-            if (useFirebase) {
-              lastError = 'Firebase API disabled or forbidden: $e';
-            } else {
-              lastError = 'Your API Key is invalid or expired.';
-            }
-            skipStrategy = true;
-            break; // Break retries
-          } 
+          if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
+            throw AiException('Your API Key is invalid or not authorized. Please check your AI Settings.');
+          } else if (errorString.contains('403') || errorString.contains('forbidden') || errorString.contains('404') || errorString.contains('not found')) {
+            lastError = 'Model $modelName unavailable (403/404). Trying next...';
+            break; // Break retries, try next model
+          } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
+            throw AiException('You seem to be offline. Please check your internet connection.');
+          }
           
           if (errorString.contains('429') || errorString.contains('quota')) {
             if (attempt < maxRetries) {
               final delaySeconds = 1 << attempt; // 1s, 2s
-              debugPrint('Rate limited. Waiting \${delaySeconds}s before retry...');
+              debugPrint('Rate limited. Waiting ${delaySeconds}s before retry...');
               await Future.delayed(Duration(seconds: delaySeconds));
               continue; // Retry
             } else {
-              lastError = 'Rate limited: $e';
-              break; // Break retries
+              _circuitBreaker.recordFailure();
+              throw AiException('We\'re experiencing heavy traffic. Please try again in a moment.');
+            }
+          } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout')) {
+            if (attempt < maxRetries) {
+              continue; // Retry
+            } else {
+              lastError = 'Connection timed out';
+              break;
             }
           }
           
@@ -139,7 +161,7 @@ class AiClient {
     }
 
     _circuitBreaker.recordFailure();
-    throw Exception('Failed to generate response. Last error: $lastError');
+    throw AiException('Failed to generate response. Please try again later.');
   }
 
   Future<String?> _callModel({
@@ -171,45 +193,45 @@ class AiClient {
           vertex.Content.text(prompt)
       ];
 
-      final response = await model.generateContent(contents);
+      final response = await model.generateContent(contents).timeout(const Duration(seconds: 20));
       return response.text;
     } else {
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('API Key is required if not using Firebase.');
       }
       
-      final client = GoogleAIClient(
-        config: GoogleAIConfig.googleAI(
-          authProvider: ApiKeyProvider(apiKey),
+      if (_cachedApiKey != apiKey || _cachedClient == null) {
+        _cachedClient?.close();
+        _cachedClient = GoogleAIClient(
+          config: GoogleAIConfig.googleAI(
+            authProvider: ApiKeyProvider(apiKey),
+          ),
+        );
+        _cachedApiKey = apiKey;
+      }
+
+      final request = GenerateContentRequest(
+        systemInstruction: Content.text(systemInstruction),
+        generationConfig: const GenerationConfig(
+          temperature: 0.1,
+          responseMimeType: 'application/json',
         ),
+        contents: [
+          if (imageBytes != null)
+            Content.user([
+              TextPart(prompt),
+              Part.bytes(imageBytes, mimeType ?? 'image/jpeg'),
+            ])
+          else
+            Content.text(prompt)
+        ],
       );
 
-      try {
-        final request = GenerateContentRequest(
-          systemInstruction: Content.text(systemInstruction),
-          generationConfig: const GenerationConfig(
-            temperature: 0.1,
-            responseMimeType: 'application/json',
-          ),
-          contents: [
-            if (imageBytes != null)
-              Content.user([
-                TextPart(prompt),
-                Part.bytes(imageBytes, mimeType ?? 'image/jpeg'),
-              ])
-            else
-              Content.text(prompt)
-          ],
-        );
-
-        final response = await client.models.generateContent(
-          model: modelName,
-          request: request,
-        );
-        return response.text;
-      } finally {
-        client.close();
-      }
+      final response = await _cachedClient!.models.generateContent(
+        model: modelName,
+        request: request,
+      ).timeout(const Duration(seconds: 20));
+      return response.text;
     }
   }
 
@@ -218,7 +240,7 @@ class AiClient {
       final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
       return jsonDecode(cleaned) as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Failed to parse AI response as JSON: $e');
+      throw AiException('Something went wrong parsing the response. Please try again.');
     }
   }
 }

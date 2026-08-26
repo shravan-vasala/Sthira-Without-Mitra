@@ -239,9 +239,9 @@ Return ONLY a JSON object with the exact following structure. Do NOT include mar
     );
 
     final modelsToTry = [
-      'gemini-2.5-flash',
       'gemini-2.0-flash',
       'gemini-1.5-flash',
+      'gemini-1.5-pro',
     ];
 
     String lastError = '';
@@ -254,181 +254,33 @@ Return ONLY a JSON object with the exact following structure. Do NOT include mar
             request: GenerateContentRequest(
               contents: [Content.text("Respond exactly with 'OK'")],
             ),
-          );
+          ).timeout(const Duration(seconds: 15));
           if (response.text != null && response.text!.isNotEmpty) {
             return; // Success!
           }
         } catch (e) {
           final errorString = e.toString();
-          if (errorString.contains('403') || errorString.contains('API_KEY_INVALID') || errorString.contains('forbidden')) {
-            throw Exception('Your API Key is invalid or expired.');
+          if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
+            throw AiException('Your API Key is invalid or not authorized.');
+          } else if (errorString.contains('403') || errorString.contains('forbidden') || errorString.contains('404') || errorString.contains('not found')) {
+            lastError = 'Model $model unavailable (403/404)';
+            continue; // Try next model
           } else if (errorString.contains('429') || errorString.contains('quota')) {
-            throw Exception('You are sending too many requests or exceeded your quota! Please wait a minute.');
+            throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');
+          } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout') || errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
+             lastError = 'Connection timed out or offline';
+             continue; 
           }
           lastError = errorString;
           continue; // Try next model on 404 etc.
         }
       }
-      throw Exception("Failed to verify API key with all models. Last error: $lastError");
+      throw AiException("Failed to verify API key: $lastError");
     } finally {
       client.close();
     }
   }
+}
 
-  Future<Map<String, dynamic>?> _generateWithFallback(
-    Future<Map<String, dynamic>?> Function(String model, bool useFirebase) call,
-  ) async {
-    const modelsToTry = [
-      'gemini-2.5-flash',
-      'gemini-2.5-pro',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-    ];
 
-    final hasManualKey = apiKey != null && apiKey!.isNotEmpty;
-    final strategies = <bool>[];
-    if (isSignedIn) strategies.add(true); // Firebase Vertex AI
-    if (hasManualKey) strategies.add(false); // Manual API Key
-
-    if (strategies.isEmpty) {
-      throw Exception('Gemini API key is not configured and user is not signed in.');
-    }
-
-    String lastError = '';
-    
-    for (final useFirebase in strategies) {
-      for (final model in modelsToTry) {
-        int maxRetries = 2;
-        bool skipStrategy = false;
-        
-        for (int attempt = 0; attempt <= maxRetries; attempt++) {
-          try {
-            debugPrint('Trying Gemini model: $model (Firebase: $useFirebase, attempt \${attempt + 1})...');
-            return await call(model, useFirebase);
-          } catch (e) {
-            debugPrint('Failed with $model (Firebase: $useFirebase): $e');
-            final errorString = e.toString();
-            
-            if (errorString.contains('403') || errorString.contains('API_KEY_INVALID') || errorString.contains('forbidden') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
-              if (useFirebase) {
-                lastError = 'Firebase API disabled or forbidden: $e';
-                skipStrategy = true;
-                break; // Break retries
-              } else {
-                throw Exception('Your API Key is invalid or expired.');
-              }
-            } 
-            
-            if (errorString.contains('429') || errorString.contains('quota')) {
-              if (attempt < maxRetries) {
-                final delaySeconds = 1 << attempt; // 1s, 2s
-                debugPrint('Rate limited. Waiting \${delaySeconds}s before retry...');
-                await Future.delayed(Duration(seconds: delaySeconds));
-                continue;
-              } else {
-                lastError = 'Rate limited: $e';
-                break; // Break retries
-              }
-            }
-            
-            lastError = e.toString();
-            break; // For other errors, break retries, try next model immediately
-          }
-        }
-        
-        if (skipStrategy) {
-          break; // Break models loop, try next strategy (e.g. manual key)
-        }
-      }
-    }
-
-    throw Exception(
-      'Failed to analyze food. Ensure your API key is valid or Cloud Sync is fully set up. Last error: $lastError',
-    );
-  }
-
-  Future<Map<String, dynamic>?> _callGemini(
-    String modelName,
-    String prompt,
-    bool useFirebase, [
-    Uint8List? imageBytes,
-    String? mimeType,
-  ]) async {
-    String? jsonText;
-
-    if (useFirebase) {
-      // Use Firebase Vertex AI
-      final model = vertex.FirebaseAI.vertexAI().generativeModel(
-        model: modelName,
-        systemInstruction: vertex.Content.system(_systemInstruction),
-        generationConfig: vertex.GenerationConfig(
-          temperature: 0.1,
-          responseMimeType: 'application/json',
-        ),
-      );
-
-      final contents = [
-        if (imageBytes != null)
-          vertex.Content.multi([
-            vertex.TextPart(prompt),
-            vertex.InlineDataPart(mimeType ?? 'image/jpeg', imageBytes)
-          ])
-        else
-          vertex.Content.text(prompt)
-      ];
-
-      final response = await model.generateContent(contents);
-      jsonText = response.text;
-    } else {
-      // Use Manual API Key
-      final client = GoogleAIClient(
-        config: GoogleAIConfig.googleAI(
-          authProvider: ApiKeyProvider(apiKey!),
-        ),
-      );
-
-      try {
-        final contents = [
-          if (imageBytes != null)
-            Content.user([
-              TextPart(prompt),
-              Part.bytes(imageBytes, mimeType ?? 'image/jpeg'),
-            ])
-          else
-            Content.text(prompt)
-        ];
-
-        final response = await client.models.generateContent(
-          model: modelName,
-          request: GenerateContentRequest(
-            contents: contents,
-            systemInstruction: Content.text(_systemInstruction),
-            generationConfig: const GenerationConfig(
-              temperature: 0.1,
-              responseMimeType: 'application/json',
-            ),
-          ),
-        );
-        jsonText = response.text;
-      } finally {
-        client.close();
-      }
-    }
-
-    if (jsonText != null) {
-      final jsonString = jsonText
-          .trim()
-          .replaceAll('```json', '')
-          .replaceAll('```', '')
-          .trim();
-      debugPrint('Gemini Response: $jsonString');
-      try {
-        return jsonDecode(jsonString) as Map<String, dynamic>;
-      } catch (e) {
-        debugPrint('Gemini JSON parsing error: $e\nRaw string: $jsonString');
-        throw Exception('AI returned malformed data. Please try again.');
-      }
-    }
-    return null;
-  }
 }
