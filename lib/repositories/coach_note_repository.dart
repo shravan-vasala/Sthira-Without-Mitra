@@ -1,50 +1,57 @@
 import 'dart:convert';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:isar/isar.dart';
 import '../models/coach_note.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 
 class CoachNoteRepository {
-  static const String boxName = 'coach_notes_v2';
-  late final Box<CoachNote> _box;
+  late Isar _isar;
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
 
-  Future<void> init() async {
-    _box = await Hive.openBox<CoachNote>(boxName);
+  Future<void> init(Isar isar) async {
+    _isar = isar;
   }
 
   CoachNote? getNote(String date) {
-    return _box.get(date);
+    return _isar.coachNotes.where().dateEqualTo(date).findFirstSync();
   }
 
   Future<void> saveNote(CoachNote note) async {
-    await _box.put(note.date, note);
+    final existing = getNote(note.date);
+    if (existing != null) {
+      note.id = existing.id;
+    }
+    await _isar.writeTxn(() async {
+      await _isar.coachNotes.put(note);
+    });
     _sync?.syncToCloud('coach_notes', note.date, note.toJson());
   }
 
   List<CoachNote> getRecentNotes(int limit) {
-    final notes = _box.values.toList();
-    notes.sort((a, b) => b.date.compareTo(a.date)); // Descending
-    return notes.take(limit).toList();
+    return _isar.coachNotes.where().sortByDateDesc().limit(limit).findAllSync();
   }
 
   // ── Cloud sync helpers ──
 
   Future<void> importNotesFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_box.containsKey(entry.key)) {
+      if (getNote(entry.key) == null) {
         final note = CoachNote.fromJson(entry.value);
-        await _box.put(entry.key, note);
+        await _isar.writeTxn(() async {
+          await _isar.coachNotes.put(note);
+        });
       }
     }
   }
 
   Map<String, Map<String, dynamic>> exportNotesForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final note in _box.values) {
+    final notes = _isar.coachNotes.where().findAllSync();
+    for (final note in notes) {
       result[note.date] = note.toJson();
     }
     return result;
   }
 }
+

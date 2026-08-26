@@ -1,18 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/scanned_meal_log.dart';
 
 class PhotoMealRepository {
-  static const String _boxName = 'scanned_photo_meals_v2';
-
-  late Box<ScannedMealLog> _box;
+  late Isar _isar;
   late String _baseDir;
 
-  Future<void> init() async {
-    _box = await Hive.openBox<ScannedMealLog>(_boxName);
+  Future<void> init(Isar isar) async {
+    _isar = isar;
     if (!kIsWeb) {
       final appDir = await getApplicationDocumentsDirectory();
       _baseDir = '${appDir.path}/trufit_meal_photos';
@@ -44,7 +42,7 @@ class PhotoMealRepository {
     }
 
     final log = ScannedMealLog(
-      id: 'photo_meal_$timestampMs',
+      idStr: 'photo_meal_$timestampMs',
       date: date,
       photoPath: destPath,
       mealType: mealType,
@@ -57,19 +55,14 @@ class PhotoMealRepository {
       timestamp: DateTime.now().toIso8601String(),
     );
 
-    await _box.put(log.id, log);
+    await _isar.writeTxn(() async {
+      await _isar.scannedMealLogs.put(log);
+    });
     return log;
   }
 
   List<ScannedMealLog> getScannedMealsForDate(String date) {
-    final logs = <ScannedMealLog>[];
-    for (final log in _box.values) {
-      if (log.date == date) {
-        logs.add(log);
-      }
-    }
-    logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return logs;
+    return _isar.scannedMealLogs.where().dateEqualTo(date).sortByTimestampDesc().findAllSync();
   }
 
   int getTotalScannedCaloriesForDate(String date) {
@@ -78,7 +71,7 @@ class PhotoMealRepository {
   }
 
   Future<void> deleteScannedMeal(String id) async {
-    final log = _box.get(id);
+    final log = _isar.scannedMealLogs.where().idStrEqualTo(id).findFirstSync();
     if (log != null) {
       if (!kIsWeb) {
         final file = File(log.photoPath);
@@ -86,7 +79,10 @@ class PhotoMealRepository {
           await file.delete();
         }
       }
-      await _box.delete(id);
+      await _isar.writeTxn(() async {
+        await _isar.scannedMealLogs.delete(log.id);
+      });
     }
   }
 }
+

@@ -1,11 +1,26 @@
+import 'package:isar/isar.dart';
+
+part 'daily_meal_log.g.dart';
+
+@collection
 class DailyMealLog {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String date; // yyyy-MM-dd
-  final Map<String, MealSlotLog> customSlots;
+
+  @ignore
+  Map<String, MealSlotLog> customSlots;
+
+  List<CustomSlotEntry> get isarCustomSlots => customSlots.entries.map((e) => CustomSlotEntry()..key = e.key..value = e.value).toList();
+  set isarCustomSlots(List<CustomSlotEntry> list) {
+    customSlots = { for (var e in list) if (e.key != null && e.value != null) e.key!: e.value! };
+  }
 
   DailyMealLog({
     required this.date,
-    this.customSlots = const {},
-  });
+    Map<String, MealSlotLog>? customSlots,
+  }) : customSlots = customSlots ?? {};
 
   int get totalCalories => customSlots.values.fold(0, (sum, slot) => sum + slot.totalCalories);
 
@@ -55,26 +70,33 @@ class DailyMealLog {
   }
 }
 
+@embedded
+class CustomSlotEntry {
+  String? key;
+  MealSlotLog? value;
+}
+
+@embedded
 class MealSlotLog {
-  final String? name;
-  final String? emoji;
-  final String? photoPath;
-  final List<MealItemLog> items;
-  final int totalCalories;
-  final double totalProtein;
-  final double totalCarbs;
-  final double totalFat;
-  final String? confidence; // "high", "medium", "low"
+  String? name;
+  String? emoji;
+  String? photoPath;
+  List<MealItemLog> items;
+  int totalCalories;
+  double totalProtein;
+  double totalCarbs;
+  double totalFat;
+  String? confidence; // "high", "medium", "low"
 
   MealSlotLog({
     this.name,
     this.emoji,
     this.photoPath,
-    required this.items,
-    required this.totalCalories,
-    required this.totalProtein,
-    required this.totalCarbs,
-    required this.totalFat,
+    this.items = const [],
+    this.totalCalories = 0,
+    this.totalProtein = 0.0,
+    this.totalCarbs = 0.0,
+    this.totalFat = 0.0,
     this.confidence,
   });
 
@@ -108,21 +130,22 @@ class MealSlotLog {
       };
 }
 
+@embedded
 class MealItemLog {
-  final String name;
-  final String portion;
-  final int calories;
-  final double proteinG;
-  final double carbsG;
-  final double fatG;
+  String? name;
+  String? portion;
+  int? calories;
+  double? proteinG;
+  double? carbsG;
+  double? fatG;
 
   MealItemLog({
-    required this.name,
-    required this.portion,
-    required this.calories,
-    required this.proteinG,
-    required this.carbsG,
-    required this.fatG,
+    this.name,
+    this.portion,
+    this.calories,
+    this.proteinG,
+    this.carbsG,
+    this.fatG,
   });
 
   factory MealItemLog.fromJson(Map<String, dynamic> json) {

@@ -1,18 +1,28 @@
+import 'dart:convert';
+import 'package:isar/isar.dart';
 import 'daily_log.dart';
+
+part 'habit.g.dart';
 
 enum HabitType { checkbox, counter, autoSteps, autoSleep, autoFromScreenTime }
 enum GoalDirection { atLeast, atMost }
 
+@collection
 class Habit {
+  Id idInternal = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String id;
   final String name;
   final String icon;
+  @enumerated
   final HabitType type;
   final String unit;
   final double target;
   final double step;
-  final DateTime createdAt;
+  DateTime createdAt;
   final int order;
+  @enumerated
   final GoalDirection goalDirection;
   final DateTime? updatedAt;
 
@@ -24,11 +34,11 @@ class Habit {
     this.unit = '',
     required this.target,
     this.step = 1.0,
-    DateTime? createdAt,
+    DateTime? initialCreatedAt,
     this.order = 0,
     this.goalDirection = GoalDirection.atLeast,
     this.updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : createdAt = initialCreatedAt ?? DateTime.now();
 
   factory Habit.fromJson(Map<String, dynamic> json) {
     return Habit(
@@ -42,7 +52,7 @@ class Habit {
       unit: json['unit'] as String? ?? '',
       target: (json['target'] as num?)?.toDouble() ?? 1.0,
       step: (json['step'] as num?)?.toDouble() ?? 1.0,
-      createdAt: json['createdAt'] != null
+      initialCreatedAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.parse('2020-01-01'),
       order: json['order'] as int? ?? 0,
@@ -89,7 +99,7 @@ class Habit {
       unit: unit ?? this.unit,
       target: target ?? this.target,
       step: step ?? this.step,
-      createdAt: createdAt,
+      initialCreatedAt: createdAt,
       order: order ?? this.order,
       goalDirection: goalDirection ?? this.goalDirection,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -113,7 +123,7 @@ class Habit {
         type: HabitType.autoSteps,
         unit: 'steps',
         target: 8000.0,
-        createdAt: DateTime.parse('2020-01-01'),
+        initialCreatedAt: DateTime.parse('2020-01-01'),
         order: 1),
     Habit(
         id: 'water',
@@ -123,17 +133,44 @@ class Habit {
         unit: 'L',
         target: 3.0,
         step: 1.0,
-        createdAt: DateTime.parse('2020-01-01'),
+        initialCreatedAt: DateTime.parse('2020-01-01'),
         order: 2),
   ];
 }
 
+@collection
 class HabitCompletion {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String date;
+
+  @ignore
   final Map<String, dynamic> completions; // habitId -> bool or num
+  @ignore
   final Map<String, String> overrides; // habitId -> 'done', 'notDone'
+  @ignore
   final Map<String, int> streaks; // habitId -> current streak including this day
+  
   final DateTime? updatedAt;
+
+  String get isarCompletions => jsonEncode(completions);
+  set isarCompletions(String json) {
+    completions.clear();
+    completions.addAll(jsonDecode(json) as Map<String, dynamic>);
+  }
+
+  String get isarOverrides => jsonEncode(overrides);
+  set isarOverrides(String json) {
+    overrides.clear();
+    overrides.addAll((jsonDecode(json) as Map<String, dynamic>).cast<String, String>());
+  }
+
+  String get isarStreaks => jsonEncode(streaks);
+  set isarStreaks(String json) {
+    streaks.clear();
+    streaks.addAll((jsonDecode(json) as Map<String, dynamic>).cast<String, int>());
+  }
 
   HabitCompletion({
     required this.date,

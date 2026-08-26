@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'workout_plan.g.dart';
+
+@collection
 class WorkoutPlan {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String planName;
   final List<WorkoutDay> days;
 
@@ -19,14 +27,20 @@ class WorkoutPlan {
       };
 }
 
+@embedded
 class WorkoutDay {
-  final String dayId;
-  final String? label;
-  final List<WorkoutSection> sections;
+  String? dayId;
+  String? label;
+  List<WorkoutSection> sections;
 
-  WorkoutDay({required this.dayId, this.label, required this.sections});
+  WorkoutDay({
+    this.dayId,
+    this.label,
+    this.sections = const [],
+  });
 
   int? get weekday {
+    if (dayId == null) return null;
     switch (dayId.toLowerCase()) {
       case 'monday': return DateTime.monday;
       case 'tuesday': return DateTime.tuesday;
@@ -56,11 +70,15 @@ class WorkoutDay {
       };
 }
 
+@embedded
 class WorkoutSection {
-  final String title;
-  final List<Exercise> exercises;
+  String? title;
+  List<Exercise> exercises;
 
-  WorkoutSection({required this.title, required this.exercises});
+  WorkoutSection({
+    this.title,
+    this.exercises = const [],
+  });
 
   factory WorkoutSection.fromJson(Map<String, dynamic> json) {
     return WorkoutSection(
@@ -77,22 +95,23 @@ class WorkoutSection {
       };
 }
 
+@embedded
 class Exercise {
-  final String name;
-  final String? displayName;
-  final String? youtubeUrl;
-  final List<String> reps;
-  final String note;
-  final String sideInfo;
-  final int restSecondsAfterSet;
-  final double? weightKg;
-  final int? durationSeconds;
+  String? name;
+  String? displayName;
+  String? youtubeUrl;
+  List<String> reps;
+  String note;
+  String sideInfo;
+  int restSecondsAfterSet;
+  double? weightKg;
+  int? durationSeconds;
 
   Exercise({
-    required this.name,
+    this.name,
     this.displayName,
     this.youtubeUrl,
-    required this.reps,
+    this.reps = const [],
     this.note = '',
     this.sideInfo = 'None',
     this.restSecondsAfterSet = 0,

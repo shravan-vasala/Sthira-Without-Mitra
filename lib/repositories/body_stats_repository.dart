@@ -1,57 +1,61 @@
 import 'dart:convert';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import '../models/body_stats.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 
 class BodyStatsRepository {
-  static const String _boxName = 'body_stats_v2';
-
-  late Box<BodyStats> _box;
+  late Isar _isar;
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
 
-  Future<void> init() async {
-    _box = await Hive.openBox<BodyStats>(_boxName);
+  Future<void> init(Isar isar) async {
+    _isar = isar;
   }
 
   BodyStats? getStats(String date) {
-    return _box.get(date);
+    return _isar.bodyStats.where().dateEqualTo(date).findFirstSync();
   }
 
   Future<void> saveStats(BodyStats stats) async {
-    await _box.put(stats.date, stats);
+    final existing = getStats(stats.date);
+    if (existing != null) {
+      stats.id = existing.id;
+    }
+    await _isar.writeTxn(() async {
+      await _isar.bodyStats.put(stats);
+    });
     _sync?.syncToCloud('body_stats', stats.date, stats.toJson());
   }
 
   BodyStats? getLatestStats() {
-    if (_box.isEmpty) return null;
-    final keys = _box.keys.cast<String>().toList()..sort();
-    return getStats(keys.last);
+    return _isar.bodyStats.where().sortByDateDesc().findFirstSync();
   }
 
   List<BodyStats> getAllStats() {
-    final stats = _box.values.toList();
-    stats.sort((a, b) => a.date.compareTo(b.date));
-    return stats;
+    return _isar.bodyStats.where().sortByDate().findAllSync();
   }
 
   // ── Cloud sync helpers ──
 
   Future<void> importStatsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_box.containsKey(entry.key)) {
+      if (getStats(entry.key) == null) {
         final stats = BodyStats.fromJson(entry.value);
-        await _box.put(entry.key, stats);
+        await _isar.writeTxn(() async {
+          await _isar.bodyStats.put(stats);
+        });
       }
     }
   }
 
   Map<String, Map<String, dynamic>> exportStatsForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final stats in _box.values) {
+    final allStats = getAllStats();
+    for (final stats in allStats) {
       result[stats.date] = stats.toJson();
     }
     return result;
   }
 }
+

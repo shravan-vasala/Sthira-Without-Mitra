@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'progress_photo.g.dart';
+
+@collection
 class ProgressPhoto {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String path;
   final String date;
   final String pose;

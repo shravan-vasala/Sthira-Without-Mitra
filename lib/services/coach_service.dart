@@ -19,7 +19,7 @@ class CoachService {
     return FeatureAvailability.available;
   }
 
-  Future<String> generateNote({
+  Stream<String> generateNoteStream({
     required String userName,
     required String coachName,
     required int steps,
@@ -33,7 +33,7 @@ class CoachService {
     required String weightTrend,
     required bool isRestDay,
     required int daysSinceLastWorkout,
-  }) async {
+  }) async* {
     final coachLabel = coachName.trim().isEmpty ? 'Coach' : coachName.trim();
 
     final hasManualKey = apiKey != null && apiKey!.isNotEmpty;
@@ -42,9 +42,10 @@ class CoachService {
     if (hasManualKey) strategies.add(false);
 
     if (strategies.isEmpty) {
-      return _generateTemplatedNote(
+      yield _generateTemplatedNote(
         userName, steps, sleep, habitsDone, habitsTotal, calories, workoutsDone, workoutsTotal, isRestDay, daysSinceLastWorkout
       );
+      return;
     }
 
     final prompt = '''
@@ -70,28 +71,27 @@ Your client's name is ${userName.isEmpty ? 'friend' : userName}.
 Write a very brief (1-2 short sentences) encouraging note for them right now based on their stats.
 Focus on what they've done well today, their recent trends, or what they should focus on next today.
 Use a friendly, casual tone and 1-2 emojis. Do not use quotes.
-Return ONLY a valid JSON object with the exact following structure:
-{
-  "note": "Your short encouraging note here"
-}
+Return exactly the note text, and nothing else.
 ''';
 
     try {
-      final response = await aiClient.generateJson(
+      final stream = aiClient.generateTextStream(
         prompt: prompt,
         systemInstruction: systemInstruction,
         useFirebase: isSignedIn,
         apiKey: apiKey,
       );
-      if (response != null && response.containsKey('note')) {
-        return response['note'].toString();
+      
+      await for (final chunk in stream) {
+        yield chunk;
       }
+      return;
     } catch (e) {
       debugPrint('Gemini Coach Note failed via AiClient: $e');
     }
 
     // Fallback if Gemini fails
-    return _generateTemplatedNote(
+    yield _generateTemplatedNote(
       userName, steps, sleep, habitsDone, habitsTotal, calories, workoutsDone, workoutsTotal, isRestDay, daysSinceLastWorkout
     );
   }

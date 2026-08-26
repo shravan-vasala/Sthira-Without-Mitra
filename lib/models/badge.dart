@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'badge.g.dart';
+
+@collection
 class Badge {
+  Id idInternal = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String id;
   final String category; // 'workout', 'streak', 'habit', 'meal'
   final String title;

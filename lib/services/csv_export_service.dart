@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:csv/csv.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/daily_log.dart';
 import '../models/exercise_log.dart';
@@ -21,11 +21,14 @@ class CsvExportService {
         archive.addFile(ArchiveFile.bytes(name, bytes));
       }
 
-      await addCsv('daily_logs.csv', await _exportDailyLogs(startDate));
-      await addCsv('exercise_logs.csv', await _exportExerciseLogs(startDate));
-      await addCsv('habits.csv', await _exportHabitCompletions(startDate));
-      await addCsv('body_stats.csv', await _exportBodyStats(startDate));
-      await addCsv('meals.csv', await _exportMeals(startDate));
+      final isar = Isar.getInstance();
+      if (isar == null) return null;
+
+      await addCsv('daily_logs.csv', await _exportDailyLogs(isar, startDate));
+      await addCsv('exercise_logs.csv', await _exportExerciseLogs(isar, startDate));
+      await addCsv('habits.csv', await _exportHabitCompletions(isar, startDate));
+      await addCsv('body_stats.csv', await _exportBodyStats(isar, startDate));
+      await addCsv('meals.csv', await _exportMeals(isar, startDate));
 
       if (archive.isEmpty) return null;
 
@@ -44,17 +47,6 @@ class CsvExportService {
     }
   }
 
-  Future<Box<T>> _openTypedBox<T>(String boxName) async {
-    if (Hive.isBoxOpen(boxName)) {
-      return Hive.box<T>(boxName);
-    }
-    try {
-      return await Hive.openBox<T>(boxName);
-    } catch (_) {
-      return Hive.box<T>(boxName);
-    }
-  }
-
   bool _isAfterStartDate(String dateStr, DateTime? startDate) {
     if (startDate == null) return true;
     try {
@@ -65,14 +57,14 @@ class CsvExportService {
     }
   }
 
-  Future<String?> _exportDailyLogs(DateTime? startDate) async {
-    final box = await _openTypedBox<DailyLog>('daily_logs_v2');
+  Future<String?> _exportDailyLogs(Isar isar, DateTime? startDate) async {
+    final logs = isar.dailyLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
     
     // Headers
     rows.add(['Date', 'Weight', 'Steps', 'Steps Source', 'Sleep Hours', 'Sleep Source', 'Body Fat', 'Workout Completed', 'Workout Day ID']);
 
-    for (final log in box.values) {
+    for (final log in logs) {
       try {
         if (!_isAfterStartDate(log.date, startDate)) continue;
 
@@ -91,16 +83,16 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null; // Only headers
-    return csv.encode(rows);
+    return const ListToCsvConverter().convert(rows);
   }
 
-  Future<String?> _exportExerciseLogs(DateTime? startDate) async {
-    final box = await _openTypedBox<ExerciseLog>('exercise_logs_v2');
+  Future<String?> _exportExerciseLogs(Isar isar, DateTime? startDate) async {
+    final logs = isar.exerciseLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
     
     rows.add(['Date', 'Exercise', 'Set', 'Reps', 'Weight']);
 
-    for (final log in box.values) {
+    for (final log in logs) {
       try {
         if (!_isAfterStartDate(log.date, startDate)) continue;
 
@@ -117,24 +109,22 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return const ListToCsvConverter().convert(rows);
   }
 
-  Future<String?> _exportHabitCompletions(DateTime? startDate) async {
-    final box = await _openTypedBox<HabitCompletion>('habit_completions_v2');
-    final habitBox = await _openTypedBox<Habit>('habit_config_v2');
+  Future<String?> _exportHabitCompletions(Isar isar, DateTime? startDate) async {
+    final completions = isar.habitCompletions.where().findAllSync();
+    final habitList = isar.habits.where().findAllSync();
     
     final habits = <String, Habit>{};
-    for (final h in habitBox.values) {
-      try {
-        habits[h.id] = h;
-      } catch (_) {}
+    for (final h in habitList) {
+      habits[h.id] = h;
     }
 
     final rows = <List<dynamic>>[];
     rows.add(['Date', 'Habit ID', 'Habit Name', 'Value', 'Override']);
 
-    for (final completion in box.values) {
+    for (final completion in completions) {
       try {
         if (!_isAfterStartDate(completion.date, startDate)) continue;
 
@@ -156,16 +146,16 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return const ListToCsvConverter().convert(rows);
   }
 
-  Future<String?> _exportBodyStats(DateTime? startDate) async {
-    final box = await _openTypedBox<BodyStats>('body_stats_v2');
+  Future<String?> _exportBodyStats(Isar isar, DateTime? startDate) async {
+    final statsList = isar.bodyStats.where().findAllSync();
     final rows = <List<dynamic>>[];
     
     rows.add(['Date', 'Unit', 'Waist', 'Hips', 'Chest', 'Left Arm', 'Right Arm', 'Left Thigh', 'Right Thigh', 'Neck']);
 
-    for (final stats in box.values) {
+    for (final stats in statsList) {
       try {
         if (!_isAfterStartDate(stats.date, startDate)) continue;
 
@@ -185,16 +175,16 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return const ListToCsvConverter().convert(rows);
   }
 
-  Future<String?> _exportMeals(DateTime? startDate) async {
-    final box = await _openTypedBox<DailyMealLog>('daily_meal_logs_v2');
+  Future<String?> _exportMeals(Isar isar, DateTime? startDate) async {
+    final logs = isar.dailyMealLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
     
     rows.add(['Date', 'Slot', 'Total Calories', 'Total Protein (g)', 'Total Carbs (g)', 'Total Fat (g)']);
 
-    for (final log in box.values) {
+    for (final log in logs) {
       try {
         if (!_isAfterStartDate(log.date, startDate)) continue;
 
@@ -217,6 +207,6 @@ class CsvExportService {
     }
 
     if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return const ListToCsvConverter().convert(rows);
   }
 }

@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'body_stats.g.dart';
+
+@collection
 class BodyStats {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String date;
   final double? waist;
   final double? hips;
@@ -76,6 +84,7 @@ class BodyStats {
     );
   }
 
+  @ignore
   Map<String, double?> get allMeasurements => {
         'Waist': waist,
         'Hips': hips,

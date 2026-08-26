@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'exercise_log.g.dart';
+
+@collection
 class ExerciseLog {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String date;
   final String exerciseName;
   final List<SetLog> sets;
@@ -36,14 +44,15 @@ class ExerciseLog {
   String get key => '${date}_$exerciseName';
 }
 
+@embedded
 class SetLog {
-  final int setNumber;
-  final int reps;
-  final double weight;
+  int? setNumber;
+  int? reps;
+  double? weight;
 
   SetLog({
-    required this.setNumber,
-    required this.reps,
+    this.setNumber,
+    this.reps,
     this.weight = 0,
   });
 

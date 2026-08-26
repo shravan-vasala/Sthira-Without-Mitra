@@ -235,6 +235,112 @@ class AiClient {
     }
   }
 
+  Stream<String> generateTextStream({
+    required String prompt,
+    required String systemInstruction,
+    required bool useFirebase,
+    String? apiKey,
+  }) async* {
+    if (_circuitBreaker.isOpen) {
+      throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
+    }
+
+    String lastError = '';
+
+    for (final modelName in modelsToTry) {
+      try {
+        debugPrint('AiClient: Trying Gemini stream model: $modelName (Firebase: $useFirebase)...');
+        final stream = _callModelStream(
+          modelName: modelName,
+          prompt: prompt,
+          systemInstruction: systemInstruction,
+          useFirebase: useFirebase,
+          apiKey: apiKey,
+        );
+        
+        await for (final chunk in stream) {
+           if (chunk != null && chunk.isNotEmpty) {
+               yield chunk;
+           }
+        }
+        _circuitBreaker.recordSuccess();
+        return; // Success, exit the loop
+      } catch (e) {
+        debugPrint('AiClient: Stream failed with $modelName: $e');
+        final errorString = e.toString();
+        
+        if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid')) {
+          throw AiException('Your API Key is invalid or not authorized. Please check your AI Settings.');
+        } else if (errorString.contains('403') || errorString.contains('404')) {
+          lastError = 'Model $modelName unavailable (403/404)';
+          continue; // Try next model
+        } else if (errorString.contains('SocketException')) {
+          throw AiException('You seem to be offline. Please check your internet connection.');
+        } else if (errorString.contains('429') || errorString.contains('quota')) {
+          _circuitBreaker.recordFailure();
+          throw AiException('We\'re experiencing heavy traffic. Please try again in a moment.');
+        }
+        
+        lastError = errorString;
+        continue;
+      }
+    }
+
+    _circuitBreaker.recordFailure();
+    throw AiException('Failed to generate response. Please try again later.');
+  }
+
+  Stream<String?> _callModelStream({
+    required String modelName,
+    required String prompt,
+    required String systemInstruction,
+    required bool useFirebase,
+    String? apiKey,
+  }) {
+    if (useFirebase) {
+      final model = vertex.FirebaseAI.vertexAI().generativeModel(
+        model: modelName,
+        systemInstruction: vertex.Content.system(systemInstruction),
+        generationConfig: vertex.GenerationConfig(
+          temperature: 0.1,
+          responseMimeType: 'text/plain',
+        ),
+      );
+
+      return model.generateContentStream([vertex.Content.text(prompt)])
+          .map((res) => res.text)
+          .timeout(const Duration(seconds: 20));
+    } else {
+      if (apiKey == null || apiKey.isEmpty) {
+        throw Exception('API Key is required if not using Firebase.');
+      }
+      
+      if (_cachedApiKey != apiKey || _cachedClient == null) {
+        _cachedClient?.close();
+        _cachedClient = GoogleAIClient(
+          config: GoogleAIConfig.googleAI(
+            authProvider: ApiKeyProvider(apiKey),
+          ),
+        );
+        _cachedApiKey = apiKey;
+      }
+
+      final request = GenerateContentRequest(
+        systemInstruction: Content.text(systemInstruction),
+        generationConfig: const GenerationConfig(
+          temperature: 0.1,
+          responseMimeType: 'text/plain',
+        ),
+        contents: [Content.text(prompt)],
+      );
+
+      return _cachedClient!.models.generateContentStream(
+        model: modelName,
+        request: request,
+      ).map((res) => res.text).timeout(const Duration(seconds: 20));
+    }
+  }
+
   Map<String, dynamic> _parseJson(String text) {
     try {
       final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();

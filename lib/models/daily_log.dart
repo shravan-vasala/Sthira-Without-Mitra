@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'daily_log.g.dart';
+
+@collection
 class DailyLog {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String date; // yyyy-MM-dd
   final double? weight;
   final int? steps;

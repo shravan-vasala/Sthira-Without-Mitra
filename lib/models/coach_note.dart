@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'coach_note.g.dart';
+
+@collection
 class CoachNote {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String date;
   final String note;
   final bool isAi;

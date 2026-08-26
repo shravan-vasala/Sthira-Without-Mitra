@@ -1,49 +1,57 @@
 import 'dart:convert';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import '../models/habit.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 
 class HabitRepository {
-  static const String _configBoxName = 'habit_config_v2';
-  static const String _completionBoxName = 'habit_completions_v2';
-
-  late Box<Habit> _configBox;
-  late Box<HabitCompletion> _completionBox;
+  late Isar _isar;
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
 
-  Future<void> init() async {
-    _configBox = await Hive.openBox<Habit>(_configBoxName);
-    _completionBox = await Hive.openBox<HabitCompletion>(_completionBoxName);
+  Future<void> init(Isar isar) async {
+    _isar = isar;
     await _seedIfEmpty();
   }
 
   Future<void> _seedIfEmpty() async {
-    if (_configBox.isEmpty) {
+    if (_isar.habits.where().countSync() == 0) {
       final defaultHabits = Habit.defaults;
-      for (final habit in defaultHabits) {
-        await _configBox.put(habit.id, habit);
-      }
+      await _isar.writeTxn(() async {
+        for (final habit in defaultHabits) {
+          await _isar.habits.put(habit);
+        }
+      });
     }
   }
 
-  // Legacy migrations removed, handled by V2 migration now.
-
   List<Habit> getHabits() {
-    final habits = _configBox.values.toList();
-    habits.sort((a, b) => a.order.compareTo(b.order));
-    return habits;
+    return _isar.habits.where().sortByOrder().findAllSync();
+  }
+
+  Habit? getHabit(String id) {
+    return _isar.habits.where().idEqualTo(id).findFirstSync();
   }
 
   Future<void> saveHabit(Habit habit) async {
     final updatedHabit = habit.copyWith(updatedAt: DateTime.now());
-    await _configBox.put(updatedHabit.id, updatedHabit);
+    final existing = getHabit(habit.id);
+    if (existing != null) {
+      updatedHabit.idInternal = existing.idInternal;
+    }
+    await _isar.writeTxn(() async {
+      await _isar.habits.put(updatedHabit);
+    });
     _sync?.syncToCloud('habit_config', updatedHabit.id, updatedHabit.toJson());
   }
 
   Future<void> deleteHabit(String id) async {
-    await _configBox.delete(id);
+    final existing = getHabit(id);
+    if (existing != null) {
+      await _isar.writeTxn(() async {
+        await _isar.habits.delete(existing.idInternal);
+      });
+    }
     _sync?.deleteFromCloud('habit_config', id);
   }
 
@@ -55,7 +63,7 @@ class HabitRepository {
   }
 
   HabitCompletion getCompletions(String date) {
-    return _completionBox.get(date) ?? HabitCompletion(date: date);
+    return _isar.habitCompletions.where().dateEqualTo(date).findFirstSync() ?? HabitCompletion(date: date);
   }
 
   Future<void> saveCompletion(HabitCompletion completion) async {
@@ -66,7 +74,13 @@ class HabitRepository {
       streaks: completion.streaks,
       updatedAt: DateTime.now(),
     );
-    await _completionBox.put(updatedCompletion.date, updatedCompletion);
+    final existing = _isar.habitCompletions.where().dateEqualTo(completion.date).findFirstSync();
+    if (existing != null) {
+      updatedCompletion.id = existing.id;
+    }
+    await _isar.writeTxn(() async {
+      await _isar.habitCompletions.put(updatedCompletion);
+    });
     _sync?.syncToCloud('habit_completions', updatedCompletion.date, updatedCompletion.toJson());
   }
 
@@ -107,15 +121,20 @@ class HabitRepository {
   Future<void> importConfigFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
       final cloudHabit = Habit.fromJson(entry.value);
-      final localHabit = _configBox.get(entry.key);
+      final localHabit = getHabit(entry.key);
 
       if (localHabit == null) {
-        await _configBox.put(entry.key, cloudHabit);
+        await _isar.writeTxn(() async {
+          await _isar.habits.put(cloudHabit);
+        });
       } else {
         final localDate = localHabit.updatedAt ?? DateTime.parse('2000-01-01');
         final cloudDate = cloudHabit.updatedAt ?? DateTime.parse('2000-01-01');
         if (cloudDate.isAfter(localDate)) {
-          await _configBox.put(entry.key, cloudHabit);
+          cloudHabit.idInternal = localHabit.idInternal;
+          await _isar.writeTxn(() async {
+            await _isar.habits.put(cloudHabit);
+          });
         }
       }
     }
@@ -124,15 +143,20 @@ class HabitRepository {
   Future<void> importCompletionsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
       final cloudCompletion = HabitCompletion.fromJson(entry.value);
-      final localCompletion = _completionBox.get(entry.key);
+      final localCompletion = _isar.habitCompletions.where().dateEqualTo(entry.key).findFirstSync();
 
       if (localCompletion == null) {
-        await _completionBox.put(entry.key, cloudCompletion);
+        await _isar.writeTxn(() async {
+          await _isar.habitCompletions.put(cloudCompletion);
+        });
       } else {
         final localDate = localCompletion.updatedAt ?? DateTime.parse('2000-01-01');
         final cloudDate = cloudCompletion.updatedAt ?? DateTime.parse('2000-01-01');
         if (cloudDate.isAfter(localDate)) {
-          await _completionBox.put(entry.key, cloudCompletion);
+          cloudCompletion.id = localCompletion.id;
+          await _isar.writeTxn(() async {
+            await _isar.habitCompletions.put(cloudCompletion);
+          });
         }
       }
     }
@@ -140,7 +164,8 @@ class HabitRepository {
 
   Map<String, Map<String, dynamic>> exportConfigForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final habit in _configBox.values) {
+    final habits = getHabits();
+    for (final habit in habits) {
       result[habit.id] = habit.toJson();
     }
     return result;
@@ -148,9 +173,11 @@ class HabitRepository {
 
   Map<String, Map<String, dynamic>> exportCompletionsForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final completion in _completionBox.values) {
+    final completions = _isar.habitCompletions.where().findAllSync();
+    for (final completion in completions) {
       result[completion.date] = completion.toJson();
     }
     return result;
   }
 }
+

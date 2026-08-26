@@ -1,51 +1,49 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import '../models/workout_plan.dart';
+import '../models/workout_session.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 
 class WorkoutRepository {
-  static const String _planBoxName = 'workout_plans_v2';
-  static const String _sessionBoxName = 'workout_sessions_v2';
-  late Box<WorkoutPlan> _planBox;
-  late Box<String> _sessionBox;
+  late Isar _isar;
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
 
-  Future<void> init() async {
-    _planBox = await Hive.openBox<WorkoutPlan>(_planBoxName);
-    _sessionBox = await Hive.openBox<String>(_sessionBoxName);
+  Future<void> init(Isar isar) async {
+    _isar = isar;
     await _seedIfEmpty();
   }
 
   Future<void> _seedIfEmpty() async {
-    if (_planBox.isEmpty) {
+    if (_isar.workoutPlans.where().countSync() == 0) {
       final jsonStr = await rootBundle.loadString('assets/data/seed_workout_plan.json');
       final plan = WorkoutPlan.fromJson(jsonDecode(jsonStr) as Map<String, dynamic>);
-      _planBox.put('beginner_plan', plan);
+      await _isar.writeTxn(() async {
+        await _isar.workoutPlans.put(plan);
+      });
     }
   }
 
   List<WorkoutPlan> getAllPlans() {
-    return _planBox.values.toList();
+    return _isar.workoutPlans.where().findAllSync();
   }
 
   WorkoutPlan? getPlan(String key) {
-    return _planBox.get(key);
+    return _isar.workoutPlans.where().planNameEqualTo(key).findFirstSync();
   }
 
   /// Resolves the plan for [preferredKey], falling back to `beginner_plan`
   /// then the first stored plan (same pattern as meal plans).
   WorkoutPlan? getActivePlan({String? preferredKey}) {
-    if (_planBox.isEmpty) return null;
+    if (_isar.workoutPlans.where().countSync() == 0) return null;
     if (preferredKey != null) {
       final preferred = getPlan(preferredKey);
       if (preferred != null) return preferred;
     }
-    return getPlan('beginner_plan') ??
-        getPlan(_planBox.keys.first as String);
+    return getPlan('beginner_plan') ?? _isar.workoutPlans.where().findFirstSync();
   }
 
   WorkoutDay? getWorkoutDay(String dayId) {
@@ -59,7 +57,13 @@ class WorkoutRepository {
   }
 
   Future<void> savePlan(String key, WorkoutPlan plan) async {
-    await _planBox.put(key, plan);
+    final existing = getPlan(key);
+    if (existing != null) {
+      plan.id = existing.id;
+    }
+    await _isar.writeTxn(() async {
+      await _isar.workoutPlans.put(plan);
+    });
     _sync?.syncToCloud('workout_plans', key, plan.toJson());
   }
 
@@ -115,53 +119,61 @@ class WorkoutRepository {
       }
     }
     final plan = WorkoutPlan.fromJson(map);
-    await _planBox.put(key, plan);
-    _sync?.syncToCloud('workout_plans', key, plan.toJson());
+    await savePlan(key, plan);
   }
 
 
 
   Future<void> finishWorkout(String date, String dayId) async {
     final key = '${date}_$dayId';
-    final jsonStr = _sessionBox.get(key);
+    final existingSession = _isar.workoutSessions.where().keyEqualTo(key).findFirstSync();
     Map<String, dynamic> data = {};
-    if (jsonStr != null) {
-      data = jsonDecode(jsonStr) as Map<String, dynamic>;
+    if (existingSession != null) {
+      data = jsonDecode(existingSession.jsonStr) as Map<String, dynamic>;
     }
     data['finished'] = true;
     data['finishedAt'] = DateTime.now().toIso8601String();
     data['dayId'] = dayId;
     data['date'] = date;
-    await _sessionBox.put(key, jsonEncode(data));
+    
+    final newSession = WorkoutSession(key: key, jsonStr: jsonEncode(data));
+    if (existingSession != null) {
+      newSession.id = existingSession.id;
+    }
+    
+    await _isar.writeTxn(() async {
+      await _isar.workoutSessions.put(newSession);
+    });
     
     _sync?.syncToCloud('workout_sessions', key, data);
   }
 
   bool isWorkoutFinished(String date, String dayId) {
     final key = '${date}_$dayId';
-    final jsonStr = _sessionBox.get(key);
-    if (jsonStr == null) return false;
-    final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final existingSession = _isar.workoutSessions.where().keyEqualTo(key).findFirstSync();
+    if (existingSession == null) return false;
+    final data = jsonDecode(existingSession.jsonStr) as Map<String, dynamic>;
     return data['finished'] as bool? ?? false;
   }
 
   String? getRawPlanJson(String key) {
-    final plan = _planBox.get(key);
+    final plan = getPlan(key);
     if (plan == null) return null;
     return jsonEncode(plan.toJson());
   }
 
   List<String> getPlanKeys() {
-    return _planBox.keys.cast<String>().toList();
+    final plans = _isar.workoutPlans.where().findAllSync();
+    return plans.map((p) => p.planName).toList();
   }
 
   // ── Cloud sync helpers ──
 
   Future<void> importPlansFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_planBox.containsKey(entry.key)) {
+      if (getPlan(entry.key) == null) {
         final plan = WorkoutPlan.fromJson(entry.value);
-        await _planBox.put(entry.key, plan);
+        await savePlan(entry.key, plan);
       }
     }
   }
@@ -173,7 +185,7 @@ class WorkoutRepository {
       final globalData = await _sync!.pullGlobalCollection('public_workout_plans');
       for (final entry in globalData.entries) {
         final plan = WorkoutPlan.fromJson(entry.value);
-        await _planBox.put(entry.key, plan); // Always updates with latest from cloud
+        await savePlan(entry.key, plan); // Always updates with latest from cloud
       }
     } catch (e) {
       debugPrint('Error fetching global workout plans: $e');
@@ -187,7 +199,7 @@ class WorkoutRepository {
       final userData = await _sync!.pullCollection('workout_plans');
       for (final entry in userData.entries) {
         final plan = WorkoutPlan.fromJson(entry.value);
-        await _planBox.put(entry.key, plan); // Always updates with latest from cloud
+        await savePlan(entry.key, plan); // Always updates with latest from cloud
       }
     } catch (e) {
       debugPrint('Error fetching user workout plans: $e');
@@ -196,27 +208,32 @@ class WorkoutRepository {
 
   Future<void> importSessionsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_sessionBox.containsKey(entry.key)) {
-        await _sessionBox.put(entry.key, jsonEncode(entry.value));
+      final existingSession = _isar.workoutSessions.where().keyEqualTo(entry.key).findFirstSync();
+      if (existingSession == null) {
+        final newSession = WorkoutSession(key: entry.key, jsonStr: jsonEncode(entry.value));
+        await _isar.writeTxn(() async {
+          await _isar.workoutSessions.put(newSession);
+        });
       }
     }
   }
 
   Map<String, Map<String, dynamic>> exportPlansForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final key in _planBox.keys) {
-      final plan = _planBox.get(key as String);
-      if (plan != null) result[key] = plan.toJson();
+    final plans = getAllPlans();
+    for (final plan in plans) {
+      result[plan.planName] = plan.toJson();
     }
     return result;
   }
 
   Map<String, Map<String, dynamic>> exportSessionsForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final key in _sessionBox.keys) {
-      final sessionStr = _sessionBox.get(key as String);
-      if (sessionStr != null) result[key] = jsonDecode(sessionStr) as Map<String, dynamic>;
+    final sessions = _isar.workoutSessions.where().findAllSync();
+    for (final session in sessions) {
+      result[session.key] = jsonDecode(session.jsonStr) as Map<String, dynamic>;
     }
     return result;
   }
 }
+

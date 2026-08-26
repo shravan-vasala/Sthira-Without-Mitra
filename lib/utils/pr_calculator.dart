@@ -44,30 +44,33 @@ class PrCalculator {
     double estimated1RM = pr.estimated1RM;
 
     for (final set in log.sets) {
+      final setWeight = set.weight ?? 0.0;
+      final setReps = set.reps ?? 0;
+
       // Check max weight (only meaningful if weight > 0)
-      if (set.weight > 0) {
-        if (set.weight > maxWeight) {
-          maxWeight = set.weight;
-          maxWeightReps = set.reps;
+      if (setWeight > 0) {
+        if (setWeight > maxWeight) {
+          maxWeight = setWeight;
+          maxWeightReps = setReps;
           newMaxWeight = true;
-        } else if (set.weight == maxWeight && set.reps > maxWeightReps) {
-          maxWeightReps = set.reps;
+        } else if (setWeight == maxWeight && setReps > maxWeightReps) {
+          maxWeightReps = setReps;
           newMaxWeight = true;
         }
       }
 
       // Check max reps
-      if (set.reps > maxReps) {
-        maxReps = set.reps;
-        maxRepsWeight = set.weight;
+      if (setReps > maxReps) {
+        maxReps = setReps;
+        maxRepsWeight = setWeight;
         newMaxReps = true;
-      } else if (set.reps == maxReps && set.weight > maxRepsWeight) {
-        maxRepsWeight = set.weight;
+      } else if (setReps == maxReps && setWeight > maxRepsWeight) {
+        maxRepsWeight = setWeight;
         newMaxReps = true;
       }
 
       // Check 1RM
-      final current1RM = calculate1RM(set.weight, set.reps);
+      final current1RM = calculate1RM(setWeight, setReps);
       if (current1RM > estimated1RM) {
         estimated1RM = current1RM;
         new1RM = true;

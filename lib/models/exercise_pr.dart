@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'exercise_pr.g.dart';
+
+@collection
 class ExercisePr {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String exerciseName;
   final double maxWeight;
   final int maxWeightReps; // Reps performed at max weight

@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'scanned_meal_log.g.dart';
+
+@collection
 class ScannedMealLog {
+  Id idInternal = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String id;
   final String date; // yyyy-MM-dd
   final String photoPath;

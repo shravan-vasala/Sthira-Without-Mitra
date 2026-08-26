@@ -1,110 +1,99 @@
 import 'dart:convert';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 
 class ExerciseLogRepository {
-  static const String _boxName = 'exercise_logs_v2';
-  static const String _prBoxName = 'exercise_prs_v2';
-
-  late Box<ExerciseLog> _box;
-  late Box<ExercisePr> _prBox;
+  late Isar _isar;
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
 
-  Future<void> init() async {
-    _box = await Hive.openBox<ExerciseLog>(_boxName);
-    _prBox = await Hive.openBox<ExercisePr>(_prBoxName);
+  Future<void> init(Isar isar) async {
+    _isar = isar;
   }
 
   ExercisePr? getPr(String exerciseName) {
-    return _prBox.get(exerciseName);
+    return _isar.exercisePrs.where().exerciseNameEqualTo(exerciseName).findFirstSync();
   }
 
   Future<void> savePr(ExercisePr pr) async {
-    await _prBox.put(pr.exerciseName, pr);
+    final existing = getPr(pr.exerciseName);
+    if (existing != null) pr.id = existing.id;
+    await _isar.writeTxn(() async {
+      await _isar.exercisePrs.put(pr);
+    });
     _sync?.syncToCloud('exercise_prs', pr.exerciseName, pr.toJson());
   }
 
   ExerciseLog? getLog(String date, String exerciseName) {
     final key = '${date}_$exerciseName';
-    return _box.get(key);
+    return _isar.exerciseLogs.where().keyEqualTo(key).findFirstSync();
   }
 
   Future<void> saveLog(ExerciseLog log) async {
-    await _box.put(log.key, log);
+    final existing = _isar.exerciseLogs.where().keyEqualTo(log.key).findFirstSync();
+    if (existing != null) log.id = existing.id;
+    await _isar.writeTxn(() async {
+      await _isar.exerciseLogs.put(log);
+    });
     _sync?.syncToCloud('exercise_logs', log.key, log.toJson());
   }
 
   bool hasLog(String date, String exerciseName) {
-    return _box.containsKey('${date}_$exerciseName');
+    return getLog(date, exerciseName) != null;
   }
 
   List<ExerciseLog> getLogsForExercise(String exerciseName) {
-    final logs = <ExerciseLog>[];
-    for (final key in _box.keys) {
-      final keyStr = key as String;
-      if (keyStr.endsWith('_$exerciseName')) {
-        final log = _box.get(keyStr);
-        if (log != null) {
-          logs.add(log);
-        }
-      }
-    }
-    logs.sort((a, b) => a.date.compareTo(b.date));
-    return logs;
+    // Isar doesn't have a good endswith query out of the box, but we can query all and filter, or use filter().keyEndsWith()
+    return _isar.exerciseLogs.filter().keyEndsWith('_$exerciseName').sortByDate().findAllSync();
   }
 
   List<ExerciseLog> getLogsForDate(String date) {
-    final logs = <ExerciseLog>[];
-    for (final key in _box.keys) {
-      final keyStr = key as String;
-      if (keyStr.startsWith('${date}_')) {
-        final log = _box.get(keyStr);
-        if (log != null) {
-          logs.add(log);
-        }
-      }
-    }
-    return logs;
+    return _isar.exerciseLogs.filter().dateEqualTo(date).findAllSync();
   }
 
   // ── Cloud sync helpers ──
 
   Future<void> importLogsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_box.containsKey(entry.key)) {
+      if (_isar.exerciseLogs.where().keyEqualTo(entry.key).findFirstSync() == null) {
         final log = ExerciseLog.fromJson(entry.value);
-        await _box.put(entry.key, log);
+        await _isar.writeTxn(() async {
+          await _isar.exerciseLogs.put(log);
+        });
       }
     }
   }
 
   Future<void> importPrsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_prBox.containsKey(entry.key)) {
+      if (getPr(entry.key) == null) {
         final pr = ExercisePr.fromJson(entry.value);
-        await _prBox.put(entry.key, pr);
+        await _isar.writeTxn(() async {
+          await _isar.exercisePrs.put(pr);
+        });
       }
     }
   }
 
   Map<String, Map<String, dynamic>> exportLogsForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final key in _box.keys) {
-      final log = _box.get(key as String);
-      if (log != null) result[key] = log.toJson();
+    final logs = _isar.exerciseLogs.where().findAllSync();
+    for (final log in logs) {
+      result[log.key] = log.toJson();
     }
     return result;
   }
 
   Map<String, Map<String, dynamic>> exportPrsForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final pr in _prBox.values) {
+    final prs = _isar.exercisePrs.where().findAllSync();
+    for (final pr in prs) {
       result[pr.exerciseName] = pr.toJson();
     }
     return result;
   }
 }
+

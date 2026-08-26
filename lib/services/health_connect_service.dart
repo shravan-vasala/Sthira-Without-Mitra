@@ -1,5 +1,5 @@
 import 'package:health/health.dart';
-import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../repositories/daily_log_repository.dart';
@@ -10,15 +10,14 @@ import '../models/feature_availability.dart';
 enum StepsSource { healthConnect, manual, none }
 
 class HealthConnectService {
-  static const String _metaBoxName = 'health_connect_meta';
-  static const String _backfillDoneKey = 'backfill_done';
+  static const String _backfillDoneKey = 'health_connect_backfill_done';
 
   final Health _health = Health();
-  late Box<String> _metaBox;
+  late SharedPreferences _prefs;
   bool _configured = false;
 
   Future<void> init() async {
-    _metaBox = await Hive.openBox<String>(_metaBoxName);
+    _prefs = await SharedPreferences.getInstance();
   }
 
   Future<void> _ensureConfigured() async {
@@ -138,7 +137,7 @@ class HealthConnectService {
   }
 
   /// Whether the 90-day backfill has already been done.
-  bool get isBackfillDone => _metaBox.get(_backfillDoneKey) == 'true';
+  bool get isBackfillDone => _prefs.getBool(_backfillDoneKey) ?? false;
 
   /// Helper to update steps and handle habit auto-completion logic.
   Future<void> _syncStepValueAndHabit(
@@ -202,7 +201,7 @@ class HealthConnectService {
       }
     }
 
-    await _metaBox.put(_backfillDoneKey, 'true');
+    await _prefs.setBool(_backfillDoneKey, true);
     return count;
   }
 
@@ -283,3 +282,4 @@ class HealthConnectService {
     }
   }
 }
+

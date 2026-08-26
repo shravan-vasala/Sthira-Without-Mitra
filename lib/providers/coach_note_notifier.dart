@@ -18,8 +18,15 @@ class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
   Future<void> _loadForDate() async {
     final repo = _ref.read(coachNoteRepoProvider);
     final cached = repo.getNote(dateStr);
+    
     if (cached != null) {
       if (mounted) state = AsyncValue.data(cached);
+      
+      final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      if (dateStr == todayStr) {
+        // Silently evaluate the 4-hour rule in the background
+        await fetchNote(background: true);
+      }
       return;
     }
 
@@ -38,16 +45,31 @@ class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
     }
   }
 
-  Future<void> fetchNote({bool force = false}) async {
+  Future<void> fetchNote({bool force = false, bool background = false}) async {
     final repo = _ref.read(coachNoteRepoProvider);
+    final prefs = _ref.read(sharedPreferencesProvider);
+    final lastGenStr = prefs.getString('coach_note_last_gen_$dateStr');
+    final lastGen = lastGenStr != null ? DateTime.tryParse(lastGenStr) : null;
+    
+    bool shouldRegenerate = force;
+
     if (!force) {
       final cached = repo.getNote(dateStr);
       if (cached != null) {
-        if (mounted) state = AsyncValue.data(cached);
-        return;
+        if (lastGen != null && DateTime.now().difference(lastGen).inHours < 4) {
+          if (mounted && !background) state = AsyncValue.data(cached);
+          return;
+        } else {
+          shouldRegenerate = true;
+        }
+      } else {
+        shouldRegenerate = true;
       }
     }
-    state = const AsyncValue.loading();
+
+    if (!shouldRegenerate) return;
+    
+    if (!background) state = const AsyncValue.loading();
     try {
       final coachService = _ref.read(coachServiceProvider);
       final profile = _ref.read(profileProvider);
@@ -95,44 +117,44 @@ class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
         dailyLogRepo: dailyLogRepo,
       );
 
-      String? noteStr;
-      int attempts = 0;
-      while (attempts < 3) {
-        try {
-          noteStr = await coachService
-              .generateNote(
-                userName: profile.name,
-                coachName: profile.coachName,
-                steps: todayStats.steps,
-                sleep: todayStats.sleepHours,
-                habitsDone: todayStats.habitsDone,
-                habitsTotal: todayStats.habitsTotal,
-                calories: todayStats.totalCalories,
-                workoutsDone: todayStats.workoutsDone,
-                workoutsTotal: todayStats.workoutsTotal,
-                yesterdayHabitRate: yesterdayStats.habitRate,
-                weightTrend: todayStats.weightTrend,
-                isRestDay: todayStats.isRestDay,
-                daysSinceLastWorkout: todayStats.daysSinceLastWorkout,
-              )
-              .timeout(const Duration(seconds: 15));
-          break;
-        } catch (e) {
-          attempts++;
-          if (attempts >= 3) rethrow;
-          await Future.delayed(Duration(seconds: 2 * attempts));
+      final isAi = coachService.apiKey != null && coachService.apiKey!.isNotEmpty;
+      
+      final stream = coachService.generateNoteStream(
+        userName: profile.name,
+        coachName: profile.coachName,
+        steps: todayStats.steps,
+        sleep: todayStats.sleepHours,
+        habitsDone: todayStats.habitsDone,
+        habitsTotal: todayStats.habitsTotal,
+        calories: todayStats.totalCalories,
+        workoutsDone: todayStats.workoutsDone,
+        workoutsTotal: todayStats.workoutsTotal,
+        yesterdayHabitRate: yesterdayStats.habitRate,
+        weightTrend: todayStats.weightTrend,
+        isRestDay: todayStats.isRestDay,
+        daysSinceLastWorkout: todayStats.daysSinceLastWorkout,
+      );
+      
+      String accumulatedNote = "";
+      
+      await for (final chunk in stream) {
+        accumulatedNote += chunk;
+        if (mounted) {
+          state = AsyncValue.data(CoachNote(
+            date: dateStr,
+            note: accumulatedNote,
+            isAi: isAi,
+          ));
         }
       }
       
-      if (noteStr == null) throw Exception('Failed to generate note after 3 attempts');
+      if (accumulatedNote.isEmpty) throw Exception('Failed to generate note stream');
 
-      final isAi = coachService.apiKey != null && coachService.apiKey!.isNotEmpty;
-      final newNote = CoachNote(date: dateStr, note: noteStr, isAi: isAi);
-      await repo.saveNote(newNote);
-
-      if (mounted) {
-        state = AsyncValue.data(newNote);
-      }
+      final finalNote = CoachNote(date: dateStr, note: accumulatedNote, isAi: isAi);
+      await repo.saveNote(finalNote);
+      
+      final prefs = _ref.read(sharedPreferencesProvider);
+      await prefs.setString('coach_note_last_gen_$dateStr', DateTime.now().toIso8601String());
     } catch (e, st) {
       if (mounted) {
         state = AsyncValue.error(e, st);

@@ -32,7 +32,7 @@ class WorkoutCompletion {
     bool Function(String date, String exerciseName) hasLog,
   ) {
     return section.exercises.isNotEmpty &&
-        section.exercises.every((ex) => hasLog(date, ex.name));
+        section.exercises.every((ex) => hasLog(date, ex.name ?? ''));
   }
 
   static bool isSectionCompleteWithRepo(

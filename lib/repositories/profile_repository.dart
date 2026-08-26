@@ -1,22 +1,18 @@
-import 'dart:convert';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user_profile.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 
 class ProfileRepository {
-  static const String _boxName = 'user_profile_v2';
-  static const String _profileKey = 'profile';
-
-  late Box<UserProfile> _box;
+  late Isar _isar;
   final _secureStorage = const FlutterSecureStorage();
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
 
-  Future<void> init() async {
-    _box = await Hive.openBox<UserProfile>(_boxName);
-    if (!_box.containsKey(_profileKey)) {
+  Future<void> init(Isar isar) async {
+    _isar = isar;
+    if (_isar.userProfiles.where().countSync() == 0) {
       await saveProfile(UserProfile());
     }
   }
@@ -30,11 +26,13 @@ class ProfileRepository {
   }
 
   UserProfile getProfile() {
-    return _box.get(_profileKey) ?? UserProfile();
+    return _isar.userProfiles.where().findFirstSync() ?? UserProfile();
   }
 
   Future<void> saveProfile(UserProfile profile) async {
-    await _box.put(_profileKey, profile);
+    await _isar.writeTxn(() async {
+      await _isar.userProfiles.put(profile);
+    });
     _sync?.syncProfile(profile.toJson());
   }
 
@@ -63,7 +61,10 @@ class ProfileRepository {
   Future<void> importProfileFromCloud(Map<String, dynamic>? cloudData) async {
     if (cloudData != null) {
       final profile = UserProfile.fromJson(cloudData);
-      await _box.put(_profileKey, profile);
+      // We must preserve the existing Isar id if it exists, or clear it to let Isar assign one
+      final existing = getProfile();
+      profile.id = existing.id;
+      await saveProfile(profile);
     }
   }
 
@@ -71,3 +72,4 @@ class ProfileRepository {
     return getProfile().toJson();
   }
 }
+

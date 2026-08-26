@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 import '../models/daily_meal_log.dart';
 import '../models/meal_plan.dart';
 import 'package:flutter/services.dart';
@@ -7,11 +7,7 @@ import '../interfaces/i_cloud_sync_service.dart';
 import 'package:flutter/foundation.dart';
 
 class MealRepository {
-  static const String _dailyLogsBoxName = 'daily_meal_logs_v2';
-  static const String _planBoxName = 'meal_plans_v2';
-
-  late Box<DailyMealLog> _dailyLogsBox;
-  late Box<MealPlan> _planBox;
+  late Isar _isar;
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) {
@@ -20,68 +16,77 @@ class MealRepository {
       _sync!.streamCollection('meal_logs').listen((data) async {
         for (final entry in data.entries) {
           final log = DailyMealLog.fromJson(entry.value);
-          final existing = _dailyLogsBox.get(entry.key);
+          final existing = _isar.dailyMealLogs.where().dateEqualTo(entry.key).findFirstSync();
           if (existing == null || jsonEncode(existing.toJson()) != jsonEncode(log.toJson())) {
-            await _dailyLogsBox.put(entry.key, log);
+            if (existing != null) log.id = existing.id;
+            await _isar.writeTxn(() async {
+              await _isar.dailyMealLogs.put(log);
+            });
           }
         }
       });
       _sync!.streamCollection('meal_plans').listen((data) async {
         for (final entry in data.entries) {
           final plan = MealPlan.fromJson(entry.value);
-          final existing = _planBox.get(entry.key);
+          final existing = _isar.mealPlans.where().planNameEqualTo(entry.key).findFirstSync();
           if (existing == null || jsonEncode(existing.toJson()) != jsonEncode(plan.toJson())) {
-            await _planBox.put(entry.key, plan);
+            if (existing != null) plan.id = existing.id;
+            await _isar.writeTxn(() async {
+              await _isar.mealPlans.put(plan);
+            });
           }
         }
       });
     }
   }
 
-  Future<void> init() async {
-    _dailyLogsBox = await Hive.openBox<DailyMealLog>(_dailyLogsBoxName);
-    _planBox = await Hive.openBox<MealPlan>(_planBoxName);
+  Future<void> init(Isar isar) async {
+    _isar = isar;
     
     // Quick migration to rename the default plan if the user disliked it.
-    final existingPlan = _planBox.get('standard_plan');
+    final existingPlan = _isar.mealPlans.where().planNameEqualTo('standard_plan').findFirstSync();
     if (existingPlan != null && existingPlan.planName == '1200 kcal Cutting Plan') {
       final updatedPlan = existingPlan.copyWith(planName: 'Daily Nutrition Plan');
-      await _planBox.put('standard_plan', updatedPlan);
+      updatedPlan.id = existingPlan.id;
+      await _isar.writeTxn(() async {
+        await _isar.mealPlans.put(updatedPlan);
+      });
     }
     
     await _seedIfEmpty();
   }
 
   Future<void> _seedIfEmpty() async {
-    if (_planBox.isEmpty) {
+    if (_isar.mealPlans.where().countSync() == 0) {
       final jsonStr = await rootBundle.loadString('assets/data/seed_meal_plan.json');
       final plan = MealPlan.fromJson(jsonDecode(jsonStr) as Map<String, dynamic>);
-      _planBox.put('standard_plan', plan);
+      await _isar.writeTxn(() async {
+        await _isar.mealPlans.put(plan);
+      });
     }
   }
 
-  // Legacy migrations removed, handled by V2 migration now.
-
   DailyMealLog getDailyLog(String date) {
-    return _dailyLogsBox.get(date) ?? DailyMealLog(date: date);
+    return _isar.dailyMealLogs.where().dateEqualTo(date).findFirstSync() ?? DailyMealLog(date: date);
   }
 
   List<DailyMealLog> getLogsInRange(String start, String end) {
-    final logs = <DailyMealLog>[];
-    for (final key in _dailyLogsBox.keys) {
-      final dateStr = key as String;
-      if (dateStr.compareTo(start) >= 0 && dateStr.compareTo(end) <= 0) {
-        final log = _dailyLogsBox.get(key);
-        if (log != null) {
-          logs.add(log);
-        }
-      }
-    }
-    return logs;
+    return _isar.dailyMealLogs.filter()
+      .dateGreaterThan(start, include: true)
+      .and()
+      .dateLessThan(end, include: true)
+      .sortByDate()
+      .findAllSync();
   }
 
   Future<void> saveDailyLog(DailyMealLog log) async {
-    await _dailyLogsBox.put(log.date, log);
+    final existing = _isar.dailyMealLogs.where().dateEqualTo(log.date).findFirstSync();
+    if (existing != null) {
+      log.id = existing.id;
+    }
+    await _isar.writeTxn(() async {
+      await _isar.dailyMealLogs.put(log);
+    });
     _sync?.syncToCloud('meal_logs', log.date, log.toJson());
   }
 
@@ -104,7 +109,7 @@ class MealRepository {
   }
 
   MealPlan? getMealPlan(String key) {
-    return _planBox.get(key);
+    return _isar.mealPlans.where().planNameEqualTo(key).findFirstSync();
   }
 
   Future<void> savePlanJson(String key, String jsonStr) async {
@@ -121,34 +126,46 @@ class MealRepository {
       throw const FormatException('"meals" must be an array');
     }
     final plan = MealPlan.fromJson(map);
-    await _planBox.put(key, plan);
+    
+    final existing = getMealPlan(key);
+    if (existing != null) {
+      plan.id = existing.id;
+    }
+    await _isar.writeTxn(() async {
+      await _isar.mealPlans.put(plan);
+    });
     _sync?.syncToCloud('meal_plans', key, plan.toJson());
   }
 
   String? getRawPlanJson(String key) {
-    final plan = _planBox.get(key);
+    final plan = getMealPlan(key);
     if (plan == null) return null;
     return jsonEncode(plan.toJson());
   }
 
   List<String> getPlanKeys() {
-    return _planBox.keys.cast<String>().toList();
+    final plans = _isar.mealPlans.where().findAllSync();
+    return plans.map((p) => p.planName).toList();
   }
 
   // ── Cloud sync helpers ──
 
   Future<void> importLogsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_dailyLogsBox.containsKey(entry.key)) {
+      final existing = _isar.dailyMealLogs.where().dateEqualTo(entry.key).findFirstSync();
+      if (existing == null) {
         final log = DailyMealLog.fromJson(entry.value);
-        await _dailyLogsBox.put(entry.key, log);
+        await _isar.writeTxn(() async {
+          await _isar.dailyMealLogs.put(log);
+        });
       }
     }
   }
 
   Map<String, Map<String, dynamic>> exportLogsForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final log in _dailyLogsBox.values) {
+    final logs = _isar.dailyMealLogs.where().findAllSync();
+    for (final log in logs) {
       result[log.date] = log.toJson();
     }
     return result;
@@ -156,35 +173,44 @@ class MealRepository {
 
   Future<void> importPlansFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
     for (final entry in cloudData.entries) {
-      if (!_planBox.containsKey(entry.key)) {
+      final existing = _isar.mealPlans.where().planNameEqualTo(entry.key).findFirstSync();
+      if (existing == null) {
         final plan = MealPlan.fromJson(entry.value);
-        await _planBox.put(entry.key, plan);
+        await _isar.writeTxn(() async {
+          await _isar.mealPlans.put(plan);
+        });
       }
     }
   }
 
-  /// Fetches global/public meal plans from Firebase and merges them locally.
   Future<void> fetchGlobalPlans() async {
     if (_sync == null) return;
     try {
       final globalData = await _sync!.pullGlobalCollection('public_meal_plans');
       for (final entry in globalData.entries) {
         final plan = MealPlan.fromJson(entry.value);
-        await _planBox.put(entry.key, plan); // Always updates with latest from cloud
+        final existing = _isar.mealPlans.where().planNameEqualTo(entry.key).findFirstSync();
+        if (existing != null) plan.id = existing.id;
+        await _isar.writeTxn(() async {
+          await _isar.mealPlans.put(plan);
+        });
       }
     } catch (e) {
       debugPrint('Error fetching global meal plans: $e');
     }
   }
 
-  /// Fetches the user's personal meal plans from Firebase and merges them locally.
   Future<void> fetchUserPlans() async {
     if (_sync == null) return;
     try {
       final userData = await _sync!.pullCollection('meal_plans');
       for (final entry in userData.entries) {
         final plan = MealPlan.fromJson(entry.value);
-        await _planBox.put(entry.key, plan); // Always updates with latest from cloud
+        final existing = _isar.mealPlans.where().planNameEqualTo(entry.key).findFirstSync();
+        if (existing != null) plan.id = existing.id;
+        await _isar.writeTxn(() async {
+          await _isar.mealPlans.put(plan);
+        });
       }
     } catch (e) {
       debugPrint('Error fetching user meal plans: $e');
@@ -193,10 +219,11 @@ class MealRepository {
 
   Map<String, Map<String, dynamic>> exportPlansForCloud() {
     final result = <String, Map<String, dynamic>>{};
-    for (final key in _planBox.keys) {
-      final plan = _planBox.get(key as String);
-      if (plan != null) result[key] = plan.toJson();
+    final plans = _isar.mealPlans.where().findAllSync();
+    for (final plan in plans) {
+      result[plan.planName] = plan.toJson();
     }
     return result;
   }
 }
+

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'models/hive_adapters.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'repositories/workout_repository.dart';
 import 'repositories/meal_repository.dart';
 import 'repositories/daily_log_repository.dart';
@@ -26,6 +26,22 @@ import 'theme/app_theme.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_sync_service.dart';
 
+// Models
+import 'models/user_profile.dart';
+import 'models/daily_log.dart';
+import 'models/workout_plan.dart';
+import 'models/workout_session.dart';
+import 'models/daily_meal_log.dart';
+import 'models/meal_plan.dart';
+import 'models/habit.dart';
+import 'models/scanned_meal_log.dart';
+import 'models/progress_photo.dart';
+import 'models/exercise_log.dart';
+import 'models/exercise_pr.dart';
+import 'models/coach_note.dart';
+import 'models/body_stats.dart';
+import 'models/badge.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -43,9 +59,27 @@ Future<void> main() async {
     ),
   );
 
-  // Initialize Hive
-  await Hive.initFlutter();
-  registerHiveAdapters();
+  final dir = await getApplicationDocumentsDirectory();
+  final isar = await Isar.open(
+    [
+      UserProfileSchema,
+      DailyLogSchema,
+      WorkoutPlanSchema,
+      WorkoutSessionSchema,
+      DailyMealLogSchema,
+      MealPlanSchema,
+      HabitSchema,
+      HabitCompletionSchema,
+      ScannedMealLogSchema,
+      ProgressPhotoSchema,
+      ExerciseLogSchema,
+      ExercisePrSchema,
+      CoachNoteSchema,
+      BodyStatsSchema,
+      BadgeSchema,
+    ],
+    directory: dir.path,
+  );
   
   final prefs = await SharedPreferences.getInstance();
   await SchemaMigrationService.runStartupMigrations(prefs);
@@ -64,16 +98,16 @@ Future<void> main() async {
   final healthConnectService = HealthConnectService();
 
   await Future.wait([
-    workoutRepo.init(),
-    mealRepo.init(),
-    dailyLogRepo.init(),
-    habitRepo.init(),
-    bodyStatsRepo.init(),
-    mediaRepo.init(),
-    profileRepo.init(),
-    exerciseLogRepo.init(),
-    coachNoteRepo.init(),
-    badgeRepo.init(),
+    workoutRepo.init(isar),
+    mealRepo.init(isar),
+    dailyLogRepo.init(isar),
+    habitRepo.init(isar),
+    bodyStatsRepo.init(isar),
+    mediaRepo.init(isar),
+    profileRepo.init(isar),
+    exerciseLogRepo.init(isar),
+    coachNoteRepo.init(isar),
+    badgeRepo.init(isar),
     healthConnectService.init(),
     NotificationService().init(),
   ]);

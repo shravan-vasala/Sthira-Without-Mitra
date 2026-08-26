@@ -1,4 +1,12 @@
+import 'package:isar/isar.dart';
+
+part 'meal_plan.g.dart';
+
+@collection
 class MealPlan {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String planName;
   final List<Meal> meals;
   final int totalCalories;
@@ -39,19 +47,20 @@ class MealPlan {
   }
 }
 
+@embedded
 class Meal {
-  final String name;
-  final String type; // breakfast, lunch, snack, dinner
-  final List<MealItem> items;
-  final int calories;
-  final bool isCompleted;
-  final List<String> suggestions;
+  String? name;
+  String? type; // breakfast, lunch, snack, dinner
+  List<MealItem> items;
+  int calories;
+  bool isCompleted;
+  List<String> suggestions;
 
   Meal({
-    required this.name,
-    required this.type,
-    required this.items,
-    required this.calories,
+    this.name,
+    this.type,
+    this.items = const [],
+    this.calories = 0,
     this.isCompleted = false,
     this.suggestions = const [],
   });
@@ -106,15 +115,16 @@ class Meal {
   }
 }
 
+@embedded
 class MealItem {
-  final String name;
-  final String quantity;
-  final int calories;
+  String? name;
+  String? quantity;
+  int? calories;
 
   MealItem({
-    required this.name,
-    required this.quantity,
-    required this.calories,
+    this.name,
+    this.quantity,
+    this.calories,
   });
 
   factory MealItem.fromJson(Map<String, dynamic> json) {

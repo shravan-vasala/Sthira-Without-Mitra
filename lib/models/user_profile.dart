@@ -1,4 +1,13 @@
+import 'dart:convert';
+import 'package:isar/isar.dart';
+
+part 'user_profile.g.dart';
+
+@collection
 class UserProfile {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true, replace: true)
   final String name;
   /// Display name for the AI / notes coach (e.g. "Shravan"). Empty → generic "Coach".
   final String coachName;
@@ -9,9 +18,25 @@ class UserProfile {
   final int targetCalories;
   final String? activeWorkoutPlan;
   final String? activeMealPlan;
+  
+  @ignore
   final List<Map<String, dynamic>> customHabits;
+  @ignore
   final List<Map<String, dynamic>> customMealSlots;
+  
   final String? geminiApiKey;
+
+  String get isarCustomHabits => jsonEncode(customHabits);
+  set isarCustomHabits(String json) {
+    customHabits.clear();
+    customHabits.addAll((jsonDecode(json) as List).map((e) => e as Map<String, dynamic>).toList());
+  }
+
+  String get isarCustomMealSlots => jsonEncode(customMealSlots);
+  set isarCustomMealSlots(String json) {
+    customMealSlots.clear();
+    customMealSlots.addAll((jsonDecode(json) as List).map((e) => e as Map<String, dynamic>).toList());
+  }
   final bool restTimerSound;
   final bool restTimerVibration;
   final int targetProteinG;
@@ -20,6 +45,7 @@ class UserProfile {
   final DateTime? planStartDate;
   final int currentPhaseWeek;
   final bool screenTimeEnabled;
+
   UserProfile({
     this.name = '',
     this.coachName = '',
@@ -30,13 +56,8 @@ class UserProfile {
     this.targetCalories = 1250,
     this.activeWorkoutPlan,
     this.activeMealPlan,
-    this.customHabits = const [],
-    this.customMealSlots = const [
-      {'id': 'breakfast', 'name': 'Breakfast', 'emoji': 'breakfast', 'isDefault': true},
-      {'id': 'lunch', 'name': 'Lunch', 'emoji': 'lunch', 'isDefault': true},
-      {'id': 'snack', 'name': 'Snack', 'emoji': 'snack', 'isDefault': true},
-      {'id': 'dinner', 'name': 'Dinner', 'emoji': 'dinner', 'isDefault': true},
-    ],
+    List<Map<String, dynamic>>? customHabits,
+    List<Map<String, dynamic>>? customMealSlots,
     this.geminiApiKey,
     this.restTimerSound = true,
     this.restTimerVibration = true,
@@ -46,7 +67,13 @@ class UserProfile {
     this.planStartDate,
     this.currentPhaseWeek = 1,
     this.screenTimeEnabled = false,
-  });
+  }) : customHabits = customHabits ?? [],
+       customMealSlots = customMealSlots ?? [
+      {'id': 'breakfast', 'name': 'Breakfast', 'emoji': 'breakfast', 'isDefault': true},
+      {'id': 'lunch', 'name': 'Lunch', 'emoji': 'lunch', 'isDefault': true},
+      {'id': 'snack', 'name': 'Snack', 'emoji': 'snack', 'isDefault': true},
+      {'id': 'dinner', 'name': 'Dinner', 'emoji': 'dinner', 'isDefault': true},
+    ];
 
   /// Title shown on Home coach notes (e.g. "Coach Shravan").
   String get coachDisplayName {

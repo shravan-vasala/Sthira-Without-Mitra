@@ -281,6 +281,3 @@ Return ONLY a JSON object with the exact following structure. Do NOT include mar
     }
   }
 }
-
-
-}
