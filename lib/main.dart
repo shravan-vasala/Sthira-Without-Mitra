@@ -24,6 +24,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_sync_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Models
 import 'models/user_profile.dart';
@@ -141,6 +142,7 @@ Future<void> main() async {
   BackupService().autoBackup();
 
   final initialGeminiKey = await profileRepo.getSecureGeminiKey();
+  final prefs = await SharedPreferences.getInstance();
 
   runApp(
     ProviderScope(
@@ -157,6 +159,7 @@ Future<void> main() async {
         badgeRepoProvider.overrideWithValue(badgeRepo),
         healthConnectServiceProvider.overrideWithValue(healthConnectService),
         initialGeminiKeyProvider.overrideWithValue(initialGeminiKey ?? ''),
+        sharedPreferencesProvider.overrideWithValue(prefs),
       ],
       child: const TruFitApp(),
     ),

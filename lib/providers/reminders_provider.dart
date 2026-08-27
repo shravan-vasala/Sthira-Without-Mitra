@@ -4,22 +4,22 @@ import '../models/reminder_config.dart';
 import '../services/notification_service.dart';
 import 'app_providers.dart';
 
-class RemindersNotifier extends StateNotifier<ReminderConfig> {
-  final SharedPreferences _prefs;
-  final NotificationService _notificationService;
-  final Ref _ref;
-
-  RemindersNotifier(this._prefs, this._notificationService, this._ref) : super(ReminderConfig()) {
-    _load();
-  }
+class RemindersNotifier extends Notifier<ReminderConfig> {
+  late SharedPreferences _prefs;
+  late NotificationService _notificationService;
 
   static final _key = 'reminder_config';
 
-  void _load() {
+  @override
+  ReminderConfig build() {
+    _prefs = ref.watch(sharedPreferencesProvider);
+    _notificationService = ref.watch(notificationServiceProvider);
+    
     final jsonStr = _prefs.getString(_key);
     if (jsonStr != null) {
-      state = ReminderConfig.fromJson(jsonStr);
+      return ReminderConfig.fromJson(jsonStr);
     }
+    return ReminderConfig();
   }
 
   Future<void> updateConfig(ReminderConfig newConfig) async {
@@ -45,7 +45,7 @@ class RemindersNotifier extends StateNotifier<ReminderConfig> {
     }
 
     if (state.workoutsEnabled) {
-      final workoutPlan = _ref.read(workoutPlanProvider);
+      final workoutPlan = ref.read(workoutPlanProvider);
       if (workoutPlan != null) {
         // Convert active days to list of ints (1=Monday, 7=Sunday)
         // workoutPlan.days has items. Index 0 is Monday (usually)
@@ -71,7 +71,7 @@ class RemindersNotifier extends StateNotifier<ReminderConfig> {
     }
 
     if (state.photosEnabled) {
-      final mediaRepo = _ref.read(mediaRepoProvider);
+      final mediaRepo = ref.read(mediaRepoProvider);
       final allPhotos = mediaRepo.getAllProgressPhotosDetailed();
       DateTime? lastPhotoDate;
       if (allPhotos.isNotEmpty) {
@@ -92,9 +92,7 @@ class RemindersNotifier extends StateNotifier<ReminderConfig> {
   }
 }
 
-final remindersProvider = StateNotifierProvider<RemindersNotifier, ReminderConfig>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  final notificationService = ref.watch(notificationServiceProvider);
-  return RemindersNotifier(prefs, notificationService, ref);
+final remindersProvider = NotifierProvider<RemindersNotifier, ReminderConfig>(() {
+  return RemindersNotifier();
 });
 

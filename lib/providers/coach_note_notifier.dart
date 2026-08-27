@@ -7,47 +7,44 @@ import '../models/habit.dart';
 import '../models/daily_stats_snapshot.dart';
 import 'app_providers.dart';
 
-class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
-  final Ref _ref;
-  final String dateStr;
+class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
+  late String dateStr;
 
-  CoachNoteNotifier(this._ref, this.dateStr) : super(const AsyncValue.loading()) {
-    _loadForDate();
+  @override
+  FutureOr<CoachNote> build() async {
+    dateStr = ref.watch(dateStringProvider);
+    return _loadForDate();
   }
 
-  Future<void> _loadForDate() async {
-    final repo = _ref.read(coachNoteRepoProvider);
+  Future<CoachNote> _loadForDate() async {
+    final repo = ref.read(coachNoteRepoProvider);
     final cached = repo.getNote(dateStr);
     
     if (cached != null) {
-      if (mounted) state = AsyncValue.data(cached);
-      
       final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
       if (dateStr == todayStr) {
         // Silently evaluate the 4-hour rule in the background
-        await fetchNote(background: true);
+        fetchNote(background: true);
       }
-      return;
+      return cached;
     }
 
     final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
     if (dateStr == todayStr) {
-      await fetchNote();
-      return;
+      fetchNote(); // Updates state asynchronously
+      return CoachNote(date: dateStr, note: 'Generating...', isAi: true);
     }
 
-    if (mounted) {
-      state = AsyncValue.data(CoachNote(
-        date: dateStr,
-        note: 'No coach note saved for this day yet.',
-        isAi: false,
-      ));
-    }
+    return CoachNote(
+      date: dateStr,
+      note: 'No coach note saved for this day yet.',
+      isAi: false,
+    );
   }
 
   Future<void> fetchNote({bool force = false, bool background = false}) async {
-    final repo = _ref.read(coachNoteRepoProvider);
-    final prefs = _ref.read(sharedPreferencesProvider);
+    final repo = ref.read(coachNoteRepoProvider);
+    final prefs = ref.read(sharedPreferencesProvider);
     final lastGenStr = prefs.getString('coach_note_last_gen_$dateStr');
     final lastGen = lastGenStr != null ? DateTime.tryParse(lastGenStr) : null;
     
@@ -57,7 +54,7 @@ class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
       final cached = repo.getNote(dateStr);
       if (cached != null) {
         if (lastGen != null && DateTime.now().difference(lastGen).inHours < 4) {
-          if (mounted && !background) state = AsyncValue.data(cached);
+          if (!background) state = AsyncValue.data(cached);
           return;
         } else {
           shouldRegenerate = true;
@@ -71,18 +68,18 @@ class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
     
     if (!background) state = const AsyncValue.loading();
     try {
-      final coachService = _ref.read(coachServiceProvider);
-      final profile = _ref.read(profileProvider);
-      final dailyLog = _ref.read(dailyLogProvider);
-      final dailyLogRepo = _ref.read(dailyLogRepoProvider);
-      final habitRepo = _ref.read(habitRepoProvider);
+      final coachService = ref.read(coachServiceProvider);
+      final profile = ref.read(profileProvider);
+      final dailyLog = ref.read(dailyLogProvider);
+      final dailyLogRepo = ref.read(dailyLogRepoProvider);
+      final habitRepo = ref.read(habitRepoProvider);
 
-      final habits = _ref.read(habitsProvider);
-      final completions = _ref.read(habitCompletionsProvider);
-      final workoutPlan = _ref.read(workoutPlanProvider);
-      final logRepo = _ref.read(exerciseLogRepoProvider);
-      final mealPlan = _ref.read(mealPlanProvider);
-      final mealLog = _ref.read(dailyMealLogProvider);
+      final habits = ref.read(habitsProvider);
+      final completions = ref.read(habitCompletionsProvider);
+      final workoutPlan = ref.read(workoutPlanProvider);
+      final logRepo = ref.read(exerciseLogRepoProvider);
+      final mealPlan = ref.read(mealPlanProvider);
+      final mealLog = ref.read(dailyMealLogProvider);
       
       final todayStats = DailyStatsSnapshot.compute(
         date: DateTime.parse(dateStr),
@@ -139,13 +136,11 @@ class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
       
       await for (final chunk in stream) {
         accumulatedNote += chunk;
-        if (mounted) {
-          state = AsyncValue.data(CoachNote(
-            date: dateStr,
-            note: accumulatedNote,
-            isAi: isAi,
-          ));
-        }
+        state = AsyncValue.data(CoachNote(
+          date: dateStr,
+          note: accumulatedNote,
+          isAi: isAi,
+        ));
       }
       
       if (accumulatedNote.isEmpty) throw Exception('Failed to generate note stream');
@@ -153,18 +148,14 @@ class CoachNoteNotifier extends StateNotifier<AsyncValue<CoachNote>> {
       final finalNote = CoachNote(date: dateStr, note: accumulatedNote, isAi: isAi);
       await repo.saveNote(finalNote);
       
-      final prefs = _ref.read(sharedPreferencesProvider);
-      await prefs.setString('coach_note_last_gen_$dateStr', DateTime.now().toIso8601String());
+      final currentPrefs = ref.read(sharedPreferencesProvider);
+      await currentPrefs.setString('coach_note_last_gen_$dateStr', DateTime.now().toIso8601String());
     } catch (e, st) {
-      if (mounted) {
-        state = AsyncValue.error(e, st);
-      }
+      state = AsyncValue.error(e, st);
     }
   }
 }
 
-final coachNoteProvider =
-    StateNotifierProvider<CoachNoteNotifier, AsyncValue<CoachNote>>((ref) {
-  final dateStr = ref.watch(dateStringProvider);
-  return CoachNoteNotifier(ref, dateStr);
+final coachNoteProvider = AsyncNotifierProvider<CoachNoteNotifier, CoachNote>(() {
+  return CoachNoteNotifier();
 });

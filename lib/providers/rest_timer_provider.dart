@@ -40,13 +40,17 @@ class RestTimerState {
   }
 }
 
-class RestTimerNotifier extends StateNotifier<RestTimerState> {
-  final Ref _ref;
+class RestTimerNotifier extends Notifier<RestTimerState> {
   Timer? _timer;
   int? _targetEndTimeEpoch;
 
-  RestTimerNotifier(this._ref) : super(RestTimerState(remainingSeconds: 0)) {
+  @override
+  RestTimerState build() {
+    ref.onDispose(() {
+      _timer?.cancel();
+    });
     _loadPersistedTimer();
+    return RestTimerState(remainingSeconds: 0);
   }
 
   Future<void> _loadPersistedTimer() async {
@@ -150,7 +154,7 @@ class RestTimerNotifier extends StateNotifier<RestTimerState> {
     _clearPersistedTimer();
 
     // Trigger feedback based on profile settings
-    final profile = _ref.read(profileProvider);
+    final profile = ref.read(profileProvider);
     if (profile.restTimerVibration) {
       HapticFeedback.heavyImpact();
     }
@@ -231,13 +235,11 @@ class RestTimerNotifier extends StateNotifier<RestTimerState> {
     }
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
+  // Note: Notifier automatically handles disposal in Riverpod, but we can override it if we want.
+  // Actually, we should hook into ref.onDispose instead of overriding dispose().
+
 }
 
-final restTimerProvider = StateNotifierProvider<RestTimerNotifier, RestTimerState>((ref) {
-  return RestTimerNotifier(ref);
+final restTimerProvider = NotifierProvider<RestTimerNotifier, RestTimerState>(() {
+  return RestTimerNotifier();
 });

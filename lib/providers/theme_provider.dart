@@ -4,21 +4,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_providers.dart';
 
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  return ThemeModeNotifier(prefs);
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(() {
+  return ThemeModeNotifier();
 });
 
-class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  final SharedPreferences _prefs;
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  late SharedPreferences _prefs;
 
-  ThemeModeNotifier(this._prefs) : super(ThemeMode.system) {
-    _loadTheme();
-  }
-
-  void _loadTheme() {
+  @override
+  ThemeMode build() {
+    _prefs = ref.watch(sharedPreferencesProvider);
     final modeStr = _prefs.getString('themeMode') ?? 'system';
-    state = ThemeMode.values.firstWhere(
+    return ThemeMode.values.firstWhere(
       (e) => e.name == modeStr,
       orElse: () => ThemeMode.system,
     );
