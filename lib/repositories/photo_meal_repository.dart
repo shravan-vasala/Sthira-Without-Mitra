@@ -62,7 +62,7 @@ class PhotoMealRepository {
   }
 
   List<ScannedMealLog> getScannedMealsForDate(String date) {
-    return _isar.scannedMealLogs.where().dateEqualTo(date).sortByTimestampDesc().findAllSync();
+    return _isar.scannedMealLogs.filter().dateEqualTo(date).sortByTimestampDesc().findAllSync();
   }
 
   int getTotalScannedCaloriesForDate(String date) {
@@ -80,7 +80,7 @@ class PhotoMealRepository {
         }
       }
       await _isar.writeTxn(() async {
-        await _isar.scannedMealLogs.delete(log.id);
+        await _isar.scannedMealLogs.delete(log.idInternal);
       });
     }
   }
