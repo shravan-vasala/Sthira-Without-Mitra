@@ -48,128 +48,146 @@ import 'models/food_search_cache.dart';
 import 'models/friend.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
 
-  // Lock to portrait
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+    // Lock to portrait
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
-  // Set status bar style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ),
-  );
+    // Set status bar style
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+      ),
+    );
 
-  final dir = await getApplicationDocumentsDirectory();
-  final isar = Isar.openSync(
-    [
-      UserProfileSchema,
-      DailyLogSchema,
-      WorkoutPlanSchema,
-      WorkoutSessionSchema,
-      DailyMealLogSchema,
-      MealPlanSchema,
-      HabitSchema,
-      HabitCompletionSchema,
-      ScannedMealLogSchema,
-      ProgressPhotoSchema,
-      ExerciseLogSchema,
-      ExercisePrSchema,
-      CoachNoteSchema,
-      BodyStatsSchema,
-      BadgeSchema,
-      AppConfigSchema,
-      AiCacheEntrySchema,
-      FoodSearchCacheSchema,
-      FriendSchema,
-    ],
-    directory: dir.path,
-  );
-  
-  SchemaMigrationService.runStartupMigrations(isar);
-
-  // Initialize all repositories
-  final workoutRepo = WorkoutRepository();
-  final mealRepo = MealRepository();
-  final dailyLogRepo = DailyLogRepository();
-  final habitRepo = HabitRepository();
-  final bodyStatsRepo = BodyStatsRepository();
-  final mediaRepo = MediaRepository();
-  final profileRepo = ProfileRepository();
-  final exerciseLogRepo = ExerciseLogRepository();
-  final coachNoteRepo = CoachNoteRepository();
-  final badgeRepo = BadgeRepository();
-  final friendRepo = FriendRepository(isar);
-  final healthConnectService = HealthConnectService();
-
-  await Future.wait([
-    workoutRepo.init(isar),
-    mealRepo.init(isar),
-    dailyLogRepo.init(isar),
-    habitRepo.init(isar),
-    bodyStatsRepo.init(isar),
-    mediaRepo.init(isar),
-    profileRepo.init(isar),
-    exerciseLogRepo.init(isar),
-    coachNoteRepo.init(isar),
-    badgeRepo.init(isar),
-    healthConnectService.init(),
-    NotificationService().init(),
-  ]);
-
-  final authService = AuthService();
-  final firestoreSyncService = FirestoreSyncService(authService);
-  
-  workoutRepo.attachSync(firestoreSyncService);
-  mealRepo.attachSync(firestoreSyncService);
-  dailyLogRepo.attachSync(firestoreSyncService);
-  habitRepo.attachSync(firestoreSyncService);
-  bodyStatsRepo.attachSync(firestoreSyncService);
-  profileRepo.attachSync(firestoreSyncService);
-  exerciseLogRepo.attachSync(firestoreSyncService);
-  coachNoteRepo.attachSync(firestoreSyncService);
-  badgeRepo.attachSync(firestoreSyncService);
-
-  // Fetch global plans from Firebase (non-blocking) to merge with local seed data
-  workoutRepo.fetchGlobalPlans();
-  mealRepo.fetchGlobalPlans();
-  
-  // Fetch user-specific personal plans from Firebase (non-blocking)
-  workoutRepo.fetchUserPlans();
-  mealRepo.fetchUserPlans();
-  
-  // Run weekly auto-backup (non-blocking)
-  BackupService().autoBackup();
-
-  final initialGeminiKey = await profileRepo.getSecureGeminiKey();
-  final prefs = await SharedPreferences.getInstance();
-
-  runApp(
-    ProviderScope(
-      overrides: [
-        workoutRepoProvider.overrideWithValue(workoutRepo),
-        mealRepoProvider.overrideWithValue(mealRepo),
-        dailyLogRepoProvider.overrideWithValue(dailyLogRepo),
-        habitRepoProvider.overrideWithValue(habitRepo),
-        bodyStatsRepoProvider.overrideWithValue(bodyStatsRepo),
-        mediaRepoProvider.overrideWithValue(mediaRepo),
-        profileRepoProvider.overrideWithValue(profileRepo),
-        exerciseLogRepoProvider.overrideWithValue(exerciseLogRepo),
-        coachNoteRepoProvider.overrideWithValue(coachNoteRepo),
-        badgeRepoProvider.overrideWithValue(badgeRepo),
-        friendRepoProvider.overrideWithValue(friendRepo),
-        healthConnectServiceProvider.overrideWithValue(healthConnectService),
-        authServiceProvider.overrideWithValue(authService),
-        initialGeminiKeyProvider.overrideWithValue(initialGeminiKey ?? ''),
-        sharedPreferencesProvider.overrideWithValue(prefs),
+    final dir = await getApplicationDocumentsDirectory();
+    final isar = Isar.openSync(
+      [
+        UserProfileSchema,
+        DailyLogSchema,
+        WorkoutPlanSchema,
+        WorkoutSessionSchema,
+        DailyMealLogSchema,
+        MealPlanSchema,
+        HabitSchema,
+        HabitCompletionSchema,
+        ScannedMealLogSchema,
+        ProgressPhotoSchema,
+        ExerciseLogSchema,
+        ExercisePrSchema,
+        CoachNoteSchema,
+        BodyStatsSchema,
+        BadgeSchema,
+        AppConfigSchema,
+        AiCacheEntrySchema,
+        FoodSearchCacheSchema,
+        FriendSchema,
       ],
-      child: const TruFitApp(),
-    ),
-  );
+      directory: dir.path,
+    );
+    
+    SchemaMigrationService.runStartupMigrations(isar);
+
+    // Initialize all repositories
+    final workoutRepo = WorkoutRepository();
+    final mealRepo = MealRepository();
+    final dailyLogRepo = DailyLogRepository();
+    final habitRepo = HabitRepository();
+    final bodyStatsRepo = BodyStatsRepository();
+    final mediaRepo = MediaRepository();
+    final profileRepo = ProfileRepository();
+    final exerciseLogRepo = ExerciseLogRepository();
+    final coachNoteRepo = CoachNoteRepository();
+    final badgeRepo = BadgeRepository();
+    final friendRepo = FriendRepository(isar);
+    final healthConnectService = HealthConnectService();
+
+    await Future.wait([
+      workoutRepo.init(isar),
+      mealRepo.init(isar),
+      dailyLogRepo.init(isar),
+      habitRepo.init(isar),
+      bodyStatsRepo.init(isar),
+      mediaRepo.init(isar),
+      profileRepo.init(isar),
+      exerciseLogRepo.init(isar),
+      coachNoteRepo.init(isar),
+      badgeRepo.init(isar),
+      healthConnectService.init(),
+      NotificationService().init(),
+    ]);
+
+    final authService = AuthService();
+    final firestoreSyncService = FirestoreSyncService(authService);
+    
+    workoutRepo.attachSync(firestoreSyncService);
+    mealRepo.attachSync(firestoreSyncService);
+    dailyLogRepo.attachSync(firestoreSyncService);
+    habitRepo.attachSync(firestoreSyncService);
+    bodyStatsRepo.attachSync(firestoreSyncService);
+    profileRepo.attachSync(firestoreSyncService);
+    exerciseLogRepo.attachSync(firestoreSyncService);
+    coachNoteRepo.attachSync(firestoreSyncService);
+    badgeRepo.attachSync(firestoreSyncService);
+
+    // Fetch global plans from Firebase (non-blocking) to merge with local seed data
+    workoutRepo.fetchGlobalPlans();
+    mealRepo.fetchGlobalPlans();
+    
+    // Fetch user-specific personal plans from Firebase (non-blocking)
+    workoutRepo.fetchUserPlans();
+    mealRepo.fetchUserPlans();
+    
+    // Run weekly auto-backup (non-blocking)
+    BackupService().autoBackup();
+
+    final initialGeminiKey = await profileRepo.getSecureGeminiKey();
+    final prefs = await SharedPreferences.getInstance();
+
+    runApp(
+      ProviderScope(
+        overrides: [
+          workoutRepoProvider.overrideWithValue(workoutRepo),
+          mealRepoProvider.overrideWithValue(mealRepo),
+          dailyLogRepoProvider.overrideWithValue(dailyLogRepo),
+          habitRepoProvider.overrideWithValue(habitRepo),
+          bodyStatsRepoProvider.overrideWithValue(bodyStatsRepo),
+          mediaRepoProvider.overrideWithValue(mediaRepo),
+          profileRepoProvider.overrideWithValue(profileRepo),
+          exerciseLogRepoProvider.overrideWithValue(exerciseLogRepo),
+          coachNoteRepoProvider.overrideWithValue(coachNoteRepo),
+          badgeRepoProvider.overrideWithValue(badgeRepo),
+          friendRepoProvider.overrideWithValue(friendRepo),
+          healthConnectServiceProvider.overrideWithValue(healthConnectService),
+          authServiceProvider.overrideWithValue(authService),
+          initialGeminiKeyProvider.overrideWithValue(initialGeminiKey ?? ''),
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: const TruFitApp(),
+      ),
+    );
+  } catch (e, stack) {
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Fatal Error on Startup:\n\n$e\n\n$stack',
+                style: const TextStyle(color: Colors.red, fontSize: 12),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class TruFitApp extends ConsumerStatefulWidget {
