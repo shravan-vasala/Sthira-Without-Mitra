@@ -13,6 +13,7 @@ import 'repositories/profile_repository.dart';
 import 'repositories/exercise_log_repository.dart';
 import 'repositories/badge_repository.dart';
 import 'repositories/coach_note_repository.dart';
+import 'repositories/friend_repository.dart';
 import 'services/health_connect_service.dart';
 import 'services/backup_service.dart';
 import 'services/notification_service.dart';
@@ -44,6 +45,7 @@ import 'models/badge.dart';
 import 'models/app_config.dart';
 import 'models/ai_cache_entry.dart';
 import 'models/food_search_cache.dart';
+import 'models/friend.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +85,7 @@ Future<void> main() async {
       AppConfigSchema,
       AiCacheEntrySchema,
       FoodSearchCacheSchema,
+      FriendSchema,
     ],
     directory: dir.path,
   );
@@ -100,6 +103,7 @@ Future<void> main() async {
   final exerciseLogRepo = ExerciseLogRepository();
   final coachNoteRepo = CoachNoteRepository();
   final badgeRepo = BadgeRepository();
+  final friendRepo = FriendRepository(isar);
   final healthConnectService = HealthConnectService();
 
   await Future.wait([
@@ -157,7 +161,9 @@ Future<void> main() async {
         exerciseLogRepoProvider.overrideWithValue(exerciseLogRepo),
         coachNoteRepoProvider.overrideWithValue(coachNoteRepo),
         badgeRepoProvider.overrideWithValue(badgeRepo),
+        friendRepoProvider.overrideWithValue(friendRepo),
         healthConnectServiceProvider.overrideWithValue(healthConnectService),
+        authServiceProvider.overrideWithValue(authService),
         initialGeminiKeyProvider.overrideWithValue(initialGeminiKey ?? ''),
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
@@ -180,6 +186,7 @@ class _TruFitAppState extends ConsumerState<TruFitApp> {
     // Initialize notifications and sync them
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(remindersProvider.notifier).initializeNotifications();
+      ref.read(socialPushControllerProvider);
     });
   }
 

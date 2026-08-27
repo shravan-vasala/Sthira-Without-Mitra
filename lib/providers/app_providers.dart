@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../models/social_profile.dart';
+import 'daily_log_notifier.dart';
+import '../models/daily_log.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:isar/isar.dart';
 import '../repositories/coach_note_repository.dart';
@@ -12,6 +15,7 @@ import '../repositories/media_repository.dart';
 import '../repositories/profile_repository.dart';
 import '../repositories/exercise_log_repository.dart';
 import '../repositories/badge_repository.dart';
+import '../repositories/friend_repository.dart';
 import '../services/health_connect_service.dart';
 import '../services/backup_service.dart';
 import '../services/coach_service.dart';
@@ -19,6 +23,8 @@ import '../services/gemini_food_service.dart';
 import '../services/csv_export_service.dart';
 import '../services/ai_cache.dart';
 import '../services/ai_client.dart';
+import '../services/auth_service.dart';
+import '../services/social_sync_service.dart';
 import '../interfaces/i_ai_food_service.dart';
 
 import 'auth_provider.dart';
@@ -112,12 +118,51 @@ final coachNoteRepoProvider = Provider<CoachNoteRepository>((ref) {
 final badgeRepoProvider = Provider<BadgeRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
+final friendRepoProvider = Provider<FriendRepository>((ref) {
+  throw UnimplementedError('Must be overridden in main');
+});
 final healthConnectServiceProvider = Provider<HealthConnectService>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
 final backupServiceProvider = Provider<BackupService>((ref) {
   return BackupService();
 });
+final authServiceProvider = Provider<AuthService>((ref) {
+  throw UnimplementedError('Must be overridden in main');
+});
+final socialSyncServiceProvider = Provider<SocialSyncService>((ref) {
+  return SocialSyncService(ref.watch(authServiceProvider));
+});
+
+final socialPushControllerProvider = Provider<void>((ref) {
+  ref.listen(dailyLogProvider, (prev, next) {
+    _pushProfile(ref, next);
+  });
+  ref.listen(profileProvider, (prev, next) {
+    _pushProfile(ref, ref.read(dailyLogProvider));
+  });
+});
+
+void _pushProfile(Ref ref, DailyLog dailyLog) {
+  final profile = ref.read(profileProvider);
+  final syncService = ref.read(socialSyncServiceProvider);
+  final authService = ref.read(authServiceProvider);
+
+  if (authService.uid == null) return;
+
+  final profileData = SocialProfile(
+    uid: authService.uid!,
+    name: profile.name,
+    avatarUrl: profile.photoPath,
+    todaySteps: dailyLog.steps,
+    todayWorkouts: dailyLog.completedWorkoutDayIds.length,
+    currentStreak: 0, // TODO: calculate streak
+    latestBadge: null, // TODO: fetch latest badge
+    lastUpdatedAt: DateTime.now(),
+  );
+  syncService.pushProfile(profileData);
+}
+
 final csvExportServiceProvider = Provider<CsvExportService>((ref) {
   return CsvExportService();
 });

@@ -16,6 +16,7 @@ import 'widgets/trophy_room_card.dart';
 import '../../providers/app_providers.dart';
 import '../../services/firestore_sync_service.dart';
 import '../../services/screen_time_service.dart';
+import '../../widgets/avatar_picker_sheet.dart';
 import 'package:intl/intl.dart';
 
 
@@ -81,25 +82,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                       child: ClipOval(
-                        child: profile.photoPath != null && File(profile.photoPath!).existsSync()
-                            ? Image.file(
-                                File(profile.photoPath!),
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              )
-                            : Center(
-                                child: profile.name.isNotEmpty
-                                    ? Text(
-                                        profile.name[0].toUpperCase(),
-                                        style: TextStyle(
-                                          fontSize: 32,
-                                          fontWeight: FontWeight.w800,
-                                          color: context.colors.primary,
-                                        ),
+                        child: profile.photoPath != null 
+                            ? (profile.photoPath!.startsWith('assets/')
+                                ? Image.asset(
+                                    profile.photoPath!,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                : (File(profile.photoPath!).existsSync()
+                                    ? Image.file(
+                                        File(profile.photoPath!),
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
                                       )
-                                    : Icon(Icons.person, size: 40, color: context.colors.primary),
-                              ),
+                                    : _buildDefaultAvatar(context, profile.name)))
+                            : _buildDefaultAvatar(context, profile.name),
                       ),
                     ),
                     SizedBox(height: 12),
@@ -597,6 +596,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       );
     }
+  }
+
+  Widget _buildDefaultAvatar(BuildContext context, String name) {
+    return Center(
+      child: name.isNotEmpty
+          ? Text(
+              name[0].toUpperCase(),
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: context.colors.primary,
+              ),
+            )
+          : Icon(Icons.person, size: 40, color: context.colors.primary),
+    );
   }
 }
 
@@ -1103,6 +1117,21 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 _pickImage(ImageSource.gallery);
               },
             ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.pets, color: context.colors.primary),
+              title: const Text('Choose preset avatar'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final selectedAvatar = await AvatarPickerSheet.show(context);
+                if (selectedAvatar != null) {
+                  setState(() {
+                    _localPhotoPath = selectedAvatar;
+                    _clearPhoto = false;
+                  });
+                }
+              },
+            ),
             if (_localPhotoPath != null && !_clearPhoto)
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -1152,12 +1181,19 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                       ),
                       child: ClipOval(
                         child: _localPhotoPath != null && !_clearPhoto
-                            ? Image.file(
-                                File(_localPhotoPath!),
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              )
+                            ? (_localPhotoPath!.startsWith('assets/')
+                                ? Image.asset(
+                                    _localPhotoPath!,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    File(_localPhotoPath!),
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  ))
                             : Center(
                                 child: nameController.text.isNotEmpty
                                     ? Text(

@@ -48,6 +48,8 @@ dependencies:
   confetti: ^0.8.0
   wakelock_plus: ^1.2.8
   flutter_animate: ^4.5.2
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.4.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -61,6 +63,7 @@ flutter:
   assets:
     - assets/data/
     - assets/icon/
+    - assets/avatars/
 
 flutter_launcher_icons:
   android: true

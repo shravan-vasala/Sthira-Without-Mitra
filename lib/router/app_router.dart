@@ -23,11 +23,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
 import '../providers/reminders_provider.dart';
 import '../widgets/badge_overlay_host.dart';
+import '../screens/social/social_feed_screen.dart';
+import '../screens/social/connect_screen.dart';
 
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
 final _progressNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'progress');
+final _socialNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'social');
 final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 
 class RouterNotifier extends ChangeNotifier {
@@ -166,6 +169,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'yearly-activity',
                   builder: (context, state) => const YearlyActivityScreen(),
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _socialNavigatorKey,
+          routes: [
+            GoRoute(
+              path: '/social',
+              builder: (context, state) => const SocialFeedScreen(),
+              routes: [
+                GoRoute(
+                  path: 'connect',
+                  builder: (context, state) => const ConnectScreen(),
                 ),
               ],
             ),
@@ -395,11 +413,18 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         onTap: () => navigationShell.goBranch(1),
                       ),
                       _NavItem(
+                        icon: Icons.people_outline_rounded,
+                        activeIcon: Icons.people_rounded,
+                        label: 'Social',
+                        isSelected: navigationShell.currentIndex == 2,
+                        onTap: () => navigationShell.goBranch(2),
+                      ),
+                      _NavItem(
                         icon: Icons.person_outline_rounded,
                         activeIcon: Icons.person_rounded,
                         label: 'Profile',
-                        isSelected: navigationShell.currentIndex == 2,
-                        onTap: () => navigationShell.goBranch(2),
+                        isSelected: navigationShell.currentIndex == 3,
+                        onTap: () => navigationShell.goBranch(3),
                       ),
                     ],
                   ),
