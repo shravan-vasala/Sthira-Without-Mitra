@@ -1,11 +1,14 @@
 import 'package:isar/isar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import '../models/user_profile.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 
 class ProfileRepository {
   late Isar _isar;
-  final _secureStorage = const FlutterSecureStorage();
+  final _secureStorage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
@@ -18,7 +21,12 @@ class ProfileRepository {
   }
 
   Future<String?> getSecureGeminiKey() async {
-    return await _secureStorage.read(key: 'gemini_api_key');
+    try {
+      return await _secureStorage.read(key: 'gemini_api_key').timeout(const Duration(seconds: 2));
+    } catch (e) {
+      debugPrint('Secure storage error or timeout: $e');
+      return null;
+    }
   }
 
   Future<void> saveSecureGeminiKey(String key) async {
