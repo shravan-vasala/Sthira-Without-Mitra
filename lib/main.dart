@@ -107,20 +107,18 @@ Future<void> main() async {
     final friendRepo = FriendRepository(isar);
     final healthConnectService = HealthConnectService();
 
-    await Future.wait([
-      workoutRepo.init(isar),
-      mealRepo.init(isar),
-      dailyLogRepo.init(isar),
-      habitRepo.init(isar),
-      bodyStatsRepo.init(isar),
-      mediaRepo.init(isar),
-      profileRepo.init(isar),
-      exerciseLogRepo.init(isar),
-      coachNoteRepo.init(isar),
-      badgeRepo.init(isar),
-      healthConnectService.init(),
-      NotificationService().init(),
-    ]);
+    await workoutRepo.init(isar);
+    await mealRepo.init(isar);
+    await dailyLogRepo.init(isar);
+    await habitRepo.init(isar);
+    await bodyStatsRepo.init(isar);
+    await mediaRepo.init(isar);
+    await profileRepo.init(isar);
+    await exerciseLogRepo.init(isar);
+    await coachNoteRepo.init(isar);
+    await badgeRepo.init(isar);
+    await healthConnectService.init();
+    await NotificationService().init();
 
     final authService = AuthService();
     final firestoreSyncService = FirestoreSyncService(authService);
