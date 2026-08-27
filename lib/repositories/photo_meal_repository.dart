@@ -42,7 +42,7 @@ class PhotoMealRepository {
     }
 
     final log = ScannedMealLog(
-      idStr: 'photo_meal_$timestampMs',
+      id: 'photo_meal_$timestampMs',
       date: date,
       photoPath: destPath,
       mealType: mealType,
@@ -71,7 +71,7 @@ class PhotoMealRepository {
   }
 
   Future<void> deleteScannedMeal(String id) async {
-    final log = _isar.scannedMealLogs.where().idStrEqualTo(id).findFirstSync();
+    final log = _isar.scannedMealLogs.where().idEqualTo(id).findFirstSync();
     if (log != null) {
       if (!kIsWeb) {
         final file = File(log.photoPath);

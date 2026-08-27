@@ -154,8 +154,8 @@ void _pushProfile(Ref ref, DailyLog dailyLog) {
     uid: authService.uid!,
     name: profile.name,
     avatarUrl: profile.photoPath,
-    todaySteps: dailyLog.steps,
-    todayWorkouts: dailyLog.completedWorkoutDayIds.length,
+    todaySteps: dailyLog.steps ?? 0,
+    todayWorkouts: dailyLog.workoutCompleted ? 1 : 0,
     currentStreak: 0, // TODO: calculate streak
     latestBadge: null, // TODO: fetch latest badge
     lastUpdatedAt: DateTime.now(),
