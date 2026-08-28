@@ -185,7 +185,7 @@ class UserProfile {
     bool clearPhoto = false,
     bool clearPlanStart = false,
   }) {
-    return UserProfile(
+    final updated = UserProfile(
       name: name ?? this.name,
       coachName: coachName ?? this.coachName,
       photoPath: clearPhoto ? null : (photoPath ?? this.photoPath),
@@ -207,5 +207,7 @@ class UserProfile {
       currentPhaseWeek: currentPhaseWeek ?? this.currentPhaseWeek,
       screenTimeEnabled: screenTimeEnabled ?? this.screenTimeEnabled,
     );
+    updated.id = this.id;
+    return updated;
   }
 }
