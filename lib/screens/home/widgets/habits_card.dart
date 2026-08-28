@@ -10,6 +10,7 @@ import '../../../widgets/surface_card.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../sleep_entry_dialog.dart';
 import '../water_entry_dialog.dart';
+import 'timer_entry_dialog.dart';
 import '../../../widgets/empty_state_view.dart';
 
 class HabitsCard extends ConsumerWidget {
@@ -330,6 +331,14 @@ class _HabitItem extends ConsumerWidget {
       showAppBottomSheet(
         context: context,
         builder: (_) => const WaterEntryDialog(),
+      );
+      return;
+    }
+    
+    if (habit.type == HabitType.timer) {
+      showAppBottomSheet(
+        context: context,
+        builder: (_) => TimerEntryDialog(habit: habit),
       );
       return;
     }

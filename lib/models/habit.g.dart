@@ -211,6 +211,7 @@ const _HabittypeEnumValueMap = {
   'autoSteps': 2,
   'autoSleep': 3,
   'autoFromScreenTime': 4,
+  'timer': 5,
 };
 const _HabittypeValueEnumMap = {
   0: HabitType.checkbox,
@@ -218,6 +219,7 @@ const _HabittypeValueEnumMap = {
   2: HabitType.autoSteps,
   3: HabitType.autoSleep,
   4: HabitType.autoFromScreenTime,
+  5: HabitType.timer,
 };
 
 Id _habitGetId(Habit object) {

@@ -4,7 +4,7 @@ import 'daily_log.dart';
 
 part 'habit.g.dart';
 
-enum HabitType { checkbox, counter, autoSteps, autoSleep, autoFromScreenTime }
+enum HabitType { checkbox, counter, autoSteps, autoSleep, autoFromScreenTime, timer }
 enum GoalDirection { atLeast, atMost }
 
 @collection
@@ -276,6 +276,7 @@ double getHabitProgress(Habit habit, HabitCompletion completions, DailyLog daily
   switch (habit.type) {
     case HabitType.checkbox:
     case HabitType.counter:
+    case HabitType.timer:
       return completions.getProgress(habit);
     case HabitType.autoSteps:
       return (dailyLog.steps ?? 0).toDouble();
@@ -291,7 +292,7 @@ bool isHabitCompleted(Habit habit, HabitCompletion completions, DailyLog dailyLo
   if (override == 'done') return true;
   if (override == 'notDone') return false;
 
-  if (habit.type == HabitType.checkbox) {
+  if (habit.type == HabitType.checkbox || habit.type == HabitType.timer) {
     return completions.isCompleted(habit);
   }
   final progress = getHabitProgress(habit, completions, dailyLog);

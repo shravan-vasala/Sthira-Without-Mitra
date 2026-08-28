@@ -7,7 +7,6 @@ part 'user_profile.g.dart';
 class UserProfile {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: true)
   final String name;
   /// Display name for the AI / notes coach (e.g. "Shravan"). Empty → generic "Coach".
   final String coachName;

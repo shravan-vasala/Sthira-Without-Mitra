@@ -190,6 +190,8 @@ class _HabitListTile extends ConsumerWidget {
         return 'From sleep log (Target: ${h.target} hrs)';
       case HabitType.autoFromScreenTime:
         return 'From screen time (Target: ${h.target} mins)';
+      case HabitType.timer:
+        return 'Timer (Target: ${h.target} mins)';
     }
   }
 }
@@ -441,6 +443,13 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                     value: HabitType.autoFromScreenTime,
                     child: Text(
                       'Auto from Screen Time',
+                      style: TextStyle(color: context.colors.textDark),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: HabitType.timer,
+                    child: Text(
+                      'Timer (Countdown)',
                       style: TextStyle(color: context.colors.textDark),
                     ),
                   ),
