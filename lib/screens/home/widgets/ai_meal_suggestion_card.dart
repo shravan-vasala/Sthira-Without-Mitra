@@ -64,17 +64,26 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
       );
 
       
-      setState(() {
-        _suggestionText = '';
-        _isLoading = false;
-      });
-
+      bool isFirstChunk = true;
       await for (final chunk in stream) {
         if (mounted) {
           setState(() {
+            if (isFirstChunk) {
+              _isLoading = false;
+              _suggestionText = '';
+              isFirstChunk = false;
+            }
             _suggestionText = (_suggestionText ?? '') + chunk;
           });
         }
+      }
+      
+      if (isFirstChunk && mounted) {
+        // Stream completed without yielding anything
+        setState(() {
+          _isLoading = false;
+          _error = 'Failed to generate a suggestion. Please try again.';
+        });
       }
     } catch (e) {
       if (mounted) {
