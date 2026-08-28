@@ -16,7 +16,7 @@ class AiCache {
     if (imageContext != null) {
       raw += imageContext;
     }
-    return 'ai_cache_\${sha256.convert(utf8.encode(raw)).toString()}';
+    return 'ai_cache_${sha256.convert(utf8.encode(raw)).toString()}';
   }
 
   Map<String, dynamic>? get(String prompt, [String? imageContext]) {
@@ -52,8 +52,8 @@ class AiCache {
       timestamp: DateTime.now(),
     );
     
-    _isar.writeTxnSync(() {
-      _isar.aiCacheEntrys.putSync(entry);
+    await _isar.writeTxn(() async {
+      await _isar.aiCacheEntrys.put(entry);
     });
   }
 }
