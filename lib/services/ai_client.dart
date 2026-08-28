@@ -299,7 +299,7 @@ class AiClient {
     required String systemInstruction,
     required bool useFirebase,
     String? apiKey,
-  }) {
+  }) async* {
     if (useFirebase) {
       final model = vertex.FirebaseAI.vertexAI().generativeModel(
         model: modelName,
@@ -310,7 +310,7 @@ class AiClient {
         ),
       );
 
-      return model.generateContentStream([vertex.Content.text(prompt)])
+      yield* model.generateContentStream([vertex.Content.text(prompt)])
           .map((res) => res.text)
           .timeout(const Duration(seconds: 20));
     } else {
@@ -337,10 +337,12 @@ class AiClient {
         contents: [Content.text(prompt)],
       );
 
-      return _cachedClient!.models.streamGenerateContent(
+      final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).map((res) => res.text).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 20));
+      
+      yield response.text;
     }
   }
 
