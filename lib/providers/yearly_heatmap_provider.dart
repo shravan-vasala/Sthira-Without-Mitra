@@ -17,7 +17,7 @@ final yearlyActivityHeatmapProvider = FutureProvider<Map<DateTime, int>>((ref) a
   
   final habits = habitRepo.getHabits();
   final workoutPlan = workoutRepo.getActivePlan(preferredKey: profile.activeWorkoutPlan ?? 'beginner_plan');
-  final mealPlan = mealRepo.getMealPlan(profile.activeMealPlan ?? 'standard_plan');
+  final mealPlan = mealRepo.getMealPlan(profile.activeMealPlan ?? 'Daily Nutrition Plan');
 
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);

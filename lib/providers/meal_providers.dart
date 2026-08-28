@@ -8,7 +8,7 @@ final mealPlanProvider = Provider<MealPlan?>((ref) {
   final repo = ref.watch(mealRepoProvider);
   final profile = ref.watch(profileProvider);
   
-  final activePlanId = profile.activeMealPlan ?? 'standard_plan';
+  final activePlanId = profile.activeMealPlan ?? 'Daily Nutrition Plan';
   return repo.getMealPlan(activePlanId);
 });
 
