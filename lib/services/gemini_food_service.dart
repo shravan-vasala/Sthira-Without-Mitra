@@ -288,8 +288,11 @@ Do NOT use JSON.
           final errorString = e.toString();
           if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
             throw AiException('Your API Key is invalid or not authorized.');
-          } else if (errorString.contains('403') || errorString.contains('forbidden') || errorString.contains('404') || errorString.contains('not found')) {
-            lastError = 'Model $model unavailable (403/404)';
+          } else if (errorString.contains('403') || errorString.contains('forbidden')) {
+            lastError = 'Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.';
+            continue; // Try next model
+          } else if (errorString.contains('404') || errorString.contains('not found')) {
+            lastError = 'Model $model unavailable (404)';
             continue; // Try next model
           } else if (errorString.contains('429') || errorString.contains('quota')) {
             throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');

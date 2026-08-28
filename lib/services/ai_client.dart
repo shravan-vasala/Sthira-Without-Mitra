@@ -271,8 +271,11 @@ class AiClient {
         
         if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid')) {
           throw AiException('Your API Key is invalid or not authorized. Please check your AI Settings.');
-        } else if (errorString.contains('403') || errorString.contains('404')) {
-          lastError = 'Model $modelName unavailable (403/404)';
+        } else if (errorString.contains('403') || errorString.contains('forbidden')) {
+          lastError = 'Access Forbidden (403). Ensure your API key has no restrictions, your region is supported, and billing is enabled in Google Cloud.';
+          continue; // Try next model
+        } else if (errorString.contains('404') || errorString.contains('not found')) {
+          lastError = 'Model $modelName unavailable (404)';
           continue; // Try next model
         } else if (errorString.contains('SocketException')) {
           throw AiException('You seem to be offline. Please check your internet connection.');
