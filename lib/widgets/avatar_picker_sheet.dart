@@ -8,6 +8,10 @@ class AvatarPickerSheet extends StatelessWidget {
     {'name': 'Rabbit', 'path': 'assets/avatars/rabbit.jpg'},
     {'name': 'Owl', 'path': 'assets/avatars/owl.jpg'},
     {'name': 'Fox', 'path': 'assets/avatars/fox.jpg'},
+    {'name': 'Bear', 'path': 'assets/avatars/bear.jpg'},
+    {'name': 'Panda', 'path': 'assets/avatars/panda.jpg'},
+    {'name': 'Tiger', 'path': 'assets/avatars/tiger.jpg'},
+    {'name': 'Koala', 'path': 'assets/avatars/koala.jpg'},
   ];
 
   static Future<String?> show(BuildContext context) {
