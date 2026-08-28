@@ -197,6 +197,7 @@ $_jsonShape
     String? mealName,
     int? mealsLeft,
     List<String>? previousMeals,
+    String? plannedMealContext,
   }) async* {
     _ensureApiKey();
 
@@ -239,6 +240,8 @@ Remaining Macros for the ENTIRE rest of the day:
 $mealContext
 
 $historyContext
+
+${plannedMealContext != null && plannedMealContext.isNotEmpty ? '\nCRITICAL PLAN OVERRIDE:\n$plannedMealContext\n' : ''}
 
 $_cuisineHint
 

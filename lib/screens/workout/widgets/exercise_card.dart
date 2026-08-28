@@ -24,6 +24,7 @@ class ExerciseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(exerciseLogsUpdateProvider);
     final pr = ref.watch(exercisePrProvider(exercise.name ?? ''));
     final logRepo = ref.watch(exerciseLogRepoProvider);
     final dateStr = ref.watch(dateStringProvider);

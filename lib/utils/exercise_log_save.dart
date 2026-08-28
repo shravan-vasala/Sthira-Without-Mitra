@@ -36,6 +36,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   );
 
   await repo.saveLog(newLog);
+  ref.read(exerciseLogsUpdateProvider.notifier).state++;
 
   // --- Check PR ---
   final isCompletedSet = sets;

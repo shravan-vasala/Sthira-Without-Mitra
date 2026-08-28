@@ -53,6 +53,21 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
           .where((name) => name.isNotEmpty)
           .toList();
 
+      final profile = ref.read(profileProvider);
+      final activePlanId = profile.activeMealPlan ?? 'standard_plan';
+      final mealPlan = mealRepo.getMealPlan(activePlanId);
+      
+      String? plannedMealContext;
+      if (mealPlan != null && widget.mealName != null) {
+        final slotMeal = mealPlan.meals.firstWhere(
+            (m) => m.type?.toLowerCase() == widget.mealName?.toLowerCase(), 
+            orElse: () => Meal());
+        if (slotMeal.items.isNotEmpty) {
+           final itemsStr = slotMeal.items.map((i) => "${i.quantity ?? ''} ${i.name ?? ''}".trim()).join(', ');
+           plannedMealContext = "The user's active diet plan (${mealPlan.planName}) suggests the following for ${widget.mealName}: $itemsStr. Please base your suggestion strongly around this plan, adjusting portions if needed to fit remaining macros. DO NOT completely ignore the plan.";
+        }
+      }
+
       final stream = service.suggestMealStream(
         remainingCalories: widget.remainingCalories,
         remainingProtein: widget.remainingProtein,
@@ -61,7 +76,9 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         mealName: widget.mealName,
         mealsLeft: widget.mealsLeft,
         previousMeals: previousMeals,
+        plannedMealContext: plannedMealContext,
       );
+
       
       setState(() {
         _suggestionText = '';
