@@ -17,21 +17,40 @@ class ActivityHeatmap extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final heatmapAsync = ref.watch(yearlyActivityHeatmapProvider);
+    final year = ref.watch(selectedYearProvider);
+    final heatmapAsync = ref.watch(yearlyActivityHeatmapProvider(year));
     
     return heatmapAsync.when(
       data: (heatmapData) {
-        final today = DateTime.now();
-        final todayDate = DateTime(today.year, today.month, today.day);
-        final startDate = todayDate.subtract(const Duration(days: 364));
+        final startDate = DateTime(year, 1, 1);
+        final isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        final daysInYear = isLeapYear ? 366 : 365;
         
         // DateTime.weekday is 1 (Monday) to 7 (Sunday). Let's make Monday = 0, Sunday = 6.
         final startWeekday = startDate.weekday - 1; 
         
-        final totalCells = 365 + startWeekday;
+        final totalCells = daysInYear + startWeekday;
         final totalColumns = (totalCells / 7).ceil();
         
         int lastMonth = -1;
+        
+        // Calculate some basic stats
+        int activeDays = 0;
+        int currentStreak = 0;
+        int maxStreak = 0;
+        
+        for (int i = 0; i < daysInYear; i++) {
+          final date = startDate.add(Duration(days: i));
+          if ((heatmapData[date] ?? 0) > 0) {
+            activeDays++;
+            currentStreak++;
+            if (currentStreak > maxStreak) {
+              maxStreak = currentStreak;
+            }
+          } else {
+            currentStreak = 0;
+          }
+        }
         
         return Container(
           padding: const EdgeInsets.all(20),
@@ -46,13 +65,33 @@ class ActivityHeatmap extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Yearly Activity',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: context.colors.textDark,
-                    ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.chevron_left_rounded, color: context.colors.textDark),
+                        onPressed: () => ref.read(selectedYearProvider.notifier).state--,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        year.toString(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: context.colors.textDark,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(Icons.chevron_right_rounded, color: year < DateTime.now().year ? context.colors.textDark : context.colors.textLight),
+                        onPressed: year < DateTime.now().year 
+                            ? () => ref.read(selectedYearProvider.notifier).state++ 
+                            : null,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
                   ),
                   Row(
                     children: [
@@ -94,11 +133,9 @@ class ActivityHeatmap extends ConsumerWidget {
               const SizedBox(height: 8),
               
               // Scrollable Vertical Heatmap
-              SizedBox(
-                height: 350, // Fixed height for vertical scrolling within bottom sheet
+              Expanded(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
-                  reverse: true, // Scroll to bottom (today)
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +180,7 @@ class ActivityHeatmap extends ConsumerWidget {
                             final cellIndex = rowIndex * 7 + colIndex;
                             final dayOffset = cellIndex - startWeekday;
                             
-                            if (dayOffset < 0 || dayOffset >= 365) {
+                            if (dayOffset < 0 || dayOffset >= daysInYear) {
                               return Container(
                                 width: 12,
                                 height: 12,
@@ -174,6 +211,18 @@ class ActivityHeatmap extends ConsumerWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(context, 'Active Days', '$activeDays'),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildStatCard(context, 'Longest Streak', '$maxStreak'),
+                  ),
+                ],
+              ),
             ],
           ),
         );
@@ -199,6 +248,37 @@ class ActivityHeatmap extends ConsumerWidget {
       decoration: BoxDecoration(
         color: _getColorForScore(context, score),
         borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(BuildContext context, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      decoration: BoxDecoration(
+        color: context.colors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: context.colors.primary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: context.colors.textMedium,
+            ),
+          ),
+        ],
       ),
     );
   }

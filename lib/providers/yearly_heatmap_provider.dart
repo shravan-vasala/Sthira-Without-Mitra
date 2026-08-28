@@ -4,7 +4,9 @@ import 'app_providers.dart';
 import '../models/daily_log.dart';
 import '../models/daily_meal_log.dart';
 
-final yearlyActivityHeatmapProvider = FutureProvider<Map<DateTime, int>>((ref) async {
+final selectedYearProvider = StateProvider<int>((ref) => DateTime.now().year);
+
+final yearlyActivityHeatmapProvider = FutureProvider.family<Map<DateTime, int>, int>((ref, year) async {
   final result = <DateTime, int>{};
   
   // Get repositories and global plans
@@ -19,17 +21,18 @@ final yearlyActivityHeatmapProvider = FutureProvider<Map<DateTime, int>>((ref) a
   final workoutPlan = workoutRepo.getActivePlan(preferredKey: profile.activeWorkoutPlan ?? 'beginner_plan');
   final mealPlan = mealRepo.getMealPlan(profile.activeMealPlan ?? 'Daily Nutrition Plan');
 
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
+  final startDate = DateTime(year, 1, 1);
+  final isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+  final daysInYear = isLeapYear ? 366 : 365;
   
-  // Calculate for the past 365 days
-  for (int i = 0; i < 365; i++) {
+  // Calculate for the specific year
+  for (int i = 0; i < daysInYear; i++) {
     // Yield to the event loop every 30 days to prevent main-thread jank
     if (i > 0 && i % 30 == 0) {
       await Future.delayed(Duration.zero);
     }
 
-    final date = today.subtract(Duration(days: i));
+    final date = startDate.add(Duration(days: i));
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
     
     final completions = habitRepo.getCompletions(dateStr);

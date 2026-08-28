@@ -26,7 +26,9 @@ class YearlyActivityScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Display the heatmap
-              const ActivityHeatmap(),
+              const Expanded(
+                child: ActivityHeatmap(),
+              ),
               
               const SizedBox(height: 32),
               
