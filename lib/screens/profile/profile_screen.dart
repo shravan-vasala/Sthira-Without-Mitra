@@ -405,10 +405,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       BuildContext context, WidgetRef ref, dynamic profile) {
     final keyController = TextEditingController(text: profile.geminiApiKey ?? '');
     final coachController = TextEditingController(text: profile.coachName as String? ?? '');
+    bool isVerifying = false;
+    String errorMessage = '';
     
     showAppBottomSheet(
       context: context,
-      builder: (ctx) => AppSheet(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AppSheet(
         title: 'AI & Coach Settings',
         scrollable: true,
         subtitle:
@@ -460,21 +463,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
             ),
+            if (errorMessage.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                errorMessage,
+                style: TextStyle(color: context.colors.red, fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ],
             const SizedBox(height: 24),
-            PrimaryButton(
-              label: 'Save',
+            isVerifying
+                ? Center(
+                    child: CircularProgressIndicator(color: context.colors.primary),
+                  )
+                : PrimaryButton(
+              label: 'Save & Verify',
               onPressed: () async {
                 final key = keyController.text.trim();
                 final coachName = coachController.text.trim();
                 
                 if (key.isNotEmpty) {
+                  setState(() {
+                    isVerifying = true;
+                    errorMessage = '';
+                  });
                   try {
                     await ref.read(geminiFoodServiceProvider).verifyApiKey(key);
                   } catch (e) {
                     if (ctx.mounted) {
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-                      );
+                      setState(() {
+                        isVerifying = false;
+                        errorMessage = e.toString().replaceAll('Exception: ', '');
+                      });
                     }
                     return; // Abort save if key is invalid
                   }
@@ -493,7 +512,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 if (ctx.mounted) {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('AI settings saved successfully'),
+                      content: Text(key.isNotEmpty ? 'Connected & Verified ✅' : 'AI settings saved successfully'),
                       backgroundColor: context.colors.green,
                     ),
                   );
@@ -504,6 +523,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         ),
         ),
+      ),
       ),
     );
   }

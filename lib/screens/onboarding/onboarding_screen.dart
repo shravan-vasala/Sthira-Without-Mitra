@@ -46,6 +46,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // Step 5 — AI
   final _geminiKeyController = TextEditingController();
   bool _geminiKeySaved = false;
+  bool _geminiKeyVerifying = false;
+  String _geminiKeyError = '';
   bool _obscureKey = true;
 
   @override
@@ -163,18 +165,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _saveGeminiKey() async {
     final key = _geminiKeyController.text.trim();
     if (key.isNotEmpty) {
+      setState(() {
+        _geminiKeyVerifying = true;
+        _geminiKeyError = '';
+      });
       try {
         await ref.read(geminiFoodServiceProvider).verifyApiKey(key);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-          );
+          setState(() {
+            _geminiKeyVerifying = false;
+            _geminiKeyError = e.toString().replaceAll('Exception: ', '');
+          });
         }
         return; // Abort save if key is invalid
       }
       await ref.read(profileProvider.notifier).updateGeminiKey(key);
-      setState(() => _geminiKeySaved = true);
+      setState(() {
+        _geminiKeySaved = true;
+        _geminiKeyVerifying = false;
+      });
     }
   }
 
@@ -231,6 +241,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _AiSetupPage(
                     controller: _geminiKeyController,
                     keySaved: _geminiKeySaved,
+                    isVerifying: _geminiKeyVerifying,
+                    errorMessage: _geminiKeyError,
                     obscure: _obscureKey,
                     onToggleObscure: () =>
                         setState(() => _obscureKey = !_obscureKey),
@@ -1018,6 +1030,8 @@ class _HealthConnectPage extends StatelessWidget {
 class _AiSetupPage extends StatelessWidget {
   final TextEditingController controller;
   final bool keySaved;
+  final bool isVerifying;
+  final String errorMessage;
   final bool obscure;
   final VoidCallback onToggleObscure;
   final VoidCallback onSaveKey;
@@ -1025,6 +1039,8 @@ class _AiSetupPage extends StatelessWidget {
   const _AiSetupPage({
     required this.controller,
     required this.keySaved,
+    required this.isVerifying,
+    required this.errorMessage,
     required this.obscure,
     required this.onToggleObscure,
     required this.onSaveKey,
@@ -1141,9 +1157,11 @@ class _AiSetupPage extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                icon: Icon(Icons.save_outlined),
-                label: Text('Save API Key', style: TextStyle(fontWeight: FontWeight.w700)),
-                onPressed: onSaveKey,
+                icon: isVerifying
+                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.primary))
+                    : Icon(Icons.save_outlined),
+                label: Text(isVerifying ? 'Verifying...' : 'Save API Key', style: TextStyle(fontWeight: FontWeight.w700)),
+                onPressed: isVerifying ? null : onSaveKey,
               ),
             )
           else
@@ -1157,11 +1175,15 @@ class _AiSetupPage extends StatelessWidget {
                 children: [
                   Icon(Icons.check_circle_rounded, color: context.colors.green, size: 18),
                   SizedBox(width: 10),
-                  Text('API key saved securely 🔒',
+                  Text('Connected & Verified ✅',
                       style: TextStyle(fontWeight: FontWeight.w600, color: context.colors.green)),
                 ],
               ),
             ),
+          if (errorMessage.isNotEmpty) ...[
+            SizedBox(height: 12),
+            Text(errorMessage, style: TextStyle(color: context.colors.red, fontSize: 13, fontWeight: FontWeight.w500)),
+          ],
           SizedBox(height: 24),
         ],
       ),
