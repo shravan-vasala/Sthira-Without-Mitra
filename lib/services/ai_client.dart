@@ -45,7 +45,8 @@ class AiClientCircuitBreaker {
 
 class AiClient {
   final AiCache? cache;
-  final AiClientCircuitBreaker _circuitBreaker = AiClientCircuitBreaker();
+  final AiClientCircuitBreaker _visionCircuitBreaker = AiClientCircuitBreaker();
+  final AiClientCircuitBreaker _textCircuitBreaker = AiClientCircuitBreaker();
   
   static const modelsToTry = [
     'gemini-3.6-flash',
@@ -73,8 +74,14 @@ class AiClient {
     String? apiKey,
     bool skipCache = false,
   }) async {
-    if (_circuitBreaker.isOpen) {
-      throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
+    final breaker = imageBytes != null ? _visionCircuitBreaker : _textCircuitBreaker;
+    
+    if (breaker.isOpen) {
+      if (imageBytes != null) {
+        throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
+      } else {
+        throw AiException('AI rate limited. Please try again later.');
+      }
     }
 
     String? imageContext;
@@ -111,7 +118,7 @@ class AiClient {
           if (response == null || response.isEmpty) throw Exception("Empty response");
           
           final json = _parseJson(response);
-          _circuitBreaker.recordSuccess();
+          breaker.recordSuccess();
 
           if (cache != null && !skipCache) {
             await cache!.set(prompt, json, imageContext);
@@ -138,7 +145,7 @@ class AiClient {
               await Future.delayed(Duration(seconds: delaySeconds));
               continue; // Retry
             } else {
-              _circuitBreaker.recordFailure();
+              breaker.recordFailure();
               throw AiException('We\'re experiencing heavy traffic. Please try again in a moment.');
             }
           } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout')) {
@@ -160,7 +167,7 @@ class AiClient {
       }
     }
 
-    _circuitBreaker.recordFailure();
+    breaker.recordFailure();
     throw AiException('Failed to generate response. Please try again later.');
   }
 
@@ -193,7 +200,7 @@ class AiClient {
           vertex.Content.text(prompt)
       ];
 
-      final response = await model.generateContent(contents).timeout(const Duration(seconds: 20));
+      final response = await model.generateContent(contents).timeout(const Duration(seconds: 30));
       return response.text;
     } else {
       if (apiKey == null || apiKey.isEmpty) {
@@ -230,7 +237,7 @@ class AiClient {
       final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 30));
       return response.text;
     }
   }
@@ -241,7 +248,7 @@ class AiClient {
     required bool useFirebase,
     String? apiKey,
   }) async* {
-    if (_circuitBreaker.isOpen) {
+    if (_textCircuitBreaker.isOpen) {
       throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
     }
 
@@ -262,10 +269,10 @@ class AiClient {
            if (chunk != null && chunk.isNotEmpty) {
                yield chunk;
            }
-        }
-        _circuitBreaker.recordSuccess();
-        return; // Success, exit the loop
-      } catch (e) {
+         }
+         _textCircuitBreaker.recordSuccess();
+         return; // Success, exit the loop
+       } catch (e) {
         debugPrint('AiClient: Stream failed with $modelName: $e');
         final errorString = e.toString();
         
@@ -280,7 +287,7 @@ class AiClient {
         } else if (errorString.contains('SocketException')) {
           throw AiException('You seem to be offline. Please check your internet connection.');
         } else if (errorString.contains('429') || errorString.contains('quota')) {
-          _circuitBreaker.recordFailure();
+          _textCircuitBreaker.recordFailure();
           throw AiException('We\'re experiencing heavy traffic. Please try again in a moment.');
         }
         
@@ -288,8 +295,7 @@ class AiClient {
         continue;
       }
     }
-
-    _circuitBreaker.recordFailure();
+    _textCircuitBreaker.recordFailure();
     throw AiException('Failed to generate response. Please try again later.');
   }
 
@@ -312,7 +318,7 @@ class AiClient {
 
       yield* model.generateContentStream([vertex.Content.text(prompt)])
           .map((res) => res.text)
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 30));
     } else {
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('API Key is required if not using Firebase.');
@@ -340,7 +346,7 @@ class AiClient {
       final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 30));
       
       yield response.text;
     }

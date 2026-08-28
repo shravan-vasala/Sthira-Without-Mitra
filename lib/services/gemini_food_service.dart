@@ -4,6 +4,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'package:isar/isar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_search_cache.dart';
 import '../providers/app_providers.dart';
 import '../interfaces/i_ai_food_service.dart';
@@ -199,6 +200,17 @@ $_jsonShape
   }) async* {
     _ensureApiKey();
 
+    final bucketedCalories = (remainingCalories ~/ 50) * 50;
+    final dateStr = DateTime.now().toIso8601String().substring(0, 10);
+    final cacheKey = 'meal_suggestion_${dateStr}_$bucketedCalories';
+    final prefs = await SharedPreferences.getInstance();
+    
+    final cached = prefs.getString(cacheKey);
+    if (cached != null && cached.isNotEmpty) {
+      yield cached;
+      return;
+    }
+
     String mealContext = '';
     if (mealName != null && mealsLeft != null && mealsLeft > 1) {
       mealContext = 'The user is asking for a "$mealName" suggestion. There are $mealsLeft meals left to eat today (including this one), so DO NOT use up all the remaining macros for this single meal. Instead, roughly divide the remaining macros by $mealsLeft to get a sensible target for this specific meal. Be realistic and do not suggest massive meals (e.g. keep single meal suggestions under 800-1000 calories).';
@@ -236,15 +248,29 @@ Do NOT use markdown formatting (no asterisks).
 Do NOT use JSON.
 ''';
     
-    final stream = aiClient.generateTextStream(
-      prompt: prompt,
-      systemInstruction: 'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
-      useFirebase: isSignedIn,
-      apiKey: apiKey,
-    );
-    
-    await for (final chunk in stream) {
-      yield chunk;
+    try {
+      final stream = aiClient.generateTextStream(
+        prompt: prompt,
+        systemInstruction: 'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
+        useFirebase: isSignedIn,
+        apiKey: apiKey,
+      );
+      
+      final buffer = StringBuffer();
+      await for (final chunk in stream) {
+        buffer.write(chunk);
+        yield chunk;
+      }
+      
+      if (buffer.isNotEmpty) {
+        prefs.setString(cacheKey, buffer.toString());
+      }
+    } catch (e) {
+      if (e is AiException && (e.message.contains('traffic') || e.message.contains('rate limited') || e.message.contains('later'))) {
+        yield "Our AI is currently taking a breather to handle traffic, but here's a quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! This should easily fit your remaining $remainingCalories calories.";
+      } else {
+        rethrow;
+      }
     }
   }
 
