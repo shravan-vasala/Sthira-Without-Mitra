@@ -205,8 +205,8 @@ class HealthConnectService {
       }
     }
 
-    _isar.writeTxnSync(() {
-      _isar.appConfigs.putSync(AppConfig(key: _backfillDoneKey, value: 'true'));
+    await _isar.writeTxn(() async {
+      await _isar.appConfigs.put(AppConfig(key: _backfillDoneKey, value: 'true'));
     });
     return count;
   }

@@ -100,7 +100,14 @@ class _MyCodeTab extends ConsumerWidget {
               version: QrVersions.auto,
               size: 200.0,
               backgroundColor: Colors.transparent,
-              foregroundColor: context.colors.primary,
+              eyeStyle: QrEyeStyle(
+                eyeShape: QrEyeShape.circle,
+                color: context.colors.primary,
+              ),
+              dataModuleStyle: QrDataModuleStyle(
+                dataModuleShape: QrDataModuleShape.circle,
+                color: context.colors.primary,
+              ),
             ),
           ),
           const SizedBox(height: 40),

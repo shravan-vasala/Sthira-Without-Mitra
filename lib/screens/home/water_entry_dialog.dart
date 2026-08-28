@@ -172,7 +172,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     child: Text('+ 250ml', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => _addAmount(500),
@@ -183,6 +183,19 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       padding: EdgeInsets.symmetric(vertical: 12),
                     ),
                     child: Text('+ 500ml', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _addAmount(1000),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: context.colors.primary,
+                      side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text('+ 1L', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

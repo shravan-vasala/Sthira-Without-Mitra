@@ -176,8 +176,8 @@ $_jsonShape
     );
 
     if (response != null) {
-      isar.writeTxnSync(() {
-        isar.foodSearchCaches.putSync(FoodSearchCache(
+      await isar.writeTxn(() async {
+        await isar.foodSearchCaches.put(FoodSearchCache(
           normalizedQuery: normalizedQuery,
           cachedResponseJson: jsonEncode(response),
         ));

@@ -17,8 +17,8 @@ class SchemaMigrationService {
     // Since we've fully migrated to Isar + Firebase Sync as the source of truth,
     // we bypass legacy local Hive migrations. Data is pulled from Firestore on sign-in.
 
-    isar.writeTxnSync(() {
-      isar.appConfigs.putSync(AppConfig(key: _versionKey, value: currentSchemaVersion.toString()));
+    await isar.writeTxn(() async {
+      await isar.appConfigs.put(AppConfig(key: _versionKey, value: currentSchemaVersion.toString()));
     });
   }
 

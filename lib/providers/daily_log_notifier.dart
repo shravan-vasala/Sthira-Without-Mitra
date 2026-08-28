@@ -86,7 +86,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
   Future<void> clearWater() async {
     final repo = ref.read(dailyLogRepoProvider);
     final current = state;
-    await repo.saveLog(current.copyWith(waterMl: 0));
+    await repo.saveLog(current.clearWater());
     state = repo.getOrCreate(state.date);
   }
 

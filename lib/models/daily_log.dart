@@ -107,6 +107,24 @@ class DailyLog {
       bodyFat: bodyFat,
       workoutCompleted: workoutCompleted,
       workoutDayId: workoutDayId,
+      waterMl: waterMl,
+      screenTimeMinutes: screenTimeMinutes,
+      updatedAt: updatedAt,
+    );
+  }
+
+  DailyLog clearWater() {
+    return DailyLog(
+      date: date,
+      weight: weight,
+      steps: steps,
+      stepsSource: stepsSource,
+      sleepHours: sleepHours,
+      sleepSource: sleepSource,
+      bodyFat: bodyFat,
+      workoutCompleted: workoutCompleted,
+      workoutDayId: workoutDayId,
+      waterMl: null,
       screenTimeMinutes: screenTimeMinutes,
       updatedAt: updatedAt,
     );
