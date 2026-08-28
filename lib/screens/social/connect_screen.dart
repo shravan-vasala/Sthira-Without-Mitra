@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../providers/app_providers.dart';
+import '../../theme/app_theme.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -68,34 +69,65 @@ class _MyCodeTab extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
+          Text(
             'Scan this code to connect!',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20, 
+              fontWeight: FontWeight.w800,
+              color: context.colors.primary,
+            ),
           ),
           const SizedBox(height: 32),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              color: context.colors.card,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: context.colors.primary.withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: context.colors.primary.withOpacity(0.15),
+                  blurRadius: 24,
+                  spreadRadius: 8,
+                ),
+              ],
             ),
             child: QrImageView(
               data: uid,
               version: QrVersions.auto,
               size: 200.0,
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+              backgroundColor: Colors.transparent,
+              foregroundColor: context.colors.primary,
             ),
           ),
-          const SizedBox(height: 32),
-          const Text('Or share this ID:'),
-          const SizedBox(height: 8),
-          SelectableText(
-            uid,
-            style: const TextStyle(
-              fontSize: 16,
-              fontFamily: 'monospace',
-              letterSpacing: 2,
+          const SizedBox(height: 40),
+          Text(
+            'Or share this ID:',
+            style: TextStyle(
+              color: context.colors.textMedium,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: context.colors.inputFill,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SelectableText(
+              uid,
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'monospace',
+                letterSpacing: 2,
+                fontWeight: FontWeight.w600,
+                color: context.colors.textDark,
+              ),
             ),
           ),
         ],
@@ -173,15 +205,42 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
       children: [
         Expanded(
           flex: 4,
-          child: MobileScanner(
-            controller: _scannerController,
-            onDetect: _onDetect,
+          child: Stack(
+            children: [
+              MobileScanner(
+                controller: _scannerController,
+                onDetect: _onDetect,
+              ),
+              Center(
+                child: Container(
+                  width: 260,
+                  height: 260,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: context.colors.primary.withOpacity(0.8),
+                      width: 4,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const Expanded(
+        Expanded(
           flex: 1,
-          child: Center(
-            child: Text('Position the QR code in the frame.'),
+          child: Container(
+            color: context.colors.scaffoldBg,
+            child: Center(
+              child: Text(
+                'Position the QR code in the frame.',
+                style: TextStyle(
+                  color: context.colors.textMedium,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           ),
         ),
       ],
