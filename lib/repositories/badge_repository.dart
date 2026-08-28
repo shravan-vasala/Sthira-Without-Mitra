@@ -76,7 +76,7 @@ class BadgeRepository {
 
     await _isar.writeTxn(() async {
       for (final b in defaults) {
-        if (_isar.badges.where().idEqualTo(b.id).findFirstSync() == null) {
+        if (await _isar.badges.where().idEqualTo(b.id).findFirst() == null) {
           await _isar.badges.put(b);
         }
       }
