@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ffi';
 import 'package:isar/isar.dart';
 import 'package:trufit_bodamma/models/user_profile.dart';
 import 'package:trufit_bodamma/models/daily_log.dart';
@@ -33,7 +34,10 @@ Future<Isar> setUpTestIsar() async {
         if (response.statusCode == 200) {
           final file = File('libisar.so');
           await response.pipe(file.openWrite());
-          await Isar.initializeIsarCore(download: false);
+          await Isar.initializeIsarCore(
+            libraries: {Abi.linuxX64: file.absolute.path}, 
+            download: false,
+          );
         } else {
           // ignore: avoid_print
           print('Manual download failed with status: ${response.statusCode}');
