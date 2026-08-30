@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/home/home_screen.dart';
@@ -17,13 +16,14 @@ import '../screens/profile/backup_restore_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/profile/reminders_screen.dart';
 import '../theme/app_colors.dart';
-import '../theme/layout_insets.dart';
+import '../theme/app_theme.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
 import '../widgets/badge_overlay_host.dart';
 import '../screens/social/social_feed_screen.dart';
 import '../screens/social/connect_screen.dart';
-
+import '../services/haptics.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -263,7 +263,6 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           data: MediaQuery.of(context).copyWith(
             padding: MediaQuery.paddingOf(context).copyWith(
               bottom: MediaQuery.paddingOf(context).bottom + 
-                      kFloatingNavClearance + 
                       (timerState.isActive ? 76.0 : 0.0),
             ),
           ),
@@ -272,7 +271,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             navigationShell,
             if (timerState.isActive)
               Positioned(
-                bottom: kFloatingNavClearance,
+                bottom: 16,
                 left: 20,
                 right: 20,
                 child: Container(
@@ -315,10 +314,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                             ),
                             Text(
                               '${timerState.remainingSeconds ~/ 60}:${(timerState.remainingSeconds % 60).toString().padLeft(2, '0')}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: context.colors.onPrimary,
+                              style: AppTheme.numeric(
+                                TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.colors.onPrimary,
+                                ),
                               ),
                             ),
                           ],
@@ -370,68 +371,52 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           ],
         ),
         ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: context.colors.card.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(color: context.colors.border.withValues(alpha: 0.6)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: context.colors.textDark.withValues(alpha: 0.12),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _NavItem(
-                        icon: Icons.home_outlined,
-                        activeIcon: Icons.home_rounded,
-                        label: 'Home',
-                        isSelected: navigationShell.currentIndex == 0,
-                        onTap: () => navigationShell.goBranch(0),
-                      ),
-                      _NavItem(
-                        icon: Icons.show_chart_outlined,
-                        activeIcon: Icons.show_chart_rounded,
-                        label: 'Progress',
-                        isSelected: navigationShell.currentIndex == 1,
-                        onTap: () => navigationShell.goBranch(1),
-                      ),
-                      _NavItem(
-                        icon: Icons.people_outline_rounded,
-                        activeIcon: Icons.people_rounded,
-                        label: 'Social',
-                        isSelected: navigationShell.currentIndex == 2,
-                        onTap: () => navigationShell.goBranch(2),
-                      ),
-                      _NavItem(
-                        icon: Icons.person_outline_rounded,
-                        activeIcon: Icons.person_rounded,
-                        label: 'Profile',
-                        isSelected: navigationShell.currentIndex == 3,
-                        onTap: () => navigationShell.goBranch(3),
-                      ),
-                    ],
-                  ),
-                ),
-                ),
-                ),
-              ],
-            ),
+        bottomNavigationBar: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            height: 72,
+            backgroundColor: context.colors.card,
+            indicatorColor: context.colors.primary,
+            labelTextStyle: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.colors.primary);
+              }
+              return TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.colors.textMedium);
+            }),
+            iconTheme: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return IconThemeData(color: context.colors.onPrimary, size: 24);
+              }
+              return IconThemeData(color: context.colors.textLight, size: 24);
+            }),
+          ),
+          child: NavigationBar(
+            selectedIndex: navigationShell.currentIndex,
+            onDestinationSelected: (index) {
+              Haptics.tap();
+              navigationShell.goBranch(index);
+            },
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home_rounded),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.show_chart_outlined),
+                selectedIcon: Icon(Icons.show_chart_rounded),
+                label: 'Progress',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.people_outline_rounded),
+                selectedIcon: Icon(Icons.people_rounded),
+                label: 'Social',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline_rounded),
+                selectedIcon: Icon(Icons.person_rounded),
+                label: 'Profile',
+              ),
+            ],
           ),
         ),
       ),
@@ -443,107 +428,6 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   }
 }
 
-class _NavItem extends StatefulWidget {
-  const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  State<_NavItem> createState() => _NavItemState();
-}
-
-class _NavItemState extends State<_NavItem> with SingleTickerProviderStateMixin {
-  late final AnimationController _bounceController;
-  late final Animation<double> _scaleAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _bounceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _scaleAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.85), weight: 20),
-      TweenSequenceItem(tween: Tween(begin: 0.85, end: 1.12), weight: 40),
-      TweenSequenceItem(tween: Tween(begin: 1.12, end: 1.0), weight: 40),
-    ]).animate(CurvedAnimation(
-      parent: _bounceController,
-      curve: Curves.easeOutCubic,
-    ));
-  }
-
-  @override
-  void didUpdateWidget(_NavItem old) {
-    super.didUpdateWidget(old);
-    if (widget.isSelected && !old.isSelected) {
-      _bounceController.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _bounceController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: '${widget.label} tab, ${widget.isSelected ? 'selected' : 'unselected'}',
-      button: true,
-      selected: widget.isSelected,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 350),
-          curve: Curves.easeOutBack,
-          constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: widget.isSelected ? context.colors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ScaleTransition(
-              scale: _scaleAnim,
-              child: Icon(
-                widget.isSelected ? widget.activeIcon : widget.icon,
-                color: widget.isSelected ? context.colors.onPrimary : context.colors.textLight,
-                size: 24,
-              ),
-            ),
-            if (widget.isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                widget.label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.onPrimary,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-      ),
-    );
-  }
-}
 
 class _TimerControlButton extends StatelessWidget {
   final String label;

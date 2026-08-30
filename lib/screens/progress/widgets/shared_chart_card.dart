@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../services/haptics.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
@@ -638,7 +638,7 @@ class SharedChartCard extends StatelessWidget {
                 response.lineBarSpots != null &&
                 response.lineBarSpots!.isNotEmpty) {
               if (event is FlTapUpEvent || event is FlPanStartEvent) {
-                HapticFeedback.lightImpact();
+                Haptics.tap();
               }
               if (event is FlLongPressEnd && onPointLongPress != null) {
                 final spot = response.lineBarSpots!.first;
@@ -669,3 +669,4 @@ class SharedChartCard extends StatelessWidget {
     );
   }
 }
+

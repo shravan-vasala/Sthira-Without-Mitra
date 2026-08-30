@@ -211,22 +211,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       children: [
         Scaffold(
           backgroundColor: context.colors.scaffoldBg,
-          body: SafeArea(
-            child: RefreshIndicator(
-              color: context.colors.primary,
-              onRefresh: () => _syncSteps(isManualRefresh: true),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
+          body: RefreshIndicator(
+            color: context.colors.primary,
+            onRefresh: () => _syncSteps(isManualRefresh: true),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: [
+                SliverAppBar.large(
+                  pinned: true,
+                  backgroundColor: context.colors.scaffoldBg,
+                  surfaceTintColor: Colors.transparent,
+                  title: const _HomeGreetingTitle(),
+                  actions: const [
+                    Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: _HomeShareButton(),
+                    ),
+                  ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 32),
-
-                    // 1. Greeting
-                    _staggerWrap(0, const _HomeGreeting()),
-                    const SizedBox(height: 24),
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
 
                     // 2. Week calendar + score
                     _staggerWrap(1, const WeekCalendarStrip()),
@@ -295,9 +304,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
+      ),
         
 
 
@@ -324,8 +334,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 }
 
-class _HomeGreeting extends ConsumerWidget {
-  const _HomeGreeting();
+class _HomeGreetingTitle extends ConsumerWidget {
+  const _HomeGreetingTitle();
 
   String _timeGreeting() {
     final hour = DateTime.now().hour;
@@ -340,76 +350,58 @@ class _HomeGreeting extends ConsumerWidget {
     final selected = ref.watch(selectedDateProvider);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final selectedDay = DateTime(selected.year, selected.month, selected.day);
-    final isToday = selectedDay == today;
+    final isToday = selectedDay(selected) == today;
 
-    final title = name.isEmpty ? _timeGreeting() : '${_timeGreeting()}, $name';
+    final title = name.isEmpty ? _timeGreeting() : '${_timeGreeting()},\n$name';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                        height: 1.15,
-                      ),
-                    ),
-                    if (!isToday) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.textMedium,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Row(
-                children: [
-
-
-                   IconButton(
-                     onPressed: () {
-                       showModalBottomSheet(
-                         context: context,
-                         isScrollControlled: true,
-                         useRootNavigator: true,
-                         backgroundColor: Colors.transparent,
-                         builder: (context) => const SharePreviewSheet(),
-                       );
-                     },
-                     icon: Icon(
-                       Icons.ios_share_rounded,
-                       color: context.colors.primary,
-                     ),
-                     style: IconButton.styleFrom(
-                       backgroundColor: context.colors.primary.withValues(alpha: 0.1),
-                       padding: const EdgeInsets.all(12),
-                     ),
-                   ),
-                ],
-              ),
-            ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: context.colors.textDark,
+            height: 1.15,
+          ),
+        ),
+        if (!isToday) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: context.colors.primary,
+            ),
           ),
         ],
+      ],
+    );
+  }
+  
+  DateTime selectedDay(DateTime s) => DateTime(s.year, s.month, s.day);
+}
+
+class _HomeShareButton extends StatelessWidget {
+  const _HomeShareButton();
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useRootNavigator: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const SharePreviewSheet(),
+        );
+      },
+      icon: Icon(Icons.ios_share_rounded, color: context.colors.primary),
+      style: IconButton.styleFrom(
+        backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+        padding: const EdgeInsets.all(12),
       ),
     );
   }
@@ -650,12 +642,8 @@ class _WorkoutsSection extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: SurfaceCard(
         onTap: isFuture ? null : onTap,
-        border: isCompleted
-            ? Border.all(
-                color: context.colors.green.withValues(alpha: 0.3),
-                width: 1.5,
-              )
-            : null,
+        color: isCompleted ? context.colors.card : context.colors.primary,
+        border: null,
         child: Row(
           children: [
             Expanded(
@@ -670,9 +658,9 @@ class _WorkoutsSection extends ConsumerWidget {
                         child: Text(
                           title,
                           style: TextStyle(
-                            color: context.colors.textDark,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                            color: isCompleted ? context.colors.textDark : context.colors.onPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
@@ -681,18 +669,18 @@ class _WorkoutsSection extends ConsumerWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        color: context.colors.textDark,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        color: isCompleted ? context.colors.textDark : context.colors.onPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: context.colors.textMedium,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                      color: isCompleted ? context.colors.textMedium : context.colors.onPrimary.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -701,28 +689,35 @@ class _WorkoutsSection extends ConsumerWidget {
             const SizedBox(width: 16),
             if (isCompleted)
               Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: context.colors.green.withValues(alpha: 0.1),
+                  color: context.colors.green.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check_rounded,
                   color: context.colors.green,
-                  size: 20,
+                  size: 24,
                 ),
               )
             else if (isRest)
               Icon(
                 Icons.self_improvement_rounded,
-                color: context.colors.textLight,
-                size: 26,
+                color: context.colors.onPrimary.withValues(alpha: 0.8),
+                size: 32,
               )
             else
-              Icon(
-                Icons.fitness_center_outlined,
-                color: context.colors.textDark,
-                size: 26,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: context.colors.onPrimary.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: context.colors.onPrimary,
+                  size: 24,
+                ),
               ),
           ],
         ),

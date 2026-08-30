@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trufit_bodamma/providers/app_providers.dart';
 import 'package:trufit_bodamma/repositories/coach_note_repository.dart';
 import 'package:trufit_bodamma/repositories/daily_log_repository.dart';
@@ -20,6 +21,7 @@ void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     FlutterSecureStorage.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({});
   });
 
   setUp(() async {
@@ -57,21 +59,26 @@ void main() {
         exerciseLogRepoProvider.overrideWithValue(exerciseLogRepo),
         initialGeminiKeyProvider.overrideWithValue(''),
         selectedDateProvider.overrideWith((ref) => DateTime(2023, 10, 2)),
+        sharedPreferencesProvider.overrideWithValue(await SharedPreferences.getInstance()),
       ],
     );
   });
 
   tearDown(() async {
-    container.dispose();
-    await tearDownTestIsar(isar);
+    try {
+      container.dispose();
+    } catch (_) {
+    } finally {
+      await tearDownTestIsar(isar);
+    }
   });
 
   test('CoachNoteNotifier uses cache hit', () async {
     final note = CoachNote(date: '2023-10-02', note: 'Cached Note', isAi: false);
     await coachNoteRepo.saveNote(note);
 
-    final asyncValue = container.read(coachNoteProvider);
-    expect(asyncValue.value?.note, 'Cached Note');
+    final value = await container.read(coachNoteProvider.future);
+    expect(value.note, 'Cached Note');
   });
 
   test('CoachNoteNotifier force refresh bypasses cache', () async {

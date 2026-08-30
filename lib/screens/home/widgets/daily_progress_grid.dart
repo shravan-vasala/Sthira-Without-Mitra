@@ -10,6 +10,7 @@ import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/health_connect_service.dart';
 import '../../../widgets/app_bottom_sheet.dart';
+import '../../../theme/app_theme.dart';
 import '../weight_entry_dialog.dart';
 import '../steps_entry_dialog.dart';
 import 'sync_status_sheet.dart';
@@ -380,10 +381,12 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
             const SizedBox(height: 4),
             Text(
               stepsSubtitle,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textMedium,
+              style: AppTheme.numeric(
+                TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: context.colors.textMedium,
+                ),
               ),
             ).animate(key: ValueKey(stepsSubtitle)).fade().scale(begin: const Offset(0.95, 0.95)),
             if (sourceHint != null) ...[
@@ -524,10 +527,12 @@ class _ProgressCard extends StatelessWidget {
             else
               Text(
                 subtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.textMedium,
+                style: AppTheme.numeric(
+                  TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ).animate(key: ValueKey(subtitle)).fade().scale(begin: const Offset(0.95, 0.95)),
           ],

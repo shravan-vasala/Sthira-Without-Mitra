@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_theme.dart';
 import '../../../providers/app_providers.dart';
 
 class RestTimerLabel extends ConsumerWidget {
@@ -42,11 +43,13 @@ class RestTimerLabel extends ConsumerWidget {
                 const SizedBox(width: 4),
                 Text(
                   isActive ? 'RESTING FOR $display' : 'REST FOR $display AFTER SET',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: isActive ? context.colors.orange : context.colors.textLight,
-                    letterSpacing: 0.8,
+                  style: AppTheme.numeric(
+                    TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: isActive ? context.colors.orange : context.colors.textLight,
+                      letterSpacing: 0.8,
+                    ),
                   ),
                 ),
               ],

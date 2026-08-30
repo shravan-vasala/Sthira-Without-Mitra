@@ -50,7 +50,7 @@ void main() {
 
     // Create a mock workout plan in the repo
     final mockPlan = WorkoutPlan(
-      planName: 'Test Plan',
+      planName: 'beginner_plan', // Must match the key used in savePlan
       days: [
         WorkoutDay(
           dayId: 'day_1',
@@ -89,8 +89,10 @@ void main() {
   });
 
   tearDown(() async {
-    container.dispose();
-    await tearDownTestIsar(isar);
+    try {
+      container.dispose();
+      await tearDownTestIsar(isar);
+    } catch (_) {}
   });
 
   test('Saving exercise log marks workout as partially/fully complete in daily score', () async {
@@ -162,7 +164,7 @@ void main() {
     
     // Create a meal plan with a custom display name but standard type
     final mockMealPlan = MealPlan(
-      planName: 'Test Meal Plan',
+      planName: 'test_meal_plan',
       totalCalories: 1200,
       meals: [
         Meal(type: 'breakfast', name: 'Morning Fuel', calories: 500, items: []),

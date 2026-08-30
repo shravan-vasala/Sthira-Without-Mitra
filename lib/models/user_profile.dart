@@ -39,6 +39,7 @@ class UserProfile {
   }
   final bool restTimerSound;
   final bool restTimerVibration;
+  final bool restTimerNotification;
   final int targetProteinG;
   final int targetCarbsG;
   final int targetFatG;
@@ -61,6 +62,7 @@ class UserProfile {
     this.geminiApiKey,
     this.restTimerSound = true,
     this.restTimerVibration = true,
+    this.restTimerNotification = true,
     this.targetProteinG = 80,
     this.targetCarbsG = 120,
     this.targetFatG = 40,
@@ -129,6 +131,7 @@ class UserProfile {
           ],
       restTimerSound: json['restTimerSound'] as bool? ?? true,
       restTimerVibration: json['restTimerVibration'] as bool? ?? true,
+      restTimerNotification: json['restTimerNotification'] as bool? ?? true,
       targetProteinG: (json['targetProteinG'] as num?)?.toInt() ?? 80,
       targetCarbsG: (json['targetCarbsG'] as num?)?.toInt() ?? 120,
       targetFatG: (json['targetFatG'] as num?)?.toInt() ?? 40,
@@ -152,6 +155,7 @@ class UserProfile {
         'customMealSlots': customMealSlots,
         'restTimerSound': restTimerSound,
         'restTimerVibration': restTimerVibration,
+        'restTimerNotification': restTimerNotification,
         'targetProteinG': targetProteinG,
         'targetCarbsG': targetCarbsG,
         'targetFatG': targetFatG,
@@ -175,6 +179,7 @@ class UserProfile {
     String? geminiApiKey,
     bool? restTimerSound,
     bool? restTimerVibration,
+    bool? restTimerNotification,
     int? targetProteinG,
     int? targetCarbsG,
     int? targetFatG,
@@ -200,6 +205,7 @@ class UserProfile {
       geminiApiKey: clearGeminiApiKey ? null : (geminiApiKey ?? this.geminiApiKey),
       restTimerSound: restTimerSound ?? this.restTimerSound,
       restTimerVibration: restTimerVibration ?? this.restTimerVibration,
+      restTimerNotification: restTimerNotification ?? this.restTimerNotification,
       targetProteinG: targetProteinG ?? this.targetProteinG,
       targetCarbsG: targetCarbsG ?? this.targetCarbsG,
       targetFatG: targetFatG ?? this.targetFatG,

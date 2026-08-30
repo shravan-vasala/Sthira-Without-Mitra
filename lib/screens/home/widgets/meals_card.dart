@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
+import '../../../theme/app_theme.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
@@ -20,7 +21,7 @@ class MealsCard extends ConsumerWidget {
     required String slotName,
     required bool describe,
   }) {
-    HapticFeedback.selectionClick();
+    Haptics.tap();
     showAppBottomSheet(
       context: context,
       builder: (_) => PhotoCalorieScannerSheet(
@@ -90,7 +91,7 @@ class MealsCard extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () {
-                HapticFeedback.selectionClick();
+                Haptics.tap();
                 context.go('/home/meals');
               },
               behavior: HitTestBehavior.opaque,
@@ -143,10 +144,12 @@ class MealsCard extends ConsumerWidget {
             const SizedBox(height: 10),
             Text(
               '$completedMeals/$totalMeals meals  ·  $completedCal/$totalCal kcal',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+              style: AppTheme.numeric(
+                Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.textMedium,
+                    ) ?? const TextStyle(),
+              ),
             ).animate(key: ValueKey('$completedMeals-$completedCal')).fade().scale(begin: const Offset(0.95, 0.95)),
             const SizedBox(height: 8),
             Row(
@@ -200,12 +203,15 @@ class _MacroPill extends StatelessWidget {
       ),
       child: Text(
         '$label: $value',
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: color,
+        style: AppTheme.numeric(
+          TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
       ),
     );
   }
 }
+

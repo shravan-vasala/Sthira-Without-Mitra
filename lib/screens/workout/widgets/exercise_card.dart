@@ -10,6 +10,7 @@ import '../../../utils/exercise_log_save.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/app_bottom_sheet.dart';
+import '../../../theme/app_theme.dart';
 import '../log_data_dialog.dart';
 
 class ExerciseCard extends ConsumerWidget {
@@ -179,10 +180,12 @@ class ExerciseCard extends ConsumerWidget {
                             ),
                             child: Text(
                               'Reps: ${exercise.repsDisplay}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: context.colors.primary,
+                              style: AppTheme.numeric(
+                                TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.colors.primary,
+                                ),
                               ),
                             ),
                           ),
@@ -197,10 +200,12 @@ class ExerciseCard extends ConsumerWidget {
                               ),
                               child: Text(
                                 '${exercise.weightKg} kg',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.colors.primary,
+                                style: AppTheme.numeric(
+                                  TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.colors.primary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -240,10 +245,12 @@ class ExerciseCard extends ConsumerWidget {
                                   const SizedBox(width: 2),
                                   Text(
                                     pr.maxWeight > 0 ? '${pr.maxWeight}kg' : '${pr.maxReps} reps',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFFB8860B),
+                                    style: AppTheme.numeric(
+                                      const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFFB8860B),
+                                      ),
                                     ),
                                   ),
                                 ],

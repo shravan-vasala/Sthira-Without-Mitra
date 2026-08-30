@@ -60,14 +60,19 @@ const ExerciseLogSchema = CollectionSchema(
   deserializeProp: _exerciseLogDeserializeProp,
   idName: r'id',
   indexes: {
-    r'date': IndexSchema(
-      id: -7552997827385218417,
-      name: r'date',
+    r'date_exerciseName': IndexSchema(
+      id: 4066726893760949379,
+      name: r'date_exerciseName',
       unique: true,
       replace: true,
       properties: [
         IndexPropertySchema(
           name: r'date',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'exerciseName',
           type: IndexType.hash,
           caseSensitive: true,
         )
@@ -189,57 +194,90 @@ void _exerciseLogAttach(
 }
 
 extension ExerciseLogByIndex on IsarCollection<ExerciseLog> {
-  Future<ExerciseLog?> getByDate(String date) {
-    return getByIndex(r'date', [date]);
+  Future<ExerciseLog?> getByDateExerciseName(String date, String exerciseName) {
+    return getByIndex(r'date_exerciseName', [date, exerciseName]);
   }
 
-  ExerciseLog? getByDateSync(String date) {
-    return getByIndexSync(r'date', [date]);
+  ExerciseLog? getByDateExerciseNameSync(String date, String exerciseName) {
+    return getByIndexSync(r'date_exerciseName', [date, exerciseName]);
   }
 
-  Future<bool> deleteByDate(String date) {
-    return deleteByIndex(r'date', [date]);
+  Future<bool> deleteByDateExerciseName(String date, String exerciseName) {
+    return deleteByIndex(r'date_exerciseName', [date, exerciseName]);
   }
 
-  bool deleteByDateSync(String date) {
-    return deleteByIndexSync(r'date', [date]);
+  bool deleteByDateExerciseNameSync(String date, String exerciseName) {
+    return deleteByIndexSync(r'date_exerciseName', [date, exerciseName]);
   }
 
-  Future<List<ExerciseLog?>> getAllByDate(List<String> dateValues) {
-    final values = dateValues.map((e) => [e]).toList();
-    return getAllByIndex(r'date', values);
+  Future<List<ExerciseLog?>> getAllByDateExerciseName(
+      List<String> dateValues, List<String> exerciseNameValues) {
+    final len = dateValues.length;
+    assert(exerciseNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([dateValues[i], exerciseNameValues[i]]);
+    }
+
+    return getAllByIndex(r'date_exerciseName', values);
   }
 
-  List<ExerciseLog?> getAllByDateSync(List<String> dateValues) {
-    final values = dateValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'date', values);
+  List<ExerciseLog?> getAllByDateExerciseNameSync(
+      List<String> dateValues, List<String> exerciseNameValues) {
+    final len = dateValues.length;
+    assert(exerciseNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([dateValues[i], exerciseNameValues[i]]);
+    }
+
+    return getAllByIndexSync(r'date_exerciseName', values);
   }
 
-  Future<int> deleteAllByDate(List<String> dateValues) {
-    final values = dateValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'date', values);
+  Future<int> deleteAllByDateExerciseName(
+      List<String> dateValues, List<String> exerciseNameValues) {
+    final len = dateValues.length;
+    assert(exerciseNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([dateValues[i], exerciseNameValues[i]]);
+    }
+
+    return deleteAllByIndex(r'date_exerciseName', values);
   }
 
-  int deleteAllByDateSync(List<String> dateValues) {
-    final values = dateValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'date', values);
+  int deleteAllByDateExerciseNameSync(
+      List<String> dateValues, List<String> exerciseNameValues) {
+    final len = dateValues.length;
+    assert(exerciseNameValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([dateValues[i], exerciseNameValues[i]]);
+    }
+
+    return deleteAllByIndexSync(r'date_exerciseName', values);
   }
 
-  Future<Id> putByDate(ExerciseLog object) {
-    return putByIndex(r'date', object);
+  Future<Id> putByDateExerciseName(ExerciseLog object) {
+    return putByIndex(r'date_exerciseName', object);
   }
 
-  Id putByDateSync(ExerciseLog object, {bool saveLinks = true}) {
-    return putByIndexSync(r'date', object, saveLinks: saveLinks);
+  Id putByDateExerciseNameSync(ExerciseLog object, {bool saveLinks = true}) {
+    return putByIndexSync(r'date_exerciseName', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByDate(List<ExerciseLog> objects) {
-    return putAllByIndex(r'date', objects);
+  Future<List<Id>> putAllByDateExerciseName(List<ExerciseLog> objects) {
+    return putAllByIndex(r'date_exerciseName', objects);
   }
 
-  List<Id> putAllByDateSync(List<ExerciseLog> objects,
+  List<Id> putAllByDateExerciseNameSync(List<ExerciseLog> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'date', objects, saveLinks: saveLinks);
+    return putAllByIndexSync(r'date_exerciseName', objects,
+        saveLinks: saveLinks);
   }
 }
 
@@ -320,29 +358,29 @@ extension ExerciseLogQueryWhere
     });
   }
 
-  QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause> dateEqualTo(
-      String date) {
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
+      dateEqualToAnyExerciseName(String date) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date',
+        indexName: r'date_exerciseName',
         value: [date],
       ));
     });
   }
 
-  QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause> dateNotEqualTo(
-      String date) {
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
+      dateNotEqualToAnyExerciseName(String date) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date',
+              indexName: r'date_exerciseName',
               lower: [],
               upper: [date],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date',
+              indexName: r'date_exerciseName',
               lower: [date],
               includeLower: false,
               upper: [],
@@ -350,15 +388,60 @@ extension ExerciseLogQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date',
+              indexName: r'date_exerciseName',
               lower: [date],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date',
+              indexName: r'date_exerciseName',
               lower: [],
               upper: [date],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
+      dateExerciseNameEqualTo(String date, String exerciseName) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'date_exerciseName',
+        value: [date, exerciseName],
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
+      dateEqualToExerciseNameNotEqualTo(String date, String exerciseName) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_exerciseName',
+              lower: [date],
+              upper: [date, exerciseName],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_exerciseName',
+              lower: [date, exerciseName],
+              includeLower: false,
+              upper: [date],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_exerciseName',
+              lower: [date, exerciseName],
+              includeLower: false,
+              upper: [date],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_exerciseName',
+              lower: [date],
+              upper: [date, exerciseName],
               includeUpper: false,
             ));
       }

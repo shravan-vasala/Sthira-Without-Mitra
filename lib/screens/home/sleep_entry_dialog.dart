@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
@@ -208,7 +208,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                     if (sleepHours != null &&
                         sleepHours >= 0 &&
                         sleepHours <= 16) {
-                      HapticFeedback.mediumImpact();
+                      Haptics.toggle();
                       ref
                           .read(dailyLogProvider.notifier)
                           .updateSleep(sleepHours);
@@ -286,3 +286,4 @@ class _TimePickerCard extends StatelessWidget {
     );
   }
 }
+

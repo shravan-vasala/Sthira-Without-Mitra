@@ -1,7 +1,8 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../theme/app_colors.dart';
@@ -178,7 +179,7 @@ class _PhotoCalorieScannerSheetState
     final text = _descriptionCtrl.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Type what you ate first — e.g. rice, sambar, curd')),
+        const SnackBar(content: Text('Type what you ate first â€” e.g. rice, sambar, curd')),
       );
       return;
     }
@@ -209,9 +210,9 @@ class _PhotoCalorieScannerSheetState
     if (msg.contains('Service temporarily unavailable')) {
       _showError('OFFLINE_FALLBACK');
     } else if (msg.contains('FormatException') || msg.contains('json')) {
-      _showError('Couldn\'t analyze — try again or add items yourself.');
+      _showError('Couldn\'t analyze â€” try again or add items yourself.');
     } else if (msg.contains('api key') || msg.contains('API key')) {
-      _showError('Invalid API key. Add it in Profile → AI Settings.');
+      _showError('Invalid API key. Add it in Profile â†’ AI Settings.');
     } else if (msg.contains('SocketException') || msg.contains('network')) {
       _showError('Network error. Please check your connection.');
     } else {
@@ -441,7 +442,7 @@ class _PhotoCalorieScannerSheetState
 
     if (mounted) {
       // ignore: unawaited_futures
-      HapticFeedback.mediumImpact();
+      Haptics.toggle();
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -511,7 +512,7 @@ class _PhotoCalorieScannerSheetState
                       widget.appendToLog != null
                           ? 'Add another serving to this meal'
                           : _describeMode
-                              ? 'Describe home cooking — AI estimates macros'
+                              ? 'Describe home cooking â€” AI estimates macros'
                               : 'Photo of your plate works best for home meals',
                       style: TextStyle(
                         fontSize: 12,
@@ -828,7 +829,7 @@ class _PhotoCalorieScannerSheetState
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Analyzing multiple angles…',
+                            'Analyzing multiple anglesâ€¦',
                             style: TextStyle(
                               color: context.colors.textDark,
                               fontWeight: FontWeight.w600,
@@ -875,7 +876,7 @@ class _PhotoCalorieScannerSheetState
                       const CircularProgressIndicator(),
                       const SizedBox(height: 16),
                       Text(
-                        'Estimating from your description…',
+                        'Estimating from your descriptionâ€¦',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: context.colors.textMedium,
@@ -910,8 +911,8 @@ class _PhotoCalorieScannerSheetState
                     Expanded(
                       child: Text(
                         _confidence == 'low'
-                            ? 'Low confidence estimate — please check portions carefully.'
-                            : 'AI is somewhat unsure about this meal — please verify portions.',
+                            ? 'Low confidence estimate â€” please check portions carefully.'
+                            : 'AI is somewhat unsure about this meal â€” please verify portions.',
                         style: TextStyle(
                           color: _confidence == 'low' ? context.colors.red : context.colors.orange,
                           fontSize: 13,
@@ -949,7 +950,7 @@ class _PhotoCalorieScannerSheetState
                                 ),
                               ),
                               Text(
-                                '${item.portion} • ${item.calories} kcal',
+                                '${item.portion} â€¢ ${item.calories} kcal',
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: context.colors.textMedium,
@@ -1039,3 +1040,4 @@ class _PhotoCalorieScannerSheetState
     );
   }
 }
+

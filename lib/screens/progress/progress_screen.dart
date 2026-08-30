@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
@@ -161,7 +161,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           IconButton(
             icon: const Icon(Icons.lightbulb_outline_rounded),
             onPressed: () {
-              HapticFeedback.lightImpact();
+              Haptics.tap();
               showAppBottomSheet(
                 context: context,
                 builder: (_) => const Padding(
@@ -174,7 +174,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           IconButton(
             icon: const Icon(Icons.grid_view_rounded),
             onPressed: () {
-              HapticFeedback.lightImpact();
+              Haptics.tap();
               context.push('/progress/yearly-activity');
             },
           ),
@@ -184,7 +184,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             IconButton(
               icon: const Icon(Icons.add_rounded),
               onPressed: () {
-                HapticFeedback.lightImpact();
+                Haptics.tap();
                 _openManualEntry();
               },
             ),
@@ -870,3 +870,4 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     }
   }
 }
+

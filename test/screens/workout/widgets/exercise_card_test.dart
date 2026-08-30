@@ -5,7 +5,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trufit_bodamma/models/workout_plan.dart';
 import 'package:trufit_bodamma/screens/workout/widgets/exercise_card.dart';
 
+import 'package:trufit_bodamma/providers/app_providers.dart';
+import 'package:trufit_bodamma/repositories/exercise_log_repository.dart';
+import 'package:isar/isar.dart';
+import '../../../helpers/test_isar_setup.dart';
+
 void main() {
+  late Isar isar;
+  late ExerciseLogRepository logRepo;
+
+  setUp(() async {
+    isar = await setUpTestIsar();
+    logRepo = ExerciseLogRepository();
+    await logRepo.init(isar);
+  });
+
+  tearDown(() async {
+    try {
+      await tearDownTestIsar(isar);
+    } catch (_) {}
+  });
+
   group('ExerciseCard Widget Tests', () {
     testWidgets('renders exercise name and reps correctly', (WidgetTester tester) async {
       final exercise = Exercise(
@@ -17,6 +37,9 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [
+            exerciseLogRepoProvider.overrideWithValue(logRepo),
+          ],
           child: MaterialApp(
             home: Scaffold(
               body: ExerciseCard(

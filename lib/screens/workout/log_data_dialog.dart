@@ -69,6 +69,10 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
           if (w > 0) {
             _weightControllers[i].text = w.toString();
           }
+          final r = _lastLog!.sets[i].reps ?? 0;
+          if (r > 0) {
+            _repsControllers[i].text = r.toString();
+          }
         }
       }
     }
@@ -175,17 +179,10 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                   Expanded(
                     child: Semantics(
                       label: 'Reps for set ${i + 1}',
-                      child: TextField(
+                      child: _StepperField(
                         controller: _repsControllers[i],
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 10,
-                          ),
-                        ),
+                        isWeight: false,
+                        hint: '0',
                       ),
                     ),
                   ),
@@ -193,22 +190,12 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                   Expanded(
                     child: Semantics(
                       label: 'Weight in kg for set ${i + 1}',
-                      child: TextField(
+                      child: _StepperField(
                         controller: _weightControllers[i],
-                        keyboardType:
-                            const TextInputType.numberWithOptions(decimal: true),
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          hintText: _lastLog != null &&
-                                  i < _lastLog!.sets.length
-                              ? (_lastLog!.sets[i].weight ?? 0.0).toString()
-                              : '0',
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 10,
-                          ),
-                        ),
+                        isWeight: true,
+                        hint: _lastLog != null && i < _lastLog!.sets.length
+                            ? (_lastLog!.sets[i].weight ?? 0.0).toString()
+                            : '0',
                       ),
                     ),
                   ),
@@ -305,3 +292,79 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     );
   }
 }
+
+class _StepperField extends StatelessWidget {
+  const _StepperField({
+    required this.controller,
+    required this.isWeight,
+    this.hint,
+  });
+
+  final TextEditingController controller;
+  final bool isWeight;
+  final String? hint;
+
+  void _increment(double amount) {
+    final val = double.tryParse(controller.text) ?? 0.0;
+    final newVal = val + amount;
+    if (newVal < 0) return;
+    if (isWeight) {
+      controller.text = newVal.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+    } else {
+      controller.text = newVal.toInt().toString();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final step = isWeight ? 2.5 : 1.0;
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colors.inputFill,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => _increment(-step),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(Icons.remove_rounded, size: 18, color: context.colors.primary),
+            ),
+          ),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              keyboardType: TextInputType.numberWithOptions(decimal: isWeight),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: context.colors.textDark,
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: hint,
+                hintStyle: TextStyle(color: context.colors.textLight),
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _increment(step),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(Icons.add_rounded, size: 18, color: context.colors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

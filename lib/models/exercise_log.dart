@@ -6,7 +6,7 @@ part 'exercise_log.g.dart';
 class ExerciseLog {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: true)
+  @Index(composite: [CompositeIndex('exerciseName')], unique: true, replace: true)
   final String date;
   final String exerciseName;
   final List<SetLog> sets;

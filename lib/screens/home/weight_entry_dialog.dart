@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
@@ -91,7 +91,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             onPressed: () {
               final weight = double.tryParse(_controller.text);
               if (weight != null && weight > 0) {
-                HapticFeedback.mediumImpact();
+                Haptics.toggle();
                 ref.read(dailyLogProvider.notifier).updateWeight(weight);
                 Navigator.of(context).pop();
               }
@@ -103,3 +103,4 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     );
   }
 }
+

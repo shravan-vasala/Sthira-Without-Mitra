@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/layout_insets.dart';
@@ -777,7 +777,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     final notifier = ref.read(dailyMealLogProvider.notifier);
     if (_isPlannedComplete) {
       // ignore: unawaited_futures
-      HapticFeedback.selectionClick();
+      Haptics.tap();
       await notifier.clearMealSlot(widget.slotId);
       return;
     }
@@ -812,7 +812,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     );
 
     // ignore: unawaited_futures
-    HapticFeedback.mediumImpact();
+    Haptics.toggle();
     await notifier.saveMealSlot(widget.slotId, log);
   }
 
@@ -828,5 +828,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     );
   }
 }
+
 
 

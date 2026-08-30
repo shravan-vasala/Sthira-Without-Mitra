@@ -6,6 +6,13 @@ import 'app_colors.dart';
 class AppTheme {
   AppTheme._();
 
+  static TextStyle numeric(TextStyle base) => base.copyWith(
+        fontFeatures: [
+          ...?base.fontFeatures,
+          const FontFeature.tabularFigures(),
+        ],
+      );
+
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
@@ -91,6 +98,12 @@ class AppTheme {
       ).apply(
         bodyColor: AppColorsLight().textDark,
         displayColor: AppColorsLight().textDark,
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+        },
       ),
       cardTheme: CardThemeData(
         color: AppColorsLight().card,
@@ -269,6 +282,7 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColorsDark().scaffoldBg,
       primaryColor: AppColorsDark().primary,
+      splashFactory: InkSparkle.splashFactory,
       colorScheme: ColorScheme.dark(
         primary: AppColorsDark().primary,
         secondary: AppColorsDark().indigo,
@@ -348,6 +362,12 @@ class AppTheme {
           color: AppColorsDark().textLight,
           letterSpacing: 0.5,
         ),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+        },
       ),
       cardTheme: CardThemeData(
         color: AppColorsDark().card,

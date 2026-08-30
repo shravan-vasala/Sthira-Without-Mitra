@@ -20,6 +20,11 @@ class FakeHabitRepository extends HabitRepository {
 
   @override
   List<Habit> getHabits() => _habits;
+
+  @override
+  Stream<HabitCompletion?> watchCompletions(String date) async* {
+    yield getCompletions(date);
+  }
 }
 
 class FakeDailyLogRepository extends DailyLogRepository {

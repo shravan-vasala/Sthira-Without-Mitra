@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_colors.dart';
 import '../../../models/habit.dart';
@@ -91,7 +91,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
 
     final profile = ref.read(profileProvider);
     if (profile.restTimerVibration) {
-      HapticFeedback.heavyImpact();
+      Haptics.success();
     }
     // We're skipping playing a sound here to avoid adding a new audio dependency just for this, 
     // but the framework is in place (restTimerSound).
@@ -229,3 +229,4 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     );
   }
 }
+

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
@@ -251,7 +251,7 @@ class _HabitItem extends ConsumerWidget {
 
   Future<bool?> _handleSwipe(DismissDirection direction, BuildContext context, WidgetRef ref) async {
     // ignore: unawaited_futures
-    HapticFeedback.mediumImpact();
+    Haptics.toggle();
     
     if (direction == DismissDirection.startToEnd) { // Swipe Right -> Complete
       if (habit.type == HabitType.counter) {
@@ -446,7 +446,7 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle> with SingleTicke
   void didUpdateWidget(_LivelyHabitCircle oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isCompleted && !oldWidget.isCompleted) {
-      HapticFeedback.lightImpact();
+      Haptics.tap();
       _controller.forward(from: 0.0);
     }
   }
@@ -498,3 +498,4 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle> with SingleTicke
     );
   }
 }
+

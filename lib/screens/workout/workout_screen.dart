@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -413,7 +413,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
   void _executeFinish(BuildContext context, WidgetRef ref, String dayId) {
     _persistWorkoutFinished(ref, dayId);
-    HapticFeedback.mediumImpact();
+    Haptics.toggle();
 
     final name = ref.read(profileProvider).name.trim();
     final title = name.isEmpty ? 'Workout complete!' : 'Nice work, $name!';
@@ -578,3 +578,4 @@ class _SectionWidget extends StatelessWidget {
     );
   }
 }
+

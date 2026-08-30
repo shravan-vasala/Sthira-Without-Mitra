@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
@@ -72,7 +72,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
             onPressed: () {
               final steps = int.tryParse(_controller.text);
               if (steps != null && steps > 0) {
-                HapticFeedback.mediumImpact();
+                Haptics.toggle();
                 ref
                     .read(dailyLogProvider.notifier)
                     .updateSteps(steps, source: 'manual');
@@ -86,3 +86,4 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
     );
   }
 }
+

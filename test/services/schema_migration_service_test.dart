@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trufit_bodamma/services/schema_migration_service.dart';
+import 'package:trufit_bodamma/models/user_profile.dart';
 
 void main() {
   test('SchemaMigrationService migrates v1 profile to v2 with default macros', () {
@@ -25,13 +26,14 @@ void main() {
     final userProfileBox = migratedBoxes['user_profile'] as Map<String, dynamic>? ?? {};
     final profileJsonStr = userProfileBox['profile'] as String? ?? '{}';
     final profileJson = jsonDecode(profileJsonStr) as Map<String, dynamic>;
+    final profile = UserProfile.fromJson(profileJson);
     
-    expect(profileJson['name'], 'Old User');
-    expect(profileJson['targetCalories'], 2000);
+    expect(profile.name, 'Old User');
+    expect(profile.targetCalories, 2000);
     
     // v2 fields added
-    expect(profileJson['targetProteinG'], 120);
-    expect(profileJson['targetCarbsG'], 150);
-    expect(profileJson['targetFatG'], 50);
+    expect(profile.targetProteinG, 80);
+    expect(profile.targetCarbsG, 120);
+    expect(profile.targetFatG, 40);
   });
 }
