@@ -23,7 +23,27 @@ import 'package:trufit_bodamma/models/sync_queue_item.dart';
 Future<Isar> setUpTestIsar() async {
   try {
     await Isar.initializeIsarCore(download: true);
-  } catch (_) {}
+  } catch (e) {
+    // ignore: avoid_print
+    print('Isar initializeIsarCore failed: $e. Attempting manual download...');
+    if (Platform.isLinux) {
+      try {
+        final request = await HttpClient().getUrl(Uri.parse('https://github.com/isar/isar/releases/download/3.1.0+1/libisar_linux_x64.so'));
+        final response = await request.close();
+        if (response.statusCode == 200) {
+          final file = File('libisar.so');
+          await response.pipe(file.openWrite());
+          await Isar.initializeIsarCore(download: false);
+        } else {
+          // ignore: avoid_print
+          print('Manual download failed with status: ${response.statusCode}');
+        }
+      } catch (e2) {
+        // ignore: avoid_print
+        print('Manual download also failed: $e2');
+      }
+    }
+  }
   
   final tempDir = Directory.systemTemp.createTempSync('isar_test_');
   return await Isar.open(

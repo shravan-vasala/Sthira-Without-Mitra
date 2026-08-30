@@ -10,9 +10,16 @@ import 'package:trufit_bodamma/repositories/exercise_log_repository.dart';
 import 'package:isar/isar.dart';
 import '../../../helpers/test_isar_setup.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 void main() {
   late Isar isar;
   late ExerciseLogRepository logRepo;
+
+  setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
+  });
 
   setUp(() async {
     isar = await setUpTestIsar();
