@@ -9,7 +9,7 @@ import 'package:trufit_bodamma/repositories/profile_repository.dart';
 import 'package:trufit_bodamma/repositories/workout_repository.dart';
 import 'package:trufit_bodamma/repositories/exercise_log_repository.dart';
 import 'package:trufit_bodamma/models/coach_note.dart';
-import '../helpers/test_hive_setup.dart';
+import '../helpers/test_isar_setup.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {

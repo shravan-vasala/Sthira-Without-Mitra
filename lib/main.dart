@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import 'repositories/workout_repository.dart';
 import 'repositories/meal_repository.dart';
 import 'repositories/daily_log_repository.dart';
@@ -46,6 +47,7 @@ import 'models/app_config.dart';
 import 'models/ai_cache_entry.dart';
 import 'models/food_search_cache.dart';
 import 'models/friend.dart';
+import 'models/sync_queue_item.dart';
 
 Future<void> main() async {
   try {
@@ -66,7 +68,7 @@ Future<void> main() async {
     );
 
     final dir = await getApplicationDocumentsDirectory();
-    final isar = Isar.openSync(
+    final isar = await Isar.open(
       [
         UserProfileSchema,
         DailyLogSchema,
@@ -87,6 +89,7 @@ Future<void> main() async {
         AiCacheEntrySchema,
         FoodSearchCacheSchema,
         FriendSchema,
+        SyncQueueItemSchema,
       ],
       directory: dir.path,
     );
@@ -107,18 +110,20 @@ Future<void> main() async {
     final friendRepo = FriendRepository(isar);
     final healthConnectService = HealthConnectService();
 
-    await workoutRepo.init(isar);
-    await mealRepo.init(isar);
-    await dailyLogRepo.init(isar);
-    await habitRepo.init(isar);
-    await bodyStatsRepo.init(isar);
-    await mediaRepo.init(isar);
-    await profileRepo.init(isar);
-    await exerciseLogRepo.init(isar);
-    await coachNoteRepo.init(isar);
-    await badgeRepo.init(isar);
-    await healthConnectService.init();
-    await NotificationService().init();
+    await Future.wait([
+      workoutRepo.init(isar),
+      mealRepo.init(isar),
+      dailyLogRepo.init(isar),
+      habitRepo.init(isar),
+      bodyStatsRepo.init(isar),
+      mediaRepo.init(isar),
+      profileRepo.init(isar),
+      exerciseLogRepo.init(isar),
+      coachNoteRepo.init(isar),
+      badgeRepo.init(isar),
+      healthConnectService.init(),
+      NotificationService().init(),
+    ]);
 
     final authService = AuthService();
     final firestoreSyncService = FirestoreSyncService(authService);
@@ -170,21 +175,43 @@ Future<void> main() async {
       ),
     );
   } catch (e, stack) {
-    runApp(
-      MaterialApp(
-        home: Scaffold(
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Fatal Error on Startup:\n\n$e\n\n$stack',
-                style: const TextStyle(color: Colors.red, fontSize: 12),
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final logFile = File('${dir.path}/crash_log.txt');
+      await logFile.writeAsString('Error:\n$e\n\nStack:\n$stack');
+      
+      runApp(
+        MaterialApp(
+          home: Scaffold(
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Fatal Error on Startup.\n\nA crash log has been saved to:\n${logFile.path}\n\nError: $e',
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    } catch (fallbackErr) {
+      runApp(
+        MaterialApp(
+          home: Scaffold(
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Fatal Error on Startup:\n\n$e',
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
 

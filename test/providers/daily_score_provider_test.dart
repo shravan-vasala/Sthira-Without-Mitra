@@ -13,7 +13,7 @@ import 'package:trufit_bodamma/models/workout_plan.dart';
 import 'package:trufit_bodamma/models/meal_plan.dart';
 import 'package:trufit_bodamma/models/daily_meal_log.dart';
 import 'dart:convert';
-import '../helpers/test_hive_setup.dart';
+import '../helpers/test_isar_setup.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

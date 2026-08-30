@@ -46,8 +46,15 @@ app.*.map.json
 
 # User specifically requested these ignored due to OneDrive syncing locks
 build_locked_1/
+
 .dart_tool_locked_1/
 ios_backup/
 *.apk
 build_log.txt
 *.zip
+
+# Keystore and keys
+key.properties
+*.jks
+*.keystore
+!debug.keystore

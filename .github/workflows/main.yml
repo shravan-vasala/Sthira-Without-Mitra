@@ -17,17 +17,15 @@ jobs:
           
       - run: flutter pub get
       
-      - run: flutter analyze || true
+      - run: flutter analyze
+      
+      - run: flutter test
       
       - name: Build APK
         run: flutter build apk --release
         
       - name: Rename APK
         run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/sthira-release.apk || true
-        
-      - name: Extract Keystore SHA1
-        run: |
-          keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android > build/app/outputs/flutter-apk/keystore-info.txt
         
       - name: Upload APK
         if: always()
@@ -36,4 +34,3 @@ jobs:
           name: sthira-release
           path: |
             build/app/outputs/flutter-apk/sthira-release.apk
-            build/app/outputs/flutter-apk/keystore-info.txt

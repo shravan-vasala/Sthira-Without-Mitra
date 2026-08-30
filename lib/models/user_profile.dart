@@ -23,6 +23,7 @@ class UserProfile {
   @ignore
   final List<Map<String, dynamic>> customMealSlots;
   
+  @ignore
   final String? geminiApiKey;
 
   String get isarCustomHabits => jsonEncode(customHabits);
@@ -126,7 +127,6 @@ class UserProfile {
             {'id': 'snack', 'name': 'Snack', 'emoji': 'snack', 'isDefault': true},
             {'id': 'dinner', 'name': 'Dinner', 'emoji': 'dinner', 'isDefault': true},
           ],
-      geminiApiKey: json['geminiApiKey'] as String?,
       restTimerSound: json['restTimerSound'] as bool? ?? true,
       restTimerVibration: json['restTimerVibration'] as bool? ?? true,
       targetProteinG: (json['targetProteinG'] as num?)?.toInt() ?? 80,
@@ -183,6 +183,7 @@ class UserProfile {
     bool? screenTimeEnabled,
     bool clearPhoto = false,
     bool clearPlanStart = false,
+    bool clearGeminiApiKey = false,
   }) {
     final updated = UserProfile(
       name: name ?? this.name,
@@ -196,7 +197,7 @@ class UserProfile {
       activeMealPlan: activeMealPlan ?? this.activeMealPlan,
       customHabits: customHabits ?? this.customHabits,
       customMealSlots: customMealSlots ?? this.customMealSlots,
-      geminiApiKey: geminiApiKey ?? this.geminiApiKey,
+      geminiApiKey: clearGeminiApiKey ? null : (geminiApiKey ?? this.geminiApiKey),
       restTimerSound: restTimerSound ?? this.restTimerSound,
       restTimerVibration: restTimerVibration ?? this.restTimerVibration,
       targetProteinG: targetProteinG ?? this.targetProteinG,

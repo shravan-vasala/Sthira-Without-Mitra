@@ -11,6 +11,15 @@ class SchemaMigrationService {
     final int storedVersion = config != null ? int.tryParse(config.value) ?? 1 : 1;
 
     if (storedVersion >= currentSchemaVersion) {
+      // Check if we need to scrub geminiApiKey for existing users
+      final profilesWithKey = isar.userProfiles.filter().geminiApiKeyIsNotNull().findAllSync();
+      if (profilesWithKey.isNotEmpty) {
+        await isar.writeTxn(() async {
+          for (final profile in profilesWithKey) {
+            await isar.userProfiles.put(profile.copyWith(clearGeminiApiKey: true));
+          }
+        });
+      }
       return; // Already up to date
     }
 
@@ -18,6 +27,12 @@ class SchemaMigrationService {
     // we bypass legacy local Hive migrations. Data is pulled from Firestore on sign-in.
 
     await isar.writeTxn(() async {
+      // Scrub geminiApiKey for all profiles during migration as well
+      final profilesWithKey = isar.userProfiles.filter().geminiApiKeyIsNotNull().findAllSync();
+      for (final profile in profilesWithKey) {
+        await isar.userProfiles.put(profile.copyWith(clearGeminiApiKey: true));
+      }
+
       await isar.appConfigs.put(AppConfig(key: _versionKey, value: currentSchemaVersion.toString()));
     });
   }

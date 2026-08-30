@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:isar/isar.dart';
 import '../interfaces/i_auth_service.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import '../models/sync_queue_item.dart';
 
 /// Handles all Firestore cloud sync operations.
 ///
@@ -19,7 +23,13 @@ class FirestoreSyncService implements ICloudSyncService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final Map<String, Timer> _debouncers = {};
 
-  FirestoreSyncService(this._auth);
+  FirestoreSyncService(this._auth) {
+    flushQueue();
+    Connectivity().onConnectivityChanged.listen((results) {
+      if (results.contains(ConnectivityResult.none)) return;
+      flushQueue();
+    });
+  }
 
   /// Whether syncing is available (user signed in).
   @override
@@ -59,8 +69,20 @@ class FirestoreSyncService implements ICloudSyncService {
 
     _debouncers[debounceKey] = Timer(const Duration(seconds: 3), () {
       // Fire-and-forget — don't await, don't block UI
-      ref.doc(docId).set(data, SetOptions(merge: true)).catchError((e) {
-        debugPrint('FirestoreSync: Error syncing $collection/$docId: $e');
+      ref.doc(docId).set(data, SetOptions(merge: true)).catchError((e) async {
+        debugPrint('FirestoreSync: Error syncing $collection/$docId: $e, queuing...');
+        final isar = Isar.getInstance();
+        if (isar != null) {
+          await isar.writeTxn(() async {
+            final item = SyncQueueItem(
+              collection: collection,
+              docId: docId,
+              payload: jsonEncode(data),
+              timestamp: DateTime.now(),
+            );
+            await isar.syncQueueItems.put(item);
+          });
+        }
       });
       _debouncers.remove(debounceKey);
     });
@@ -104,6 +126,43 @@ class FirestoreSyncService implements ICloudSyncService {
   }
 
 
+
+  Future<void> flushQueue() async {
+    if (!canSync) return;
+    final isar = Isar.getInstance();
+    if (isar == null) return;
+
+    final items = isar.syncQueueItems.where().sortByTimestamp().findAllSync();
+    if (items.isEmpty) return;
+
+    // Deduplicate keeping latest payload
+    final Map<String, SyncQueueItem> deduped = {};
+    for (final item in items) {
+      final key = '${item.collection}/${item.docId}';
+      deduped[key] = item;
+    }
+
+    final batch = _db.batch();
+    for (final item in deduped.values) {
+      final ref = _subcollection(item.collection);
+      if (ref != null) {
+        try {
+          final data = jsonDecode(item.payload) as Map<String, dynamic>;
+          batch.set(ref.doc(item.docId), data, SetOptions(merge: true));
+        } catch (_) {}
+      }
+    }
+
+    try {
+      await batch.commit();
+      await isar.writeTxn(() async {
+        await isar.syncQueueItems.clear();
+      });
+      debugPrint('FirestoreSync: Flushed ${deduped.length} items from queue.');
+    } catch (e) {
+      debugPrint('FirestoreSync: Error flushing queue: $e');
+    }
+  }
 
   // ──────────────────────────────────────────────
   //  READ — pull cloud data on sign-in

@@ -4,7 +4,7 @@ TruFit Bodamma is a private, local-first personal fitness tracking application b
 
 ## Core Principles
 
-1. **Local-First by Default:** All data is stored in a local Hive NoSQL database on your device.
+1. **Local-First by Default:** All data is stored in a local Isar NoSQL database on your device.
 2. **Optional Cloud Sync:** If you choose to sign in with Google, your text data (workouts, meals, habits) syncs securely to your personal Firestore database. **Photos and media are NEVER synced to the cloud** to ensure maximum privacy.
 3. **AI Features:** You can optionally provide a Gemini API key (or use the built-in Vertex integration) for smart meal logging and coaching. 
 4. **Data Ownership:** You can export all your data (including photos) as a single encrypted ZIP file and restore it at any time.
@@ -23,7 +23,7 @@ TruFit Bodamma is a private, local-first personal fitness tracking application b
 
 The app is built using a modern Riverpod architecture:
 - **Models:** Simple Dart classes representing data entities (e.g., `WorkoutPlan`, `DailyLog`).
-- **Repositories:** Classes responsible for reading/writing models to the local Hive database.
+- **Repositories:** Classes responsible for reading/writing models to the local Isar database.
 - **Providers:** Riverpod providers connect the repositories to the UI, ensuring the app is always reactive.
 - **Services:** External integrations, such as `HealthConnectService` and `GeminiFoodService`.
 - **UI:** The app is divided into three main tabs: Home, Progress, and Profile.
@@ -47,9 +47,9 @@ To build the app and install it on your Android device:
 
 ### App Signing (Optional)
 If you want to generate a signed release APK:
-1. Run `.\scripts\generate_keystore.ps1` and follow the prompts.
-2. Create an `android/key.properties` file with the generated details.
-3. Modify `build_and_install.ps1` to use `flutter build apk --release` instead of `--profile`.
+1. Generate a keystore file using standard Android tooling (`keytool`).
+2. Create an `android/key.properties` file containing your keystore details (`storePassword`, `keyPassword`, `keyAlias`, `storeFile`).
+3. The build process will automatically detect `key.properties` and sign your release build. If it's missing, it will gracefully fallback to debug signing.
 
 ## App Icons
 
