@@ -256,19 +256,18 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       child: Stack(
         children: [
           Scaffold(
-      // Floating pill nav paints over the body; inflate MediaQuery padding so
-        // SafeArea / scroll views leave room and content isn't trapped under it.
-        extendBody: true,
-        body: MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            padding: MediaQuery.paddingOf(context).copyWith(
-              bottom: MediaQuery.paddingOf(context).bottom + 
-                      (timerState.isActive ? 76.0 : 0.0),
-            ),
-          ),
-          child: Stack(
-          children: [
-            navigationShell,
+        body: Builder(
+          builder: (innerContext) {
+            return MediaQuery(
+              data: MediaQuery.of(innerContext).copyWith(
+                padding: MediaQuery.paddingOf(innerContext).copyWith(
+                  bottom: MediaQuery.paddingOf(innerContext).bottom + 
+                          (timerState.isActive ? 76.0 : 0.0),
+                ),
+              ),
+              child: Stack(
+                children: [
+                  navigationShell,
             if (timerState.isActive)
               Positioned(
                 bottom: 16,
@@ -368,10 +367,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                   ),
                 ),
               ),
-          ],
-        ),
-        ),
-        bottomNavigationBar: NavigationBarTheme(
+            ],
+          ),
+        );
+      },
+    ),
+    bottomNavigationBar: NavigationBarTheme(
           data: NavigationBarThemeData(
             height: 72,
             backgroundColor: context.colors.card,
