@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,12 +73,15 @@ class _PhotoCalorieScannerSheetState
 
   Future<void> _checkConnectivity() async {
     final connectivityResult = await Connectivity().checkConnectivity();
+    if (!mounted) return;
     setState(() {
       _isOffline = connectivityResult.contains(ConnectivityResult.none);
     });
   }
 
   void _applyResult(Map<String, dynamic> result) {
+    if (!mounted) return;
+    
     final itemsData = result['items'] as List?;
     final totalData = result['total'] as Map<String, dynamic>?;
 
@@ -130,8 +133,8 @@ class _PhotoCalorieScannerSheetState
       _isAnalyzing = false;
       _analysisComplete = false;
       _errorMessage = null;
-      _items = [];
-      _descriptionCtrl.clear();
+      // We do not clear _descriptionCtrl so the user's hint is preserved
+      // We do not clear _items so they don't lose manually entered items before re-analysis
     });
   }
 
@@ -165,12 +168,15 @@ class _PhotoCalorieScannerSheetState
             skipCache,
           );
 
+      if (!mounted) return;
+
       if (result != null) {
         _applyResult(result);
       } else {
         _showError('AI could not analyze the image.');
       }
     } catch (e) {
+      if (!mounted) return;
       _handleAnalyzeError(e);
     }
   }
@@ -179,7 +185,7 @@ class _PhotoCalorieScannerSheetState
     final text = _descriptionCtrl.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Type what you ate first â€” e.g. rice, sambar, curd')),
+        const SnackBar(content: Text('Type what you ate first — e.g. rice, sambar, curd')),
       );
       return;
     }
@@ -195,12 +201,16 @@ class _PhotoCalorieScannerSheetState
     try {
       final result =
           await ref.read(geminiFoodServiceProvider).analyzeFoodText(text);
+          
+      if (!mounted) return;
+      
       if (result != null) {
         _applyResult(result);
       } else {
         _showError('AI could not estimate from that description.');
       }
     } catch (e) {
+      if (!mounted) return;
       _handleAnalyzeError(e);
     }
   }
