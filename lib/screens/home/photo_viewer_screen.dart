@@ -234,7 +234,9 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto> with SingleTickerProvide
       final position = _doubleTapDetails!.localPosition;
       // Zoom in
       endMatrix = Matrix4.identity()
+        // ignore: deprecated_member_use
         ..translate(-position.dx, -position.dy)
+        // ignore: deprecated_member_use
         ..scale(2.5);
     } else {
       // Zoom out to normal

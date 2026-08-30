@@ -83,6 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final selectedDate = ref.read(dateStringProvider);
     final todayStr = DateTime.now().toIso8601String().substring(0, 10);
     if (selectedDate == todayStr) {
+      // ignore: unawaited_futures
       ref.read(coachNoteProvider.notifier).fetchNote(force: isManualRefresh);
     }
 
@@ -142,6 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     ref.invalidate(habitCompletionsProvider);
   }
 
+  // ignore: unused_element
   void _scrollTo(GlobalKey key) {
     final target = key.currentContext;
     if (target != null) {
@@ -163,6 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget build(BuildContext context) {
     ref.watch(badgeEngineProvider); // Initialize Gamification Engine
     final plan = ref.watch(workoutPlanProvider);
+    // ignore: unused_local_variable
     final dailyScore = ref.watch(dailyScoreProvider);
 
     // One calm day-complete sheet when primary buckets fill (today only).

@@ -204,6 +204,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       // Attempt to enable
                       final hasPermission = await ref.read(screenTimeServiceProvider).checkPermission();
                       if (hasPermission) {
+                        // ignore: unawaited_futures
                         ref.read(profileProvider.notifier).updateProfile(
                           profile.copyWith(screenTimeEnabled: true),
                         );
@@ -214,6 +215,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       }
                     } else {
                       // Disable
+                      // ignore: unawaited_futures
                       ref.read(profileProvider.notifier).updateProfile(
                         profile.copyWith(screenTimeEnabled: false),
                       );
@@ -401,7 +403,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _showGeminiKeyDialog(
       BuildContext context, WidgetRef ref, dynamic profile) {
+    // ignore: avoid_dynamic_calls
     final keyController = TextEditingController(text: profile.geminiApiKey ?? '');
+    // ignore: avoid_dynamic_calls
     final coachController = TextEditingController(text: profile.coachName as String? ?? '');
     bool isVerifying = false;
     String errorMessage = '';
@@ -577,6 +581,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   ) async {
     if (!context.mounted) return;
 
+    // ignore: unawaited_futures
     showDialog(
       context: context,
       useRootNavigator: true,
@@ -592,6 +597,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       Navigator.of(context, rootNavigator: true).pop(); // hide loading
 
       if (zipPath != null) {
+        // ignore: deprecated_member_use
         await Share.shareXFiles(
           [XFile(zipPath)],
           text: 'TruFit Data Export',
@@ -1077,6 +1083,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
         uiSettings: [
           AndroidUiSettings(
             toolbarTitle: 'Crop Photo',
+            // ignore: use_build_context_synchronously
             toolbarColor: context.colors.primary,
             toolbarWidgetColor: Colors.white,
             initAspectRatio: CropAspectRatioPreset.square,

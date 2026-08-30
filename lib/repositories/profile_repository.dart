@@ -7,7 +7,7 @@ import '../interfaces/i_cloud_sync_service.dart';
 class ProfileRepository {
   late Isar _isar;
   final _secureStorage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(),
   );
   ICloudSyncService? _sync;
 

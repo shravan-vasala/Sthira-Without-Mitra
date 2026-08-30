@@ -250,11 +250,13 @@ class _HabitItem extends ConsumerWidget {
   }
 
   Future<bool?> _handleSwipe(DismissDirection direction, BuildContext context, WidgetRef ref) async {
+    // ignore: unawaited_futures
     HapticFeedback.mediumImpact();
     
     if (direction == DismissDirection.startToEnd) { // Swipe Right -> Complete
       if (habit.type == HabitType.counter) {
         final newProg = (progress + habit.step).clamp(0.0, habit.target);
+        // ignore: unawaited_futures
         ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
         _showUndo(context, 'Incremented ${habit.name}', () {
           final oldProg = (newProg - habit.step).clamp(0.0, habit.target);
@@ -262,6 +264,7 @@ class _HabitItem extends ConsumerWidget {
         });
       } else {
         if (!isCompleted) {
+          // ignore: unawaited_futures
           ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, 'done');
           _showUndo(context, 'Completed ${habit.name}', () {
             ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, null);
@@ -271,12 +274,14 @@ class _HabitItem extends ConsumerWidget {
     } else if (direction == DismissDirection.endToStart) { // Swipe Left -> Not done
       if (habit.type == HabitType.counter) {
         final newProg = (progress - habit.step).clamp(0.0, habit.target);
+        // ignore: unawaited_futures
         ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
         _showUndo(context, 'Decremented ${habit.name}', () {
           final oldProg = (newProg + habit.step).clamp(0.0, habit.target);
           ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, oldProg);
         });
       } else {
+        // ignore: unawaited_futures
         ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, 'notDone');
         _showUndo(context, 'Marked ${habit.name} incomplete', () {
           ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, null);

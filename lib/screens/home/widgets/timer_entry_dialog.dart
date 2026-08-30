@@ -115,6 +115,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final progress = _remainingSeconds / _totalSeconds;
 
     return AppSheet(

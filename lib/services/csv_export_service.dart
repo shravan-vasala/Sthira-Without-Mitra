@@ -42,6 +42,7 @@ class CsvExportService {
 
       return zipFile.path;
     } catch (e) {
+      // ignore: avoid_print
       print('Export error: $e');
       return null;
     }

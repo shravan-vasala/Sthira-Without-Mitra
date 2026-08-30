@@ -32,6 +32,7 @@ class ScreenTimeService {
        await _channel.invokeMethod('openUsageSettings');
     } catch (e) {
       debugPrint('Failed to open usage settings via native channel: $e');
+      // ignore: unawaited_futures
       openAppSettings();
     }
   }

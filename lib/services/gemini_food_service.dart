@@ -241,7 +241,7 @@ Return ONLY a JSON object:
       final name = item['name']?.toString() ?? 'Unknown';
       final grams = (item['estimated_grams'] as num?)?.toDouble() ?? 100.0;
       
-      Map<String, dynamic>? match = nutritionLookup.match(name);
+      final Map<String, dynamic>? match = nutritionLookup.match(name);
       Map<String, dynamic> per100g;
       
       if (match != null) {
@@ -358,6 +358,7 @@ Do NOT use JSON.
       }
       
       if (buffer.isNotEmpty) {
+        // ignore: unawaited_futures
         prefs.setString(cacheKey, buffer.toString());
       }
     } catch (e) {

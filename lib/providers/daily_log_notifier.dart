@@ -97,6 +97,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final profile = ref.read(profileProvider);
     if (profile.planStartDate == null) {
       final now = DateTime.now();
+      // ignore: unawaited_futures
       ref.read(profileProvider.notifier).updateProfile(profile.copyWith(
         planStartDate: DateTime(now.year, now.month, now.day),
         currentPhaseWeek: 1,

@@ -143,7 +143,7 @@ class _PhotoCalorieScannerSheetState
     });
 
     try {
-      List<Uint8List> allBytes = [];
+      final List<Uint8List> allBytes = [];
       for (var f in _selectedImages) {
         allBytes.add(await f.readAsBytes());
       }
@@ -440,6 +440,7 @@ class _PhotoCalorieScannerSheetState
     await ref.read(dailyMealLogProvider.notifier).saveMealSlot(widget.slotId, slotLog);
 
     if (mounted) {
+      // ignore: unawaited_futures
       HapticFeedback.mediumImpact();
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(

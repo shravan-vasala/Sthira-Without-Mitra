@@ -74,11 +74,12 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_isFullScreen,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop && _isFullScreen) {
           _controller.exitFullScreen();
         }
       },
+      // ignore: deprecated_member_use
       child: YoutubePlayerScaffold(
         controller: _controller,
         builder: (context, player) {

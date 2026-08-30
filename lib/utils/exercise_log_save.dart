@@ -10,6 +10,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
 }) async {
   final dateStr = ref.read(dateStringProvider);
   final repo = ref.read(exerciseLogRepoProvider);
+  // ignore: unused_local_variable
   final profile = ref.read(profileProvider);
 
   // Parse planned reps

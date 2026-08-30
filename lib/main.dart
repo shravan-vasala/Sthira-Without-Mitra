@@ -94,6 +94,7 @@ Future<void> main() async {
       directory: dir.path,
     );
     
+    // ignore: unawaited_futures
     SchemaMigrationService.runStartupMigrations(isar);
 
     // Initialize all repositories
@@ -139,14 +140,19 @@ Future<void> main() async {
     badgeRepo.attachSync(firestoreSyncService);
 
     // Fetch global plans from Firebase (non-blocking) to merge with local seed data
+    // ignore: unawaited_futures
     workoutRepo.fetchGlobalPlans();
+    // ignore: unawaited_futures
     mealRepo.fetchGlobalPlans();
     
     // Fetch user-specific personal plans from Firebase (non-blocking)
+    // ignore: unawaited_futures
     workoutRepo.fetchUserPlans();
+    // ignore: unawaited_futures
     mealRepo.fetchUserPlans();
     
     // Run weekly auto-backup (non-blocking)
+    // ignore: unawaited_futures
     BackupService().autoBackup();
 
     final initialGeminiKey = await profileRepo.getSecureGeminiKey();

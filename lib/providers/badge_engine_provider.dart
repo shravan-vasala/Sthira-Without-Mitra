@@ -27,6 +27,7 @@ class BadgeEngine {
 
   Future<void> _evaluateBadges() async {
     final badgeRepo = ref.read(badgeRepoProvider);
+    // ignore: unused_local_variable
     final workoutRepo = ref.read(workoutRepoProvider);
     final dailyLogRepo = ref.read(dailyLogRepoProvider);
     

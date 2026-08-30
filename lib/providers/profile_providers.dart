@@ -45,6 +45,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
       final repo = ref.read(profileRepoProvider);
       await repo.saveSecureGeminiKey(key);
     } catch (e) {
+      // ignore: avoid_print
       print('Error saving secure key: $e');
     }
   }

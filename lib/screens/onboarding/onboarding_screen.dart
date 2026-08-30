@@ -64,12 +64,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (_currentPage == 2) {
         _saveGoals();
       }
+      // ignore: unawaited_futures
       _pageController.nextPage(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
     } else {
       await _saveGeminiKey();
+      // ignore: unawaited_futures
       _complete();
     }
   }

@@ -776,6 +776,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
   Future<void> _toggleCompletedAsPlanned(Meal planned) async {
     final notifier = ref.read(dailyMealLogProvider.notifier);
     if (_isPlannedComplete) {
+      // ignore: unawaited_futures
       HapticFeedback.selectionClick();
       await notifier.clearMealSlot(widget.slotId);
       return;
@@ -810,6 +811,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       profile: profile,
     );
 
+    // ignore: unawaited_futures
     HapticFeedback.mediumImpact();
     await notifier.saveMealSlot(widget.slotId, log);
   }

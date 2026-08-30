@@ -83,6 +83,7 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
           _startInternalTimer();
         } else {
           // It expired while app was closed
+          // ignore: unawaited_futures
           _clearPersistedTimer();
         }
       }

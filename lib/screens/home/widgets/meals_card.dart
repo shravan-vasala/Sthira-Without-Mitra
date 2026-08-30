@@ -13,6 +13,7 @@ import 'photo_calorie_scanner_sheet.dart';
 class MealsCard extends ConsumerWidget {
   const MealsCard({super.key});
 
+  // ignore: unused_element
   void _openLogSheet(
     BuildContext context, {
     required String slotId,

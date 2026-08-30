@@ -211,6 +211,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         final habits = ref.read(habitsProvider);
                         final waterHabit = habits.where((h) => h.name.toLowerCase().contains('water')).firstOrNull;
                         if (waterHabit != null) {
+                          // ignore: unawaited_futures
                           ref.read(habitCompletionsProvider.notifier).setOverride(waterHabit.id, 'none');
                         }
                         
@@ -244,8 +245,10 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                             targetInMl *= 1000;
                           }
                           if (amount >= targetInMl) {
+                            // ignore: unawaited_futures
                             ref.read(habitCompletionsProvider.notifier).setOverride(waterHabit.id, 'done');
                           } else {
+                            // ignore: unawaited_futures
                             ref.read(habitCompletionsProvider.notifier).setOverride(waterHabit.id, 'none');
                           }
                         }

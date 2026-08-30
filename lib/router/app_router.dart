@@ -41,6 +41,7 @@ class RouterNotifier extends ChangeNotifier {
 final routerNotifierProvider = Provider((ref) => RouterNotifier(ref));
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // ignore: unused_local_variable
   final prefs = ref.watch(sharedPreferencesProvider);
 
   return GoRouter(
@@ -247,7 +248,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final timerState = ref.watch(restTimerProvider);
     return PopScope(
       canPop: navigationShell.currentIndex == 0,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop && navigationShell.currentIndex != 0) {
           navigationShell.goBranch(0, initialLocation: false);
         }

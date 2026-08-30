@@ -37,6 +37,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     final setCount = widget.exercise.setCount;
     _repsControllers = List.generate(setCount, (i) {
       return TextEditingController(
+        // ignore: dead_code, dead_null_aware_expression
         text: parseRepTarget(widget.exercise.repsDisplay ?? ''),
       );
     });
@@ -100,6 +101,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   void _fillFromPlan() {
     setState(() {
       for (int i = 0; i < widget.exercise.setCount; i++) {
+        // ignore: dead_code, dead_null_aware_expression
         _repsControllers[i].text = parseRepTarget(widget.exercise.repsDisplay ?? '');
         final planned = widget.exercise.weightKg;
         if (planned != null && planned > 0) {
@@ -284,6 +286,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
       }
     }
 
+    // ignore: unused_local_variable
     final timerActive = ref.read(restTimerProvider).isActive;
 
     ScaffoldMessenger.of(context).showSnackBar(

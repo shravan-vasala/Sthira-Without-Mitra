@@ -13,6 +13,7 @@ class NutritionLookupService {
       _nutritionTable = List<Map<String, dynamic>>.from(jsonList);
       _isLoaded = true;
     } catch (e) {
+      // ignore: avoid_print
       print('Failed to load nutrition table: $e');
     }
   }

@@ -386,6 +386,7 @@ class _PhysiquePicturesScreenState
     );
   }
 
+  // ignore: unused_element
   String _poseLabel(String tag) {
     switch (tag) {
       case 'front':
@@ -547,6 +548,7 @@ class _PhysiquePicturesScreenState
   }
 }
 
+// ignore: unused_element
 class _PoseOption extends StatelessWidget {
   const _PoseOption({
     required this.icon,

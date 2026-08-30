@@ -220,6 +220,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
     
     // Backfill in background
     if (!hcService.isBackfillDone) {
+      // ignore: unawaited_futures
       hcService.backfillLast90Days(dailyLogRepo, habitRepo).then((_) {
         ref.invalidate(dailyLogProvider);
         ref.invalidate(habitCompletionsProvider);

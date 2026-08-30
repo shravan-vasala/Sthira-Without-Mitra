@@ -84,9 +84,10 @@ class AiClient {
     }
 
     String? imageContext;
-    List<Uint8List> processedImages = [];
+    final List<Uint8List> processedImages = [];
     String? actualMimeType = mimeType;
     if (imageBytesList != null && imageBytesList.isNotEmpty) {
+      // ignore: deprecated_export_use
       final b = BytesBuilder();
       for (var imageBytes in imageBytesList) {
         final processed = await ImagePreprocessor.processImage(imageBytes, mimeType ?? 'image/jpeg');
@@ -112,6 +113,7 @@ class AiClient {
       }
     }
 
+    // ignore: unused_local_variable
     String lastError = '';
 
     final modelsToUse = imageBytesList != null && imageBytesList.isNotEmpty ? visionModelsToTry : textModelsToTry;
@@ -184,6 +186,7 @@ class AiClient {
         }
       }
       
+      // ignore: dead_code
       if (skipStrategy) {
         break; // Break models loop
       }
@@ -276,6 +279,7 @@ class AiClient {
       throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
     }
 
+    // ignore: unused_local_variable
     String lastError = '';
 
     for (final modelName in textModelsToTry) {

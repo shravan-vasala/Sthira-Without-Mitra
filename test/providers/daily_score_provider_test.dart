@@ -123,10 +123,15 @@ void main() {
     container.invalidate(dailyScoreProvider);
     final fullScore = container.read(dailyScoreProvider);
     
+    // ignore: avoid_print
     print('DateStr in test: 2023-10-02');
+    // ignore: avoid_print
     print('Log repo has Bench Press: ${logRepo.hasLog('2023-10-02', 'Bench Press')}');
+    // ignore: avoid_print
     print('Log repo has Squat: ${logRepo.hasLog('2023-10-02', 'Squat')}');
+    // ignore: avoid_print
     print('Plan dayId: ${container.read(workoutPlanProvider)?.days.first.dayId}');
+    // ignore: avoid_print
     print('Plan exercises count: ${container.read(workoutPlanProvider)?.days.first.sections.first.exercises.length}');
     
     expect(fullScore.workoutsScore, 30.0); // Max score for workouts is 30

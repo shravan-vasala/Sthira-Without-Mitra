@@ -91,6 +91,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         final file = File(zipPath);
         await _saveMetadata(await file.length(), _encryptBackup);
         
+        // ignore: deprecated_member_use
         await Share.shareXFiles(
           [XFile(zipPath)],
           text: 'Sthira Backup',
@@ -212,6 +213,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       }
 
       if (verify.isValid) {
+        // ignore: unawaited_futures
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -229,6 +231,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           ),
         );
       } else {
+        // ignore: unawaited_futures
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -242,6 +245,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       }
     } catch (e) {
       if (mounted) {
+        // ignore: unawaited_futures
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -318,6 +322,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                   if (!mounted) return;
 
                   if (result.success) {
+                    // ignore: unawaited_futures
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -349,6 +354,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
             ),
           ],
         ),
+      // ignore: unawaited_futures
       ).then((_) {
         // If dialog was dismissed without restoring, loading should be cleared,
         // but we only set _isLoading = false if we didn't start the restore.

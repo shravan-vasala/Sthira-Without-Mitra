@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
-import '../../lib/services/nutrition_lookup_service.dart';
+import 'package:trufit_bodamma/services/nutrition_lookup_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

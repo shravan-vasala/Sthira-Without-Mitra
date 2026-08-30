@@ -112,6 +112,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   final text = summary.generateShareText();
+                  // ignore: deprecated_member_use
                   Share.share(text);
                 },
                 icon: const Icon(Icons.ios_share_rounded),

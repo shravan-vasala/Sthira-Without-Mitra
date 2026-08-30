@@ -409,6 +409,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
 
 
+  // ignore: unused_element
   List<ChartDataPoint> _dailyMetricSeries(
     List<DailyLog> logs,
     MetricType metric,
@@ -462,6 +463,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return data;
   }
 
+  // ignore: unused_element
   List<ChartDataPoint> _mealSeries(
     List<DailyMealLog> mealLogs, {
     required bool calories,
@@ -508,6 +510,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   /// Primary overview value = period average (coach-friendly).
+  // ignore: unused_element
   String _overviewAvgText(
     List<ChartDataPoint> data,
     MetricType metric,
@@ -519,6 +522,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   /// Subtitle: "avg this period" + delta vs first point when useful.
+  // ignore: unused_element
   String? _overviewSubtitle(
     List<ChartDataPoint> data,
     MetricType metric,
@@ -594,7 +598,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             break;
           case MetricType.bmi:
             if (log.weight != null) {
+              // ignore: avoid_dynamic_calls
               final h = profile.heightInMeters;
+              // ignore: avoid_dynamic_calls
               val = log.weight! / (h * h);
             }
             break;
@@ -687,9 +693,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       statValues: isEmpty ? [] : values,
       timeFormat: format,
       emptyMessage: emptyMessage,
+      // ignore: avoid_dynamic_calls
       targetValue: _selectedMetric == MetricType.weight && profile.targetWeight != null
           ? (useKg
+              // ignore: avoid_dynamic_calls
               ? profile.targetWeight as double
+              // ignore: avoid_dynamic_calls
               : (profile.targetWeight as double) * 2.20462)
           : null,
       onPointLongPress: _handlePointLongPress,
@@ -752,6 +761,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       statValues: isEmpty ? [] : values,
       timeFormat: format,
       emptyMessage: 'No calories logged yet.',
+      // ignore: avoid_dynamic_calls
       targetValue: profile.targetCalories.toDouble(),
       onPointLongPress: null,
       expandChart: true,

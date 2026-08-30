@@ -40,6 +40,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
 
       // 3. Share the file via OS Share Sheet
       final xFile = XFile(file.path, mimeType: 'image/png');
+      // ignore: deprecated_member_use
       await Share.shareXFiles(
         [xFile],
         text: 'Just finished my daily goals on Sthira! 💪',

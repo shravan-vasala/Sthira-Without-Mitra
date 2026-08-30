@@ -24,6 +24,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
       if (dateStr == todayStr) {
         // Silently evaluate the 4-hour rule in the background
+        // ignore: unawaited_futures
         fetchNote(background: true);
       }
       return cached;
@@ -31,6 +32,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
 
     final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
     if (dateStr == todayStr) {
+      // ignore: unawaited_futures
       fetchNote(); // Updates state asynchronously
       return CoachNote(date: dateStr, note: 'Generating...', isAi: true);
     }

@@ -63,6 +63,7 @@ class _MyCodeTab extends ConsumerWidget {
       return const Center(child: Text('Please sign in to view your code.'));
     }
 
+    // ignore: unused_local_variable
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
@@ -173,12 +174,14 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
       _isProcessing = true;
     });
 
+    // ignore: unawaited_futures
     _scannerController.stop();
 
     try {
       final friendRepo = ref.read(friendRepoProvider);
       
       // Attempt to fetch profile from Firestore to get their name
+      // ignore: unused_local_variable
       final db = ref.read(socialSyncServiceProvider);
       // Wait, we can't easily do a one-off fetch with the current stream interface
       // So we'll just add them locally and stream their data in the feed
@@ -196,6 +199,7 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
           SnackBar(content: Text('Failed to add friend: $e')),
         );
       }
+      // ignore: unawaited_futures
       _scannerController.start();
     } finally {
       if (mounted) {
