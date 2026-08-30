@@ -99,8 +99,8 @@ class AiClient {
     String lastError = '';
 
     for (final modelName in modelsToTry) {
-      int maxRetries = 2;
-      bool skipStrategy = false;
+      final int maxRetries = 2;
+      final bool skipStrategy = false;
       
       for (int attempt = 0; attempt <= maxRetries; attempt++) {
         try {

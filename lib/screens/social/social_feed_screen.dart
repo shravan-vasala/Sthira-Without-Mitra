@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/app_providers.dart';
-import '../../models/friend.dart';
 import 'widgets/friend_status_card.dart';
 
 class SocialFeedScreen extends ConsumerWidget {

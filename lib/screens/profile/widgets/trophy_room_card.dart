@@ -33,7 +33,7 @@ class TrophyRoomCard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.2),
+                  color: Colors.amber.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 20),
@@ -104,7 +104,7 @@ class _BadgeItem extends StatelessWidget {
         color: isUnlocked ? context.colors.lavenderCard : context.colors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isUnlocked ? context.colors.primary.withOpacity(0.3) : context.colors.border,
+          color: isUnlocked ? context.colors.primary.withValues(alpha: 0.3) : context.colors.border,
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),

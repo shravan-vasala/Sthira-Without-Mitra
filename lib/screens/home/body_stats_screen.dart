@@ -61,9 +61,9 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text('Body Stats'),
+        title: const Text('Body Stats'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded),
+          icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
@@ -85,11 +85,11 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
         ],
       ),
       body: ListView(
-        physics: BouncingScrollPhysics(),
-        padding: EdgeInsets.all(20),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(20),
         children: [
           Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: context.colors.lavender,
               borderRadius: BorderRadius.circular(20),
@@ -101,7 +101,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                   color: context.colors.primary,
                   size: 36,
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Body Measurements',
                   style: TextStyle(
@@ -110,7 +110,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                     color: context.colors.textDark,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'All measurements in cm',
                   style: TextStyle(
@@ -121,7 +121,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -141,7 +141,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
 
   Widget _buildField(String field) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(16),
@@ -149,7 +149,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.04),
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -167,21 +167,21 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           _isEditing
               ? SizedBox(
                   height: 38,
                   child: TextField(
                     controller: _controllers[field],
                     keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: context.colors.primary,
                     ),
                     decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 0,
                       ),

@@ -10,12 +10,10 @@ import '../../models/daily_log.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_profile.dart';
 import 'widgets/shared_chart_card.dart';
-import 'widgets/metric_overview_card.dart';
 import '../home/weight_entry_dialog.dart';
 import '../home/steps_entry_dialog.dart';
 import '../home/sleep_entry_dialog.dart';
 import '../../models/daily_meal_log.dart';
-import 'widgets/activity_heatmap.dart';
 import 'widgets/insights_card.dart';
 
 enum MetricType { weight, steps, sleep, bmi, bodyFat, calories, protein, screenTime }
@@ -59,7 +57,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final d = _currentReferenceDate;
     switch (_selectedRange) {
       case TimeRange.weekly:
-        return _startDate.add(Duration(days: 6));
+        return _startDate.add(const Duration(days: 6));
       case TimeRange.monthly:
         return DateTime(d.year, d.month + 1, 0);
       case TimeRange.sixMonths:
@@ -95,17 +93,17 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Entry?'),
+        title: const Text('Delete Entry?'),
         content: Text('Are you sure you want to delete the ${_metricLabel(_selectedMetric)} entry for ${DateFormat('MMM dd').format(date)}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: context.colors.red),
-            child: Text('Delete'),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -134,11 +132,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   void _openManualEntry() {
     if (_selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi) {
-      showAppBottomSheet(context: context, builder: (_) => WeightEntryDialog());
+      showAppBottomSheet(context: context, builder: (_) => const WeightEntryDialog());
     } else if (_selectedMetric == MetricType.steps) {
-      showAppBottomSheet(context: context, builder: (_) => StepsEntryDialog());
+      showAppBottomSheet(context: context, builder: (_) => const StepsEntryDialog());
     } else if (_selectedMetric == MetricType.sleep) {
-      showAppBottomSheet(context: context, builder: (_) => SleepEntryDialog());
+      showAppBottomSheet(context: context, builder: (_) => const SleepEntryDialog());
     }
   }
 
@@ -152,16 +150,16 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text('My Progress'),
+        title: const Text('My Progress'),
         leading: Navigator.of(context).canPop()
             ? IconButton(
-                icon: Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_ios_rounded),
                 onPressed: () => Navigator.of(context).pop(),
               )
             : null,
         actions: [
           IconButton(
-            icon: Icon(Icons.lightbulb_outline_rounded),
+            icon: const Icon(Icons.lightbulb_outline_rounded),
             onPressed: () {
               HapticFeedback.lightImpact();
               showAppBottomSheet(
@@ -174,7 +172,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.grid_view_rounded),
+            icon: const Icon(Icons.grid_view_rounded),
             onPressed: () {
               HapticFeedback.lightImpact();
               context.push('/progress/yearly-activity');
@@ -184,7 +182,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               _selectedMetric != MetricType.calories &&
               _selectedMetric != MetricType.protein)
             IconButton(
-              icon: Icon(Icons.add_rounded),
+              icon: const Icon(Icons.add_rounded),
               onPressed: () {
                 HapticFeedback.lightImpact();
                 _openManualEntry();
@@ -198,13 +196,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         children: [
           // Time range segmented control
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: kScreenPadding),
+            padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
             child: Container(
               decoration: BoxDecoration(
                 color: context.colors.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
               ),
-              padding: EdgeInsets.all(4),
+              padding: const EdgeInsets.all(4),
               child: Row(
                 children: TimeRange.values.map((range) {
                   final isSelected = _selectedRange == range;
@@ -215,8 +213,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                         _currentReferenceDate = DateTime.now();
                       }),
                       child: AnimatedContainer(
-                        duration: Duration(milliseconds: 200),
-                        padding: EdgeInsets.symmetric(vertical: 10),
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
                           color: isSelected ? context.colors.card : Colors.transparent,
                           borderRadius: BorderRadius.circular(10),
@@ -225,7 +223,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                                   BoxShadow(
                                     color: context.colors.primary.withValues(alpha: 0.1),
                                     blurRadius: 8,
-                                    offset: Offset(0, 2),
+                                    offset: const Offset(0, 2),
                                   ),
                                 ]
                               : null,
@@ -249,11 +247,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               ),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
 
           // Date range navigator
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -296,11 +294,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               },
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
 
           Expanded(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
                 switchInCurve: Curves.easeOut,
@@ -325,14 +323,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
           // Metric tab bar (icons below chart)
           Container(
-            padding: EdgeInsets.fromLTRB(4, 10, 4, 12),
+            padding: const EdgeInsets.fromLTRB(4, 10, 4, 12),
             decoration: BoxDecoration(
               color: context.colors.card,
               boxShadow: [
                 BoxShadow(
                   color: context.colors.primary.withValues(alpha: 0.06),
                   blurRadius: 20,
-                  offset: Offset(0, -4),
+                  offset: const Offset(0, -4),
                 ),
               ],
             ),
@@ -369,7 +367,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                             size: 22,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           _metricLabel(metric),
                           maxLines: 1,
@@ -384,9 +382,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                                 : context.colors.textLight,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         AnimatedContainer(
-                          duration: Duration(milliseconds: 200),
+                          duration: const Duration(milliseconds: 200),
                           width: 18,
                           height: 3,
                           decoration: BoxDecoration(

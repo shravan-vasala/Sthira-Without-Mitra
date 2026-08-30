@@ -1,9 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/badge.dart';
-import '../models/badge.dart';
 import 'app_providers.dart';
-import 'daily_log_notifier.dart';
-import '../repositories/badge_repository.dart';
 
 // Provides access to the list of badges for the UI
 final badgesProvider = Provider<List<Badge>>((ref) {
@@ -36,7 +33,7 @@ class BadgeEngine {
     final allLogs = dailyLogRepo.getAllLogs();
     
     // Count workouts
-    int totalWorkouts = allLogs.where((l) => l.workoutCompleted).length;
+    final int totalWorkouts = allLogs.where((l) => l.workoutCompleted).length;
 
     // Calculate Streak
     int currentStreak = 0;

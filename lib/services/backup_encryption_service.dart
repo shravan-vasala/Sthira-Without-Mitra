@@ -5,7 +5,6 @@ import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/key_derivators/pbkdf2.dart';
 import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/digests/sha256.dart';
-import 'package:pointycastle/api.dart';
 import 'package:pointycastle/key_derivators/api.dart';
 
 class BackupEncryptionService {

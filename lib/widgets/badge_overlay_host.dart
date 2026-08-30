@@ -82,10 +82,10 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost> with Single
           decoration: BoxDecoration(
             color: context.colors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.amber.withOpacity(0.5), width: 2),
+            border: Border.all(color: Colors.amber.withValues(alpha: 0.5), width: 2),
             boxShadow: [
               BoxShadow(
-                color: Colors.amber.withOpacity(0.2),
+                color: Colors.amber.withValues(alpha: 0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),

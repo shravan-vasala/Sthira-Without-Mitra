@@ -30,9 +30,9 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: context.colors.card,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +47,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Container(
@@ -59,7 +59,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                   ),
                   child: Icon(Icons.sync_rounded, color: context.colors.green, size: 22),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +85,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 ),
               ],
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Center(
               child: Column(
                 children: [
@@ -98,7 +98,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                       height: 1.0,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Steps Today',
                     style: TextStyle(
@@ -111,7 +111,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
               ),
             ),
             if (_errorMessage != null) ...[
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               AsyncErrorCard(
                 title: 'Sync Failed',
                 message: _errorMessage!,
@@ -128,7 +128,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 } : null,
               ),
             ],
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -211,7 +211,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 ),
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -220,7 +220,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                   Navigator.of(context).pop();
                   showAppBottomSheet(
                     context: context,
-                    builder: (_) => StepsEntryDialog(),
+                    builder: (_) => const StepsEntryDialog(),
                   );
                 },
                 style: TextButton.styleFrom(
@@ -238,7 +238,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 ),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
         ),
       ),

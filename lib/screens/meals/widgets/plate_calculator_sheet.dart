@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
-import '../../../theme/layout_insets.dart';
 
 class PlateCalculatorSheet extends StatefulWidget {
   const PlateCalculatorSheet({super.key});
@@ -159,14 +158,14 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
   }
 
   void _balance({bool protein = false, bool carbs = false, bool veg = false, bool fat = false}) {
-    double total = proteinPercent + carbsPercent + vegPercent + fatPercent;
+    final double total = proteinPercent + carbsPercent + vegPercent + fatPercent;
     if (total == 100.0) return;
 
-    double diff = 100.0 - total;
+    final double diff = 100.0 - total;
     
     // Distribute diff to others
-    int othersCount = (protein ? 0 : 1) + (carbs ? 0 : 1) + (veg ? 0 : 1) + (fat ? 0 : 1);
-    double addPerOther = diff / othersCount;
+    final int othersCount = (protein ? 0 : 1) + (carbs ? 0 : 1) + (veg ? 0 : 1) + (fat ? 0 : 1);
+    final double addPerOther = diff / othersCount;
 
     if (!protein) proteinPercent = (proteinPercent + addPerOther).clamp(0, 100);
     if (!carbs) carbsPercent = (carbsPercent + addPerOther).clamp(0, 100);

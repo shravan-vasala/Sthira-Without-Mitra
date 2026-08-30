@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
-import '../../../services/gemini_food_service.dart';
 import '../../../models/daily_meal_log.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -173,7 +172,7 @@ class _PhotoCalorieScannerSheetState
     final text = _descriptionCtrl.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Type what you ate first — e.g. rice, sambar, curd')),
+        const SnackBar(content: Text('Type what you ate first — e.g. rice, sambar, curd')),
       );
       return;
     }
@@ -292,7 +291,7 @@ class _PhotoCalorieScannerSheetState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Edit Item'),
+        title: const Text('Edit Item'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -353,7 +352,7 @@ class _PhotoCalorieScannerSheetState
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               setState(() {
@@ -369,7 +368,7 @@ class _PhotoCalorieScannerSheetState
               });
               Navigator.pop(ctx);
             },
-            child: Text('Save'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -466,14 +465,14 @@ class _PhotoCalorieScannerSheetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_isOffline && !_analysisComplete)
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(bottom: 12.0),
               child: OfflineBanner(),
             ),
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: context.colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -488,7 +487,7 @@ class _PhotoCalorieScannerSheetState
                   size: 24,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,12 +516,12 @@ class _PhotoCalorieScannerSheetState
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
 
           if (showChooser && !_describeMode) ...[
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
               decoration: BoxDecoration(
                 color: context.colors.lavenderCard,
                 borderRadius: BorderRadius.circular(20),
@@ -537,7 +536,7 @@ class _PhotoCalorieScannerSheetState
                     size: 48,
                     color: context.colors.primary,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
                     'Snap what you ate',
                     style: TextStyle(
@@ -546,7 +545,7 @@ class _PhotoCalorieScannerSheetState
                       color: context.colors.textDark,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
                     'Best for home-cooked plates',
                     style: TextStyle(
@@ -554,39 +553,39 @@ class _PhotoCalorieScannerSheetState
                       color: context.colors.textMedium,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton.icon(
                         onPressed: () => _pickImage(ImageSource.camera),
-                        icon: Icon(Icons.camera_rounded, size: 18),
-                        label: Text('Camera'),
+                        icon: const Icon(Icons.camera_rounded, size: 18),
+                        label: const Text('Camera'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.primary,
                         ),
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       OutlinedButton.icon(
                         onPressed: () => _pickImage(ImageSource.gallery),
-                        icon: Icon(Icons.photo_library_rounded, size: 18),
-                        label: Text('Gallery'),
+                        icon: const Icon(Icons.photo_library_rounded, size: 18),
+                        label: const Text('Gallery'),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _switchToDescribe,
-                icon: Icon(Icons.notes_rounded, size: 18),
-                label: Text('Or describe in text'),
+                icon: const Icon(Icons.notes_rounded, size: 18),
+                label: const Text('Or describe in text'),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Center(
               child: TextButton(
                 onPressed: _enterManualItems,
@@ -608,55 +607,55 @@ class _PhotoCalorieScannerSheetState
                 color: context.colors.textDark,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextField(
               controller: _descriptionCtrl,
               maxLines: 4,
               textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText:
                     'e.g. 1 cup rice, chicken curry, beans fry, curd',
                 alignLabelWithHint: true,
               ),
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             PrimaryButton(
               label: 'Estimate macros',
               icon: Icons.auto_awesome_rounded,
               onPressed: _isOffline ? null : _analyzeDescription,
               isLoading: _isAnalyzing,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: _switchToPhoto,
-                    icon: Icon(Icons.camera_alt_rounded, size: 18),
-                    label: Text('Use photo'),
+                    icon: const Icon(Icons.camera_alt_rounded, size: 18),
+                    label: const Text('Use photo'),
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: TextButton(
                     onPressed: _enterManualItems,
-                    child: Text('Enter yourself'),
+                    child: const Text('Enter yourself'),
                   ),
                 ),
               ],
             ),
           ] else if (_errorMessage == 'OFFLINE_FALLBACK') ...[
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                color: Colors.orange.withValues(alpha: 0.1),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
-                  Icon(Icons.cloud_off_rounded, color: Colors.orange, size: 36),
-                  SizedBox(height: 8),
+                  const Icon(Icons.cloud_off_rounded, color: Colors.orange, size: 36),
+                  const SizedBox(height: 8),
                   Text(
                     'AI Service Offline',
                     style: TextStyle(
@@ -665,19 +664,19 @@ class _PhotoCalorieScannerSheetState
                       color: Colors.orange[800],
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'The AI system is temporarily overwhelmed or unavailable. Please log your macros manually for now.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 13, color: Colors.orange[800]),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _enterManualItems,
-                      icon: Icon(Icons.edit_rounded, size: 18),
-                      label: Text('Enter manual macros'),
+                      icon: const Icon(Icons.edit_rounded, size: 18),
+                      label: const Text('Enter manual macros'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         foregroundColor: Colors.white,
@@ -701,7 +700,7 @@ class _PhotoCalorieScannerSheetState
               },
               actionText: _describeMode ? 'Try again' : 'Try another photo',
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -710,14 +709,14 @@ class _PhotoCalorieScannerSheetState
                       setState(() => _errorMessage = null);
                       _switchToDescribe();
                     },
-                    child: Text('Describe instead'),
+                    child: const Text('Describe instead'),
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _enterManualItems,
-                    child: Text('Enter yourself'),
+                    child: const Text('Enter yourself'),
                   ),
                 ),
               ],
@@ -753,7 +752,7 @@ class _PhotoCalorieScannerSheetState
                                 color: context.colors.card,
                                 strokeWidth: 3,
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               Text(
                                 'Reading your plate…',
                                 style: TextStyle(
@@ -775,8 +774,8 @@ class _PhotoCalorieScannerSheetState
                             _analysisComplete = false;
                           }),
                           child: Container(
-                            padding: EdgeInsets.all(6),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
                               color: Colors.black54,
                               shape: BoxShape.circle,
                             ),
@@ -792,7 +791,7 @@ class _PhotoCalorieScannerSheetState
                 ),
               ),
               if (_selectedImage != null && !_isAnalyzing && !_analysisComplete) ...[
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   'Optional hint',
                   style: TextStyle(
@@ -801,16 +800,16 @@ class _PhotoCalorieScannerSheetState
                     color: context.colors.textDark,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 TextField(
                   controller: _descriptionCtrl,
                   textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'e.g. This is chicken biryani, normal portion',
                     alignLabelWithHint: true,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 PrimaryButton(
                   label: 'Analyze Photo',
                   icon: Icons.auto_awesome_rounded,
@@ -820,12 +819,12 @@ class _PhotoCalorieScannerSheetState
               ]
             else if (_isAnalyzing)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
+                padding: const EdgeInsets.symmetric(vertical: 40),
                 child: Center(
                   child: Column(
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
                       Text(
                         'Estimating from your description…',
                         style: TextStyle(
@@ -840,11 +839,11 @@ class _PhotoCalorieScannerSheetState
           ],
 
           if (_analysisComplete) ...[
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             if (_confidence == 'low' || _confidence == 'medium')
               Container(
-                margin: EdgeInsets.only(bottom: 12),
-                padding: EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: _confidence == 'low' 
                       ? context.colors.red.withValues(alpha: 0.1) 
@@ -858,7 +857,7 @@ class _PhotoCalorieScannerSheetState
                       color: _confidence == 'low' ? context.colors.red : context.colors.orange,
                       size: 20,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _confidence == 'low'
@@ -876,13 +875,13 @@ class _PhotoCalorieScannerSheetState
               ),
             Expanded(
               child: ListView.separated(
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 itemCount: _items.length,
-                separatorBuilder: (_, index) => SizedBox(height: 8),
+                separatorBuilder: (_, index) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final item = _items[index];
                   return Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: context.colors.background,
                       borderRadius: BorderRadius.circular(12),
@@ -895,7 +894,7 @@ class _PhotoCalorieScannerSheetState
                             children: [
                               Text(
                                 item.name ?? '',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                 ),
@@ -939,12 +938,12 @@ class _PhotoCalorieScannerSheetState
                 },
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: context.colors.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
@@ -971,15 +970,15 @@ class _PhotoCalorieScannerSheetState
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: _addItem,
-                  icon: Icon(Icons.add),
-                  label: Text('Add Item'),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Item'),
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             PrimaryButton(
               label: 'Save Log',
               icon: Icons.check_circle_rounded,

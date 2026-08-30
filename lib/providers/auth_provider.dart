@@ -23,7 +23,7 @@ final isSignedInProvider = Provider<bool>((ref) {
   return authState.when(
     data: (user) => user != null,
     loading: () => false,
-    error: (_, __) => false,
+    error: (_, _) => false,
   );
 });
 
@@ -33,7 +33,7 @@ final userDisplayNameProvider = Provider<String?>((ref) {
   return authState.when(
     data: (user) => user?.displayName,
     loading: () => null,
-    error: (_, __) => null,
+    error: (_, _) => null,
   );
 });
 
@@ -43,7 +43,7 @@ final userEmailProvider = Provider<String?>((ref) {
   return authState.when(
     data: (user) => user?.email,
     loading: () => null,
-    error: (_, __) => null,
+    error: (_, _) => null,
   );
 });
 
@@ -53,7 +53,7 @@ final userPhotoUrlProvider = Provider<String?>((ref) {
   return authState.when(
     data: (user) => user?.photoURL,
     loading: () => null,
-    error: (_, __) => null,
+    error: (_, _) => null,
   );
 });
 

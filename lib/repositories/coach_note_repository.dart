@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:isar/isar.dart';
 import '../models/coach_note.dart';
 import '../interfaces/i_cloud_sync_service.dart';

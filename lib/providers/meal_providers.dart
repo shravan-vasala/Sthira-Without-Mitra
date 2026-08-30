@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
 import '../models/meal_plan.dart';
 import '../models/daily_meal_log.dart';
-import '../repositories/meal_repository.dart';
 
 final mealPlanProvider = Provider<MealPlan?>((ref) {
   final repo = ref.watch(mealRepoProvider);

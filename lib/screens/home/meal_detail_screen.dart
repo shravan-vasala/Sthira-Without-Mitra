@@ -24,7 +24,7 @@ class MealDetailScreen extends ConsumerWidget {
   void _openAddSlotDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => AddMealSlotDialog(),
+      builder: (_) => const AddMealSlotDialog(),
     );
   }
 
@@ -72,7 +72,7 @@ class MealDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Today's meals"),
+            const Text("Today's meals"),
             Text(
               planName,
               style: TextStyle(
@@ -84,7 +84,7 @@ class MealDetailScreen extends ConsumerWidget {
           ],
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded),
+          icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -275,7 +275,7 @@ class _CalorieHeader extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,7 +289,7 @@ class _CalorieHeader extends StatelessWidget {
                   ),
                 ),
                 if (isOverTarget) ...[
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     '+${eaten - target} over',
                     style: TextStyle(
@@ -299,21 +299,21 @@ class _CalorieHeader extends StatelessWidget {
                     ),
                   ),
                 ],
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 _MacroBar(
                   label: 'Protein',
                   current: protein,
                   target: proteinTarget,
                   color: context.colors.green,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 _MacroBar(
                   label: 'Carbs',
                   current: carbs,
                   target: carbsTarget,
                   color: context.colors.orange,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 _MacroBar(
                   label: 'Fat',
                   current: fat,
@@ -370,7 +370,7 @@ class _MacroBar extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -417,18 +417,18 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     final slotLog = widget.slotLog;
 
     return SurfaceCard(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       elevation: SurfaceCardElevation.nested,
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               children: [
                 Icon(MealIcons.resolve(widget.slotEmoji), size: 18, color: context.colors.textDark),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,7 +443,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       ),
                       if (!_hasLog && planned != null) ...[
                         if (planned.calories > 0) ...[
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             'Target ~${planned.calories} kcal',
                             style: TextStyle(
@@ -469,7 +469,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                     ),
                   ),
                 if (_hasLog) ...[
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Icon(
                     Icons.check_circle_rounded,
                     color: context.colors.green,
@@ -483,7 +483,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       color: context.colors.textMedium,
                     ),
                     padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
+                    constraints: const BoxConstraints(),
                     onPressed: () {
                       ref
                           .read(dailyMealLogProvider.notifier)
@@ -498,7 +498,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
           // Logged non-planned content
           if (_hasLog && !_isPlannedComplete) ...[
             Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -519,14 +519,14 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 fit: BoxFit.cover,
                               ),
                       ),
-                    if (slotLog.photoPath != null) SizedBox(width: 12),
+                    if (slotLog.photoPath != null) const SizedBox(width: 12),
                     Expanded(
                       child: Wrap(
                         spacing: 6,
                         runSpacing: 6,
                         children: slotLog.items.map((item) {
                           return Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 4,
                             ),
@@ -545,7 +545,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                         }).toList(),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: context.colors.textLight,
@@ -555,7 +555,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                 ),
               ),
             Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
                   Expanded(
@@ -565,7 +565,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       onPressed: () => _openScanner(context, false, append: true),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: CompactButton(
                       label: 'Replace meal',
@@ -581,7 +581,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
           // Photo & describe first — home cooking primary path
           if (!_hasLog)
             Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 4),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
               child: Column(
                 children: [
                   Row(
@@ -594,7 +594,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           onPressed: () => _openScanner(context, false),
                         ),
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: CompactButton(
                           label: 'Describe',
@@ -621,7 +621,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             )
           else if (_isPlannedComplete)
             Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
                   Expanded(
@@ -631,7 +631,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       onPressed: () => _openScanner(context, false),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: CompactButton(
                       label: 'Describe',
@@ -645,12 +645,12 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
           if (planned != null && _hasLog && !_isPlannedComplete)
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(8, 0, 12, 12),
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: () => _toggleCompletedAsPlanned(planned),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   child: Row(
                     children: [
                       Icon(
@@ -658,7 +658,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                         color: context.colors.textMedium,
                         size: 22,
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Switch to completed as planned',
@@ -676,12 +676,12 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             )
           else if (planned != null && _isPlannedComplete)
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(8, 0, 12, 12),
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: () => _toggleCompletedAsPlanned(planned),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   child: Row(
                     children: [
                       Icon(
@@ -689,7 +689,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                         color: context.colors.green,
                         size: 22,
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Completed as planned',
@@ -706,7 +706,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
               ),
             )
           else
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
 
           if (planned != null && planned.suggestions.isNotEmpty)
             _buildSuggestions(context, planned),
@@ -717,14 +717,14 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
   Widget _buildSuggestions(BuildContext context, Meal planned) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(Icons.lightbulb_outline_rounded, size: 16, color: context.colors.primary),
-              SizedBox(width: 6),
+              const SizedBox(width: 6),
               Text(
                 'Suggestions',
                 style: TextStyle(
@@ -735,15 +735,15 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           ...planned.suggestions.map((suggestion) {
             return Padding(
-              padding: EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(top: 4, right: 8),
+                    padding: const EdgeInsets.only(top: 4, right: 8),
                     child: Container(
                       width: 6,
                       height: 6,
@@ -785,16 +785,16 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text('Overwrite Meal?'),
-          content: Text('This will remove your scanned photos and macros and replace them with the planned meal. Are you sure?'),
+          title: const Text('Overwrite Meal?'),
+          content: const Text('This will remove your scanned photos and macros and replace them with the planned meal. Are you sure?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text('Overwrite', style: TextStyle(color: Colors.red)),
+              child: const Text('Overwrite', style: TextStyle(color: Colors.red)),
             ),
           ],
         ),

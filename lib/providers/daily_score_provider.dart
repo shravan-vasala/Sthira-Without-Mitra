@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
 import '../models/habit.dart';
 import '../models/daily_log.dart';
-import '../utils/workout_completion.dart';
 import '../models/workout_plan.dart';
 import '../models/meal_plan.dart';
 import '../models/daily_meal_log.dart';
@@ -101,14 +100,14 @@ class DailyScore {
 
     // 1. Habits (Max 50)
     double habitsScore = 0;
-    double habitsMax = 50;
+    final double habitsMax = 50;
     if (stats.habitsTotal > 0) {
       habitsScore = stats.habitRate * habitsMax;
     }
 
     // 2. Workouts (Max 30)
     double workoutsScore = 0;
-    double workoutsMax = 30;
+    final double workoutsMax = 30;
     if (stats.isRestDay) {
       workoutsScore = workoutsMax;
     } else if (stats.workoutsTotal > 0) {
@@ -117,7 +116,7 @@ class DailyScore {
 
     // 3. Meals (Max 20)
     double mealsScore = 0;
-    double mealsMax = 20;
+    final double mealsMax = 20;
     if (stats.mealsTotal > 0) {
       mealsScore = (stats.mealsLogged / stats.mealsTotal) * mealsMax;
     }

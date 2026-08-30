@@ -207,7 +207,7 @@ class UserProfile {
       currentPhaseWeek: currentPhaseWeek ?? this.currentPhaseWeek,
       screenTimeEnabled: screenTimeEnabled ?? this.screenTimeEnabled,
     );
-    updated.id = this.id;
+    updated.id = id;
     return updated;
   }
 }

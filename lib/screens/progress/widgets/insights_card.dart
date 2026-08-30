@@ -41,7 +41,7 @@ class InsightsCard extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             scrollDirection: Axis.horizontal,
             itemCount: insights.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final insight = insights[index];
               return _buildInsightItem(context, insight);

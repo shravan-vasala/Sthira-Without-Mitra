@@ -124,14 +124,14 @@ class PastDaySummarySheet extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.lavender,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Drag handle
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Container(
               width: 48,
               height: 4,
@@ -140,11 +140,11 @@ class PastDaySummarySheet extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Header
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -159,7 +159,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                           color: context.colors.textDark,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         '$totalDone of $totalThings things completed',
                         style: TextStyle(
@@ -171,7 +171,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -188,11 +188,11 @@ class PastDaySummarySheet extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Rows
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
                   // Workout Row
@@ -212,7 +212,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                       parentContext.go('/home/workout/$currentWorkoutDayId');
                     },
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
                   // Meals Row
                   _SummaryRow(
@@ -222,7 +222,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (loggedIcons.isNotEmpty)
-                          ...loggedIcons.map((ic) => Padding(padding: EdgeInsets.only(right: 4), child: Icon(ic, size: 16, color: context.colors.textDark))),
+                          ...loggedIcons.map((ic) => Padding(padding: const EdgeInsets.only(right: 4), child: Icon(ic, size: 16, color: context.colors.textDark))),
                         if (loggedIcons.isNotEmpty) Text('· ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.colors.textDark)),
                         Text('$completedMeals/$totalMealsTarget logged · ${mealLog.totalCalories} / ${profile.targetCalories} kcal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.colors.textDark)),
                       ],
@@ -236,7 +236,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                       parentContext.go('/home/meals');
                     },
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
                   // Habits Row
                   _SummaryRow(
@@ -255,11 +255,11 @@ class PastDaySummarySheet extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Metrics 2x2 Grid
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
                   Expanded(
@@ -269,7 +269,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                       value: '${dailyLog.steps ?? 0}',
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: _MetricBox(
                       icon: Icons.bedtime_rounded,
@@ -280,9 +280,9 @@ class PastDaySummarySheet extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
                   Expanded(
@@ -292,7 +292,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                       value: dailyLog.weight != null ? '${dailyLog.weight} kg' : '—',
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: _MetricBox(
                       icon: Icons.water_drop_rounded,
@@ -307,11 +307,11 @@ class PastDaySummarySheet extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
             // Action Button
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: SizedBox(
                 width: double.infinity,
                 height: 54,
@@ -339,7 +339,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                 ),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -369,7 +369,7 @@ class _SummaryRow extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(16),
@@ -385,13 +385,13 @@ class _SummaryRow extends StatelessWidget {
               ),
               child: Icon(icon, color: color, size: 20),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   titleWidget,
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: TextStyle(
@@ -430,7 +430,7 @@ class _MetricBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(16),
@@ -438,7 +438,7 @@ class _MetricBox extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: context.colors.primary, size: 20),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

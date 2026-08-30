@@ -74,7 +74,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
   Future<void> _handleCreateBackup() async {
     if (_encryptBackup && _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a password for encryption'), backgroundColor: context.colors.red),
+        SnackBar(content: const Text('Please enter a password for encryption'), backgroundColor: context.colors.red),
       );
       return;
     }
@@ -98,7 +98,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to create backup'), backgroundColor: context.colors.red),
+            SnackBar(content: const Text('Failed to create backup'), backgroundColor: context.colors.red),
           );
         }
       }
@@ -123,12 +123,12 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('This backup is encrypted. Please enter the password to unlock it.'),
-            SizedBox(height: 16),
+            const Text('This backup is encrypted. Please enter the password to unlock it.'),
+            const SizedBox(height: 16),
             TextField(
               controller: pc,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
               ),
@@ -138,11 +138,11 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, pc.text),
-            child: Text('Unlock'),
+            child: const Text('Unlock'),
           ),
         ],
       ),
@@ -162,7 +162,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
+            content: const Text(
               'Could not read the selected file. Try again or pick from Downloads.',
             ),
             backgroundColor: context.colors.red,
@@ -224,7 +224,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
               'Your current data was not touched.'
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Awesome')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Awesome')),
             ],
           ),
         );
@@ -235,7 +235,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
             title: Text('Verification Failed', style: TextStyle(color: context.colors.red)),
             content: Text(verify.errorMessage ?? 'Invalid backup file.'),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text('OK')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
             ],
           ),
         );
@@ -248,7 +248,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
             title: Text('Verification Error', style: TextStyle(color: context.colors.red)),
             content: Text('An error occurred while verifying the backup: $e'),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text('OK')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
             ],
           ),
         );
@@ -290,7 +290,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
 
       if (!verify.isValid) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid backup file.'), backgroundColor: context.colors.red),
+          SnackBar(content: const Text('Invalid backup file.'), backgroundColor: context.colors.red),
         );
         return;
       }
@@ -298,7 +298,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text('Restore Backup?'),
+          title: const Text('Restore Backup?'),
           content: Text(
             'App Version: ${verify.appVersion}\n'
             'Created At: ${verify.createdAt != 'Unknown' ? DateFormat('MMM dd, yyyy · HH:mm').format(DateTime.parse(verify.createdAt)) : 'Unknown'}\n'
@@ -307,7 +307,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
             'WARNING: Restoring will completely overwrite all your current data. A pre-restore safety backup will be created in your app documents directory.'
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
             TextButton(
               onPressed: () async {
                 Navigator.pop(ctx);
@@ -331,7 +331,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to restore backup.'), backgroundColor: context.colors.red),
+                      SnackBar(content: const Text('Failed to restore backup.'), backgroundColor: context.colors.red),
                     );
                   }
                 } catch (e) {
@@ -370,19 +370,19 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text('Backup & Restore'),
+        title: const Text('Backup & Restore'),
         backgroundColor: context.colors.scaffoldBg,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: context.colors.lavender,
                       borderRadius: BorderRadius.circular(16),
@@ -397,12 +397,12 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                               style: TextStyle(fontSize: 14, color: context.colors.textMedium),
                             ),
                             if (_isLastBackupEncrypted) ...[
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Icon(Icons.lock_rounded, size: 14, color: context.colors.textMedium),
                             ],
                           ],
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           _lastBackupDate,
                           style: TextStyle(
@@ -412,20 +412,20 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                           ),
                         ),
                         if (_lastBackupSize.isNotEmpty) ...[
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             _lastBackupSize,
                             style: TextStyle(fontSize: 12, color: context.colors.textMedium),
                           ),
                         ],
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Divider(color: context.colors.border),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Last Auto-Backup (Weekly)',
                           style: TextStyle(fontSize: 14, color: context.colors.textMedium),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           _lastAutoBackupDate,
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.colors.textDark),
@@ -433,14 +433,14 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 32),
+                  const SizedBox(height: 32),
                   Row(
                     children: [
                       Text(
                         'Encrypt Backup',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.colors.textDark),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Switch(
                         value: _encryptBackup,
                         onChanged: (val) {
@@ -453,24 +453,24 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                     ],
                   ),
                   if (_encryptBackup) ...[
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Backup Password',
                         border: OutlineInputBorder(),
                       ),
                     ),
                   ],
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _ActionCard(
                     title: 'Create Backup',
                     subtitle: 'Export a copy of all your data',
                     icon: Icons.upload_file_rounded,
                     onTap: _handleCreateBackup,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _ActionCard(
                     title: 'Restore from Backup',
                     subtitle: 'Overwrite current data with a backup',
@@ -478,7 +478,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                     iconColor: context.colors.pinkIcon,
                     onTap: _handleRestoreBackup,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _ActionCard(
                     title: 'Verify Backup',
                     subtitle: 'Test a backup file without restoring',
@@ -513,7 +513,7 @@ class _ActionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(16),
@@ -521,27 +521,27 @@ class _ActionCard extends StatelessWidget {
             BoxShadow(
               color: context.colors.textDark.withValues(alpha: 0.05),
               blurRadius: 10,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: (iconColor ?? context.colors.primary).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: iconColor ?? context.colors.primary),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.colors.textDark)),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(subtitle, style: TextStyle(fontSize: 13, color: context.colors.textMedium)),
                 ],
               ),

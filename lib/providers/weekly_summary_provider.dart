@@ -1,13 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'app_providers.dart';
-import '../repositories/daily_log_repository.dart';
-import '../repositories/meal_repository.dart';
 import '../models/daily_stats_snapshot.dart';
 import '../models/daily_log.dart';
 import '../models/daily_meal_log.dart';
 import '../models/habit.dart';
-import '../utils/workout_completion.dart';
 
 class WeeklySummary {
   final int workoutsCompleted;
@@ -99,8 +96,8 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
   final habits = ref.watch(habitsProvider);
   int totalHabitInstances = 0;
   int completedHabitInstances = 0;
-  List<double> dailyRates = List.filled(7, 0.0);
-  Map<String, int> habitStreaksThisWeek = {};
+  final List<double> dailyRates = List.filled(7, 0.0);
+  final Map<String, int> habitStreaksThisWeek = {};
   
   // Calculate Steps & Sleep
   int sumSteps = 0;
@@ -210,8 +207,8 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
       : 0.0;
       
   // Calculate Week Score (0-100)
-  double workoutScore = wTotal > 0 ? (wCompleted / wTotal) : 1.0;
-  double habitScore = habitCompletionRate;
+  final double workoutScore = wTotal > 0 ? (wCompleted / wTotal) : 1.0;
+  final double habitScore = habitCompletionRate;
   
   int weekScore = ((workoutScore * 0.5 + habitScore * 0.5) * 100).toInt();
   if (wTotal == 0) {

@@ -78,7 +78,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(displayTitle),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded),
+          icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -92,7 +92,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                     size: 64,
                     color: context.colors.textLight.withValues(alpha: 0.4),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     'No data logged yet',
                     style: TextStyle(
@@ -101,7 +101,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                       color: context.colors.textMedium,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'Log exercise data to see your progress',
                     style: TextStyle(
@@ -185,16 +185,16 @@ class _PrSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFFFFD700).withValues(alpha: 0.1),
-        border: Border.all(color: Color(0xFFFFD700).withValues(alpha: 0.3)),
+        color: const Color(0xFFFFD700).withValues(alpha: 0.1),
+        border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(Icons.emoji_events_rounded, color: Color(0xFFB8860B), size: 24),
               SizedBox(width: 8),
@@ -209,7 +209,7 @@ class _PrSummary extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           if (pr.maxWeight > 0)
             _buildPrRow('Max Weight', '${pr.maxWeight}kg × ${pr.maxWeightReps}'),
           if (pr.maxReps > 0 && (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
@@ -225,12 +225,12 @@ class _PrSummary extends StatelessWidget {
 
   Widget _buildPrRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 14, color: Color(0xFF8B6508))),
-          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF8B6508))),
+          Text(label, style: const TextStyle(fontSize: 14, color: Color(0xFF8B6508))),
+          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF8B6508))),
         ],
       ),
     );
@@ -246,8 +246,8 @@ class _HistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('dd MMM yyyy').format(DateTime.parse(log.date));
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(14),
@@ -266,7 +266,7 @@ class _HistoryCard extends StatelessWidget {
                     color: context.colors.textDark,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   log.sets.map((s) => '${s.reps}×${s.weight}kg').join(' | '),
                   style: TextStyle(

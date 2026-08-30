@@ -111,7 +111,7 @@ class DailyShareCard extends ConsumerWidget {
                 const SizedBox(height: 32),
                 
                 Text(
-                  "${name}'s Day",
+                  "$name's Day",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 32,

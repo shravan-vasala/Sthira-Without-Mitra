@@ -49,7 +49,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
       if (workoutPlan != null) {
         // Convert active days to list of ints (1=Monday, 7=Sunday)
         // workoutPlan.days has items. Index 0 is Monday (usually)
-        List<int> activeDays = [];
+        final List<int> activeDays = [];
         for (final day in workoutPlan.days) {
           if (day.sections.isNotEmpty && day.dayId != 'Rest') {
             final wday = day.weekday;

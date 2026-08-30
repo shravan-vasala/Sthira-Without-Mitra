@@ -45,12 +45,12 @@ class _PhysiquePicturesScreenState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete Photos?'),
+        title: const Text('Delete Photos?'),
         content: Text('Delete ${_selectedPhotos.length} photo(s)? This can\'t be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
@@ -152,10 +152,10 @@ class _PhysiquePicturesScreenState
           // Filter Toggle
           if (rawPhotos.isNotEmpty)
             Padding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 child: Row(
                   children: [
                     _FilterChip(
@@ -163,19 +163,19 @@ class _PhysiquePicturesScreenState
                       isSelected: _currentFilter == 'all',
                       onTap: () => setState(() => _currentFilter = 'all'),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     _FilterChip(
                       label: 'Front',
                       isSelected: _currentFilter == 'front',
                       onTap: () => setState(() => _currentFilter = 'front'),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     _FilterChip(
                       label: 'Side',
                       isSelected: _currentFilter == 'side',
                       onTap: () => setState(() => _currentFilter = 'side'),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     _FilterChip(
                       label: 'Back',
                       isSelected: _currentFilter == 'back',
@@ -196,7 +196,7 @@ class _PhysiquePicturesScreenState
                           size: 64,
                           color: context.colors.textLight.withValues(alpha: 0.5),
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
                           'No progress photos yet',
                           style: TextStyle(
@@ -205,7 +205,7 @@ class _PhysiquePicturesScreenState
                             color: context.colors.textMedium,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Tap the + button to add your first photo',
                           style: TextStyle(
@@ -224,8 +224,8 @@ class _PhysiquePicturesScreenState
                         ),
                       )
                     : ListView.builder(
-                        physics: BouncingScrollPhysics(),
-                        padding: EdgeInsets.all(20),
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.all(20),
               itemCount: allPhotos.length,
               itemBuilder: (context, index) {
                 final entry = allPhotos[index];
@@ -237,7 +237,7 @@ class _PhysiquePicturesScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 12),
                       child: Text(
                         formattedDate,
                         style: TextStyle(
@@ -249,9 +249,9 @@ class _PhysiquePicturesScreenState
                     ),
                     GridView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
                         crossAxisSpacing: 8,
                         mainAxisSpacing: 8,
@@ -316,7 +316,7 @@ class _PhysiquePicturesScreenState
                                   bottom: 4,
                                   left: 4,
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: 6,
                                       vertical: 2,
                                     ),
@@ -339,7 +339,7 @@ class _PhysiquePicturesScreenState
                                   top: 4,
                                   right: 4,
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: 6,
                                       vertical: 2,
                                     ),
@@ -375,7 +375,7 @@ class _PhysiquePicturesScreenState
                         );
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 );
               },
@@ -436,7 +436,7 @@ class _PhysiquePicturesScreenState
   void _openCompareMode(List<MapEntry<String, List<String>>> allPhotos) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PhotoCompareScreen(), // Will implement next
+        builder: (_) => const PhotoCompareScreen(), // Will implement next
       ),
     );
   }
@@ -455,33 +455,33 @@ class _PhysiquePicturesScreenState
       context: context,
       useRootNavigator: true,
       backgroundColor: context.colors.card,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => Padding(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Add Progress Photo',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ListTile(
               leading: Icon(Icons.camera_alt, color: context.colors.primary),
-              title: Text('Take Photo'),
+              title: const Text('Take Photo'),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: Icon(Icons.photo_library, color: context.colors.primary),
-              title: Text('Choose from Gallery'),
+              title: const Text('Choose from Gallery'),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -504,22 +504,22 @@ class _PhysiquePicturesScreenState
       context: context,
       useRootNavigator: true,
       backgroundColor: context.colors.card,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => Padding(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Photo Details',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _CaptureMetadataForm(
               initialWeight: currentWeight ?? 0.0,
               onComplete: (data) => Navigator.pop(ctx, data),
@@ -563,7 +563,7 @@ class _PoseOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: context.colors.lavender,
           borderRadius: BorderRadius.circular(14),
@@ -571,7 +571,7 @@ class _PoseOption extends StatelessWidget {
         child: Column(
           children: [
             Icon(icon, color: context.colors.primary, size: 28),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
@@ -627,11 +627,11 @@ class _CaptureMetadataFormState extends State<_CaptureMetadataForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
+        const Text(
           'Pose (Required)',
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -642,7 +642,7 @@ class _CaptureMetadataFormState extends State<_CaptureMetadataForm> {
                 onTap: () => setState(() => _selectedPose = 'front'),
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               child: _SelectablePoseOption(
                 icon: Icons.sync_alt_rounded,
@@ -651,7 +651,7 @@ class _CaptureMetadataFormState extends State<_CaptureMetadataForm> {
                 onTap: () => setState(() => _selectedPose = 'side'),
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               child: _SelectablePoseOption(
                 icon: Icons.turn_left_rounded,
@@ -662,25 +662,25 @@ class _CaptureMetadataFormState extends State<_CaptureMetadataForm> {
             ),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         TextField(
           controller: _weightController,
-          keyboardType: TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
             labelText: 'Weight (Optional)',
             prefixIcon: Icon(Icons.monitor_weight_outlined),
           ),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         TextField(
           controller: _noteController,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Note (Optional)',
             prefixIcon: Icon(Icons.notes_rounded),
             hintText: 'e.g. Post-workout pump',
           ),
         ),
-        SizedBox(height: 24),
+        const SizedBox(height: 24),
         ElevatedButton(
           onPressed: _selectedPose == null
               ? null
@@ -691,7 +691,7 @@ class _CaptureMetadataFormState extends State<_CaptureMetadataForm> {
                     'note': _noteController.text,
                   });
                 },
-          child: Text('Save Photo'),
+          child: const Text('Save Photo'),
         ),
       ],
     );
@@ -716,7 +716,7 @@ class _SelectablePoseOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : context.colors.lavender,
           borderRadius: BorderRadius.circular(12),
@@ -724,7 +724,7 @@ class _SelectablePoseOption extends StatelessWidget {
         child: Column(
           children: [
             Icon(icon, color: isSelected ? context.colors.onPrimary : context.colors.primary, size: 24),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
@@ -756,7 +756,7 @@ class _FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : context.colors.lavender,
           borderRadius: BorderRadius.circular(20),

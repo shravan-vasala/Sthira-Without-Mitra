@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trufit_bodamma/providers/app_providers.dart';
-import 'package:trufit_bodamma/providers/daily_score_provider.dart';
 import 'package:trufit_bodamma/repositories/daily_log_repository.dart';
 import 'package:trufit_bodamma/repositories/exercise_log_repository.dart';
 import 'package:trufit_bodamma/repositories/habit_repository.dart';

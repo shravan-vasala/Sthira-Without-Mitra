@@ -31,7 +31,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
     _controller = YoutubePlayerController.fromVideoId(
       videoId: widget.videoId,
       autoPlay: true,
-      params: YoutubePlayerParams(
+      params: const YoutubePlayerParams(
         showControls: true,
         showFullscreenButton: true,
         mute: false,
@@ -111,9 +111,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                   child: player,
                 ),
                 if (!_isFullScreen) ...[
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -126,7 +126,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                           ),
                         ),
                         if (widget.subtitle.isNotEmpty) ...[
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             widget.subtitle,
                             style: TextStyle(
@@ -135,7 +135,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                             ),
                           ),
                         ],
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         if (widget.reps.isNotEmpty)
                           Text(
                             'Reps: ${widget.reps}',
@@ -144,7 +144,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                               fontSize: 16,
                             ),
                           ),
-                        SizedBox(height: 24),
+                        const SizedBox(height: 24),
                         Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton.icon(
@@ -155,7 +155,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                               style: TextStyle(color: context.colors.primary, fontSize: 16),
                             ),
                             style: TextButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               backgroundColor: context.colors.primary.withValues(alpha: 0.1),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),

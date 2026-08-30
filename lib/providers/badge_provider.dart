@@ -8,7 +8,7 @@ final badgeProvider = Provider<List<AchievementBadge>>((ref) {
   
   if (logs.isEmpty) return [];
 
-  int workoutCount = logs.where((l) => l.workoutCompleted).length;
+  final int workoutCount = logs.where((l) => l.workoutCompleted).length;
   // A simplistic streak for demo purposes
   int currentStreak = 0;
   for (final log in logs.reversed) {

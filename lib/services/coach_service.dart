@@ -1,6 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:googleai_dart/googleai_dart.dart';
-import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'dart:math';
 
 import '../models/feature_availability.dart';

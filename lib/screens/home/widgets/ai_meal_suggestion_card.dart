@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/primary_button.dart';
-import '../../../services/gemini_food_service.dart';
 import '../../../providers/app_providers.dart';
 
 class AIMealSuggestionCard extends ConsumerStatefulWidget {

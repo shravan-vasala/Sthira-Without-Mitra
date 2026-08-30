@@ -63,7 +63,7 @@ class AvatarPickerSheet extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Theme.of(context).primaryColor.withOpacity(0.3),
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                               width: 2,
                             ),
                             image: DecorationImage(

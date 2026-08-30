@@ -118,7 +118,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.colors.scaffoldBg,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => DraggableScrollableSheet(
@@ -128,7 +128,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
         expand: false,
         builder: (ctx, scrollController) => Column(
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
                 'Select Photo',
@@ -138,8 +138,8 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             Expanded(
               child: GridView.builder(
                 controller: scrollController,
-                padding: EdgeInsets.all(16),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
@@ -173,14 +173,14 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                             bottom: 4,
                             left: 4,
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                               decoration: BoxDecoration(
                                 color: Colors.black.withValues(alpha: 0.6),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 item.poseTag,
-                                style: TextStyle(fontSize: 9, color: Colors.white),
+                                style: const TextStyle(fontSize: 9, color: Colors.white),
                               ),
                             ),
                           ),
@@ -203,7 +203,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
           onTap: () => _pickPhoto(isLeft),
           child: Container(
             color: Colors.black,
-            child: Center(
+            child: const Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -238,19 +238,19 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
               ),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 color: Colors.black87,
                 child: Column(
                   children: [
                     Text(
                       _formatDate(item.date),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       _getWeightStr(item.date),
                       style: TextStyle(
@@ -275,8 +275,8 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text('Compare', style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Compare', style: TextStyle(color: Colors.white)),
         elevation: 0,
       ),
       body: Stack(
@@ -297,7 +297,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
               top: 32,
               child: Center(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: context.colors.primary,
                     borderRadius: BorderRadius.circular(20),
@@ -305,13 +305,13 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.5),
                         blurRadius: 8,
-                        offset: Offset(0, 4),
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: Text(
                     _getTimeDeltaText(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 13,

@@ -46,7 +46,7 @@ class DailyProgressGrid extends ConsumerWidget {
     final flattenedPhotos = allPhotos.expand((e) => e.value).toList();
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: kScreenPadding),
+      padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
       child: Column(
         children: [
           IntrinsicHeight(
@@ -63,7 +63,7 @@ class DailyProgressGrid extends ConsumerWidget {
                     onTap: () => context.go('/home/body-stats'),
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: _ProgressCard(
                     title: 'Physique\nPictures',
@@ -78,7 +78,7 @@ class DailyProgressGrid extends ConsumerWidget {
               ],
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,13 +95,13 @@ class DailyProgressGrid extends ConsumerWidget {
                         : () {
                             showAppBottomSheet(
                               context: context,
-                              builder: (_) => WeightEntryDialog(),
+                              builder: (_) => const WeightEntryDialog(),
                             );
                           },
                     onChartTap: () => context.push('/progress?metric=weight'),
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: _StepsCard(
                     isFuture: isFuture,
@@ -245,7 +245,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
       return GestureDetector(
         onTap: _handleSyncTap,
         child: Container(
-          padding: EdgeInsets.all(18),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             gradient: context.colors.primaryGradient,
             borderRadius: BorderRadius.circular(20),
@@ -253,7 +253,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               BoxShadow(
                 color: context.colors.primary.withValues(alpha: 0.3),
                 blurRadius: 12,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -269,7 +269,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 ),
                 child: Icon(Icons.sync_rounded, color: context.colors.onPrimary, size: 22),
               ),
-              SizedBox(height: 14),
+              const SizedBox(height: 14),
               Text(
                 'Sync Steps',
                 style: TextStyle(
@@ -279,7 +279,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                   height: 1.3,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 'from Health Connect',
                 style: TextStyle(
@@ -322,17 +322,17 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 showAppBottomSheet(
                   context: context,
                   isScrollControlled: false,
-                  builder: (_) => SyncStatusSheet(),
+                  builder: (_) => const SyncStatusSheet(),
                 );
               } else {
                 showAppBottomSheet(
                   context: context,
-                  builder: (_) => StepsEntryDialog(),
+                  builder: (_) => const StepsEntryDialog(),
                 );
               }
             },
       child: Container(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: context.colors.mint,
           borderRadius: BorderRadius.circular(20),
@@ -356,7 +356,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 GestureDetector(
                   onTap: () => context.push('/progress?metric=steps'),
                   child: Container(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
@@ -366,7 +366,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 ),
               ],
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             Text(
               'Steps',
               style: TextStyle(
@@ -376,7 +376,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 height: 1.3,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               stepsSubtitle,
               style: TextStyle(
@@ -386,7 +386,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               ),
             ).animate(key: ValueKey(stepsSubtitle)).fade().scale(begin: const Offset(0.95, 0.95)),
             if (sourceHint != null) ...[
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
                 sourceHint,
                 style: TextStyle(
@@ -430,7 +430,7 @@ class _ProgressCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(18),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(20),
@@ -455,7 +455,7 @@ class _ProgressCard extends StatelessWidget {
                   GestureDetector(
                     onTap: onChartTap,
                     child: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
@@ -465,7 +465,7 @@ class _ProgressCard extends StatelessWidget {
                   ),
               ],
             ),
-            SizedBox(height: 14),
+            const SizedBox(height: 14),
             Text(
               title,
               style: TextStyle(
@@ -475,12 +475,12 @@ class _ProgressCard extends StatelessWidget {
                 height: 1.3,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             if (thumbnails != null && thumbnails!.isNotEmpty)
               Row(
                 children: [
                   ...thumbnails!.take(3).map((path) => Padding(
-                        padding: EdgeInsets.only(right: 4),
+                        padding: const EdgeInsets.only(right: 4),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(6),
                           child: kIsWeb

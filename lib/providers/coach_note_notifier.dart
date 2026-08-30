@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../models/coach_note.dart';
 import '../models/daily_log.dart';
 import '../models/daily_meal_log.dart';
-import '../models/habit.dart';
 import '../models/daily_stats_snapshot.dart';
 import 'app_providers.dart';
 

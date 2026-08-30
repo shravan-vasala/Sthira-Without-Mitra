@@ -13,7 +13,6 @@ import '../../models/habit.dart';
 import '../../utils/workout_completion.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/surface_card.dart';
-import '../../widgets/app_bottom_sheet.dart';
 import '../profile/manage_habits_screen.dart';
 import 'widgets/week_calendar_strip.dart';
 import 'widgets/meals_card.dart';
@@ -21,7 +20,6 @@ import 'widgets/habits_card.dart';
 import 'widgets/daily_progress_grid.dart';
 import 'widgets/coach_notes_card.dart';
 import 'widgets/day_complete_sheet.dart';
-import 'water_entry_dialog.dart';
 
 import 'package:confetti/confetti.dart';
 import '../../providers/gamification_provider.dart';
@@ -215,7 +213,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               color: context.colors.primary,
               onRefresh: () => _syncSteps(isManualRefresh: true),
               child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(
+                physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
                 child: Column(
@@ -243,10 +241,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         KeyedSubtree(
                           key: _habitsKey,
-                          child: SectionHeader(
+                          child: const SectionHeader(
                             'HABITS',
-                            trailing: const _HabitsEditButton(),
-                            countLabel: const _HabitsCountLabel(),
+                            trailing: _HabitsEditButton(),
+                            countLabel: _HabitsCountLabel(),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -496,7 +494,7 @@ class _HabitsEditButton extends StatelessWidget {
         Navigator.of(
           context,
           rootNavigator: true,
-        ).push(MaterialPageRoute(builder: (_) => ManageHabitsScreen()));
+        ).push(MaterialPageRoute(builder: (_) => const ManageHabitsScreen()));
       },
       child: Icon(Icons.edit_rounded, color: context.colors.primary, size: 18),
     );
@@ -512,7 +510,7 @@ class _WorkoutsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final workoutPlan = ref.watch(workoutPlanProvider);
     final phaseProgress = ref.watch(phaseProgressProvider);
-    if (workoutPlan == null || workoutPlan.days.isEmpty) return SizedBox();
+    if (workoutPlan == null || workoutPlan.days.isEmpty) return const SizedBox();
 
     final dateStr = ref.watch(dateStringProvider);
 
@@ -535,7 +533,7 @@ class _WorkoutsSection extends ConsumerWidget {
       dailyLog: dailyLog,
     );
 
-    List<Widget> cards = [];
+    final List<Widget> cards = [];
     int completedCount = 0;
 
     if (isRest) {
@@ -567,13 +565,13 @@ class _WorkoutsSection extends ConsumerWidget {
           title = 'Cool down';
         }
 
-        String subtitle = (i == 0)
+        final String subtitle = (i == 0)
             ? 'Complete your scheduled workout'
             : '${sec.exercises.length} exercises';
 
         cards.add(
           Padding(
-            padding: EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: 8),
             child: _buildCard(
               context,
               title: title,
@@ -607,7 +605,7 @@ class _WorkoutsSection extends ConsumerWidget {
                         color: context.colors.primary,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     SizedBox(
                       width: 16,
                       height: 16,
@@ -626,9 +624,9 @@ class _WorkoutsSection extends ConsumerWidget {
                 )
               : null,
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: kScreenPadding),
+          padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
           child: Column(children: cards),
         ),
       ],
@@ -646,7 +644,7 @@ class _WorkoutsSection extends ConsumerWidget {
     VoidCallback? onTap,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 12),
       child: SurfaceCard(
         onTap: isFuture ? null : onTap,
         border: isCompleted
@@ -685,7 +683,7 @@ class _WorkoutsSection extends ConsumerWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(
@@ -697,10 +695,10 @@ class _WorkoutsSection extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             if (isCompleted)
               Container(
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: context.colors.green.withValues(alpha: 0.1),
                   shape: BoxShape.circle,

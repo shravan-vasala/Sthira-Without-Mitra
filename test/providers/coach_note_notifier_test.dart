@@ -77,7 +77,7 @@ void main() {
     final note = CoachNote(date: '2023-10-02', note: 'Cached Note', isAi: false);
     await coachNoteRepo.saveNote(note);
 
-    container.listen(coachNoteProvider, (_, __) {});
+    container.listen(coachNoteProvider, (_, _) {});
 
     await container.read(coachNoteProvider.notifier).fetchNote(force: true);
 
@@ -90,7 +90,7 @@ void main() {
   });
 
   test('CoachNoteNotifier fallback without API key', () async {
-    container.listen(coachNoteProvider, (_, __) {});
+    container.listen(coachNoteProvider, (_, _) {});
 
     await container.read(coachNoteProvider.notifier).fetchNote(force: true);
 

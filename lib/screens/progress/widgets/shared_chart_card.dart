@@ -79,12 +79,12 @@ class SharedChartCard extends StatelessWidget {
             color: context.colors.textDark,
           ),
         ),
-        Spacer(),
+        const Spacer(),
         if (showKgLbToggle)
           GestureDetector(
             onTap: onToggleUnit,
             child: Container(
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 10,
                 vertical: 4,
               ),
@@ -146,7 +146,7 @@ class SharedChartCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           chartArea,
         ],
       ),
@@ -159,7 +159,7 @@ class SharedChartCard extends StatelessWidget {
     return Column(
       children: [
         mainContainer,
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         if (statLabels.isNotEmpty && statValues.isNotEmpty)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -194,7 +194,7 @@ class SharedChartCard extends StatelessWidget {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               statValues[index],
                               style: TextStyle(
@@ -283,12 +283,12 @@ class SharedChartCard extends StatelessWidget {
     }
     
     if (timeFormat == ChartTimeFormat.sixMonths && spots != null && spots.isNotEmpty) {
-       final minY_data = spots.map((s) => s.y).reduce(min);
-       final maxY_data = spots.map((s) => s.y).reduce(max);
+       final minyData = spots.map((s) => s.y).reduce(min);
+       final maxyData = spots.map((s) => s.y).reduce(max);
        
        lines.add(
          HorizontalLine(
-           y: maxY_data,
+           y: maxyData,
            color: Colors.transparent,
            strokeWidth: 0,
            label: HorizontalLineLabel(
@@ -296,15 +296,15 @@ class SharedChartCard extends StatelessWidget {
              alignment: Alignment.topLeft,
              padding: const EdgeInsets.only(left: 4, bottom: 2),
              style: TextStyle(fontSize: 10, color: context.colors.primary, fontWeight: FontWeight.bold),
-             labelResolver: (_) => 'Max ${maxY_data.toStringAsFixed(1)}'
+             labelResolver: (_) => 'Max ${maxyData.toStringAsFixed(1)}'
            )
          )
        );
        
-       if (minY_data != maxY_data) {
+       if (minyData != maxyData) {
          lines.add(
            HorizontalLine(
-             y: minY_data,
+             y: minyData,
              color: Colors.transparent,
              strokeWidth: 0,
              label: HorizontalLineLabel(
@@ -312,7 +312,7 @@ class SharedChartCard extends StatelessWidget {
                alignment: Alignment.bottomRight,
                padding: const EdgeInsets.only(right: 4, top: 2),
                style: TextStyle(fontSize: 10, color: context.colors.red, fontWeight: FontWeight.bold),
-               labelResolver: (_) => 'Min ${minY_data.toStringAsFixed(1)}'
+               labelResolver: (_) => 'Min ${minyData.toStringAsFixed(1)}'
              )
            )
          );
@@ -563,9 +563,9 @@ class SharedChartCard extends StatelessWidget {
             show: true,
             checkToShowDot: (spot, barData) {
               if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
-                 final minY_data = spots.map((s) => s.y).reduce(min);
-                 final maxY_data = spots.map((s) => s.y).reduce(max);
-                 if (spot.y == minY_data || spot.y == maxY_data || spot.x == barData.spots.last.x) {
+                 final minyData = spots.map((s) => s.y).reduce(min);
+                 final maxyData = spots.map((s) => s.y).reduce(max);
+                 if (spot.y == minyData || spot.y == maxyData || spot.x == barData.spots.last.x) {
                     return true;
                  }
                  return false;
@@ -574,12 +574,12 @@ class SharedChartCard extends StatelessWidget {
             },
             getDotPainter: (spot, percent, bar, index) {
               if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
-                 final minY_data = spots.map((s) => s.y).reduce(min);
-                 final maxY_data = spots.map((s) => s.y).reduce(max);
-                 if (spot.y == minY_data && spot.y != maxY_data) {
+                 final minyData = spots.map((s) => s.y).reduce(min);
+                 final maxyData = spots.map((s) => s.y).reduce(max);
+                 if (spot.y == minyData && spot.y != maxyData) {
                     return FlDotCirclePainter(radius: 4.5, color: context.colors.red, strokeWidth: 1.5, strokeColor: context.colors.card);
                  }
-                 if (spot.y == maxY_data) {
+                 if (spot.y == maxyData) {
                     return FlDotCirclePainter(radius: 4.5, color: context.colors.primary, strokeWidth: 1.5, strokeColor: context.colors.card);
                  }
                  if (spot.x == bar.spots.last.x) {

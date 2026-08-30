@@ -28,14 +28,14 @@ class HabitsCard extends ConsumerWidget {
     final isFuture = selectedDate.isAfter(today);
 
     return SurfaceCard(
-      margin: EdgeInsets.symmetric(horizontal: kScreenPadding),
+      margin: const EdgeInsets.symmetric(horizontal: kScreenPadding),
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (int i = 0; i < habits.length; i++) ...[
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: _HabitItem(
                 habit: habits[i],
                 isCompleted: isHabitCompleted(habits[i], completions, dailyLog),
@@ -105,7 +105,7 @@ class _HabitItem extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 2),
+                    const SizedBox(width: 2),
                     
                     // Habit Name & Progress
                     Expanded(
@@ -129,7 +129,7 @@ class _HabitItem extends ConsumerWidget {
                               habit.unit.isNotEmpty &&
                               habit.target > 0)
                             Padding(
-                              padding: EdgeInsets.only(top: 2),
+                              padding: const EdgeInsets.only(top: 2),
                               child: Text(
                                 'Goal: ${habit.target == habit.target.roundToDouble() ? habit.target.toInt() : habit.target} ${habit.unit}',
                                 style: TextStyle(
@@ -146,13 +146,13 @@ class _HabitItem extends ConsumerWidget {
                                       ? () {
                                           showAppBottomSheet(
                                             context: context,
-                                            builder: (_) => SleepEntryDialog(),
+                                            builder: (_) => const SleepEntryDialog(),
                                           );
                                         }
                                       : null,
                                   behavior: HitTestBehavior.opaque,
                                   child: Padding(
-                                    padding: EdgeInsets.only(top: 2, bottom: 2, right: 8),
+                                    padding: const EdgeInsets.only(top: 2, bottom: 2, right: 8),
                                     child: Text(
                                       _formatProgress(),
                                       style: TextStyle(fontSize: 12, color: context.colors.textMedium),
@@ -164,8 +164,8 @@ class _HabitItem extends ConsumerWidget {
                                   final streak = ref.watch(habitStreakProvider(habit.id));
                                   if (streak > 1) {
                                     return Container(
-                                      margin: EdgeInsets.only(top: 2),
-                                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      margin: const EdgeInsets.only(top: 2),
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
                                         color: context.colors.orange.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(4),
@@ -178,7 +178,7 @@ class _HabitItem extends ConsumerWidget {
                                             size: 12,
                                             color: context.colors.orange,
                                           ),
-                                          SizedBox(width: 2),
+                                          const SizedBox(width: 2),
                                           Text(
                                             '$streak Day Streak',
                                             style: TextStyle(
@@ -191,7 +191,7 @@ class _HabitItem extends ConsumerWidget {
                                       ),
                                     );
                                   }
-                                  return SizedBox.shrink();
+                                  return const SizedBox.shrink();
                                 },
                               ),
                             ],
@@ -215,7 +215,7 @@ class _HabitItem extends ConsumerWidget {
                       ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
                     },
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   _MiniButton(
                     icon: Icons.add,
                     onTap: () {
@@ -223,7 +223,7 @@ class _HabitItem extends ConsumerWidget {
                       ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
                     },
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                 ],
               ),
               
@@ -236,7 +236,7 @@ class _HabitItem extends ConsumerWidget {
 
   Widget _buildSwipeBackground(BuildContext context, bool isRight) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: isRight ? context.colors.green.withValues(alpha: 0.1) : context.colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
@@ -291,7 +291,7 @@ class _HabitItem extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         action: SnackBarAction(
           label: 'UNDO',
           onPressed: onUndo,
@@ -309,8 +309,8 @@ class _HabitItem extends ConsumerWidget {
   }
 
   String _formatProgress() {
-    String pStr = progress == progress.toInt() ? progress.toInt().toString() : progress.toStringAsFixed(1);
-    String tStr = habit.target == habit.target.toInt() ? habit.target.toInt().toString() : habit.target.toStringAsFixed(1);
+    final String pStr = progress == progress.toInt() ? progress.toInt().toString() : progress.toStringAsFixed(1);
+    final String tStr = habit.target == habit.target.toInt() ? habit.target.toInt().toString() : habit.target.toStringAsFixed(1);
     return '$pStr / $tStr ${habit.unit}';
   }
 
@@ -353,7 +353,7 @@ class _HabitItem extends ConsumerWidget {
     
     if ((habit.type == HabitType.autoSteps || habit.type == HabitType.autoSleep) && isSyncCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Completed from Samsung Health. Long press to override as not done.')),
+        const SnackBar(content: Text('Completed from Samsung Health. Long press to override as not done.')),
       );
       return;
     }
@@ -396,7 +396,7 @@ class _MiniButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: EdgeInsets.all(4),
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: context.colors.primary.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),

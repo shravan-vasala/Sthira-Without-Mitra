@@ -135,7 +135,7 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
 
   void _startInternalTimer() {
     _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_targetEndTimeEpoch != null) {
         final remaining = (_targetEndTimeEpoch! - DateTime.now().millisecondsSinceEpoch) ~/ 1000;
         if (remaining > 0) {
@@ -170,13 +170,13 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
           content: Row(
             children: [
               Icon(Icons.timer_off_rounded, color: context.colors.onPrimary),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Rest Complete',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -191,7 +191,7 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
             ],
           ),
           backgroundColor: context.colors.orange,
-          duration: Duration(seconds: 4),
+          duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),

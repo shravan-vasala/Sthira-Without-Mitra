@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:isar/isar.dart';
 
 class BackupRestoreResult {
   final bool success;

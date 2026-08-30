@@ -57,7 +57,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
         children: [
           TextField(
             controller: _controller,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
             style: TextStyle(
               fontSize: 32,
@@ -82,10 +82,10 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
                 color: context.colors.textMedium,
               ),
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           PrimaryButton(
             label: 'Save Weight',
             onPressed: () {

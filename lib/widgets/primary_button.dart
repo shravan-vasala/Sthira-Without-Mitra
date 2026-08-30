@@ -91,7 +91,7 @@ class CompactButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = TextStyle(
+    final textStyle = const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
     );
@@ -121,7 +121,7 @@ class CompactButton extends StatelessWidget {
           ? ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 textStyle: textStyle,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(kOutlinedButtonRadius),
@@ -132,7 +132,7 @@ class CompactButton extends StatelessWidget {
           : OutlinedButton(
               onPressed: onPressed,
               style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 textStyle: textStyle,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(kOutlinedButtonRadius),

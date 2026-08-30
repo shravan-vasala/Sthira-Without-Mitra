@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
@@ -69,7 +68,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: context.colors.lavenderCard,
                   borderRadius: BorderRadius.circular(12),
@@ -85,11 +84,11 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           
           if (isFuture)
             Container(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: context.colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
@@ -97,7 +96,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
               child: Row(
                 children: [
                   Icon(Icons.info_outline_rounded, color: context.colors.primary, size: 20),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'You cannot log water for future dates.',
@@ -116,7 +115,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                 color: context.colors.textMedium,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -134,7 +133,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: context.colors.card,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       suffixText: 'ml',
                       suffixStyle: TextStyle(
                         fontSize: 16,
@@ -157,7 +156,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -167,12 +166,12 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       foregroundColor: context.colors.primary,
                       side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: Text('+ 250ml', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('+ 250ml', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => _addAmount(500),
@@ -180,12 +179,12 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       foregroundColor: context.colors.primary,
                       side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: Text('+ 500ml', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('+ 500ml', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => _addAmount(1000),
@@ -193,14 +192,14 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       foregroundColor: context.colors.primary,
                       side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: Text('+ 1L', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('+ 1L', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Row(
               children: [
                 if (_hasExistingEntry) ...[
@@ -221,12 +220,12 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         foregroundColor: context.colors.red,
                         side: BorderSide(color: context.colors.red.withValues(alpha: 0.5)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: Text('Clear', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text('Clear', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                 ],
                 Expanded(
                   flex: 2,

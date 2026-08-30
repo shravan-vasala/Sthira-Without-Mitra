@@ -190,10 +190,10 @@ class _MiniSparkline extends StatelessWidget {
         maxX: maxX,
         minY: minY,
         maxY: maxY,
-        gridData: FlGridData(show: false),
-        titlesData: FlTitlesData(show: false),
+        gridData: const FlGridData(show: false),
+        titlesData: const FlTitlesData(show: false),
         borderData: FlBorderData(show: false),
-        lineTouchData: LineTouchData(enabled: false),
+        lineTouchData: const LineTouchData(enabled: false),
         lineBarsData: [
           for (final segment in _segments(spots))
             LineChartBarData(

@@ -66,7 +66,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               ),
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           PrimaryButton(
             label: 'Save Steps',
             onPressed: () {

@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/insight.dart';
 import 'app_providers.dart';
-import '../models/daily_log.dart';
 
 final insightsProvider = Provider<List<Insight>>((ref) {
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
@@ -48,11 +46,11 @@ final insightsProvider = Provider<List<Insight>>((ref) {
   if (logs.length >= 5) {
     final goodSleepDays = logs.where((l) => (l.sleepHours ?? 0) >= 7.5).toList();
     if (goodSleepDays.isNotEmpty && goodSleepDays.length >= 3) {
-      double avgStepsGoodSleep = goodSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / goodSleepDays.length;
+      final double avgStepsGoodSleep = goodSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / goodSleepDays.length;
       
       final badSleepDays = logs.where((l) => (l.sleepHours ?? 0) > 0 && (l.sleepHours ?? 0) < 6.5).toList();
       if (badSleepDays.isNotEmpty) {
-        double avgStepsBadSleep = badSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / badSleepDays.length;
+        final double avgStepsBadSleep = badSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / badSleepDays.length;
         
         if (avgStepsGoodSleep > avgStepsBadSleep + 2000) {
           insights.add(Insight(

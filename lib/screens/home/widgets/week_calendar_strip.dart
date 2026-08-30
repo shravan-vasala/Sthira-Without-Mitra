@@ -92,7 +92,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
         if (_pageController.page?.round() != targetPage) {
           _pageController.animateToPage(
             targetPage,
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
         }
@@ -100,7 +100,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
     });
 
     return SurfaceCard(
-      margin: EdgeInsets.symmetric(horizontal: kScreenPadding),
+      margin: const EdgeInsets.symmetric(horizontal: kScreenPadding),
       child: Column(
         children: [
           // Date header row
@@ -114,7 +114,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     ref.read(weekOffsetProvider.notifier).state = 0;
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: context.colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -129,7 +129,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
               ],
               Text(
                 DateFormat('EEE, d').format(selectedDate),
@@ -139,7 +139,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   color: context.colors.textDark,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -162,9 +162,9 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   ),
                 ],
               ),
-              Spacer(),
+              const Spacer(),
               const _DailyScoreBadge(),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               GestureDetector(
                 onTap: () async {
                   final picked = await showDatePicker(
@@ -179,8 +179,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                             primary: context.colors.primary,
                             surface: context.colors.card,
                             onSurface: context.colors.textDark,
-                          ),
-                          dialogBackgroundColor: context.colors.card,
+                          ), dialogTheme: DialogThemeData(backgroundColor: context.colors.card),
                         ),
                         child: child!,
                       );
@@ -207,7 +206,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
 
           // Week day circles
           SizedBox(
@@ -382,11 +381,11 @@ class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProvide
                   widget.isSelected ? context.colors.primary : context.colors.textLight,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           ScaleTransition(
             scale: _scaleAnim,
             child: AnimatedContainer(
-              duration: Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 200),
               width: 32,
               height: 32,
               decoration: BoxDecoration(
@@ -409,7 +408,7 @@ class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProvide
               ),
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           // Activity dot (hidden on rest days)
           SizedBox(
             width: 8,
@@ -462,7 +461,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
     Color textColor;
     List<Color>? gradientColors;
     Color borderColor;
-    IconData iconData = Icons.local_fire_department_rounded;
+    final IconData iconData = Icons.local_fire_department_rounded;
 
     if (isFuture) {
       iconColor = context.colors.textLight;

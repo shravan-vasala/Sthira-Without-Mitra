@@ -3,8 +3,6 @@ import 'app_providers.dart';
 import '../models/workout_plan.dart';
 import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';
-import '../repositories/workout_repository.dart';
-import '../repositories/exercise_log_repository.dart';
 
 final workoutPlanProvider = Provider<WorkoutPlan?>((ref) {
   final repo = ref.watch(workoutRepoProvider);

@@ -4,7 +4,6 @@ import '../models/social_profile.dart';
 import 'daily_log_notifier.dart';
 import '../models/daily_log.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:isar/isar.dart';
 import '../repositories/coach_note_repository.dart';
 import '../repositories/workout_repository.dart';
 import '../repositories/meal_repository.dart';
@@ -28,14 +27,9 @@ import '../services/social_sync_service.dart';
 import '../interfaces/i_ai_food_service.dart';
 
 import 'auth_provider.dart';
-import 'habit_providers.dart';
 import 'profile_providers.dart';
-import 'workout_providers.dart';
-import 'meal_providers.dart';
 
-import '../models/daily_log.dart';
-import '../models/coach_note.dart';
-import '../models/habit.dart'; // used for daily log habit auto-complete
+// used for daily log habit auto-complete
 
 export 'rest_timer_provider.dart';
 export 'phase_progress_provider.dart';

@@ -14,10 +14,8 @@ import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 import 'widgets/trophy_room_card.dart';
 import '../../providers/app_providers.dart';
-import '../../services/firestore_sync_service.dart';
 import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
-import 'package:intl/intl.dart';
 
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -53,15 +51,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: context.colors.scaffoldBg,
       body: SafeArea(
         child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(20, 20, 20, 24),
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
           child: Column(
             children: [
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               // Profile header
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: context.colors.card,
                   borderRadius: BorderRadius.circular(24),
@@ -101,7 +99,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             : _buildDefaultAvatar(context, profile.name),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
                       profile.name,
                       style: TextStyle(
@@ -110,7 +108,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         color: context.colors.textDark,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'Height: ${profile.height.toStringAsFixed(0)} cm',
                       style: TextStyle(
@@ -119,7 +117,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     if (profile.targetWeight != null) ...[
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         'Target: ${profile.targetWeight!.toStringAsFixed(1)} ${profile.weightUnit}',
                         style: TextStyle(
@@ -131,7 +129,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               
               // Cloud Sync
               const _CloudSyncCard(),
@@ -247,7 +245,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Download logs and stats as CSV',
                 onTap: () => _showExportDataSheet(context, ref),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'Made with ❤️ for Bodamma',
                 style: TextStyle(
@@ -257,7 +255,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               if (_appVersion.isNotEmpty) ...[
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   _appVersion,
                   style: TextStyle(
@@ -266,7 +264,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               ],
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -427,7 +425,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               decoration: InputDecoration(
                 labelText: 'Coach name',
                 hintText: 'e.g. Shravan',
-                prefixIcon: Icon(Icons.sports_rounded),
+                prefixIcon: const Icon(Icons.sports_rounded),
                 filled: true,
                 fillColor: context.colors.inputFill,
               ),
@@ -438,7 +436,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Gemini API Key',
-                prefixIcon: Icon(Icons.key_rounded),
+                prefixIcon: const Icon(Icons.key_rounded),
                 filled: true,
                 fillColor: context.colors.inputFill,
               ),
@@ -601,7 +599,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to export data or no data found'),
+            content: const Text('Failed to export data or no data found'),
             backgroundColor: context.colors.red,
           ),
         );
@@ -655,7 +653,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
         await _runFullSync();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Successfully signed in & synced!'), backgroundColor: context.colors.primary),
+            SnackBar(content: const Text('Successfully signed in & synced!'), backgroundColor: context.colors.primary),
           );
         }
       }
@@ -723,7 +721,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
     final userEmail = ref.watch(userEmailProvider);
 
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(24),
@@ -732,7 +730,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -742,7 +740,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
           Row(
             children: [
               Icon(Icons.cloud_sync_rounded, color: context.colors.primary),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'Cloud Sync',
                 style: TextStyle(
@@ -751,10 +749,10 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   color: context.colors.textDark,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               if (isSignedIn)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: context.colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -766,20 +764,20 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                 )
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             isSignedIn 
               ? 'Your text data is securely synced as $userEmail. Photos are NOT cloud-synced. Use ZIP backup to move media.'
               : 'Sign in to sync your text data across devices. Photos are NOT cloud-synced.',
             style: TextStyle(color: context.colors.textMedium, fontSize: 13),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           if (_isSyncing)
             Center(
               child: Column(
                 children: [
-                  SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
-                  SizedBox(height: 8),
+                  const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+                  const SizedBox(height: 8),
                   Text(_syncStatus, style: TextStyle(color: context.colors.primary, fontSize: 12)),
                 ],
               ),
@@ -792,11 +790,11 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
-                  padding: EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                icon: Icon(Icons.login),
-                label: Text('Sign in with Google'),
+                icon: const Icon(Icons.login),
+                label: const Text('Sign in with Google'),
               ),
             )
           else
@@ -812,14 +810,14 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
                       side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    icon: Icon(Icons.sync),
-                    label: Text('Sync Now'),
+                    icon: const Icon(Icons.sync),
+                    label: const Text('Sync Now'),
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 IconButton(
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
@@ -867,7 +865,7 @@ class _ExportOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: 24),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
       title: Text(title, style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.w600)),
       trailing: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium),
       onTap: onTap,
@@ -893,8 +891,8 @@ class _MenuCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(18),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(kCardRadius),
@@ -902,7 +900,7 @@ class _MenuCard extends StatelessWidget {
             BoxShadow(
               color: context.colors.primary.withValues(alpha: 0.04),
               blurRadius: 8,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -917,7 +915,7 @@ class _MenuCard extends StatelessWidget {
               ),
               child: Icon(icon, color: context.colors.primary, size: 22),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -930,7 +928,7 @@ class _MenuCard extends StatelessWidget {
                       color: context.colors.textDark,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: TextStyle(
@@ -970,7 +968,7 @@ class _SettingsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(kCardRadius),
@@ -978,7 +976,7 @@ class _SettingsSwitch extends StatelessWidget {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -987,7 +985,7 @@ class _SettingsSwitch extends StatelessWidget {
         onChanged: onChanged,
         activeThumbColor: context.colors.primary,
         secondary: Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: context.colors.lavender,
             borderRadius: BorderRadius.circular(14),
@@ -1010,7 +1008,7 @@ class _SettingsSwitch extends StatelessWidget {
           ),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kCardRadius)),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
     );
   }
@@ -1072,7 +1070,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
 
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: pickedFile.path,
-        aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
         compressQuality: 70,
         maxWidth: 512,
         maxHeight: 512,

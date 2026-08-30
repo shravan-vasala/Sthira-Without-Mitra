@@ -6,10 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
-import '../../../models/meal_plan.dart';
-import '../../../utils/meal_plan_complete.dart';
 import '../../../widgets/app_bottom_sheet.dart';
-import '../../../widgets/primary_button.dart';
 import '../../../widgets/surface_card.dart';
 import 'photo_calorie_scanner_sheet.dart';
 
@@ -86,7 +83,7 @@ class MealsCard extends ConsumerWidget {
       label:
           'Meals Card. $completedMeals of $totalMeals meals logged. $completedCal of $totalCal calories consumed.',
       child: SurfaceCard(
-        margin: EdgeInsets.symmetric(horizontal: kScreenPadding),
+        margin: const EdgeInsets.symmetric(horizontal: kScreenPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -111,7 +108,7 @@ class MealsCard extends ConsumerWidget {
                             color: context.colors.textDark,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           planName,
                           style: TextStyle(
@@ -130,7 +127,7 @@ class MealsCard extends ConsumerWidget {
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
@@ -142,7 +139,7 @@ class MealsCard extends ConsumerWidget {
                 minHeight: 6,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               '$completedMeals/$totalMeals meals  ·  $completedCal/$totalCal kcal',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -150,7 +147,7 @@ class MealsCard extends ConsumerWidget {
                     color: context.colors.textMedium,
                   ),
             ).animate(key: ValueKey('$completedMeals-$completedCal')).fade().scale(begin: const Offset(0.95, 0.95)),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               children: [
                 _MacroPill(
@@ -158,13 +155,13 @@ class MealsCard extends ConsumerWidget {
                   value: '${dailyLog.totalProtein.toStringAsFixed(0)}g',
                   color: context.colors.green,
                 ).animate(key: ValueKey(dailyLog.totalProtein)).scale(begin: const Offset(0.9, 0.9)),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 _MacroPill(
                   label: 'C',
                   value: '${dailyLog.totalCarbs.toStringAsFixed(0)}g',
                   color: context.colors.orange,
                 ).animate(key: ValueKey(dailyLog.totalCarbs)).scale(begin: const Offset(0.9, 0.9)),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 _MacroPill(
                   label: 'F',
                   value: '${dailyLog.totalFat.toStringAsFixed(0)}g',
@@ -173,7 +170,7 @@ class MealsCard extends ConsumerWidget {
               ],
             ),
 
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -194,7 +191,7 @@ class _MacroPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),

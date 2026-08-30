@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 enum BadgeCategory { frequency, streaks, milestones, aiSupport }
 

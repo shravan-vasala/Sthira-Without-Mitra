@@ -20,7 +20,7 @@ class DailyScoreSheet extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
       child: Column(
@@ -44,7 +44,7 @@ class DailyScoreSheet extends ConsumerWidget {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           if (scoreData.isFutureDate)
             Center(
               child: Padding(
@@ -58,7 +58,7 @@ class DailyScoreSheet extends ConsumerWidget {
           else ...[
             Center(
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
                   color: scoreColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -85,7 +85,7 @@ class DailyScoreSheet extends ConsumerWidget {
                 ),
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Text(
               'Score Breakdown',
               style: TextStyle(
@@ -94,7 +94,7 @@ class DailyScoreSheet extends ConsumerWidget {
                 color: context.colors.textDark,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildScoreRow(
               context: context,
               label: 'Habits',
@@ -120,7 +120,7 @@ class DailyScoreSheet extends ConsumerWidget {
               color: context.colors.green,
             ),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Text(
               'Your final score is normalized based on your active goals for the day.',
               style: TextStyle(
@@ -149,14 +149,14 @@ class DailyScoreSheet extends ConsumerWidget {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 20),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Text(
               label,

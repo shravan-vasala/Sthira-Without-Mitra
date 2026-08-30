@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/daily_log.dart';
 import '../models/habit.dart';
-import '../repositories/daily_log_repository.dart';
 import '../services/health_connect_service.dart';
 import 'app_providers.dart';
 

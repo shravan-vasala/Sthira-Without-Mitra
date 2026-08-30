@@ -154,7 +154,7 @@ class Exercise {
       return '${durationSeconds}s';
     }
     if (reps.isEmpty) return '';
-    bool allSame = reps.every((r) => r == reps.first);
+    final bool allSame = reps.every((r) => r == reps.first);
     if (allSame && reps.length > 1) {
       return '${reps.length} × ${reps.first}';
     }

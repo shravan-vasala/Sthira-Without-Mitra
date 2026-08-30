@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../models/user_profile.dart';
-import '../../services/health_connect_service.dart';
-import '../../services/auth_service.dart';
-import '../../services/firestore_sync_service.dart';
 import '../../models/habit.dart';
 import '../../utils/habit_icons.dart';
 
@@ -71,7 +65,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         _saveGoals();
       }
       _pageController.nextPage(
-        duration: Duration(milliseconds: 350),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
     } else {
@@ -83,7 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _goBack() {
     if (_currentPage > 0) {
       _pageController.previousPage(
-        duration: Duration(milliseconds: 350),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
     }
@@ -94,7 +88,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please enter your name'),
+          content: const Text('Please enter your name'),
           backgroundColor: context.colors.red,
         ),
       );
@@ -205,7 +199,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (i) => setState(() => _currentPage = i),
                 children: [
                   _WelcomePage(),
@@ -278,14 +272,14 @@ class _ProgressDots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(
           total,
           (i) => AnimatedContainer(
-            duration: Duration(milliseconds: 250),
-            margin: EdgeInsets.symmetric(horizontal: 4),
+            duration: const Duration(milliseconds: 250),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
             width: i == current ? 24 : 8,
             height: 8,
             decoration: BoxDecoration(
@@ -322,7 +316,7 @@ class _NavButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24, 8, 24, 24),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
       child: Row(
         children: [
           if (currentPage > 0)
@@ -332,15 +326,15 @@ class _NavButtons extends StatelessWidget {
                   style: TextStyle(color: context.colors.textMedium)),
             )
           else
-            SizedBox(width: 64),
-          Spacer(),
+            const SizedBox(width: 64),
+          const Spacer(),
           if (_isOptionalPage && !_isLastPage)
             TextButton(
               onPressed: onSkip,
               child: Text('Skip',
                   style: TextStyle(color: context.colors.primary.withValues(alpha: 0.7))),
             ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           _PrimaryButton(
             label: _isLastPage ? 'Get Started' : 'Next',
             onPressed: onNext,
@@ -367,7 +361,7 @@ class _PrimaryButton extends StatelessWidget {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.3),
             blurRadius: 12,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -375,7 +369,7 @@ class _PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
@@ -399,10 +393,10 @@ class _WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           // Logo
           ClipRRect(
             borderRadius: BorderRadius.circular(32),
@@ -413,7 +407,7 @@ class _WelcomePage extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           Text(
             'Sthira',
             style: TextStyle(
@@ -423,7 +417,7 @@ class _WelcomePage extends StatelessWidget {
               letterSpacing: -0.5,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'स्थिर · steady, every day',
             style: TextStyle(
@@ -432,25 +426,25 @@ class _WelcomePage extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 48),
+          const SizedBox(height: 48),
           ...[
-            _FeaturePill(
+            const _FeaturePill(
               icon: Icons.play_circle_outline_rounded,
               title: 'No accounts, ever',
               subtitle: 'Your data never leaves your device',
             ),
-            _FeaturePill(
+            const _FeaturePill(
               icon: Icons.camera_alt_outlined,
               title: 'Works fully offline',
               subtitle: 'No internet required for workouts & tracking',
             ),
-            _FeaturePill(
+            const _FeaturePill(
               icon: Icons.lock_outline_rounded,
               title: 'You own your data',
               subtitle: 'Export & restore any time with one tap',
             ),
           ],
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           GestureDetector(
             onTap: () {
               showDialog(
@@ -476,7 +470,7 @@ class _WelcomePage extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
@@ -509,7 +503,7 @@ class _WelcomePage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -530,20 +524,20 @@ class _FeaturePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
-          Container(
+          SizedBox(
             width: 48,
             height: 48,
             child: Center(child: Icon(icon, size: 28, color: context.colors.textDark)),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,7 +550,7 @@ class _FeaturePill extends StatelessWidget {
                     color: context.colors.textDark,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: TextStyle(
@@ -595,39 +589,39 @@ class _ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 24),
-          _StepHeader(icon: Icons.person_outline_rounded, title: "Let's set up\nyour profile"),
-          SizedBox(height: 32),
-          _FieldLabel('Your Name *'),
+          const SizedBox(height: 24),
+          const _StepHeader(icon: Icons.person_outline_rounded, title: "Let's set up\nyour profile"),
+          const SizedBox(height: 32),
+          const _FieldLabel('Your Name *'),
           _InputField(
             controller: nameController,
             hint: 'e.g. Bodamma',
             capitalization: TextCapitalization.words,
           ),
-          SizedBox(height: 20),
-          _FieldLabel('Coach name (optional)'),
+          const SizedBox(height: 20),
+          const _FieldLabel('Coach name (optional)'),
           _InputField(
             controller: coachNameController,
             hint: 'e.g. Shravan',
             capitalization: TextCapitalization.words,
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Shown on daily coach notes (e.g. "Coach Shravan").',
             style: TextStyle(fontSize: 12, color: context.colors.textMedium),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FieldLabel('Height (cm)'),
+                    const _FieldLabel('Height (cm)'),
                     _InputField(
                       controller: heightController,
                       hint: '175',
@@ -637,12 +631,12 @@ class _ProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FieldLabel('Target Weight (opt.)'),
+                    const _FieldLabel('Target Weight (opt.)'),
                     _InputField(
                       controller: weightController,
                       hint: useKg ? '70 kg' : '154 lb',
@@ -654,9 +648,9 @@ class _ProfilePage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 24),
-          _FieldLabel('Weight Unit'),
-          SizedBox(height: 8),
+          const SizedBox(height: 24),
+          const _FieldLabel('Weight Unit'),
+          const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
               color: context.colors.card,
@@ -675,7 +669,7 @@ class _ProfilePage extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -695,8 +689,8 @@ class _UnitTab extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 200),
-          padding: EdgeInsets.symmetric(vertical: 14),
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: selected ? context.colors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
@@ -734,19 +728,19 @@ class _GoalsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 24),
-          _StepHeader(icon: Icons.flag_outlined, title: 'Set your\ndaily goals'),
-          SizedBox(height: 32),
+          const SizedBox(height: 24),
+          const _StepHeader(icon: Icons.flag_outlined, title: 'Set your\ndaily goals'),
+          const SizedBox(height: 32),
           _SectionCard(
             children: [
               Row(
                 children: [
                   Icon(Icons.local_fire_department_outlined, color: context.colors.primary, size: 22),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
                     'Daily Calorie Target',
                     style: TextStyle(
@@ -755,9 +749,9 @@ class _GoalsPage extends StatelessWidget {
                       color: context.colors.textDark,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: context.colors.lavender,
                       borderRadius: BorderRadius.circular(10),
@@ -798,7 +792,7 @@ class _GoalsPage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             'Default Habits',
             style: TextStyle(
@@ -807,20 +801,20 @@ class _GoalsPage extends StatelessWidget {
               color: context.colors.textDark,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             'Pick habits to track daily',
             style: TextStyle(fontSize: 13, color: context.colors.textMedium),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           ...Habit.defaults.map((habit) {
             final selected = selectedHabitIds.contains(habit.id);
             return GestureDetector(
               onTap: () => onHabitToggled(habit.id, !selected),
               child: AnimatedContainer(
-                duration: Duration(milliseconds: 200),
-                margin: EdgeInsets.only(bottom: 10),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: selected ? context.colors.lavender : context.colors.card,
                   borderRadius: BorderRadius.circular(16),
@@ -838,7 +832,7 @@ class _GoalsPage extends StatelessWidget {
                           ? context.colors.primary
                           : context.colors.textMedium,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         habit.name,
@@ -856,7 +850,7 @@ class _GoalsPage extends StatelessWidget {
               ),
             );
           }),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -881,18 +875,18 @@ class _HealthConnectPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 24),
-          _StepHeader(icon: Icons.favorite_border_rounded, title: 'Sync health\ndata (optional)'),
-          SizedBox(height: 12),
+          const SizedBox(height: 24),
+          const _StepHeader(icon: Icons.favorite_border_rounded, title: 'Sync health\ndata (optional)'),
+          const SizedBox(height: 12),
           Text(
             'Connect to Health Connect to automatically sync your daily steps and sleep hours from Samsung Health or other health apps.',
             style: TextStyle(fontSize: 14, color: context.colors.textMedium, height: 1.5),
           ),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _SectionCard(
             children: [
               Row(
@@ -904,9 +898,9 @@ class _HealthConnectPage extends StatelessWidget {
                       color: context.colors.mint,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Center(child: Icon(Icons.directions_walk_rounded, color: Colors.white, size: 24)),
+                    child: const Center(child: Icon(Icons.directions_walk_rounded, color: Colors.white, size: 24)),
                   ),
-                  SizedBox(width: 14),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -918,7 +912,7 @@ class _HealthConnectPage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Container(
@@ -928,9 +922,9 @@ class _HealthConnectPage extends StatelessWidget {
                       color: context.colors.lavenderCard,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Center(child: Icon(Icons.nights_stay_rounded, color: Colors.white, size: 22)),
+                    child: const Center(child: Icon(Icons.nights_stay_rounded, color: Colors.white, size: 22)),
                   ),
-                  SizedBox(width: 14),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -944,10 +938,10 @@ class _HealthConnectPage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           if (status.isNotEmpty)
             Container(
-              padding: EdgeInsets.all(14),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: connected ? context.colors.greenLight : context.colors.lavender,
                 borderRadius: BorderRadius.circular(14),
@@ -959,7 +953,7 @@ class _HealthConnectPage extends StatelessWidget {
                     color: connected ? context.colors.green : context.colors.primary,
                     size: 18,
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       status,
@@ -973,7 +967,7 @@ class _HealthConnectPage extends StatelessWidget {
                 ],
               ),
             ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           if (!connected)
             SizedBox(
               width: double.infinity,
@@ -985,7 +979,7 @@ class _HealthConnectPage extends StatelessWidget {
                     BoxShadow(
                       color: context.colors.primary.withValues(alpha: 0.3),
                       blurRadius: 12,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -993,7 +987,7 @@ class _HealthConnectPage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   onPressed: connecting ? null : onConnect,
@@ -1018,7 +1012,7 @@ class _HealthConnectPage extends StatelessWidget {
                 ),
               ),
             ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -1049,27 +1043,27 @@ class _AiSetupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 24),
-          _StepHeader(icon: Icons.auto_awesome_outlined, title: 'AI-powered\nfeatures (optional)'),
-          SizedBox(height: 12),
+          const SizedBox(height: 24),
+          const _StepHeader(icon: Icons.auto_awesome_outlined, title: 'AI-powered\nfeatures (optional)'),
+          const SizedBox(height: 12),
           Text(
             'Add a free Gemini API key to unlock AI meal scanning from photos and personalized daily coach notes. (Skip this if you plan to use Cloud Sync on the next step!)',
             style: TextStyle(fontSize: 14, color: context.colors.textMedium, height: 1.5),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _SectionCard(
             children: [
               Row(children: [
                 Container(
                   width: 40, height: 40,
                   decoration: BoxDecoration(color: context.colors.pink, borderRadius: BorderRadius.circular(12)),
-                  child: Center(child: Icon(Icons.camera_alt_outlined, color: Colors.white, size: 20)),
+                  child: const Center(child: Icon(Icons.camera_alt_outlined, color: Colors.white, size: 20)),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1078,14 +1072,14 @@ class _AiSetupPage extends StatelessWidget {
                   ],
                 )),
               ]),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(children: [
                 Container(
                   width: 40, height: 40,
                   decoration: BoxDecoration(color: context.colors.lavenderCard, borderRadius: BorderRadius.circular(12)),
-                  child: Center(child: Icon(Icons.psychology_outlined, color: Colors.white, size: 22)),
+                  child: const Center(child: Icon(Icons.psychology_outlined, color: Colors.white, size: 22)),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1096,9 +1090,9 @@ class _AiSetupPage extends StatelessWidget {
               ]),
             ],
           ),
-          SizedBox(height: 24),
-          _FieldLabel('Gemini API Key'),
-          SizedBox(height: 8),
+          const SizedBox(height: 24),
+          const _FieldLabel('Gemini API Key'),
+          const SizedBox(height: 8),
           TextField(
             controller: controller,
             obscureText: obscure,
@@ -1129,7 +1123,7 @@ class _AiSetupPage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             children: [
               GestureDetector(
@@ -1146,7 +1140,7 @@ class _AiSetupPage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           if (!keySaved)
             SizedBox(
               width: double.infinity,
@@ -1154,19 +1148,19 @@ class _AiSetupPage extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: context.colors.primary,
                   side: BorderSide(color: context.colors.primary),
-                  padding: EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 icon: isVerifying
                     ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.primary))
-                    : Icon(Icons.save_outlined),
-                label: Text(isVerifying ? 'Verifying...' : 'Save API Key', style: TextStyle(fontWeight: FontWeight.w700)),
+                    : const Icon(Icons.save_outlined),
+                label: Text(isVerifying ? 'Verifying...' : 'Save API Key', style: const TextStyle(fontWeight: FontWeight.w700)),
                 onPressed: isVerifying ? null : onSaveKey,
               ),
             )
           else
             Container(
-              padding: EdgeInsets.all(14),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: context.colors.greenLight,
                 borderRadius: BorderRadius.circular(14),
@@ -1174,17 +1168,17 @@ class _AiSetupPage extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(Icons.check_circle_rounded, color: context.colors.green, size: 18),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text('Connected & Verified ✅',
                       style: TextStyle(fontWeight: FontWeight.w600, color: context.colors.green)),
                 ],
               ),
             ),
           if (errorMessage.isNotEmpty) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(errorMessage, style: TextStyle(color: context.colors.red, fontSize: 13, fontWeight: FontWeight.w500)),
           ],
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -1205,7 +1199,7 @@ class _StepHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 36, color: context.colors.primary),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Text(
           title,
           style: TextStyle(
@@ -1230,7 +1224,7 @@ class _SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(20),
@@ -1238,7 +1232,7 @@ class _SectionCard extends StatelessWidget {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.06),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -1257,7 +1251,7 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Text(
         text,
         style: TextStyle(
@@ -1310,7 +1304,7 @@ class _InputField extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: context.colors.primary, width: 1.5),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
@@ -1370,7 +1364,7 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Successfully signed in & synced!'), backgroundColor: context.colors.primary),
+            SnackBar(content: const Text('Successfully signed in & synced!'), backgroundColor: context.colors.primary),
           );
         }
       }
@@ -1391,24 +1385,24 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
     final userEmail = ref.watch(userEmailProvider);
 
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 24),
-          _StepHeader(icon: Icons.cloud_queue_rounded, title: 'Cloud Sync\n(optional)'),
-          SizedBox(height: 12),
+          const SizedBox(height: 24),
+          const _StepHeader(icon: Icons.cloud_queue_rounded, title: 'Cloud Sync\n(optional)'),
+          const SizedBox(height: 12),
           Text(
             'Keep your data safe. Sign in to sync your progress, habits, and logs across devices securely.',
             style: TextStyle(fontSize: 14, color: context.colors.textMedium, height: 1.5),
           ),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           if (_isSyncing)
             Center(
               child: Column(
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
                   Text(_syncStatus, style: TextStyle(color: context.colors.primary, fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -1421,16 +1415,16 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                icon: Icon(Icons.login),
-                label: Text('Sign in with Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                icon: const Icon(Icons.login),
+                label: const Text('Sign in with Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             )
           else
             Container(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: context.colors.card,
                 borderRadius: BorderRadius.circular(16),
@@ -1439,18 +1433,18 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
               child: Column(
                 children: [
                   Icon(Icons.cloud_done_rounded, color: context.colors.green, size: 48),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text('Signed In!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark)),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(userEmail ?? '', style: TextStyle(color: context.colors.textMedium)),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   OutlinedButton(
                     onPressed: () => ref.read(authServiceProvider).signOut(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.red,
                       side: BorderSide(color: context.colors.red),
                     ),
-                    child: Text('Sign Out'),
+                    child: const Text('Sign Out'),
                   )
                 ],
               ),

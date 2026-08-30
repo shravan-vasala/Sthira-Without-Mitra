@@ -11,7 +11,7 @@ class RestTimerLabel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (seconds <= 0) return SizedBox.shrink();
+    if (seconds <= 0) return const SizedBox.shrink();
 
     final timerState = ref.watch(restTimerProvider);
     final isActive = timerState.isActive && timerState.exerciseName == exerciseName;
@@ -23,14 +23,14 @@ class RestTimerLabel extends ConsumerWidget {
         : '$displaySeconds SEC';
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         children: [
           Expanded(
             child: Container(height: 1, color: isActive ? context.colors.orange : context.colors.border),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -39,7 +39,7 @@ class RestTimerLabel extends ConsumerWidget {
                   size: 14,
                   color: isActive ? context.colors.orange : context.colors.textLight,
                 ),
-                SizedBox(width: 4),
+                const SizedBox(width: 4),
                 Text(
                   isActive ? 'RESTING FOR $display' : 'REST FOR $display AFTER SET',
                   style: TextStyle(

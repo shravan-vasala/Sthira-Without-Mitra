@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
 import '../models/habit.dart';
 import '../models/daily_log.dart';
-import '../repositories/habit_repository.dart';
 
 final habitsProvider = Provider<List<Habit>>((ref) {
   return ref.watch(habitRepoProvider).getHabits();
@@ -68,7 +67,7 @@ final habitStreakProvider = Provider.family<int, String>((ref, habitId) {
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
   
   int streak = 0;
-  DateTime current = DateTime.parse(dateStr);
+  final DateTime current = DateTime.parse(dateStr);
   
   // Check today
   final todayCompletions = habitRepo.getCompletions(dateStr);

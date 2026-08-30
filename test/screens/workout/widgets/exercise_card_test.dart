@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trufit_bodamma/models/workout_plan.dart';
 import 'package:trufit_bodamma/screens/workout/widgets/exercise_card.dart';
-import 'package:trufit_bodamma/theme/app_colors.dart';
 
 void main() {
   group('ExerciseCard Widget Tests', () {

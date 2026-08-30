@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:googleai_dart/googleai_dart.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_search_cache.dart';
-import '../providers/app_providers.dart';
 import '../interfaces/i_ai_food_service.dart';
 
 import 'ai_client.dart';

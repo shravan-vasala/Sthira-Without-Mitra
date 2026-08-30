@@ -49,8 +49,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     final plan = ref.watch(workoutPlanProvider);
     if (plan == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Workout')),
-        body: Center(child: Text('No workout plan found')),
+        appBar: AppBar(title: const Text('Workout')),
+        body: const Center(child: Text('No workout plan found')),
       );
     }
 
@@ -64,8 +64,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
     if (day == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Workout')),
-        body: Center(child: Text('Workout day not found')),
+        appBar: AppBar(title: const Text('Workout')),
+        body: const Center(child: Text('Workout day not found')),
       );
     }
 
@@ -113,11 +113,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           children: [
             // ── Header ──────────────────────────────────────────────────────
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 8, 20, 0),
+              padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back_ios_rounded),
+                    icon: const Icon(Icons.arrow_back_ios_rounded),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   Expanded(
@@ -161,7 +161,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   ),
                   if (isFinished)
                     Container(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: context.colors.greenLight,
@@ -172,7 +172,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         children: [
                           Icon(Icons.check_circle,
                               color: context.colors.green, size: 16),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             'Done',
                             style: TextStyle(
@@ -187,11 +187,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
 
             // ── Progress bar (always total day progress) ─────────────────
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: LinearProgressIndicator(
@@ -204,10 +204,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             if (totalExercises > 0)
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -221,16 +221,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   ],
                 ),
               ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
 
             // ── "Show all sections" banner when filtered ─────────────────
             if (isFiltered)
               GestureDetector(
                 onTap: () => setState(() => _activeSectionIndex = null),
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(20, 0, 20, 10),
+                  margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
                   padding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: context.colors.lavenderCard,
                     borderRadius: BorderRadius.circular(14),
@@ -241,7 +241,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     children: [
                       Icon(Icons.grid_view_rounded,
                           color: context.colors.primary, size: 16),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
                         'Showing: ${workoutDay.sections[_activeSectionIndex!].title}',
                         style: TextStyle(
@@ -250,7 +250,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                           color: context.colors.primary,
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Text(
                         'Show all →',
                         style: TextStyle(
@@ -268,8 +268,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                physics: BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: sectionsToShow.length,
                 itemBuilder: (context, listIndex) {
                   // Map back to original section index for consistency
@@ -292,7 +292,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             if (!isFinished)
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.fromLTRB(20, 12, 20, 16),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: context.colors.primaryGradient,
@@ -301,7 +301,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       BoxShadow(
                         color: context.colors.primary.withValues(alpha: 0.35),
                         blurRadius: 16,
-                        offset: Offset(0, 6),
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -311,7 +311,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 18),
+                      padding: const EdgeInsets.symmetric(vertical: 18),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -321,7 +321,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       children: [
                         Icon(Icons.emoji_events_rounded,
                             color: context.colors.onPrimary, size: 24),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Text(
                           'Finish Workout',
                           style: TextStyle(
@@ -359,20 +359,20 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Finish early?'),
+        title: const Text('Finish early?'),
         content:
             Text('Only $completed of $total exercises done — finish anyway?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Keep going'),
+            child: const Text('Keep going'),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               _executeFinish(context, ref, dayId);
             },
-            child: Text('Finish'),
+            child: const Text('Finish'),
           ),
         ],
       ),
@@ -384,13 +384,13 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Skip workout?'),
-        content: Text(
+        title: const Text('Skip workout?'),
+        content: const Text(
             'Nothing checked — mark this workout as skipped instead?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Keep going'),
+            child: const Text('Keep going'),
           ),
           TextButton(
             onPressed: () {
@@ -398,7 +398,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               _persistWorkoutFinished(ref, dayId);
               context.go('/home');
             },
-            child: Text('Skip Workout'),
+            child: const Text('Skip Workout'),
           ),
         ],
       ),
@@ -424,12 +424,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         backgroundColor: context.colors.card,
         child: Padding(
-          padding: EdgeInsets.all(32),
+          padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: EdgeInsets.all(14),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: context.colors.green.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
@@ -440,7 +440,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   size: 40,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 title,
                 style: TextStyle(
@@ -450,7 +450,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Session saved. Head home to finish habits and meals if you have any left.',
                 style: TextStyle(
@@ -460,7 +460,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -472,7 +472,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     backgroundColor: context.colors.primary,
                     foregroundColor: context.colors.onPrimary,
                     elevation: 0,
-                    padding: EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -510,7 +510,7 @@ class _SectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: context.colors.lavenderCard,
         borderRadius: BorderRadius.circular(20),
@@ -520,7 +520,7 @@ class _SectionWidget extends StatelessWidget {
         children: [
           // Sticky-style section header
           Padding(
-            padding: EdgeInsets.fromLTRB(20, 18, 20, 4),
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
             child: Row(
               children: [
                 Container(
@@ -531,7 +531,7 @@ class _SectionWidget extends StatelessWidget {
                     color: context.colors.primary,
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Text(
                   section.title?.toUpperCase() ?? '',
                   style: TextStyle(
@@ -541,7 +541,7 @@ class _SectionWidget extends StatelessWidget {
                     letterSpacing: 1.2,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Text(
                   '${section.exercises.length} exercises',
                   style: TextStyle(
@@ -563,7 +563,7 @@ class _SectionWidget extends StatelessWidget {
                   exerciseName: exercise.name ?? '',
                 );
               }
-              return SizedBox(height: 4);
+              return const SizedBox(height: 4);
             }
             final exerciseIndex = index ~/ 2;
             final exercise = section.exercises[exerciseIndex];
@@ -572,7 +572,7 @@ class _SectionWidget extends StatelessWidget {
               dayId: dayId,
             );
           }),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
         ],
       ),
     );

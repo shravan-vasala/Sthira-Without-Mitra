@@ -125,7 +125,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
         children: [
           Row(
             children: [
-              SizedBox(width: 40),
+              const SizedBox(width: 40),
               Expanded(
                 child: Text(
                   'REPS',
@@ -138,7 +138,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                   ),
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'WEIGHT (kg)',
@@ -153,10 +153,10 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           ...List.generate(widget.exercise.setCount, (i) {
             return Padding(
-              padding: EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 children: [
                   SizedBox(
@@ -177,7 +177,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                         controller: _repsControllers[i],
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 8,
@@ -187,14 +187,14 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Semantics(
                       label: 'Weight in kg for set ${i + 1}',
                       child: TextField(
                         controller: _weightControllers[i],
                         keyboardType:
-                            TextInputType.numberWithOptions(decimal: true),
+                            const TextInputType.numberWithOptions(decimal: true),
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           isDense: true,
@@ -202,7 +202,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                                   i < _lastLog!.sets.length
                               ? (_lastLog!.sets[i].weight ?? 0.0).toString()
                               : '0',
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 10,
                           ),
@@ -214,7 +214,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
               ),
             );
           }),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             height: 48,
@@ -225,10 +225,10 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                   widget.exercise,
                 );
               },
-              child: Text('Log as planned'),
+              child: const Text('Log as planned'),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Semantics(
             label: 'Save Log Data',
             button: true,

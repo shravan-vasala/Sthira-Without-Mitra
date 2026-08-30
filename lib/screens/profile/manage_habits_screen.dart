@@ -47,7 +47,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
               ),
             )
           : ReorderableListView.builder(
-              padding: EdgeInsets.fromLTRB(0, 8, 0, 100),
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 100),
               itemCount: habits.length,
               // ignore: deprecated_member_use
               onReorder: (oldIndex, newIndex) {
@@ -68,7 +68,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
               },
             ),
       floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.only(bottom: 16),
         child: FloatingActionButton.extended(
           onPressed: () => _showEditorDialog(context, ref, null),
           backgroundColor: context.colors.primary,
@@ -99,7 +99,7 @@ class _HabitListTile extends ConsumerWidget {
     return Card(
       key: key,
       color: context.colors.card,
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: ListTile(
         leading: Icon(
           HabitIcons.resolve(habit.icon),
@@ -137,14 +137,14 @@ class _HabitListTile extends ConsumerWidget {
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: Text('Delete Habit?'),
-                    content: Text(
+                    title: const Text('Delete Habit?'),
+                    content: const Text(
                       'Are you sure you want to delete this habit? History will be kept for past days, but it won\'t appear anymore.',
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
-                        child: Text('Cancel'),
+                        child: const Text('Cancel'),
                       ),
                       TextButton(
                         onPressed: () {
@@ -164,7 +164,7 @@ class _HabitListTile extends ConsumerWidget {
                 );
               },
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Icon(Icons.drag_handle_rounded, color: context.colors.textMedium),
           ],
         ),
@@ -341,13 +341,13 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                   color: context.colors.textMedium,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Tap once on Home to mark it done. Change how much you aim for below.',
                 style: TextStyle(fontSize: 13, color: context.colors.textLight),
               ),
             ],
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Icon',
               style: TextStyle(
@@ -355,7 +355,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 color: context.colors.textMedium,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -390,7 +390,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               }).toList(),
             ),
             if (!_isWaterHabit) ...[
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               DropdownButtonFormField<HabitType>(
                 initialValue: _type,
                 dropdownColor: context.colors.card,
@@ -460,7 +460,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               ),
             ],
             if (_showGoalFields) ...[
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -474,7 +474,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                         ),
                       ),
                       keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
+                          const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (_) {
                         if (_isWaterHabit) {
                           setState(_syncWaterNameFromGoal);
@@ -482,7 +482,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                       },
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: _unitCtrl,
@@ -503,7 +503,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 ],
               ),
               if (_isWaterHabit) ...[
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Text(
                   _nameCtrl.text,
                   style: TextStyle(
@@ -515,7 +515,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               ],
             ],
             if (_type == HabitType.counter && !_isWaterHabit) ...[
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextField(
                 controller: _stepCtrl,
                 style: TextStyle(color: context.colors.textDark),
@@ -525,7 +525,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
             ],
           ],
@@ -551,7 +551,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Text('Save'),
+          child: const Text('Save'),
         ),
       ],
     );

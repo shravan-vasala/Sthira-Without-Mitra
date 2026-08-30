@@ -20,7 +20,7 @@ class AsyncErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colors.red.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
@@ -33,7 +33,7 @@ class AsyncErrorCard extends StatelessWidget {
           Row(
             children: [
               Icon(icon, color: context.colors.red, size: 20),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   title,
@@ -46,7 +46,7 @@ class AsyncErrorCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             message,
             style: TextStyle(
@@ -56,16 +56,16 @@ class AsyncErrorCard extends StatelessWidget {
             ),
           ),
           if (onRetry != null) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
                 onPressed: onRetry,
-                icon: Icon(Icons.refresh_rounded, size: 16),
+                icon: const Icon(Icons.refresh_rounded, size: 16),
                 label: Text(actionText ?? 'Retry'),
                 style: TextButton.styleFrom(
                   foregroundColor: context.colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),

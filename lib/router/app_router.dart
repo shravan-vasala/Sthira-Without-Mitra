@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/home/meal_detail_screen.dart';
@@ -21,7 +20,6 @@ import '../theme/app_colors.dart';
 import '../theme/layout_insets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
-import '../providers/reminders_provider.dart';
 import '../widgets/badge_overlay_host.dart';
 import '../screens/social/social_feed_screen.dart';
 import '../screens/social/connect_screen.dart';
@@ -36,7 +34,7 @@ final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
   RouterNotifier(this._ref) {
-    _ref.listen(onboardingCompletedProvider, (_, __) => notifyListeners());
+    _ref.listen(onboardingCompletedProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -55,10 +53,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Page Not Found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark)),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => context.go('/home'),
-              child: Text('Go Home'),
+              child: const Text('Go Home'),
             ),
           ],
         ),
@@ -277,7 +275,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                 left: 20,
                 right: 20,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: context.colors.orange,
                     borderRadius: BorderRadius.circular(20),
@@ -285,7 +283,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                       BoxShadow(
                         color: context.colors.orange.withValues(alpha: 0.3),
                         blurRadius: 12,
-                        offset: Offset(0, 4),
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -296,7 +294,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         color: context.colors.onPrimary,
                         size: 28,
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +304,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                               timerState.exerciseName != null
                                   ? 'Resting for ${timerState.exerciseName}'
                                   : 'Resting',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white70,
@@ -333,19 +331,19 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                             label: '+15s',
                             onTap: () => ref.read(restTimerProvider.notifier).addSeconds(15),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           _TimerControlButton(
                             label: '+30s',
                             onTap: () => ref.read(restTimerProvider.notifier).addSeconds(30),
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           IconButton(
                             icon: Icon(
                               timerState.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
                               color: context.colors.white,
                             ),
                             padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
+                            constraints: const BoxConstraints(),
                             onPressed: () {
                               if (timerState.isPaused) {
                                 ref.read(restTimerProvider.notifier).resumeTimer();
@@ -357,7 +355,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                           IconButton(
                             icon: Icon(Icons.close, color: context.colors.white),
                             padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
+                            constraints: const BoxConstraints(),
                             onPressed: () {
                               ref.read(restTimerProvider.notifier).stopTimer();
                             },
@@ -373,7 +371,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         ),
         bottomNavigationBar: SafeArea(
           child: Padding(
-            padding: EdgeInsets.only(left: 20, right: 20, bottom: 12),
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -382,7 +380,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       decoration: BoxDecoration(
                         color: context.colors.card.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(32),
@@ -391,7 +389,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                           BoxShadow(
                             color: context.colors.textDark.withValues(alpha: 0.12),
                             blurRadius: 20,
-                            offset: Offset(0, 10),
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
@@ -565,7 +563,7 @@ class _TimerControlButton extends StatelessWidget {
           height: 48,
           child: Center(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),

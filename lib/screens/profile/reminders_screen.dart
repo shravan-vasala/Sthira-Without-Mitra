@@ -49,14 +49,14 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text('Reminders'),
+        title: const Text('Reminders'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded),
+          icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: ListView(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         children: [
           _buildSectionHeader('DAILY HABITS'),
           _buildToggleCard(
@@ -76,7 +76,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _buildSectionHeader('WORKOUTS'),
           _buildToggleCard(
             title: 'Workout Reminder',
@@ -95,7 +95,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _buildSectionHeader('MEALS'),
           _buildToggleCard(
             title: 'Meal Logging Nudge',
@@ -114,7 +114,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                           ref.read(remindersProvider.notifier).updateConfig(config.copyWith(lunchTime: t));
                         }),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       _buildTimeSelector(
                         label: 'Dinner Time',
                         time: config.dinnerTime,
@@ -126,7 +126,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _buildSectionHeader('DATA BACKUP'),
           _buildToggleCard(
             title: 'Weekly Backup Reminder',
@@ -144,16 +144,16 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                           Text('Day of Week', style: TextStyle(fontSize: 14, color: context.colors.textDark)),
                           DropdownButton<int>(
                             value: config.backupDayOfWeek,
-                            underline: SizedBox(),
+                            underline: const SizedBox(),
                             icon: Icon(Icons.arrow_drop_down, color: context.colors.primary),
                             items: [
-                              DropdownMenuItem(value: DateTime.monday, child: Text('Monday')),
-                              DropdownMenuItem(value: DateTime.tuesday, child: Text('Tuesday')),
-                              DropdownMenuItem(value: DateTime.wednesday, child: Text('Wednesday')),
-                              DropdownMenuItem(value: DateTime.thursday, child: Text('Thursday')),
-                              DropdownMenuItem(value: DateTime.friday, child: Text('Friday')),
-                              DropdownMenuItem(value: DateTime.saturday, child: Text('Saturday')),
-                              DropdownMenuItem(value: DateTime.sunday, child: Text('Sunday')),
+                              const DropdownMenuItem(value: DateTime.monday, child: Text('Monday')),
+                              const DropdownMenuItem(value: DateTime.tuesday, child: Text('Tuesday')),
+                              const DropdownMenuItem(value: DateTime.wednesday, child: Text('Wednesday')),
+                              const DropdownMenuItem(value: DateTime.thursday, child: Text('Thursday')),
+                              const DropdownMenuItem(value: DateTime.friday, child: Text('Friday')),
+                              const DropdownMenuItem(value: DateTime.saturday, child: Text('Saturday')),
+                              const DropdownMenuItem(value: DateTime.sunday, child: Text('Sunday')),
                             ],
                             onChanged: (val) {
                               if (val != null) {
@@ -163,7 +163,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       _buildTimeSelector(
                         label: 'Time',
                         time: config.backupTime,
@@ -182,7 +182,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8, left: 4),
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
         title,
         style: TextStyle(
@@ -208,7 +208,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.colors.border),
       ),
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(
@@ -219,7 +219,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.colors.textDark)),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(subtitle, style: TextStyle(fontSize: 13, color: context.colors.textMedium)),
                   ],
                 ),
@@ -233,7 +233,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
           ),
           if (child != null) ...[
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Divider(height: 1, color: context.colors.border),
             ),
             child,
@@ -247,13 +247,13 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: TextStyle(fontSize: 14, color: context.colors.textDark)),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: context.colors.lavender,
                 borderRadius: BorderRadius.circular(8),

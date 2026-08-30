@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:isar/isar.dart';
 import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';

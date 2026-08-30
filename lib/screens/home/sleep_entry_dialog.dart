@@ -40,8 +40,8 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
     if (_bedtime == null || _waketime == null) return;
     
     // Compute duration
-    double bedHours = _bedtime!.hour + _bedtime!.minute / 60.0;
-    double wakeHours = _waketime!.hour + _waketime!.minute / 60.0;
+    final double bedHours = _bedtime!.hour + _bedtime!.minute / 60.0;
+    final double wakeHours = _waketime!.hour + _waketime!.minute / 60.0;
     
     double duration = wakeHours - bedHours;
     if (duration < 0) {
@@ -53,8 +53,8 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
 
   Future<void> _pickTime(bool isBedtime) async {
     final initialTime = isBedtime
-        ? (_bedtime ?? TimeOfDay(hour: 22, minute: 0))
-        : (_waketime ?? TimeOfDay(hour: 6, minute: 0));
+        ? (_bedtime ?? const TimeOfDay(hour: 22, minute: 0))
+        : (_waketime ?? const TimeOfDay(hour: 6, minute: 0));
     final parentTheme = Theme.of(context);
 
     final time = await showTimePicker(
@@ -127,13 +127,13 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                   style: TextButton.styleFrom(
                     foregroundColor: context.colors.pinkIcon,
                     padding: EdgeInsets.zero,
-                    minimumSize: Size(0, 0),
+                    minimumSize: const Size(0, 0),
                   ),
-                  child: Text('Clear entry'),
+                  child: const Text('Clear entry'),
                 ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Enter your sleep for $dateFormatted',
             style: TextStyle(
@@ -141,10 +141,10 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               color: context.colors.textMedium,
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           TextField(
             controller: _controller,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
@@ -169,7 +169,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               ),
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Text(
             'Or calculate from times:',
             style: TextStyle(
@@ -178,7 +178,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               color: context.colors.textMedium,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -188,7 +188,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                   onTap: isFuture ? null : () => _pickTime(true),
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: _TimePickerCard(
                   title: 'Wake up',
@@ -198,7 +198,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           PrimaryButton(
             label: isFuture ? 'Cannot log for future date' : 'Save Sleep',
             onPressed: isFuture
@@ -222,7 +222,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                       Navigator.of(context).pop();
                     } else if (sleepHours != null && sleepHours > 16) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text(
                             'Please enter a value between 0 and 16 hours',
                           ),
@@ -254,7 +254,7 @@ class _TimePickerCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(12),
@@ -271,7 +271,7 @@ class _TimePickerCard extends StatelessWidget {
                 color: context.colors.textMedium,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               time != null ? time!.format(context) : '--:--',
               style: TextStyle(

@@ -99,10 +99,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(24),
         ),
         shadowColor: AppColorsLight().textDark.withValues(alpha: 0.03),
-        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
       appBarTheme: AppBarTheme(
-        systemOverlayStyle: SystemUiOverlayStyle(
+        systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
         ),
@@ -123,11 +123,11 @@ class AppTheme {
         unselectedItemColor: AppColorsLight().textLight,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -137,7 +137,7 @@ class AppTheme {
           backgroundColor: AppColorsLight().primary,
           foregroundColor: AppColorsLight().white,
           elevation: 0,
-          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.quicksand(
             fontSize: 16,
@@ -150,7 +150,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColorsLight().primary,
           side: BorderSide(color: AppColorsLight().primary, width: 1.5),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.quicksand(
             fontSize: 14,
@@ -187,7 +187,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: AppColorsLight().primary, width: 1.5),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: TextStyle(
           color: AppColorsLight().textMedium,
@@ -216,7 +216,7 @@ class AppTheme {
           }
           return Colors.transparent;
         }),
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         side: BorderSide(color: AppColorsLight().border, width: 2),
       ),
       dialogTheme: DialogThemeData(
@@ -238,7 +238,7 @@ class AppTheme {
         textStyle: TextStyle(color: AppColorsLight().textDark, fontSize: 14),
         menuStyle: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(AppColorsLight().card),
-          surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
         ),
       ),
       listTileTheme: ListTileThemeData(
@@ -356,10 +356,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(24),
         ),
         shadowColor: AppColorsDark().textDark.withValues(alpha: 0.03),
-        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
       appBarTheme: AppBarTheme(
-        systemOverlayStyle: SystemUiOverlayStyle(
+        systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
         ),
@@ -380,11 +380,11 @@ class AppTheme {
         unselectedItemColor: AppColorsDark().textLight,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -394,7 +394,7 @@ class AppTheme {
           backgroundColor: AppColorsDark().primary,
           foregroundColor: AppColorsDark().white,
           elevation: 0,
-          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.quicksand(
             fontSize: 16,
@@ -407,7 +407,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColorsDark().primary,
           side: BorderSide(color: AppColorsDark().primary, width: 1.5),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: GoogleFonts.quicksand(
             fontSize: 14,
@@ -444,7 +444,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: AppColorsDark().primary, width: 1.5),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: TextStyle(
           color: AppColorsDark().textMedium,
@@ -473,7 +473,7 @@ class AppTheme {
           }
           return Colors.transparent;
         }),
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         side: BorderSide(color: AppColorsDark().border, width: 2),
       ),
       dialogTheme: DialogThemeData(
@@ -495,7 +495,7 @@ class AppTheme {
         textStyle: TextStyle(color: AppColorsDark().textDark, fontSize: 14),
         menuStyle: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(AppColorsDark().card),
-          surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
         ),
       ),
       listTileTheme: ListTileThemeData(

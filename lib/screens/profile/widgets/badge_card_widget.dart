@@ -41,7 +41,7 @@ class BadgeCardWidget extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             scrollDirection: Axis.horizontal,
             itemCount: badges.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final badge = badges[index];
               return _buildBadgeItem(context, badge);

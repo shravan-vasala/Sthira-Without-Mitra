@@ -41,14 +41,14 @@ class ExerciseCard extends ConsumerWidget {
     }
     
     return SurfaceCard(
-      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: EdgeInsets.zero,
       elevation: SurfaceCardElevation.nested,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(14),
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -83,7 +83,7 @@ class ExerciseCard extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.search_rounded, color: context.colors.primary, size: 24),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
                                 'Search YT',
                                 style: TextStyle(
@@ -99,9 +99,9 @@ class ExerciseCard extends ConsumerWidget {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                if (exercise.thumbnailUrl?.isNotEmpty ?? false)
+                                if (exercise.thumbnailUrl.isNotEmpty ?? false)
                                   CachedNetworkImage(
-                                    imageUrl: exercise.thumbnailUrl!,
+                                    imageUrl: exercise.thumbnailUrl,
                                     fit: BoxFit.cover,
                                     placeholder: (ctx, url) => Center(
                                       child: Icon(
@@ -149,7 +149,7 @@ class ExerciseCard extends ConsumerWidget {
                   ),
                 ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
 
                 // Exercise info
                 Expanded(
@@ -164,11 +164,11 @@ class ExerciseCard extends ConsumerWidget {
                           color: context.colors.textDark,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: context.colors.lavenderCard,
@@ -184,9 +184,9 @@ class ExerciseCard extends ConsumerWidget {
                             ),
                           ),
                           if (exercise.weightKg != null) ...[
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
                                 color: context.colors.lavenderCard,
@@ -202,10 +202,10 @@ class ExerciseCard extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          if (exercise.sideInfo != 'None' && exercise.sideInfo != null) ...[
-                            SizedBox(width: 6),
+                          if (exercise.sideInfo != 'None') ...[
+                            const SizedBox(width: 6),
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
                                 color: context.colors.mint,
@@ -222,21 +222,21 @@ class ExerciseCard extends ConsumerWidget {
                             ),
                           ],
                           if (pr != null) ...[
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: Color(0xFFFFD700).withValues(alpha: 0.2), // Gold tint
+                                color: const Color(0xFFFFD700).withValues(alpha: 0.2), // Gold tint
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.emoji_events, size: 12, color: Color(0xFFB8860B)),
-                                  SizedBox(width: 2),
+                                  const Icon(Icons.emoji_events, size: 12, color: Color(0xFFB8860B)),
+                                  const SizedBox(width: 2),
                                   Text(
                                     pr.maxWeight > 0 ? '${pr.maxWeight}kg' : '${pr.maxReps} reps',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFFB8860B),
@@ -249,7 +249,7 @@ class ExerciseCard extends ConsumerWidget {
                         ],
                       ),
                       if (loggedText != null) ...[
-                        SizedBox(height: 6),
+                        const SizedBox(height: 6),
                         Text(
                           loggedText,
                           style: TextStyle(
@@ -279,7 +279,7 @@ class ExerciseCard extends ConsumerWidget {
                       height: 48,
                       child: Center(
                         child: AnimatedContainer(
-                          duration: Duration(milliseconds: 200),
+                          duration: const Duration(milliseconds: 200),
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
@@ -302,12 +302,12 @@ class ExerciseCard extends ConsumerWidget {
           ),
 
           // Coach note
-          if (exercise.note?.isNotEmpty ?? false)
+          if (exercise.note.isNotEmpty ?? false)
             Padding(
-              padding: EdgeInsets.fromLTRB(14, 0, 14, 10),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: context.colors.lavenderCard.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(10),
@@ -320,7 +320,7 @@ class ExerciseCard extends ConsumerWidget {
                       size: 16,
                       color: context.colors.primary,
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         exercise.note ?? '',
@@ -339,7 +339,7 @@ class ExerciseCard extends ConsumerWidget {
 
           // Button row
           Padding(
-            padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
             child: Row(
               children: [
                 if (!isCompleted) ...[
@@ -350,7 +350,7 @@ class ExerciseCard extends ConsumerWidget {
                       onPressed: () => _logAsPlanned(context, ref),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                 ],
                 Expanded(
                   child: CompactButton(
@@ -359,7 +359,7 @@ class ExerciseCard extends ConsumerWidget {
                     onPressed: () => _openLogSheet(context),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: CompactButton(
                     label: 'Progress',

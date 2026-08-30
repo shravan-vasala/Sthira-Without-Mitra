@@ -62,7 +62,7 @@ class DailyStatsSnapshot {
     for (final h in habits) {
       if (isHabitCompleted(h, habitCompletions, dailyLog)) habitsDone++;
     }
-    double habitRate = habits.isEmpty ? 0.0 : habitsDone / habits.length;
+    final double habitRate = habits.isEmpty ? 0.0 : habitsDone / habits.length;
 
     // 2. Workouts
     int workoutsDone = 0;

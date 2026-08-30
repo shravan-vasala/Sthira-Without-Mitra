@@ -84,12 +84,12 @@ class _MyCodeTab extends ConsumerWidget {
               color: context.colors.card,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: context.colors.primary.withOpacity(0.3),
+                color: context.colors.primary.withValues(alpha: 0.3),
                 width: 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: context.colors.primary.withOpacity(0.15),
+                  color: context.colors.primary.withValues(alpha: 0.15),
                   blurRadius: 24,
                   spreadRadius: 8,
                 ),
@@ -224,7 +224,7 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
                   height: 260,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: context.colors.primary.withOpacity(0.8),
+                      color: context.colors.primary.withValues(alpha: 0.8),
                       width: 4,
                     ),
                     borderRadius: BorderRadius.circular(24),

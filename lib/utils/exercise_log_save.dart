@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/workout_plan.dart';
 import '../models/exercise_log.dart';
@@ -20,7 +19,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
 
   // Build sets (copying weight from last log if needed)
   final lastLog = repo.getLastLog(exercise.name ?? '');
-  List<SetLog> sets = [];
+  final List<SetLog> sets = [];
   for (int i = 0; i < exercise.setCount; i++) {
     double weight = exercise.weightKg ?? 0.0;
     if (exercise.weightKg == null && lastLog != null && i < lastLog.sets.length) {

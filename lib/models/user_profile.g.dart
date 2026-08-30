@@ -42,93 +42,88 @@ const UserProfileSchema = CollectionSchema(
       name: r'currentPhaseWeek',
       type: IsarType.long,
     ),
-    r'geminiApiKey': PropertySchema(
-      id: 5,
-      name: r'geminiApiKey',
-      type: IsarType.string,
-    ),
     r'height': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'height',
       type: IsarType.double,
     ),
     r'heightInMeters': PropertySchema(
-      id: 7,
+      id: 6,
       name: r'heightInMeters',
       type: IsarType.double,
     ),
     r'isarCustomHabits': PropertySchema(
-      id: 8,
+      id: 7,
       name: r'isarCustomHabits',
       type: IsarType.string,
     ),
     r'isarCustomMealSlots': PropertySchema(
-      id: 9,
+      id: 8,
       name: r'isarCustomMealSlots',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 10,
+      id: 9,
       name: r'name',
       type: IsarType.string,
     ),
     r'photoPath': PropertySchema(
-      id: 11,
+      id: 10,
       name: r'photoPath',
       type: IsarType.string,
     ),
     r'planStartDate': PropertySchema(
-      id: 12,
+      id: 11,
       name: r'planStartDate',
       type: IsarType.dateTime,
     ),
     r'restTimerSound': PropertySchema(
-      id: 13,
+      id: 12,
       name: r'restTimerSound',
       type: IsarType.bool,
     ),
     r'restTimerVibration': PropertySchema(
-      id: 14,
+      id: 13,
       name: r'restTimerVibration',
       type: IsarType.bool,
     ),
     r'screenTimeEnabled': PropertySchema(
-      id: 15,
+      id: 14,
       name: r'screenTimeEnabled',
       type: IsarType.bool,
     ),
     r'targetCalories': PropertySchema(
-      id: 16,
+      id: 15,
       name: r'targetCalories',
       type: IsarType.long,
     ),
     r'targetCarbsG': PropertySchema(
-      id: 17,
+      id: 16,
       name: r'targetCarbsG',
       type: IsarType.long,
     ),
     r'targetFatG': PropertySchema(
-      id: 18,
+      id: 17,
       name: r'targetFatG',
       type: IsarType.long,
     ),
     r'targetProteinG': PropertySchema(
-      id: 19,
+      id: 18,
       name: r'targetProteinG',
       type: IsarType.long,
     ),
     r'targetWeight': PropertySchema(
-      id: 20,
+      id: 19,
       name: r'targetWeight',
       type: IsarType.double,
     ),
     r'useKg': PropertySchema(
-      id: 21,
+      id: 20,
       name: r'useKg',
       type: IsarType.bool,
     ),
     r'weightUnit': PropertySchema(
-      id: 22,
+      id: 21,
       name: r'weightUnit',
       type: IsarType.string,
     )
@@ -167,12 +162,6 @@ int _userProfileEstimateSize(
   }
   bytesCount += 3 + object.coachDisplayName.length * 3;
   bytesCount += 3 + object.coachName.length * 3;
-  {
-    final value = object.geminiApiKey;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
   bytesCount += 3 + object.isarCustomHabits.length * 3;
   bytesCount += 3 + object.isarCustomMealSlots.length * 3;
   bytesCount += 3 + object.name.length * 3;
@@ -197,24 +186,23 @@ void _userProfileSerialize(
   writer.writeString(offsets[2], object.coachDisplayName);
   writer.writeString(offsets[3], object.coachName);
   writer.writeLong(offsets[4], object.currentPhaseWeek);
-  writer.writeString(offsets[5], object.geminiApiKey);
-  writer.writeDouble(offsets[6], object.height);
-  writer.writeDouble(offsets[7], object.heightInMeters);
-  writer.writeString(offsets[8], object.isarCustomHabits);
-  writer.writeString(offsets[9], object.isarCustomMealSlots);
-  writer.writeString(offsets[10], object.name);
-  writer.writeString(offsets[11], object.photoPath);
-  writer.writeDateTime(offsets[12], object.planStartDate);
-  writer.writeBool(offsets[13], object.restTimerSound);
-  writer.writeBool(offsets[14], object.restTimerVibration);
-  writer.writeBool(offsets[15], object.screenTimeEnabled);
-  writer.writeLong(offsets[16], object.targetCalories);
-  writer.writeLong(offsets[17], object.targetCarbsG);
-  writer.writeLong(offsets[18], object.targetFatG);
-  writer.writeLong(offsets[19], object.targetProteinG);
-  writer.writeDouble(offsets[20], object.targetWeight);
-  writer.writeBool(offsets[21], object.useKg);
-  writer.writeString(offsets[22], object.weightUnit);
+  writer.writeDouble(offsets[5], object.height);
+  writer.writeDouble(offsets[6], object.heightInMeters);
+  writer.writeString(offsets[7], object.isarCustomHabits);
+  writer.writeString(offsets[8], object.isarCustomMealSlots);
+  writer.writeString(offsets[9], object.name);
+  writer.writeString(offsets[10], object.photoPath);
+  writer.writeDateTime(offsets[11], object.planStartDate);
+  writer.writeBool(offsets[12], object.restTimerSound);
+  writer.writeBool(offsets[13], object.restTimerVibration);
+  writer.writeBool(offsets[14], object.screenTimeEnabled);
+  writer.writeLong(offsets[15], object.targetCalories);
+  writer.writeLong(offsets[16], object.targetCarbsG);
+  writer.writeLong(offsets[17], object.targetFatG);
+  writer.writeLong(offsets[18], object.targetProteinG);
+  writer.writeDouble(offsets[19], object.targetWeight);
+  writer.writeBool(offsets[20], object.useKg);
+  writer.writeString(offsets[21], object.weightUnit);
 }
 
 UserProfile _userProfileDeserialize(
@@ -228,24 +216,23 @@ UserProfile _userProfileDeserialize(
     activeWorkoutPlan: reader.readStringOrNull(offsets[1]),
     coachName: reader.readStringOrNull(offsets[3]) ?? '',
     currentPhaseWeek: reader.readLongOrNull(offsets[4]) ?? 1,
-    geminiApiKey: reader.readStringOrNull(offsets[5]),
-    height: reader.readDoubleOrNull(offsets[6]) ?? 160,
-    name: reader.readStringOrNull(offsets[10]) ?? '',
-    photoPath: reader.readStringOrNull(offsets[11]),
-    planStartDate: reader.readDateTimeOrNull(offsets[12]),
-    restTimerSound: reader.readBoolOrNull(offsets[13]) ?? true,
-    restTimerVibration: reader.readBoolOrNull(offsets[14]) ?? true,
-    screenTimeEnabled: reader.readBoolOrNull(offsets[15]) ?? false,
-    targetCalories: reader.readLongOrNull(offsets[16]) ?? 1250,
-    targetCarbsG: reader.readLongOrNull(offsets[17]) ?? 120,
-    targetFatG: reader.readLongOrNull(offsets[18]) ?? 40,
-    targetProteinG: reader.readLongOrNull(offsets[19]) ?? 80,
-    targetWeight: reader.readDoubleOrNull(offsets[20]),
-    useKg: reader.readBoolOrNull(offsets[21]) ?? true,
+    height: reader.readDoubleOrNull(offsets[5]) ?? 160,
+    name: reader.readStringOrNull(offsets[9]) ?? '',
+    photoPath: reader.readStringOrNull(offsets[10]),
+    planStartDate: reader.readDateTimeOrNull(offsets[11]),
+    restTimerSound: reader.readBoolOrNull(offsets[12]) ?? true,
+    restTimerVibration: reader.readBoolOrNull(offsets[13]) ?? true,
+    screenTimeEnabled: reader.readBoolOrNull(offsets[14]) ?? false,
+    targetCalories: reader.readLongOrNull(offsets[15]) ?? 1250,
+    targetCarbsG: reader.readLongOrNull(offsets[16]) ?? 120,
+    targetFatG: reader.readLongOrNull(offsets[17]) ?? 40,
+    targetProteinG: reader.readLongOrNull(offsets[18]) ?? 80,
+    targetWeight: reader.readDoubleOrNull(offsets[19]),
+    useKg: reader.readBoolOrNull(offsets[20]) ?? true,
   );
   object.id = id;
-  object.isarCustomHabits = reader.readString(offsets[8]);
-  object.isarCustomMealSlots = reader.readString(offsets[9]);
+  object.isarCustomHabits = reader.readString(offsets[7]);
+  object.isarCustomMealSlots = reader.readString(offsets[8]);
   return object;
 }
 
@@ -267,40 +254,38 @@ P _userProfileDeserializeProp<P>(
     case 4:
       return (reader.readLongOrNull(offset) ?? 1) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
-    case 6:
       return (reader.readDoubleOrNull(offset) ?? 160) as P;
-    case 7:
+    case 6:
       return (reader.readDouble(offset)) as P;
+    case 7:
+      return (reader.readString(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
-      return (reader.readString(offset)) as P;
-    case 10:
       return (reader.readStringOrNull(offset) ?? '') as P;
-    case 11:
+    case 10:
       return (reader.readStringOrNull(offset)) as P;
-    case 12:
+    case 11:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 12:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 13:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 14:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 15:
       return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 16:
+    case 15:
       return (reader.readLongOrNull(offset) ?? 1250) as P;
-    case 17:
+    case 16:
       return (reader.readLongOrNull(offset) ?? 120) as P;
-    case 18:
+    case 17:
       return (reader.readLongOrNull(offset) ?? 40) as P;
-    case 19:
+    case 18:
       return (reader.readLongOrNull(offset) ?? 80) as P;
-    case 20:
+    case 19:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 21:
+    case 20:
       return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 22:
+    case 21:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1032,160 +1017,6 @@ extension UserProfileQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'geminiApiKey',
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'geminiApiKey',
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'geminiApiKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'geminiApiKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'geminiApiKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'geminiApiKey',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'geminiApiKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'geminiApiKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'geminiApiKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'geminiApiKey',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'geminiApiKey',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      geminiApiKeyIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'geminiApiKey',
-        value: '',
       ));
     });
   }
@@ -2563,19 +2394,6 @@ extension UserProfileQuerySortBy
     });
   }
 
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByGeminiApiKey() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'geminiApiKey', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
-      sortByGeminiApiKeyDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'geminiApiKey', Sort.desc);
-    });
-  }
-
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByHeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'height', Sort.asc);
@@ -2865,19 +2683,6 @@ extension UserProfileQuerySortThenBy
     });
   }
 
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByGeminiApiKey() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'geminiApiKey', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
-      thenByGeminiApiKeyDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'geminiApiKey', Sort.desc);
-    });
-  }
-
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByHeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'height', Sort.asc);
@@ -3150,13 +2955,6 @@ extension UserProfileQueryWhereDistinct
     });
   }
 
-  QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByGeminiApiKey(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'geminiApiKey', caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByHeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'height');
@@ -3307,12 +3105,6 @@ extension UserProfileQueryProperty
   QueryBuilder<UserProfile, int, QQueryOperations> currentPhaseWeekProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentPhaseWeek');
-    });
-  }
-
-  QueryBuilder<UserProfile, String?, QQueryOperations> geminiApiKeyProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'geminiApiKey');
     });
   }
 

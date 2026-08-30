@@ -18,19 +18,19 @@ class WeeklySummaryScreen extends ConsumerWidget {
     // Get week bounds for title
     final weekday = selectedDate.weekday;
     final startOfWeek = selectedDate.subtract(Duration(days: weekday - 1));
-    final endOfWeek = startOfWeek.add(Duration(days: 6));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
     final titleText = '${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d').format(endOfWeek)}';
 
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text('Weekly Summary'),
+        title: const Text('Weekly Summary'),
         centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -43,23 +43,23 @@ class WeeklySummaryScreen extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               
               // ── Score Hero Card ──
               _ScoreHeroCard(score: summary.weekScore),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               
               // ── Habits Chart ──
               if (summary.habitCompletionRate > 0)
                 _HabitChartCard(rates: summary.dailyHabitRates),
               if (summary.habitCompletionRate > 0)
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
               // ── Grid Stats ──
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.1, // slightly wide cards
@@ -106,7 +106,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               
               // ── Share Button ──
               ElevatedButton.icon(
@@ -114,16 +114,16 @@ class WeeklySummaryScreen extends ConsumerWidget {
                   final text = summary.generateShareText();
                   Share.share(text);
                 },
-                icon: Icon(Icons.ios_share_rounded),
-                label: Text('Share Summary'),
+                icon: const Icon(Icons.ios_share_rounded),
+                label: const Text('Share Summary'),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -150,7 +150,7 @@ class _ScoreHeroCard extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
       decoration: BoxDecoration(
         gradient: context.colors.primaryGradient,
         borderRadius: BorderRadius.circular(24),
@@ -158,13 +158,13 @@ class _ScoreHeroCard extends StatelessWidget {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.3),
             blurRadius: 16,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         children: [
-          Text(
+          const Text(
             'Week Score',
             style: TextStyle(
               fontSize: 16,
@@ -172,7 +172,7 @@ class _ScoreHeroCard extends StatelessWidget {
               color: Colors.white70,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             '$score',
             style: TextStyle(
@@ -182,7 +182,7 @@ class _ScoreHeroCard extends StatelessWidget {
               height: 1.0,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             message,
             style: TextStyle(
@@ -206,7 +206,7 @@ class _HabitChartCard extends StatelessWidget {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(24),
@@ -214,7 +214,7 @@ class _HabitChartCard extends StatelessWidget {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -224,7 +224,7 @@ class _HabitChartCard extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.bar_chart_rounded, color: context.colors.primary, size: 20),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'Daily Habits',
                 style: TextStyle(
@@ -235,7 +235,7 @@ class _HabitChartCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           SizedBox(
             height: 120,
             child: BarChart(
@@ -251,9 +251,9 @@ class _HabitChartCard extends StatelessWidget {
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
                         final i = value.toInt();
-                        if (i < 0 || i > 6) return SizedBox.shrink();
+                        if (i < 0 || i > 6) return const SizedBox.shrink();
                         return Padding(
-                          padding: EdgeInsets.only(top: 8.0),
+                          padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             days[i],
                             style: TextStyle(
@@ -266,11 +266,11 @@ class _HabitChartCard extends StatelessWidget {
                       },
                     ),
                   ),
-                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                gridData: FlGridData(show: false),
+                gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
                 barGroups: List.generate(7, (i) {
                   return BarChartGroupData(
@@ -280,7 +280,7 @@ class _HabitChartCard extends StatelessWidget {
                         toY: rates[i],
                         color: context.colors.primary,
                         width: 14,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: 1.0,
@@ -317,7 +317,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(20),
@@ -325,7 +325,7 @@ class _StatCard extends StatelessWidget {
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -335,14 +335,14 @@ class _StatCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(6),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: context.colors.lavender,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, size: 16, color: context.colors.primary),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   title,
@@ -357,7 +357,7 @@ class _StatCard extends StatelessWidget {
               ),
             ],
           ),
-          Spacer(),
+          const Spacer(),
           Text(
             primaryValue,
             style: TextStyle(
@@ -369,7 +369,7 @@ class _StatCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             subtitle,
             style: TextStyle(
@@ -380,7 +380,7 @@ class _StatCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           if (tertiaryText != null) ...[
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
             Text(
               tertiaryText!,
               style: TextStyle(

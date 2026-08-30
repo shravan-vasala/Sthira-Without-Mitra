@@ -2,8 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
 import '../models/user_profile.dart';
 import '../models/body_stats.dart';
-import '../repositories/profile_repository.dart';
-import '../repositories/body_stats_repository.dart';
 
 final latestBodyStatsProvider = Provider<BodyStats?>((ref) {
   return ref.watch(bodyStatsRepoProvider).getLatestStats();
