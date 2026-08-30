@@ -144,7 +144,7 @@ class AiClient {
           }
           breaker.recordSuccess();
 
-          if (cache != null && !skipCache) {
+          if (cache != null) {
             await cache!.set(prompt, json, imageContext);
           }
 

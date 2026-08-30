@@ -109,7 +109,9 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
   void _cancelNotification() {
     try {
       _notificationsPlugin.cancel(0);
-    } catch (e) {}
+    } catch (e) {
+      // Ignore in test
+    }
   }
 
   Future<void> _loadPersistedTimer() async {
