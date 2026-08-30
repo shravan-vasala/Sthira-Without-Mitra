@@ -24,6 +24,7 @@ import '../services/ai_cache.dart';
 import '../services/ai_client.dart';
 import '../services/auth_service.dart';
 import '../services/social_sync_service.dart';
+import '../services/nutrition_lookup_service.dart';
 import '../interfaces/i_ai_food_service.dart';
 
 import 'auth_provider.dart';
@@ -169,6 +170,10 @@ final aiClientProvider = Provider<AiClient>((ref) {
   return AiClient(cache: ref.watch(aiCacheProvider));
 });
 
+final nutritionLookupServiceProvider = Provider<NutritionLookupService>((ref) {
+  return NutritionLookupService();
+});
+
 final geminiFoodServiceProvider = Provider<IAiFoodService>((ref) {
   final profile = ref.watch(profileProvider);
   final isSignedIn = ref.watch(isSignedInProvider);
@@ -176,6 +181,7 @@ final geminiFoodServiceProvider = Provider<IAiFoodService>((ref) {
     apiKey: profile.geminiApiKey,
     isSignedIn: isSignedIn,
     aiClient: ref.watch(aiClientProvider),
+    nutritionLookup: ref.watch(nutritionLookupServiceProvider),
   );
 });
 

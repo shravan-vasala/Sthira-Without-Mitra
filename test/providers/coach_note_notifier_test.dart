@@ -9,12 +9,13 @@ import 'package:trufit_bodamma/repositories/profile_repository.dart';
 import 'package:trufit_bodamma/repositories/workout_repository.dart';
 import 'package:trufit_bodamma/repositories/exercise_log_repository.dart';
 import 'package:trufit_bodamma/models/coach_note.dart';
+import 'package:isar/isar.dart';
 import '../helpers/test_isar_setup.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 void main() {
   late ProviderContainer container;
   late CoachNoteRepository coachNoteRepo;
+  late Isar isar;
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -22,28 +23,28 @@ void main() {
   });
 
   setUp(() async {
-    await setUpTestHive();
+    isar = await setUpTestIsar();
 
     coachNoteRepo = CoachNoteRepository();
-    await coachNoteRepo.init();
+    await coachNoteRepo.init(isar);
 
     final profileRepo = ProfileRepository();
-    await profileRepo.init();
+    await profileRepo.init(isar);
 
     final dailyLogRepo = DailyLogRepository();
-    await dailyLogRepo.init();
+    await dailyLogRepo.init(isar);
 
     final habitRepo = HabitRepository();
-    await habitRepo.init();
+    await habitRepo.init(isar);
 
     final mealRepo = MealRepository();
-    await mealRepo.init();
+    await mealRepo.init(isar);
 
     final workoutRepo = WorkoutRepository();
-    await workoutRepo.init();
+    await workoutRepo.init(isar);
 
     final exerciseLogRepo = ExerciseLogRepository();
-    await exerciseLogRepo.init();
+    await exerciseLogRepo.init(isar);
 
     container = ProviderContainer(
       overrides: [
@@ -62,7 +63,7 @@ void main() {
 
   tearDown(() async {
     container.dispose();
-    await tearDownTestHive();
+    await tearDownTestIsar(isar);
   });
 
   test('CoachNoteNotifier uses cache hit', () async {

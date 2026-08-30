@@ -2,9 +2,10 @@ import 'dart:typed_data';
 
 abstract class IAiFoodService {
   Future<Map<String, dynamic>?> analyzeFoodImage(
-    Uint8List imageBytes,
+    List<Uint8List> imageBytesList,
     String mimeType, [
     String? userContext,
+    bool skipCache = false,
   ]);
 
   Future<Map<String, dynamic>?> analyzeFoodText(String description);

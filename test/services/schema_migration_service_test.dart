@@ -22,7 +22,8 @@ void main() {
     final migratedBoxes = SchemaMigrationService.runMigrationsForRestore(boxes, version);
     
     // Test verification
-    final profileJsonStr = migratedBoxes['user_profile']['profile'] as String;
+    final userProfileBox = migratedBoxes['user_profile'] as Map<String, dynamic>? ?? {};
+    final profileJsonStr = userProfileBox['profile'] as String? ?? '{}';
     final profileJson = jsonDecode(profileJsonStr) as Map<String, dynamic>;
     
     expect(profileJson['name'], 'Old User');

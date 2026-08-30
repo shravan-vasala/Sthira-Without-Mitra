@@ -12,14 +12,15 @@ import 'package:trufit_bodamma/models/workout_plan.dart';
 import 'package:trufit_bodamma/models/meal_plan.dart';
 import 'package:trufit_bodamma/models/daily_meal_log.dart';
 import 'dart:convert';
+import 'package:isar/isar.dart';
 import '../helpers/test_isar_setup.dart';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
   late ProviderContainer container;
   late ExerciseLogRepository logRepo;
   late WorkoutRepository workoutRepo;
+  late Isar isar;
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -28,24 +29,24 @@ void main() {
 
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    await setUpTestHive();
+    isar = await setUpTestIsar();
     logRepo = ExerciseLogRepository();
-    await logRepo.init();
+    await logRepo.init(isar);
     
     workoutRepo = WorkoutRepository();
-    await workoutRepo.init();
+    await workoutRepo.init(isar);
 
     final habitRepo = HabitRepository();
-    await habitRepo.init();
+    await habitRepo.init(isar);
 
     final mealRepo = MealRepository();
-    await mealRepo.init();
+    await mealRepo.init(isar);
 
     final dailyRepo = DailyLogRepository();
-    await dailyRepo.init();
+    await dailyRepo.init(isar);
     
     final profileRepo = ProfileRepository();
-    await profileRepo.init();
+    await profileRepo.init(isar);
 
     // Create a mock workout plan in the repo
     final mockPlan = WorkoutPlan(
@@ -89,7 +90,7 @@ void main() {
 
   tearDown(() async {
     container.dispose();
-    await tearDownTestHive();
+    await tearDownTestIsar(isar);
   });
 
   test('Saving exercise log marks workout as partially/fully complete in daily score', () async {

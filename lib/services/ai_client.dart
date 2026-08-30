@@ -5,6 +5,7 @@ import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'package:crypto/crypto.dart';
 import 'ai_cache.dart';
 import 'dart:async';
+import 'dart:io';
 import 'image_preprocessor.dart';
 
 class AiException implements Exception {
@@ -48,12 +49,16 @@ class AiClient {
   final AiClientCircuitBreaker _visionCircuitBreaker = AiClientCircuitBreaker();
   final AiClientCircuitBreaker _textCircuitBreaker = AiClientCircuitBreaker();
   
-  static const modelsToTry = [
+  static const visionModelsToTry = [
     'gemini-3.6-flash',
-    'gemini-3.1-flash-lite',
-    'gemini-2.5-flash',
+    'gemini-3.5-flash',
   ];
 
+  static const textModelsToTry = [
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-3.1-flash-lite',
+  ];
   GoogleAIClient? _cachedClient;
   String? _cachedApiKey;
 
@@ -68,27 +73,28 @@ class AiClient {
   Future<Map<String, dynamic>?> generateJson({
     required String prompt,
     required String systemInstruction,
-    Uint8List? imageBytes,
+    List<Uint8List>? imageBytesList,
     String? mimeType,
     required bool useFirebase,
     String? apiKey,
     bool skipCache = false,
   }) async {
-    final breaker = imageBytes != null ? _visionCircuitBreaker : _textCircuitBreaker;
-    
-    if (breaker.isOpen) {
-      if (imageBytes != null) {
-        throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
-      } else {
-        throw AiException('AI rate limited. Please try again later.');
-      }
+    if (!useFirebase && (apiKey == null || apiKey.isEmpty)) {
+      throw AiException('API Key is required if not using Firebase. Add it in Profile -> AI Settings.');
     }
 
     String? imageContext;
-    Uint8List? processedImage;
-    if (imageBytes != null) {
-      processedImage = await ImagePreprocessor.downscale(imageBytes);
-      imageContext = sha256.convert(processedImage).toString();
+    List<Uint8List> processedImages = [];
+    String? actualMimeType = mimeType;
+    if (imageBytesList != null && imageBytesList.isNotEmpty) {
+      final b = BytesBuilder();
+      for (var imageBytes in imageBytesList) {
+        final processed = await ImagePreprocessor.processImage(imageBytes, mimeType ?? 'image/jpeg');
+        processedImages.add(processed.$1);
+        actualMimeType = processed.$2; // Assume all are same mime type after processing
+        b.add(processed.$1);
+      }
+      imageContext = sha256.convert(b.toBytes()).toString();
     }
 
     if (cache != null && !skipCache) {
@@ -96,28 +102,44 @@ class AiClient {
       if (cachedResult != null) return cachedResult;
     }
 
+    final breaker = imageBytesList != null && imageBytesList.isNotEmpty ? _visionCircuitBreaker : _textCircuitBreaker;
+    
+    if (breaker.isOpen) {
+      if (imageBytesList != null && imageBytesList.isNotEmpty) {
+        throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
+      } else {
+        throw AiException('AI rate limited. Please try again later.');
+      }
+    }
+
     String lastError = '';
 
-    for (final modelName in modelsToTry) {
+    final modelsToUse = imageBytesList != null && imageBytesList.isNotEmpty ? visionModelsToTry : textModelsToTry;
+
+    for (int i = 0; i < modelsToUse.length; i++) {
+      final modelName = modelsToUse[i];
       final int maxRetries = 2;
       final bool skipStrategy = false;
       
       for (int attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          debugPrint('AiClient: Trying Gemini model: $modelName (Firebase: $useFirebase, attempt \${attempt + 1})...');
+          debugPrint('AiClient: Trying Gemini model: $modelName (Firebase: $useFirebase, attempt ${attempt + 1})...');
           final response = await _callModel(
             modelName: modelName,
             prompt: prompt,
             systemInstruction: systemInstruction,
             useFirebase: useFirebase,
             apiKey: apiKey,
-            imageBytes: processedImage,
-            mimeType: mimeType,
+            imageBytesList: processedImages.isNotEmpty ? processedImages : null,
+            mimeType: actualMimeType,
           );
           
           if (response == null || response.isEmpty) throw Exception("Empty response");
           
           final json = _parseJson(response);
+          if (i > 0) {
+            json['modelUsed'] = modelName;
+          }
           breaker.recordSuccess();
 
           if (cache != null && !skipCache) {
@@ -174,16 +196,16 @@ class AiClient {
   Future<String?> _callModel({
     required String modelName,
     required String prompt,
-    required String systemInstruction,
+    String? systemInstruction,
     required bool useFirebase,
     String? apiKey,
-    Uint8List? imageBytes,
+    List<Uint8List>? imageBytesList,
     String? mimeType,
   }) async {
     if (useFirebase) {
       final model = vertex.FirebaseAI.vertexAI().generativeModel(
         model: modelName,
-        systemInstruction: vertex.Content.system(systemInstruction),
+        systemInstruction: systemInstruction != null ? vertex.Content.system(systemInstruction) : null,
         generationConfig: vertex.GenerationConfig(
           temperature: 0.1,
           responseMimeType: 'application/json',
@@ -191,10 +213,11 @@ class AiClient {
       );
 
       final contents = [
-        if (imageBytes != null)
+        if (imageBytesList != null && imageBytesList.isNotEmpty)
           vertex.Content.multi([
             vertex.TextPart(prompt),
-            vertex.InlineDataPart(mimeType ?? 'image/jpeg', imageBytes)
+            for (var imageBytes in imageBytesList)
+              vertex.InlineDataPart(mimeType ?? 'image/jpeg', imageBytes)
           ])
         else
           vertex.Content.text(prompt)
@@ -218,16 +241,17 @@ class AiClient {
       }
 
       final request = GenerateContentRequest(
-        systemInstruction: Content.text(systemInstruction),
+        systemInstruction: systemInstruction != null ? Content.text(systemInstruction) : null,
         generationConfig: const GenerationConfig(
           temperature: 0.1,
           responseMimeType: 'application/json',
         ),
         contents: [
-          if (imageBytes != null)
+          if (imageBytesList != null && imageBytesList.isNotEmpty)
             Content.user([
               TextPart(prompt),
-              Part.bytes(imageBytes, mimeType ?? 'image/jpeg'),
+              for (var imageBytes in imageBytesList)
+                Part.bytes(imageBytes, mimeType ?? 'image/jpeg'),
             ])
           else
             Content.text(prompt)
@@ -254,7 +278,7 @@ class AiClient {
 
     String lastError = '';
 
-    for (final modelName in modelsToTry) {
+    for (final modelName in textModelsToTry) {
       try {
         debugPrint('AiClient: Trying Gemini stream model: $modelName (Firebase: $useFirebase)...');
         final stream = _callModelStream(

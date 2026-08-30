@@ -5,6 +5,7 @@ import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_search_cache.dart';
 import '../interfaces/i_ai_food_service.dart';
+import 'nutrition_lookup_service.dart';
 
 import 'ai_client.dart';
 
@@ -12,8 +13,9 @@ class GeminiFoodService implements IAiFoodService {
   final String? apiKey;
   final bool isSignedIn;
   final AiClient aiClient;
+  final NutritionLookupService nutritionLookup;
 
-  GeminiFoodService({this.apiKey, this.isSignedIn = false, required this.aiClient});
+  GeminiFoodService({this.apiKey, this.isSignedIn = false, required this.aiClient, required this.nutritionLookup});
 
   static const _jsonShape = '''
 Return ONLY a JSON object with the exact following structure and types. Do NOT include markdown blocks or any other text.
@@ -22,18 +24,9 @@ Return ONLY a JSON object with the exact following structure and types. Do NOT i
     {
       "name": "Name of the dish (string)",
       "portion": "Estimated portion size (e.g. 1 bowl, 2 pieces)",
-      "calories": 0,
-      "protein_g": 0.0,
-      "carbs_g": 0.0,
-      "fat_g": 0.0
+      "estimated_grams": 0
     }
   ],
-  "total": {
-    "calories": 0,
-    "protein_g": 0.0,
-    "carbs_g": 0.0,
-    "fat_g": 0.0
-  },
   "confidence": "high|medium|low"
 }
 If you cannot identify the food, provide a generic "Unknown Food" response with 0 values and low confidence.
@@ -100,36 +93,40 @@ Portion estimation guidelines:
       'JSON Output:\n'
       '{\n'
       '  "items": [\n'
-      '    { "name": "Idli", "portion": "2 pieces", "calories": 120, "protein_g": 4.0, "carbs_g": 24.0, "fat_g": 0.0 },\n'
-      '    { "name": "Coconut Chutney", "portion": "2 tbsp", "calories": 70, "protein_g": 1.0, "carbs_g": 2.0, "fat_g": 7.0 },\n'
-      '    { "name": "Sambar", "portion": "1 small bowl (100ml)", "calories": 60, "protein_g": 2.5, "carbs_g": 8.0, "fat_g": 2.0 }\n'
+      '    { "name": "Idli", "portion": "2 pieces", "estimated_grams": 80 },\n'
+      '    { "name": "Coconut Chutney", "portion": "2 tbsp", "estimated_grams": 30 },\n'
+      '    { "name": "Sambar", "portion": "1 small bowl (100ml)", "estimated_grams": 100 }\n'
       '  ],\n'
-      '  "total": { "calories": 250, "protein_g": 7.5, "carbs_g": 34.0, "fat_g": 9.0 },\n'
       '  "confidence": "high"\n'
       '}';
 
   @override
   Future<Map<String, dynamic>?> analyzeFoodImage(
-    Uint8List imageBytes,
+    List<Uint8List> imageBytesList,
     String mimeType, [
     String? userContext,
+    bool skipCache = false,
   ]) async {
     _ensureApiKey();
     final hint = userContext != null && userContext.trim().isNotEmpty
         ? '\nUser provided context/hint: "${userContext.trim()}". Use this to help identify the food, but still estimate macros realistically.'
         : '';
     final prompt = '''
-Analyze this food image and estimate its nutritional content. $_cuisineHint$hint
+Analyze these food images (different angles of the SAME meal) and estimate its nutritional content.
+IMPORTANT: Since these are different angles of the same meal, do NOT double count the dishes. Identify the unique items present.
+$_cuisineHint$hint
 $_jsonShape
 ''';
-    return aiClient.generateJson(
+    final response = await aiClient.generateJson(
       prompt: prompt,
       systemInstruction: _systemInstruction,
-      imageBytes: imageBytes,
+      imageBytesList: imageBytesList,
       mimeType: mimeType,
       useFirebase: isSignedIn,
       apiKey: apiKey,
+      skipCache: skipCache,
     );
+    return _processAiResponse(response);
   }
 
   /// Estimate macros from a free-text description of what was eaten at home.
@@ -181,7 +178,108 @@ $_jsonShape
       });
     }
 
-    return response;
+    return _processAiResponse(response);
+  }
+
+  Future<Map<String, dynamic>> _fallbackLookup(String dishName) async {
+    final normalized = dishName.toLowerCase().trim();
+    final isar = Isar.getInstance()!;
+    final cached = isar.foodSearchCaches
+        .where()
+        .normalizedQueryEqualTo('fallback_$normalized')
+        .findFirstSync();
+    
+    if (cached != null) {
+      try {
+        return jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+
+    final prompt = '''
+Provide the nutritional values per 100 grams for the dish: "$dishName".
+Return ONLY a JSON object:
+{
+  "kcal": 0,
+  "protein_g": 0.0,
+  "carbs_g": 0.0,
+  "fat_g": 0.0
+}
+''';
+    final response = await aiClient.generateJson(
+      prompt: prompt,
+      systemInstruction: 'You are a nutrition database. Provide exact values per 100g.',
+      useFirebase: isSignedIn,
+      apiKey: apiKey,
+    );
+    
+    if (response != null) {
+      await isar.writeTxn(() async {
+        await isar.foodSearchCaches.put(FoodSearchCache(
+          normalizedQuery: 'fallback_$normalized',
+          cachedResponseJson: jsonEncode(response),
+        ));
+      });
+      return response;
+    }
+    
+    return {"kcal": 0, "protein_g": 0.0, "carbs_g": 0.0, "fat_g": 0.0};
+  }
+
+  Future<Map<String, dynamic>?> _processAiResponse(Map<String, dynamic>? aiResponse) async {
+    if (aiResponse == null) return null;
+    await nutritionLookup.load();
+    
+    double totalCal = 0;
+    double totalP = 0;
+    double totalC = 0;
+    double totalF = 0;
+    bool hadUnknown = false;
+    
+    final items = aiResponse['items'] as List<dynamic>? ?? [];
+    for (var item in items) {
+      if (item is! Map) continue;
+      final name = item['name']?.toString() ?? 'Unknown';
+      final grams = (item['estimated_grams'] as num?)?.toDouble() ?? 100.0;
+      
+      Map<String, dynamic>? match = nutritionLookup.match(name);
+      Map<String, dynamic> per100g;
+      
+      if (match != null) {
+        per100g = match['per100g'] as Map<String, dynamic>;
+      } else {
+        hadUnknown = true;
+        per100g = await _fallbackLookup(name);
+      }
+      
+      final multiplier = grams / 100.0;
+      final kcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * multiplier;
+      final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * multiplier;
+      final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * multiplier;
+      final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * multiplier;
+      
+      item['calories'] = kcal.round();
+      item['protein_g'] = p;
+      item['carbs_g'] = c;
+      item['fat_g'] = f;
+      
+      totalCal += kcal;
+      totalP += p;
+      totalC += c;
+      totalF += f;
+    }
+    
+    aiResponse['total'] = {
+      'calories': totalCal.round(),
+      'protein_g': totalP,
+      'carbs_g': totalC,
+      'fat_g': totalF,
+    };
+    
+    if (hadUnknown) {
+       aiResponse['confidence'] = 'low';
+    }
+    
+    return aiResponse;
   }
 
   /// Suggest a meal that fits within the remaining daily macros.
@@ -289,8 +387,8 @@ Do NOT use JSON.
 
     final modelsToTry = [
       'gemini-3.6-flash',
+      'gemini-3.5-flash',
       'gemini-3.1-flash-lite',
-      'gemini-2.5-flash',
     ];
 
     String lastError = '';

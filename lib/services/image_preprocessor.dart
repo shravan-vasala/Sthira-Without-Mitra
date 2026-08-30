@@ -1,18 +1,38 @@
-import 'dart:ui' as ui;
+import 'dart:isolate';
 import 'package:flutter/foundation.dart';
+import 'package:image/image.dart' as img;
 
 class ImagePreprocessor {
-  /// Downscales an image to a maximum width (maintaining aspect ratio).
-  /// Uses Flutter's native codec for fast, memory-efficient decoding.
-  static Future<Uint8List> downscale(Uint8List bytes, {int maxWidth = 512}) async {
+  /// Downscales an image so the longest side is 1280px and encodes as JPEG.
+  /// Uses a background isolate. Returns (bytes, mimeType).
+  static Future<(Uint8List, String)> processImage(Uint8List bytes, String fallbackMimeType) async {
     try {
-      final codec = await ui.instantiateImageCodec(bytes, targetWidth: maxWidth);
-      final frame = await codec.getNextFrame();
-      final data = await frame.image.toByteData(format: ui.ImageByteFormat.png);
-      return data!.buffer.asUint8List();
+      return await Isolate.run(() {
+        final image = img.decodeImage(bytes);
+        if (image == null) throw Exception('Cannot decode image');
+        
+        int width = image.width;
+        int height = image.height;
+        
+        if (width > 1280 || height > 1280) {
+          if (width > height) {
+            height = (height * 1280 ~/ width);
+            width = 1280;
+          } else {
+            width = (width * 1280 ~/ height);
+            height = 1280;
+          }
+          final resized = img.copyResize(image, width: width, height: height);
+          final encoded = img.encodeJpg(resized, quality: 85);
+          return (Uint8List.fromList(encoded), 'image/jpeg');
+        } else {
+          final encoded = img.encodeJpg(image, quality: 85);
+          return (Uint8List.fromList(encoded), 'image/jpeg');
+        }
+      });
     } catch (e) {
-      debugPrint('Image downsampling failed, returning original bytes: $e');
-      return bytes;
+      debugPrint('Image processing failed, returning original bytes: $e');
+      return (bytes, fallbackMimeType);
     }
   }
 }

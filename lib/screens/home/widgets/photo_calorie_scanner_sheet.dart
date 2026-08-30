@@ -39,7 +39,7 @@ class _PhotoCalorieScannerSheetState
   final _picker = ImagePicker();
   final _descriptionCtrl = TextEditingController();
 
-  File? _selectedImage;
+  List<File> _selectedImages = [];
   bool _isAnalyzing = false;
   bool _analysisComplete = false;
   bool _describeMode = false;
@@ -115,6 +115,7 @@ class _PhotoCalorieScannerSheetState
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    if (_selectedImages.length >= 3) return;
     final picked = await _picker.pickImage(
       source: source,
       maxWidth: 1600,
@@ -123,7 +124,7 @@ class _PhotoCalorieScannerSheetState
     if (picked == null) return;
 
     setState(() {
-      _selectedImage = File(picked.path);
+      _selectedImages.add(File(picked.path));
       _describeMode = false;
       _isAnalyzing = false;
       _analysisComplete = false;
@@ -133,8 +134,8 @@ class _PhotoCalorieScannerSheetState
     });
   }
 
-  Future<void> _analyzeImage() async {
-    if (_selectedImage == null) return;
+  Future<void> _analyzeImage({bool skipCache = false}) async {
+    if (_selectedImages.isEmpty) return;
 
     setState(() {
       _isAnalyzing = true;
@@ -142,20 +143,25 @@ class _PhotoCalorieScannerSheetState
     });
 
     try {
-      final imageBytes = await _selectedImage!.readAsBytes();
+      List<Uint8List> allBytes = [];
+      for (var f in _selectedImages) {
+        allBytes.add(await f.readAsBytes());
+      }
+      
       String mimeType = 'image/jpeg';
-      if (_selectedImage!.path.toLowerCase().endsWith('.png')) {
+      if (_selectedImages.first.path.toLowerCase().endsWith('.png')) {
         mimeType = 'image/png';
-      } else if (_selectedImage!.path.toLowerCase().endsWith('.webp')) {
+      } else if (_selectedImages.first.path.toLowerCase().endsWith('.webp')) {
         mimeType = 'image/webp';
       }
 
       final result = await ref
           .read(geminiFoodServiceProvider)
           .analyzeFoodImage(
-            imageBytes,
+            allBytes,
             mimeType,
             _descriptionCtrl.text,
+            skipCache,
           );
 
       if (result != null) {
@@ -182,7 +188,7 @@ class _PhotoCalorieScannerSheetState
       _analysisComplete = false;
       _errorMessage = null;
       _items = [];
-      _selectedImage = null;
+      _selectedImages = [];
     });
 
     try {
@@ -223,7 +229,7 @@ class _PhotoCalorieScannerSheetState
   void _switchToDescribe() {
     setState(() {
       _describeMode = true;
-      _selectedImage = null;
+      _selectedImages = [];
       _analysisComplete = false;
       _errorMessage = null;
       _isAnalyzing = false;
@@ -408,16 +414,16 @@ class _PhotoCalorieScannerSheetState
 
   Future<void> _saveMeal() async {
     String? finalPhotoPath;
-    if (_selectedImage != null) {
+    if (_selectedImages.isNotEmpty) {
       if (!kIsWeb) {
         final appDir = await getApplicationDocumentsDirectory();
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final fileName = 'meal_photo_$timestamp.jpg';
         final savedImage =
-            await _selectedImage!.copy('${appDir.path}/$fileName');
+            await _selectedImages.first.copy('${appDir.path}/$fileName');
         finalPhotoPath = savedImage.path;
       } else {
-        finalPhotoPath = _selectedImage!.path;
+        finalPhotoPath = _selectedImages.first.path;
       }
     }
 
@@ -453,7 +459,7 @@ class _PhotoCalorieScannerSheetState
     final showChooser = !_analysisComplete &&
         !_isAnalyzing &&
         _errorMessage == null &&
-        _selectedImage == null;
+        _selectedImages.isEmpty;
 
     final title = widget.appendToLog != null
         ? 'Add to ${widget.slotDisplayName}'
@@ -694,11 +700,13 @@ class _PhotoCalorieScannerSheetState
                 setState(() => _errorMessage = null);
                 if (_describeMode) {
                   _analyzeDescription();
+                } else if (_selectedImages.isNotEmpty) {
+                  _analyzeImage(skipCache: true);
                 } else {
                   _pickImage(ImageSource.gallery);
                 }
               },
-              actionText: _describeMode ? 'Try again' : 'Try another photo',
+              actionText: _describeMode ? 'Try again' : 'Try again',
             ),
             const SizedBox(height: 12),
             Row(
@@ -721,76 +729,116 @@ class _PhotoCalorieScannerSheetState
                 ),
               ],
             ),
-          ] else if (_selectedImage != null || _isAnalyzing) ...[
-            if (_selectedImage != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Stack(
-                  children: [
-                    kIsWeb
-                        ? Image.network(
-                            _selectedImage!.path,
-                            height: 160,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          )
-                        : Image.file(
-                            _selectedImage!,
-                            height: 160,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                    if (_isAnalyzing)
-                      Container(
-                        height: 160,
-                        color: Colors.black.withValues(alpha: 0.65),
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+          ] else if (_selectedImages.isNotEmpty || _isAnalyzing) ...[
+            if (_selectedImages.isNotEmpty)
+              Column(
+                children: [
+                  SizedBox(
+                    height: 160,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _selectedImages.length + (_selectedImages.length < 3 ? 1 : 0),
+                      separatorBuilder: (context, index) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        if (index == _selectedImages.length) {
+                          // Add angle button
+                          return GestureDetector(
+                            onTap: () => _pickImage(ImageSource.camera),
+                            child: Container(
+                              width: 120,
+                              decoration: BoxDecoration(
+                                color: context.colors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add_a_photo_rounded, color: context.colors.primary),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Add angle\n(Max 3)',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: context.colors.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        final img = _selectedImages[index];
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Stack(
                             children: [
-                              CircularProgressIndicator(
-                                color: context.colors.card,
-                                strokeWidth: 3,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Reading your plate…',
-                                style: TextStyle(
-                                  color: context.colors.onPrimary,
-                                  fontWeight: FontWeight.w700,
+                              kIsWeb
+                                  ? Image.network(img.path, width: 160, height: 160, fit: BoxFit.cover)
+                                  : Image.file(img, width: 160, height: 160, fit: BoxFit.cover),
+                              if (!_isAnalyzing)
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedImages.removeAt(index);
+                                        if (_selectedImages.isEmpty) _analysisComplete = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(Icons.close_rounded, color: context.colors.onPrimary, size: 16),
+                                    ),
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
-                        ),
+                        );
+                      },
+                    ),
+                  ),
+                  if (_isAnalyzing)
+                    Container(
+                      margin: const EdgeInsets.only(top: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.colors.lavenderCard,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    if (!_isAnalyzing)
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: GestureDetector(
-                          onTap: () => setState(() {
-                            _selectedImage = null;
-                            _analysisComplete = false;
-                          }),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: context.colors.onPrimary,
-                              size: 20,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: context.colors.primary,
+                              strokeWidth: 2,
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Analyzing multiple angles…',
+                            style: TextStyle(
+                              color: context.colors.textDark,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
-              if (_selectedImage != null && !_isAnalyzing && !_analysisComplete) ...[
+              if (_selectedImages.isNotEmpty && !_isAnalyzing && !_analysisComplete) ...[
                 const SizedBox(height: 16),
                 Text(
                   'Optional hint',

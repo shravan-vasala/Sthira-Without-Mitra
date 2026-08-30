@@ -46,11 +46,17 @@ class AiCache {
     final key = _hash(prompt, imageContext);
     final data = jsonEncode(result);
     
+    final existing = _isar.aiCacheEntrys.where().cacheKeyEqualTo(key).findFirstSync();
+    
     final entry = AiCacheEntry(
       cacheKey: key,
       cachedResponse: data,
       timestamp: DateTime.now(),
     );
+    
+    if (existing != null) {
+      entry.id = existing.id;
+    }
     
     await _isar.writeTxn(() async {
       await _isar.aiCacheEntrys.put(entry);
