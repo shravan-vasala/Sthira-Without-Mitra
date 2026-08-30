@@ -15,6 +15,7 @@ import 'dart:convert';
 import 'package:isar/isar.dart';
 import '../helpers/test_isar_setup.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late ProviderContainer container;
