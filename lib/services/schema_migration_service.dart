@@ -13,10 +13,10 @@ class SchemaMigrationService {
 
     if (storedVersion >= currentSchemaVersion) {
       // Check if we need to scrub geminiApiKey for existing users
-      final profilesWithKey = isar.userProfiles.filter().geminiApiKeyIsNotNull().findAllSync();
-      if (profilesWithKey.isNotEmpty) {
+      final allProfiles = isar.userProfiles.where().findAllSync();
+      if (allProfiles.isNotEmpty) {
         await isar.writeTxn(() async {
-          for (final profile in profilesWithKey) {
+          for (final profile in allProfiles) {
             await isar.userProfiles.put(profile.copyWith(clearGeminiApiKey: true));
           }
         });
@@ -29,8 +29,8 @@ class SchemaMigrationService {
 
     await isar.writeTxn(() async {
       // Scrub geminiApiKey for all profiles during migration as well
-      final profilesWithKey = isar.userProfiles.filter().geminiApiKeyIsNotNull().findAllSync();
-      for (final profile in profilesWithKey) {
+      final allProfiles = isar.userProfiles.where().findAllSync();
+      for (final profile in allProfiles) {
         await isar.userProfiles.put(profile.copyWith(clearGeminiApiKey: true));
       }
 
