@@ -35,6 +35,16 @@ class FirestoreSyncService implements ICloudSyncService {
   @override
   bool get canSync => _auth.isSignedIn;
 
+  @override
+  Stream<int> get pendingCountStream {
+    final isar = Isar.getInstance();
+    if (isar == null) return Stream.value(0);
+    return isar.syncQueueItems.watchLazy(fireImmediately: true).map((_) => isar.syncQueueItems.countSync());
+  }
+
+  @override
+  Future<void> flushNow() => flushQueue();
+
   /// Reference to the current user's document.
   DocumentReference? get _userDoc {
     final uid = _auth.uid;
@@ -298,3 +308,4 @@ class FirestoreSyncService implements ICloudSyncService {
     }
   }
 }
+

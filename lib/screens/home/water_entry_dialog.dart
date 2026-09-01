@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../services/widget_update_service.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 
@@ -265,3 +266,4 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
     );
   }
 }
+

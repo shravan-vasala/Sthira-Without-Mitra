@@ -52,6 +52,7 @@ dependencies:
   mobile_scanner: ^7.4.0
   pointycastle: any
   image: ^4.9.2
+  home_widget: ^0.9.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/format_units.dart';
 import '../../providers/app_providers.dart';
 import '../../models/workout_plan.dart';
 import '../../models/exercise_log.dart';
@@ -96,7 +97,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
       final dateStr = DateFormat('MMM d').format(dt);
       final weight = _lastLog!.sets.first.weight ?? 0.0;
       final reps = _lastLog!.sets.map((s) => s.reps ?? 0).join(', ');
-      return 'Last time ($dateStr): ${weight > 0 ? '${weight}kg × ' : ''}$reps';
+      return 'Last time ($dateStr): ${weight > 0 ? '${formatWeight(ref.watch(profileProvider), weight)} × ' : ''}$reps';
     } catch (_) {
       return null;
     }
@@ -147,7 +148,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'WEIGHT (kg)',
+                  'WEIGHT (${ref.watch(profileProvider).useKg ? 'kg' : 'lb'})',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
@@ -262,8 +263,8 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   void _showResultSnack(PrUpdateResult prResult) {
     String msg = 'Logged ${widget.exercise.name ?? ''}';
     if (prResult.hasAnyNewPr) {
-      if (prResult.isNewMaxWeight) {
-        msg = 'New PR! ${prResult.newPr.maxWeight}kg';
+        if (prResult.isNewMaxWeight) {
+          msg = 'New PR! ${formatWeight(ref.watch(profileProvider), prResult.newPr.maxWeight)}';
       } else if (prResult.isNewMaxReps) {
         msg = 'New PR! ${prResult.newPr.maxReps} reps';
       } else if (prResult.isNewMaxVolume) {

@@ -96,6 +96,40 @@ class DailyLog {
     );
   }
 
+  DailyLog clearWeight() {
+    return DailyLog(
+      date: date,
+      weight: null,
+      steps: steps,
+      stepsSource: stepsSource,
+      sleepHours: sleepHours,
+      sleepSource: sleepSource,
+      bodyFat: bodyFat,
+      workoutCompleted: workoutCompleted,
+      workoutDayId: workoutDayId,
+      waterMl: waterMl,
+      screenTimeMinutes: screenTimeMinutes,
+      updatedAt: updatedAt,
+    );
+  }
+
+  DailyLog clearSteps() {
+    return DailyLog(
+      date: date,
+      weight: weight,
+      steps: null,
+      stepsSource: null,
+      sleepHours: sleepHours,
+      sleepSource: sleepSource,
+      bodyFat: bodyFat,
+      workoutCompleted: workoutCompleted,
+      workoutDayId: workoutDayId,
+      waterMl: waterMl,
+      screenTimeMinutes: screenTimeMinutes,
+      updatedAt: updatedAt,
+    );
+  }
+
   DailyLog clearSleep() {
     return DailyLog(
       date: date,
@@ -105,6 +139,23 @@ class DailyLog {
       sleepHours: null,
       sleepSource: null,
       bodyFat: bodyFat,
+      workoutCompleted: workoutCompleted,
+      workoutDayId: workoutDayId,
+      waterMl: waterMl,
+      screenTimeMinutes: screenTimeMinutes,
+      updatedAt: updatedAt,
+    );
+  }
+
+  DailyLog clearBodyFat() {
+    return DailyLog(
+      date: date,
+      weight: weight,
+      steps: steps,
+      stepsSource: stepsSource,
+      sleepHours: sleepHours,
+      sleepSource: sleepSource,
+      bodyFat: null,
       workoutCompleted: workoutCompleted,
       workoutDayId: workoutDayId,
       waterMl: waterMl,
@@ -137,3 +188,4 @@ class DailyLog {
       workoutCompleted ||
       screenTimeMinutes != null;
 }
+

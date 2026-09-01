@@ -86,6 +86,35 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
               ],
             ),
             const SizedBox(height: 24),
+            Consumer(builder: (context, ref, _) {
+              final pendingCount = ref.watch(syncPendingCountProvider).value ?? 0;
+              if (pendingCount > 0) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: context.colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.cloud_upload_rounded, color: context.colors.orange, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        '\ items pending cloud sync',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
             Center(
               child: Column(
                 children: [
@@ -245,3 +274,4 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
     );
   }
 }
+

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
+import '../services/widget_update_service.dart';
 import '../models/habit.dart';
 import '../models/daily_log.dart';
 
@@ -27,6 +28,7 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
     final date = ref.read(dateStringProvider);
     await repo.toggleCheckboxCompletion(date, habitId);
     state = repo.getCompletions(date);
+    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> updateProgress(String habitId, double progress) async {
@@ -34,6 +36,7 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
     final date = ref.read(dateStringProvider);
     await repo.updateProgress(date, habitId, progress);
     state = repo.getCompletions(date);
+    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> setOverride(String habitId, String? overrideValue) async {
@@ -41,6 +44,7 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
     final date = ref.read(dateStringProvider);
     await repo.setOverride(date, habitId, overrideValue);
     state = repo.getCompletions(date);
+    WidgetUpdateService.pushWidgetState(ref);
   }
 }
 
@@ -92,3 +96,4 @@ final habitStreakProvider = Provider.family<int, String>((ref, habitId) {
   }
   return streak;
 });
+

@@ -34,7 +34,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
-    with WidgetsBindingObserver {
+    {
   late ConfettiController _confettiController;
   final _habitsKey = GlobalKey();
   final _mealsKey = GlobalKey();
@@ -43,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    
     
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
@@ -51,96 +51,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     // Initial sync when screen first loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _syncSteps(isManualRefresh: true);
+      ref.read(syncControllerProvider.notifier).sync(isManualRefresh: true);
     });
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _confettiController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _syncSteps(isManualRefresh: false);
-    }
-  }
-
-  Future<void> _syncSteps({bool isManualRefresh = false}) async {
-    final hcService = ref.read(healthConnectServiceProvider);
-    final dailyLogRepo = ref.read(dailyLogRepoProvider);
-    final habitRepo = ref.read(habitRepoProvider);
-    final prefs = ref.read(sharedPreferencesProvider);
-
-    // Refresh local state immediately (covers cached Hive values on cold start)
-    ref.invalidate(dailyLogProvider);
-    ref.invalidate(habitCompletionsProvider);
-
-    // Coach note is date-scoped — only auto-refresh when viewing today
-    final selectedDate = ref.read(dateStringProvider);
-    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
-    if (selectedDate == todayStr) {
-      // ignore: unawaited_futures
-      ref.read(coachNoteProvider.notifier).fetchNote(force: isManualRefresh);
-    }
-
-    // Sync Screen Time
-    if (ref.read(profileProvider).screenTimeEnabled) {
-      final screenTimeMins = await ref
-          .read(screenTimeServiceProvider)
-          .getScreenTimeForToday();
-      if (screenTimeMins > 0) {
-        await dailyLogRepo.updateScreenTime(todayStr, screenTimeMins);
-      }
-    }
-
-    final available = await hcService.isAvailable();
-    if (!available) return;
-
-    final now = DateTime.now();
-    final lastSyncStr = prefs.getString('last_hc_sync_time');
-    final lastSync = lastSyncStr != null
-        ? DateTime.tryParse(lastSyncStr)
-        : null;
-    final everConnected = prefs.getBool('hc_connected') ?? false;
-
-    // Always refresh TODAY on open/resume.
-    // Do NOT gate on hasPermissions — it often returns false after the app is killed
-    // even when Health Connect access was already granted.
-    final todaySteps = await hcService.syncTodayAndAutoCompleteHabit(
-      dailyLogRepo,
-      habitRepo,
-    );
-
-    if (todaySteps != null) {
-      await prefs.setBool('hc_connected', true);
-      ref.read(stepsSourceProvider.notifier).state = StepsSource.healthConnect;
-    } else if (!everConnected) {
-      // First-run: Steps card will show the Sync CTA
-      ref.invalidate(dailyLogProvider);
-      ref.invalidate(habitCompletionsProvider);
-      return;
-    }
-
-    // Heavier historical sync — manual pull or every 15 minutes
-    final shouldFullSync =
-        isManualRefresh ||
-        lastSync == null ||
-        now.difference(lastSync).inMinutes >= 15;
-
-    if (shouldFullSync) {
-      await hcService.syncLast7Days(dailyLogRepo, habitRepo);
-      if (!hcService.isBackfillDone) {
-        await hcService.backfillLast90Days(dailyLogRepo, habitRepo);
-      }
-      await prefs.setString('last_hc_sync_time', now.toIso8601String());
-    }
-
-    ref.invalidate(dailyLogProvider);
-    ref.invalidate(habitCompletionsProvider);
   }
 
   // ignore: unused_element
@@ -165,6 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget build(BuildContext context) {
     ref.watch(badgeEngineProvider); // Initialize Gamification Engine
     final plan = ref.watch(workoutPlanProvider);
+    ref.watch(syncControllerProvider);
     // ignore: unused_local_variable
     final dailyScore = ref.watch(dailyScoreProvider);
 
@@ -213,7 +132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           backgroundColor: context.colors.scaffoldBg,
           body: RefreshIndicator(
             color: context.colors.primary,
-            onRefresh: () => _syncSteps(isManualRefresh: true),
+            onRefresh: () => ref.read(syncControllerProvider.notifier).sync(isManualRefresh: true),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
@@ -725,3 +644,7 @@ class _WorkoutsSection extends ConsumerWidget {
     );
   }
 }
+
+
+
+

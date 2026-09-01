@@ -44,6 +44,9 @@ export 'meal_providers.dart';
 export 'profile_providers.dart';
 export 'daily_log_notifier.dart';
 export 'coach_note_notifier.dart';
+export 'sync_controller.dart';
+import 'gamification_provider.dart';
+export 'gamification_provider.dart';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('prefs must be overridden in ProviderScope');
@@ -151,7 +154,7 @@ void _pushProfile(Ref ref, DailyLog dailyLog) {
     avatarUrl: profile.photoPath,
     todaySteps: dailyLog.steps ?? 0,
     todayWorkouts: dailyLog.workoutCompleted ? 1 : 0,
-    currentStreak: 0, // TODO: calculate streak
+    currentStreak: ref.read(stepsStreakProvider),
     latestBadge: null, // TODO: fetch latest badge
     lastUpdatedAt: DateTime.now(),
   );
@@ -198,3 +201,12 @@ final coachServiceProvider = Provider<CoachService>((ref) {
 final stepsSourceProvider = StateProvider<StepsSource>((ref) => StepsSource.none);
 
 // ── End of file ──
+
+
+
+
+final syncPendingCountProvider = StreamProvider<int>((ref) {
+  final sync = ref.watch(firestoreSyncServiceProvider);
+  return sync.pendingCountStream;
+});
+

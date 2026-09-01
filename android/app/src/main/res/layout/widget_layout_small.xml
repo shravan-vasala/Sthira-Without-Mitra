@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:weightSum="4">
+    <!-- Steps -->
+    <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+        <TextView android:id="@+id/tv_steps" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#2D1A25" android:textSize="14sp" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Steps" android:textColor="#2D1A25" android:textSize="10sp" />
+        <ProgressBar android:id="@+id/pb_steps" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="4dp" android:layout_marginTop="4dp" android:layout_marginStart="4dp" android:layout_marginEnd="4dp" android:max="100" android:progress="0" android:progressTint="#7FA35C" />
+    </LinearLayout>
+    
+    <!-- Workout -->
+    <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+        <TextView android:id="@+id/tv_workout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Workout" android:textColor="#E29B65" android:textSize="14sp" android:textStyle="bold" android:lines="1" android:ellipsize="end" />
+        <TextView android:id="@+id/tv_workout_sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pending" android:textColor="#2D1A25" android:textSize="10sp" />
+    </LinearLayout>
+
+    <!-- Meals -->
+    <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+        <TextView android:id="@+id/tv_meals" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-/-" android:textColor="#2D1A25" android:textSize="14sp" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Meals" android:textColor="#2D1A25" android:textSize="10sp" />
+    </LinearLayout>
+
+    <!-- Habits -->
+    <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+        <TextView android:id="@+id/tv_habits" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-/-" android:textColor="#2D1A25" android:textSize="14sp" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Habits" android:textColor="#2D1A25" android:textSize="10sp" />
+    </LinearLayout>
+</LinearLayout>

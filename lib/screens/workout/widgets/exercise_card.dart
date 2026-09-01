@@ -12,6 +12,7 @@ import '../../../widgets/primary_button.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../theme/app_theme.dart';
 import '../log_data_dialog.dart';
+import '../../../utils/format_units.dart';
 
 class ExerciseCard extends ConsumerWidget {
   const ExerciseCard({
@@ -63,7 +64,6 @@ class ExerciseCard extends ConsumerWidget {
                     if (videoId != null && videoId != 'XXXX' && videoId.isNotEmpty) {
                       // ignore: unawaited_futures
                       context.push(
-                        // ignore: dead_code, dead_null_aware_expression
                         '/youtube-player?videoId=$videoId&title=${Uri.encodeComponent(exercise.displayName ?? exercise.name ?? '')}&subtitle=${Uri.encodeComponent(exercise.name ?? '')}&reps=${Uri.encodeComponent(exercise.repsDisplay ?? '')}',
                       );
                     } else {
@@ -102,8 +102,7 @@ class ExerciseCard extends ConsumerWidget {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                // ignore: dead_code, dead_null_aware_expression
-                                if (exercise.thumbnailUrl.isNotEmpty ?? false)
+                                if (exercise.thumbnailUrl.isNotEmpty)
                                   CachedNetworkImage(
                                     imageUrl: exercise.thumbnailUrl,
                                     fit: BoxFit.cover,
@@ -220,7 +219,6 @@ class ExerciseCard extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                // ignore: dead_code, dead_null_aware_expression
                                 exercise.sideInfo ?? '',
                                 style: TextStyle(
                                   fontSize: 11,
@@ -313,8 +311,7 @@ class ExerciseCard extends ConsumerWidget {
           ),
 
           // Coach note
-          // ignore: dead_code, dead_null_aware_expression
-          if (exercise.note.isNotEmpty ?? false)
+          if (exercise.note.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
               child: Container(
@@ -434,4 +431,6 @@ class ExerciseCard extends ConsumerWidget {
     );
   }
 }
+
+
 

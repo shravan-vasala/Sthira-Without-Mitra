@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/daily_log.dart';
+import '../services/widget_update_service.dart';
 import '../models/habit.dart';
 import '../services/health_connect_service.dart';
 import 'app_providers.dart';
@@ -29,12 +30,14 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.updateWeight(state.date, weight);
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> updateSteps(int steps, {String? source}) async {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.updateSteps(state.date, steps, source: source ?? 'manual');
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
     ref.read(stepsSourceProvider.notifier).state = 
         (source == 'healthConnect') ? StepsSource.healthConnect : StepsSource.manual;
   }
@@ -43,6 +46,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.updateSleep(state.date, hours, source: source ?? 'manual');
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
 
     final habitRepo = ref.read(habitRepoProvider);
     final allHabits = habitRepo.getHabits();
@@ -60,6 +64,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.clearSleep(state.date);
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
     
     final habitRepo = ref.read(habitRepoProvider);
     final allHabits = habitRepo.getHabits();
@@ -73,6 +78,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.updateBodyFat(state.date, bodyFat);
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> updateWater(int waterMl) async {
@@ -80,6 +86,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final current = state;
     await repo.saveLog(current.copyWith(waterMl: waterMl));
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> clearWater() async {
@@ -87,12 +94,14 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final current = state;
     await repo.saveLog(current.clearWater());
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> markWorkoutCompleted(String dayId) async {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.markWorkoutCompleted(state.date, dayId);
     state = repo.getOrCreate(state.date);
+    WidgetUpdateService.pushWidgetState(ref);
 
     final profile = ref.read(profileProvider);
     if (profile.planStartDate == null) {
@@ -115,3 +124,4 @@ final dailyLogsRangeProvider =
   final (start, end) = range;
   return ref.watch(dailyLogRepoProvider).getLogsInRange(start, end);
 });
+

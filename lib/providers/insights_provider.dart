@@ -42,30 +42,33 @@ final insightsProvider = Provider<List<Insight>>((ref) {
     ));
   }
 
-  // 2. Sleep vs Steps Correlation (fictional heuristic for demo)
-  if (logs.length >= 5) {
-    final goodSleepDays = logs.where((l) => (l.sleepHours ?? 0) >= 7.5).toList();
-    if (goodSleepDays.isNotEmpty && goodSleepDays.length >= 3) {
-      final double avgStepsGoodSleep = goodSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / goodSleepDays.length;
+  // 2. Sleep vs Steps Correlation (Real 30-day computation)
+  final thirtyDaysAgoStr = DateTime.now().subtract(const Duration(days: 30)).toIso8601String().substring(0, 10);
+  final recentLogs = logs.where((l) => l.date.compareTo(thirtyDaysAgoStr) >= 0).toList();
+
+  if (recentLogs.length >= 10) {
+    final goodSleepDays = recentLogs.where((l) => (l.sleepHours ?? 0) >= 7.5 && (l.steps ?? 0) > 0).toList();
+    final badSleepDays = recentLogs.where((l) => (l.sleepHours ?? 0) > 0 && (l.sleepHours ?? 0) < 7.5 && (l.steps ?? 0) > 0).toList();
+    
+    if (goodSleepDays.isNotEmpty && badSleepDays.isNotEmpty) {
+      final avgStepsGood = goodSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / goodSleepDays.length;
+      final avgStepsBad = badSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / badSleepDays.length;
       
-      final badSleepDays = logs.where((l) => (l.sleepHours ?? 0) > 0 && (l.sleepHours ?? 0) < 6.5).toList();
-      if (badSleepDays.isNotEmpty) {
-        final double avgStepsBadSleep = badSleepDays.fold(0.0, (sum, l) => sum + (l.steps ?? 0)) / badSleepDays.length;
-        
-        if (avgStepsGoodSleep > avgStepsBadSleep + 2000) {
-          insights.add(Insight(
-            id: 'corr_sleep_steps',
-            type: InsightType.correlation,
-            title: 'Sleep Powers Your Movement',
-            description: 'On days you get 7.5hr+ sleep, you walk on average 2,000 more steps. Sleep is truly your superpower!',
-            severity: InsightSeverity.positive,
-            dateGenerated: now,
-            icon: Icons.bedtime_rounded,
-          ));
-        }
+      if (avgStepsGood > avgStepsBad && ((avgStepsGood - avgStepsBad) / avgStepsBad) >= 0.15) {
+        final diff = (avgStepsGood - avgStepsBad).round();
+        insights.add(Insight(
+          id: 'corr_sleep_steps',
+          type: InsightType.correlation,
+          title: 'Sleep Powers Your Movement',
+          description: 'Over the last 30 days, when you get 7.5h+ sleep, you walk on average \ more steps. Sleep is truly your superpower!',
+          severity: InsightSeverity.positive,
+          dateGenerated: now,
+          icon: Icons.bedtime_rounded,
+        ));
       }
     }
   }
   
   return insights;
 });
+

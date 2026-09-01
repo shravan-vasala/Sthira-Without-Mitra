@@ -3,6 +3,7 @@ import '../models/workout_plan.dart';
 import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';
 import '../providers/app_providers.dart';
+import '../services/widget_update_service.dart';
 
 Future<PrUpdateResult> saveExerciseAsPlanned({
   required WidgetRef ref,
@@ -37,6 +38,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
 
   await repo.saveLog(newLog);
   ref.read(exerciseLogsUpdateProvider.notifier).state++;
+  WidgetUpdateService.pushWidgetState(ref);
 
   // --- Check PR ---
   final isCompletedSet = sets;
@@ -100,3 +102,4 @@ Map<String, dynamic> getExerciseChartData(WidgetRef ref, Exercise exercise) {
     'pr': repo.getPr(exercise.name ?? ''),
   };
 }
+
