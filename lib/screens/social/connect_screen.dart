@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../providers/app_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/surface_card.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -63,9 +64,6 @@ class _MyCodeTab extends ConsumerWidget {
       return const Center(child: Text('Please sign in to view your code.'));
     }
 
-    // ignore: unused_local_variable
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -79,23 +77,8 @@ class _MyCodeTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 32),
-          Container(
+          SurfaceCard(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.colors.card,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: context.colors.primary.withValues(alpha: 0.3),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colors.primary.withValues(alpha: 0.15),
-                  blurRadius: 24,
-                  spreadRadius: 8,
-                ),
-              ],
-            ),
             child: QrImageView(
               data: uid,
               version: QrVersions.auto,
@@ -178,25 +161,85 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
     _scannerController.stop();
 
     try {
+      final syncService = ref.read(socialSyncServiceProvider);
+      final myUid = syncService.currentUid;
       final friendRepo = ref.read(friendRepoProvider);
+      final profile = ref.read(profileProvider);
+
+      if (!RegExp(r'^[A-Za-z0-9]{20,40}\$').hasMatch(code)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Not a valid Sthira code')),
+          );
+        }
+        // ignore: unawaited_futures
+        _scannerController.start();
+        if (mounted) {
+          setState(() { _isProcessing = false; });
+        }
+        return;
+      }
+
+      if (code == myUid) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('That\'s your own code!')),
+          );
+        }
+        // ignore: unawaited_futures
+        _scannerController.start();
+        if (mounted) {
+          setState(() { _isProcessing = false; });
+        }
+        return;
+      }
+
+      final existingFriend = friendRepo.getFriend(code);
+      if (existingFriend != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('You are already friends with this person!')),
+          );
+        }
+        // ignore: unawaited_futures
+        _scannerController.start();
+        if (mounted) {
+          setState(() { _isProcessing = false; });
+        }
+        return;
+      }
       
-      // Attempt to fetch profile from Firestore to get their name
-      // ignore: unused_local_variable
-      final db = ref.read(socialSyncServiceProvider);
-      // Wait, we can't easily do a one-off fetch with the current stream interface
-      // So we'll just add them locally and stream their data in the feed
-      await friendRepo.addFriend(code, 'Connected Friend');
+      final targetProfile = await syncService.fetchProfileOnce(code);
+      if (targetProfile == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not find a user with this code.')),
+          );
+        }
+        // ignore: unawaited_futures
+        _scannerController.start();
+        if (mounted) {
+          setState(() { _isProcessing = false; });
+        }
+        return;
+      }
+
+      final String? safeAvatar = (profile.photoPath?.startsWith('assets/') ?? false) 
+          ? profile.photoPath 
+          : null;
+
+      await syncService.sendFriendRequest(code, profile.name, safeAvatar);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Friend connected successfully!')),
+          SnackBar(content: Text('Friend request sent to ${targetProfile.name} successfully!')),
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add friend: $e')),
+          SnackBar(content: Text('Failed to send friend request: $e')),
         );
       }
       // ignore: unawaited_futures

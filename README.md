@@ -55,3 +55,12 @@ If you want to generate a signed release APK:
 
 App icons are generated using `flutter_launcher_icons`. If you change the icon in `assets/icon/app_icon.png`, you can regenerate the Android launcher icons by running:
 `dart run flutter_launcher_icons`
+
+## Firestore Security Rules
+
+The social features require specific Firestore security rules to be deployed to ensure privacy (e.g., mutual consent friend handshakes).
+
+To deploy the rules:
+1. Ensure you have the Firebase CLI installed.
+2. Run `firebase deploy --only firestore:rules` from the project root.
+

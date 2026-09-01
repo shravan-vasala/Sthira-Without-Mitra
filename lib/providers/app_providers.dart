@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/social_profile.dart';
@@ -134,29 +136,109 @@ final socialSyncServiceProvider = Provider<SocialSyncService>((ref) {
 
 final socialPushControllerProvider = Provider<void>((ref) {
   ref.listen(dailyLogProvider, (prev, next) {
-    _pushProfile(ref, next);
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+    if (next.date == todayStr) {
+      _pushProfile(ref, next);
+    }
   });
   ref.listen(profileProvider, (prev, next) {
-    _pushProfile(ref, ref.read(dailyLogProvider));
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+    final repo = ref.read(dailyLogRepoProvider);
+    final todayLog = repo.getOrCreate(todayStr);
+    _pushProfile(ref, todayLog);
+  });
+  
+  // Start pending acceptances check
+  Future.microtask(() async {
+    final syncService = ref.read(socialSyncServiceProvider);
+    final friendRepo = ref.read(friendRepoProvider);
+    final pending = await syncService.getPendingAcceptances();
+    for (final p in pending) {
+      final fromUid = p['fromUid'] as String?;
+      if (fromUid != null) {
+        // We know they accepted our request, add them to our allowedReaders
+        await syncService.acceptFriendRequest(fromUid); // Not quite, we just need to add to allowed readers
+        // Actually, the sender side of acceptance:
+        // When I send request, they accept -> they add me to their allowed readers, and create an acceptance marker for me.
+        // I see the marker -> I add them to my allowed readers, local friend DB, and delete the marker.
+        try {
+          await syncService.fetchProfileOnce(fromUid).then((profile) {
+            if (profile != null) {
+              friendRepo.addFriend(fromUid, profile.name, avatarUrl: profile.avatarUrl);
+            }
+          });
+          // To add to my allowed readers, I can just call acceptFriendRequest which does it.
+          // Wait, acceptFriendRequest deletes from my requests, adds to my allowed readers, creates a marker for them.
+          // That's for the TARGET receiving a request.
+          // For the SENDER receiving an acceptance marker:
+          // The marker is in my requests but has accepted=true.
+          // Let's just update my allowedReaders, and clear the marker.
+          final db = FirebaseFirestore.instance;
+          final currentUid = syncService.currentUid;
+          if (currentUid != null) {
+             await db.collection('social_profiles').doc(currentUid).update({
+                'allowedReaders': FieldValue.arrayUnion([fromUid])
+             });
+             await syncService.clearAcceptanceMarker(fromUid);
+          }
+        } catch (e) {
+          debugPrint('Error processing pending acceptance: $e');
+        }
+      }
+    }
   });
 });
 
-void _pushProfile(Ref ref, DailyLog dailyLog) {
+final friendProfileStreamProvider = StreamProvider.family<SocialProfile?, String>((ref, uid) {
+  final syncService = ref.watch(socialSyncServiceProvider);
+  return syncService.streamFriendProfile(uid);
+});
+
+void _pushProfile(Ref ref, DailyLog todayLog) {
   final profile = ref.read(profileProvider);
   final syncService = ref.read(socialSyncServiceProvider);
   final authService = ref.read(authServiceProvider);
 
   if (authService.uid == null) return;
 
+  // Calculate weekly stats
+  final dailyLogRepo = ref.read(dailyLogRepoProvider);
+  final now = DateTime.now();
+  // Monday is 1, Sunday is 7
+  final diff = now.weekday - 1;
+  final monday = now.subtract(Duration(days: diff));
+  
+  int weeklySteps = 0;
+  int weeklyWorkouts = 0;
+  
+  for (int i = 0; i <= diff; i++) {
+    final d = monday.add(Duration(days: i));
+    final dStr = d.toIso8601String().substring(0, 10);
+    final log = dailyLogRepo.getLog(dStr);
+    if (log != null) {
+      weeklySteps += log.steps ?? 0;
+      if (log.workoutCompleted) {
+        weeklyWorkouts++;
+      }
+    }
+  }
+
+  final String? safeAvatarUrl = (profile.photoPath?.startsWith('assets/') ?? false) 
+      ? profile.photoPath 
+      : null;
+
   final profileData = SocialProfile(
     uid: authService.uid!,
     name: profile.name,
-    avatarUrl: profile.photoPath,
-    todaySteps: dailyLog.steps ?? 0,
-    todayWorkouts: dailyLog.workoutCompleted ? 1 : 0,
+    avatarUrl: safeAvatarUrl,
+    todaySteps: todayLog.steps ?? 0,
+    todayWorkouts: todayLog.workoutCompleted ? 1 : 0,
     currentStreak: ref.read(stepsStreakProvider),
-    latestBadge: null, // TODO: fetch latest badge
+    weeklySteps: weeklySteps,
+    weeklyWorkouts: weeklyWorkouts,
+    latestBadge: null,
     lastUpdatedAt: DateTime.now(),
+    // We do NOT overwrite allowedReaders here because pushProfile uses SetOptions(merge: true)
   );
   syncService.pushProfile(profileData);
 }
@@ -209,4 +291,7 @@ final syncPendingCountProvider = StreamProvider<int>((ref) {
   final sync = ref.watch(firestoreSyncServiceProvider);
   return sync.pendingCountStream;
 });
+
+
+
 

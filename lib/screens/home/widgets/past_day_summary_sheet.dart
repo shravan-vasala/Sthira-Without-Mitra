@@ -85,7 +85,7 @@ class PastDaySummarySheet extends ConsumerWidget {
         if (log.emoji != null) {
           loggedIcons.add(MealIcons.resolve(log.emoji));
         } else {
-          final profileSlot = profile.customMealSlots.firstWhere((s) => s['id'] == slotId, orElse: () => {});
+          final profileSlot = profile.customMealSlots.firstWhere((s) => s['id'] == slotId, orElse: () => <String, dynamic>{});
           if (profileSlot.isNotEmpty) loggedIcons.add(MealIcons.resolve(profileSlot['emoji'] as String?));
         }
       }

@@ -5,8 +5,11 @@ class SocialProfile {
   final int todaySteps;
   final int todayWorkouts;
   final int currentStreak;
+  final int weeklySteps;
+  final int weeklyWorkouts;
   final String? latestBadge;
   final DateTime lastUpdatedAt;
+  final List<String> allowedReaders;
 
   SocialProfile({
     required this.uid,
@@ -15,8 +18,11 @@ class SocialProfile {
     required this.todaySteps,
     required this.todayWorkouts,
     required this.currentStreak,
+    required this.weeklySteps,
+    required this.weeklyWorkouts,
     this.latestBadge,
     required this.lastUpdatedAt,
+    this.allowedReaders = const [],
   });
 
   factory SocialProfile.fromJson(Map<String, dynamic> json) {
@@ -27,10 +33,13 @@ class SocialProfile {
       todaySteps: json['todaySteps'] ?? 0,
       todayWorkouts: json['todayWorkouts'] ?? 0,
       currentStreak: json['currentStreak'] ?? 0,
+      weeklySteps: json['weeklySteps'] ?? 0,
+      weeklyWorkouts: json['weeklyWorkouts'] ?? 0,
       latestBadge: json['latestBadge'],
       lastUpdatedAt: json['lastUpdatedAt'] != null 
           ? DateTime.fromMillisecondsSinceEpoch(json['lastUpdatedAt'] as int)
           : DateTime.now(),
+      allowedReaders: (json['allowedReaders'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
     );
   }
 
@@ -42,8 +51,11 @@ class SocialProfile {
       'todaySteps': todaySteps,
       'todayWorkouts': todayWorkouts,
       'currentStreak': currentStreak,
+      'weeklySteps': weeklySteps,
+      'weeklyWorkouts': weeklyWorkouts,
       'latestBadge': latestBadge,
       'lastUpdatedAt': lastUpdatedAt.millisecondsSinceEpoch,
+      'allowedReaders': allowedReaders,
     };
   }
 }

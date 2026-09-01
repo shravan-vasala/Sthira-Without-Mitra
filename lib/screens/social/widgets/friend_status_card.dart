@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/friend.dart';
-import '../../../models/social_profile.dart';
 import '../../../providers/app_providers.dart';
+import '../../../theme/app_colors.dart';
+import '../../../widgets/surface_card.dart';
 
 class FriendStatusCard extends ConsumerWidget {
   final Friend friend;
@@ -11,38 +12,33 @@ class FriendStatusCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final syncService = ref.watch(socialSyncServiceProvider);
+    final profileAsync = ref.watch(friendProfileStreamProvider(friend.uid));
     
-    return StreamBuilder<SocialProfile?>(
-      stream: syncService.streamFriendProfile(friend.uid),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Card(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
-
-        final profile = snapshot.data;
-
+    return profileAsync.when(
+      data: (profile) {
         if (profile == null) {
-          return Card(
+          return SurfaceCard(
+            margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.person)),
+              leading: _buildAvatar(null, friend.name, context),
               title: Text(friend.name),
               subtitle: const Text('No recent activity.'),
               trailing: IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => ref.read(friendRepoProvider).removeFriend(friend.uid),
+                icon: Icon(Icons.delete_outline, color: context.colors.red),
+                onPressed: () => _showRemoveDialog(context, ref, friend),
               ),
             ),
           );
         }
 
-        return Card(
-          elevation: 2,
+        final now = DateTime.now();
+        final diff = now.difference(profile.lastUpdatedAt);
+        final isStale = diff.inHours > 24;
+        
+        final Color iconColor = isStale ? context.colors.textMedium.withValues(alpha: 0.5) : context.colors.primary;
+        final Color textColor = isStale ? context.colors.textMedium.withValues(alpha: 0.5) : context.colors.textDark;
+
+        return SurfaceCard(
           margin: const EdgeInsets.only(bottom: 12),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -51,14 +47,7 @@ class FriendStatusCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: profile.avatarUrl != null 
-                        ? (profile.avatarUrl!.startsWith('assets/') 
-                            ? AssetImage(profile.avatarUrl!) as ImageProvider
-                            : NetworkImage(profile.avatarUrl!))
-                        : null,
-                      child: profile.avatarUrl == null ? const Icon(Icons.person) : null,
-                    ),
+                    _buildAvatar(profile.avatarUrl, profile.name, context),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -66,18 +55,18 @@ class FriendStatusCard extends ConsumerWidget {
                         children: [
                           Text(
                             profile.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: context.colors.textDark),
                           ),
                           Text(
-                            'Updated ${_timeAgo(profile.lastUpdatedAt)}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            isStale ? 'Last active ${diff.inDays}d ago' : 'Updated ${_timeAgo(profile.lastUpdatedAt)}',
+                            style: TextStyle(color: context.colors.textMedium, fontSize: 12),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => ref.read(friendRepoProvider).removeFriend(friend.uid),
+                      icon: Icon(Icons.delete_outline, color: context.colors.red),
+                      onPressed: () => _showRemoveDialog(context, ref, friend),
                     ),
                   ],
                 ),
@@ -89,19 +78,22 @@ class FriendStatusCard extends ConsumerWidget {
                       icon: Icons.directions_walk,
                       value: profile.todaySteps.toString(),
                       label: 'Steps',
-                      color: Colors.green,
+                      color: iconColor,
+                      textColor: textColor,
                     ),
                     _StatBlock(
                       icon: Icons.fitness_center,
                       value: profile.todayWorkouts.toString(),
                       label: 'Workouts',
-                      color: Colors.blue,
+                      color: iconColor,
+                      textColor: textColor,
                     ),
                     _StatBlock(
                       icon: Icons.local_fire_department,
                       value: profile.currentStreak.toString(),
                       label: 'Streak',
-                      color: Colors.orange,
+                      color: iconColor,
+                      textColor: textColor,
                     ),
                   ],
                 ),
@@ -110,6 +102,68 @@ class FriendStatusCard extends ConsumerWidget {
           ),
         );
       },
+      loading: () => const SurfaceCard(
+        margin: EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.all(16.0),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, st) => SurfaceCard(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: ListTile(title: Text('Error loading profile', style: TextStyle(color: context.colors.red))),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(String? avatarUrl, String name, BuildContext context) {
+    if (avatarUrl != null && avatarUrl.startsWith('assets/')) {
+      return CircleAvatar(
+        radius: 24,
+        backgroundColor: context.colors.inputFill,
+        backgroundImage: AssetImage(avatarUrl),
+      );
+    }
+    
+    // Initials fallback
+    final initials = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?';
+    return CircleAvatar(
+      radius: 24,
+      backgroundColor: context.colors.primary.withValues(alpha: 0.2),
+      child: Text(
+        initials,
+        style: TextStyle(
+          color: context.colors.primary,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+    );
+  }
+
+  void _showRemoveDialog(BuildContext context, WidgetRef ref, Friend friend) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: context.colors.card,
+        title: Text('Remove Friend', style: TextStyle(color: context.colors.textDark)),
+        content: Text(
+          'Are you sure you want to remove ${friend.name}? They will lose access to your activity. They may still see your past stats locally until they remove you.',
+          style: TextStyle(color: context.colors.textMedium),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Cancel', style: TextStyle(color: context.colors.textMedium)),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(friendRepoProvider).removeFriend(friend.uid);
+              ref.read(socialSyncServiceProvider).removeFriendAccess(friend.uid);
+              Navigator.of(ctx).pop();
+            },
+            child: Text('Remove', style: TextStyle(color: context.colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -127,12 +181,14 @@ class _StatBlock extends StatelessWidget {
   final String value;
   final String label;
   final Color color;
+  final Color textColor;
 
   const _StatBlock({
     required this.icon,
     required this.value,
     required this.label,
     required this.color,
+    required this.textColor,
   });
 
   @override
@@ -143,11 +199,11 @@ class _StatBlock extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor),
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.grey, fontSize: 12),
+          style: TextStyle(color: context.colors.textMedium, fontSize: 12),
         ),
       ],
     );
