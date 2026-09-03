@@ -372,54 +372,58 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         );
       },
     ),
-    bottomNavigationBar: NavigationBarTheme(
-          data: NavigationBarThemeData(
-            height: 72,
-            backgroundColor: context.colors.card,
-            indicatorColor: context.colors.primary,
-            labelTextStyle: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.colors.primary);
-              }
-              return TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.colors.textMedium);
-            }),
-            iconTheme: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return IconThemeData(color: context.colors.onPrimary, size: 24);
-              }
-              return IconThemeData(color: context.colors.textLight, size: 24);
-            }),
-          ),
-          child: NavigationBar(
-            selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: (index) {
-              Haptics.tap();
-              navigationShell.goBranch(index);
-            },
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.show_chart_outlined),
-                selectedIcon: Icon(Icons.show_chart_rounded),
-                label: 'Progress',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.people_outline_rounded),
-                selectedIcon: Icon(Icons.people_rounded),
-                label: 'Social',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline_rounded),
-                selectedIcon: Icon(Icons.person_rounded),
-                label: 'Profile',
-              ),
-            ],
+    bottomNavigationBar: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 32, right: 32, bottom: 16, top: 0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(40),
+          child: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              height: 64,
+              backgroundColor: context.colors.card,
+              indicatorColor: context.colors.primary,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              iconTheme: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return IconThemeData(color: context.colors.onPrimary, size: 24);
+                }
+                return const IconThemeData(color: Color(0xFF8A9A93), size: 24);
+              }),
+            ),
+            child: NavigationBar(
+              selectedIndex: navigationShell.currentIndex,
+              elevation: 0,
+              onDestinationSelected: (index) {
+                Haptics.tap();
+                navigationShell.goBranch(index);
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.show_chart_outlined),
+                  selectedIcon: Icon(Icons.show_chart_rounded),
+                  label: 'Progress',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.people_outline_rounded),
+                  selectedIcon: Icon(Icons.people_rounded),
+                  label: 'Social',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline_rounded),
+                  selectedIcon: Icon(Icons.person_rounded),
+                  label: 'Profile',
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    ),
       ),
 
       const BadgeOverlayHost(),

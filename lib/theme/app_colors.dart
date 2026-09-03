@@ -86,12 +86,12 @@ class AppColorsDark implements AppColorsPalette {
   @override Color get primaryDark => const Color(0xFFC57A42);
   @override Color get indigo => const Color(0xFF8C593C);
   @override Color get lavender => const Color(0xFF251E1C); 
-  @override Color get scaffoldBg => const Color(0xFF0D0B0D); 
+  @override Color get scaffoldBg => const Color(0xFF0F1513); 
   @override Color get background => scaffoldBg;
   @override Color get white => const Color(0xFFFFFFFF); 
-  @override Color get inputFill => const Color(0xFF191518);
-  @override Color get surface => const Color(0xFF120E11);
-  @override Color get card => const Color(0xFF120E11);
+  @override Color get inputFill => const Color(0xFF1C2622);
+  @override Color get surface => const Color(0xFF171F1B);
+  @override Color get card => const Color(0xFF171F1B);
   @override Color get onPrimary => const Color(0xFF2D1A25); 
   @override Color get onSurface => const Color(0xFFEFE8EA);
   @override Color get orange => const Color(0xFFE0912F);

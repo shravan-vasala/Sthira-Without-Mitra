@@ -561,7 +561,7 @@ class _WorkoutsSection extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: SurfaceCard(
         onTap: isFuture ? null : onTap,
-        color: isCompleted ? context.colors.card : context.colors.primary,
+        color: context.colors.card,
         border: null,
         child: Row(
           children: [
@@ -577,7 +577,7 @@ class _WorkoutsSection extends ConsumerWidget {
                         child: Text(
                           title,
                           style: TextStyle(
-                            color: isCompleted ? context.colors.textDark : context.colors.onPrimary,
+                            color: context.colors.textDark,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
@@ -588,7 +588,7 @@ class _WorkoutsSection extends ConsumerWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        color: isCompleted ? context.colors.textDark : context.colors.onPrimary,
+                        color: context.colors.textDark,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                       ),
@@ -597,7 +597,7 @@ class _WorkoutsSection extends ConsumerWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: isCompleted ? context.colors.textMedium : context.colors.onPrimary.withValues(alpha: 0.8),
+                      color: context.colors.textMedium,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -622,22 +622,22 @@ class _WorkoutsSection extends ConsumerWidget {
             else if (isRest)
               Icon(
                 Icons.self_improvement_rounded,
-                color: context.colors.onPrimary.withValues(alpha: 0.8),
+                color: context.colors.textMedium,
                 size: 32,
               )
             else
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: context.colors.onPrimary.withValues(alpha: 0.2),
+                  color: context.colors.textLight.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.arrow_forward_rounded,
-                  color: context.colors.onPrimary,
+                  color: context.colors.textMedium,
                   size: 24,
                 ),
-              ),
+              )
           ],
         ),
       ),

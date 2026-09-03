@@ -29,7 +29,7 @@ class AppTheme {
         onSurface: AppColorsLight().textDark,
         onError: AppColorsLight().white,
       ),
-      textTheme: GoogleFonts.quicksandTextTheme(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(
         TextTheme(
           headlineLarge: TextStyle(
             fontSize: 28,
@@ -123,7 +123,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColorsLight().textDark,
@@ -152,7 +152,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -165,7 +165,7 @@ class AppTheme {
           side: BorderSide(color: AppColorsLight().primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -182,7 +182,7 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColorsLight().textDark,
-        contentTextStyle: GoogleFonts.quicksand(color: AppColorsLight().white),
+        contentTextStyle: GoogleFonts.plusJakartaSans(color: AppColorsLight().white),
         behavior: SnackBarBehavior.floating,
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -235,12 +235,12 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsLight().card,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColorsLight().textDark,
         ),
-        contentTextStyle: GoogleFonts.quicksand(
+        contentTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColorsLight().textMedium,
@@ -255,12 +255,12 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColorsLight().textDark,
         ),
-        subtitleTextStyle: GoogleFonts.quicksand(
+        subtitleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 13,
           fontWeight: FontWeight.w400,
           color: AppColorsLight().textMedium,
@@ -293,7 +293,7 @@ class AppTheme {
         onSurface: AppColorsDark().onSurface,
         onError: AppColorsDark().onPrimary,
       ),
-      textTheme: GoogleFonts.quicksandTextTheme(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(
         ThemeData(brightness: Brightness.dark).textTheme,
       ).apply(
         bodyColor: AppColorsDark().textDark,
@@ -387,7 +387,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColorsDark().textDark,
@@ -416,7 +416,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -429,7 +429,7 @@ class AppTheme {
           side: BorderSide(color: AppColorsDark().primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -446,7 +446,7 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColorsDark().surface,
-        contentTextStyle: GoogleFonts.quicksand(color: AppColorsDark().textDark),
+        contentTextStyle: GoogleFonts.plusJakartaSans(color: AppColorsDark().textDark),
         behavior: SnackBarBehavior.floating,
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -499,12 +499,12 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsDark().card,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColorsDark().textDark,
         ),
-        contentTextStyle: GoogleFonts.quicksand(
+        contentTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColorsDark().textMedium,
@@ -519,12 +519,12 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColorsDark().textDark,
         ),
-        subtitleTextStyle: GoogleFonts.quicksand(
+        subtitleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 13,
           fontWeight: FontWeight.w400,
           color: AppColorsDark().textMedium,
