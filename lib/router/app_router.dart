@@ -372,57 +372,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         );
       },
     ),
-    bottomNavigationBar: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 32, right: 32, bottom: 16, top: 0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(40),
-          child: NavigationBarTheme(
-            data: NavigationBarThemeData(
-              height: 64,
-              backgroundColor: context.colors.card,
-              indicatorColor: context.colors.primary,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-              iconTheme: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return IconThemeData(color: context.colors.onPrimary, size: 24);
-                }
-                return const IconThemeData(color: Color(0xFF8A9A93), size: 24);
-              }),
-            ),
-            child: NavigationBar(
-              selectedIndex: navigationShell.currentIndex,
-              elevation: 0,
-              onDestinationSelected: (index) {
-                Haptics.tap();
-                navigationShell.goBranch(index);
-              },
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_rounded),
-                  label: 'Home',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.show_chart_outlined),
-                  selectedIcon: Icon(Icons.show_chart_rounded),
-                  label: 'Progress',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.people_outline_rounded),
-                  selectedIcon: Icon(Icons.people_rounded),
-                  label: 'Social',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline_rounded),
-                  selectedIcon: Icon(Icons.person_rounded),
-                  label: 'Profile',
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    bottomNavigationBar: _CustomNavBar(
+      currentIndex: navigationShell.currentIndex,
+      onItemSelected: (index) {
+        Haptics.tap();
+        navigationShell.goBranch(index);
+      },
     ),
       ),
 
@@ -468,6 +423,101 @@ class _TimerControlButton extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomNavBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onItemSelected;
+
+  const _CustomNavBar({
+    required this.currentIndex,
+    required this.onItemSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 32, right: 32, bottom: 16, top: 0),
+        child: Container(
+          height: 64,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: context.colors.card,
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _NavBarItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_rounded,
+                isSelected: currentIndex == 0,
+                onTap: () => onItemSelected(0),
+              ),
+              _NavBarItem(
+                icon: Icons.show_chart_outlined,
+                activeIcon: Icons.show_chart_rounded,
+                isSelected: currentIndex == 1,
+                onTap: () => onItemSelected(1),
+              ),
+              _NavBarItem(
+                icon: Icons.people_outline_rounded,
+                activeIcon: Icons.people_rounded,
+                isSelected: currentIndex == 2,
+                onTap: () => onItemSelected(2),
+              ),
+              _NavBarItem(
+                icon: Icons.person_outline_rounded,
+                activeIcon: Icons.person_rounded,
+                isSelected: currentIndex == 3,
+                onTap: () => onItemSelected(3),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavBarItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavBarItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 24 : 12,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? context.colors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(32),
+        ),
+        child: Icon(
+          isSelected ? activeIcon : icon,
+          color: isSelected ? context.colors.onPrimary : const Color(0xFF8A9A93),
+          size: 24,
         ),
       ),
     );
