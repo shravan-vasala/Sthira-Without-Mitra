@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../models/habit.dart';
 import '../../utils/habit_icons.dart';
+import '../../utils/target_calculator.dart';
 import 'widgets/sthira_aura_background.dart';
 
 String kOnboardingCompletedKey = 'onboarding_completed';
@@ -218,6 +218,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               _selectedHabitIds.remove(id);
                             }
                           });
+                        },
+                        onSuggestTapped: () {
+                          final height = double.tryParse(_heightController.text) ?? 160.0;
+                          double? weight = double.tryParse(_weightController.text);
+                          if (weight != null && !_useKg) {
+                            weight = weight / 2.20462; // Convert lb to kg
+                          }
+                          
+                          final targets = TargetCalculator.calculate(
+                            heightCm: height,
+                            weightKg: weight,
+                            age: 30, // Defaults for now
+                            gender: 'M',
+                            goal: 'Maintain',
+                            activityLevel: 'Sedentary',
+                          );
+                          
+                          setState(() {
+                            _targetCalories = targets.calories.toDouble();
+                          });
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Suggested: ${targets.calories} kcal (Protein: ${targets.proteinG}g, Carbs: ${targets.carbsG}g, Fat: ${targets.fatG}g)'),
+                              backgroundColor: context.colors.primary,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
                         },
                       ),
                       _HealthConnectPage(
@@ -622,12 +650,14 @@ class _GoalsPage extends StatelessWidget {
   final List<String> selectedHabitIds;
   final ValueChanged<double> onCaloriesChanged;
   final void Function(String id, bool selected) onHabitToggled;
+  final VoidCallback onSuggestTapped;
 
   const _GoalsPage({
     required this.targetCalories,
     required this.selectedHabitIds,
     required this.onCaloriesChanged,
     required this.onHabitToggled,
+    required this.onSuggestTapped,
   });
 
   @override
@@ -659,6 +689,15 @@ class _GoalsPage extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: Color(0xFFE8A163),
             ),
+          ),
+          const SizedBox(height: 8),
+          ActionChip(
+            label: const Text('Suggest for me'),
+            avatar: const Icon(Icons.auto_awesome_rounded, size: 16),
+            backgroundColor: const Color(0xFFE8A163).withOpacity(0.2),
+            labelStyle: const TextStyle(color: Color(0xFFE8A163)),
+            side: BorderSide(color: const Color(0xFFE8A163).withOpacity(0.5)),
+            onPressed: onSuggestTapped,
           ),
           const SizedBox(height: 16),
           SliderTheme(

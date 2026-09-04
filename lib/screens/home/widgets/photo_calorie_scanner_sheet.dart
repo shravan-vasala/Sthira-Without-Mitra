@@ -308,57 +308,77 @@ class _PhotoCalorieScannerSheetState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edit Item'),
+        backgroundColor: context.colors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text('Edit Item', style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Name'),
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  labelStyle: TextStyle(color: context.colors.textMedium),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: portionCtrl,
-                decoration: const InputDecoration(labelText: 'Portion'),
+                decoration: InputDecoration(
+                  labelText: 'Portion',
+                  labelStyle: TextStyle(color: context.colors.textMedium),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: calsCtrl,
-                decoration: const InputDecoration(labelText: 'Calories'),
+                decoration: InputDecoration(
+                  labelText: 'Calories',
+                  labelStyle: TextStyle(color: context.colors.textMedium),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                ),
                 keyboardType: TextInputType.number,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: pCtrl,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Pro(g)',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        labelStyle: TextStyle(color: context.colors.textMedium, fontSize: 13),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
                       ),
                       keyboardType: TextInputType.number,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: cCtrl,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Carb(g)',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        labelStyle: TextStyle(color: context.colors.textMedium, fontSize: 13),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
                       ),
                       keyboardType: TextInputType.number,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: fCtrl,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Fat(g)',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        labelStyle: TextStyle(color: context.colors.textMedium, fontSize: 13),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -369,7 +389,11 @@ class _PhotoCalorieScannerSheetState
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(foregroundColor: context.colors.textMedium),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               setState(() {
@@ -385,6 +409,11 @@ class _PhotoCalorieScannerSheetState
               });
               Navigator.pop(ctx);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.colors.primary,
+              foregroundColor: context.colors.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Save'),
           ),
         ],
@@ -821,10 +850,11 @@ class _PhotoCalorieScannerSheetState
                   if (_isAnalyzing)
                     Container(
                       margin: const EdgeInsets.only(top: 16),
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: context.colors.lavenderCard,
-                        borderRadius: BorderRadius.circular(12),
+                        color: context.colors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -834,15 +864,16 @@ class _PhotoCalorieScannerSheetState
                             height: 20,
                             child: CircularProgressIndicator(
                               color: context.colors.primary,
-                              strokeWidth: 2,
+                              strokeWidth: 2.5,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           Text(
-                            'Analyzing multiple angles…',
+                            'AI is analyzing your meal...',
                             style: TextStyle(
                               color: context.colors.textDark,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -878,22 +909,42 @@ class _PhotoCalorieScannerSheetState
                 ),
               ]
             else if (_isAnalyzing)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Center(
-                  child: Column(
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Estimating from your description…',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textMedium,
-                        ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: context.colors.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: context.colors.primary.withValues(alpha: 0.2)),
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: CircularProgressIndicator(
+                        color: context.colors.primary,
+                        strokeWidth: 3,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'AI is estimating macros...',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: context.colors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This usually takes 2-4 seconds',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: context.colors.textMedium,
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -937,62 +988,71 @@ class _PhotoCalorieScannerSheetState
               child: ListView.separated(
                 physics: const BouncingScrollPhysics(),
                 itemCount: _items.length,
-                separatorBuilder: (_, index) => const SizedBox(height: 8),
+                separatorBuilder: (_, index) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final item = _items[index];
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: context.colors.background,
-                      borderRadius: BorderRadius.circular(12),
+                  return Dismissible(
+                    key: ValueKey('${item.name}_$index'),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      decoration: BoxDecoration(
+                        color: context.colors.red,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(Icons.delete_outline_rounded, color: context.colors.onPrimary),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.name ?? '',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
+                    onDismissed: (_) => _removeItem(index),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      color: Colors.transparent,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name ?? 'Unknown',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                    color: context.colors.textDark,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '${item.portion} • ${item.calories} kcal',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: context.colors.textMedium,
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${item.portion} • ${item.calories} kcal',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: context.colors.primary,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                'P: ${item.proteinG}g  C: ${item.carbsG}g  F: ${item.fatG}g',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: context.colors.textMedium,
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    _buildMacroPill(context, 'Protein', '${item.proteinG?.toStringAsFixed(1) ?? '0'}g', const Color(0xFFE8A163)),
+                                    const SizedBox(width: 8),
+                                    _buildMacroPill(context, 'Carbs', '${item.carbsG?.toStringAsFixed(1) ?? '0'}g', const Color(0xFF8FB896)),
+                                    const SizedBox(width: 8),
+                                    _buildMacroPill(context, 'Fat', '${item.fatG?.toStringAsFixed(1) ?? '0'}g', const Color(0xFFE58B88)),
+                                  ],
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.edit_rounded,
-                            size: 20,
-                            color: context.colors.primary,
+                          IconButton(
+                            icon: Icon(
+                              Icons.edit_rounded,
+                              size: 20,
+                              color: context.colors.textMedium,
+                            ),
+                            onPressed: () => _editItem(index),
                           ),
-                          onPressed: () => _editItem(index),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.delete_outline_rounded,
-                            size: 20,
-                            color: context.colors.red,
-                          ),
-                          onPressed: () => _removeItem(index),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -1049,5 +1109,22 @@ class _PhotoCalorieScannerSheetState
       ),
     );
   }
+  Widget _buildMacroPill(BuildContext context, String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        '$label: $value',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
 }
-

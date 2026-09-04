@@ -147,7 +147,12 @@ $_jsonShape
 
     if (cached != null) {
       try {
-        return jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
+        final decoded = jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
+        if (!decoded.containsKey('total')) {
+          // Legacy cached raw data lacking totals — process it
+          return await _processAiResponse(decoded);
+        }
+        return decoded;
       } catch (_) {
         // Fallback to API if cache is corrupted
       }
@@ -213,16 +218,23 @@ Return ONLY a JSON object:
     );
     
     if (response != null) {
+      final safeResponse = {
+        'kcal': (response['kcal'] as num?)?.clamp(0, 900).toDouble() ?? 0.0,
+        'protein_g': (response['protein_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
+        'carbs_g': (response['carbs_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
+        'fat_g': (response['fat_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
+      };
+
       await isar.writeTxn(() async {
         await isar.foodSearchCaches.put(FoodSearchCache(
           normalizedQuery: 'fallback_$normalized',
-          cachedResponseJson: jsonEncode(response),
+          cachedResponseJson: jsonEncode(safeResponse),
         ));
       });
-      return response;
+      return safeResponse;
     }
     
-    return {"kcal": 0, "protein_g": 0.0, "carbs_g": 0.0, "fat_g": 0.0};
+    return {"kcal": 0.0, "protein_g": 0.0, "carbs_g": 0.0, "fat_g": 0.0};
   }
 
   Future<Map<String, dynamic>?> _processAiResponse(Map<String, dynamic>? aiResponse) async {
@@ -239,7 +251,9 @@ Return ONLY a JSON object:
     for (var item in items) {
       if (item is! Map) continue;
       final name = item['name']?.toString() ?? 'Unknown';
-      final grams = (item['estimated_grams'] as num?)?.toDouble() ?? 100.0;
+      double grams = (item['estimated_grams'] as num?)?.toDouble() ?? 100.0;
+      grams = grams.clamp(1.0, 1500.0);
+      item['estimated_grams'] = grams;
       
       final Map<String, dynamic>? match = nutritionLookup.match(name);
       Map<String, dynamic> per100g;
@@ -258,9 +272,9 @@ Return ONLY a JSON object:
       final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * multiplier;
       
       item['calories'] = kcal.round();
-      item['protein_g'] = p;
-      item['carbs_g'] = c;
-      item['fat_g'] = f;
+      item['protein_g'] = double.parse(p.toStringAsFixed(1));
+      item['carbs_g'] = double.parse(c.toStringAsFixed(1));
+      item['fat_g'] = double.parse(f.toStringAsFixed(1));
       
       totalCal += kcal;
       totalP += p;
@@ -270,13 +284,19 @@ Return ONLY a JSON object:
     
     aiResponse['total'] = {
       'calories': totalCal.round(),
-      'protein_g': totalP,
-      'carbs_g': totalC,
-      'fat_g': totalF,
+      'protein_g': double.parse(totalP.toStringAsFixed(1)),
+      'carbs_g': double.parse(totalC.toStringAsFixed(1)),
+      'fat_g': double.parse(totalF.toStringAsFixed(1)),
     };
     
     if (hadUnknown) {
-       aiResponse['confidence'] = 'low';
+      final currentConfidence = aiResponse['confidence']?.toString().toLowerCase() ?? 'low';
+      if (currentConfidence == 'high') {
+        aiResponse['confidence'] = 'medium';
+      } else if (currentConfidence == 'medium') {
+        aiResponse['confidence'] = 'low';
+      }
+      aiResponse['lookup'] = 'partial';
     }
     
     return aiResponse;
@@ -295,11 +315,26 @@ Return ONLY a JSON object:
   }) async* {
     _ensureApiKey();
 
-    final bucketedCalories = (remainingCalories ~/ 50) * 50;
+    final bucketedCalories = (remainingCalories ~/ 100) * 100;
+    final bucketedProtein = (remainingProtein ~/ 10) * 10;
     final dateStr = DateTime.now().toIso8601String().substring(0, 10);
-    final cacheKey = 'meal_suggestion_${dateStr}_$bucketedCalories';
+    final mName = mealName?.replaceAll(' ', '_') ?? 'final';
+    final cacheKey = 'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_$bucketedProtein';
+    
     final prefs = await SharedPreferences.getInstance();
     
+    // Prune old keys
+    final keys = prefs.getKeys().where((k) => k.startsWith('meal_suggestion_')).toList();
+    final twoDaysAgo = DateTime.now().subtract(const Duration(days: 2)).toIso8601String().substring(0, 10);
+    for (final key in keys) {
+      if (key.length >= 26) {
+        final keyDate = key.substring(16, 26); // extracts YYYY-MM-DD
+        if (keyDate.compareTo(twoDaysAgo) < 0) {
+          prefs.remove(key);
+        }
+      }
+    }
+
     final cached = prefs.getString(cacheKey);
     if (cached != null && cached.isNotEmpty) {
       yield cached;

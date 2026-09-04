@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../utils/meal_icons.dart';
+import '../../utils/target_calculator.dart';
 
 class ManagePlansScreen extends ConsumerWidget {
   const ManagePlansScreen({super.key});
@@ -105,6 +106,57 @@ class ManagePlansScreen extends ConsumerWidget {
                           },
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
+              color: context.colors.card,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Daily Targets', style: TextStyle(fontSize: 12, color: context.colors.textMedium, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('${profile.targetCalories} kcal (P:${profile.targetProteinG} C:${profile.targetCarbsG} F:${profile.targetFatG})', style: const TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      final currentKg = profile.currentWeight ?? (profile.useKg ? (profile.targetWeight ?? 70) : (profile.targetWeight ?? 154) / 2.20462);
+                      final targets = TargetCalculator.calculate(
+                        heightCm: profile.height,
+                        weightKg: currentKg,
+                        age: profile.age ?? 30,
+                        gender: profile.gender ?? 'M',
+                        goal: profile.primaryGoal ?? 'Maintain',
+                        activityLevel: 'Sedentary',
+                      );
+                      ref.read(profileProvider.notifier).updateProfile(
+                            profile.copyWith(
+                              targetCalories: targets.calories.round(),
+                              targetProteinG: targets.proteinG.round(),
+                              targetCarbsG: targets.carbsG.round(),
+                              targetFatG: targets.fatG.round(),
+                            ),
+                          );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Targets recalculated: ${targets.calories} kcal'),
+                          backgroundColor: context.colors.primary,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.auto_awesome_rounded, size: 16),
+                    label: const Text('Recalculate'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      backgroundColor: context.colors.primary.withValues(alpha: 0.1),
                     ),
                   ),
                 ],

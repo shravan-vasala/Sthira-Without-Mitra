@@ -19,15 +19,16 @@ class NutritionLookupService {
   }
 
   /// Returns the matched item if found, otherwise null.
-  /// Uses a basic fuzzy/normalized matching against name and aliases.
   Map<String, dynamic>? match(String dishName) {
     if (!_isLoaded || dishName.trim().isEmpty) return null;
 
-    final query = _normalize(dishName);
+    final queryTokens = _tokenize(dishName);
+    if (queryTokens.isEmpty) return null;
+    final queryStr = queryTokens.join(' ');
 
     // 1. Exact match on name
     for (var item in _nutritionTable) {
-      if (_normalize(item['name'] as String) == query) {
+      if (_normalize(item['name'] as String) == queryStr) {
         return item;
       }
     }
@@ -36,31 +37,84 @@ class NutritionLookupService {
     for (var item in _nutritionTable) {
       final aliases = List<String>.from(item['aliases'] ?? []);
       for (var alias in aliases) {
-        if (_normalize(alias) == query) {
+        if (_normalize(alias) == queryStr) {
           return item;
         }
       }
     }
 
-    // 3. Partial match (if query is inside name or alias)
+    // 3. Token-subset match
+    final candidates = <Map<String, dynamic>>[];
+    final neutralModifiers = {'plain', 'steamed', 'white', 'cooked'};
+
     for (var item in _nutritionTable) {
-      final name = _normalize(item['name'] as String);
-      if (name.contains(query) || query.contains(name)) {
-        return item;
-      }
+      final nameTokens = _tokenize(item['name'] as String);
       final aliases = List<String>.from(item['aliases'] ?? []);
-      for (var alias in aliases) {
-        final normAlias = _normalize(alias);
-        if (normAlias.contains(query) || query.contains(normAlias)) {
-          return item;
+      
+      bool matched = false;
+      int matchedTokensCount = 0;
+
+      // Check name token subset
+      if (nameTokens.isNotEmpty && nameTokens.every((t) => queryTokens.contains(t))) {
+        matched = true;
+        matchedTokensCount = nameTokens.length;
+      }
+
+      // Check aliases token subset
+      if (!matched) {
+        for (var alias in aliases) {
+          final aliasTokens = _tokenize(alias);
+          if (aliasTokens.isEmpty) continue;
+
+          // Single-token alias strict rule
+          if (aliasTokens.length == 1) {
+            final t = aliasTokens.first;
+            // Check if query is exactly that token + neutral modifiers
+            final nonNeutralQueryTokens = queryTokens.where((qt) => !neutralModifiers.contains(qt)).toList();
+            if (nonNeutralQueryTokens.length == 1 && nonNeutralQueryTokens.first == t) {
+              matched = true;
+              matchedTokensCount = 1;
+              break;
+            }
+          } else {
+            // Multi-token alias
+            if (aliasTokens.every((t) => queryTokens.contains(t))) {
+              matched = true;
+              matchedTokensCount = aliasTokens.length;
+              break;
+            }
+          }
         }
+      }
+
+      if (matched) {
+        candidates.add({
+          'item': item,
+          'matchedTokensCount': matchedTokensCount,
+          'nameLength': (item['name'] as String).length,
+        });
       }
     }
 
-    return null;
+    if (candidates.isEmpty) return null;
+
+    // Sort by most matched tokens wins, then longest (most specific) name
+    candidates.sort((a, b) {
+      final cmp1 = (b['matchedTokensCount'] as int).compareTo(a['matchedTokensCount'] as int);
+      if (cmp1 != 0) return cmp1;
+      return (b['nameLength'] as int).compareTo(a['nameLength'] as int);
+    });
+
+    return candidates.first['item'] as Map<String, dynamic>;
+  }
+
+  List<String> _tokenize(String input) {
+    final cleaned = input.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), ' ').trim();
+    if (cleaned.isEmpty) return [];
+    return cleaned.split(RegExp(r'\s+'));
   }
 
   String _normalize(String input) {
-    return input.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    return _tokenize(input).join(' ');
   }
 }

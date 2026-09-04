@@ -8,7 +8,6 @@ import '../../../providers/app_providers.dart';
 import '../../../models/habit.dart';
 import '../../../utils/workout_completion.dart';
 import '../../../widgets/app_bottom_sheet.dart';
-import '../../../widgets/surface_card.dart';
 import 'past_day_summary_sheet.dart';
 import 'daily_score_sheet.dart';
 
@@ -99,72 +98,14 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
       }
     });
 
-    return SurfaceCard(
-      margin: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: kScreenPadding, vertical: 8),
       child: Column(
         children: [
           // Date header row
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (!_isSameDay(selectedDate, today)) ...[
-                GestureDetector(
-                  onTap: () {
-                    ref.read(selectedDateProvider.notifier).state = today;
-                    ref.read(weekOffsetProvider.notifier).state = 0;
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: context.colors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'Today',
-                      style: TextStyle(
-                        color: context.colors.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                DateFormat('EEE, d').format(selectedDate),
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    DateFormat('MMM').format(selectedDate).toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textLight,
-                    ),
-                  ),
-                  Text(
-                    DateFormat('yyyy').format(selectedDate),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textLight,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              const _DailyScoreBadge(),
-              const SizedBox(width: 16),
               GestureDetector(
                 onTap: () async {
                   final picked = await showDatePicker(
@@ -187,7 +128,6 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   );
                   if (picked != null) {
                     ref.read(selectedDateProvider.notifier).state = picked;
-                    // Calculate week offset between today and picked date
                     final pickedWeekStart =
                         picked.subtract(Duration(days: picked.weekday - 1));
                     final todayWeekStart =
@@ -198,15 +138,62 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     ref.read(weekOffsetProvider.notifier).state = weekOffset;
                   }
                 },
-                child: Icon(
-                  Icons.calendar_month_outlined,
-                  color: context.colors.textLight,
-                  size: 24,
+                child: Text(
+                  'This week',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: context.colors.textDark,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              const _DailyScoreBadge(),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () {
+                  _pageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: context.colors.border.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.chevron_left_rounded,
+                    color: context.colors.textDark,
+                    size: 20,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: context.colors.border.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    color: context.colors.textDark,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           // Week day circles
           SizedBox(
@@ -233,10 +220,6 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
         ],
       ),
     );
-  }
-
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }
 
@@ -373,21 +356,20 @@ class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProvide
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            dayName,
+            dayName.toUpperCase(),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color:
-                  widget.isSelected ? context.colors.primary : context.colors.textLight,
+              color: context.colors.textLight,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           ScaleTransition(
             scale: _scaleAnim,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 32,
-              height: 32,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: widget.isSelected ? context.colors.primary : Colors.transparent,
@@ -399,7 +381,7 @@ class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProvide
                     fontSize: 14,
                     fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w600,
                     color: widget.isSelected
-                        ? context.colors.white
+                        ? context.colors.onPrimary
                         : (widget.isToday
                             ? context.colors.primary
                             : context.colors.textDark),

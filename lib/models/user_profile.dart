@@ -18,6 +18,9 @@ class UserProfile {
   final String? activeWorkoutPlan;
   final String? activeMealPlan;
   final String? primaryGoal;
+  final double? currentWeight; // in kg
+  final int? age;
+  final String? gender; // 'M' or 'F'
   
   @ignore
   final List<Map<String, dynamic>> customHabits;
@@ -59,6 +62,9 @@ class UserProfile {
     this.activeWorkoutPlan,
     this.activeMealPlan,
     this.primaryGoal,
+    this.currentWeight,
+    this.age,
+    this.gender,
     List<Map<String, dynamic>>? customHabits,
     List<Map<String, dynamic>>? customMealSlots,
     this.geminiApiKey,
@@ -119,6 +125,9 @@ class UserProfile {
       activeWorkoutPlan: json['activeWorkoutPlan'] as String?,
       activeMealPlan: json['activeMealPlan'] as String?,
       primaryGoal: json['primaryGoal'] as String?,
+      currentWeight: (json['currentWeight'] as num?)?.toDouble(),
+      age: (json['age'] as num?)?.toInt(),
+      gender: json['gender'] as String?,
       customHabits: (json['customHabits'] as List?)
               ?.map((h) => Map<String, dynamic>.from(h as Map))
               .toList() ??
@@ -155,6 +164,9 @@ class UserProfile {
         if (activeWorkoutPlan != null) 'activeWorkoutPlan': activeWorkoutPlan,
         if (activeMealPlan != null) 'activeMealPlan': activeMealPlan,
         if (primaryGoal != null) 'primaryGoal': primaryGoal,
+        if (currentWeight != null) 'currentWeight': currentWeight,
+        if (age != null) 'age': age,
+        if (gender != null) 'gender': gender,
         'customHabits': customHabits,
         'customMealSlots': customMealSlots,
         'restTimerSound': restTimerSound,
@@ -179,6 +191,9 @@ class UserProfile {
     String? activeWorkoutPlan,
     String? activeMealPlan,
     String? primaryGoal,
+    double? currentWeight,
+    int? age,
+    String? gender,
     List<Map<String, dynamic>>? customHabits,
     List<Map<String, dynamic>>? customMealSlots,
     String? geminiApiKey,
@@ -206,6 +221,9 @@ class UserProfile {
       activeWorkoutPlan: activeWorkoutPlan ?? this.activeWorkoutPlan,
       activeMealPlan: activeMealPlan ?? this.activeMealPlan,
       primaryGoal: primaryGoal ?? this.primaryGoal,
+      currentWeight: currentWeight ?? this.currentWeight,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
       customHabits: customHabits ?? this.customHabits,
       customMealSlots: customMealSlots ?? this.customMealSlots,
       geminiApiKey: clearGeminiApiKey ? null : (geminiApiKey ?? this.geminiApiKey),

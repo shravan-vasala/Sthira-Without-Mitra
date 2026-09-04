@@ -27,113 +27,128 @@ const UserProfileSchema = CollectionSchema(
       name: r'activeWorkoutPlan',
       type: IsarType.string,
     ),
-    r'coachDisplayName': PropertySchema(
+    r'age': PropertySchema(
       id: 2,
+      name: r'age',
+      type: IsarType.long,
+    ),
+    r'coachDisplayName': PropertySchema(
+      id: 3,
       name: r'coachDisplayName',
       type: IsarType.string,
     ),
     r'coachName': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'coachName',
       type: IsarType.string,
     ),
     r'currentPhaseWeek': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'currentPhaseWeek',
       type: IsarType.long,
     ),
+    r'currentWeight': PropertySchema(
+      id: 6,
+      name: r'currentWeight',
+      type: IsarType.double,
+    ),
+    r'gender': PropertySchema(
+      id: 7,
+      name: r'gender',
+      type: IsarType.string,
+    ),
     r'height': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'height',
       type: IsarType.double,
     ),
     r'heightInMeters': PropertySchema(
-      id: 6,
+      id: 9,
       name: r'heightInMeters',
       type: IsarType.double,
     ),
     r'isarCustomHabits': PropertySchema(
-      id: 7,
+      id: 10,
       name: r'isarCustomHabits',
       type: IsarType.string,
     ),
     r'isarCustomMealSlots': PropertySchema(
-      id: 8,
+      id: 11,
       name: r'isarCustomMealSlots',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 9,
+      id: 12,
       name: r'name',
       type: IsarType.string,
     ),
     r'photoPath': PropertySchema(
-      id: 10,
+      id: 13,
       name: r'photoPath',
       type: IsarType.string,
     ),
     r'planStartDate': PropertySchema(
-      id: 11,
+      id: 14,
       name: r'planStartDate',
       type: IsarType.dateTime,
     ),
     r'primaryGoal': PropertySchema(
-      id: 12,
+      id: 15,
       name: r'primaryGoal',
       type: IsarType.string,
     ),
     r'restTimerNotification': PropertySchema(
-      id: 13,
+      id: 16,
       name: r'restTimerNotification',
       type: IsarType.bool,
     ),
     r'restTimerSound': PropertySchema(
-      id: 14,
+      id: 17,
       name: r'restTimerSound',
       type: IsarType.bool,
     ),
     r'restTimerVibration': PropertySchema(
-      id: 15,
+      id: 18,
       name: r'restTimerVibration',
       type: IsarType.bool,
     ),
     r'screenTimeEnabled': PropertySchema(
-      id: 16,
+      id: 19,
       name: r'screenTimeEnabled',
       type: IsarType.bool,
     ),
     r'targetCalories': PropertySchema(
-      id: 17,
+      id: 20,
       name: r'targetCalories',
       type: IsarType.long,
     ),
     r'targetCarbsG': PropertySchema(
-      id: 18,
+      id: 21,
       name: r'targetCarbsG',
       type: IsarType.long,
     ),
     r'targetFatG': PropertySchema(
-      id: 19,
+      id: 22,
       name: r'targetFatG',
       type: IsarType.long,
     ),
     r'targetProteinG': PropertySchema(
-      id: 20,
+      id: 23,
       name: r'targetProteinG',
       type: IsarType.long,
     ),
     r'targetWeight': PropertySchema(
-      id: 21,
+      id: 24,
       name: r'targetWeight',
       type: IsarType.double,
     ),
     r'useKg': PropertySchema(
-      id: 22,
+      id: 25,
       name: r'useKg',
       type: IsarType.bool,
     ),
     r'weightUnit': PropertySchema(
-      id: 23,
+      id: 26,
       name: r'weightUnit',
       type: IsarType.string,
     )
@@ -172,6 +187,12 @@ int _userProfileEstimateSize(
   }
   bytesCount += 3 + object.coachDisplayName.length * 3;
   bytesCount += 3 + object.coachName.length * 3;
+  {
+    final value = object.gender;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.isarCustomHabits.length * 3;
   bytesCount += 3 + object.isarCustomMealSlots.length * 3;
   bytesCount += 3 + object.name.length * 3;
@@ -199,28 +220,31 @@ void _userProfileSerialize(
 ) {
   writer.writeString(offsets[0], object.activeMealPlan);
   writer.writeString(offsets[1], object.activeWorkoutPlan);
-  writer.writeString(offsets[2], object.coachDisplayName);
-  writer.writeString(offsets[3], object.coachName);
-  writer.writeLong(offsets[4], object.currentPhaseWeek);
-  writer.writeDouble(offsets[5], object.height);
-  writer.writeDouble(offsets[6], object.heightInMeters);
-  writer.writeString(offsets[7], object.isarCustomHabits);
-  writer.writeString(offsets[8], object.isarCustomMealSlots);
-  writer.writeString(offsets[9], object.name);
-  writer.writeString(offsets[10], object.photoPath);
-  writer.writeDateTime(offsets[11], object.planStartDate);
-  writer.writeString(offsets[12], object.primaryGoal);
-  writer.writeBool(offsets[13], object.restTimerNotification);
-  writer.writeBool(offsets[14], object.restTimerSound);
-  writer.writeBool(offsets[15], object.restTimerVibration);
-  writer.writeBool(offsets[16], object.screenTimeEnabled);
-  writer.writeLong(offsets[17], object.targetCalories);
-  writer.writeLong(offsets[18], object.targetCarbsG);
-  writer.writeLong(offsets[19], object.targetFatG);
-  writer.writeLong(offsets[20], object.targetProteinG);
-  writer.writeDouble(offsets[21], object.targetWeight);
-  writer.writeBool(offsets[22], object.useKg);
-  writer.writeString(offsets[23], object.weightUnit);
+  writer.writeLong(offsets[2], object.age);
+  writer.writeString(offsets[3], object.coachDisplayName);
+  writer.writeString(offsets[4], object.coachName);
+  writer.writeLong(offsets[5], object.currentPhaseWeek);
+  writer.writeDouble(offsets[6], object.currentWeight);
+  writer.writeString(offsets[7], object.gender);
+  writer.writeDouble(offsets[8], object.height);
+  writer.writeDouble(offsets[9], object.heightInMeters);
+  writer.writeString(offsets[10], object.isarCustomHabits);
+  writer.writeString(offsets[11], object.isarCustomMealSlots);
+  writer.writeString(offsets[12], object.name);
+  writer.writeString(offsets[13], object.photoPath);
+  writer.writeDateTime(offsets[14], object.planStartDate);
+  writer.writeString(offsets[15], object.primaryGoal);
+  writer.writeBool(offsets[16], object.restTimerNotification);
+  writer.writeBool(offsets[17], object.restTimerSound);
+  writer.writeBool(offsets[18], object.restTimerVibration);
+  writer.writeBool(offsets[19], object.screenTimeEnabled);
+  writer.writeLong(offsets[20], object.targetCalories);
+  writer.writeLong(offsets[21], object.targetCarbsG);
+  writer.writeLong(offsets[22], object.targetFatG);
+  writer.writeLong(offsets[23], object.targetProteinG);
+  writer.writeDouble(offsets[24], object.targetWeight);
+  writer.writeBool(offsets[25], object.useKg);
+  writer.writeString(offsets[26], object.weightUnit);
 }
 
 UserProfile _userProfileDeserialize(
@@ -232,27 +256,30 @@ UserProfile _userProfileDeserialize(
   final object = UserProfile(
     activeMealPlan: reader.readStringOrNull(offsets[0]),
     activeWorkoutPlan: reader.readStringOrNull(offsets[1]),
-    coachName: reader.readStringOrNull(offsets[3]) ?? '',
-    currentPhaseWeek: reader.readLongOrNull(offsets[4]) ?? 1,
-    height: reader.readDoubleOrNull(offsets[5]) ?? 160,
-    name: reader.readStringOrNull(offsets[9]) ?? '',
-    photoPath: reader.readStringOrNull(offsets[10]),
-    planStartDate: reader.readDateTimeOrNull(offsets[11]),
-    primaryGoal: reader.readStringOrNull(offsets[12]),
-    restTimerNotification: reader.readBoolOrNull(offsets[13]) ?? true,
-    restTimerSound: reader.readBoolOrNull(offsets[14]) ?? true,
-    restTimerVibration: reader.readBoolOrNull(offsets[15]) ?? true,
-    screenTimeEnabled: reader.readBoolOrNull(offsets[16]) ?? false,
-    targetCalories: reader.readLongOrNull(offsets[17]) ?? 1250,
-    targetCarbsG: reader.readLongOrNull(offsets[18]) ?? 120,
-    targetFatG: reader.readLongOrNull(offsets[19]) ?? 40,
-    targetProteinG: reader.readLongOrNull(offsets[20]) ?? 80,
-    targetWeight: reader.readDoubleOrNull(offsets[21]),
-    useKg: reader.readBoolOrNull(offsets[22]) ?? true,
+    age: reader.readLongOrNull(offsets[2]),
+    coachName: reader.readStringOrNull(offsets[4]) ?? '',
+    currentPhaseWeek: reader.readLongOrNull(offsets[5]) ?? 1,
+    currentWeight: reader.readDoubleOrNull(offsets[6]),
+    gender: reader.readStringOrNull(offsets[7]),
+    height: reader.readDoubleOrNull(offsets[8]) ?? 160,
+    name: reader.readStringOrNull(offsets[12]) ?? '',
+    photoPath: reader.readStringOrNull(offsets[13]),
+    planStartDate: reader.readDateTimeOrNull(offsets[14]),
+    primaryGoal: reader.readStringOrNull(offsets[15]),
+    restTimerNotification: reader.readBoolOrNull(offsets[16]) ?? true,
+    restTimerSound: reader.readBoolOrNull(offsets[17]) ?? true,
+    restTimerVibration: reader.readBoolOrNull(offsets[18]) ?? true,
+    screenTimeEnabled: reader.readBoolOrNull(offsets[19]) ?? false,
+    targetCalories: reader.readLongOrNull(offsets[20]) ?? 1250,
+    targetCarbsG: reader.readLongOrNull(offsets[21]) ?? 120,
+    targetFatG: reader.readLongOrNull(offsets[22]) ?? 40,
+    targetProteinG: reader.readLongOrNull(offsets[23]) ?? 80,
+    targetWeight: reader.readDoubleOrNull(offsets[24]),
+    useKg: reader.readBoolOrNull(offsets[25]) ?? true,
   );
   object.id = id;
-  object.isarCustomHabits = reader.readString(offsets[7]);
-  object.isarCustomMealSlots = reader.readString(offsets[8]);
+  object.isarCustomHabits = reader.readString(offsets[10]);
+  object.isarCustomMealSlots = reader.readString(offsets[11]);
   return object;
 }
 
@@ -268,48 +295,54 @@ P _userProfileDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readLongOrNull(offset) ?? 1) as P;
-    case 5:
-      return (reader.readDoubleOrNull(offset) ?? 160) as P;
-    case 6:
-      return (reader.readDouble(offset)) as P;
-    case 7:
-      return (reader.readString(offset)) as P;
-    case 8:
-      return (reader.readString(offset)) as P;
-    case 9:
       return (reader.readStringOrNull(offset) ?? '') as P;
-    case 10:
-      return (reader.readStringOrNull(offset)) as P;
-    case 11:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 12:
-      return (reader.readStringOrNull(offset)) as P;
-    case 13:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 14:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 15:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 16:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 17:
-      return (reader.readLongOrNull(offset) ?? 1250) as P;
-    case 18:
-      return (reader.readLongOrNull(offset) ?? 120) as P;
-    case 19:
-      return (reader.readLongOrNull(offset) ?? 40) as P;
-    case 20:
-      return (reader.readLongOrNull(offset) ?? 80) as P;
-    case 21:
+    case 5:
+      return (reader.readLongOrNull(offset) ?? 1) as P;
+    case 6:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 22:
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
+      return (reader.readDoubleOrNull(offset) ?? 160) as P;
+    case 9:
+      return (reader.readDouble(offset)) as P;
+    case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 13:
+      return (reader.readStringOrNull(offset)) as P;
+    case 14:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 15:
+      return (reader.readStringOrNull(offset)) as P;
+    case 16:
       return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 17:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 18:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 19:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 20:
+      return (reader.readLongOrNull(offset) ?? 1250) as P;
+    case 21:
+      return (reader.readLongOrNull(offset) ?? 120) as P;
+    case 22:
+      return (reader.readLongOrNull(offset) ?? 40) as P;
     case 23:
+      return (reader.readLongOrNull(offset) ?? 80) as P;
+    case 24:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 25:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 26:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -717,6 +750,75 @@ extension UserProfileQueryFilter
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> ageIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'age',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> ageIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'age',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> ageEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'age',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> ageGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'age',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> ageLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'age',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> ageBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'age',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
       coachDisplayNameEqualTo(
     String value, {
@@ -1041,6 +1143,241 @@ extension UserProfileQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      currentWeightIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'currentWeight',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      currentWeightIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'currentWeight',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      currentWeightEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'currentWeight',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      currentWeightGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'currentWeight',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      currentWeightLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'currentWeight',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      currentWeightBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'currentWeight',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> genderIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'gender',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      genderIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'gender',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> genderEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'gender',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      genderGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'gender',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> genderLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'gender',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> genderBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'gender',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      genderStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'gender',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> genderEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'gender',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> genderContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'gender',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> genderMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'gender',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      genderIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'gender',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      genderIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'gender',
+        value: '',
       ));
     });
   }
@@ -2542,6 +2879,18 @@ extension UserProfileQuerySortBy
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByAge() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'age', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByAgeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'age', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
       sortByCoachDisplayName() {
     return QueryBuilder.apply(this, (query) {
@@ -2579,6 +2928,31 @@ extension UserProfileQuerySortBy
       sortByCurrentPhaseWeekDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentPhaseWeek', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByCurrentWeight() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWeight', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      sortByCurrentWeightDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWeight', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByGender() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gender', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByGenderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gender', Sort.desc);
     });
   }
 
@@ -2857,6 +3231,18 @@ extension UserProfileQuerySortThenBy
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByAge() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'age', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByAgeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'age', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
       thenByCoachDisplayName() {
     return QueryBuilder.apply(this, (query) {
@@ -2894,6 +3280,31 @@ extension UserProfileQuerySortThenBy
       thenByCurrentPhaseWeekDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentPhaseWeek', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByCurrentWeight() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWeight', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      thenByCurrentWeightDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWeight', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByGender() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gender', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByGenderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gender', Sort.desc);
     });
   }
 
@@ -3173,6 +3584,12 @@ extension UserProfileQueryWhereDistinct
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByAge() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'age');
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByCoachDisplayName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -3192,6 +3609,19 @@ extension UserProfileQueryWhereDistinct
       distinctByCurrentPhaseWeek() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentPhaseWeek');
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByCurrentWeight() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'currentWeight');
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByGender(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'gender', caseSensitive: caseSensitive);
     });
   }
 
@@ -3343,6 +3773,12 @@ extension UserProfileQueryProperty
     });
   }
 
+  QueryBuilder<UserProfile, int?, QQueryOperations> ageProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'age');
+    });
+  }
+
   QueryBuilder<UserProfile, String, QQueryOperations>
       coachDisplayNameProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -3359,6 +3795,18 @@ extension UserProfileQueryProperty
   QueryBuilder<UserProfile, int, QQueryOperations> currentPhaseWeekProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentPhaseWeek');
+    });
+  }
+
+  QueryBuilder<UserProfile, double?, QQueryOperations> currentWeightProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'currentWeight');
+    });
+  }
+
+  QueryBuilder<UserProfile, String?, QQueryOperations> genderProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'gender');
     });
   }
 
