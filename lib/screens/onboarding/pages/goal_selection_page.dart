@@ -24,30 +24,30 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
   String? _selectedGoal;
   String? _error;
 
-  final List<Map<String, String>> _goals = [
+  final List<Map<String, dynamic>> _goals = [
     {
       'id': 'lose_weight',
       'title': 'Lose Weight',
       'subtitle': 'Burn fat and get leaner',
-      'icon': '🔥',
+      'icon': Icons.local_fire_department_rounded,
     },
     {
       'id': 'build_muscle',
       'title': 'Build Muscle',
       'subtitle': 'Increase strength and mass',
-      'icon': '💪',
+      'icon': Icons.fitness_center_rounded,
     },
     {
       'id': 'stay_healthy',
       'title': 'Stay Healthy',
       'subtitle': 'Maintain weight and feel good',
-      'icon': '🥑',
+      'icon': Icons.favorite_rounded,
     },
     {
       'id': 'get_stronger',
       'title': 'Get Stronger',
       'subtitle': 'Improve athletic performance',
-      'icon': '⚡',
+      'icon': Icons.bolt_rounded,
     },
   ];
 
@@ -106,19 +106,19 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: kSpace4),
+            const SizedBox(height: 24), // kSpace4
             Text(
               'WHAT IS YOUR MAIN GOAL?',
               style: context.text.display.copyWith(color: context.colors.textDark, fontSize: 32, height: 1.0),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: kSpace2),
+            const SizedBox(height: 8), // kSpace2
             Text(
               'This helps your AI Coach personalize recommendations and motivation.',
               style: context.text.body.copyWith(color: context.colors.textMedium),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: kSpace5),
+            const SizedBox(height: 32), // kSpace5
             
             Expanded(
               child: SingleChildScrollView(
@@ -138,19 +138,20 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           decoration: BoxDecoration(
-                            color: isSelected ? context.colors.cyan : context.colors.card,
-                            borderRadius: BorderRadius.circular(kRadiusLg),
+                            color: isSelected ? context.colors.primary : context.colors.card,
+                            borderRadius: BorderRadius.circular(24), // kRadiusLg
                             border: Border.all(
-                              color: isSelected ? context.colors.cyan : context.colors.border,
+                              color: isSelected ? context.colors.primary : context.colors.border,
                               width: isSelected ? 2 : 1,
                             ),
                           ),
                           padding: const EdgeInsets.all(20),
                           child: Row(
                             children: [
-                              Text(
-                                goal['icon']!,
-                                style: const TextStyle(fontSize: 32),
+                              Icon(
+                                goal['icon'] as IconData,
+                                size: 32,
+                                color: isSelected ? context.colors.onPrimary : context.colors.primary,
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -184,19 +185,19 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
             ),
             
             if (_error != null) ...[
-              const SizedBox(height: kSpace2),
+              const SizedBox(height: 8), // kSpace2
               Text(
                 _error!,
                 style: context.text.label.copyWith(color: context.colors.red),
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: kSpace4),
+            const SizedBox(height: 24), // kSpace4
             PrimaryButton(
               label: 'Continue',
               onPressed: _onSaveAndNext,
             ),
-            const SizedBox(height: kSpace4),
+            const SizedBox(height: 24), // kSpace4
           ],
         ),
       ),

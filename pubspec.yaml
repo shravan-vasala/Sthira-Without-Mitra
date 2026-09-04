@@ -68,6 +68,13 @@ flutter:
     - assets/data/
     - assets/icon/
     - assets/avatars/
+  fonts:
+    - family: Cabinet Grotesk
+      fonts:
+        - asset: assets/fonts/CabinetGrotesk-Variable.ttf
+    - family: General Sans
+      fonts:
+        - asset: assets/fonts/GeneralSans-Variable.ttf
 
 flutter_launcher_icons:
   android: true

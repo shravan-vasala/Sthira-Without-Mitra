@@ -17,6 +17,7 @@ class UserProfile {
   final int targetCalories;
   final String? activeWorkoutPlan;
   final String? activeMealPlan;
+  final String? primaryGoal;
   
   @ignore
   final List<Map<String, dynamic>> customHabits;
@@ -57,6 +58,7 @@ class UserProfile {
     this.targetCalories = 1250,
     this.activeWorkoutPlan,
     this.activeMealPlan,
+    this.primaryGoal,
     List<Map<String, dynamic>>? customHabits,
     List<Map<String, dynamic>>? customMealSlots,
     this.geminiApiKey,
@@ -116,6 +118,7 @@ class UserProfile {
       targetCalories: (json['targetCalories'] as num?)?.toInt() ?? 1250,
       activeWorkoutPlan: json['activeWorkoutPlan'] as String?,
       activeMealPlan: json['activeMealPlan'] as String?,
+      primaryGoal: json['primaryGoal'] as String?,
       customHabits: (json['customHabits'] as List?)
               ?.map((h) => Map<String, dynamic>.from(h as Map))
               .toList() ??
@@ -151,6 +154,7 @@ class UserProfile {
         'targetCalories': targetCalories,
         if (activeWorkoutPlan != null) 'activeWorkoutPlan': activeWorkoutPlan,
         if (activeMealPlan != null) 'activeMealPlan': activeMealPlan,
+        if (primaryGoal != null) 'primaryGoal': primaryGoal,
         'customHabits': customHabits,
         'customMealSlots': customMealSlots,
         'restTimerSound': restTimerSound,
@@ -174,6 +178,7 @@ class UserProfile {
     int? targetCalories,
     String? activeWorkoutPlan,
     String? activeMealPlan,
+    String? primaryGoal,
     List<Map<String, dynamic>>? customHabits,
     List<Map<String, dynamic>>? customMealSlots,
     String? geminiApiKey,
@@ -200,6 +205,7 @@ class UserProfile {
       targetCalories: targetCalories ?? this.targetCalories,
       activeWorkoutPlan: activeWorkoutPlan ?? this.activeWorkoutPlan,
       activeMealPlan: activeMealPlan ?? this.activeMealPlan,
+      primaryGoal: primaryGoal ?? this.primaryGoal,
       customHabits: customHabits ?? this.customHabits,
       customMealSlots: customMealSlots ?? this.customMealSlots,
       geminiApiKey: clearGeminiApiKey ? null : (geminiApiKey ?? this.geminiApiKey),

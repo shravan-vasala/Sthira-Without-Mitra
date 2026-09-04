@@ -77,58 +77,63 @@ const UserProfileSchema = CollectionSchema(
       name: r'planStartDate',
       type: IsarType.dateTime,
     ),
-    r'restTimerNotification': PropertySchema(
+    r'primaryGoal': PropertySchema(
       id: 12,
+      name: r'primaryGoal',
+      type: IsarType.string,
+    ),
+    r'restTimerNotification': PropertySchema(
+      id: 13,
       name: r'restTimerNotification',
       type: IsarType.bool,
     ),
     r'restTimerSound': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'restTimerSound',
       type: IsarType.bool,
     ),
     r'restTimerVibration': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'restTimerVibration',
       type: IsarType.bool,
     ),
     r'screenTimeEnabled': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'screenTimeEnabled',
       type: IsarType.bool,
     ),
     r'targetCalories': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'targetCalories',
       type: IsarType.long,
     ),
     r'targetCarbsG': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'targetCarbsG',
       type: IsarType.long,
     ),
     r'targetFatG': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'targetFatG',
       type: IsarType.long,
     ),
     r'targetProteinG': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'targetProteinG',
       type: IsarType.long,
     ),
     r'targetWeight': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'targetWeight',
       type: IsarType.double,
     ),
     r'useKg': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'useKg',
       type: IsarType.bool,
     ),
     r'weightUnit': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'weightUnit',
       type: IsarType.string,
     )
@@ -176,6 +181,12 @@ int _userProfileEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.primaryGoal;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.weightUnit.length * 3;
   return bytesCount;
 }
@@ -198,17 +209,18 @@ void _userProfileSerialize(
   writer.writeString(offsets[9], object.name);
   writer.writeString(offsets[10], object.photoPath);
   writer.writeDateTime(offsets[11], object.planStartDate);
-  writer.writeBool(offsets[12], object.restTimerNotification);
-  writer.writeBool(offsets[13], object.restTimerSound);
-  writer.writeBool(offsets[14], object.restTimerVibration);
-  writer.writeBool(offsets[15], object.screenTimeEnabled);
-  writer.writeLong(offsets[16], object.targetCalories);
-  writer.writeLong(offsets[17], object.targetCarbsG);
-  writer.writeLong(offsets[18], object.targetFatG);
-  writer.writeLong(offsets[19], object.targetProteinG);
-  writer.writeDouble(offsets[20], object.targetWeight);
-  writer.writeBool(offsets[21], object.useKg);
-  writer.writeString(offsets[22], object.weightUnit);
+  writer.writeString(offsets[12], object.primaryGoal);
+  writer.writeBool(offsets[13], object.restTimerNotification);
+  writer.writeBool(offsets[14], object.restTimerSound);
+  writer.writeBool(offsets[15], object.restTimerVibration);
+  writer.writeBool(offsets[16], object.screenTimeEnabled);
+  writer.writeLong(offsets[17], object.targetCalories);
+  writer.writeLong(offsets[18], object.targetCarbsG);
+  writer.writeLong(offsets[19], object.targetFatG);
+  writer.writeLong(offsets[20], object.targetProteinG);
+  writer.writeDouble(offsets[21], object.targetWeight);
+  writer.writeBool(offsets[22], object.useKg);
+  writer.writeString(offsets[23], object.weightUnit);
 }
 
 UserProfile _userProfileDeserialize(
@@ -226,16 +238,17 @@ UserProfile _userProfileDeserialize(
     name: reader.readStringOrNull(offsets[9]) ?? '',
     photoPath: reader.readStringOrNull(offsets[10]),
     planStartDate: reader.readDateTimeOrNull(offsets[11]),
-    restTimerNotification: reader.readBoolOrNull(offsets[12]) ?? true,
-    restTimerSound: reader.readBoolOrNull(offsets[13]) ?? true,
-    restTimerVibration: reader.readBoolOrNull(offsets[14]) ?? true,
-    screenTimeEnabled: reader.readBoolOrNull(offsets[15]) ?? false,
-    targetCalories: reader.readLongOrNull(offsets[16]) ?? 1250,
-    targetCarbsG: reader.readLongOrNull(offsets[17]) ?? 120,
-    targetFatG: reader.readLongOrNull(offsets[18]) ?? 40,
-    targetProteinG: reader.readLongOrNull(offsets[19]) ?? 80,
-    targetWeight: reader.readDoubleOrNull(offsets[20]),
-    useKg: reader.readBoolOrNull(offsets[21]) ?? true,
+    primaryGoal: reader.readStringOrNull(offsets[12]),
+    restTimerNotification: reader.readBoolOrNull(offsets[13]) ?? true,
+    restTimerSound: reader.readBoolOrNull(offsets[14]) ?? true,
+    restTimerVibration: reader.readBoolOrNull(offsets[15]) ?? true,
+    screenTimeEnabled: reader.readBoolOrNull(offsets[16]) ?? false,
+    targetCalories: reader.readLongOrNull(offsets[17]) ?? 1250,
+    targetCarbsG: reader.readLongOrNull(offsets[18]) ?? 120,
+    targetFatG: reader.readLongOrNull(offsets[19]) ?? 40,
+    targetProteinG: reader.readLongOrNull(offsets[20]) ?? 80,
+    targetWeight: reader.readDoubleOrNull(offsets[21]),
+    useKg: reader.readBoolOrNull(offsets[22]) ?? true,
   );
   object.id = id;
   object.isarCustomHabits = reader.readString(offsets[7]);
@@ -275,26 +288,28 @@ P _userProfileDeserializeProp<P>(
     case 11:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 12:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 13:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 14:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 15:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 16:
-      return (reader.readLongOrNull(offset) ?? 1250) as P;
-    case 17:
-      return (reader.readLongOrNull(offset) ?? 120) as P;
-    case 18:
-      return (reader.readLongOrNull(offset) ?? 40) as P;
-    case 19:
-      return (reader.readLongOrNull(offset) ?? 80) as P;
-    case 20:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 21:
       return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 16:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 17:
+      return (reader.readLongOrNull(offset) ?? 1250) as P;
+    case 18:
+      return (reader.readLongOrNull(offset) ?? 120) as P;
+    case 19:
+      return (reader.readLongOrNull(offset) ?? 40) as P;
+    case 20:
+      return (reader.readLongOrNull(offset) ?? 80) as P;
+    case 21:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 22:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 23:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1844,6 +1859,160 @@ extension UserProfileQueryFilter
   }
 
   QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'primaryGoal',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'primaryGoal',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'primaryGoal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'primaryGoal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'primaryGoal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'primaryGoal',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'primaryGoal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'primaryGoal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'primaryGoal',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'primaryGoal',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'primaryGoal',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      primaryGoalIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'primaryGoal',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
       restTimerNotificationEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -2503,6 +2672,18 @@ extension UserProfileQuerySortBy
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByPrimaryGoal() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'primaryGoal', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByPrimaryGoalDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'primaryGoal', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
       sortByRestTimerNotification() {
     return QueryBuilder.apply(this, (query) {
@@ -2818,6 +2999,18 @@ extension UserProfileQuerySortThenBy
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByPrimaryGoal() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'primaryGoal', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByPrimaryGoalDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'primaryGoal', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
       thenByRestTimerNotification() {
     return QueryBuilder.apply(this, (query) {
@@ -3050,6 +3243,13 @@ extension UserProfileQueryWhereDistinct
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByPrimaryGoal(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'primaryGoal', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QDistinct>
       distinctByRestTimerNotification() {
     return QueryBuilder.apply(this, (query) {
@@ -3204,6 +3404,12 @@ extension UserProfileQueryProperty
       planStartDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'planStartDate');
+    });
+  }
+
+  QueryBuilder<UserProfile, String?, QQueryOperations> primaryGoalProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'primaryGoal');
     });
   }
 

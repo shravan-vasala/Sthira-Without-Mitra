@@ -43,7 +43,7 @@ class SectionHeader extends StatelessWidget {
             countLabel!,
           ],
           const Spacer(),
-          ?trailing,
+          if (trailing != null) trailing!,
         ],
       ),
     );
