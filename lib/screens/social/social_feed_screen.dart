@@ -37,9 +37,28 @@ class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen> with Single
         title: const Text('Social'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Friends'),
-            Tab(text: 'Board'),
+          tabs: [
+            Consumer(
+              builder: (context, ref, child) {
+                final count = ref.watch(friendRequestsCountProvider).value ?? 0;
+                return Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Friends'),
+                      if (count > 0) ...[
+                        const SizedBox(width: 8),
+                        Badge(
+                          label: Text(count.toString()),
+                          backgroundColor: context.colors.red,
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            ),
+            const Tab(text: 'Board'),
           ],
         ),
         actions: [
@@ -98,25 +117,25 @@ class _FriendsTab extends ConsumerWidget {
                     final String name = req['fromName'] ?? 'Unknown';
                     final String? avatarUrl = req['fromAvatar'];
                     
-                    return SurfaceCard(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
+                        contentPadding: EdgeInsets.zero,
                         leading: _buildAvatar(avatarUrl, name, context),
-                        title: Text(name, style: TextStyle(color: context.colors.textDark)),
+                        title: Text(name, style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold, fontSize: 16)),
                         subtitle: Text('Wants to be friends', style: TextStyle(color: context.colors.textMedium)),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: Icon(Icons.check_circle, color: context.colors.green),
+                              icon: Icon(Icons.check_circle, color: context.colors.primary),
                               onPressed: () async {
                                 await syncService.acceptFriendRequest(fromUid);
                                 friendRepo.addFriend(fromUid, name, avatarUrl: avatarUrl);
-                                // The UI should automatically rebuild as stream updates
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.cancel, color: context.colors.red),
+                              icon: Icon(Icons.cancel, color: context.colors.textMedium.withValues(alpha: 0.5)),
                               onPressed: () => syncService.declineFriendRequest(fromUid),
                             ),
                           ],
@@ -340,10 +359,10 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       else rankWidget = Text('#$rank', style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textMedium));
     }
 
-    return SurfaceCard(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: isMe ? context.colors.primary.withValues(alpha: 0.1) : (isInactive ? context.colors.scaffoldBg : context.colors.card),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
+        contentPadding: EdgeInsets.zero,
         leading: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -352,15 +371,16 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           ],
         ),
         title: Text(isMe ? 'You' : profile.name, style: TextStyle(
-          fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
-          color: isInactive ? context.colors.textMedium : context.colors.textDark,
+          fontWeight: isMe ? FontWeight.w800 : FontWeight.bold,
+          fontSize: 16,
+          color: isInactive ? context.colors.textMedium.withValues(alpha: 0.5) : (isMe ? context.colors.primary : context.colors.textDark),
         )),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(primaryMetric.toString(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isInactive ? context.colors.textMedium : context.colors.primary)),
-            Text(secondaryMetric, style: TextStyle(fontSize: 12, color: context.colors.textMedium)),
+            Text(primaryMetric.toString(), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: isInactive ? context.colors.textMedium.withValues(alpha: 0.5) : context.colors.primary)),
+            Text(secondaryMetric, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.colors.textMedium)),
           ],
         ),
       ),

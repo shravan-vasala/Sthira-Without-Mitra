@@ -166,7 +166,7 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
       final friendRepo = ref.read(friendRepoProvider);
       final profile = ref.read(profileProvider);
 
-      if (!RegExp(r'^[A-Za-z0-9]{20,40}\$').hasMatch(code)) {
+      if (!RegExp(r'^[A-Za-z0-9]{20,40}$').hasMatch(code)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Not a valid Sthira code')),

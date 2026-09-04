@@ -287,6 +287,11 @@ final stepsSourceProvider = StateProvider<StepsSource>((ref) => StepsSource.none
 
 
 
+final friendRequestsCountProvider = StreamProvider<int>((ref) {
+  final sync = ref.watch(socialSyncServiceProvider);
+  return sync.streamFriendRequests().map((reqs) => reqs.length);
+});
+
 final syncPendingCountProvider = StreamProvider<int>((ref) {
   final sync = ref.watch(firestoreSyncServiceProvider);
   return sync.pendingCountStream;
