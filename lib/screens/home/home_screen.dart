@@ -279,10 +279,10 @@ class _HomeGreetingTitle extends ConsumerWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: context.colors.textDark,
             height: 1.15,
+            fontSize: 32,
           ),
         ),
         if (!isToday) ...[
@@ -484,18 +484,15 @@ class _WorkoutsSection extends ConsumerWidget {
             : '${sec.exercises.length} exercises';
 
         cards.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: _buildCard(
-              context,
-              title: title,
-              subtitle: subtitle,
-              isCompleted: isCompleted,
-              isFuture: isFuture,
-              isRest: false,
-              heroTag: 'workout-${day.dayId}-section-$i',
-              onTap: () => context.go('/home/workout/${day.dayId}?section=$i'),
-            ),
+          _buildCard(
+            context,
+            title: title,
+            subtitle: subtitle,
+            isCompleted: isCompleted,
+            isFuture: isFuture,
+            isRest: false,
+            heroTag: 'workout-${day.dayId}-section-$i',
+            onTap: () => context.go('/home/workout/${day.dayId}?section=$i'),
           ),
         );
       }
@@ -563,6 +560,7 @@ class _WorkoutsSection extends ConsumerWidget {
         onTap: isFuture ? null : onTap,
         color: context.colors.card,
         border: null,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           children: [
             Expanded(
@@ -578,8 +576,8 @@ class _WorkoutsSection extends ConsumerWidget {
                           title,
                           style: TextStyle(
                             color: context.colors.textDark,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -589,8 +587,8 @@ class _WorkoutsSection extends ConsumerWidget {
                       title,
                       style: TextStyle(
                         color: context.colors.textDark,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   const SizedBox(height: 4),
@@ -598,8 +596,7 @@ class _WorkoutsSection extends ConsumerWidget {
                     subtitle,
                     style: TextStyle(
                       color: context.colors.textMedium,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
                   ),
                 ],

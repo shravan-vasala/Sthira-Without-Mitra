@@ -294,13 +294,13 @@ class _NavButtons extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8FB896),
+                  color: const Color(0xFFE8A163),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Text(
                   'Get Started',
                   style: TextStyle(
-                    color: Color(0xFF1B3B2B),
+                    color: Color(0xFF2E1D2F),
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
                   ),
@@ -314,12 +314,12 @@ class _NavButtons extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8FB896),
+                  color: const Color(0xFFE8A163),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(
                   Icons.arrow_forward_rounded,
-                  color: Color(0xFF1B3B2B),
+                  color: Color(0xFF2E1D2F),
                   size: 28,
                 ),
               ),
@@ -330,9 +330,18 @@ class _NavButtons extends StatelessWidget {
   }
 }
 
-class _WelcomePage extends StatelessWidget {
+class _WelcomePage extends StatefulWidget {
+  @override
+  State<_WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<_WelcomePage> {
+  bool _showSloka = false;
+
   @override
   Widget build(BuildContext context) {
+    final fontFamily = Theme.of(context).textTheme.headlineLarge?.fontFamily;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
@@ -348,45 +357,117 @@ class _WelcomePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 48),
-          const Text(
+          Text(
             'Sthira',
             style: TextStyle(
+              fontFamily: fontFamily,
               fontSize: 48,
               fontWeight: FontWeight.w800,
               color: Colors.white,
               letterSpacing: -1,
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'steady, every day',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.white.withOpacity(0.7),
-              fontWeight: FontWeight.w500,
-              letterSpacing: 1.2,
-            ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'स्थिर',
+                style: TextStyle(
+                  fontFamily: fontFamily,
+                  fontSize: 22,
+                  color: const Color(0xFFE8A163),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  '•',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              Text(
+                'steady, every day',
+                style: TextStyle(
+                  fontFamily: fontFamily,
+                  fontSize: 18,
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 64),
-          const Text(
-            'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.8,
-              color: Color(0xFFE8A163),
-              fontWeight: FontWeight.w600,
+          GestureDetector(
+            onTap: () => setState(() => _showSloka = !_showSloka),
+            behavior: HitTestBehavior.opaque,
+            child: Column(
+              children: [
+                Text(
+                  'Bhagavad Gita 2:47',
+                  style: TextStyle(
+                    fontFamily: fontFamily,
+                    fontSize: 16,
+                    color: const Color(0xFFE8A163),
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: _showSloka
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Text(
+                            'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: fontFamily,
+                              fontSize: 14,
+                              height: 1.8,
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(width: double.infinity),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Bhagavad Gita 2:47',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.white.withOpacity(0.5),
-            ),
+          const Spacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Made with ',
+                style: TextStyle(
+                  fontFamily: fontFamily,
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Icon(Icons.favorite_rounded, color: Color(0xFFE8A163), size: 14),
+              Text(
+                ' for Bodamma',
+                style: TextStyle(
+                  fontFamily: fontFamily,
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 24),
         ],
       ),
     );

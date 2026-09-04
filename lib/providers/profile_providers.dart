@@ -21,7 +21,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
     final sub = repo.watchProfile().listen((profile) {
       if (profile != null) {
         state = profile.copyWith(
-          geminiApiKey: initialKey.isNotEmpty ? initialKey : null
+          geminiApiKey: state.geminiApiKey ?? (initialKey.isNotEmpty ? initialKey : null)
         );
       }
     });
@@ -34,7 +34,7 @@ class ProfileNotifier extends Notifier<UserProfile> {
   }
 
   Future<void> updateProfile(UserProfile profile) async {
-    state = profile;
+    state = profile.copyWith(geminiApiKey: state.geminiApiKey);
     final repo = ref.read(profileRepoProvider);
     await repo.saveProfile(profile);
   }

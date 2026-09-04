@@ -150,7 +150,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: const Text('My Progress'),
+        title: Text('My Progress', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: context.colors.textDark, fontSize: 32)),
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: Navigator.of(context).canPop()
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_rounded),
@@ -159,7 +162,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             : null,
         actions: [
           IconButton(
-            icon: const Icon(Icons.lightbulb_outline_rounded),
+            icon: const Icon(Icons.insights_rounded),
             onPressed: () {
               Haptics.tap();
               showAppBottomSheet(
@@ -172,7 +175,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.grid_view_rounded),
+            icon: const Icon(Icons.calendar_month_rounded),
             onPressed: () {
               Haptics.tap();
               context.push('/progress/yearly-activity');
@@ -197,54 +200,95 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           // Time range segmented control
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.colors.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              padding: const EdgeInsets.all(4),
-              child: Row(
-                children: TimeRange.values.map((range) {
-                  final isSelected = _selectedRange == range;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() {
-                        _selectedRange = range;
-                        _currentReferenceDate = DateTime.now();
-                      }),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: isSelected ? context.colors.card : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: context.colors.primary.withValues(alpha: 0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Center(
-                          child: Text(
-                            _rangeLabel(range),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected
-                                  ? context.colors.primary
-                                  : context.colors.textMedium,
-                            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: TimeRange.values.map((range) {
+                final isSelected = _selectedRange == range;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() {
+                      _selectedRange = range;
+                      _currentReferenceDate = DateTime.now();
+                    }),
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _rangeLabel(range),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: isSelected ? context.colors.textDark : context.colors.textMedium,
                           ),
                         ),
+                        const SizedBox(height: 8),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 24,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: isSelected ? context.colors.primary : Colors.transparent,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Horizontal scrollable Metric tab bar
+          SizedBox(
+            height: 48,
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+              scrollDirection: Axis.horizontal,
+              itemCount: MetricType.values.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final metric = MetricType.values[index];
+                if (metric == MetricType.screenTime && !profile.screenTimeEnabled) return const SizedBox();
+                final isSelected = _selectedMetric == metric;
+                
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedMetric = metric),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? context.colors.primary.withValues(alpha: 0.1) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: isSelected ? context.colors.primary : context.colors.border,
+                        width: 1,
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _metricIcon(metric),
+                          size: 18,
+                          color: isSelected ? context.colors.primary : context.colors.textMedium,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _metricLabel(metric),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                            color: isSelected ? context.colors.primary : context.colors.textMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),
@@ -321,86 +365,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
           ),
 
-          // Metric tab bar (icons below chart)
-          Container(
-            padding: const EdgeInsets.fromLTRB(4, 10, 4, 12),
-            decoration: BoxDecoration(
-              color: context.colors.card,
-              boxShadow: [
-                BoxShadow(
-                  color: context.colors.primary.withValues(alpha: 0.06),
-                  blurRadius: 20,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: MetricType.values.where((m) => m != MetricType.screenTime || profile.screenTimeEnabled).map((metric) {
-                final isSelected = _selectedMetric == metric;
-                return Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => setState(() => _selectedMetric = metric),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: isSelected
-                              ? BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: context.colors.accentGlow,
-                                      blurRadius: 12,
-                                      spreadRadius: 2,
-                                    ),
-                                  ],
-                                )
-                              : null,
-                          child: Icon(
-                            _metricIcon(metric),
-                            color: isSelected
-                                ? context.colors.primary
-                                : context.colors.textLight,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _metricLabel(metric),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight:
-                                isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected
-                                ? context.colors.primary
-                                : context.colors.textLight,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 18,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? context.colors.primary
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
+
         ],
       ),
       ),

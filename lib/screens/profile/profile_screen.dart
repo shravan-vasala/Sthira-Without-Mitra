@@ -55,7 +55,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
           child: Column(
             children: [
-              const SizedBox(height: 8),
+              // Massive Heading
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24, top: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'My Profile',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: context.colors.textDark,
+                      fontSize: 32,
+                    ),
+                  ),
+                ),
+              ),
+              
               // Profile header
               Container(
                 width: double.infinity,
