@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';\nimport 'ai_logger.dart';
+import 'package:flutter/foundation.dart';
+import 'ai_logger.dart';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'package:crypto/crypto.dart';
@@ -298,7 +299,7 @@ class AiClient {
       final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).timeout(timeout);
+      ).timeout(const Duration(seconds: 20));
       return response.text;
     }
   }
@@ -380,7 +381,7 @@ class AiClient {
 
       yield* model.generateContentStream([vertex.Content.text(prompt)])
           .map((res) => res.text)
-          .timeout(timeout);
+          .timeout(const Duration(seconds: 20));
     } else {
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('API Key is required if not using Firebase.');
@@ -407,7 +408,7 @@ class AiClient {
       final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).timeout(timeout);
+      ).timeout(const Duration(seconds: 20));
       
       yield response.text;
     }

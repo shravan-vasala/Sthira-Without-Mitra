@@ -22,7 +22,7 @@ void main() {
     );
 
     final result = PrCalculator.calculateNewPr(log, null);
-    
+
     expect(result.isNewMaxWeight, isTrue);
     expect(result.newPr.maxWeight, 120.0);
     expect(result.newPr.maxWeightReps, 3);
@@ -44,7 +44,7 @@ void main() {
     );
 
     final result = PrCalculator.calculateNewPr(log, currentPr);
-    
+
     expect(result.isNewMaxWeight, isTrue);
     expect(result.newPr.maxWeight, 100.0);
     expect(result.newPr.maxWeightReps, 8);
@@ -65,7 +65,7 @@ void main() {
     );
 
     final result = PrCalculator.calculateNewPr(log, currentPr);
-    
+
     expect(result.isNewMaxVolume, isTrue);
     expect(result.newPr.maxVolume, 600.0);
   });

@@ -29,13 +29,17 @@ Future<Isar> setUpTestIsar() async {
     print('Isar initializeIsarCore failed: $e. Attempting manual download...');
     if (Platform.isLinux) {
       try {
-        final request = await HttpClient().getUrl(Uri.parse('https://github.com/isar/isar/releases/download/3.1.0+1/libisar_linux_x64.so'));
+        final request = await HttpClient().getUrl(
+          Uri.parse(
+            'https://github.com/isar/isar/releases/download/3.1.0+1/libisar_linux_x64.so',
+          ),
+        );
         final response = await request.close();
         if (response.statusCode == 200) {
           final file = File('libisar.so');
           await response.pipe(file.openWrite());
           await Isar.initializeIsarCore(
-            libraries: {Abi.linuxX64: file.absolute.path}, 
+            libraries: {Abi.linuxX64: file.absolute.path},
             download: false,
           );
         } else {
@@ -48,33 +52,30 @@ Future<Isar> setUpTestIsar() async {
       }
     }
   }
-  
+
   final tempDir = Directory.systemTemp.createTempSync('isar_test_');
-  return await Isar.open(
-    [
-      UserProfileSchema,
-      DailyLogSchema,
-      WorkoutPlanSchema,
-      WorkoutSessionSchema,
-      DailyMealLogSchema,
-      MealPlanSchema,
-      HabitSchema,
-      HabitCompletionSchema,
-      ScannedMealLogSchema,
-      ProgressPhotoSchema,
-      ExerciseLogSchema,
-      ExercisePrSchema,
-      CoachNoteSchema,
-      BodyStatsSchema,
-      BadgeSchema,
-      AppConfigSchema,
-      AiCacheEntrySchema,
-      FoodSearchCacheSchema,
-      FriendSchema,
-      SyncQueueItemSchema,
-    ],
-    directory: tempDir.path,
-  );
+  return await Isar.open([
+    UserProfileSchema,
+    DailyLogSchema,
+    WorkoutPlanSchema,
+    WorkoutSessionSchema,
+    DailyMealLogSchema,
+    MealPlanSchema,
+    HabitSchema,
+    HabitCompletionSchema,
+    ScannedMealLogSchema,
+    ProgressPhotoSchema,
+    ExerciseLogSchema,
+    ExercisePrSchema,
+    CoachNoteSchema,
+    BodyStatsSchema,
+    BadgeSchema,
+    AppConfigSchema,
+    AiCacheEntrySchema,
+    FoodSearchCacheSchema,
+    FriendSchema,
+    SyncQueueItemSchema,
+  ], directory: tempDir.path);
 }
 
 Future<void> tearDownTestIsar(Isar isar) async {

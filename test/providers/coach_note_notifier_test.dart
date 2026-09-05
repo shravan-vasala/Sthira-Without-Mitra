@@ -66,7 +66,9 @@ void main() {
         exerciseLogRepoProvider.overrideWithValue(exerciseLogRepo),
         initialGeminiKeyProvider.overrideWithValue(''),
         selectedDateProvider.overrideWith((ref) => DateTime(2023, 10, 2)),
-        sharedPreferencesProvider.overrideWithValue(await SharedPreferences.getInstance()),
+        sharedPreferencesProvider.overrideWithValue(
+          await SharedPreferences.getInstance(),
+        ),
       ],
     );
   });
@@ -81,7 +83,11 @@ void main() {
   });
 
   test('CoachNoteNotifier uses cache hit', () async {
-    final note = CoachNote(date: '2023-10-02', note: 'Cached Note', isAi: false);
+    final note = CoachNote(
+      date: '2023-10-02',
+      note: 'Cached Note',
+      isAi: false,
+    );
     await coachNoteRepo.saveNote(note);
 
     final value = await container.read(coachNoteProvider.future);
@@ -89,7 +95,11 @@ void main() {
   });
 
   test('CoachNoteNotifier force refresh bypasses cache', () async {
-    final note = CoachNote(date: '2023-10-02', note: 'Cached Note', isAi: false);
+    final note = CoachNote(
+      date: '2023-10-02',
+      note: 'Cached Note',
+      isAi: false,
+    );
     await coachNoteRepo.saveNote(note);
 
     container.listen(coachNoteProvider, (_, _) {});

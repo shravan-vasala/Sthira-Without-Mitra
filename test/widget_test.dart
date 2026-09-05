@@ -22,13 +22,13 @@ void main() {
                     'reps': [30],
                     'note': '',
                     'sideInfo': 'None',
-                    'restSecondsAfterSet': 0
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+                    'restSecondsAfterSet': 0,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       };
 
       final plan = WorkoutPlan.fromJson(json);
@@ -60,8 +60,20 @@ void main() {
       final plan = MealPlan(
         planName: 'Test',
         meals: [
-          Meal(name: 'B', type: 'breakfast', items: [], calories: 300, isCompleted: true),
-          Meal(name: 'L', type: 'lunch', items: [], calories: 500, isCompleted: false),
+          Meal(
+            name: 'B',
+            type: 'breakfast',
+            items: [],
+            calories: 300,
+            isCompleted: true,
+          ),
+          Meal(
+            name: 'L',
+            type: 'lunch',
+            items: [],
+            calories: 500,
+            isCompleted: false,
+          ),
         ],
         totalCalories: 800,
       );

@@ -11,7 +11,7 @@ void main() {
       service = NutritionLookupService();
       // Since it's a test, we mock the asset loading or just load from disk.
       // But Flutter test environment doesn't always have access to assets easily unless configured.
-      // However, for this test we can just call load() and if it fails to load the real asset, 
+      // However, for this test we can just call load() and if it fails to load the real asset,
       // we could mock it. Actually, `TestWidgetsFlutterBinding` allows loading assets if they are in pubspec.
       await service.load();
     });

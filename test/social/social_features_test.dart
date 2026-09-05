@@ -7,7 +7,10 @@ void main() {
 
     test('valid UID passes', () {
       expect(regex.hasMatch('abcDEF1234567890xyZZZ'), isTrue);
-      expect(regex.hasMatch('a' * 28), isTrue); // Typical Firebase UID is 28 chars
+      expect(
+        regex.hasMatch('a' * 28),
+        isTrue,
+      ); // Typical Firebase UID is 28 chars
       expect(regex.hasMatch('a' * 20), isTrue);
       expect(regex.hasMatch('a' * 40), isTrue);
     });
@@ -15,30 +18,64 @@ void main() {
     test('invalid UID fails', () {
       expect(regex.hasMatch('too_short'), isFalse); // < 20
       expect(regex.hasMatch('a' * 41), isFalse); // > 40
-      expect(regex.hasMatch('abcDEF1234567890!@#\$'), isFalse); // Special characters
-      expect(regex.hasMatch(' abcDEF1234567890xyZZZ'), isFalse); // Leading space
+      expect(
+        regex.hasMatch('abcDEF1234567890!@#\$'),
+        isFalse,
+      ); // Special characters
+      expect(
+        regex.hasMatch(' abcDEF1234567890xyZZZ'),
+        isFalse,
+      ); // Leading space
     });
   });
 
   group('Leaderboard Sort Order', () {
     final now = DateTime.now();
-    
+
     final me = SocialProfile(
-      uid: 'me', name: 'Me', todaySteps: 5000, todayWorkouts: 1, currentStreak: 5, weeklySteps: 20000, weeklyWorkouts: 3, lastUpdatedAt: now,
+      uid: 'me',
+      name: 'Me',
+      todaySteps: 5000,
+      todayWorkouts: 1,
+      currentStreak: 5,
+      weeklySteps: 20000,
+      weeklyWorkouts: 3,
+      lastUpdatedAt: now,
     );
     final active1 = SocialProfile(
-      uid: 'a1', name: 'A1', todaySteps: 8000, todayWorkouts: 1, currentStreak: 10, weeklySteps: 15000, weeklyWorkouts: 2, lastUpdatedAt: now.subtract(const Duration(hours: 1)),
+      uid: 'a1',
+      name: 'A1',
+      todaySteps: 8000,
+      todayWorkouts: 1,
+      currentStreak: 10,
+      weeklySteps: 15000,
+      weeklyWorkouts: 2,
+      lastUpdatedAt: now.subtract(const Duration(hours: 1)),
     );
     final active2 = SocialProfile(
-      uid: 'a2', name: 'A2', todaySteps: 5000, todayWorkouts: 0, currentStreak: 6, weeklySteps: 20000, weeklyWorkouts: 4, lastUpdatedAt: now,
+      uid: 'a2',
+      name: 'A2',
+      todaySteps: 5000,
+      todayWorkouts: 0,
+      currentStreak: 6,
+      weeklySteps: 20000,
+      weeklyWorkouts: 4,
+      lastUpdatedAt: now,
     );
     final inactive1 = SocialProfile(
-      uid: 'i1', name: 'I1', todaySteps: 10000, todayWorkouts: 1, currentStreak: 20, weeklySteps: 50000, weeklyWorkouts: 5, lastUpdatedAt: now.subtract(const Duration(days: 8)),
+      uid: 'i1',
+      name: 'I1',
+      todaySteps: 10000,
+      todayWorkouts: 1,
+      currentStreak: 20,
+      weeklySteps: 50000,
+      weeklyWorkouts: 5,
+      lastUpdatedAt: now.subtract(const Duration(days: 8)),
     );
 
     test('Sort active profiles Today (by steps, then streak)', () {
       final activeProfiles = [me, active1, active2];
-      
+
       activeProfiles.sort((a, b) {
         final aSteps = a.todaySteps ?? 0;
         final bSteps = b.todaySteps ?? 0;
@@ -54,23 +91,26 @@ void main() {
       expect(activeProfiles[2].uid, 'me');
     });
 
-    test('Sort active profiles This Week (by weekly steps, then weekly workouts)', () {
-      final activeProfiles = [me, active1, active2];
-      
-      activeProfiles.sort((a, b) {
-        final aWSteps = a.weeklySteps ?? 0;
-        final bWSteps = b.weeklySteps ?? 0;
-        final aWWorkouts = a.weeklyWorkouts ?? 0;
-        final bWWorkouts = b.weeklyWorkouts ?? 0;
-        if (bWSteps != aWSteps) return bWSteps.compareTo(aWSteps);
-        return bWWorkouts.compareTo(aWWorkouts);
-      });
+    test(
+      'Sort active profiles This Week (by weekly steps, then weekly workouts)',
+      () {
+        final activeProfiles = [me, active1, active2];
 
-      // A2 (20000, 4 W/O), Me (20000, 3 W/O), A1 (15000, 2 W/O)
-      expect(activeProfiles[0].uid, 'a2');
-      expect(activeProfiles[1].uid, 'me');
-      expect(activeProfiles[2].uid, 'a1');
-    });
+        activeProfiles.sort((a, b) {
+          final aWSteps = a.weeklySteps ?? 0;
+          final bWSteps = b.weeklySteps ?? 0;
+          final aWWorkouts = a.weeklyWorkouts ?? 0;
+          final bWWorkouts = b.weeklyWorkouts ?? 0;
+          if (bWSteps != aWSteps) return bWSteps.compareTo(aWSteps);
+          return bWWorkouts.compareTo(aWWorkouts);
+        });
+
+        // A2 (20000, 4 W/O), Me (20000, 3 W/O), A1 (15000, 2 W/O)
+        expect(activeProfiles[0].uid, 'a2');
+        expect(activeProfiles[1].uid, 'me');
+        expect(activeProfiles[2].uid, 'a1');
+      },
+    );
 
     test('Split inactive properly (> 7 days)', () {
       final allProfiles = [me, active1, active2, inactive1];
@@ -97,7 +137,7 @@ void main() {
       final now = DateTime(2023, 10, 25); // Oct 25, 2023 was a Wednesday
       final diff = now.weekday - 1; // 3 - 1 = 2
       final monday = now.subtract(Duration(days: diff)); // Oct 23
-      
+
       expect(monday.weekday, DateTime.monday);
       expect(monday.day, 23);
 

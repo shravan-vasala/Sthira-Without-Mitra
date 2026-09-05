@@ -21,11 +21,11 @@ void main() {
                 "calories": 300,
                 "proteinG": 10.0,
                 "carbsG": 50.0,
-                "fatG": 5.0
-              }
-            ]
-          }
-        ]
+                "fatG": 5.0,
+              },
+            ],
+          },
+        ],
       };
 
       final plan = MealPlan.fromJson(json);
@@ -33,7 +33,7 @@ void main() {
       expect(plan.planName, "High Protein Day");
       expect(plan.totalCalories, 2000);
       expect(plan.meals.length, 1);
-      
+
       final meal = plan.meals.first;
       expect(meal.name, "Breakfast");
       expect(meal.type, "breakfast");
@@ -50,12 +50,8 @@ void main() {
       final json = {
         "planName": "Minimal Plan",
         "meals": [
-          {
-            "name": "Lunch",
-            "type": "lunch",
-            "calories": 600
-          }
-        ]
+          {"name": "Lunch", "type": "lunch", "calories": 600},
+        ],
       };
 
       final plan = MealPlan.fromJson(json);
@@ -63,7 +59,7 @@ void main() {
       expect(plan.planName, "Minimal Plan");
       expect(plan.totalCalories, 600); // auto-calculated from meals
       expect(plan.meals.length, 1);
-      
+
       final meal = plan.meals.first;
       expect(meal.isCompleted, false); // defaults to false
       expect(meal.suggestions, isEmpty); // defaults to empty

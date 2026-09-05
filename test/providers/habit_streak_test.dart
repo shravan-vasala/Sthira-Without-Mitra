@@ -10,7 +10,7 @@ import 'package:trufit_bodamma/models/habit.dart';
 class FakeHabitRepository extends HabitRepository {
   final Map<String, HabitCompletion> completions = {};
   final List<Habit> _habits = [
-    Habit.defaults.firstWhere((h) => h.id == 'water')
+    Habit.defaults.firstWhere((h) => h.id == 'water'),
   ];
 
   @override
@@ -40,12 +40,24 @@ void main() {
   test('habitStreakProvider calculates streak correctly', () {
     final habitRepo = FakeHabitRepository();
     final dailyLogRepo = FakeDailyLogRepository();
-    
+
     // Simulate completions
-    habitRepo.completions['2023-10-05'] = HabitCompletion(date: '2023-10-05', completions: {'water': true});
-    habitRepo.completions['2023-10-04'] = HabitCompletion(date: '2023-10-04', completions: {'water': true});
-    habitRepo.completions['2023-10-03'] = HabitCompletion(date: '2023-10-03', completions: {'water': true});
-    habitRepo.completions['2023-10-02'] = HabitCompletion(date: '2023-10-02', completions: {'water': false}); // missed
+    habitRepo.completions['2023-10-05'] = HabitCompletion(
+      date: '2023-10-05',
+      completions: {'water': true},
+    );
+    habitRepo.completions['2023-10-04'] = HabitCompletion(
+      date: '2023-10-04',
+      completions: {'water': true},
+    );
+    habitRepo.completions['2023-10-03'] = HabitCompletion(
+      date: '2023-10-03',
+      completions: {'water': true},
+    );
+    habitRepo.completions['2023-10-02'] = HabitCompletion(
+      date: '2023-10-02',
+      completions: {'water': false},
+    ); // missed
 
     final container = ProviderContainer(
       overrides: [
@@ -59,23 +71,35 @@ void main() {
     expect(streak, 3); // 5th, 4th, 3rd = 3 days
   });
 
-  test('habitStreakProvider calculates streak with overrides (e.g. rest day)', () {
-    final habitRepo = FakeHabitRepository();
-    final dailyLogRepo = FakeDailyLogRepository();
-    
-    habitRepo.completions['2023-10-05'] = HabitCompletion(date: '2023-10-05', completions: {'water': true});
-    habitRepo.completions['2023-10-04'] = HabitCompletion(date: '2023-10-04', overrides: {'water': 'done'}); // Rest day override
-    habitRepo.completions['2023-10-03'] = HabitCompletion(date: '2023-10-03', completions: {'water': true});
+  test(
+    'habitStreakProvider calculates streak with overrides (e.g. rest day)',
+    () {
+      final habitRepo = FakeHabitRepository();
+      final dailyLogRepo = FakeDailyLogRepository();
 
-    final container = ProviderContainer(
-      overrides: [
-        habitRepoProvider.overrideWithValue(habitRepo),
-        dailyLogRepoProvider.overrideWithValue(dailyLogRepo),
-        dateStringProvider.overrideWith((ref) => '2023-10-05'),
-      ],
-    );
+      habitRepo.completions['2023-10-05'] = HabitCompletion(
+        date: '2023-10-05',
+        completions: {'water': true},
+      );
+      habitRepo.completions['2023-10-04'] = HabitCompletion(
+        date: '2023-10-04',
+        overrides: {'water': 'done'},
+      ); // Rest day override
+      habitRepo.completions['2023-10-03'] = HabitCompletion(
+        date: '2023-10-03',
+        completions: {'water': true},
+      );
 
-    final streak = container.read(habitStreakProvider('water'));
-    expect(streak, 3); 
-  });
+      final container = ProviderContainer(
+        overrides: [
+          habitRepoProvider.overrideWithValue(habitRepo),
+          dailyLogRepoProvider.overrideWithValue(dailyLogRepo),
+          dateStringProvider.overrideWith((ref) => '2023-10-05'),
+        ],
+      );
+
+      final streak = container.read(habitStreakProvider('water'));
+      expect(streak, 3);
+    },
+  );
 }

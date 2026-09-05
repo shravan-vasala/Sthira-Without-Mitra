@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +14,10 @@ import 'dart:io';
 
 void main() {
   if (Platform.isLinux) {
-    testWidgets('Skipping Isar tests on Linux CI due to binary linking issues', (tester) async {});
+    testWidgets(
+      'Skipping Isar tests on Linux CI due to binary linking issues',
+      (tester) async {},
+    );
     return;
   }
 
@@ -40,7 +42,9 @@ void main() {
   });
 
   group('ExerciseCard Widget Tests', () {
-    testWidgets('renders exercise name and reps correctly', (WidgetTester tester) async {
+    testWidgets('renders exercise name and reps correctly', (
+      WidgetTester tester,
+    ) async {
       final exercise = Exercise(
         name: 'Barbell Squat',
         displayName: 'Squat',
@@ -50,27 +54,22 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            exerciseLogRepoProvider.overrideWithValue(logRepo),
-          ],
+          overrides: [exerciseLogRepoProvider.overrideWithValue(logRepo)],
           child: MaterialApp(
             home: Scaffold(
-              body: ExerciseCard(
-                exercise: exercise,
-                dayId: 'monday',
-              ),
+              body: ExerciseCard(exercise: exercise, dayId: 'monday'),
             ),
           ),
         ),
       );
 
-      // Let the FutureProviders/NetworkImages settle (if any, though CachedNetworkImage might cause issues in tests, 
+      // Let the FutureProviders/NetworkImages settle (if any, though CachedNetworkImage might cause issues in tests,
       // it should be fine since we check for text)
       await tester.pumpAndSettle();
 
       expect(find.text('Squat'), findsOneWidget); // displayName
       expect(find.text('Go deep'), findsOneWidget); // note
-      
+
       // Look for Reps text. The UI might combine them or show them sequentially.
       // Usually it displays '3 sets • 5, 5, 5 reps' or similar based on `repsDisplay`
       expect(find.textContaining('5'), findsWidgets);

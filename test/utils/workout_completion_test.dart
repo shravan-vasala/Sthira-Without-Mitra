@@ -18,11 +18,7 @@ void main() {
     ],
   );
 
-  final restDay = WorkoutDay(
-    dayId: 'Rest',
-    label: 'Sunday',
-    sections: [],
-  );
+  final restDay = WorkoutDay(dayId: 'Rest', label: 'Sunday', sections: []);
 
   final monday = DateTime(2023, 10, 2); // Monday
   final sunday = DateTime(2023, 10, 1); // Sunday
@@ -39,7 +35,11 @@ void main() {
     bool hasLog(String date, String name) => logged.contains('$date|$name');
 
     expect(
-      WorkoutCompletion.isTrainingDayComplete('2023-10-02', trainingDay, hasLog),
+      WorkoutCompletion.isTrainingDayComplete(
+        '2023-10-02',
+        trainingDay,
+        hasLog,
+      ),
       isFalse,
     );
     expect(
@@ -55,13 +55,21 @@ void main() {
 
     logged.add('2023-10-02|Bench Press');
     expect(
-      WorkoutCompletion.isTrainingDayComplete('2023-10-02', trainingDay, hasLog),
+      WorkoutCompletion.isTrainingDayComplete(
+        '2023-10-02',
+        trainingDay,
+        hasLog,
+      ),
       isFalse,
     );
 
     logged.add('2023-10-02|Squat');
     expect(
-      WorkoutCompletion.isTrainingDayComplete('2023-10-02', trainingDay, hasLog),
+      WorkoutCompletion.isTrainingDayComplete(
+        '2023-10-02',
+        trainingDay,
+        hasLog,
+      ),
       isTrue,
     );
     expect(
@@ -76,20 +84,23 @@ void main() {
     );
   });
 
-  test('Finish-early / skip via DailyLog.workoutCompleted counts as day done', () {
-    bool hasLog(String date, String name) => false;
+  test(
+    'Finish-early / skip via DailyLog.workoutCompleted counts as day done',
+    () {
+      bool hasLog(String date, String name) => false;
 
-    expect(
-      WorkoutCompletion.isDayWorkoutDone(
-        date: '2023-10-02',
-        day: trainingDay,
-        dateTime: monday,
-        hasLog: hasLog,
-        dailyLog: DailyLog(date: '2023-10-02', workoutCompleted: true),
-      ),
-      isTrue,
-    );
-  });
+      expect(
+        WorkoutCompletion.isDayWorkoutDone(
+          date: '2023-10-02',
+          day: trainingDay,
+          dateTime: monday,
+          hasLog: hasLog,
+          dailyLog: DailyLog(date: '2023-10-02', workoutCompleted: true),
+        ),
+        isTrue,
+      );
+    },
+  );
 
   test('rest day scores as done', () {
     bool hasLog(String date, String name) => false;

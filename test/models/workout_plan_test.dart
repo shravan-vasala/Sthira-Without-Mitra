@@ -18,20 +18,20 @@ void main() {
                     "name": "Pushups",
                     "reps": ["10", "10", "10"],
                     "note": "Slow and controlled",
-                    "restSecondsAfterSet": 60
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+                    "restSecondsAfterSet": 60,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       };
 
       final plan = WorkoutPlan.fromJson(json);
 
       expect(plan.planName, "Push Pull Legs");
       expect(plan.days.length, 1);
-      
+
       final day = plan.days.first;
       expect(day.dayId, "monday");
       expect(day.label, "Push Day");
@@ -58,18 +58,18 @@ void main() {
             "exercises": [
               {
                 "name": "Squat",
-                "reps": ["5"]
-              }
-            ]
-          }
-        ]
+                "reps": ["5"],
+              },
+            ],
+          },
+        ],
       };
 
       final day = WorkoutDay.fromJson(json);
 
       expect(day.dayId, "tuesday");
       expect(day.label, isNull);
-      
+
       final exercise = day.sections.first.exercises.first;
       expect(exercise.note, ""); // defaults to empty string
       expect(exercise.sideInfo, "None"); // defaults to 'None'

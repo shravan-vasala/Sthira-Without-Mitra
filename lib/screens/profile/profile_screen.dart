@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../services/ai_client.dart';
+import '../../services/ai_logger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -1715,7 +1717,7 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
       ...AiClient.textModelsToTry,
       ...AiClient.visionModelsToTry,
     }.toList();
-    final client = widget.ref.read(geminiFoodServiceProvider).aiClient;
+    final client = AiClient();
     final useFirebase = widget.ref.read(isSignedInProvider);
     final profile = widget.ref.read(profileProvider);
 
@@ -1741,7 +1743,7 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
           });
       } catch (e) {
         sw.stop();
-        final cause = (e is AiException) ? e.cause : null;
+        final cause = (e is AiException) ? (e as AiException).cause : null;
         if (mounted)
           setState(() {
             _results[model] = {
