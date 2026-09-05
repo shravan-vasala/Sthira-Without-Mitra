@@ -540,6 +540,9 @@ class SharedChartCard extends StatelessWidget {
 
     final segments = _segmentSpots(spots);
     final (minY, maxY) = _yRange(spots.map((s) => s.y));
+    final dataYValues = spots.map((s) => s.y).toList();
+    final dataMinY = dataYValues.isNotEmpty ? dataYValues.reduce(min) : 0.0;
+    final dataMaxY = dataYValues.isNotEmpty ? dataYValues.reduce(max) : 0.0;
     final maxXValue = _maxXValue;
     final showDots = spots.length <= 14;
     final useCurve = spots.length > 2;
@@ -559,10 +562,23 @@ class SharedChartCard extends StatelessWidget {
           dotData: FlDotData(
             show: true,
             checkToShowDot: (spot, barData) {
+              if (timeFormat == ChartTimeFormat.sixMonths) {
+                if (dataYValues.length > 1 && dataMinY == dataMaxY) return false;
+                return spot.y == dataMinY || spot.y == dataMaxY;
+              }
               if (hasTrend) return true;
               return showDots || segment.length == 1;
             },
             getDotPainter: (spot, percent, bar, index) {
+              if (timeFormat == ChartTimeFormat.sixMonths && (spot.y == dataMinY || spot.y == dataMaxY)) {
+                final isMax = spot.y == dataMaxY;
+                return FlDotCirclePainter(
+                  radius: 4.5,
+                  color: isMax ? context.colors.primary : context.colors.red,
+                  strokeWidth: 2,
+                  strokeColor: context.colors.card,
+                );
+              }
               if (hasTrend) {
                 return FlDotCirclePainter(
                   radius: 3.0,

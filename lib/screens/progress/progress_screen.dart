@@ -276,6 +276,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       final valid = data.map((d) => d.value).toList();
       final total = valid.reduce((a, b) => a + b);
       final avg = total ~/ valid.length;
+      final maxVal = valid.reduce((a, b) => a > b ? a : b).toInt();
       final kcal = (avg * 0.04).toStringAsFixed(0);
       final distance = (avg * 0.762).toStringAsFixed(0); // roughly 0.762m per step
 
@@ -286,7 +287,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           children: [
             _buildCircularStat('kcal', '${kcal}+', Icons.bolt),
             _buildCircularStat('meters', distance, Icons.location_on),
-            _buildCircularStat('avg speed', '1.4', Icons.directions_run),
+            _buildCircularStat('max steps', NumberFormat('#,###').format(maxVal), Icons.directions_run),
           ],
         ),
       );
