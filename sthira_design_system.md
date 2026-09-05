@@ -61,14 +61,13 @@ Here is your beautifully structured **Sthira Design System** cheat sheet, update
 
 ## DESIGN CONTEXT: "Sasirekha Minimalist Tile Style"
 
-When building or refactoring lists, menus, or repeating items, strictly adhere to the "Sasirekha Minimalist Tile Style":
-1. **Completely Flat & Borderless:** Do NOT wrap list items in Card widgets or explicit container borders. Items must have a transparent background (`Colors.transparent`) to sit entirely flush against the app's `scaffoldBg`.
-2. **Negative Space over Lines:** Never use `Divider` lines or distinct card margins. Separate items purely using consistent vertical spacing/padding (e.g., `Padding(padding: EdgeInsets.only(bottom: kSpace2))`).
-3. **Leading Elements:** The far-left element should be a simple, slightly rounded icon container or image that anchors the row.
-4. **Typography Contrast:** Use strong, bold titles (`context.text.bodyBold` or `title`) paired with highly muted subtitles (`context.text.caption` colored with `context.colors.textMedium` or `textLight`).
-5. **Trailing Actions:** The far-right element should be minimal, utilizing simple `IconButton`s (like a vertical 3-dot menu or a simple thin-outline icon) without heavy button backgrounds.
-6. **Hero Data vs Visual Clutter:** For primary screens (like meal details or daily scores), **avoid thick structural rings and avoid blocky colored cards** for hero metrics. Instead, rely entirely on *massive, flush typography* (e.g. Cabinet Grotesk 56px) resting directly on the scaffold background, paired with ultra-thin (1-2px) linear progress indicators. Place secondary metrics (macros) directly in a flat row beneath it utilizing purely typographic color contrast (`Off-White` values next to `Muted Sage` labels). The goal is maximum data density with absolute zero "boxiness" or generic gamified styles.
-7. **Goal:** The interface should feel infinitely open, lightweight, and modern, using alignment and space rather than boxes and borders to group information.
+When building or refactoring lists, menus, or repeating items—such as the "MEALS" or "HABITS" sections—strictly adhere to the **Sasirekha Minimalist Tile Style** based on the exact visual anatomy:
+1. **The Tile Foundation (Rounded Cards):** Use distinct, softly lifted cards (`SurfaceCard` or bounded `Container`) floating on the dark scaffold. The tile's background color should be the slightly lighter `Dark Surface` (`#171F1B`) using a substantial corner radius (e.g., `24px`). Do NOT make them entirely transparent/flush; the tile boundary is crucial.
+2. **Elegant Typography Hierarchy:** Inside the tile, primary titles are cleanly weighted (e.g., bold `w700`, ~18px, `Off-White` text). Directly beneath them, subtitles sit flush with a lighter weight and muted color (e.g., `Muted Sage`).
+3. **Muted Structural Separators:** Instead of harsh 1px `Divider` lines, use thick but heavily subdued horizontal bars (e.g., a 4px tall `LinearProgressIndicator` where the track color nearly blends into the card background) to separate header context from numeric data.
+4. **Data Rows & Pill Tags:** Secondary metrics (like `0/4 meals • 0/1400 kcal`) remain purely typographic, while distinct entities like macros (`P: 0g`, `C: 0g`, `F: 0g`) should be placed in highly compact, outlined, pill-shaped tags with distinct but muted accent colors to denote their type without overpowering the dark aesthetic.
+5. **Minimal Trailing Elements:** Navigable tiles should place a simple, un-boxed chevron (e.g., `Icons.arrow_forward_ios_rounded`, size 16, muted grey) cleanly on the far right. No heavy button backgrounds.
+6. **Negative Space over Clutter:** Maintain generous internal padding inside the tiles (e.g., `padding: EdgeInsets.all(20)`) so the typography and elements have maximum breathing room.
 
 ## BOTTOM NAVIGATION STYLE: "Floating Pill Navigation"
 
