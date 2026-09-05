@@ -1604,7 +1604,6 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
       ...AiClient.visionModelsToTry,
     }.toList();
     final client = AiClient();
-    final useFirebase = widget.ref.read(isSignedInProvider);
     final profile = widget.ref.read(profileProvider);
 
     for (final model in allModels) {
@@ -1614,7 +1613,6 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
         await client.generateJson(
           prompt: '{"test":"Respond with exactly {\"status\":\"ok\"}"}',
           systemInstruction: 'Respond only in valid JSON.',
-          useFirebase: useFirebase,
           apiKey: profile.geminiApiKey,
           skipCache: true,
         );
