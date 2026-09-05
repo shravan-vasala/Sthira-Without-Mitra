@@ -790,6 +790,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             _buildSuggestions(context, planned),
         ],
       ),
+      ),
     );
   }
 
