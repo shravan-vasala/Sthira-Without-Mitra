@@ -191,57 +191,7 @@ class MealsCard extends ConsumerWidget {
           ],
         ),
       ),
-          const SizedBox(height: 8),
-          ...slots.map((s) => _buildSasirekhaSlot(context, s, dailyLog)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSasirekhaSlot(BuildContext context, ({String id, String name, String emoji}) slot, dynamic dailyLog) {
-    final loggedSlot = dailyLog.customSlots[slot.id];
-    final isLogged = loggedSlot != null && (loggedSlot.items.isNotEmpty || loggedSlot.photoPath != null || loggedSlot.totalCalories > 0);
-    final slotCalories = loggedSlot?.totalCalories ?? 0;
-
-    return InkWell(
-      onTap: () => _openLogSheet(context, slotId: slot.id, slotName: slot.name, describe: false),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: kScreenPadding, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: context.colors.card,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              alignment: Alignment.center,
-              child: Text(slot.emoji, style: const TextStyle(fontSize: 28)),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    slot.name,
-                    style: context.text.bodyBold.copyWith(color: context.colors.textDark),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    isLogged ? '$slotCalories kcal' : 'Tap to log',
-                    style: context.text.caption.copyWith(color: context.colors.textMedium),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              isLogged ? Icons.more_vert : Icons.add_rounded,
-              color: context.colors.textMedium,
-            ),
-          ],
-        ),
       ),
     );
   }
