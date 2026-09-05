@@ -19,7 +19,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
   Future<CoachNote> _loadForDate() async {
     final repo = ref.read(coachNoteRepoProvider);
     final cached = repo.getNote(dateStr);
-    
+
     if (cached != null) {
       final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
       if (dateStr == todayStr) {
@@ -49,7 +49,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
     final prefs = ref.read(sharedPreferencesProvider);
     final lastGenStr = prefs.getString('coach_note_last_gen_$dateStr');
     final lastGen = lastGenStr != null ? DateTime.tryParse(lastGenStr) : null;
-    
+
     bool shouldRegenerate = force;
 
     if (!force) {
@@ -67,7 +67,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
     }
 
     if (!shouldRegenerate) return;
-    
+
     if (!background) state = const AsyncValue.loading();
     try {
       final coachService = ref.read(coachServiceProvider);
@@ -82,7 +82,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       final logRepo = ref.read(exerciseLogRepoProvider);
       final mealPlan = ref.read(mealPlanProvider);
       final mealLog = ref.read(dailyMealLogProvider);
-      
+
       final todayStats = DailyStatsSnapshot.compute(
         date: DateTime.parse(dateStr),
         dateStr: dateStr,
@@ -97,11 +97,14 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         dailyLogRepo: dailyLogRepo,
       );
 
-      final yesterday = DateTime.parse(dateStr).subtract(const Duration(days: 1));
+      final yesterday = DateTime.parse(
+        dateStr,
+      ).subtract(const Duration(days: 1));
       final yesterdayStr = DateFormat('yyyy-MM-dd').format(yesterday);
       final yCompletions = habitRepo.getCompletions(yesterdayStr);
-      final yLog = dailyLogRepo.getLog(yesterdayStr) ?? DailyLog(date: yesterdayStr);
-      
+      final yLog =
+          dailyLogRepo.getLog(yesterdayStr) ?? DailyLog(date: yesterdayStr);
+
       final yesterdayStats = DailyStatsSnapshot.compute(
         date: yesterday,
         dateStr: yesterdayStr,
@@ -116,8 +119,9 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         dailyLogRepo: dailyLogRepo,
       );
 
-      final isAi = coachService.apiKey != null && coachService.apiKey!.isNotEmpty;
-      
+      final isAi =
+          coachService.apiKey != null && coachService.apiKey!.isNotEmpty;
+
       final stream = coachService.generateNoteStream(
         userName: profile.name,
         coachName: profile.coachName,
@@ -133,31 +137,39 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         isRestDay: todayStats.isRestDay,
         daysSinceLastWorkout: todayStats.daysSinceLastWorkout,
       );
-      
+
       String accumulatedNote = "";
-      
+
       await for (final chunk in stream) {
         accumulatedNote += chunk;
-        state = AsyncValue.data(CoachNote(
-          date: dateStr,
-          note: accumulatedNote,
-          isAi: isAi,
-        ));
+        state = AsyncValue.data(
+          CoachNote(date: dateStr, note: accumulatedNote, isAi: isAi),
+        );
       }
-      
-      if (accumulatedNote.isEmpty) throw Exception('Failed to generate note stream');
 
-      final finalNote = CoachNote(date: dateStr, note: accumulatedNote, isAi: isAi);
+      if (accumulatedNote.isEmpty)
+        throw Exception('Failed to generate note stream');
+
+      final finalNote = CoachNote(
+        date: dateStr,
+        note: accumulatedNote,
+        isAi: isAi,
+      );
       await repo.saveNote(finalNote);
-      
+
       final currentPrefs = ref.read(sharedPreferencesProvider);
-      await currentPrefs.setString('coach_note_last_gen_$dateStr', DateTime.now().toIso8601String());
+      await currentPrefs.setString(
+        'coach_note_last_gen_$dateStr',
+        DateTime.now().toIso8601String(),
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
 }
 
-final coachNoteProvider = AsyncNotifierProvider<CoachNoteNotifier, CoachNote>(() {
-  return CoachNoteNotifier();
-});
+final coachNoteProvider = AsyncNotifierProvider<CoachNoteNotifier, CoachNote>(
+  () {
+    return CoachNoteNotifier();
+  },
+);

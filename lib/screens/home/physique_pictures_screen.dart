@@ -46,7 +46,9 @@ class _PhysiquePicturesScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Photos?'),
-        content: Text('Delete ${_selectedPhotos.length} photo(s)? This can\'t be undone.'),
+        content: Text(
+          'Delete ${_selectedPhotos.length} photo(s)? This can\'t be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -55,7 +57,7 @@ class _PhysiquePicturesScreenState
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              
+
               // Map selected paths back to their dates
               final toDelete = <String, List<String>>{};
               for (final path in _selectedPhotos) {
@@ -85,7 +87,7 @@ class _PhysiquePicturesScreenState
   Widget build(BuildContext context) {
     final mediaRepo = ref.watch(mediaRepoProvider);
     final rawPhotos = mediaRepo.getAllProgressPhotos();
-    
+
     // Filter the photos based on _currentFilter
     final allPhotos = <MapEntry<String, List<String>>>[];
     for (final entry in rawPhotos) {
@@ -105,9 +107,17 @@ class _PhysiquePicturesScreenState
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text(_isSelectionMode ? '${_selectedPhotos.length} Selected' : 'Physique Pictures'),
+        title: Text(
+          _isSelectionMode
+              ? '${_selectedPhotos.length} Selected'
+              : 'Physique Pictures',
+        ),
         leading: IconButton(
-          icon: Icon(_isSelectionMode ? Icons.close_rounded : Icons.arrow_back_ios_rounded),
+          icon: Icon(
+            _isSelectionMode
+                ? Icons.close_rounded
+                : Icons.arrow_back_ios_rounded,
+          ),
           onPressed: () {
             if (_isSelectionMode) {
               setState(() {
@@ -122,7 +132,10 @@ class _PhysiquePicturesScreenState
         actions: [
           if (_isSelectionMode)
             IconButton(
-              icon: Icon(Icons.delete_outline_rounded, color: context.colors.red),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: context.colors.red,
+              ),
               onPressed: () {
                 final Map<String, List<String>> photosByDate = {};
                 for (final entry in allPhotos) {
@@ -135,7 +148,10 @@ class _PhysiquePicturesScreenState
             TextButton.icon(
               onPressed: () => _openCompareMode(allPhotos),
               icon: Icon(Icons.compare_rounded, color: context.colors.primary),
-              label: Text('Compare', style: TextStyle(color: context.colors.primary)),
+              label: Text(
+                'Compare',
+                style: TextStyle(color: context.colors.primary),
+              ),
             ),
         ],
       ),
@@ -144,7 +160,10 @@ class _PhysiquePicturesScreenState
         child: FloatingActionButton(
           onPressed: _addPhoto,
           backgroundColor: context.colors.primary,
-          child: Icon(Icons.add_a_photo_rounded, color: context.colors.onPrimary),
+          child: Icon(
+            Icons.add_a_photo_rounded,
+            color: context.colors.onPrimary,
+          ),
         ),
       ),
       body: Column(
@@ -194,7 +213,9 @@ class _PhysiquePicturesScreenState
                         Icon(
                           Icons.photo_library_outlined,
                           size: 64,
-                          color: context.colors.textLight.withValues(alpha: 0.5),
+                          color: context.colors.textLight.withValues(
+                            alpha: 0.5,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -216,170 +237,202 @@ class _PhysiquePicturesScreenState
                       ],
                     ),
                   )
-                : allPhotos.isEmpty 
-                    ? Center(
-                        child: Text(
-                          'No photos for this pose.',
-                          style: TextStyle(color: context.colors.textMedium),
-                        ),
-                      )
-                    : ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.all(20),
-              itemCount: allPhotos.length,
-              itemBuilder: (context, index) {
-                final entry = allPhotos[index];
-                final date = entry.key;
-                final photos = entry.value;
-                final formattedDate = _formatDate(date);
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        formattedDate,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.textDark,
-                        ),
-                      ),
+                : allPhotos.isEmpty
+                ? Center(
+                    child: Text(
+                      'No photos for this pose.',
+                      style: TextStyle(color: context.colors.textMedium),
                     ),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                      ),
-                      itemCount: photos.length,
-                      itemBuilder: (context, i) {
-                        final photoPath = photos[i];
-                        final meta = ref.read(mediaRepoProvider).getProgressPhotoMeta(date, photoPath);
-                        final poseTag = meta.pose;
-                        final weight = meta.weight;
+                  )
+                : ListView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
+                    itemCount: allPhotos.length,
+                    itemBuilder: (context, index) {
+                      final entry = allPhotos[index];
+                      final date = entry.key;
+                      final photos = entry.value;
+                      final formattedDate = _formatDate(date);
 
-                        final isSelected = _selectedPhotos.contains(photoPath);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text(
+                              formattedDate,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: context.colors.textDark,
+                              ),
+                            ),
+                          ),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                ),
+                            itemCount: photos.length,
+                            itemBuilder: (context, i) {
+                              final photoPath = photos[i];
+                              final meta = ref
+                                  .read(mediaRepoProvider)
+                                  .getProgressPhotoMeta(date, photoPath);
+                              final poseTag = meta.pose;
+                              final weight = meta.weight;
 
-                        return GestureDetector(
-                          onLongPress: () {
-                            if (!_isSelectionMode) {
-                              setState(() {
-                                _isSelectionMode = true;
-                                _selectedPhotos.add(photoPath);
-                              });
-                            }
-                          },
-                          onTap: () {
-                            if (_isSelectionMode) {
-                              _toggleSelection(photoPath);
-                            } else {
-                              _openViewer(allPhotos, index, i);
-                            }
-                          },
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: kIsWeb
-                                      ? Image.network(
-                                          photoPath,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, e, s) => Container(
-                                            color: context.colors.lavender,
-                                            child: Icon(
-                                              Icons.broken_image_rounded,
-                                              color: context.colors.textLight,
+                              final isSelected = _selectedPhotos.contains(
+                                photoPath,
+                              );
+
+                              return GestureDetector(
+                                onLongPress: () {
+                                  if (!_isSelectionMode) {
+                                    setState(() {
+                                      _isSelectionMode = true;
+                                      _selectedPhotos.add(photoPath);
+                                    });
+                                  }
+                                },
+                                onTap: () {
+                                  if (_isSelectionMode) {
+                                    _toggleSelection(photoPath);
+                                  } else {
+                                    _openViewer(allPhotos, index, i);
+                                  }
+                                },
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: kIsWeb
+                                            ? Image.network(
+                                                photoPath,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, e, s) =>
+                                                    Container(
+                                                      color: context
+                                                          .colors
+                                                          .lavender,
+                                                      child: Icon(
+                                                        Icons
+                                                            .broken_image_rounded,
+                                                        color: context
+                                                            .colors
+                                                            .textLight,
+                                                      ),
+                                                    ),
+                                              )
+                                            : Image.file(
+                                                File(photoPath),
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, e, s) =>
+                                                    Container(
+                                                      color: context
+                                                          .colors
+                                                          .lavender,
+                                                      child: Icon(
+                                                        Icons
+                                                            .broken_image_rounded,
+                                                        color: context
+                                                            .colors
+                                                            .textLight,
+                                                      ),
+                                                    ),
+                                              ),
+                                      ),
+                                    ),
+                                    if (poseTag != 'none')
+                                      Positioned(
+                                        bottom: 4,
+                                        left: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: context.colors.textDark
+                                                .withValues(alpha: 0.6),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
                                             ),
                                           ),
-                                        )
-                                      : Image.file(
-                                          File(photoPath),
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, e, s) => Container(
-                                            color: context.colors.lavender,
-                                            child: Icon(
-                                              Icons.broken_image_rounded,
-                                              color: context.colors.textLight,
+                                          child: Text(
+                                            poseTag.toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              color: context.colors.onPrimary,
                                             ),
                                           ),
                                         ),
-                                ),
-                              ),
-                              if (poseTag != 'none')
-                                Positioned(
-                                  bottom: 4,
-                                  left: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: context.colors.textDark.withValues(alpha: 0.6),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      poseTag.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: context.colors.onPrimary,
                                       ),
-                                    ),
-                                  ),
-                                ),
-                              if (weight != null)
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: context.colors.primary.withValues(alpha: 0.8),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      '${weight}kg',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: context.colors.onPrimary,
+                                    if (weight != null)
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: context.colors.primary
+                                                .withValues(alpha: 0.8),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${weight}kg',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              color: context.colors.onPrimary,
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
+                                    if (isSelected)
+                                      Positioned.fill(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: context.colors.primary
+                                                .withValues(alpha: 0.4),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
+                                              color: context.colors.primary,
+                                              width: 3,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.check_circle_rounded,
+                                              color: context.colors.onPrimary,
+                                              size: 32,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                              if (isSelected)
-                                Positioned.fill(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: context.colors.primary.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: context.colors.primary, width: 3),
-                                    ),
-                                    child: Center(
-                                      child: Icon(Icons.check_circle_rounded, color: context.colors.onPrimary, size: 32),
-                                    ),
-                                  ),
-                                ),
-                            ],
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                );
-              },
-            ),
+                          const SizedBox(height: 20),
+                        ],
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -400,38 +453,44 @@ class _PhysiquePicturesScreenState
     }
   }
 
-  void _openViewer(List<MapEntry<String, List<String>>> allPhotos, int dateIndex, int photoIndex) {
+  void _openViewer(
+    List<MapEntry<String, List<String>>> allPhotos,
+    int dateIndex,
+    int photoIndex,
+  ) {
     // Flatten all photos into a list of PhotoItems
     final List<PhotoItem> flatPhotos = [];
     int initialIndex = 0;
-    
+
     for (int d = 0; d < allPhotos.length; d++) {
       final date = allPhotos[d].key;
       final photos = allPhotos[d].value;
-      
+
       for (int p = 0; p < photos.length; p++) {
         final path = photos[p];
         final poseTag = ref.read(mediaRepoProvider).getPoseTag(path);
-        
+
         if (d == dateIndex && p == photoIndex) {
           initialIndex = flatPhotos.length;
         }
-        
+
         flatPhotos.add(PhotoItem(path: path, date: date, poseTag: poseTag));
       }
     }
-    
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => PhotoViewerScreen(
-          photos: flatPhotos,
-          initialIndex: initialIndex,
-        ),
-      ),
-    ).then((_) {
-      // Re-fetch in case a photo was deleted
-      setState(() {});
-    });
+
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => PhotoViewerScreen(
+              photos: flatPhotos,
+              initialIndex: initialIndex,
+            ),
+          ),
+        )
+        .then((_) {
+          // Re-fetch in case a photo was deleted
+          setState(() {});
+        });
   }
 
   void _openCompareMode(List<MapEntry<String, List<String>>> allPhotos) {
@@ -466,10 +525,7 @@ class _PhysiquePicturesScreenState
           children: [
             const Text(
               'Add Progress Photo',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 20),
             ListTile(
@@ -515,10 +571,7 @@ class _PhysiquePicturesScreenState
           children: [
             const Text(
               'Photo Details',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 16),
             _CaptureMetadataForm(
@@ -531,19 +584,21 @@ class _PhysiquePicturesScreenState
     );
 
     if (!mounted || metadata == null) return;
-    
+
     final selectedPose = metadata['pose'] as String;
     final weight = metadata['weight'] as double?;
     final note = metadata['note'] as String?;
 
     final imageBytes = await image.readAsBytes();
-    await ref.read(mediaRepoProvider).saveProgressPhoto(
-      date,
-      imageBytes,
-      poseTag: selectedPose,
-      weight: weight,
-      note: note,
-    );
+    await ref
+        .read(mediaRepoProvider)
+        .saveProgressPhoto(
+          date,
+          imageBytes,
+          poseTag: selectedPose,
+          weight: weight,
+          note: note,
+        );
     setState(() {}); // refresh
   }
 }
@@ -725,14 +780,22 @@ class _SelectablePoseOption extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? context.colors.onPrimary : context.colors.primary, size: 24),
+            Icon(
+              icon,
+              color: isSelected
+                  ? context.colors.onPrimary
+                  : context.colors.primary,
+              size: 24,
+            ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: isSelected ? context.colors.onPrimary : context.colors.textDark,
+                color: isSelected
+                    ? context.colors.onPrimary
+                    : context.colors.textDark,
               ),
             ),
           ],
@@ -768,7 +831,9 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: isSelected ? context.colors.onPrimary : context.colors.primary,
+            color: isSelected
+                ? context.colors.onPrimary
+                : context.colors.primary,
           ),
         ),
       ),

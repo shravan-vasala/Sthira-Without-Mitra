@@ -6,7 +6,10 @@ import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
 
 /// Calm one-shot celebration when habits + meals + workout buckets are full.
-Future<void> maybeShowDayCompleteSheet(BuildContext context, WidgetRef ref) async {
+Future<void> maybeShowDayCompleteSheet(
+  BuildContext context,
+  WidgetRef ref,
+) async {
   final score = ref.read(dailyScoreProvider);
   if (!score.isPrimaryComplete || score.isFutureDate) return;
 

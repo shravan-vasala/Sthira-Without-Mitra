@@ -11,10 +11,7 @@ import '../../../widgets/primary_button.dart';
 class TimerEntryDialog extends ConsumerStatefulWidget {
   final Habit habit;
 
-  const TimerEntryDialog({
-    super.key,
-    required this.habit,
-  });
+  const TimerEntryDialog({super.key, required this.habit});
 
   @override
   ConsumerState<TimerEntryDialog> createState() => _TimerEntryDialogState();
@@ -53,13 +50,12 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
 
   void _startTimer() {
     if (_remainingSeconds <= 0) return;
-    
+
     setState(() {
       _isRunning = true;
     });
 
-    _animationController.reverse(
-        from: _remainingSeconds / _totalSeconds);
+    _animationController.reverse(from: _remainingSeconds / _totalSeconds);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
@@ -93,7 +89,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     if (profile.restTimerVibration) {
       Haptics.success();
     }
-    // We're skipping playing a sound here to avoid adding a new audio dependency just for this, 
+    // We're skipping playing a sound here to avoid adding a new audio dependency just for this,
     // but the framework is in place (restTimerSound).
 
     // Mark habit as completed
@@ -135,14 +131,11 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
           const SizedBox(height: 8),
           Text(
             'Stay focused',
-            style: TextStyle(
-              fontSize: 14,
-              color: context.colors.textMedium,
-            ),
+            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          
+
           Center(
             child: SizedBox(
               width: 200,
@@ -179,12 +172,14 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
               ),
             ),
           ),
-          
+
           const SizedBox(height: 40),
-          
+
           Row(
             children: [
-              if (_remainingSeconds < _totalSeconds && !_isRunning && _remainingSeconds > 0)
+              if (_remainingSeconds < _totalSeconds &&
+                  !_isRunning &&
+                  _remainingSeconds > 0)
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
@@ -196,29 +191,42 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       foregroundColor: context.colors.red,
-                      side: BorderSide(color: context.colors.red.withValues(alpha: 0.5)),
+                      side: BorderSide(
+                        color: context.colors.red.withValues(alpha: 0.5),
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Text('Reset', style: TextStyle(fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'Reset',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
-              if (_remainingSeconds < _totalSeconds && !_isRunning && _remainingSeconds > 0)
+              if (_remainingSeconds < _totalSeconds &&
+                  !_isRunning &&
+                  _remainingSeconds > 0)
                 const SizedBox(width: 16),
-                
+
               Expanded(
                 flex: 2,
                 child: PrimaryButton(
-                  label: _remainingSeconds == 0 
-                      ? 'Done' 
-                      : (_isRunning ? 'Pause' : (_remainingSeconds == _totalSeconds ? 'Start' : 'Resume')),
-                  onPressed: _remainingSeconds == 0 
+                  label: _remainingSeconds == 0
+                      ? 'Done'
+                      : (_isRunning
+                            ? 'Pause'
+                            : (_remainingSeconds == _totalSeconds
+                                  ? 'Start'
+                                  : 'Resume')),
+                  onPressed: _remainingSeconds == 0
                       ? () => Navigator.of(context).pop()
                       : (_isRunning ? _pauseTimer : _startTimer),
-                  icon: _remainingSeconds == 0 
-                      ? Icons.check_circle_rounded 
-                      : (_isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                  icon: _remainingSeconds == 0
+                      ? Icons.check_circle_rounded
+                      : (_isRunning
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded),
                 ),
               ),
             ],
@@ -229,4 +237,3 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     );
   }
 }
-

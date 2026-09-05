@@ -6,9 +6,7 @@ import '../interfaces/i_cloud_sync_service.dart';
 
 class ProfileRepository {
   late Isar _isar;
-  final _secureStorage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(),
-  );
+  final _secureStorage = const FlutterSecureStorage(aOptions: AndroidOptions());
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
@@ -22,7 +20,9 @@ class ProfileRepository {
 
   Future<String?> getSecureGeminiKey() async {
     try {
-      return await _secureStorage.read(key: 'gemini_api_key').timeout(const Duration(seconds: 2));
+      return await _secureStorage
+          .read(key: 'gemini_api_key')
+          .timeout(const Duration(seconds: 2));
     } catch (e) {
       debugPrint('Secure storage error or timeout: $e');
       return null;
@@ -38,7 +38,9 @@ class ProfileRepository {
   }
 
   Stream<UserProfile?> watchProfile() {
-    return _isar.userProfiles.where().watch(fireImmediately: true).map((profiles) {
+    return _isar.userProfiles.where().watch(fireImmediately: true).map((
+      profiles,
+    ) {
       return profiles.isNotEmpty ? profiles.first : null;
     });
   }
@@ -86,4 +88,3 @@ class ProfileRepository {
     return getProfile().toJson();
   }
 }
-

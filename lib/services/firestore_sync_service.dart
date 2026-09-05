@@ -39,7 +39,9 @@ class FirestoreSyncService implements ICloudSyncService {
   Stream<int> get pendingCountStream {
     final isar = Isar.getInstance();
     if (isar == null) return Stream.value(0);
-    return isar.syncQueueItems.watchLazy(fireImmediately: true).map((_) => isar.syncQueueItems.countSync());
+    return isar.syncQueueItems
+        .watchLazy(fireImmediately: true)
+        .map((_) => isar.syncQueueItems.countSync());
   }
 
   @override
@@ -80,7 +82,9 @@ class FirestoreSyncService implements ICloudSyncService {
     _debouncers[debounceKey] = Timer(const Duration(seconds: 3), () {
       // Fire-and-forget — don't await, don't block UI
       ref.doc(docId).set(data, SetOptions(merge: true)).catchError((e) async {
-        debugPrint('FirestoreSync: Error syncing $collection/$docId: $e, queuing...');
+        debugPrint(
+          'FirestoreSync: Error syncing $collection/$docId: $e, queuing...',
+        );
         final isar = Isar.getInstance();
         if (isar != null) {
           await isar.writeTxn(() async {
@@ -125,17 +129,17 @@ class FirestoreSyncService implements ICloudSyncService {
     }
 
     _debouncers[debounceKey] = Timer(const Duration(seconds: 3), () {
-      doc.set({
-        'profile': data,
-        'lastSyncedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true)).catchError((e) {
-        debugPrint('FirestoreSync: Error syncing profile: $e');
-      });
+      doc
+          .set({
+            'profile': data,
+            'lastSyncedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true))
+          .catchError((e) {
+            debugPrint('FirestoreSync: Error syncing profile: $e');
+          });
       _debouncers.remove(debounceKey);
     });
   }
-
-
 
   Future<void> flushQueue() async {
     if (!canSync) return;
@@ -181,7 +185,8 @@ class FirestoreSyncService implements ICloudSyncService {
   /// Fetches an entire sub-collection and formats it as a Hive-ready map.
   @override
   Future<Map<String, Map<String, dynamic>>> pullCollection(
-      String collection) async {
+    String collection,
+  ) async {
     if (!canSync) return {};
 
     final ref = _subcollection(collection);
@@ -194,7 +199,8 @@ class FirestoreSyncService implements ICloudSyncService {
         result[doc.id] = doc.data() as Map<String, dynamic>;
       }
       debugPrint(
-          'FirestoreSync: Pulled ${result.length} docs from $collection');
+        'FirestoreSync: Pulled ${result.length} docs from $collection',
+      );
       return result;
     } catch (e) {
       debugPrint('FirestoreSync: Error pulling $collection: $e');
@@ -203,7 +209,9 @@ class FirestoreSyncService implements ICloudSyncService {
   }
 
   @override
-  Stream<Map<String, Map<String, dynamic>>> streamCollection(String collection) {
+  Stream<Map<String, Map<String, dynamic>>> streamCollection(
+    String collection,
+  ) {
     if (!canSync) return const Stream.empty();
     final ref = _subcollection(collection);
     if (ref == null) return const Stream.empty();
@@ -221,7 +229,8 @@ class FirestoreSyncService implements ICloudSyncService {
   /// Used for pulling global workout/meal plans.
   @override
   Future<Map<String, Map<String, dynamic>>> pullGlobalCollection(
-      String collection) async {
+    String collection,
+  ) async {
     try {
       final snapshot = await _db.collection(collection).get();
       final result = <String, Map<String, dynamic>>{};
@@ -229,14 +238,14 @@ class FirestoreSyncService implements ICloudSyncService {
         result[doc.id] = doc.data();
       }
       debugPrint(
-          'FirestoreSync: Pulled ${result.length} docs from global $collection');
+        'FirestoreSync: Pulled ${result.length} docs from global $collection',
+      );
       return result;
     } catch (e) {
       debugPrint('FirestoreSync: Error pulling global $collection: $e');
       return {};
     }
   }
-
 
   /// Fetches the user profile from the cloud.
   @override
@@ -256,8 +265,6 @@ class FirestoreSyncService implements ICloudSyncService {
       return null;
     }
   }
-
-
 
   /// Checks if the user has any data backed up in the cloud.
   @override
@@ -284,7 +291,9 @@ class FirestoreSyncService implements ICloudSyncService {
   /// Used during initial migration of local data to cloud.
   @override
   Future<void> bulkSync(
-      String collection, Map<String, Map<String, dynamic>> docs) async {
+    String collection,
+    Map<String, Map<String, dynamic>> docs,
+  ) async {
     if (!canSync || docs.isEmpty) return;
 
     final ref = _subcollection(collection);
@@ -302,10 +311,10 @@ class FirestoreSyncService implements ICloudSyncService {
         await batch.commit();
       }
       debugPrint(
-          'FirestoreSync: Bulk synced ${docs.length} docs to $collection');
+        'FirestoreSync: Bulk synced ${docs.length} docs to $collection',
+      );
     } catch (e) {
       debugPrint('FirestoreSync: Error bulk syncing $collection: $e');
     }
   }
 }
-

@@ -10,8 +10,5 @@ class AppConfig {
   final String key;
   final String value;
 
-  AppConfig({
-    required this.key,
-    required this.value,
-  });
+  AppConfig({required this.key, required this.value});
 }

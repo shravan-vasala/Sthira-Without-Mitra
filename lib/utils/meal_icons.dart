@@ -20,24 +20,40 @@ class MealIcons {
 
   static IconData resolve(String? keyOrEmoji) {
     if (keyOrEmoji == null) return Icons.restaurant_outlined;
-    
+
     switch (keyOrEmoji) {
-      case '🍳': return Icons.egg_alt_outlined;
-      case '🍛': return Icons.lunch_dining_outlined;
-      case '🍎': return Icons.fastfood_outlined;
-      case '🍽️': return Icons.dinner_dining_outlined;
-      case '🍴': return Icons.restaurant_outlined;
-      case '🥤': return Icons.local_cafe_outlined;
-      case '🍌': return Icons.fastfood_outlined;
-      case '🥜': return Icons.eco_outlined;
-      case '🍚': return Icons.lunch_dining_outlined;
-      case '🫖': return Icons.emoji_food_beverage_outlined;
-      case '🍪': return Icons.cake_outlined;
-      case '🥩': return Icons.dinner_dining_outlined;
-      case '🥑': return Icons.eco_outlined;
-      case '🥪': return Icons.fastfood_outlined;
-      case '🥣': return Icons.soup_kitchen_outlined;
-      case '🥗': return Icons.eco_outlined;
+      case '🍳':
+        return Icons.egg_alt_outlined;
+      case '🍛':
+        return Icons.lunch_dining_outlined;
+      case '🍎':
+        return Icons.fastfood_outlined;
+      case '🍽️':
+        return Icons.dinner_dining_outlined;
+      case '🍴':
+        return Icons.restaurant_outlined;
+      case '🥤':
+        return Icons.local_cafe_outlined;
+      case '🍌':
+        return Icons.fastfood_outlined;
+      case '🥜':
+        return Icons.eco_outlined;
+      case '🍚':
+        return Icons.lunch_dining_outlined;
+      case '🫖':
+        return Icons.emoji_food_beverage_outlined;
+      case '🍪':
+        return Icons.cake_outlined;
+      case '🥩':
+        return Icons.dinner_dining_outlined;
+      case '🥑':
+        return Icons.eco_outlined;
+      case '🥪':
+        return Icons.fastfood_outlined;
+      case '🥣':
+        return Icons.soup_kitchen_outlined;
+      case '🥗':
+        return Icons.eco_outlined;
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.icon;
@@ -48,24 +64,40 @@ class MealIcons {
 
   static String normalize(String? keyOrEmoji) {
     if (keyOrEmoji == null) return 'restaurant';
-    
+
     switch (keyOrEmoji) {
-      case '🍳': return 'egg';
-      case '🍛': return 'lunch';
-      case '🍎': return 'snack';
-      case '🍽️': return 'dinner';
-      case '🍴': return 'restaurant';
-      case '🥤': return 'drink';
-      case '🍌': return 'snack';
-      case '🥜': return 'healthy';
-      case '🍚': return 'lunch';
-      case '🫖': return 'coffee';
-      case '🍪': return 'treat';
-      case '🥩': return 'dinner';
-      case '🥑': return 'healthy';
-      case '🥪': return 'snack';
-      case '🥣': return 'soup';
-      case '🥗': return 'healthy';
+      case '🍳':
+        return 'egg';
+      case '🍛':
+        return 'lunch';
+      case '🍎':
+        return 'snack';
+      case '🍽️':
+        return 'dinner';
+      case '🍴':
+        return 'restaurant';
+      case '🥤':
+        return 'drink';
+      case '🍌':
+        return 'snack';
+      case '🥜':
+        return 'healthy';
+      case '🍚':
+        return 'lunch';
+      case '🫖':
+        return 'coffee';
+      case '🍪':
+        return 'treat';
+      case '🥩':
+        return 'dinner';
+      case '🥑':
+        return 'healthy';
+      case '🥪':
+        return 'snack';
+      case '🥣':
+        return 'soup';
+      case '🥗':
+        return 'healthy';
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.id;

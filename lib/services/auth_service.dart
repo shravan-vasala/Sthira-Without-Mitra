@@ -7,7 +7,8 @@ class AuthService implements IAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     // Web Client ID from google-services.json to explicitly avoid Error 10
-    serverClientId: '611231023306-pdpsdsikt8vua5b8jo35h4fltourlmp4.apps.googleusercontent.com',
+    serverClientId:
+        '611231023306-pdpsdsikt8vua5b8jo35h4fltourlmp4.apps.googleusercontent.com',
   );
 
   /// Stream of auth state changes
@@ -69,10 +70,7 @@ class AuthService implements IAuthService {
   @override
   Future<void> signOut() async {
     try {
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
       debugPrint('AuthService: Signed out');
     } catch (e) {
       debugPrint('AuthService: Sign out error: $e');

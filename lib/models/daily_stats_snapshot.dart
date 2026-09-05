@@ -10,7 +10,7 @@ import '../utils/workout_completion.dart';
 class DailyStatsSnapshot {
   final int habitsDone;
   final int habitsTotal;
-  final double habitRate; 
+  final double habitRate;
 
   final int workoutsDone;
   final int workoutsTotal;
@@ -117,7 +117,7 @@ class DailyStatsSnapshot {
     int mealsTotal = 0;
     final mealPlanMeals = mealPlan?.meals.map((m) => m.type).toList();
     final mealLogSlots = mealLog.customSlots.keys.toList();
-    
+
     if (mealPlanMeals != null && mealPlanMeals.isNotEmpty) {
       mealsTotal = mealPlanMeals.length;
       for (final slotType in mealPlanMeals) {

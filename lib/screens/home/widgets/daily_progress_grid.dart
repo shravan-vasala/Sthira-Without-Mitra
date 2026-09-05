@@ -27,7 +27,11 @@ class DailyProgressGrid extends ConsumerWidget {
 
     final selectedDateStr = ref.watch(dateStringProvider);
     final selectedDate = DateTime.parse(selectedDateStr);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
     final isFuture = selectedDate.isAfter(today);
     final isToday = selectedDate.isAtSameMomentAs(today);
 
@@ -42,7 +46,7 @@ class DailyProgressGrid extends ConsumerWidget {
           ? 'Last: ${lastWeight.toStringAsFixed(1)} kg'
           : 'Tap to log';
     }
-    
+
     final mediaRepo = ref.watch(mediaRepoProvider);
     final allPhotos = mediaRepo.getAllProgressPhotos();
     final flattenedPhotos = allPhotos.expand((e) => e.value).toList();
@@ -105,10 +109,7 @@ class DailyProgressGrid extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _StepsCard(
-                    isFuture: isFuture,
-                    isToday: isToday,
-                  ),
+                  child: _StepsCard(isFuture: isFuture, isToday: isToday),
                 ),
               ],
             ),
@@ -135,10 +136,7 @@ class DailyProgressGrid extends ConsumerWidget {
 
 /// Special Steps card that handles the Health Connect first-run CTA.
 class _StepsCard extends ConsumerStatefulWidget {
-  const _StepsCard({
-    required this.isFuture,
-    required this.isToday,
-  });
+  const _StepsCard({required this.isFuture, required this.isToday});
 
   final bool isFuture;
   final bool isToday;
@@ -185,12 +183,14 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
   Future<void> _handleSyncTap() async {
     final hcService = ref.read(healthConnectServiceProvider);
     final prefs = ref.read(sharedPreferencesProvider);
-    
+
     // Check if Health Connect is installed
     final available = await hcService.isAvailable();
     if (!available) {
       // Deep link to Play Store
-      final uri = Uri.parse('https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata');
+      final uri = Uri.parse(
+        'https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata',
+      );
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
@@ -204,11 +204,17 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
     // Trigger sync
     final dailyLogRepo = ref.read(dailyLogRepoProvider);
     final habitRepo = ref.read(habitRepoProvider);
-    final steps = await hcService.syncTodayAndAutoCompleteHabit(dailyLogRepo, habitRepo);
+    final steps = await hcService.syncTodayAndAutoCompleteHabit(
+      dailyLogRepo,
+      habitRepo,
+    );
     await hcService.syncLast7Days(dailyLogRepo, habitRepo);
 
     await prefs.setBool('hc_connected', true);
-    await prefs.setString('last_hc_sync_time', DateTime.now().toIso8601String());
+    await prefs.setString(
+      'last_hc_sync_time',
+      DateTime.now().toIso8601String(),
+    );
     if (steps != null) {
       ref.read(stepsSourceProvider.notifier).state = StepsSource.healthConnect;
     }
@@ -219,7 +225,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
         _showSyncCta = false;
       });
     }
-    
+
     // Backfill in background
     if (!hcService.isBackfillDone) {
       // ignore: unawaited_futures
@@ -228,7 +234,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
         ref.invalidate(habitCompletionsProvider);
       });
     }
-    
+
     ref.invalidate(dailyLogProvider);
     ref.invalidate(habitCompletionsProvider);
   }
@@ -236,10 +242,13 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
   @override
   Widget build(BuildContext context) {
     final steps = ref.watch(dailyLogProvider.select((l) => l.steps));
-    final stepsSource = ref.watch(dailyLogProvider.select((l) => l.stepsSource));
+    final stepsSource = ref.watch(
+      dailyLogProvider.select((l) => l.stepsSource),
+    );
 
     // Hide Sync CTA once we have Health Connect data (covers race with async permission check)
-    final showSyncCta = _showSyncCta &&
+    final showSyncCta =
+        _showSyncCta &&
         !_checkingPermission &&
         !(steps != null && stepsSource == 'healthConnect');
 
@@ -270,7 +279,11 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                   color: context.colors.onPrimary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.sync_rounded, color: context.colors.onPrimary, size: 22),
+                child: Icon(
+                  Icons.sync_rounded,
+                  color: context.colors.onPrimary,
+                  size: 22,
+                ),
               ),
               const SizedBox(height: 14),
               Text(
@@ -354,7 +367,11 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                     color: context.colors.mintIcon.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.directions_walk_rounded, color: context.colors.mintIcon, size: 22),
+                  child: Icon(
+                    Icons.directions_walk_rounded,
+                    color: context.colors.mintIcon,
+                    size: 22,
+                  ),
                 ),
                 GestureDetector(
                   onTap: () => context.push('/progress?metric=steps'),
@@ -364,7 +381,11 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                       color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.show_chart_rounded, color: context.colors.mintIcon, size: 18),
+                    child: Icon(
+                      Icons.show_chart_rounded,
+                      color: context.colors.mintIcon,
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -381,22 +402,27 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
             ),
             const SizedBox(height: 4),
             Text(
-              stepsSubtitle,
-              style: AppTheme.numeric(
-                TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.textMedium,
-                ),
-              ),
-            ).animate(key: ValueKey(stepsSubtitle)).fade().scale(begin: const Offset(0.95, 0.95)),
+                  stepsSubtitle,
+                  style: AppTheme.numeric(
+                    TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: context.colors.textMedium,
+                    ),
+                  ),
+                )
+                .animate(key: ValueKey(stepsSubtitle))
+                .fade()
+                .scale(begin: const Offset(0.95, 0.95)),
             if (sourceHint != null) ...[
               const SizedBox(height: 2),
               Text(
                 sourceHint,
                 style: TextStyle(
                   fontSize: 10,
-                  color: sourceHint == 'Synced via Health Connect' || sourceHint == 'Synced'
+                  color:
+                      sourceHint == 'Synced via Health Connect' ||
+                          sourceHint == 'Synced'
                       ? context.colors.green
                       : context.colors.textLight,
                 ),
@@ -465,7 +491,11 @@ class _ProgressCard extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.show_chart_rounded, color: iconColor, size: 18),
+                      child: Icon(
+                        Icons.show_chart_rounded,
+                        color: iconColor,
+                        size: 18,
+                      ),
                     ),
                   ),
               ],
@@ -484,27 +514,31 @@ class _ProgressCard extends StatelessWidget {
             if (thumbnails != null && thumbnails!.isNotEmpty)
               Row(
                 children: [
-                  ...thumbnails!.take(3).map((path) => Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: kIsWeb
-                              ? Image.network(
-                                  path,
-                                  width: 32,
-                                  height: 32,
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.file(
-                                  File(path),
-                                  width: 32,
-                                  height: 32,
-                                  fit: BoxFit.cover,
-                                  cacheWidth: 96,
-                                  cacheHeight: 96,
-                                ),
+                  ...thumbnails!
+                      .take(3)
+                      .map(
+                        (path) => Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: kIsWeb
+                                ? Image.network(
+                                    path,
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    File(path),
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.cover,
+                                    cacheWidth: 96,
+                                    cacheHeight: 96,
+                                  ),
+                          ),
                         ),
-                      )),
+                      ),
                   if (thumbnails!.length > 3)
                     Container(
                       width: 32,
@@ -527,19 +561,21 @@ class _ProgressCard extends StatelessWidget {
               )
             else
               Text(
-                subtitle,
-                style: AppTheme.numeric(
-                  TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.textMedium,
-                  ),
-                ),
-              ).animate(key: ValueKey(subtitle)).fade().scale(begin: const Offset(0.95, 0.95)),
+                    subtitle,
+                    style: AppTheme.numeric(
+                      TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: context.colors.textMedium,
+                      ),
+                    ),
+                  )
+                  .animate(key: ValueKey(subtitle))
+                  .fade()
+                  .scale(begin: const Offset(0.95, 0.95)),
           ],
         ),
       ),
     );
   }
 }
-

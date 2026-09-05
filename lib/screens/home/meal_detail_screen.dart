@@ -22,10 +22,7 @@ class MealDetailScreen extends ConsumerWidget {
   const MealDetailScreen({super.key});
 
   void _openAddSlotDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => const AddMealSlotDialog(),
-    );
+    showDialog(context: context, builder: (_) => const AddMealSlotDialog());
   }
 
   @override
@@ -131,12 +128,16 @@ class MealDetailScreen extends ConsumerWidget {
               return slotLog == null || slotLog.items.isEmpty;
             }).toList();
             final mealsLeft = unloggedSlots.length;
-            final mealName = unloggedSlots.isNotEmpty ? unloggedSlots.first.name : null;
+            final mealName = unloggedSlots.isNotEmpty
+                ? unloggedSlots.first.name
+                : null;
 
             return AIMealSuggestionCard(
               remainingCalories: targetCalories - dailyLog.totalCalories,
-              remainingProtein: profile.targetProteinG.toDouble() - dailyLog.totalProtein,
-              remainingCarbs: profile.targetCarbsG.toDouble() - dailyLog.totalCarbs,
+              remainingProtein:
+                  profile.targetProteinG.toDouble() - dailyLog.totalProtein,
+              remainingCarbs:
+                  profile.targetCarbsG.toDouble() - dailyLog.totalCarbs,
               remainingFat: profile.targetFatG.toDouble() - dailyLog.totalFat,
               mealName: mealName,
               mealsLeft: mealsLeft,
@@ -153,11 +154,16 @@ class MealDetailScreen extends ConsumerWidget {
                     icon: const Icon(Icons.add_rounded, size: 20),
                     label: const Text(
                       'Add another meal',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
-                      backgroundColor: context.colors.primary.withValues(alpha: 0.08),
+                      backgroundColor: context.colors.primary.withValues(
+                        alpha: 0.08,
+                      ),
                       side: BorderSide(
                         color: context.colors.primary.withValues(alpha: 0.35),
                       ),
@@ -172,15 +178,23 @@ class MealDetailScreen extends ConsumerWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () => showAppBottomSheet(context: context, builder: (_) => const PlateCalculatorSheet()),
+                    onPressed: () => showAppBottomSheet(
+                      context: context,
+                      builder: (_) => const PlateCalculatorSheet(),
+                    ),
                     icon: const Icon(Icons.pie_chart_outline_rounded, size: 20),
                     label: const Text(
                       'Visual Plate Calculator',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.indigo,
-                      backgroundColor: context.colors.indigo.withValues(alpha: 0.08),
+                      backgroundColor: context.colors.indigo.withValues(
+                        alpha: 0.08,
+                      ),
                       side: BorderSide(
                         color: context.colors.indigo.withValues(alpha: 0.35),
                       ),
@@ -227,7 +241,9 @@ class _CalorieHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = isOverTarget ? context.colors.orange : context.colors.primary;
+    final accent = isOverTarget
+        ? context.colors.orange
+        : context.colors.primary;
 
     return SurfaceCard(
       elevation: SurfaceCardElevation.nested,
@@ -405,7 +421,6 @@ class _MealSlotCard extends ConsumerStatefulWidget {
 }
 
 class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
-
   bool get _hasLog => MealPlanComplete.isSlotLogged(widget.slotLog);
 
   bool get _isPlannedComplete =>
@@ -427,7 +442,11 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               children: [
-                Icon(MealIcons.resolve(widget.slotEmoji), size: 18, color: context.colors.textDark),
+                Icon(
+                  MealIcons.resolve(widget.slotEmoji),
+                  size: 18,
+                  color: context.colors.textDark,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -453,8 +472,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                             ),
                           ),
                         ],
-
-
                       ],
                     ],
                   ),
@@ -498,62 +515,62 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
           // Logged non-planned content
           if (_hasLog && !_isPlannedComplete) ...[
             Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (slotLog!.photoPath != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: kIsWeb
-                            ? Image.network(
-                                slotLog.photoPath!,
-                                width: 64,
-                                height: 64,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.file(
-                                File(slotLog.photoPath!),
-                                width: 64,
-                                height: 64,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-                    if (slotLog.photoPath != null) const SizedBox(width: 12),
-                    Expanded(
-                      child: Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: slotLog.items.map((item) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (slotLog!.photoPath != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: kIsWeb
+                          ? Image.network(
+                              slotLog.photoPath!,
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.file(
+                              File(slotLog.photoPath!),
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
                             ),
-                            decoration: BoxDecoration(
-                              color: context.colors.lavender,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '${item.name} · ${item.portion}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: context.colors.textDark,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
                     ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: context.colors.textLight,
-                      size: 14,
+                  if (slotLog.photoPath != null) const SizedBox(width: 12),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: slotLog.items.map((item) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.colors.lavender,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${item.name} · ${item.portion}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.colors.textDark,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: context.colors.textLight,
+                    size: 14,
+                  ),
+                ],
               ),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
@@ -562,7 +579,8 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                     child: CompactButton(
                       label: 'Add serving',
                       icon: Icons.add_circle_outline_rounded,
-                      onPressed: () => _openScanner(context, false, append: true),
+                      onPressed: () =>
+                          _openScanner(context, false, append: true),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -650,7 +668,10 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () => _toggleCompletedAsPlanned(planned),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Icon(
@@ -681,7 +702,10 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () => _toggleCompletedAsPlanned(planned),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Icon(
@@ -723,7 +747,11 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline_rounded, size: 16, color: context.colors.primary),
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                size: 16,
+                color: context.colors.primary,
+              ),
               const SizedBox(width: 6),
               Text(
                 'Suggestions',
@@ -787,7 +815,9 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Overwrite Meal?'),
-          content: const Text('This will remove your scanned photos and macros and replace them with the planned meal. Are you sure?'),
+          content: const Text(
+            'This will remove your scanned photos and macros and replace them with the planned meal. Are you sure?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
@@ -795,7 +825,10 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Overwrite', style: TextStyle(color: Colors.red)),
+              child: const Text(
+                'Overwrite',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         ),
@@ -816,7 +849,11 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     await notifier.saveMealSlot(widget.slotId, log);
   }
 
-  void _openScanner(BuildContext context, bool isManualEntry, {bool append = false}) {
+  void _openScanner(
+    BuildContext context,
+    bool isManualEntry, {
+    bool append = false,
+  }) {
     showAppBottomSheet(
       context: context,
       builder: (_) => PhotoCalorieScannerSheet(
@@ -828,6 +865,3 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     );
   }
 }
-
-
-

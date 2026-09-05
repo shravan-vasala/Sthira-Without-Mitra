@@ -54,9 +54,10 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('prefs must be overridden in ProviderScope');
 });
 
-final onboardingCompletedProvider = NotifierProvider<OnboardingCompletedNotifier, bool>(() {
-  return OnboardingCompletedNotifier();
-});
+final onboardingCompletedProvider =
+    NotifierProvider<OnboardingCompletedNotifier, bool>(() {
+      return OnboardingCompletedNotifier();
+    });
 
 class OnboardingCompletedNotifier extends Notifier<bool> {
   static const String _onboardingKey = 'onboarding_completed';
@@ -147,7 +148,7 @@ final socialPushControllerProvider = Provider<void>((ref) {
     final todayLog = repo.getOrCreate(todayStr);
     _pushProfile(ref, todayLog);
   });
-  
+
   // Start pending acceptances check
   Future.microtask(() async {
     final syncService = ref.read(socialSyncServiceProvider);
@@ -157,14 +158,20 @@ final socialPushControllerProvider = Provider<void>((ref) {
       final fromUid = p['fromUid'] as String?;
       if (fromUid != null) {
         // We know they accepted our request, add them to our allowedReaders
-        await syncService.acceptFriendRequest(fromUid); // Not quite, we just need to add to allowed readers
+        await syncService.acceptFriendRequest(
+          fromUid,
+        ); // Not quite, we just need to add to allowed readers
         // Actually, the sender side of acceptance:
         // When I send request, they accept -> they add me to their allowed readers, and create an acceptance marker for me.
         // I see the marker -> I add them to my allowed readers, local friend DB, and delete the marker.
         try {
           await syncService.fetchProfileOnce(fromUid).then((profile) {
             if (profile != null) {
-              friendRepo.addFriend(fromUid, profile.name, avatarUrl: profile.avatarUrl);
+              friendRepo.addFriend(
+                fromUid,
+                profile.name,
+                avatarUrl: profile.avatarUrl,
+              );
             }
           });
           // To add to my allowed readers, I can just call acceptFriendRequest which does it.
@@ -176,10 +183,10 @@ final socialPushControllerProvider = Provider<void>((ref) {
           final db = FirebaseFirestore.instance;
           final currentUid = syncService.currentUid;
           if (currentUid != null) {
-             await db.collection('social_profiles').doc(currentUid).update({
-                'allowedReaders': FieldValue.arrayUnion([fromUid])
-             });
-             await syncService.clearAcceptanceMarker(fromUid);
+            await db.collection('social_profiles').doc(currentUid).update({
+              'allowedReaders': FieldValue.arrayUnion([fromUid]),
+            });
+            await syncService.clearAcceptanceMarker(fromUid);
           }
         } catch (e) {
           debugPrint('Error processing pending acceptance: $e');
@@ -189,10 +196,11 @@ final socialPushControllerProvider = Provider<void>((ref) {
   });
 });
 
-final friendProfileStreamProvider = StreamProvider.family<SocialProfile?, String>((ref, uid) {
-  final syncService = ref.watch(socialSyncServiceProvider);
-  return syncService.streamFriendProfile(uid);
-});
+final friendProfileStreamProvider =
+    StreamProvider.family<SocialProfile?, String>((ref, uid) {
+      final syncService = ref.watch(socialSyncServiceProvider);
+      return syncService.streamFriendProfile(uid);
+    });
 
 void _pushProfile(Ref ref, DailyLog todayLog) {
   final profile = ref.read(profileProvider);
@@ -207,10 +215,10 @@ void _pushProfile(Ref ref, DailyLog todayLog) {
   // Monday is 1, Sunday is 7
   final diff = now.weekday - 1;
   final monday = now.subtract(Duration(days: diff));
-  
+
   int weeklySteps = 0;
   int weeklyWorkouts = 0;
-  
+
   for (int i = 0; i <= diff; i++) {
     final d = monday.add(Duration(days: i));
     final dStr = d.toIso8601String().substring(0, 10);
@@ -223,8 +231,9 @@ void _pushProfile(Ref ref, DailyLog todayLog) {
     }
   }
 
-  final String? safeAvatarUrl = (profile.photoPath?.startsWith('assets/') ?? false) 
-      ? profile.photoPath 
+  final String? safeAvatarUrl =
+      (profile.photoPath?.startsWith('assets/') ?? false)
+      ? profile.photoPath
       : null;
 
   final profileData = SocialProfile(
@@ -274,18 +283,17 @@ final coachServiceProvider = Provider<CoachService>((ref) {
   final apiKey = ref.watch(profileProvider.select((p) => p.geminiApiKey));
   final isSignedIn = ref.watch(isSignedInProvider);
   return CoachService(
-    apiKey: apiKey, 
+    apiKey: apiKey,
     isSignedIn: isSignedIn,
     aiClient: ref.watch(aiClientProvider),
   );
 });
 
-final stepsSourceProvider = StateProvider<StepsSource>((ref) => StepsSource.none);
+final stepsSourceProvider = StateProvider<StepsSource>(
+  (ref) => StepsSource.none,
+);
 
 // ── End of file ──
-
-
-
 
 final friendRequestsCountProvider = StreamProvider<int>((ref) {
   final sync = ref.watch(socialSyncServiceProvider);
@@ -296,7 +304,3 @@ final syncPendingCountProvider = StreamProvider<int>((ref) {
   final sync = ref.watch(firestoreSyncServiceProvider);
   return sync.pendingCountStream;
 });
-
-
-
-

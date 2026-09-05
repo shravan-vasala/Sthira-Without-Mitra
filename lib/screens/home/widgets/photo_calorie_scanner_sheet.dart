@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:async';
+import '../../../../services/ai_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,7 +48,55 @@ class _PhotoCalorieScannerSheetState
   bool _describeMode = false;
   String? _confidence;
   String? _errorMessage;
+  String? _techErrorMsg;
+  AiErrorCause? _errorCause;
   bool _isOffline = false;
+
+  int _analysisSessionToken = 0;
+  Timer? _statusTimer;
+  int _elapsedSeconds = 0;
+  Timer? _countdownTimer;
+  int _cooldownSeconds = 0;
+
+  void _startStatusTimer() {
+    _elapsedSeconds = 0;
+    _statusTimer?.cancel();
+    _statusTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _elapsedSeconds++;
+      });
+    });
+  }
+
+  void _startCooldown(int seconds) {
+    _cooldownSeconds = seconds;
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _cooldownSeconds--;
+        if (_cooldownSeconds <= 0) {
+          _cooldownSeconds = 0;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  void _cancelAnalysis() {
+    _analysisSessionToken++;
+    _statusTimer?.cancel();
+    setState(() {
+      _isAnalyzing = false;
+    });
+  }
 
   List<MealItemLog> _items = [];
   int _totalCalories = 0;
@@ -81,7 +131,7 @@ class _PhotoCalorieScannerSheetState
 
   void _applyResult(Map<String, dynamic> result) {
     if (!mounted) return;
-    
+
     final itemsData = result['items'] as List?;
     final totalData = result['total'] as Map<String, dynamic>?;
 
@@ -100,10 +150,18 @@ class _PhotoCalorieScannerSheetState
     setState(() {
       if (widget.appendToLog != null) {
         _items = [...widget.appendToLog!.items, ...newItems];
-        _totalCalories = widget.appendToLog!.totalCalories + ((totalData?['calories'] as num?)?.toInt() ?? 0);
-        _totalProtein = widget.appendToLog!.totalProtein + ((totalData?['protein_g'] as num?)?.toDouble() ?? 0.0);
-        _totalCarbs = widget.appendToLog!.totalCarbs + ((totalData?['carbs_g'] as num?)?.toDouble() ?? 0.0);
-        _totalFat = widget.appendToLog!.totalFat + ((totalData?['fat_g'] as num?)?.toDouble() ?? 0.0);
+        _totalCalories =
+            widget.appendToLog!.totalCalories +
+            ((totalData?['calories'] as num?)?.toInt() ?? 0);
+        _totalProtein =
+            widget.appendToLog!.totalProtein +
+            ((totalData?['protein_g'] as num?)?.toDouble() ?? 0.0);
+        _totalCarbs =
+            widget.appendToLog!.totalCarbs +
+            ((totalData?['carbs_g'] as num?)?.toDouble() ?? 0.0);
+        _totalFat =
+            widget.appendToLog!.totalFat +
+            ((totalData?['fat_g'] as num?)?.toDouble() ?? 0.0);
       } else {
         _items = newItems;
         _totalCalories = (totalData?['calories'] as num?)?.toInt() ?? 0;
@@ -144,14 +202,18 @@ class _PhotoCalorieScannerSheetState
     setState(() {
       _isAnalyzing = true;
       _errorMessage = null;
+      _techErrorMsg = null;
+      _errorCause = null;
     });
+    final currentToken = ++_analysisSessionToken;
+    _startStatusTimer();
 
     try {
       final List<Uint8List> allBytes = [];
       for (var f in _selectedImages) {
         allBytes.add(await f.readAsBytes());
       }
-      
+
       String mimeType = 'image/jpeg';
       if (_selectedImages.first.path.toLowerCase().endsWith('.png')) {
         mimeType = 'image/png';
@@ -170,6 +232,8 @@ class _PhotoCalorieScannerSheetState
 
       if (!mounted) return;
 
+      if (currentToken != _analysisSessionToken) return;
+      _statusTimer?.cancel();
       if (result != null) {
         _applyResult(result);
       } else {
@@ -185,7 +249,9 @@ class _PhotoCalorieScannerSheetState
     final text = _descriptionCtrl.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Type what you ate first — e.g. rice, sambar, curd')),
+        const SnackBar(
+          content: Text('Type what you ate first — e.g. rice, sambar, curd'),
+        ),
       );
       return;
     }
@@ -194,16 +260,23 @@ class _PhotoCalorieScannerSheetState
       _isAnalyzing = true;
       _analysisComplete = false;
       _errorMessage = null;
+      _techErrorMsg = null;
+      _errorCause = null;
       _items = [];
       _selectedImages = [];
     });
+    final currentToken = ++_analysisSessionToken;
+    _startStatusTimer();
 
     try {
-      final result =
-          await ref.read(geminiFoodServiceProvider).analyzeFoodText(text);
-          
+      final result = await ref
+          .read(geminiFoodServiceProvider)
+          .analyzeFoodText(text);
+
       if (!mounted) return;
-      
+
+      if (currentToken != _analysisSessionToken) return;
+      _statusTimer?.cancel();
       if (result != null) {
         _applyResult(result);
       } else {
@@ -216,21 +289,39 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _handleAnalyzeError(Object e) {
-    final msg = e.toString();
-    if (msg.contains('Service temporarily unavailable')) {
-      _showError('OFFLINE_FALLBACK');
-    } else if (msg.contains('FormatException') || msg.contains('json')) {
-      _showError('Couldn\'t analyze — try again or add items yourself.');
-    } else if (msg.contains('api key') || msg.contains('API key')) {
-      _showError('Invalid API key. Add it in Profile → AI Settings.');
-    } else if (msg.contains('SocketException') || msg.contains('network')) {
-      _showError('Network error. Please check your connection.');
-    } else {
-      _showError(msg.replaceAll('Exception: ', ''));
+    _statusTimer?.cancel();
+    final msg = e
+        .toString()
+        .replaceAll('Exception: ', '')
+        .replaceAll('AiException: ', '');
+    String humanMsg = msg;
+    AiErrorCause? cause;
+
+    if (e is AiException) {
+      cause = e.cause;
     }
+
+    if (cause == AiErrorCause.rateLimited) {
+      _startCooldown(90);
+    } else if (cause == AiErrorCause.overloaded) {
+      _startCooldown(30);
+    }
+
+    if (msg.contains('OFFLINE_FALLBACK') ||
+        msg.contains('Service temporarily unavailable')) {
+      humanMsg = 'OFFLINE_FALLBACK';
+    }
+
+    setState(() {
+      _isAnalyzing = false;
+      _errorMessage = humanMsg;
+      _techErrorMsg = msg;
+      _errorCause = cause;
+    });
   }
 
   void _showError(String message) {
+    _statusTimer?.cancel();
     setState(() {
       _isAnalyzing = false;
       _errorMessage = message;
@@ -310,7 +401,13 @@ class _PhotoCalorieScannerSheetState
       builder: (ctx) => AlertDialog(
         backgroundColor: context.colors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Edit Item', style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Edit Item',
+          style: TextStyle(
+            color: context.colors.textDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -320,7 +417,9 @@ class _PhotoCalorieScannerSheetState
                 decoration: InputDecoration(
                   labelText: 'Name',
                   labelStyle: TextStyle(color: context.colors.textMedium),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.colors.primary),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -329,7 +428,9 @@ class _PhotoCalorieScannerSheetState
                 decoration: InputDecoration(
                   labelText: 'Portion',
                   labelStyle: TextStyle(color: context.colors.textMedium),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.colors.primary),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -338,7 +439,9 @@ class _PhotoCalorieScannerSheetState
                 decoration: InputDecoration(
                   labelText: 'Calories',
                   labelStyle: TextStyle(color: context.colors.textMedium),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: context.colors.primary),
+                  ),
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -350,9 +453,17 @@ class _PhotoCalorieScannerSheetState
                       controller: pCtrl,
                       decoration: InputDecoration(
                         labelText: 'Pro(g)',
-                        labelStyle: TextStyle(color: context.colors.textMedium, fontSize: 13),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                        labelStyle: TextStyle(
+                          color: context.colors.textMedium,
+                          fontSize: 13,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: 8,
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: context.colors.primary),
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -363,9 +474,17 @@ class _PhotoCalorieScannerSheetState
                       controller: cCtrl,
                       decoration: InputDecoration(
                         labelText: 'Carb(g)',
-                        labelStyle: TextStyle(color: context.colors.textMedium, fontSize: 13),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                        labelStyle: TextStyle(
+                          color: context.colors.textMedium,
+                          fontSize: 13,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: 8,
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: context.colors.primary),
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -376,9 +495,17 @@ class _PhotoCalorieScannerSheetState
                       controller: fCtrl,
                       decoration: InputDecoration(
                         labelText: 'Fat(g)',
-                        labelStyle: TextStyle(color: context.colors.textMedium, fontSize: 13),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: context.colors.primary)),
+                        labelStyle: TextStyle(
+                          color: context.colors.textMedium,
+                          fontSize: 13,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: 8,
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: context.colors.primary),
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -391,7 +518,9 @@ class _PhotoCalorieScannerSheetState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            style: TextButton.styleFrom(foregroundColor: context.colors.textMedium),
+            style: TextButton.styleFrom(
+              foregroundColor: context.colors.textMedium,
+            ),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
@@ -412,7 +541,9 @@ class _PhotoCalorieScannerSheetState
             style: ElevatedButton.styleFrom(
               backgroundColor: context.colors.primary,
               foregroundColor: context.colors.onPrimary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Text('Save'),
           ),
@@ -459,8 +590,9 @@ class _PhotoCalorieScannerSheetState
         final appDir = await getApplicationDocumentsDirectory();
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final fileName = 'meal_photo_$timestamp.jpg';
-        final savedImage =
-            await _selectedImages.first.copy('${appDir.path}/$fileName');
+        final savedImage = await _selectedImages.first.copy(
+          '${appDir.path}/$fileName',
+        );
         finalPhotoPath = savedImage.path;
       } else {
         finalPhotoPath = _selectedImages.first.path;
@@ -477,7 +609,9 @@ class _PhotoCalorieScannerSheetState
       totalFat: _totalFat,
       confidence: _confidence ?? widget.appendToLog?.confidence,
     );
-    await ref.read(dailyMealLogProvider.notifier).saveMealSlot(widget.slotId, slotLog);
+    await ref
+        .read(dailyMealLogProvider.notifier)
+        .saveMealSlot(widget.slotId, slotLog);
 
     if (mounted) {
       // ignore: unawaited_futures
@@ -497,7 +631,8 @@ class _PhotoCalorieScannerSheetState
 
   @override
   Widget build(BuildContext context) {
-    final showChooser = !_analysisComplete &&
+    final showChooser =
+        !_analysisComplete &&
         !_isAnalyzing &&
         _errorMessage == null &&
         _selectedImages.isEmpty;
@@ -528,8 +663,8 @@ class _PhotoCalorieScannerSheetState
                   widget.appendToLog != null
                       ? Icons.add_circle_outline_rounded
                       : _describeMode
-                          ? Icons.edit_note_rounded
-                          : Icons.camera_alt_rounded,
+                      ? Icons.edit_note_rounded
+                      : Icons.camera_alt_rounded,
                   color: context.colors.primary,
                   size: 24,
                 ),
@@ -551,8 +686,8 @@ class _PhotoCalorieScannerSheetState
                       widget.appendToLog != null
                           ? 'Add another serving to this meal'
                           : _describeMode
-                              ? 'Describe home cooking — AI estimates macros'
-                              : 'Photo of your plate works best for home meals',
+                          ? 'Describe home cooking — AI estimates macros'
+                          : 'Photo of your plate works best for home meals',
                       style: TextStyle(
                         fontSize: 12,
                         color: context.colors.textMedium,
@@ -660,8 +795,7 @@ class _PhotoCalorieScannerSheetState
               maxLines: 4,
               textInputAction: TextInputAction.done,
               decoration: const InputDecoration(
-                hintText:
-                    'e.g. 1 cup rice, chicken curry, beans fry, curd',
+                hintText: 'e.g. 1 cup rice, chicken curry, beans fry, curd',
                 alignLabelWithHint: true,
               ),
             ),
@@ -701,7 +835,11 @@ class _PhotoCalorieScannerSheetState
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.cloud_off_rounded, color: Colors.orange, size: 36),
+                  const Icon(
+                    Icons.cloud_off_rounded,
+                    color: Colors.orange,
+                    size: 36,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'AI Service Offline',
@@ -734,20 +872,99 @@ class _PhotoCalorieScannerSheetState
               ),
             ),
           ] else if (_errorMessage != null) ...[
-            AsyncErrorCard(
-              title: 'Analysis Failed',
-              message: _errorMessage!,
-              onRetry: () {
-                setState(() => _errorMessage = null);
-                if (_describeMode) {
-                  _analyzeDescription();
-                } else if (_selectedImages.isNotEmpty) {
-                  _analyzeImage(skipCache: true);
-                } else {
-                  _pickImage(ImageSource.gallery);
-                }
-              },
-              actionText: _describeMode ? 'Try again' : 'Try again',
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.colors.red.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: context.colors.red.withValues(alpha: 0.3),
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: context.colors.red,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(
+                            color: context.colors.textDark,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_techErrorMsg != null &&
+                      _techErrorMsg != _errorMessage) ...[
+                    const SizedBox(height: 12),
+                    Theme(
+                      data: Theme.of(
+                        context,
+                      ).copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        title: Text(
+                          'Details',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.colors.red,
+                          ),
+                        ),
+                        tilePadding: EdgeInsets.zero,
+                        childrenPadding: const EdgeInsets.only(bottom: 8),
+                        children: [
+                          Text(
+                            _techErrorMsg!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'monospace',
+                              color: context.colors.textMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: _cooldownSeconds > 0
+                        ? null
+                        : () {
+                            setState(() => _errorMessage = null);
+                            if (_describeMode) {
+                              _analyzeDescription();
+                            } else if (_selectedImages.isNotEmpty) {
+                              _analyzeImage(skipCache: true);
+                            } else {
+                              _pickImage(ImageSource.gallery);
+                            }
+                          },
+                    icon: _cooldownSeconds > 0
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.refresh_rounded, size: 18),
+                    label: Text(
+                      _cooldownSeconds > 0
+                          ? 'Wait $_cooldownSeconds s...'
+                          : 'Try again',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -778,8 +995,11 @@ class _PhotoCalorieScannerSheetState
                     height: 160,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: _selectedImages.length + (_selectedImages.length < 3 ? 1 : 0),
-                      separatorBuilder: (context, index) => const SizedBox(width: 8),
+                      itemCount:
+                          _selectedImages.length +
+                          (_selectedImages.length < 3 ? 1 : 0),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         if (index == _selectedImages.length) {
                           // Add angle button
@@ -788,14 +1008,23 @@ class _PhotoCalorieScannerSheetState
                             child: Container(
                               width: 120,
                               decoration: BoxDecoration(
-                                color: context.colors.primary.withValues(alpha: 0.1),
+                                color: context.colors.primary.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                                border: Border.all(
+                                  color: context.colors.primary.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_a_photo_rounded, color: context.colors.primary),
+                                  Icon(
+                                    Icons.add_a_photo_rounded,
+                                    color: context.colors.primary,
+                                  ),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Add angle\n(Max 3)',
@@ -818,8 +1047,18 @@ class _PhotoCalorieScannerSheetState
                           child: Stack(
                             children: [
                               kIsWeb
-                                  ? Image.network(img.path, width: 160, height: 160, fit: BoxFit.cover)
-                                  : Image.file(img, width: 160, height: 160, fit: BoxFit.cover),
+                                  ? Image.network(
+                                      img.path,
+                                      width: 160,
+                                      height: 160,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      img,
+                                      width: 160,
+                                      height: 160,
+                                      fit: BoxFit.cover,
+                                    ),
                               if (!_isAnalyzing)
                                 Positioned(
                                   top: 8,
@@ -828,7 +1067,8 @@ class _PhotoCalorieScannerSheetState
                                     onTap: () {
                                       setState(() {
                                         _selectedImages.removeAt(index);
-                                        if (_selectedImages.isEmpty) _analysisComplete = false;
+                                        if (_selectedImages.isEmpty)
+                                          _analysisComplete = false;
                                       });
                                     },
                                     child: Container(
@@ -837,7 +1077,11 @@ class _PhotoCalorieScannerSheetState
                                         color: Colors.black54,
                                         shape: BoxShape.circle,
                                       ),
-                                      child: Icon(Icons.close_rounded, color: context.colors.onPrimary, size: 16),
+                                      child: Icon(
+                                        Icons.close_rounded,
+                                        color: context.colors.onPrimary,
+                                        size: 16,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -850,11 +1094,16 @@ class _PhotoCalorieScannerSheetState
                   if (_isAnalyzing)
                     Container(
                       margin: const EdgeInsets.only(top: 16),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: context.colors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: context.colors.primary.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -868,54 +1117,72 @@ class _PhotoCalorieScannerSheetState
                             ),
                           ),
                           const SizedBox(width: 16),
-                          Text(
-                            'AI is analyzing your meal...',
-                            style: TextStyle(
-                              color: context.colors.textDark,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
+                          Expanded(
+                            child: Text(
+                              _elapsedSeconds > 15
+                                  ? 'Still working — big plates take a moment...'
+                                  : 'AI is analyzing your meal...',
+                              style: TextStyle(
+                                color: context.colors.textDark,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                              maxLines: 2,
                             ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.cancel_rounded,
+                              color: context.colors.textMedium,
+                            ),
+                            onPressed: _cancelAnalysis,
                           ),
                         ],
                       ),
                     ),
                 ],
               ),
-              if (_selectedImages.isNotEmpty && !_isAnalyzing && !_analysisComplete) ...[
-                const SizedBox(height: 16),
-                Text(
-                  'Optional hint',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textDark,
-                  ),
+            if (_selectedImages.isNotEmpty &&
+                !_isAnalyzing &&
+                !_analysisComplete) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Optional hint',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textDark,
                 ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _descriptionCtrl,
-                  textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    hintText: 'e.g. This is chicken biryani, normal portion',
-                    alignLabelWithHint: true,
-                  ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: _descriptionCtrl,
+                textInputAction: TextInputAction.done,
+                decoration: const InputDecoration(
+                  hintText: 'e.g. This is chicken biryani, normal portion',
+                  alignLabelWithHint: true,
                 ),
-                const SizedBox(height: 16),
-                PrimaryButton(
-                  label: 'Analyze Photo',
-                  icon: Icons.auto_awesome_rounded,
-                  onPressed: _isOffline ? null : _analyzeImage,
-                  isLoading: _isAnalyzing,
-                ),
-              ]
-            else if (_isAnalyzing)
+              ),
+              const SizedBox(height: 16),
+              PrimaryButton(
+                label: 'Analyze Photo',
+                icon: Icons.auto_awesome_rounded,
+                onPressed: _isOffline ? null : _analyzeImage,
+                isLoading: _isAnalyzing,
+              ),
+            ] else if (_isAnalyzing)
               Container(
-                margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                margin: const EdgeInsets.symmetric(
+                  vertical: 40,
+                  horizontal: 20,
+                ),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: context.colors.primary.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: context.colors.primary.withValues(alpha: 0.2)),
+                  border: Border.all(
+                    color: context.colors.primary.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -929,7 +1196,9 @@ class _PhotoCalorieScannerSheetState
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'AI is estimating macros...',
+                      _elapsedSeconds > 15
+                          ? 'Still working — big requests take a moment...'
+                          : 'AI is estimating macros...',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -944,6 +1213,15 @@ class _PhotoCalorieScannerSheetState
                         color: context.colors.textMedium,
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: _cancelAnalysis,
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Cancel Analysis'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.colors.textMedium,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -956,16 +1234,20 @@ class _PhotoCalorieScannerSheetState
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _confidence == 'low' 
-                      ? context.colors.red.withValues(alpha: 0.1) 
+                  color: _confidence == 'low'
+                      ? context.colors.red.withValues(alpha: 0.1)
                       : context.colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
                     Icon(
-                      _confidence == 'low' ? Icons.error_outline_rounded : Icons.warning_amber_rounded,
-                      color: _confidence == 'low' ? context.colors.red : context.colors.orange,
+                      _confidence == 'low'
+                          ? Icons.error_outline_rounded
+                          : Icons.warning_amber_rounded,
+                      color: _confidence == 'low'
+                          ? context.colors.red
+                          : context.colors.orange,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -975,7 +1257,9 @@ class _PhotoCalorieScannerSheetState
                             ? 'Low confidence estimate — please check portions carefully.'
                             : 'AI is somewhat unsure about this meal — please verify portions.',
                         style: TextStyle(
-                          color: _confidence == 'low' ? context.colors.red : context.colors.orange,
+                          color: _confidence == 'low'
+                              ? context.colors.red
+                              : context.colors.orange,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1001,7 +1285,10 @@ class _PhotoCalorieScannerSheetState
                         color: context.colors.red,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Icon(Icons.delete_outline_rounded, color: context.colors.onPrimary),
+                      child: Icon(
+                        Icons.delete_outline_rounded,
+                        color: context.colors.onPrimary,
+                      ),
                     ),
                     onDismissed: (_) => _removeItem(index),
                     child: Container(
@@ -1033,11 +1320,26 @@ class _PhotoCalorieScannerSheetState
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    _buildMacroPill(context, 'Protein', '${item.proteinG?.toStringAsFixed(1) ?? '0'}g', const Color(0xFFE8A163)),
+                                    _buildMacroPill(
+                                      context,
+                                      'Protein',
+                                      '${item.proteinG?.toStringAsFixed(1) ?? '0'}g',
+                                      const Color(0xFFE8A163),
+                                    ),
                                     const SizedBox(width: 8),
-                                    _buildMacroPill(context, 'Carbs', '${item.carbsG?.toStringAsFixed(1) ?? '0'}g', const Color(0xFF8FB896)),
+                                    _buildMacroPill(
+                                      context,
+                                      'Carbs',
+                                      '${item.carbsG?.toStringAsFixed(1) ?? '0'}g',
+                                      const Color(0xFF8FB896),
+                                    ),
                                     const SizedBox(width: 8),
-                                    _buildMacroPill(context, 'Fat', '${item.fatG?.toStringAsFixed(1) ?? '0'}g', const Color(0xFFE58B88)),
+                                    _buildMacroPill(
+                                      context,
+                                      'Fat',
+                                      '${item.fatG?.toStringAsFixed(1) ?? '0'}g',
+                                      const Color(0xFFE58B88),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -1109,7 +1411,13 @@ class _PhotoCalorieScannerSheetState
       ),
     );
   }
-  Widget _buildMacroPill(BuildContext context, String label, String value, Color color) {
+
+  Widget _buildMacroPill(
+    BuildContext context,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

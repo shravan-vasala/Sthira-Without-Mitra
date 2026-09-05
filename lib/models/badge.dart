@@ -29,10 +29,7 @@ class Badge {
     this.unlockedAt,
   });
 
-  Badge copyWith({
-    int? currentProgress,
-    DateTime? unlockedAt,
-  }) {
+  Badge copyWith({int? currentProgress, DateTime? unlockedAt}) {
     return Badge(
       id: id,
       category: category,
@@ -54,18 +51,20 @@ class Badge {
       iconEmoji: json['iconEmoji'] as String,
       requiredProgress: json['requiredProgress'] as int,
       currentProgress: json['currentProgress'] as int? ?? 0,
-      unlockedAt: json['unlockedAt'] != null ? DateTime.parse(json['unlockedAt'] as String) : null,
+      unlockedAt: json['unlockedAt'] != null
+          ? DateTime.parse(json['unlockedAt'] as String)
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'category': category,
-        'title': title,
-        'description': description,
-        'iconEmoji': iconEmoji,
-        'requiredProgress': requiredProgress,
-        'currentProgress': currentProgress,
-        'unlockedAt': unlockedAt?.toIso8601String(),
-      };
+    'id': id,
+    'category': category,
+    'title': title,
+    'description': description,
+    'iconEmoji': iconEmoji,
+    'requiredProgress': requiredProgress,
+    'currentProgress': currentProgress,
+    'unlockedAt': unlockedAt?.toIso8601String(),
+  };
 }

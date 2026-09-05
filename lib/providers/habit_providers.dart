@@ -13,13 +13,13 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
   HabitCompletion build() {
     final repo = ref.watch(habitRepoProvider);
     final date = ref.watch(dateStringProvider);
-    
+
     final sub = repo.watchCompletions(date).listen((completion) {
       state = completion ?? repo.getCompletions(date);
     });
-    
+
     ref.onDispose(() => sub.cancel());
-    
+
     return repo.getCompletions(date);
   }
 
@@ -48,45 +48,52 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
   }
 }
 
-final habitCompletionsProvider = NotifierProvider<HabitCompletionsNotifier, HabitCompletion>(HabitCompletionsNotifier.new);
+final habitCompletionsProvider =
+    NotifierProvider<HabitCompletionsNotifier, HabitCompletion>(
+      HabitCompletionsNotifier.new,
+    );
 
 final habitStreakProvider = Provider.family<int, String>((ref, habitId) {
   final habitsList = ref.watch(habitsProvider);
-  final habit = habitsList.firstWhere((h) => h.id == habitId, orElse: () => Habit(id: '', name: '', icon: '', target: 1));
+  final habit = habitsList.firstWhere(
+    (h) => h.id == habitId,
+    orElse: () => Habit(id: '', name: '', icon: '', target: 1),
+  );
   if (habit.id.isEmpty) return 0;
-  
+
   final dateStr = ref.watch(dateStringProvider);
-  
+
   // Reactive to today's changes for THIS specific habit
   ref.watch(habitCompletionsProvider.select((c) => c.completions[habitId]));
   ref.watch(habitCompletionsProvider.select((c) => c.overrides[habitId]));
-  
+
   if (habit.type == HabitType.autoSteps) {
     ref.watch(dailyLogProvider.select((d) => d.steps));
   } else if (habit.type == HabitType.autoSleep) {
     ref.watch(dailyLogProvider.select((d) => d.sleepHours));
   }
-  
+
   final habitRepo = ref.watch(habitRepoProvider);
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
-  
+
   int streak = 0;
   final DateTime current = DateTime.parse(dateStr);
-  
+
   // Check today
   final todayCompletions = habitRepo.getCompletions(dateStr);
   final todayLog = dailyLogRepo.getLog(dateStr) ?? DailyLog(date: dateStr);
   if (isHabitCompleted(habit, todayCompletions, todayLog)) {
     streak++;
   }
-  
+
   // Go backward
   DateTime checkDate = current.subtract(const Duration(days: 1));
   while (streak < 365) {
-    final dStr = '${checkDate.year.toString().padLeft(4, '0')}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}';
+    final dStr =
+        '${checkDate.year.toString().padLeft(4, '0')}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}';
     final comp = habitRepo.getCompletions(dStr);
     final log = dailyLogRepo.getLog(dStr) ?? DailyLog(date: dStr);
-    
+
     if (isHabitCompleted(habit, comp, log)) {
       streak++;
       checkDate = checkDate.subtract(const Duration(days: 1));
@@ -96,4 +103,3 @@ final habitStreakProvider = Provider.family<int, String>((ref, habitId) {
   }
   return streak;
 });
-

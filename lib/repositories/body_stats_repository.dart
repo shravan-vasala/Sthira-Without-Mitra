@@ -37,7 +37,9 @@ class BodyStatsRepository {
 
   // ── Cloud sync helpers ──
 
-  Future<void> importStatsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
+  Future<void> importStatsFromCloud(
+    Map<String, Map<String, dynamic>> cloudData,
+  ) async {
     for (final entry in cloudData.entries) {
       if (getStats(entry.key) == null) {
         final stats = BodyStats.fromJson(entry.value);
@@ -57,4 +59,3 @@ class BodyStatsRepository {
     return result;
   }
 }
-

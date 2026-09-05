@@ -94,7 +94,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final height = double.tryParse(_heightController.text) ?? 160.0;
     final weight = double.tryParse(_weightController.text);
     final current = ref.read(profileProvider);
-    ref.read(profileProvider.notifier).updateProfile(
+    ref
+        .read(profileProvider.notifier)
+        .updateProfile(
           current.copyWith(
             name: name,
             coachName: _coachNameController.text.trim(),
@@ -108,11 +110,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _saveGoals() {
     final current = ref.read(profileProvider);
-    ref.read(profileProvider.notifier).updateProfile(
+    ref
+        .read(profileProvider.notifier)
+        .updateProfile(
           current.copyWith(targetCalories: _targetCalories.round()),
         );
     final habitRepo = ref.read(habitRepoProvider);
-    
+
     final currentHabits = habitRepo.getHabits();
     for (final habit in currentHabits) {
       if (!_selectedHabitIds.contains(habit.id)) {
@@ -167,7 +171,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             _geminiKeyError = e.toString().replaceAll('Exception: ', '');
           });
         }
-        return; 
+        return;
       }
       await ref.read(profileProvider.notifier).updateGeminiKey(key);
       setState(() {
@@ -221,12 +225,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           });
                         },
                         onSuggestTapped: () {
-                          final height = double.tryParse(_heightController.text) ?? 160.0;
-                          double? weight = double.tryParse(_weightController.text);
+                          final height =
+                              double.tryParse(_heightController.text) ?? 160.0;
+                          double? weight = double.tryParse(
+                            _weightController.text,
+                          );
                           if (weight != null && !_useKg) {
                             weight = weight / 2.20462; // Convert lb to kg
                           }
-                          
+
                           final targets = TargetCalculator.calculate(
                             heightCm: height,
                             weightKg: weight,
@@ -235,14 +242,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             goal: 'Maintain',
                             activityLevel: 'Sedentary',
                           );
-                          
+
                           setState(() {
                             _targetCalories = targets.calories.toDouble();
                           });
-                          
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Suggested: ${targets.calories} kcal (Protein: ${targets.proteinG}g, Carbs: ${targets.carbsG}g, Fat: ${targets.fatG}g)'),
+                              content: Text(
+                                'Suggested: ${targets.calories} kcal (Protein: ${targets.proteinG}g, Carbs: ${targets.carbsG}g, Fat: ${targets.fatG}g)',
+                              ),
                               backgroundColor: context.colors.primary,
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -321,7 +330,10 @@ class _NavButtons extends StatelessWidget {
             GestureDetector(
               onTap: onNext,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE8A163),
                   borderRadius: BorderRadius.circular(16),
@@ -370,7 +382,7 @@ class _WelcomePageState extends State<_WelcomePage> {
   @override
   Widget build(BuildContext context) {
     final fontFamily = Theme.of(context).textTheme.headlineLarge?.fontFamily;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
@@ -484,7 +496,11 @@ class _WelcomePageState extends State<_WelcomePage> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const Icon(Icons.favorite_rounded, color: Color(0xFFE8A163), size: 14),
+              const Icon(
+                Icons.favorite_rounded,
+                color: Color(0xFFE8A163),
+                size: 14,
+              ),
               Text(
                 ' for Bodamma',
                 style: TextStyle(
@@ -528,7 +544,11 @@ class _ProfilePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 80),
-          const Icon(Icons.person_outline_rounded, size: 48, color: Color(0xFFE8A163)),
+          const Icon(
+            Icons.person_outline_rounded,
+            size: 48,
+            color: Color(0xFFE8A163),
+          ),
           const SizedBox(height: 24),
           const Text(
             'Who is\nthis?',
@@ -669,7 +689,11 @@ class _GoalsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 80),
-          const Icon(Icons.track_changes_outlined, size: 48, color: Color(0xFF8FB896)),
+          const Icon(
+            Icons.track_changes_outlined,
+            size: 48,
+            color: Color(0xFF8FB896),
+          ),
           const SizedBox(height: 24),
           const Text(
             'Daily\nGoals',
@@ -723,12 +747,19 @@ class _GoalsPage extends StatelessWidget {
               onTap: () => onHabitToggled(habit.id, !selected),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 24,
+                ),
                 decoration: BoxDecoration(
-                  color: selected ? Colors.white.withOpacity(0.1) : Colors.transparent,
+                  color: selected
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: selected ? const Color(0xFF8FB896) : Colors.white.withOpacity(0.2),
+                    color: selected
+                        ? const Color(0xFF8FB896)
+                        : Colors.white.withOpacity(0.2),
                     width: selected ? 2 : 1,
                   ),
                 ),
@@ -737,7 +768,9 @@ class _GoalsPage extends StatelessWidget {
                     Icon(
                       HabitIcons.resolve(habit.icon),
                       size: 24,
-                      color: selected ? const Color(0xFF8FB896) : Colors.white.withOpacity(0.5),
+                      color: selected
+                          ? const Color(0xFF8FB896)
+                          : Colors.white.withOpacity(0.5),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -746,7 +779,9 @@ class _GoalsPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: selected ? Colors.white : Colors.white.withOpacity(0.5),
+                          color: selected
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.5),
                         ),
                       ),
                     ),
@@ -781,7 +816,11 @@ class _HealthConnectPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.favorite_border_rounded, size: 64, color: Color(0xFF8FB896)),
+          const Icon(
+            Icons.favorite_border_rounded,
+            size: 64,
+            color: Color(0xFF8FB896),
+          ),
           const SizedBox(height: 32),
           const Text(
             'Sync Health\nData',
@@ -808,12 +847,19 @@ class _HealthConnectPage extends StatelessWidget {
           if (connecting)
             const CircularProgressIndicator(color: Color(0xFF8FB896))
           else if (connected)
-            const Icon(Icons.check_circle_outline_rounded, size: 64, color: Color(0xFF8FB896))
+            const Icon(
+              Icons.check_circle_outline_rounded,
+              size: 64,
+              color: Color(0xFF8FB896),
+            )
           else
             GestureDetector(
               onTap: onConnect,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFF8FB896), width: 2),
                   borderRadius: BorderRadius.circular(32),
@@ -866,7 +912,11 @@ class _AiSetupPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.auto_awesome_outlined, size: 64, color: Color(0xFFE8A163)),
+          const Icon(
+            Icons.auto_awesome_outlined,
+            size: 64,
+            color: Color(0xFFE8A163),
+          ),
           const SizedBox(height: 32),
           const Text(
             'Smart\nLogging',
@@ -891,7 +941,11 @@ class _AiSetupPage extends StatelessWidget {
           ),
           const SizedBox(height: 64),
           if (keySaved)
-            const Icon(Icons.check_circle_outline_rounded, size: 64, color: Color(0xFF8FB896))
+            const Icon(
+              Icons.check_circle_outline_rounded,
+              size: 64,
+              color: Color(0xFF8FB896),
+            )
           else
             Column(
               children: [
@@ -907,7 +961,10 @@ class _AiSetupPage extends StatelessWidget {
                   GestureDetector(
                     onTap: onSaveKey,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE8A163),
                         borderRadius: BorderRadius.circular(32),
@@ -928,7 +985,10 @@ class _AiSetupPage extends StatelessWidget {
                     child: Text(
                       errorMessage,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
               ],
@@ -949,13 +1009,18 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
   String _syncStatus = '';
 
   Future<void> _handleSignIn() async {
-    setState(() { _isSyncing = true; _syncStatus = 'Signing in...'; });
+    setState(() {
+      _isSyncing = true;
+      _syncStatus = 'Signing in...';
+    });
     try {
       final user = await ref.read(authServiceProvider).signInWithGoogle();
       if (user != null && mounted) {
-        setState(() { _syncStatus = 'Syncing data...'; });
+        setState(() {
+          _syncStatus = 'Syncing data...';
+        });
         final syncService = ref.read(firestoreSyncServiceProvider);
-        
+
         final hasCloudData = await syncService.hasCloudData();
         if (hasCloudData) {
           final profile = await syncService.pullProfile();
@@ -966,22 +1031,37 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
           await ref.read(mealRepoProvider).importLogsFromCloud(mealLogs);
           final stats = await syncService.pullCollection('body_stats');
           await ref.read(bodyStatsRepoProvider).importStatsFromCloud(stats);
-          
-          final workoutPlans = await syncService.pullCollection('workout_plans');
-          await ref.read(workoutRepoProvider).importPlansFromCloud(workoutPlans);
-          
+
+          final workoutPlans = await syncService.pullCollection(
+            'workout_plans',
+          );
+          await ref
+              .read(workoutRepoProvider)
+              .importPlansFromCloud(workoutPlans);
+
           final mealPlans = await syncService.pullCollection('meal_plans');
           await ref.read(mealRepoProvider).importPlansFromCloud(mealPlans);
-          
+
           ref.invalidate(profileProvider);
           ref.invalidate(dailyLogProvider);
           ref.invalidate(dailyMealLogProvider);
           ref.invalidate(latestBodyStatsProvider);
         } else {
-          syncService.syncProfile(ref.read(profileRepoProvider).exportProfileForCloud());
-          await syncService.bulkSync('habit_config', ref.read(habitRepoProvider).exportConfigForCloud());
-          await syncService.bulkSync('workout_plans', ref.read(workoutRepoProvider).exportPlansForCloud());
-          await syncService.bulkSync('meal_plans', ref.read(mealRepoProvider).exportPlansForCloud());
+          syncService.syncProfile(
+            ref.read(profileRepoProvider).exportProfileForCloud(),
+          );
+          await syncService.bulkSync(
+            'habit_config',
+            ref.read(habitRepoProvider).exportConfigForCloud(),
+          );
+          await syncService.bulkSync(
+            'workout_plans',
+            ref.read(workoutRepoProvider).exportPlansForCloud(),
+          );
+          await syncService.bulkSync(
+            'meal_plans',
+            ref.read(mealRepoProvider).exportPlansForCloud(),
+          );
         }
 
         if (mounted) {
@@ -992,12 +1072,16 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign in failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Sign in failed: $e')));
       }
     } finally {
-      if (mounted) setState(() { _isSyncing = false; _syncStatus = ''; });
+      if (mounted)
+        setState(() {
+          _isSyncing = false;
+          _syncStatus = '';
+        });
     }
   }
 
@@ -1040,14 +1124,23 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
               children: [
                 const CircularProgressIndicator(color: Color(0xFF8FB896)),
                 const SizedBox(height: 16),
-                Text(_syncStatus, style: const TextStyle(color: Color(0xFF8FB896), fontWeight: FontWeight.bold)),
+                Text(
+                  _syncStatus,
+                  style: const TextStyle(
+                    color: Color(0xFF8FB896),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             )
           else if (!isSignedIn)
             GestureDetector(
               onTap: _handleSignIn,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFF8FB896), width: 2),
                   borderRadius: BorderRadius.circular(32),
@@ -1065,9 +1158,16 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
           else
             Column(
               children: [
-                const Icon(Icons.check_circle_outline_rounded, size: 48, color: Color(0xFF8FB896)),
+                const Icon(
+                  Icons.check_circle_outline_rounded,
+                  size: 48,
+                  color: Color(0xFF8FB896),
+                ),
                 const SizedBox(height: 12),
-                Text(userEmail ?? '', style: TextStyle(color: Colors.white.withOpacity(0.7))),
+                Text(
+                  userEmail ?? '',
+                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                ),
               ],
             ),
           const SizedBox(height: 64),
@@ -1076,15 +1176,21 @@ class _CloudSyncPageState extends ConsumerState<_CloudSyncPage> {
             children: [
               Text(
                 'Made with ',
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 12,
+                ),
               ),
               const Icon(Icons.favorite, color: Colors.white54, size: 12),
               Text(
                 ' bodamma',
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 12,
+                ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

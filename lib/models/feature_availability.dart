@@ -1,5 +1,1 @@
-enum FeatureAvailability {
-  available,
-  unavailable,
-  disabled,
-}
+enum FeatureAvailability { available, unavailable, disabled }

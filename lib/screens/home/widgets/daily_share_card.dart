@@ -14,7 +14,7 @@ class DailyShareCard extends ConsumerWidget {
     final log = ref.watch(dailyLogProvider);
     final steps = log.steps ?? 0;
     final meals = ref.watch(dailyMealLogProvider);
-    
+
     // We want this to look aesthetic, like an Instagram story card
     return Container(
       width: 300,
@@ -57,7 +57,10 @@ class DailyShareCard extends ConsumerWidget {
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.15),
                 boxShadow: [
-                  BoxShadow(color: Colors.white.withValues(alpha: 0.1), blurRadius: 40)
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    blurRadius: 40,
+                  ),
                 ],
               ),
             ),
@@ -79,7 +82,7 @@ class DailyShareCard extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           // Main Content
           Padding(
             padding: const EdgeInsets.all(28),
@@ -109,7 +112,7 @@ class DailyShareCard extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 32),
-                
+
                 Text(
                   "$name's Day",
                   style: const TextStyle(
@@ -129,9 +132,9 @@ class DailyShareCard extends ConsumerWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                
+
                 const Spacer(),
-                
+
                 // Stats Grid
                 Row(
                   children: [
@@ -159,7 +162,9 @@ class DailyShareCard extends ConsumerWidget {
                       child: _StatBox(
                         icon: Icons.restaurant_rounded,
                         label: 'Meals',
-                        value: meals.totalCalories > 0 ? '${meals.totalCalories.toInt()} kc' : '-',
+                        value: meals.totalCalories > 0
+                            ? '${meals.totalCalories.toInt()} kc'
+                            : '-',
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -193,7 +198,7 @@ class _StatBox extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  
+
   const _StatBox({
     required this.icon,
     required this.label,

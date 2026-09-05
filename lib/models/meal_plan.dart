@@ -22,21 +22,23 @@ class MealPlan {
       meals.where((m) => m.isCompleted).fold(0, (sum, m) => sum + m.calories);
 
   factory MealPlan.fromJson(Map<String, dynamic> json) {
-    final meals =
-        (json['meals'] as List).map((m) => Meal.fromJson(m as Map<String, dynamic>)).toList();
+    final meals = (json['meals'] as List)
+        .map((m) => Meal.fromJson(m as Map<String, dynamic>))
+        .toList();
     return MealPlan(
       planName: json['planName'] as String,
       meals: meals,
-      totalCalories: json['totalCalories'] as int? ??
+      totalCalories:
+          json['totalCalories'] as int? ??
           meals.fold(0, (sum, m) => sum + m.calories),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'planName': planName,
-        'meals': meals.map((m) => m.toJson()).toList(),
-        'totalCalories': totalCalories,
-      };
+    'planName': planName,
+    'meals': meals.map((m) => m.toJson()).toList(),
+    'totalCalories': totalCalories,
+  };
 
   MealPlan copyWith({String? planName, List<Meal>? meals, int? totalCalories}) {
     return MealPlan(
@@ -69,7 +71,8 @@ class Meal {
     return Meal(
       name: json['name'] as String,
       type: json['type'] as String,
-      items: (json['items'] as List?)
+      items:
+          (json['items'] as List?)
               ?.map((i) => MealItem.fromJson(i as Map<String, dynamic>))
               .toList() ??
           [],
@@ -80,13 +83,13 @@ class Meal {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'type': type,
-        'items': items.map((i) => i.toJson()).toList(),
-        'calories': calories,
-        'isCompleted': isCompleted,
-        'suggestions': suggestions,
-      };
+    'name': name,
+    'type': type,
+    'items': items.map((i) => i.toJson()).toList(),
+    'calories': calories,
+    'isCompleted': isCompleted,
+    'suggestions': suggestions,
+  };
 
   Meal copyWith({bool? isCompleted}) {
     return Meal(
@@ -121,11 +124,7 @@ class MealItem {
   String? quantity;
   int? calories;
 
-  MealItem({
-    this.name,
-    this.quantity,
-    this.calories,
-  });
+  MealItem({this.name, this.quantity, this.calories});
 
   factory MealItem.fromJson(Map<String, dynamic> json) {
     return MealItem(
@@ -136,8 +135,8 @@ class MealItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'quantity': quantity,
-        'calories': calories,
-      };
+    'name': name,
+    'quantity': quantity,
+    'calories': calories,
+  };
 }

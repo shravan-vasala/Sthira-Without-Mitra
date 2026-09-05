@@ -15,7 +15,8 @@ class SocialFeedScreen extends ConsumerStatefulWidget {
   ConsumerState<SocialFeedScreen> createState() => _SocialFeedScreenState();
 }
 
-class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen> with SingleTickerProviderStateMixin {
+class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -70,10 +71,7 @@ class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen> with Single
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _FriendsTab(),
-          _LeaderboardTab(),
-        ],
+        children: const [_FriendsTab(), _LeaderboardTab()],
       ),
     );
   }
@@ -85,9 +83,9 @@ class _FriendsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final friendRepo = ref.watch(friendRepoProvider);
-    // Actually we need to watch friends using a provider or listen to DB. 
+    // Actually we need to watch friends using a provider or listen to DB.
     // Currently getAllFriends is sync, so we just rebuild on changes if there is a provider.
-    // wait, friendRepoProvider doesn't notify on its own. 
+    // wait, friendRepoProvider doesn't notify on its own.
     // Sthira architecture: We usually getAllFriends() synchronously.
     final friends = friendRepo.getAllFriends();
     final syncService = ref.watch(socialSyncServiceProvider);
@@ -105,7 +103,13 @@ class _FriendsTab extends ConsumerWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                  child: Text('Friend Requests', style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textMedium)),
+                  child: Text(
+                    'Friend Requests',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: context.colors.textMedium,
+                    ),
+                  ),
                 ),
                 ListView.builder(
                   shrinkWrap: true,
@@ -116,27 +120,53 @@ class _FriendsTab extends ConsumerWidget {
                     final String fromUid = req['fromUid'];
                     final String name = req['fromName'] ?? 'Unknown';
                     final String? avatarUrl = req['fromAvatar'];
-                    
+
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: _buildAvatar(avatarUrl, name, context),
-                        title: Text(name, style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold, fontSize: 16)),
-                        subtitle: Text('Wants to be friends', style: TextStyle(color: context.colors.textMedium)),
+                        title: Text(
+                          name,
+                          style: TextStyle(
+                            color: context.colors.textDark,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Wants to be friends',
+                          style: TextStyle(color: context.colors.textMedium),
+                        ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: Icon(Icons.check_circle, color: context.colors.primary),
+                              icon: Icon(
+                                Icons.check_circle,
+                                color: context.colors.primary,
+                              ),
                               onPressed: () async {
                                 await syncService.acceptFriendRequest(fromUid);
-                                friendRepo.addFriend(fromUid, name, avatarUrl: avatarUrl);
+                                friendRepo.addFriend(
+                                  fromUid,
+                                  name,
+                                  avatarUrl: avatarUrl,
+                                );
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.cancel, color: context.colors.textMedium.withValues(alpha: 0.5)),
-                              onPressed: () => syncService.declineFriendRequest(fromUid),
+                              icon: Icon(
+                                Icons.cancel,
+                                color: context.colors.textMedium.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              onPressed: () =>
+                                  syncService.declineFriendRequest(fromUid),
                             ),
                           ],
                         ),
@@ -179,11 +209,17 @@ class _FriendsTab extends ConsumerWidget {
 
   Widget _buildAvatar(String? avatarUrl, String name, BuildContext context) {
     if (avatarUrl != null && avatarUrl.startsWith('assets/')) {
-      return CircleAvatar(backgroundColor: context.colors.inputFill, backgroundImage: AssetImage(avatarUrl));
+      return CircleAvatar(
+        backgroundColor: context.colors.inputFill,
+        backgroundImage: AssetImage(avatarUrl),
+      );
     }
     return CircleAvatar(
       backgroundColor: context.colors.primary.withValues(alpha: 0.2),
-      child: Text(name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?', style: TextStyle(color: context.colors.primary)),
+      child: Text(
+        name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?',
+        style: TextStyle(color: context.colors.primary),
+      ),
     );
   }
 }
@@ -202,10 +238,10 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     final friendRepo = ref.watch(friendRepoProvider);
     final friends = friendRepo.getAllFriends();
     final auth = ref.watch(authServiceProvider);
-    
+
     // We compute our own stats locally
     final myProfile = _computeMyProfile(ref, auth.uid ?? 'me');
-    
+
     // Watch streams for all friends
     List<SocialProfile> allProfiles = [myProfile];
     for (var f in friends) {
@@ -214,17 +250,19 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
         allProfiles.add(asyncProfile.value!);
       } else {
         // Fallback to minimal placeholder if loading
-        allProfiles.add(SocialProfile(
-          uid: f.uid,
-          name: f.name,
-          avatarUrl: f.avatarUrl,
-          todaySteps: 0,
-          todayWorkouts: 0,
-          currentStreak: 0,
-          weeklySteps: 0,
-          weeklyWorkouts: 0,
-          lastUpdatedAt: DateTime.now().subtract(const Duration(days: 99)),
-        ));
+        allProfiles.add(
+          SocialProfile(
+            uid: f.uid,
+            name: f.name,
+            avatarUrl: f.avatarUrl,
+            todaySteps: 0,
+            todayWorkouts: 0,
+            currentStreak: 0,
+            weeklySteps: 0,
+            weeklyWorkouts: 0,
+            lastUpdatedAt: DateTime.now().subtract(const Duration(days: 99)),
+          ),
+        );
       }
     }
 
@@ -233,7 +271,8 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     final activeProfiles = <SocialProfile>[];
     final inactiveProfiles = <SocialProfile>[];
     for (var p in allProfiles) {
-      if (now.difference(p.lastUpdatedAt).inDays > 7 && p.uid != myProfile.uid) {
+      if (now.difference(p.lastUpdatedAt).inDays > 7 &&
+          p.uid != myProfile.uid) {
         inactiveProfiles.add(p);
       } else {
         activeProfiles.add(p);
@@ -243,14 +282,16 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     // Sort active
     activeProfiles.sort((a, b) {
       if (_isWeek) {
-        if (b.weeklySteps != a.weeklySteps) return b.weeklySteps.compareTo(a.weeklySteps);
+        if (b.weeklySteps != a.weeklySteps)
+          return b.weeklySteps.compareTo(a.weeklySteps);
         return b.weeklyWorkouts.compareTo(a.weeklyWorkouts);
       } else {
-        if (b.todaySteps != a.todaySteps) return b.todaySteps.compareTo(a.todaySteps);
+        if (b.todaySteps != a.todaySteps)
+          return b.todaySteps.compareTo(a.todaySteps);
         return b.currentStreak.compareTo(a.currentStreak);
       }
     });
-    
+
     // We don't rank inactive properly, just show them at bottom
     inactiveProfiles.sort((a, b) => b.lastUpdatedAt.compareTo(a.lastUpdatedAt));
 
@@ -281,13 +322,17 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
               ChoiceChip(
                 label: const Text('Today'),
                 selected: !_isWeek,
-                onSelected: (val) { if (val) setState(() => _isWeek = false); },
+                onSelected: (val) {
+                  if (val) setState(() => _isWeek = false);
+                },
               ),
               const SizedBox(width: 16),
               ChoiceChip(
                 label: const Text('This Week'),
                 selected: _isWeek,
-                onSelected: (val) { if (val) setState(() => _isWeek = true); },
+                onSelected: (val) {
+                  if (val) setState(() => _isWeek = true);
+                },
               ),
             ],
           ),
@@ -296,14 +341,24 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              ...activeProfiles.asMap().entries.map((e) => _buildRow(e.value, e.key + 1, false, myProfile.uid)),
+              ...activeProfiles.asMap().entries.map(
+                (e) => _buildRow(e.value, e.key + 1, false, myProfile.uid),
+              ),
               if (inactiveProfiles.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text('Inactive', style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textMedium)),
+                  child: Text(
+                    'Inactive',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: context.colors.textMedium,
+                    ),
+                  ),
                 ),
-                ...inactiveProfiles.map((p) => _buildRow(p, null, true, myProfile.uid)),
-              ]
+                ...inactiveProfiles.map(
+                  (p) => _buildRow(p, null, true, myProfile.uid),
+                ),
+              ],
             ],
           ),
         ),
@@ -320,7 +375,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     final now = DateTime.now();
     final diff = now.weekday - 1;
     final monday = now.subtract(Duration(days: diff));
-    
+
     int weeklySteps = 0;
     int weeklyWorkouts = 0;
     for (int i = 0; i <= diff; i++) {
@@ -346,17 +401,43 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     );
   }
 
-  Widget _buildRow(SocialProfile profile, int? rank, bool isInactive, String myUid) {
+  Widget _buildRow(
+    SocialProfile profile,
+    int? rank,
+    bool isInactive,
+    String myUid,
+  ) {
     final isMe = profile.uid == myUid;
     final primaryMetric = _isWeek ? profile.weeklySteps : profile.todaySteps;
-    final secondaryMetric = _isWeek ? '${profile.weeklyWorkouts} W/O' : '${profile.currentStreak} Streak';
+    final secondaryMetric = _isWeek
+        ? '${profile.weeklyWorkouts} W/O'
+        : '${profile.currentStreak} Streak';
 
     Widget? rankWidget;
     if (rank != null) {
-      if (rank == 1) rankWidget = const Icon(Icons.workspace_premium, color: Color(0xFFFFD700)); // Gold
-      else if (rank == 2) rankWidget = const Icon(Icons.workspace_premium, color: Color(0xFFC0C0C0)); // Silver
-      else if (rank == 3) rankWidget = const Icon(Icons.workspace_premium, color: Color(0xFFCD7F32)); // Bronze
-      else rankWidget = Text('#$rank', style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textMedium));
+      if (rank == 1)
+        rankWidget = const Icon(
+          Icons.workspace_premium,
+          color: Color(0xFFFFD700),
+        ); // Gold
+      else if (rank == 2)
+        rankWidget = const Icon(
+          Icons.workspace_premium,
+          color: Color(0xFFC0C0C0),
+        ); // Silver
+      else if (rank == 3)
+        rankWidget = const Icon(
+          Icons.workspace_premium,
+          color: Color(0xFFCD7F32),
+        ); // Bronze
+      else
+        rankWidget = Text(
+          '#$rank',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: context.colors.textMedium,
+          ),
+        );
     }
 
     return Padding(
@@ -367,20 +448,45 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (rankWidget != null) ...[rankWidget, const SizedBox(width: 8)],
-            _buildAvatar(profile.avatarUrl, isMe ? 'You' : profile.name, isInactive),
+            _buildAvatar(
+              profile.avatarUrl,
+              isMe ? 'You' : profile.name,
+              isInactive,
+            ),
           ],
         ),
-        title: Text(isMe ? 'You' : profile.name, style: TextStyle(
-          fontWeight: isMe ? FontWeight.w800 : FontWeight.bold,
-          fontSize: 16,
-          color: isInactive ? context.colors.textMedium.withValues(alpha: 0.5) : (isMe ? context.colors.primary : context.colors.textDark),
-        )),
+        title: Text(
+          isMe ? 'You' : profile.name,
+          style: TextStyle(
+            fontWeight: isMe ? FontWeight.w800 : FontWeight.bold,
+            fontSize: 16,
+            color: isInactive
+                ? context.colors.textMedium.withValues(alpha: 0.5)
+                : (isMe ? context.colors.primary : context.colors.textDark),
+          ),
+        ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(primaryMetric.toString(), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: isInactive ? context.colors.textMedium.withValues(alpha: 0.5) : context.colors.primary)),
-            Text(secondaryMetric, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.colors.textMedium)),
+            Text(
+              primaryMetric.toString(),
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+                color: isInactive
+                    ? context.colors.textMedium.withValues(alpha: 0.5)
+                    : context.colors.primary,
+              ),
+            ),
+            Text(
+              secondaryMetric,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: context.colors.textMedium,
+              ),
+            ),
           ],
         ),
       ),
@@ -388,14 +494,27 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   }
 
   Widget _buildAvatar(String? avatarUrl, String name, bool isInactive) {
-    final String? safeAvatar = (avatarUrl?.startsWith('assets/') ?? false) ? avatarUrl : null;
+    final String? safeAvatar = (avatarUrl?.startsWith('assets/') ?? false)
+        ? avatarUrl
+        : null;
     if (safeAvatar != null) {
-      return CircleAvatar(backgroundColor: context.colors.inputFill, backgroundImage: AssetImage(safeAvatar));
+      return CircleAvatar(
+        backgroundColor: context.colors.inputFill,
+        backgroundImage: AssetImage(safeAvatar),
+      );
     }
     return CircleAvatar(
-      backgroundColor: context.colors.primary.withValues(alpha: isInactive ? 0.1 : 0.2),
-      child: Text(name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?', style: TextStyle(color: isInactive ? context.colors.textMedium : context.colors.primary)),
+      backgroundColor: context.colors.primary.withValues(
+        alpha: isInactive ? 0.1 : 0.2,
+      ),
+      child: Text(
+        name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?',
+        style: TextStyle(
+          color: isInactive
+              ? context.colors.textMedium
+              : context.colors.primary,
+        ),
+      ),
     );
   }
 }
-

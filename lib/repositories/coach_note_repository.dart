@@ -33,7 +33,9 @@ class CoachNoteRepository {
 
   // ── Cloud sync helpers ──
 
-  Future<void> importNotesFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
+  Future<void> importNotesFromCloud(
+    Map<String, Map<String, dynamic>> cloudData,
+  ) async {
     for (final entry in cloudData.entries) {
       if (getNote(entry.key) == null) {
         final note = CoachNote.fromJson(entry.value);
@@ -53,4 +55,3 @@ class CoachNoteRepository {
     return result;
   }
 }
-

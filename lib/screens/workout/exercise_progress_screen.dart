@@ -15,7 +15,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logs = ref.watch(exerciseHistoryProvider(exerciseName));
-    
+
     final plan = ref.watch(workoutPlanProvider);
     String displayTitle = exerciseName;
     if (plan != null) {
@@ -32,7 +32,8 @@ class ExerciseProgressScreen extends ConsumerWidget {
     }
 
     // Sort logs by date to ensure proper charting
-    final sortedLogs = List<ExerciseLog>.from(logs)..sort((a, b) => a.date.compareTo(b.date));
+    final sortedLogs = List<ExerciseLog>.from(logs)
+      ..sort((a, b) => a.date.compareTo(b.date));
 
     // Prepare Max Weight Data and Stats
     final List<ChartDataPoint> maxWeightData = sortedLogs
@@ -70,7 +71,9 @@ class ExerciseProgressScreen extends ConsumerWidget {
       ];
     }
 
-    final startDate = sortedLogs.isNotEmpty ? DateTime.parse(sortedLogs.first.date) : DateTime.now();
+    final startDate = sortedLogs.isNotEmpty
+        ? DateTime.parse(sortedLogs.first.date)
+        : DateTime.now();
     final endDate = DateTime.now();
 
     return Scaffold(
@@ -119,8 +122,15 @@ class ExerciseProgressScreen extends ConsumerWidget {
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      if (ref.watch(exerciseLogRepoProvider).getPr(exerciseName) != null) ...[
-                        _PrSummary(pr: ref.watch(exerciseLogRepoProvider).getPr(exerciseName)!),
+                      if (ref
+                              .watch(exerciseLogRepoProvider)
+                              .getPr(exerciseName) !=
+                          null) ...[
+                        _PrSummary(
+                          pr: ref
+                              .watch(exerciseLogRepoProvider)
+                              .getPr(exerciseName)!,
+                        ),
                         const SizedBox(height: 20),
                       ],
                       SharedChartCard(
@@ -161,17 +171,14 @@ class ExerciseProgressScreen extends ConsumerWidget {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return _HistoryCard(log: sortedLogs[sortedLogs.length - 1 - index]);
-                      },
-                      childCount: sortedLogs.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _HistoryCard(
+                        log: sortedLogs[sortedLogs.length - 1 - index],
+                      );
+                    }, childCount: sortedLogs.length),
                   ),
                 ),
-                const SliverPadding(
-                  padding: EdgeInsets.only(bottom: 20),
-                ),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
               ],
             ),
     );
@@ -188,7 +195,9 @@ class _PrSummary extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFFFD700).withValues(alpha: 0.1),
-        border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.3)),
+        border: Border.all(
+          color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+        ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -196,7 +205,11 @@ class _PrSummary extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.emoji_events_rounded, color: Color(0xFFB8860B), size: 24),
+              Icon(
+                Icons.emoji_events_rounded,
+                color: Color(0xFFB8860B),
+                size: 24,
+              ),
               SizedBox(width: 8),
               Text(
                 'PERSONAL RECORDS',
@@ -211,13 +224,19 @@ class _PrSummary extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           if (pr.maxWeight > 0)
-            _buildPrRow('Max Weight', '${pr.maxWeight}kg × ${pr.maxWeightReps}'),
-          if (pr.maxReps > 0 && (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
-            _buildPrRow('Max Reps', '${pr.maxReps} reps @ ${pr.maxRepsWeight}kg'),
+            _buildPrRow(
+              'Max Weight',
+              '${pr.maxWeight}kg × ${pr.maxWeightReps}',
+            ),
+          if (pr.maxReps > 0 &&
+              (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
+            _buildPrRow(
+              'Max Reps',
+              '${pr.maxReps} reps @ ${pr.maxRepsWeight}kg',
+            ),
           if (pr.estimated1RM > 0)
             _buildPrRow('Est. 1RM', '${pr.estimated1RM.toStringAsFixed(1)}kg'),
-          if (pr.maxVolume > 0)
-            _buildPrRow('Max Volume', '${pr.maxVolume}kg'),
+          if (pr.maxVolume > 0) _buildPrRow('Max Volume', '${pr.maxVolume}kg'),
         ],
       ),
     );
@@ -229,8 +248,18 @@ class _PrSummary extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 14, color: Color(0xFF8B6508))),
-          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF8B6508))),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF8B6508)),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF8B6508),
+            ),
+          ),
         ],
       ),
     );
@@ -244,7 +273,9 @@ class _HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('dd MMM yyyy').format(DateTime.parse(log.date));
+    final formattedDate = DateFormat(
+      'dd MMM yyyy',
+    ).format(DateTime.parse(log.date));
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),

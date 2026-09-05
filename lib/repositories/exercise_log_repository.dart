@@ -14,7 +14,10 @@ class ExerciseLogRepository {
   }
 
   ExercisePr? getPr(String exerciseName) {
-    return _isar.exercisePrs.where().exerciseNameEqualTo(exerciseName).findFirstSync();
+    return _isar.exercisePrs
+        .where()
+        .exerciseNameEqualTo(exerciseName)
+        .findFirstSync();
   }
 
   Future<void> savePr(ExercisePr pr) async {
@@ -27,7 +30,12 @@ class ExerciseLogRepository {
   }
 
   ExerciseLog? getLog(String date, String exerciseName) {
-    return _isar.exerciseLogs.filter().dateEqualTo(date).and().exerciseNameEqualTo(exerciseName).findFirstSync();
+    return _isar.exerciseLogs
+        .filter()
+        .dateEqualTo(date)
+        .and()
+        .exerciseNameEqualTo(exerciseName)
+        .findFirstSync();
   }
 
   Future<void> saveLog(ExerciseLog log) async {
@@ -45,7 +53,11 @@ class ExerciseLogRepository {
 
   List<ExerciseLog> getLogsForExercise(String exerciseName) {
     // Isar doesn't have a good endswith query out of the box, but we can query all and filter, or use filter().keyEndsWith()
-    return _isar.exerciseLogs.filter().exerciseNameEqualTo(exerciseName).sortByDate().findAllSync();
+    return _isar.exerciseLogs
+        .filter()
+        .exerciseNameEqualTo(exerciseName)
+        .sortByDate()
+        .findAllSync();
   }
 
   List<ExerciseLog> getLogsForDate(String date) {
@@ -61,7 +73,9 @@ class ExerciseLogRepository {
 
   // ── Cloud sync helpers ──
 
-  Future<void> importLogsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
+  Future<void> importLogsFromCloud(
+    Map<String, Map<String, dynamic>> cloudData,
+  ) async {
     for (final entry in cloudData.entries) {
       final log = ExerciseLog.fromJson(entry.value);
       if (getLog(log.date, log.exerciseName) == null) {
@@ -72,7 +86,9 @@ class ExerciseLogRepository {
     }
   }
 
-  Future<void> importPrsFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
+  Future<void> importPrsFromCloud(
+    Map<String, Map<String, dynamic>> cloudData,
+  ) async {
     for (final entry in cloudData.entries) {
       if (getPr(entry.key) == null) {
         final pr = ExercisePr.fromJson(entry.value);
@@ -101,4 +117,3 @@ class ExerciseLogRepository {
     return result;
   }
 }
-

@@ -24,7 +24,9 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   final List<SetLog> sets = [];
   for (int i = 0; i < exercise.setCount; i++) {
     double weight = exercise.weightKg ?? 0.0;
-    if (exercise.weightKg == null && lastLog != null && i < lastLog.sets.length) {
+    if (exercise.weightKg == null &&
+        lastLog != null &&
+        i < lastLog.sets.length) {
       weight = lastLog.sets[i].weight ?? 0.0;
     }
     sets.add(SetLog(setNumber: i + 1, reps: reps, weight: weight));
@@ -42,22 +44,47 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
 
   // --- Check PR ---
   final isCompletedSet = sets;
-  if (isCompletedSet.isEmpty) return PrUpdateResult(hasAnyNewPr: false, newPr: ExercisePr(exerciseName: ''));
+  if (isCompletedSet.isEmpty)
+    return PrUpdateResult(
+      hasAnyNewPr: false,
+      newPr: ExercisePr(exerciseName: ''),
+    );
 
-  final maxWeight = isCompletedSet.map((s) => s.weight ?? 0.0).reduce((a, b) => a > b ? a : b);
-  final maxReps = isCompletedSet.map((s) => s.reps ?? 0).reduce((a, b) => a > b ? a : b);
-  final totalVolume = isCompletedSet.fold(0.0, (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)));
-  final oneRM = isCompletedSet.map((s) => (s.weight ?? 0.0) * (1 + ((s.reps ?? 0) / 30))).reduce((a, b) => a > b ? a : b);
+  final maxWeight = isCompletedSet
+      .map((s) => s.weight ?? 0.0)
+      .reduce((a, b) => a > b ? a : b);
+  final maxReps = isCompletedSet
+      .map((s) => s.reps ?? 0)
+      .reduce((a, b) => a > b ? a : b);
+  final totalVolume = isCompletedSet.fold(
+    0.0,
+    (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)),
+  );
+  final oneRM = isCompletedSet
+      .map((s) => (s.weight ?? 0.0) * (1 + ((s.reps ?? 0) / 30)))
+      .reduce((a, b) => a > b ? a : b);
 
   final currentPr = repo.getPr(exercise.name ?? '');
 
   bool newW = false, newR = false, newV = false, new1RM = false;
   var updatedPr = currentPr ?? ExercisePr(exerciseName: exercise.name ?? '');
 
-  if (maxWeight > updatedPr.maxWeight) { updatedPr = updatedPr.copyWith(maxWeight: maxWeight); newW = true; }
-  if (maxReps > updatedPr.maxReps) { updatedPr = updatedPr.copyWith(maxReps: maxReps); newR = true; }
-  if (totalVolume > updatedPr.maxVolume) { updatedPr = updatedPr.copyWith(maxVolume: totalVolume); newV = true; }
-  if (oneRM > updatedPr.estimated1RM) { updatedPr = updatedPr.copyWith(estimated1RM: oneRM); new1RM = true; }
+  if (maxWeight > updatedPr.maxWeight) {
+    updatedPr = updatedPr.copyWith(maxWeight: maxWeight);
+    newW = true;
+  }
+  if (maxReps > updatedPr.maxReps) {
+    updatedPr = updatedPr.copyWith(maxReps: maxReps);
+    newR = true;
+  }
+  if (totalVolume > updatedPr.maxVolume) {
+    updatedPr = updatedPr.copyWith(maxVolume: totalVolume);
+    newV = true;
+  }
+  if (oneRM > updatedPr.estimated1RM) {
+    updatedPr = updatedPr.copyWith(estimated1RM: oneRM);
+    new1RM = true;
+  }
 
   final hasAnyNewPr = newW || newR || newV || new1RM;
   if (hasAnyNewPr) {
@@ -102,4 +129,3 @@ Map<String, dynamic> getExerciseChartData(WidgetRef ref, Exercise exercise) {
     'pr': repo.getPr(exercise.name ?? ''),
   };
 }
-

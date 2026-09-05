@@ -50,22 +50,34 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
           // 2.2 Animated Score Card
           Center(
             child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0, end: scoreData.totalScore.toDouble()),
+              tween: Tween<double>(
+                begin: 0,
+                end: scoreData.totalScore.toDouble(),
+              ),
               duration: const Duration(milliseconds: 1200),
               curve: Curves.easeOutCubic,
               builder: (context, value, child) {
                 final intScore = value.round();
-                
+
                 // Color dynamically shifts during animation
                 Color animColor = context.colors.green;
-                if (intScore < 50) animColor = context.colors.red;
-                else if (intScore < 80) animColor = context.colors.orange;
+                if (intScore < 50)
+                  animColor = context.colors.red;
+                else if (intScore < 80)
+                  animColor = context.colors.orange;
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 24,
+                  ),
                   decoration: BoxDecoration(
-                    color: intScore == 100 ? null : animColor.withValues(alpha: 0.1),
-                    gradient: intScore == 100 ? context.colors.primaryGradient : null,
+                    color: intScore == 100
+                        ? null
+                        : animColor.withValues(alpha: 0.1),
+                    gradient: intScore == 100
+                        ? context.colors.primaryGradient
+                        : null,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Column(
@@ -76,7 +88,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                           TextStyle(
                             fontSize: 56,
                             fontWeight: FontWeight.w900,
-                            color: intScore == 100 ? context.colors.onPrimary : animColor,
+                            color: intScore == 100
+                                ? context.colors.onPrimary
+                                : animColor,
                             height: 1.0,
                           ),
                         ),
@@ -87,9 +101,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: intScore == 100 
-                            ? context.colors.onPrimary.withValues(alpha: 0.8) 
-                            : animColor.withValues(alpha: 0.8),
+                          color: intScore == 100
+                              ? context.colors.onPrimary.withValues(alpha: 0.8)
+                              : animColor.withValues(alpha: 0.8),
                         ),
                       ),
                     ],
@@ -98,11 +112,12 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               },
             ),
           ).animate().fade().scale(begin: const Offset(0.9, 0.9)),
-          
+
           const SizedBox(height: 16),
-          
+
           // Delta Row
-          if (scoreData.yesterdayScore != null || scoreData.sevenDayAverage != null)
+          if (scoreData.yesterdayScore != null ||
+              scoreData.sevenDayAverage != null)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -112,11 +127,15 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     previous: scoreData.yesterdayScore!,
                     label: 'vs yesterday',
                   ),
-                  if (scoreData.sevenDayAverage != null) const SizedBox(width: 12),
+                  if (scoreData.sevenDayAverage != null)
+                    const SizedBox(width: 12),
                 ],
                 if (scoreData.sevenDayAverage != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: context.colors.border.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
@@ -154,20 +173,23 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
             icon: Icons.check_circle_outline_rounded,
             color: context.colors.primary,
           ).animate().fade(delay: 100.ms).slideX(begin: 0.05),
-          
+
           const SizedBox(height: 16),
-          
+
           _AnimatedProgressBarRow(
             label: 'Workouts',
             score: scoreData.workoutsScore,
             max: scoreData.workoutsMax,
             icon: Icons.fitness_center_rounded,
             color: context.colors.orange,
-            isRestDay: scoreData.workoutsScore == scoreData.workoutsMax && scoreData.totalScore > 0 && ref.watch(workoutPlanProvider) != null,
+            isRestDay:
+                scoreData.workoutsScore == scoreData.workoutsMax &&
+                scoreData.totalScore > 0 &&
+                ref.watch(workoutPlanProvider) != null,
           ).animate().fade(delay: 180.ms).slideX(begin: 0.05),
-          
+
           const SizedBox(height: 16),
-          
+
           _AnimatedProgressBarRow(
             label: 'Meals',
             score: scoreData.mealsScore,
@@ -200,9 +222,13 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     fontWeight: FontWeight.w700,
                     color: context.colors.primary,
                   ),
-                  backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                  backgroundColor: context.colors.primary.withValues(
+                    alpha: 0.1,
+                  ),
                   side: BorderSide.none,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   onPressed: () {
                     Navigator.pop(context);
                     if (label == 'workout') {
@@ -221,7 +247,11 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.auto_awesome_rounded, color: context.colors.green, size: 20),
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    color: context.colors.green,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Text(
                     'Perfect day — everything done ✨',
@@ -273,7 +303,9 @@ class _DeltaChip extends StatelessWidget {
 
     final isPositive = diff > 0;
     final color = isPositive ? context.colors.green : context.colors.red;
-    final icon = isPositive ? Icons.arrow_drop_up_rounded : Icons.arrow_drop_down_rounded;
+    final icon = isPositive
+        ? Icons.arrow_drop_up_rounded
+        : Icons.arrow_drop_down_rounded;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -360,7 +392,11 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        Icon(Icons.spa_rounded, color: context.colors.green, size: 12),
+                        Icon(
+                          Icons.spa_rounded,
+                          color: context.colors.green,
+                          size: 12,
+                        ),
                       ],
                     )
                   else
@@ -386,7 +422,9 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: val,
-                      backgroundColor: context.colors.border.withValues(alpha: 0.3),
+                      backgroundColor: context.colors.border.withValues(
+                        alpha: 0.3,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isRestDay ? context.colors.green : color,
                       ),

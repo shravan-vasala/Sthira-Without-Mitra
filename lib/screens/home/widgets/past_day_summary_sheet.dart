@@ -12,10 +12,7 @@ import '../../../utils/meal_icons.dart';
 class PastDaySummarySheet extends ConsumerWidget {
   final DateTime date;
 
-  const PastDaySummarySheet({
-    super.key,
-    required this.date,
-  });
+  const PastDaySummarySheet({super.key, required this.date});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,15 +26,20 @@ class PastDaySummarySheet extends ConsumerWidget {
     final dailyLog = ref.read(dailyLogRepoProvider).getOrCreate(dateStr);
     final mealLog = ref.read(mealRepoProvider).getDailyLog(dateStr);
     final allHabits = ref.read(habitRepoProvider).getHabits();
-    final habitCompletions = ref.read(habitRepoProvider).getCompletions(dateStr);
+    final habitCompletions = ref
+        .read(habitRepoProvider)
+        .getCompletions(dateStr);
 
     final applicableHabits = allHabits.where((h) {
-      final habitDate = DateTime(h.createdAt.year, h.createdAt.month, h.createdAt.day);
+      final habitDate = DateTime(
+        h.createdAt.year,
+        h.createdAt.month,
+        h.createdAt.day,
+      );
       final sDate = DateTime(date.year, date.month, date.day);
       return !habitDate.isAfter(sDate);
     }).toList();
-    
-    
+
     final workoutPlan = ref.read(workoutPlanProvider);
     final profile = ref.read(profileProvider);
 
@@ -73,30 +75,46 @@ class PastDaySummarySheet extends ConsumerWidget {
     }
 
     // 2) Compute totals
-    final defaultIds = profile.customMealSlots.where((s) => s['isDefault'] == true).map((s) => s['id'] as String).toSet();
+    final defaultIds = profile.customMealSlots
+        .where((s) => s['isDefault'] == true)
+        .map((s) => s['id'] as String)
+        .toSet();
     final loggedIds = mealLog.customSlots.keys.toSet();
     final customLoggedCount = loggedIds.difference(defaultIds).length;
     final totalMealsTarget = defaultIds.length + customLoggedCount;
-    
+
     final List<IconData> loggedIcons = [];
     for (final slotId in loggedIds) {
       final log = mealLog.customSlots[slotId];
-      if (log != null && (log.items.isNotEmpty || log.photoPath != null || log.totalCalories > 0)) {
+      if (log != null &&
+          (log.items.isNotEmpty ||
+              log.photoPath != null ||
+              log.totalCalories > 0)) {
         if (log.emoji != null) {
           loggedIcons.add(MealIcons.resolve(log.emoji));
         } else {
-          final profileSlot = profile.customMealSlots.firstWhere((s) => s['id'] == slotId, orElse: () => <String, dynamic>{});
-          if (profileSlot.isNotEmpty) loggedIcons.add(MealIcons.resolve(profileSlot['emoji'] as String?));
+          final profileSlot = profile.customMealSlots.firstWhere(
+            (s) => s['id'] == slotId,
+            orElse: () => <String, dynamic>{},
+          );
+          if (profileSlot.isNotEmpty)
+            loggedIcons.add(MealIcons.resolve(profileSlot['emoji'] as String?));
         }
       }
     }
 
     final completedMeals = mealLog.loggedSlotsCount;
     final totalHabitsTarget = applicableHabits.length;
-    final completedHabits = applicableHabits.where((h) => isHabitCompleted(h, habitCompletions, dailyLog)).length;
+    final completedHabits = applicableHabits
+        .where((h) => isHabitCompleted(h, habitCompletions, dailyLog))
+        .length;
 
-    final totalThings = totalMealsTarget + totalHabitsTarget + (isRestDay ? 0 : 1);
-    final totalDone = completedMeals + completedHabits + (isRestDay ? 0 : (workoutDayDone ? 1 : 0));
+    final totalThings =
+        totalMealsTarget + totalHabitsTarget + (isRestDay ? 0 : 1);
+    final totalDone =
+        completedMeals +
+        completedHabits +
+        (isRestDay ? 0 : (workoutDayDone ? 1 : 0));
 
     // 3) Status pill logic
     String statusText = "Nothing logged";
@@ -171,7 +189,10 @@ class PastDaySummarySheet extends ConsumerWidget {
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -199,9 +220,16 @@ class PastDaySummarySheet extends ConsumerWidget {
                   _SummaryRow(
                     icon: Icons.fitness_center_rounded,
                     color: context.colors.primary,
-                    titleWidget: Text(workoutDayName, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.colors.textDark)),
-                    subtitle: isRestDay 
-                        ? 'Recovery day' 
+                    titleWidget: Text(
+                      workoutDayName,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.textDark,
+                      ),
+                    ),
+                    subtitle: isRestDay
+                        ? 'Recovery day'
                         : '$completedExercises/$totalExercises exercises done',
                     isDone: workoutDayDone,
                     onTap: () {
@@ -222,12 +250,37 @@ class PastDaySummarySheet extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (loggedIcons.isNotEmpty)
-                          ...loggedIcons.map((ic) => Padding(padding: const EdgeInsets.only(right: 4), child: Icon(ic, size: 16, color: context.colors.textDark))),
-                        if (loggedIcons.isNotEmpty) Text('· ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.colors.textDark)),
-                        Text('$completedMeals/$totalMealsTarget logged · ${mealLog.totalCalories} / ${profile.targetCalories} kcal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.colors.textDark)),
+                          ...loggedIcons.map(
+                            (ic) => Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Icon(
+                                ic,
+                                size: 16,
+                                color: context.colors.textDark,
+                              ),
+                            ),
+                          ),
+                        if (loggedIcons.isNotEmpty)
+                          Text(
+                            '· ',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: context.colors.textDark,
+                            ),
+                          ),
+                        Text(
+                          '$completedMeals/$totalMealsTarget logged · ${mealLog.totalCalories} / ${profile.targetCalories} kcal',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: context.colors.textDark,
+                          ),
+                        ),
                       ],
                     ),
-                    subtitle: 'P: ${mealLog.totalProtein}g   C: ${mealLog.totalCarbs}g   F: ${mealLog.totalFat}g',
+                    subtitle:
+                        'P: ${mealLog.totalProtein}g   C: ${mealLog.totalCarbs}g   F: ${mealLog.totalFat}g',
                     isDone: completedMeals == totalMealsTarget,
                     onTap: () {
                       ref.read(selectedDateProvider.notifier).state = date;
@@ -242,8 +295,17 @@ class PastDaySummarySheet extends ConsumerWidget {
                   _SummaryRow(
                     icon: Icons.checklist_rounded,
                     color: context.colors.primary,
-                    titleWidget: Text('Habits ($completedHabits/$totalHabitsTarget)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: context.colors.textDark)),
-                    subtitle: missedHabits.isNotEmpty ? 'Missed: $missedHabits' : 'All habits completed!',
+                    titleWidget: Text(
+                      'Habits ($completedHabits/$totalHabitsTarget)',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.textDark,
+                      ),
+                    ),
+                    subtitle: missedHabits.isNotEmpty
+                        ? 'Missed: $missedHabits'
+                        : 'All habits completed!',
                     isDone: completedHabits == totalHabitsTarget,
                     onTap: () {
                       ref.read(selectedDateProvider.notifier).state = date;
@@ -274,7 +336,9 @@ class PastDaySummarySheet extends ConsumerWidget {
                     child: _MetricBox(
                       icon: Icons.bedtime_rounded,
                       label: 'Sleep',
-                      value: dailyLog.sleepHours != null ? '${dailyLog.sleepHours}h' : '—',
+                      value: dailyLog.sleepHours != null
+                          ? '${dailyLog.sleepHours}h'
+                          : '—',
                     ),
                   ),
                 ],
@@ -289,7 +353,9 @@ class PastDaySummarySheet extends ConsumerWidget {
                     child: _MetricBox(
                       icon: Icons.monitor_weight_rounded,
                       label: 'Weight',
-                      value: dailyLog.weight != null ? '${dailyLog.weight} kg' : '—',
+                      value: dailyLog.weight != null
+                          ? '${dailyLog.weight} kg'
+                          : '—',
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -299,9 +365,13 @@ class PastDaySummarySheet extends ConsumerWidget {
                       label: 'Water',
                       value: waterHabit == null
                           ? '—'
-                          : (isHabitCompleted(waterHabit, habitCompletions, dailyLog)
-                              ? 'Done · ${waterHabit.target == waterHabit.target.roundToDouble() ? waterHabit.target.toInt() : waterHabit.target} ${waterHabit.unit.isNotEmpty ? waterHabit.unit : 'L'}'
-                              : 'Goal ${waterHabit.target == waterHabit.target.roundToDouble() ? waterHabit.target.toInt() : waterHabit.target} ${waterHabit.unit.isNotEmpty ? waterHabit.unit : 'L'}'),
+                          : (isHabitCompleted(
+                                  waterHabit,
+                                  habitCompletions,
+                                  dailyLog,
+                                )
+                                ? 'Done · ${waterHabit.target == waterHabit.target.roundToDouble() ? waterHabit.target.toInt() : waterHabit.target} ${waterHabit.unit.isNotEmpty ? waterHabit.unit : 'L'}'
+                                : 'Goal ${waterHabit.target == waterHabit.target.roundToDouble() ? waterHabit.target.toInt() : waterHabit.target} ${waterHabit.unit.isNotEmpty ? waterHabit.unit : 'L'}'),
                     ),
                   ),
                 ],
@@ -406,9 +476,17 @@ class _SummaryRow extends StatelessWidget {
               ),
             ),
             if (isDone)
-              Icon(Icons.check_circle_rounded, color: context.colors.green, size: 24)
+              Icon(
+                Icons.check_circle_rounded,
+                color: context.colors.green,
+                size: 24,
+              )
             else
-              Icon(Icons.chevron_right_rounded, color: context.colors.textLight, size: 24),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: context.colors.textLight,
+                size: 24,
+              ),
           ],
         ),
       ),

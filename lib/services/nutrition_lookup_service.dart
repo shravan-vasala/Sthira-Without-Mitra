@@ -8,7 +8,9 @@ class NutritionLookupService {
   Future<void> load() async {
     if (_isLoaded) return;
     try {
-      final jsonString = await rootBundle.loadString('assets/data/nutrition_table.json');
+      final jsonString = await rootBundle.loadString(
+        'assets/data/nutrition_table.json',
+      );
       final List<dynamic> jsonList = jsonDecode(jsonString);
       _nutritionTable = List<Map<String, dynamic>>.from(jsonList);
       _isLoaded = true;
@@ -50,12 +52,13 @@ class NutritionLookupService {
     for (var item in _nutritionTable) {
       final nameTokens = _tokenize(item['name'] as String);
       final aliases = List<String>.from(item['aliases'] ?? []);
-      
+
       bool matched = false;
       int matchedTokensCount = 0;
 
       // Check name token subset
-      if (nameTokens.isNotEmpty && nameTokens.every((t) => queryTokens.contains(t))) {
+      if (nameTokens.isNotEmpty &&
+          nameTokens.every((t) => queryTokens.contains(t))) {
         matched = true;
         matchedTokensCount = nameTokens.length;
       }
@@ -70,8 +73,11 @@ class NutritionLookupService {
           if (aliasTokens.length == 1) {
             final t = aliasTokens.first;
             // Check if query is exactly that token + neutral modifiers
-            final nonNeutralQueryTokens = queryTokens.where((qt) => !neutralModifiers.contains(qt)).toList();
-            if (nonNeutralQueryTokens.length == 1 && nonNeutralQueryTokens.first == t) {
+            final nonNeutralQueryTokens = queryTokens
+                .where((qt) => !neutralModifiers.contains(qt))
+                .toList();
+            if (nonNeutralQueryTokens.length == 1 &&
+                nonNeutralQueryTokens.first == t) {
               matched = true;
               matchedTokensCount = 1;
               break;
@@ -100,7 +106,9 @@ class NutritionLookupService {
 
     // Sort by most matched tokens wins, then longest (most specific) name
     candidates.sort((a, b) {
-      final cmp1 = (b['matchedTokensCount'] as int).compareTo(a['matchedTokensCount'] as int);
+      final cmp1 = (b['matchedTokensCount'] as int).compareTo(
+        a['matchedTokensCount'] as int,
+      );
       if (cmp1 != 0) return cmp1;
       return (b['nameLength'] as int).compareTo(a['nameLength'] as int);
     });
@@ -109,7 +117,10 @@ class NutritionLookupService {
   }
 
   List<String> _tokenize(String input) {
-    final cleaned = input.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), ' ').trim();
+    final cleaned = input
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s]'), ' ')
+        .trim();
     if (cleaned.isEmpty) return [];
     return cleaned.split(RegExp(r'\s+'));
   }

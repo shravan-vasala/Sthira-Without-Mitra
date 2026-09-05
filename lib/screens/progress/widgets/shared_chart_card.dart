@@ -84,10 +84,7 @@ class SharedChartCard extends StatelessWidget {
           GestureDetector(
             onTap: onToggleUnit,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: context.colors.lavenderCard,
                 borderRadius: BorderRadius.circular(8),
@@ -112,16 +109,13 @@ class SharedChartCard extends StatelessWidget {
         ? Center(
             child: Text(
               emptyMessage,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.colors.textLight,
-              ),
+              style: TextStyle(fontSize: 14, color: context.colors.textLight),
               textAlign: TextAlign.center,
             ),
           )
         : _useBars
-            ? _buildBarChart(context)
-            : _buildLineChart(context);
+        ? _buildBarChart(context)
+        : _buildLineChart(context);
 
     if (!expandChart) {
       chartArea = SizedBox(height: 200, child: chartArea);
@@ -250,9 +244,12 @@ class SharedChartCard extends StatelessWidget {
     return (minY, maxY);
   }
 
-  ExtraLinesData? _buildExtraLines(BuildContext context, {List<FlSpot>? spots}) {
+  ExtraLinesData? _buildExtraLines(
+    BuildContext context, {
+    List<FlSpot>? spots,
+  }) {
     final lines = <HorizontalLine>[];
-    
+
     if (targetValue != null) {
       lines.add(
         HorizontalLine(
@@ -281,44 +278,54 @@ class SharedChartCard extends StatelessWidget {
         ),
       );
     }
-    
-    if (timeFormat == ChartTimeFormat.sixMonths && spots != null && spots.isNotEmpty) {
-       final minyData = spots.map((s) => s.y).reduce(min);
-       final maxyData = spots.map((s) => s.y).reduce(max);
-       
-       lines.add(
-         HorizontalLine(
-           y: maxyData,
-           color: Colors.transparent,
-           strokeWidth: 0,
-           label: HorizontalLineLabel(
-             show: true,
-             alignment: Alignment.topLeft,
-             padding: const EdgeInsets.only(left: 4, bottom: 2),
-             style: TextStyle(fontSize: 10, color: context.colors.primary, fontWeight: FontWeight.bold),
-             labelResolver: (_) => 'Max ${maxyData.toStringAsFixed(1)}'
-           )
-         )
-       );
-       
-       if (minyData != maxyData) {
-         lines.add(
-           HorizontalLine(
-             y: minyData,
-             color: Colors.transparent,
-             strokeWidth: 0,
-             label: HorizontalLineLabel(
-               show: true,
-               alignment: Alignment.bottomRight,
-               padding: const EdgeInsets.only(right: 4, top: 2),
-               style: TextStyle(fontSize: 10, color: context.colors.red, fontWeight: FontWeight.bold),
-               labelResolver: (_) => 'Min ${minyData.toStringAsFixed(1)}'
-             )
-           )
-         );
-       }
+
+    if (timeFormat == ChartTimeFormat.sixMonths &&
+        spots != null &&
+        spots.isNotEmpty) {
+      final minyData = spots.map((s) => s.y).reduce(min);
+      final maxyData = spots.map((s) => s.y).reduce(max);
+
+      lines.add(
+        HorizontalLine(
+          y: maxyData,
+          color: Colors.transparent,
+          strokeWidth: 0,
+          label: HorizontalLineLabel(
+            show: true,
+            alignment: Alignment.topLeft,
+            padding: const EdgeInsets.only(left: 4, bottom: 2),
+            style: TextStyle(
+              fontSize: 10,
+              color: context.colors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+            labelResolver: (_) => 'Max ${maxyData.toStringAsFixed(1)}',
+          ),
+        ),
+      );
+
+      if (minyData != maxyData) {
+        lines.add(
+          HorizontalLine(
+            y: minyData,
+            color: Colors.transparent,
+            strokeWidth: 0,
+            label: HorizontalLineLabel(
+              show: true,
+              alignment: Alignment.bottomRight,
+              padding: const EdgeInsets.only(right: 4, top: 2),
+              style: TextStyle(
+                fontSize: 10,
+                color: context.colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+              labelResolver: (_) => 'Min ${minyData.toStringAsFixed(1)}',
+            ),
+          ),
+        );
+      }
     }
-    
+
     if (lines.isEmpty) return null;
     return ExtraLinesData(horizontalLines: lines);
   }
@@ -338,7 +345,8 @@ class SharedChartCard extends StatelessWidget {
     } else if (timeFormat == ChartTimeFormat.monthly) {
       // ~weekly anchors — quieter than every 5 days.
       final lastDay = DateTime(date.year, date.month + 1, 0).day;
-      final show = date.day == 1 ||
+      final show =
+          date.day == 1 ||
           date.day == 8 ||
           date.day == 15 ||
           date.day == 22 ||
@@ -357,10 +365,7 @@ class SharedChartCard extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 10,
-          color: context.colors.textLight,
-        ),
+        style: TextStyle(fontSize: 10, color: context.colors.textLight),
       ),
     );
   }
@@ -382,10 +387,7 @@ class SharedChartCard extends StatelessWidget {
 
     return Text(
       label,
-      style: TextStyle(
-        fontSize: 10,
-        color: context.colors.textLight,
-      ),
+      style: TextStyle(fontSize: 10, color: context.colors.textLight),
     );
   }
 
@@ -419,8 +421,7 @@ class SharedChartCard extends StatelessWidget {
     if (targetValue != null) {
       final diff = value - targetValue!;
       final sign = diff >= 0 ? '+' : '';
-      extra =
-          '\n$sign${diff.toStringAsFixed(_isCount ? 0 : 1)}$unit vs goal';
+      extra = '\n$sign${diff.toStringAsFixed(_isCount ? 0 : 1)}$unit vs goal';
     }
     return '$dateStr\n$valStr$unit$extra';
   }
@@ -454,10 +455,10 @@ class SharedChartCard extends StatelessWidget {
     final barWidth = daySpan <= 7
         ? 14.0
         : daySpan <= 31
-            ? 6.0
-            : daySpan <= 90
-                ? 3.0
-                : 1.2;
+        ? 6.0
+        : daySpan <= 90
+        ? 3.0
+        : 1.2;
 
     // One group per calendar day so missing days stay as visual gaps.
     final groups = <BarChartGroupData>[
@@ -468,20 +469,15 @@ class SharedChartCard extends StatelessWidget {
             BarChartRodData(
               toY: byDay[x] ?? 0,
               width: barWidth,
-              borderRadius: byDay.containsKey(x) 
+              borderRadius: byDay.containsKey(x)
                   ? const BorderRadius.vertical(top: Radius.circular(4))
                   : BorderRadius.zero,
-              color: byDay.containsKey(x)
-                  ? primary
-                  : Colors.transparent,
+              color: byDay.containsKey(x) ? primary : Colors.transparent,
               gradient: byDay.containsKey(x)
                   ? LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
-                      colors: [
-                        primary.withValues(alpha: 0.55),
-                        primary,
-                      ],
+                      colors: [primary.withValues(alpha: 0.55), primary],
                     )
                   : null,
             ),
@@ -535,10 +531,8 @@ class SharedChartCard extends StatelessWidget {
     final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
     final spots = sorted
         .map(
-          (d) => FlSpot(
-            d.date.difference(startDate).inDays.toDouble(),
-            d.value,
-          ),
+          (d) =>
+              FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value),
         )
         .toList();
 
@@ -555,36 +549,57 @@ class SharedChartCard extends StatelessWidget {
           spots: segment,
           isCurved: useCurve && segment.length > 2,
           curveSmoothness: spots.length > 31 ? 0.40 : 0.25,
-          preventCurveOverShooting: spots.length <= 31, // Disable clamping on dense graphs for smoother waves
+          preventCurveOverShooting:
+              spots.length <=
+              31, // Disable clamping on dense graphs for smoother waves
           color: primary,
-          barWidth: spots.length > 31 ? 1.5 : 2.5, // Thinner line for dense data
+          barWidth: spots.length > 31
+              ? 1.5
+              : 2.5, // Thinner line for dense data
           isStrokeCapRound: true,
           dotData: FlDotData(
             show: true,
             checkToShowDot: (spot, barData) {
               if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
-                 final minyData = spots.map((s) => s.y).reduce(min);
-                 final maxyData = spots.map((s) => s.y).reduce(max);
-                 if (spot.y == minyData || spot.y == maxyData || spot.x == barData.spots.last.x) {
-                    return true;
-                 }
-                 return false;
+                final minyData = spots.map((s) => s.y).reduce(min);
+                final maxyData = spots.map((s) => s.y).reduce(max);
+                if (spot.y == minyData ||
+                    spot.y == maxyData ||
+                    spot.x == barData.spots.last.x) {
+                  return true;
+                }
+                return false;
               }
               return showDots || segment.length == 1;
             },
             getDotPainter: (spot, percent, bar, index) {
               if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
-                 final minyData = spots.map((s) => s.y).reduce(min);
-                 final maxyData = spots.map((s) => s.y).reduce(max);
-                 if (spot.y == minyData && spot.y != maxyData) {
-                    return FlDotCirclePainter(radius: 4.5, color: context.colors.red, strokeWidth: 1.5, strokeColor: context.colors.card);
-                 }
-                 if (spot.y == maxyData) {
-                    return FlDotCirclePainter(radius: 4.5, color: context.colors.primary, strokeWidth: 1.5, strokeColor: context.colors.card);
-                 }
-                 if (spot.x == bar.spots.last.x) {
-                    return FlDotCirclePainter(radius: 4.5, color: context.colors.primary, strokeWidth: 1.5, strokeColor: context.colors.card);
-                 }
+                final minyData = spots.map((s) => s.y).reduce(min);
+                final maxyData = spots.map((s) => s.y).reduce(max);
+                if (spot.y == minyData && spot.y != maxyData) {
+                  return FlDotCirclePainter(
+                    radius: 4.5,
+                    color: context.colors.red,
+                    strokeWidth: 1.5,
+                    strokeColor: context.colors.card,
+                  );
+                }
+                if (spot.y == maxyData) {
+                  return FlDotCirclePainter(
+                    radius: 4.5,
+                    color: context.colors.primary,
+                    strokeWidth: 1.5,
+                    strokeColor: context.colors.card,
+                  );
+                }
+                if (spot.x == bar.spots.last.x) {
+                  return FlDotCirclePainter(
+                    radius: 4.5,
+                    color: context.colors.primary,
+                    strokeWidth: 1.5,
+                    strokeColor: context.colors.card,
+                  );
+                }
               }
               return FlDotCirclePainter(
                 radius: 3.5,
@@ -600,14 +615,14 @@ class SharedChartCard extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: timeFormat == ChartTimeFormat.sixMonths
-                ? [
-                    primary.withValues(alpha: 0.65),
-                    primary.withValues(alpha: 0.05),
-                  ]
-                : [
-                    primary.withValues(alpha: 0.22),
-                    primary.withValues(alpha: 0.0),
-                  ],
+                  ? [
+                      primary.withValues(alpha: 0.65),
+                      primary.withValues(alpha: 0.05),
+                    ]
+                  : [
+                      primary.withValues(alpha: 0.22),
+                      primary.withValues(alpha: 0.0),
+                    ],
             ),
           ),
         ),
@@ -669,4 +684,3 @@ class SharedChartCard extends StatelessWidget {
     );
   }
 }
-

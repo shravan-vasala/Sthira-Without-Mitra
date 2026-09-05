@@ -36,10 +36,7 @@ class AvatarPickerSheet extends StatelessWidget {
           children: [
             const Text(
               'Choose an Avatar',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -63,7 +60,9 @@ class AvatarPickerSheet extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.3),
                               width: 2,
                             ),
                             image: DecorationImage(

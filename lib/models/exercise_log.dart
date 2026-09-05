@@ -6,7 +6,11 @@ part 'exercise_log.g.dart';
 class ExerciseLog {
   Id id = Isar.autoIncrement;
 
-  @Index(composite: [CompositeIndex('exerciseName')], unique: true, replace: true)
+  @Index(
+    composite: [CompositeIndex('exerciseName')],
+    unique: true,
+    replace: true,
+  )
   final String date;
   final String exerciseName;
   final List<SetLog> sets;
@@ -21,7 +25,8 @@ class ExerciseLog {
     return ExerciseLog(
       date: json['date'] as String,
       exerciseName: json['exerciseName'] as String,
-      sets: (json['sets'] as List?)
+      sets:
+          (json['sets'] as List?)
               ?.map((s) => SetLog.fromJson(s as Map<String, dynamic>))
               .toList() ??
           [],
@@ -29,17 +34,19 @@ class ExerciseLog {
   }
 
   Map<String, dynamic> toJson() => {
-        'date': date,
-        'exerciseName': exerciseName,
-        'sets': sets.map((s) => s.toJson()).toList(),
-      };
+    'date': date,
+    'exerciseName': exerciseName,
+    'sets': sets.map((s) => s.toJson()).toList(),
+  };
 
-  double get maxWeight =>
-      sets.isEmpty ? 0 : sets.map((s) => s.weight ?? 0.0).reduce((a, b) => a > b ? a : b);
+  double get maxWeight => sets.isEmpty
+      ? 0
+      : sets.map((s) => s.weight ?? 0.0).reduce((a, b) => a > b ? a : b);
 
   int get totalReps => sets.fold(0, (sum, s) => sum + (s.reps ?? 0));
 
-  double get totalVolume => sets.fold(0.0, (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)));
+  double get totalVolume =>
+      sets.fold(0.0, (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)));
 
   String get key => '${date}_$exerciseName';
 }
@@ -50,11 +57,7 @@ class SetLog {
   int? reps;
   double? weight;
 
-  SetLog({
-    this.setNumber,
-    this.reps,
-    this.weight = 0,
-  });
+  SetLog({this.setNumber, this.reps, this.weight = 0});
 
   factory SetLog.fromJson(Map<String, dynamic> json) {
     return SetLog(
@@ -65,8 +68,8 @@ class SetLog {
   }
 
   Map<String, dynamic> toJson() => {
-        'setNumber': setNumber,
-        'reps': reps,
-        'weight': weight,
-      };
+    'setNumber': setNumber,
+    'reps': reps,
+    'weight': weight,
+  };
 }

@@ -11,7 +11,11 @@ class RemindersScreen extends ConsumerStatefulWidget {
 }
 
 class _RemindersScreenState extends ConsumerState<RemindersScreen> {
-  Future<void> _pickTime(BuildContext context, TimeOfDay initialTime, Function(TimeOfDay) onPicked) async {
+  Future<void> _pickTime(
+    BuildContext context,
+    TimeOfDay initialTime,
+    Function(TimeOfDay) onPicked,
+  ) async {
     final parentTheme = Theme.of(context);
     final picked = await showTimePicker(
       context: context,
@@ -36,7 +40,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
   }
 
   String _formatTime(TimeOfDay time) {
-    final hour = time.hour == 0 ? 12 : (time.hour > 12 ? time.hour - 12 : time.hour);
+    final hour = time.hour == 0
+        ? 12
+        : (time.hour > 12 ? time.hour - 12 : time.hour);
     final period = time.hour >= 12 ? 'PM' : 'AM';
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute $period';
@@ -64,14 +70,18 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             subtitle: 'Remind me to log my habits',
             value: config.habitsEnabled,
             onChanged: (val) {
-              ref.read(remindersProvider.notifier).updateConfig(config.copyWith(habitsEnabled: val));
+              ref
+                  .read(remindersProvider.notifier)
+                  .updateConfig(config.copyWith(habitsEnabled: val));
             },
             child: config.habitsEnabled
                 ? _buildTimeSelector(
                     label: 'Time',
                     time: config.habitTime,
                     onTap: () => _pickTime(context, config.habitTime, (t) {
-                      ref.read(remindersProvider.notifier).updateConfig(config.copyWith(habitTime: t));
+                      ref
+                          .read(remindersProvider.notifier)
+                          .updateConfig(config.copyWith(habitTime: t));
                     }),
                   )
                 : null,
@@ -83,14 +93,18 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             subtitle: 'Remind me on scheduled workout days',
             value: config.workoutsEnabled,
             onChanged: (val) {
-              ref.read(remindersProvider.notifier).updateConfig(config.copyWith(workoutsEnabled: val));
+              ref
+                  .read(remindersProvider.notifier)
+                  .updateConfig(config.copyWith(workoutsEnabled: val));
             },
             child: config.workoutsEnabled
                 ? _buildTimeSelector(
                     label: 'Time',
                     time: config.workoutTime,
                     onTap: () => _pickTime(context, config.workoutTime, (t) {
-                      ref.read(remindersProvider.notifier).updateConfig(config.copyWith(workoutTime: t));
+                      ref
+                          .read(remindersProvider.notifier)
+                          .updateConfig(config.copyWith(workoutTime: t));
                     }),
                   )
                 : null,
@@ -102,7 +116,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             subtitle: 'Remind me to track lunch and dinner',
             value: config.mealsEnabled,
             onChanged: (val) {
-              ref.read(remindersProvider.notifier).updateConfig(config.copyWith(mealsEnabled: val));
+              ref
+                  .read(remindersProvider.notifier)
+                  .updateConfig(config.copyWith(mealsEnabled: val));
             },
             child: config.mealsEnabled
                 ? Column(
@@ -111,7 +127,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                         label: 'Lunch Time',
                         time: config.lunchTime,
                         onTap: () => _pickTime(context, config.lunchTime, (t) {
-                          ref.read(remindersProvider.notifier).updateConfig(config.copyWith(lunchTime: t));
+                          ref
+                              .read(remindersProvider.notifier)
+                              .updateConfig(config.copyWith(lunchTime: t));
                         }),
                       ),
                       const SizedBox(height: 8),
@@ -119,7 +137,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                         label: 'Dinner Time',
                         time: config.dinnerTime,
                         onTap: () => _pickTime(context, config.dinnerTime, (t) {
-                          ref.read(remindersProvider.notifier).updateConfig(config.copyWith(dinnerTime: t));
+                          ref
+                              .read(remindersProvider.notifier)
+                              .updateConfig(config.copyWith(dinnerTime: t));
                         }),
                       ),
                     ],
@@ -133,7 +153,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             subtitle: 'Remind me to export my data securely',
             value: config.backupEnabled,
             onChanged: (val) {
-              ref.read(remindersProvider.notifier).updateConfig(config.copyWith(backupEnabled: val));
+              ref
+                  .read(remindersProvider.notifier)
+                  .updateConfig(config.copyWith(backupEnabled: val));
             },
             child: config.backupEnabled
                 ? Column(
@@ -141,23 +163,57 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Day of Week', style: TextStyle(fontSize: 14, color: context.colors.textDark)),
+                          Text(
+                            'Day of Week',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: context.colors.textDark,
+                            ),
+                          ),
                           DropdownButton<int>(
                             value: config.backupDayOfWeek,
                             underline: const SizedBox(),
-                            icon: Icon(Icons.arrow_drop_down, color: context.colors.primary),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: context.colors.primary,
+                            ),
                             items: [
-                              const DropdownMenuItem(value: DateTime.monday, child: Text('Monday')),
-                              const DropdownMenuItem(value: DateTime.tuesday, child: Text('Tuesday')),
-                              const DropdownMenuItem(value: DateTime.wednesday, child: Text('Wednesday')),
-                              const DropdownMenuItem(value: DateTime.thursday, child: Text('Thursday')),
-                              const DropdownMenuItem(value: DateTime.friday, child: Text('Friday')),
-                              const DropdownMenuItem(value: DateTime.saturday, child: Text('Saturday')),
-                              const DropdownMenuItem(value: DateTime.sunday, child: Text('Sunday')),
+                              const DropdownMenuItem(
+                                value: DateTime.monday,
+                                child: Text('Monday'),
+                              ),
+                              const DropdownMenuItem(
+                                value: DateTime.tuesday,
+                                child: Text('Tuesday'),
+                              ),
+                              const DropdownMenuItem(
+                                value: DateTime.wednesday,
+                                child: Text('Wednesday'),
+                              ),
+                              const DropdownMenuItem(
+                                value: DateTime.thursday,
+                                child: Text('Thursday'),
+                              ),
+                              const DropdownMenuItem(
+                                value: DateTime.friday,
+                                child: Text('Friday'),
+                              ),
+                              const DropdownMenuItem(
+                                value: DateTime.saturday,
+                                child: Text('Saturday'),
+                              ),
+                              const DropdownMenuItem(
+                                value: DateTime.sunday,
+                                child: Text('Sunday'),
+                              ),
                             ],
                             onChanged: (val) {
                               if (val != null) {
-                                ref.read(remindersProvider.notifier).updateConfig(config.copyWith(backupDayOfWeek: val));
+                                ref
+                                    .read(remindersProvider.notifier)
+                                    .updateConfig(
+                                      config.copyWith(backupDayOfWeek: val),
+                                    );
                               }
                             },
                           ),
@@ -168,7 +224,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                         label: 'Time',
                         time: config.backupTime,
                         onTap: () => _pickTime(context, config.backupTime, (t) {
-                          ref.read(remindersProvider.notifier).updateConfig(config.copyWith(backupTime: t));
+                          ref
+                              .read(remindersProvider.notifier)
+                              .updateConfig(config.copyWith(backupTime: t));
                         }),
                       ),
                     ],
@@ -218,9 +276,22 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: context.colors.textDark,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(subtitle, style: TextStyle(fontSize: 13, color: context.colors.textMedium)),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: context.colors.textMedium,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -243,7 +314,11 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     );
   }
 
-  Widget _buildTimeSelector({required String label, required TimeOfDay time, required VoidCallback onTap}) {
+  Widget _buildTimeSelector({
+    required String label,
+    required TimeOfDay time,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -251,7 +326,10 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: TextStyle(fontSize: 14, color: context.colors.textDark)),
+            Text(
+              label,
+              style: TextStyle(fontSize: 14, color: context.colors.textDark),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(

@@ -11,18 +11,10 @@ class CoachNote {
   final String note;
   final bool isAi;
 
-  CoachNote({
-    required this.date,
-    required this.note,
-    required this.isAi,
-  });
+  CoachNote({required this.date, required this.note, required this.isAi});
 
   Map<String, dynamic> toJson() {
-    return {
-      'date': date,
-      'note': note,
-      'isAi': isAi,
-    };
+    return {'date': date, 'note': note, 'isAi': isAi};
   }
 
   factory CoachNote.fromJson(Map<String, dynamic> json) {

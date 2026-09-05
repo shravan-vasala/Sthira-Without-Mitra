@@ -41,8 +41,9 @@ class MealPlanComplete {
     final fat = profile.targetFatG * share;
 
     final items = planned.items.map((item) {
-      final itemShare =
-          planned.calories > 0 ? (item.calories ?? 0.0) / planned.calories : 0.0;
+      final itemShare = planned.calories > 0
+          ? (item.calories ?? 0.0) / planned.calories
+          : 0.0;
       return MealItemLog(
         name: item.name,
         portion: item.quantity,

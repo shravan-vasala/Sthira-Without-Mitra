@@ -16,7 +16,8 @@ class PrCalculationResult {
     this.isNew1RM = false,
   });
 
-  bool get hasAnyNewPr => isNewMaxWeight || isNewMaxReps || isNewMaxVolume || isNew1RM;
+  bool get hasAnyNewPr =>
+      isNewMaxWeight || isNewMaxReps || isNewMaxVolume || isNew1RM;
 }
 
 class PrCalculator {
@@ -27,7 +28,10 @@ class PrCalculator {
     return weight * (1 + reps / 30);
   }
 
-  static PrCalculationResult calculateNewPr(ExerciseLog log, ExercisePr? currentPr) {
+  static PrCalculationResult calculateNewPr(
+    ExerciseLog log,
+    ExercisePr? currentPr,
+  ) {
     final pr = currentPr ?? ExercisePr(exerciseName: log.exerciseName);
 
     bool newMaxWeight = false;
@@ -37,10 +41,10 @@ class PrCalculator {
 
     double maxWeight = pr.maxWeight;
     int maxWeightReps = pr.maxWeightReps;
-    
+
     int maxReps = pr.maxReps;
     double maxRepsWeight = pr.maxRepsWeight;
-    
+
     double estimated1RM = pr.estimated1RM;
 
     for (final set in log.sets) {

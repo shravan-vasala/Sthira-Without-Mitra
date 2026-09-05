@@ -38,8 +38,9 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.updateSteps(state.date, steps, source: source ?? 'manual');
     state = repo.getOrCreate(state.date);
     WidgetUpdateService.pushWidgetState(ref);
-    ref.read(stepsSourceProvider.notifier).state = 
-        (source == 'healthConnect') ? StepsSource.healthConnect : StepsSource.manual;
+    ref.read(stepsSourceProvider.notifier).state = (source == 'healthConnect')
+        ? StepsSource.healthConnect
+        : StepsSource.manual;
   }
 
   Future<void> updateSleep(double hours, {String? source}) async {
@@ -65,7 +66,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.clearSleep(state.date);
     state = repo.getOrCreate(state.date);
     WidgetUpdateService.pushWidgetState(ref);
-    
+
     final habitRepo = ref.read(habitRepoProvider);
     final allHabits = habitRepo.getHabits();
     for (final habit in allHabits.where((h) => h.type == HabitType.autoSleep)) {
@@ -107,10 +108,14 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     if (profile.planStartDate == null) {
       final now = DateTime.now();
       // ignore: unawaited_futures
-      ref.read(profileProvider.notifier).updateProfile(profile.copyWith(
-        planStartDate: DateTime(now.year, now.month, now.day),
-        currentPhaseWeek: 1,
-      ));
+      ref
+          .read(profileProvider.notifier)
+          .updateProfile(
+            profile.copyWith(
+              planStartDate: DateTime(now.year, now.month, now.day),
+              currentPhaseWeek: 1,
+            ),
+          );
     }
   }
 }
@@ -121,7 +126,6 @@ final dailyLogProvider = NotifierProvider<DailyLogNotifier, DailyLog>(() {
 
 final dailyLogsRangeProvider =
     Provider.family<List<DailyLog>, (String, String)>((ref, range) {
-  final (start, end) = range;
-  return ref.watch(dailyLogRepoProvider).getLogsInRange(start, end);
-});
-
+      final (start, end) = range;
+      return ref.watch(dailyLogRepoProvider).getLogsInRange(start, end);
+    });

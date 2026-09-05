@@ -48,24 +48,26 @@ class DailyLog {
       workoutDayId: json['workoutDayId'] as String?,
       waterMl: json['waterMl'] as int?,
       screenTimeMinutes: json['screenTimeMinutes'] as int?,
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'])
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'date': date,
-        if (weight != null) 'weight': weight,
-        if (steps != null) 'steps': steps,
-        if (stepsSource != null) 'stepsSource': stepsSource,
-        if (sleepHours != null) 'sleepHours': sleepHours,
-        if (sleepSource != null) 'sleepSource': sleepSource,
-        if (bodyFat != null) 'bodyFat': bodyFat,
-        'workoutCompleted': workoutCompleted,
-        if (workoutDayId != null) 'workoutDayId': workoutDayId,
-        if (waterMl != null) 'waterMl': waterMl,
-        if (screenTimeMinutes != null) 'screenTimeMinutes': screenTimeMinutes,
-        if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
-      };
+    'date': date,
+    if (weight != null) 'weight': weight,
+    if (steps != null) 'steps': steps,
+    if (stepsSource != null) 'stepsSource': stepsSource,
+    if (sleepHours != null) 'sleepHours': sleepHours,
+    if (sleepSource != null) 'sleepSource': sleepSource,
+    if (bodyFat != null) 'bodyFat': bodyFat,
+    'workoutCompleted': workoutCompleted,
+    if (workoutDayId != null) 'workoutDayId': workoutDayId,
+    if (waterMl != null) 'waterMl': waterMl,
+    if (screenTimeMinutes != null) 'screenTimeMinutes': screenTimeMinutes,
+    if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+  };
 
   DailyLog copyWith({
     double? weight,
@@ -188,4 +190,3 @@ class DailyLog {
       workoutCompleted ||
       screenTimeMinutes != null;
 }
-

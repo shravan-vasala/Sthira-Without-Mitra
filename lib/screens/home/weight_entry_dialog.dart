@@ -31,8 +31,9 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     final start = end.subtract(const Duration(days: 90));
     String fmt(DateTime d) =>
         '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-    final logs =
-        ref.read(dailyLogRepoProvider).getLogsInRange(fmt(start), fmt(end));
+    final logs = ref
+        .read(dailyLogRepoProvider)
+        .getLogsInRange(fmt(start), fmt(end));
     for (int i = logs.length - 1; i >= 0; i--) {
       final w = logs[i].weight;
       if (w != null) {
@@ -82,8 +83,10 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
                 fontWeight: FontWeight.w600,
                 color: context.colors.textMedium,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 18,
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -104,5 +107,3 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     );
   }
 }
-
-

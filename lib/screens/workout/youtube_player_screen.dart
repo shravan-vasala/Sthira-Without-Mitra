@@ -91,10 +91,16 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                     backgroundColor: Colors.black,
                     title: Text(
                       'Exercise Video',
-                      style: TextStyle(color: context.colors.white, fontSize: 16),
+                      style: TextStyle(
+                        color: context.colors.white,
+                        fontSize: 16,
+                      ),
                     ),
                     leading: IconButton(
-                      icon: Icon(Icons.arrow_back_ios_rounded, color: context.colors.white),
+                      icon: Icon(
+                        Icons.arrow_back_ios_rounded,
+                        color: context.colors.white,
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -131,7 +137,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                           Text(
                             widget.subtitle,
                             style: TextStyle(
-                              color: context.colors.white.withValues(alpha: 0.6),
+                              color: context.colors.white.withValues(
+                                alpha: 0.6,
+                              ),
                               fontSize: 14,
                             ),
                           ),
@@ -141,7 +149,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                           Text(
                             'Reps: ${widget.reps}',
                             style: TextStyle(
-                              color: context.colors.white.withValues(alpha: 0.7),
+                              color: context.colors.white.withValues(
+                                alpha: 0.7,
+                              ),
                               fontSize: 16,
                             ),
                           ),
@@ -150,14 +160,24 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                           alignment: Alignment.centerLeft,
                           child: TextButton.icon(
                             onPressed: () => _controller.enterFullScreen(),
-                            icon: Icon(Icons.fullscreen, color: context.colors.primary),
+                            icon: Icon(
+                              Icons.fullscreen,
+                              color: context.colors.primary,
+                            ),
                             label: Text(
                               'Enter Fullscreen',
-                              style: TextStyle(color: context.colors.primary, fontSize: 16),
+                              style: TextStyle(
+                                color: context.colors.primary,
+                                fontSize: 16,
+                              ),
                             ),
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                              backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              backgroundColor: context.colors.primary
+                                  .withValues(alpha: 0.1),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

@@ -5,7 +5,11 @@ import '../../../theme/app_theme.dart';
 import '../../../providers/app_providers.dart';
 
 class RestTimerLabel extends ConsumerWidget {
-  const RestTimerLabel({super.key, required this.seconds, required this.exerciseName});
+  const RestTimerLabel({
+    super.key,
+    required this.seconds,
+    required this.exerciseName,
+  });
 
   final int seconds;
   final String exerciseName;
@@ -15,9 +19,9 @@ class RestTimerLabel extends ConsumerWidget {
     if (seconds <= 0) return const SizedBox.shrink();
 
     final timerState = ref.watch(restTimerProvider);
-    final isActive = timerState.isActive && timerState.exerciseName == exerciseName;
+    final isActive =
+        timerState.isActive && timerState.exerciseName == exerciseName;
     final displaySeconds = isActive ? timerState.remainingSeconds : seconds;
-
 
     final display = displaySeconds >= 60
         ? '${displaySeconds ~/ 60} MIN${displaySeconds % 60 > 0 ? ' ${displaySeconds % 60} SEC' : ''}'
@@ -28,7 +32,10 @@ class RestTimerLabel extends ConsumerWidget {
       child: Row(
         children: [
           Expanded(
-            child: Container(height: 1, color: isActive ? context.colors.orange : context.colors.border),
+            child: Container(
+              height: 1,
+              color: isActive ? context.colors.orange : context.colors.border,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -38,16 +45,22 @@ class RestTimerLabel extends ConsumerWidget {
                 Icon(
                   Icons.timer_outlined,
                   size: 14,
-                  color: isActive ? context.colors.orange : context.colors.textLight,
+                  color: isActive
+                      ? context.colors.orange
+                      : context.colors.textLight,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  isActive ? 'RESTING FOR $display' : 'REST FOR $display AFTER SET',
+                  isActive
+                      ? 'RESTING FOR $display'
+                      : 'REST FOR $display AFTER SET',
                   style: AppTheme.numeric(
                     TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: isActive ? context.colors.orange : context.colors.textLight,
+                      color: isActive
+                          ? context.colors.orange
+                          : context.colors.textLight,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -56,7 +69,10 @@ class RestTimerLabel extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: Container(height: 1, color: isActive ? context.colors.orange : context.colors.border),
+            child: Container(
+              height: 1,
+              color: isActive ? context.colors.orange : context.colors.border,
+            ),
           ),
         ],
       ),

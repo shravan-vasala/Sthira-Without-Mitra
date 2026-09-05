@@ -4,7 +4,15 @@ import 'daily_log.dart';
 
 part 'habit.g.dart';
 
-enum HabitType { checkbox, counter, autoSteps, autoSleep, autoFromScreenTime, timer }
+enum HabitType {
+  checkbox,
+  counter,
+  autoSteps,
+  autoSleep,
+  autoFromScreenTime,
+  timer,
+}
+
 enum GoalDirection { atLeast, atMost }
 
 @collection
@@ -67,18 +75,18 @@ class Habit {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'icon': icon,
-        'type': type.name,
-        'unit': unit,
-        'target': target,
-        'step': step,
-        'createdAt': createdAt.toIso8601String(),
-        'order': order,
-        'goalDirection': goalDirection.name,
-        if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'icon': icon,
+    'type': type.name,
+    'unit': unit,
+    'target': target,
+    'step': step,
+    'createdAt': createdAt.toIso8601String(),
+    'order': order,
+    'goalDirection': goalDirection.name,
+    if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+  };
 
   Habit copyWith({
     String? name,
@@ -108,33 +116,36 @@ class Habit {
 
   static List<Habit> defaults = [
     Habit(
-        id: 'sleep',
-        name: 'Sleep 8 hours',
-        icon: 'bedtime',
-        type: HabitType.autoSleep,
-        unit: 'hours',
-        target: 8.0,
-        initialCreatedAt: DateTime.parse('2020-01-01'),
-        order: 0),
+      id: 'sleep',
+      name: 'Sleep 8 hours',
+      icon: 'bedtime',
+      type: HabitType.autoSleep,
+      unit: 'hours',
+      target: 8.0,
+      initialCreatedAt: DateTime.parse('2020-01-01'),
+      order: 0,
+    ),
     Habit(
-        id: 'walk',
-        name: 'Walk 8000 steps',
-        icon: 'walk',
-        type: HabitType.autoSteps,
-        unit: 'steps',
-        target: 8000.0,
-        initialCreatedAt: DateTime.parse('2020-01-01'),
-        order: 1),
+      id: 'walk',
+      name: 'Walk 8000 steps',
+      icon: 'walk',
+      type: HabitType.autoSteps,
+      unit: 'steps',
+      target: 8000.0,
+      initialCreatedAt: DateTime.parse('2020-01-01'),
+      order: 1,
+    ),
     Habit(
-        id: 'water',
-        name: 'Drink 3 L of water',
-        icon: 'water',
-        type: HabitType.checkbox,
-        unit: 'L',
-        target: 3.0,
-        step: 1.0,
-        initialCreatedAt: DateTime.parse('2020-01-01'),
-        order: 2),
+      id: 'water',
+      name: 'Drink 3 L of water',
+      icon: 'water',
+      type: HabitType.checkbox,
+      unit: 'L',
+      target: 3.0,
+      step: 1.0,
+      initialCreatedAt: DateTime.parse('2020-01-01'),
+      order: 2,
+    ),
   ];
 }
 
@@ -151,7 +162,7 @@ class HabitCompletion {
   final Map<String, String> overrides; // habitId -> 'done', 'notDone'
   @ignore
   final Map<String, int> streaks; // habitId -> current streak including this day
-  
+
   final DateTime? updatedAt;
 
   String get isarCompletions => jsonEncode(completions);
@@ -163,13 +174,17 @@ class HabitCompletion {
   String get isarOverrides => jsonEncode(overrides);
   set isarOverrides(String json) {
     overrides.clear();
-    overrides.addAll((jsonDecode(json) as Map<String, dynamic>).cast<String, String>());
+    overrides.addAll(
+      (jsonDecode(json) as Map<String, dynamic>).cast<String, String>(),
+    );
   }
 
   String get isarStreaks => jsonEncode(streaks);
   set isarStreaks(String json) {
     streaks.clear();
-    streaks.addAll((jsonDecode(json) as Map<String, dynamic>).cast<String, int>());
+    streaks.addAll(
+      (jsonDecode(json) as Map<String, dynamic>).cast<String, int>(),
+    );
   }
 
   HabitCompletion({
@@ -207,18 +222,30 @@ class HabitCompletion {
     final newCompletions = Map<String, dynamic>.from(completions);
     final current = newCompletions[habitId];
     newCompletions[habitId] = current is bool ? !current : true;
-    return HabitCompletion(date: date, completions: newCompletions, overrides: overrides, streaks: streaks, updatedAt: DateTime.now());
+    return HabitCompletion(
+      date: date,
+      completions: newCompletions,
+      overrides: overrides,
+      streaks: streaks,
+      updatedAt: DateTime.now(),
+    );
   }
 
   HabitCompletion updateProgress(String habitId, double progress) {
     final newCompletions = Map<String, dynamic>.from(completions);
     newCompletions[habitId] = progress;
-    // Clearing override if the user manually uses +/- buttons 
+    // Clearing override if the user manually uses +/- buttons
     // to return to normal tracking.
     final newOverrides = Map<String, String>.from(overrides);
     newOverrides.remove(habitId);
-    
-    return HabitCompletion(date: date, completions: newCompletions, overrides: newOverrides, streaks: streaks, updatedAt: DateTime.now());
+
+    return HabitCompletion(
+      date: date,
+      completions: newCompletions,
+      overrides: newOverrides,
+      streaks: streaks,
+      updatedAt: DateTime.now(),
+    );
   }
 
   HabitCompletion setOverride(String habitId, String? overrideValue) {
@@ -228,27 +255,42 @@ class HabitCompletion {
     } else {
       newOverrides[habitId] = overrideValue;
     }
-    return HabitCompletion(date: date, completions: completions, overrides: newOverrides, streaks: streaks, updatedAt: DateTime.now());
+    return HabitCompletion(
+      date: date,
+      completions: completions,
+      overrides: newOverrides,
+      streaks: streaks,
+      updatedAt: DateTime.now(),
+    );
   }
 
   HabitCompletion updateStreak(String habitId, int streak) {
     final newStreaks = Map<String, int>.from(streaks);
     newStreaks[habitId] = streak;
-    return HabitCompletion(date: date, completions: completions, overrides: overrides, streaks: newStreaks, updatedAt: DateTime.now());
+    return HabitCompletion(
+      date: date,
+      completions: completions,
+      overrides: overrides,
+      streaks: newStreaks,
+      updatedAt: DateTime.now(),
+    );
   }
 
   factory HabitCompletion.fromJson(Map<String, dynamic> json) {
     return HabitCompletion(
       date: json['date'] as String,
-      completions: (json['completions'] as Map<String, dynamic>?)?.map(
+      completions:
+          (json['completions'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, v),
           ) ??
           {},
-      overrides: (json['overrides'] as Map<String, dynamic>?)?.map(
+      overrides:
+          (json['overrides'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, v as String),
           ) ??
           {},
-      streaks: (json['streaks'] as Map<String, dynamic>?)?.map(
+      streaks:
+          (json['streaks'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, (v as num).toInt()),
           ) ??
           {},
@@ -259,16 +301,20 @@ class HabitCompletion {
   }
 
   Map<String, dynamic> toJson() => {
-        'date': date,
-        'completions': completions,
-        'overrides': overrides,
-        'streaks': streaks,
-        if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
-      };
+    'date': date,
+    'completions': completions,
+    'overrides': overrides,
+    'streaks': streaks,
+    if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+  };
 }
 
 // Helpers
-double getHabitProgress(Habit habit, HabitCompletion completions, DailyLog dailyLog) {
+double getHabitProgress(
+  Habit habit,
+  HabitCompletion completions,
+  DailyLog dailyLog,
+) {
   final override = completions.overrides[habit.id];
   if (override == 'done') return habit.target;
   if (override == 'notDone') return 0.0;
@@ -287,7 +333,11 @@ double getHabitProgress(Habit habit, HabitCompletion completions, DailyLog daily
   }
 }
 
-bool isHabitCompleted(Habit habit, HabitCompletion completions, DailyLog dailyLog) {
+bool isHabitCompleted(
+  Habit habit,
+  HabitCompletion completions,
+  DailyLog dailyLog,
+) {
   final override = completions.overrides[habit.id];
   if (override == 'done') return true;
   if (override == 'notDone') return false;
@@ -300,10 +350,10 @@ bool isHabitCompleted(Habit habit, HabitCompletion completions, DailyLog dailyLo
     // For screen time, if we don't have any data yet, we can't assume it's completed correctly
     // or maybe it starts at 0 and goes up. The specs say:
     // "today's value is partial... an atMost habit shows as not yet complete during the day and resolves at the first sync after midnight."
-    // We will just evaluate it strictly. If it exceeds target, it's false. 
+    // We will just evaluate it strictly. If it exceeds target, it's false.
     // Wait, the logic for 'not yet complete during the day' means we need to know if the day is over.
-    // For simplicity, we just evaluate it as progress <= target, BUT usually atMost habits 
-    // are only confirmed done at end of day. For now, we return progress <= target, 
+    // For simplicity, we just evaluate it as progress <= target, BUT usually atMost habits
+    // are only confirmed done at end of day. For now, we return progress <= target,
     // and UI can decide to show 'so far'.
     return progress <= habit.target;
   }

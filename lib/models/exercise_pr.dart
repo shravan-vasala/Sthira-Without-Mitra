@@ -38,14 +38,14 @@ class ExercisePr {
   }
 
   Map<String, dynamic> toJson() => {
-        'exerciseName': exerciseName,
-        'maxWeight': maxWeight,
-        'maxWeightReps': maxWeightReps,
-        'maxReps': maxReps,
-        'maxRepsWeight': maxRepsWeight,
-        'estimated1RM': estimated1RM,
-        'maxVolume': maxVolume,
-      };
+    'exerciseName': exerciseName,
+    'maxWeight': maxWeight,
+    'maxWeightReps': maxWeightReps,
+    'maxReps': maxReps,
+    'maxRepsWeight': maxRepsWeight,
+    'estimated1RM': estimated1RM,
+    'maxVolume': maxVolume,
+  };
 
   ExercisePr copyWith({
     String? exerciseName,

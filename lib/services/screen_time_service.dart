@@ -9,7 +9,9 @@ final screenTimeServiceProvider = Provider<ScreenTimeService>((ref) {
 });
 
 class ScreenTimeService {
-  static const MethodChannel _channel = MethodChannel('com.trufit.trufit_bodamma/screentime');
+  static const MethodChannel _channel = MethodChannel(
+    'com.trufit.trufit_bodamma/screentime',
+  );
 
   /// Returns true if the app has PACKAGE_USAGE_STATS permission
   Future<bool> checkPermission() async {
@@ -26,10 +28,10 @@ class ScreenTimeService {
   /// Opens the device settings page for Usage Access
   Future<void> openSettings() async {
     if (!Platform.isAndroid) return;
-    
+
     // Attempt to launch the exact intent via Kotlin
     try {
-       await _channel.invokeMethod('openUsageSettings');
+      await _channel.invokeMethod('openUsageSettings');
     } catch (e) {
       debugPrint('Failed to open usage settings via native channel: $e');
       // ignore: unawaited_futures

@@ -14,7 +14,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
   ReminderConfig build() {
     _prefs = ref.watch(sharedPreferencesProvider);
     _notificationService = ref.watch(notificationServiceProvider);
-    
+
     final jsonStr = _prefs.getString(_key);
     if (jsonStr != null) {
       return ReminderConfig.fromJson(jsonStr);
@@ -30,7 +30,11 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
 
   Future<void> _syncNotifications() async {
     // Request permission if enabling anything
-    if (state.habitsEnabled || state.workoutsEnabled || state.mealsEnabled || state.backupEnabled || state.photosEnabled) {
+    if (state.habitsEnabled ||
+        state.workoutsEnabled ||
+        state.mealsEnabled ||
+        state.backupEnabled ||
+        state.photosEnabled) {
       final granted = await _notificationService.requestPermissions();
       if (!granted) {
         // Fallback: If not granted, we probably shouldn't keep them enabled in UI
@@ -57,17 +61,26 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
           }
         }
         if (activeDays.isNotEmpty) {
-          await _notificationService.scheduleWorkoutReminders(activeDays, state.workoutTime);
+          await _notificationService.scheduleWorkoutReminders(
+            activeDays,
+            state.workoutTime,
+          );
         }
       }
     }
 
     if (state.mealsEnabled) {
-      await _notificationService.scheduleMealReminders(state.lunchTime, state.dinnerTime);
+      await _notificationService.scheduleMealReminders(
+        state.lunchTime,
+        state.dinnerTime,
+      );
     }
 
     if (state.backupEnabled) {
-      await _notificationService.scheduleBackupReminder(state.backupDayOfWeek, state.backupTime);
+      await _notificationService.scheduleBackupReminder(
+        state.backupDayOfWeek,
+        state.backupTime,
+      );
     }
 
     if (state.photosEnabled) {
@@ -82,7 +95,10 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
           lastPhotoDate = DateTime.parse(allPhotos.first.date);
         } catch (_) {}
       }
-      await _notificationService.schedulePhotoReminder(state.photoTime, lastPhotoDate);
+      await _notificationService.schedulePhotoReminder(
+        state.photoTime,
+        lastPhotoDate,
+      );
     }
   }
 
@@ -92,7 +108,8 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
   }
 }
 
-final remindersProvider = NotifierProvider<RemindersNotifier, ReminderConfig>(() {
-  return RemindersNotifier();
-});
-
+final remindersProvider = NotifierProvider<RemindersNotifier, ReminderConfig>(
+  () {
+    return RemindersNotifier();
+  },
+);

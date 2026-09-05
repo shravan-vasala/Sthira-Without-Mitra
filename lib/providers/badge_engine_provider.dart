@@ -25,9 +25,10 @@ class BadgeUnlockQueue extends Notifier<List<Badge>> {
   }
 }
 
-final badgeUnlockEventProvider = NotifierProvider<BadgeUnlockQueue, List<Badge>>(() {
-  return BadgeUnlockQueue();
-});
+final badgeUnlockEventProvider =
+    NotifierProvider<BadgeUnlockQueue, List<Badge>>(() {
+      return BadgeUnlockQueue();
+    });
 
 final badgeEngineProvider = Provider<BadgeEngine>((ref) {
   return BadgeEngine(ref);
@@ -48,9 +49,9 @@ class BadgeEngine {
     // ignore: unused_local_variable
     final workoutRepo = ref.read(workoutRepoProvider);
     final dailyLogRepo = ref.read(dailyLogRepoProvider);
-    
+
     final allLogs = dailyLogRepo.getAllLogs();
-    
+
     // Count workouts
     final int totalWorkouts = allLogs.where((l) => l.workoutCompleted).length;
 
@@ -82,7 +83,9 @@ class BadgeEngine {
 
       // If we made progress, save the new progress
       if (currentProgress > badge.currentProgress && !shouldUnlock) {
-        await badgeRepo.saveBadge(badge.copyWith(currentProgress: currentProgress));
+        await badgeRepo.saveBadge(
+          badge.copyWith(currentProgress: currentProgress),
+        );
       }
 
       // If we just unlocked it
@@ -92,7 +95,7 @@ class BadgeEngine {
           unlockedAt: DateTime.now(),
         );
         await badgeRepo.saveBadge(unlockedBadge);
-        
+
         // Fire event to UI
         ref.read(badgeUnlockEventProvider.notifier).enqueue(unlockedBadge);
       }

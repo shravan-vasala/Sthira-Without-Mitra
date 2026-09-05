@@ -8,6 +8,7 @@ class UserProfile {
   Id id = Isar.autoIncrement;
 
   final String name;
+
   /// Display name for the AI / notes coach (e.g. "Shravan"). Empty → generic "Coach".
   final String coachName;
   final String? photoPath;
@@ -21,26 +22,31 @@ class UserProfile {
   final double? currentWeight; // in kg
   final int? age;
   final String? gender; // 'M' or 'F'
-  
+
   @ignore
   final List<Map<String, dynamic>> customHabits;
   @ignore
   final List<Map<String, dynamic>> customMealSlots;
-  
+
   @ignore
   final String? geminiApiKey;
 
   String get isarCustomHabits => jsonEncode(customHabits);
   set isarCustomHabits(String json) {
     customHabits.clear();
-    customHabits.addAll((jsonDecode(json) as List).map((e) => e as Map<String, dynamic>).toList());
+    customHabits.addAll(
+      (jsonDecode(json) as List).map((e) => e as Map<String, dynamic>).toList(),
+    );
   }
 
   String get isarCustomMealSlots => jsonEncode(customMealSlots);
   set isarCustomMealSlots(String json) {
     customMealSlots.clear();
-    customMealSlots.addAll((jsonDecode(json) as List).map((e) => e as Map<String, dynamic>).toList());
+    customMealSlots.addAll(
+      (jsonDecode(json) as List).map((e) => e as Map<String, dynamic>).toList(),
+    );
   }
+
   final bool restTimerSound;
   final bool restTimerVibration;
   final bool restTimerNotification;
@@ -78,12 +84,34 @@ class UserProfile {
     this.currentPhaseWeek = 1,
     this.screenTimeEnabled = false,
   }) : customHabits = customHabits ?? [],
-       customMealSlots = customMealSlots ?? [
-      {'id': 'breakfast', 'name': 'Breakfast', 'emoji': 'breakfast', 'isDefault': true},
-      {'id': 'lunch', 'name': 'Lunch', 'emoji': 'lunch', 'isDefault': true},
-      {'id': 'snack', 'name': 'Snack', 'emoji': 'snack', 'isDefault': true},
-      {'id': 'dinner', 'name': 'Dinner', 'emoji': 'dinner', 'isDefault': true},
-    ];
+       customMealSlots =
+           customMealSlots ??
+           [
+             {
+               'id': 'breakfast',
+               'name': 'Breakfast',
+               'emoji': 'breakfast',
+               'isDefault': true,
+             },
+             {
+               'id': 'lunch',
+               'name': 'Lunch',
+               'emoji': 'lunch',
+               'isDefault': true,
+             },
+             {
+               'id': 'snack',
+               'name': 'Snack',
+               'emoji': 'snack',
+               'isDefault': true,
+             },
+             {
+               'id': 'dinner',
+               'name': 'Dinner',
+               'emoji': 'dinner',
+               'isDefault': true,
+             },
+           ];
 
   /// Title shown on Home coach notes (e.g. "Coach Shravan").
   String get coachDisplayName {
@@ -128,18 +156,40 @@ class UserProfile {
       currentWeight: (json['currentWeight'] as num?)?.toDouble(),
       age: (json['age'] as num?)?.toInt(),
       gender: json['gender'] as String?,
-      customHabits: (json['customHabits'] as List?)
+      customHabits:
+          (json['customHabits'] as List?)
               ?.map((h) => Map<String, dynamic>.from(h as Map))
               .toList() ??
           [],
-      customMealSlots: (json['customMealSlots'] as List?)
+      customMealSlots:
+          (json['customMealSlots'] as List?)
               ?.map((h) => Map<String, dynamic>.from(h as Map))
               .toList() ??
           [
-            {'id': 'breakfast', 'name': 'Breakfast', 'emoji': 'breakfast', 'isDefault': true},
-            {'id': 'lunch', 'name': 'Lunch', 'emoji': 'lunch', 'isDefault': true},
-            {'id': 'snack', 'name': 'Snack', 'emoji': 'snack', 'isDefault': true},
-            {'id': 'dinner', 'name': 'Dinner', 'emoji': 'dinner', 'isDefault': true},
+            {
+              'id': 'breakfast',
+              'name': 'Breakfast',
+              'emoji': 'breakfast',
+              'isDefault': true,
+            },
+            {
+              'id': 'lunch',
+              'name': 'Lunch',
+              'emoji': 'lunch',
+              'isDefault': true,
+            },
+            {
+              'id': 'snack',
+              'name': 'Snack',
+              'emoji': 'snack',
+              'isDefault': true,
+            },
+            {
+              'id': 'dinner',
+              'name': 'Dinner',
+              'emoji': 'dinner',
+              'isDefault': true,
+            },
           ],
       restTimerSound: json['restTimerSound'] as bool? ?? true,
       restTimerVibration: json['restTimerVibration'] as bool? ?? true,
@@ -147,38 +197,41 @@ class UserProfile {
       targetProteinG: (json['targetProteinG'] as num?)?.toInt() ?? 80,
       targetCarbsG: (json['targetCarbsG'] as num?)?.toInt() ?? 120,
       targetFatG: (json['targetFatG'] as num?)?.toInt() ?? 40,
-      planStartDate: json['planStartDate'] != null ? DateTime.parse(json['planStartDate'] as String) : null,
+      planStartDate: json['planStartDate'] != null
+          ? DateTime.parse(json['planStartDate'] as String)
+          : null,
       currentPhaseWeek: (json['currentPhaseWeek'] as num?)?.toInt() ?? 1,
       screenTimeEnabled: json['screenTimeEnabled'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'coachName': coachName,
-        if (photoPath != null) 'photoPath': photoPath,
-        'height': height,
-        if (targetWeight != null) 'targetWeight': targetWeight,
-        'useKg': useKg,
-        'targetCalories': targetCalories,
-        if (activeWorkoutPlan != null) 'activeWorkoutPlan': activeWorkoutPlan,
-        if (activeMealPlan != null) 'activeMealPlan': activeMealPlan,
-        if (primaryGoal != null) 'primaryGoal': primaryGoal,
-        if (currentWeight != null) 'currentWeight': currentWeight,
-        if (age != null) 'age': age,
-        if (gender != null) 'gender': gender,
-        'customHabits': customHabits,
-        'customMealSlots': customMealSlots,
-        'restTimerSound': restTimerSound,
-        'restTimerVibration': restTimerVibration,
-        'restTimerNotification': restTimerNotification,
-        'targetProteinG': targetProteinG,
-        'targetCarbsG': targetCarbsG,
-        'targetFatG': targetFatG,
-        if (planStartDate != null) 'planStartDate': planStartDate!.toIso8601String(),
-        'currentPhaseWeek': currentPhaseWeek,
-        'screenTimeEnabled': screenTimeEnabled,
-      };
+    'name': name,
+    'coachName': coachName,
+    if (photoPath != null) 'photoPath': photoPath,
+    'height': height,
+    if (targetWeight != null) 'targetWeight': targetWeight,
+    'useKg': useKg,
+    'targetCalories': targetCalories,
+    if (activeWorkoutPlan != null) 'activeWorkoutPlan': activeWorkoutPlan,
+    if (activeMealPlan != null) 'activeMealPlan': activeMealPlan,
+    if (primaryGoal != null) 'primaryGoal': primaryGoal,
+    if (currentWeight != null) 'currentWeight': currentWeight,
+    if (age != null) 'age': age,
+    if (gender != null) 'gender': gender,
+    'customHabits': customHabits,
+    'customMealSlots': customMealSlots,
+    'restTimerSound': restTimerSound,
+    'restTimerVibration': restTimerVibration,
+    'restTimerNotification': restTimerNotification,
+    'targetProteinG': targetProteinG,
+    'targetCarbsG': targetCarbsG,
+    'targetFatG': targetFatG,
+    if (planStartDate != null)
+      'planStartDate': planStartDate!.toIso8601String(),
+    'currentPhaseWeek': currentPhaseWeek,
+    'screenTimeEnabled': screenTimeEnabled,
+  };
 
   UserProfile copyWith({
     String? name,
@@ -226,14 +279,19 @@ class UserProfile {
       gender: gender ?? this.gender,
       customHabits: customHabits ?? this.customHabits,
       customMealSlots: customMealSlots ?? this.customMealSlots,
-      geminiApiKey: clearGeminiApiKey ? null : (geminiApiKey ?? this.geminiApiKey),
+      geminiApiKey: clearGeminiApiKey
+          ? null
+          : (geminiApiKey ?? this.geminiApiKey),
       restTimerSound: restTimerSound ?? this.restTimerSound,
       restTimerVibration: restTimerVibration ?? this.restTimerVibration,
-      restTimerNotification: restTimerNotification ?? this.restTimerNotification,
+      restTimerNotification:
+          restTimerNotification ?? this.restTimerNotification,
       targetProteinG: targetProteinG ?? this.targetProteinG,
       targetCarbsG: targetCarbsG ?? this.targetCarbsG,
       targetFatG: targetFatG ?? this.targetFatG,
-      planStartDate: clearPlanStart ? null : (planStartDate ?? this.planStartDate),
+      planStartDate: clearPlanStart
+          ? null
+          : (planStartDate ?? this.planStartDate),
       currentPhaseWeek: currentPhaseWeek ?? this.currentPhaseWeek,
       screenTimeEnabled: screenTimeEnabled ?? this.screenTimeEnabled,
     );

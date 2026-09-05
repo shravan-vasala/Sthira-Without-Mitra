@@ -65,7 +65,10 @@ class AsyncErrorCard extends StatelessWidget {
                 label: Text(actionText ?? 'Retry'),
                 style: TextButton.styleFrom(
                   foregroundColor: context.colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),

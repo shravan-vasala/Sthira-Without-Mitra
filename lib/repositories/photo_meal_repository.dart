@@ -31,7 +31,9 @@ class PhotoMealRepository {
     required double portionMultiplier,
   }) async {
     final timestampMs = DateTime.now().millisecondsSinceEpoch;
-    final ext = sourcePhotoPath.contains('.') ? sourcePhotoPath.split('.').last : 'jpg';
+    final ext = sourcePhotoPath.contains('.')
+        ? sourcePhotoPath.split('.').last
+        : 'jpg';
     final destPath = kIsWeb
         ? sourcePhotoPath
         : '$_baseDir/${date}_$timestampMs.$ext';
@@ -61,7 +63,11 @@ class PhotoMealRepository {
   }
 
   List<ScannedMealLog> getScannedMealsForDate(String date) {
-    return _isar.scannedMealLogs.filter().dateEqualTo(date).sortByTimestampDesc().findAllSync();
+    return _isar.scannedMealLogs
+        .filter()
+        .dateEqualTo(date)
+        .sortByTimestampDesc()
+        .findAllSync();
   }
 
   int getTotalScannedCaloriesForDate(String date) {
@@ -84,4 +90,3 @@ class PhotoMealRepository {
     }
   }
 }
-

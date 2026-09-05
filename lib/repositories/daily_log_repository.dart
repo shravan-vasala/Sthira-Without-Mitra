@@ -15,7 +15,8 @@ class DailyLogRepository {
         for (final entry in data.entries) {
           final log = DailyLog.fromJson(entry.value);
           final existing = getLog(entry.key);
-          if (existing == null || jsonEncode(existing.toJson()) != jsonEncode(log.toJson())) {
+          if (existing == null ||
+              jsonEncode(existing.toJson()) != jsonEncode(log.toJson())) {
             if (existing != null) log.id = existing.id;
             await _isar.writeTxn(() async {
               await _isar.dailyLogs.put(log);
@@ -35,9 +36,13 @@ class DailyLogRepository {
   }
 
   Stream<DailyLog?> watchLog(String date) {
-    return _isar.dailyLogs.where().dateEqualTo(date).watch(fireImmediately: true).map((logs) {
-      return logs.isNotEmpty ? logs.first : null;
-    });
+    return _isar.dailyLogs
+        .where()
+        .dateEqualTo(date)
+        .watch(fireImmediately: true)
+        .map((logs) {
+          return logs.isNotEmpty ? logs.first : null;
+        });
   }
 
   DailyLog getOrCreate(String date) {
@@ -73,10 +78,7 @@ class DailyLogRepository {
 
   Future<void> updateSleep(String date, double? hours, {String? source}) async {
     final log = getOrCreate(date);
-    await saveLog(log.copyWith(
-      sleepHours: hours,
-      sleepSource: source,
-    ));
+    await saveLog(log.copyWith(sleepHours: hours, sleepSource: source));
   }
 
   Future<void> clearSleep(String date) async {
@@ -95,12 +97,13 @@ class DailyLogRepository {
   }
 
   List<DailyLog> getLogsInRange(String startDate, String endDate) {
-    return _isar.dailyLogs.filter()
-      .dateGreaterThan(startDate, include: true)
-      .and()
-      .dateLessThan(endDate, include: true)
-      .sortByDate()
-      .findAllSync();
+    return _isar.dailyLogs
+        .filter()
+        .dateGreaterThan(startDate, include: true)
+        .and()
+        .dateLessThan(endDate, include: true)
+        .sortByDate()
+        .findAllSync();
   }
 
   List<DailyLog> getAllLogs() {
@@ -113,7 +116,9 @@ class DailyLogRepository {
   }
 
   /// Bulk import from Firestore (used on new-device sign-in).
-  Future<void> importFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
+  Future<void> importFromCloud(
+    Map<String, Map<String, dynamic>> cloudData,
+  ) async {
     for (final entry in cloudData.entries) {
       final cloudLog = DailyLog.fromJson(entry.value);
       final localLog = getLog(entry.key);
@@ -145,4 +150,3 @@ class DailyLogRepository {
     return result;
   }
 }
-

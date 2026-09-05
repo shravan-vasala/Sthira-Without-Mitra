@@ -36,10 +36,14 @@ class SocialProfile {
       weeklySteps: json['weeklySteps'] ?? 0,
       weeklyWorkouts: json['weeklyWorkouts'] ?? 0,
       latestBadge: json['latestBadge'],
-      lastUpdatedAt: json['lastUpdatedAt'] != null 
+      lastUpdatedAt: json['lastUpdatedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['lastUpdatedAt'] as int)
           : DateTime.now(),
-      allowedReaders: (json['allowedReaders'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      allowedReaders:
+          (json['allowedReaders'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
   }
 

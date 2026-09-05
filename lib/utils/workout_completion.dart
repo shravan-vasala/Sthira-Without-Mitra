@@ -16,10 +16,10 @@ class WorkoutCompletion {
   /// as Home / daily score (Sunday → Rest id, else weekday-1).
   static WorkoutDay resolveWorkoutDay(WorkoutPlan plan, DateTime date) {
     final isSunday = date.weekday == DateTime.sunday;
-    final dayIndex =
-        isSunday ? 0 : (date.weekday - 1).clamp(0, plan.days.length - 1);
-    final dayIdTarget =
-        isSunday ? 'Rest' : plan.days[dayIndex].dayId;
+    final dayIndex = isSunday
+        ? 0
+        : (date.weekday - 1).clamp(0, plan.days.length - 1);
+    final dayIdTarget = isSunday ? 'Rest' : plan.days[dayIndex].dayId;
     return plan.days.firstWhere(
       (d) => d.dayId == dayIdTarget,
       orElse: () => plan.days[dayIndex],

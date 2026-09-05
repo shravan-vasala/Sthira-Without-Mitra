@@ -61,11 +61,13 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
             onPressed: () async {
               Navigator.pop(ctx);
               final item = widget.photos[_currentIndex];
-              
-              await ref.read(mediaRepoProvider).deletePhoto(item.date, item.path);
-              
+
+              await ref
+                  .read(mediaRepoProvider)
+                  .deletePhoto(item.date, item.path);
+
               if (!mounted) return;
-              
+
               setState(() {
                 widget.photos.removeAt(_currentIndex);
                 if (widget.photos.isEmpty) {
@@ -110,13 +112,16 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.photos.isEmpty) return const Scaffold(backgroundColor: Colors.black);
+    if (widget.photos.isEmpty)
+      return const Scaffold(backgroundColor: Colors.black);
 
     final currentPhoto = widget.photos[_currentIndex];
     final poseLabel = _poseLabel(currentPhoto.poseTag);
     final dateLabel = _formatDate(currentPhoto.date);
-    
-    final titleText = poseLabel.isNotEmpty ? '$dateLabel · $poseLabel' : dateLabel;
+
+    final titleText = poseLabel.isNotEmpty
+        ? '$dateLabel · $poseLabel'
+        : dateLabel;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -137,11 +142,13 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                 },
               ),
             ),
-            
+
             // Top Overlay
             if (_showOverlay)
               Positioned(
-                top: 0, left: 0, right: 0,
+                top: 0,
+                left: 0,
+                right: 0,
                 child: Container(
                   padding: EdgeInsets.only(
                     top: MediaQuery.of(context).padding.top + 8,
@@ -159,7 +166,10 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_rounded,
+                          color: Colors.white,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                       Expanded(
@@ -174,7 +184,10 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Colors.white,
+                        ),
                         onPressed: _deleteCurrentPhoto,
                       ),
                     ],
@@ -196,8 +209,10 @@ class _ZoomablePhoto extends StatefulWidget {
   State<_ZoomablePhoto> createState() => _ZoomablePhotoState();
 }
 
-class _ZoomablePhotoState extends State<_ZoomablePhoto> with SingleTickerProviderStateMixin {
-  final TransformationController _transformationController = TransformationController();
+class _ZoomablePhotoState extends State<_ZoomablePhoto>
+    with SingleTickerProviderStateMixin {
+  final TransformationController _transformationController =
+      TransformationController();
   TapDownDetails? _doubleTapDetails;
   late AnimationController _animationController;
   Animation<Matrix4>? _animation;
@@ -205,14 +220,15 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto> with SingleTickerProvide
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    )..addListener(() {
-        if (_animation != null) {
-          _transformationController.value = _animation!.value;
-        }
-      });
+    _animationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 200),
+        )..addListener(() {
+          if (_animation != null) {
+            _transformationController.value = _animation!.value;
+          }
+        });
   }
 
   @override
@@ -228,7 +244,7 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto> with SingleTickerProvide
 
   void _handleDoubleTap() {
     if (_doubleTapDetails == null) return;
-    
+
     final Matrix4 endMatrix;
     if (_transformationController.value.isIdentity()) {
       final position = _doubleTapDetails!.localPosition;
@@ -247,7 +263,7 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto> with SingleTickerProvide
       begin: _transformationController.value,
       end: endMatrix,
     ).animate(CurveTween(curve: Curves.easeOut).animate(_animationController));
-    
+
     _animationController.forward(from: 0);
   }
 
@@ -264,14 +280,8 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto> with SingleTickerProvide
           child: Hero(
             tag: widget.photoPath, // Optional: if we want to do hero animations
             child: kIsWeb
-                ? Image.network(
-                    widget.photoPath,
-                    fit: BoxFit.contain,
-                  )
-                : Image.file(
-                    File(widget.photoPath),
-                    fit: BoxFit.contain,
-                  ),
+                ? Image.network(widget.photoPath, fit: BoxFit.contain)
+                : Image.file(File(widget.photoPath), fit: BoxFit.contain),
           ),
         ),
       ),

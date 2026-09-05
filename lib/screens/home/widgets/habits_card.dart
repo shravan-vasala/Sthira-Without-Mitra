@@ -21,10 +21,14 @@ class HabitsCard extends ConsumerWidget {
     final habits = ref.watch(habitsProvider);
     final completions = ref.watch(habitCompletionsProvider);
     final dailyLog = ref.watch(dailyLogProvider);
-    
+
     final selectedDateStr = ref.watch(dateStringProvider);
     final selectedDate = DateTime.parse(selectedDateStr);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
     final isFuture = selectedDate.isAfter(today);
 
     return SurfaceCard(
@@ -44,7 +48,10 @@ class HabitsCard extends ConsumerWidget {
               ),
             ),
             if (i < habits.length - 1)
-              Divider(height: 1, color: context.colors.textLight.withValues(alpha: 0.1)),
+              Divider(
+                height: 1,
+                color: context.colors.textLight.withValues(alpha: 0.1),
+              ),
           ],
           if (habits.isEmpty)
             const EmptyStateView(
@@ -74,13 +81,16 @@ class _HabitItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Semantics(
-      label: '${habit.name}, ${isCompleted ? 'completed' : 'incomplete'}${isFuture ? ', locked' : ''}',
+      label:
+          '${habit.name}, ${isCompleted ? 'completed' : 'incomplete'}${isFuture ? ', locked' : ''}',
       button: true,
       enabled: !isFuture,
       onTapHint: isCompleted ? 'Mark as incomplete' : 'Mark as complete',
       child: Dismissible(
         key: ValueKey(habit.id),
-        direction: isFuture ? DismissDirection.none : DismissDirection.horizontal,
+        direction: isFuture
+            ? DismissDirection.none
+            : DismissDirection.horizontal,
         confirmDismiss: (direction) => _handleSwipe(direction, context, ref),
         background: _buildSwipeBackground(context, true),
         secondaryBackground: _buildSwipeBackground(context, false),
@@ -89,7 +99,9 @@ class _HabitItem extends ConsumerWidget {
             Expanded(
               child: GestureDetector(
                 onTap: isFuture ? null : () => _handleTap(context, ref),
-                onLongPress: isFuture ? null : () => _handleLongPress(context, ref),
+                onLongPress: isFuture
+                    ? null
+                    : () => _handleLongPress(context, ref),
                 behavior: HitTestBehavior.opaque,
                 child: Row(
                   children: [
@@ -106,7 +118,7 @@ class _HabitItem extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 2),
-                    
+
                     // Habit Name & Progress
                     Expanded(
                       child: Column(
@@ -142,39 +154,57 @@ class _HabitItem extends ConsumerWidget {
                             children: [
                               if (habit.type != HabitType.checkbox)
                                 GestureDetector(
-                                  onTap: (habit.type == HabitType.autoSleep && !isFuture)
+                                  onTap:
+                                      (habit.type == HabitType.autoSleep &&
+                                          !isFuture)
                                       ? () {
                                           showAppBottomSheet(
                                             context: context,
-                                            builder: (_) => const SleepEntryDialog(),
+                                            builder: (_) =>
+                                                const SleepEntryDialog(),
                                           );
                                         }
                                       : null,
                                   behavior: HitTestBehavior.opaque,
                                   child: Padding(
-                                    padding: const EdgeInsets.only(top: 2, bottom: 2, right: 8),
+                                    padding: const EdgeInsets.only(
+                                      top: 2,
+                                      bottom: 2,
+                                      right: 8,
+                                    ),
                                     child: Text(
                                       _formatProgress(),
-                                      style: TextStyle(fontSize: 12, color: context.colors.textMedium),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: context.colors.textMedium,
+                                      ),
                                     ),
                                   ),
                                 ),
                               Consumer(
                                 builder: (context, ref, child) {
-                                  final streak = ref.watch(habitStreakProvider(habit.id));
+                                  final streak = ref.watch(
+                                    habitStreakProvider(habit.id),
+                                  );
                                   if (streak > 1) {
                                     return Container(
                                       margin: const EdgeInsets.only(top: 2),
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: context.colors.orange.withValues(alpha: 0.1),
+                                        color: context.colors.orange.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(
-                                            Icons.local_fire_department_outlined,
+                                            Icons
+                                                .local_fire_department_outlined,
                                             size: 12,
                                             color: context.colors.orange,
                                           ),
@@ -203,7 +233,7 @@ class _HabitItem extends ConsumerWidget {
                 ),
               ),
             ),
-            
+
             // Action / Emoji
             if (habit.type == HabitType.counter && !isFuture)
               Row(
@@ -211,22 +241,32 @@ class _HabitItem extends ConsumerWidget {
                   _MiniButton(
                     icon: Icons.remove,
                     onTap: () {
-                      final newProg = (progress - habit.step).clamp(0.0, habit.target);
-                      ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
+                      final newProg = (progress - habit.step).clamp(
+                        0.0,
+                        habit.target,
+                      );
+                      ref
+                          .read(habitCompletionsProvider.notifier)
+                          .updateProgress(habit.id, newProg);
                     },
                   ),
                   const SizedBox(width: 4),
                   _MiniButton(
                     icon: Icons.add,
                     onTap: () {
-                      final newProg = (progress + habit.step).clamp(0.0, habit.target);
-                      ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
+                      final newProg = (progress + habit.step).clamp(
+                        0.0,
+                        habit.target,
+                      );
+                      ref
+                          .read(habitCompletionsProvider.notifier)
+                          .updateProgress(habit.id, newProg);
                     },
                   ),
                   const SizedBox(width: 8),
                 ],
               ),
-              
+
             _buildIcon(context, habit.icon),
           ],
         ),
@@ -238,7 +278,9 @@ class _HabitItem extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: isRight ? context.colors.green.withValues(alpha: 0.1) : context.colors.red.withValues(alpha: 0.1),
+        color: isRight
+            ? context.colors.green.withValues(alpha: 0.1)
+            : context.colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       alignment: isRight ? Alignment.centerLeft : Alignment.centerRight,
@@ -249,42 +291,64 @@ class _HabitItem extends ConsumerWidget {
     );
   }
 
-  Future<bool?> _handleSwipe(DismissDirection direction, BuildContext context, WidgetRef ref) async {
+  Future<bool?> _handleSwipe(
+    DismissDirection direction,
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     // ignore: unawaited_futures
     Haptics.toggle();
-    
-    if (direction == DismissDirection.startToEnd) { // Swipe Right -> Complete
+
+    if (direction == DismissDirection.startToEnd) {
+      // Swipe Right -> Complete
       if (habit.type == HabitType.counter) {
         final newProg = (progress + habit.step).clamp(0.0, habit.target);
         // ignore: unawaited_futures
-        ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
+        ref
+            .read(habitCompletionsProvider.notifier)
+            .updateProgress(habit.id, newProg);
         _showUndo(context, 'Incremented ${habit.name}', () {
           final oldProg = (newProg - habit.step).clamp(0.0, habit.target);
-          ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, oldProg);
+          ref
+              .read(habitCompletionsProvider.notifier)
+              .updateProgress(habit.id, oldProg);
         });
       } else {
         if (!isCompleted) {
           // ignore: unawaited_futures
-          ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, 'done');
+          ref
+              .read(habitCompletionsProvider.notifier)
+              .setOverride(habit.id, 'done');
           _showUndo(context, 'Completed ${habit.name}', () {
-            ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, null);
+            ref
+                .read(habitCompletionsProvider.notifier)
+                .setOverride(habit.id, null);
           });
         }
       }
-    } else if (direction == DismissDirection.endToStart) { // Swipe Left -> Not done
+    } else if (direction == DismissDirection.endToStart) {
+      // Swipe Left -> Not done
       if (habit.type == HabitType.counter) {
         final newProg = (progress - habit.step).clamp(0.0, habit.target);
         // ignore: unawaited_futures
-        ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, newProg);
+        ref
+            .read(habitCompletionsProvider.notifier)
+            .updateProgress(habit.id, newProg);
         _showUndo(context, 'Decremented ${habit.name}', () {
           final oldProg = (newProg + habit.step).clamp(0.0, habit.target);
-          ref.read(habitCompletionsProvider.notifier).updateProgress(habit.id, oldProg);
+          ref
+              .read(habitCompletionsProvider.notifier)
+              .updateProgress(habit.id, oldProg);
         });
       } else {
         // ignore: unawaited_futures
-        ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, 'notDone');
+        ref
+            .read(habitCompletionsProvider.notifier)
+            .setOverride(habit.id, 'notDone');
         _showUndo(context, 'Marked ${habit.name} incomplete', () {
-          ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, null);
+          ref
+              .read(habitCompletionsProvider.notifier)
+              .setOverride(habit.id, null);
         });
       }
     }
@@ -297,10 +361,7 @@ class _HabitItem extends ConsumerWidget {
       SnackBar(
         content: Text(message),
         duration: const Duration(seconds: 2),
-        action: SnackBarAction(
-          label: 'UNDO',
-          onPressed: onUndo,
-        ),
+        action: SnackBarAction(label: 'UNDO', onPressed: onUndo),
       ),
     );
   }
@@ -314,14 +375,18 @@ class _HabitItem extends ConsumerWidget {
   }
 
   String _formatProgress() {
-    final String pStr = progress == progress.toInt() ? progress.toInt().toString() : progress.toStringAsFixed(1);
-    final String tStr = habit.target == habit.target.toInt() ? habit.target.toInt().toString() : habit.target.toStringAsFixed(1);
+    final String pStr = progress == progress.toInt()
+        ? progress.toInt().toString()
+        : progress.toStringAsFixed(1);
+    final String tStr = habit.target == habit.target.toInt()
+        ? habit.target.toInt().toString()
+        : habit.target.toStringAsFixed(1);
     return '$pStr / $tStr ${habit.unit}';
   }
 
   void _handleTap(BuildContext context, WidgetRef ref) {
     final nameLower = habit.name.toLowerCase();
-    
+
     // Check if it's the Sleep habit
     if (nameLower.contains('sleep')) {
       showAppBottomSheet(
@@ -330,7 +395,7 @@ class _HabitItem extends ConsumerWidget {
       );
       return;
     }
-    
+
     // Check if it's the Water habit
     if (nameLower.contains('water')) {
       showAppBottomSheet(
@@ -339,7 +404,7 @@ class _HabitItem extends ConsumerWidget {
       );
       return;
     }
-    
+
     if (habit.type == HabitType.timer) {
       showAppBottomSheet(
         context: context,
@@ -347,18 +412,24 @@ class _HabitItem extends ConsumerWidget {
       );
       return;
     }
-    
+
     if (habit.type == HabitType.checkbox) {
       ref.read(habitCompletionsProvider.notifier).toggle(habit.id);
       return;
     }
-    
+
     final override = ref.read(habitCompletionsProvider).overrides[habit.id];
     final isSyncCompleted = isCompleted && override == null;
-    
-    if ((habit.type == HabitType.autoSteps || habit.type == HabitType.autoSleep) && isSyncCompleted) {
+
+    if ((habit.type == HabitType.autoSteps ||
+            habit.type == HabitType.autoSleep) &&
+        isSyncCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Completed from Samsung Health. Long press to override as not done.')),
+        const SnackBar(
+          content: Text(
+            'Completed from Samsung Health. Long press to override as not done.',
+          ),
+        ),
       );
       return;
     }
@@ -366,25 +437,30 @@ class _HabitItem extends ConsumerWidget {
     String? newOverride;
     if (isCompleted) {
       if (override == 'done') {
-        newOverride = null; 
+        newOverride = null;
       } else {
-        newOverride = 'notDone'; 
+        newOverride = 'notDone';
       }
     } else {
       newOverride = 'done';
     }
-    
-    ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, newOverride);
+
+    ref
+        .read(habitCompletionsProvider.notifier)
+        .setOverride(habit.id, newOverride);
   }
 
   void _handleLongPress(BuildContext context, WidgetRef ref) {
-    if (habit.type != HabitType.autoSteps && habit.type != HabitType.autoSleep) return;
-    
+    if (habit.type != HabitType.autoSteps && habit.type != HabitType.autoSleep)
+      return;
+
     final override = ref.read(habitCompletionsProvider).overrides[habit.id];
     final isSyncCompleted = isCompleted && override == null;
-    
+
     if (isSyncCompleted) {
-      ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, 'notDone');
+      ref
+          .read(habitCompletionsProvider.notifier)
+          .setOverride(habit.id, 'notDone');
     }
   }
 }
@@ -392,7 +468,7 @@ class _HabitItem extends ConsumerWidget {
 class _MiniButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  
+
   const _MiniButton({required this.icon, required this.onTap});
 
   @override
@@ -411,6 +487,7 @@ class _MiniButton extends StatelessWidget {
     );
   }
 }
+
 class _LivelyHabitCircle extends StatefulWidget {
   final bool isCompleted;
   final bool isFuture;
@@ -428,17 +505,33 @@ class _LivelyHabitCircle extends StatefulWidget {
   State<_LivelyHabitCircle> createState() => _LivelyHabitCircleState();
 }
 
-class _LivelyHabitCircleState extends State<_LivelyHabitCircle> with SingleTickerProviderStateMixin {
+class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
     _scaleAnimation = TweenSequence([
-      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.25).chain(CurveTween(curve: Curves.easeOutCubic)), weight: 40),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.25, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)), weight: 60),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 1.25,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 40,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.25,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 60,
+      ),
     ]).animate(_controller);
   }
 
@@ -471,16 +564,18 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle> with SingleTicke
           border: widget.isCompleted || widget.isFuture
               ? null
               : Border.all(color: context.colors.border, width: 2),
-          color: widget.isCompleted 
-              ? context.colors.green 
-              : (widget.isFuture ? context.colors.textLight.withValues(alpha: 0.1) : Colors.transparent),
+          color: widget.isCompleted
+              ? context.colors.green
+              : (widget.isFuture
+                    ? context.colors.textLight.withValues(alpha: 0.1)
+                    : Colors.transparent),
           boxShadow: widget.isCompleted
               ? [
                   BoxShadow(
                     color: context.colors.green.withValues(alpha: 0.4),
                     blurRadius: 8,
                     spreadRadius: 2,
-                  )
+                  ),
                 ]
               : null,
         ),
@@ -489,13 +584,18 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle> with SingleTicke
           children: [
             widget.isCompleted
                 ? Icon(Icons.check, color: context.colors.onPrimary, size: 16)
-                : (widget.isFuture 
-                    ? Icon(Icons.lock_outline_rounded, color: context.colors.textLight.withValues(alpha: 0.5), size: 14) 
-                    : const SizedBox.shrink()),
+                : (widget.isFuture
+                      ? Icon(
+                          Icons.lock_outline_rounded,
+                          color: context.colors.textLight.withValues(
+                            alpha: 0.5,
+                          ),
+                          size: 14,
+                        )
+                      : const SizedBox.shrink()),
           ],
         ),
       ),
     );
   }
 }
-

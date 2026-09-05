@@ -4,21 +4,28 @@ import 'app_providers.dart';
 
 final mealStreakProvider = Provider<int>((ref) {
   final mealRepo = ref.watch(mealRepoProvider);
-  
+
   // Watch current day's log to trigger rebuilds when user logs a meal today
   ref.watch(dailyMealLogProvider);
-  
+
   final now = DateTime.now();
   final endStr = DateFormat('yyyy-MM-dd').format(now);
-  final startStr = DateFormat('yyyy-MM-dd').format(now.subtract(const Duration(days: 30)));
-  
+  final startStr = DateFormat(
+    'yyyy-MM-dd',
+  ).format(now.subtract(const Duration(days: 30)));
+
   final logs = mealRepo.getLogsInRange(startStr, endStr);
-  
-  final sortedLogs = logs
-    .where((log) => log.customSlots.values.any((s) => s.items.isNotEmpty || s.totalCalories > 0))
-    .map((log) => log.date)
-    .toList()
-    ..sort((a, b) => b.compareTo(a));
+
+  final sortedLogs =
+      logs
+          .where(
+            (log) => log.customSlots.values.any(
+              (s) => s.items.isNotEmpty || s.totalCalories > 0,
+            ),
+          )
+          .map((log) => log.date)
+          .toList()
+        ..sort((a, b) => b.compareTo(a));
 
   if (sortedLogs.isEmpty) return 0;
 
@@ -54,13 +61,14 @@ final mealStreakProvider = Provider<int>((ref) {
 final stepsStreakProvider = Provider<int>((ref) {
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
   final habits = ref.watch(habitsProvider);
-  
+
   // Watch current day's log to trigger rebuilds when user logs steps today
   ref.watch(dailyLogProvider);
 
   double stepsTarget = 10000;
   for (final h in habits) {
-    if (h.name.toLowerCase().contains('steps') || h.name.toLowerCase().contains('walk')) {
+    if (h.name.toLowerCase().contains('steps') ||
+        h.name.toLowerCase().contains('walk')) {
       stepsTarget = h.target.toDouble();
       break;
     }
@@ -68,14 +76,20 @@ final stepsStreakProvider = Provider<int>((ref) {
 
   final now = DateTime.now();
   final todayDate = DateTime(now.year, now.month, now.day);
-  final startStr = DateFormat('yyyy-MM-dd').format(todayDate.subtract(const Duration(days: 60)));
-  final endStr = DateFormat('yyyy-MM-dd').format(todayDate.add(const Duration(days: 1)));
+  final startStr = DateFormat(
+    'yyyy-MM-dd',
+  ).format(todayDate.subtract(const Duration(days: 60)));
+  final endStr = DateFormat(
+    'yyyy-MM-dd',
+  ).format(todayDate.add(const Duration(days: 1)));
 
-  final logs = dailyLogRepo.getLogsInRange(startStr, endStr)
-    .where((log) => log.steps != null && log.steps! >= stepsTarget)
-    .map((log) => log.date)
-    .toList()
-    ..sort((a, b) => b.compareTo(a));
+  final logs =
+      dailyLogRepo
+          .getLogsInRange(startStr, endStr)
+          .where((log) => log.steps != null && log.steps! >= stepsTarget)
+          .map((log) => log.date)
+          .toList()
+        ..sort((a, b) => b.compareTo(a));
 
   if (logs.isEmpty) return 0;
 

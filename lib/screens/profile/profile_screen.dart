@@ -17,7 +17,6 @@ import '../../providers/app_providers.dart';
 import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 
-
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -69,7 +68,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               ),
-              
+
               // Profile header
               Container(
                 width: double.infinity,
@@ -94,22 +93,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                       child: ClipOval(
-                        child: profile.photoPath != null 
+                        child: profile.photoPath != null
                             ? (profile.photoPath!.startsWith('assets/')
-                                ? Image.asset(
-                                    profile.photoPath!,
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  )
-                                : (File(profile.photoPath!).existsSync()
-                                    ? Image.file(
-                                        File(profile.photoPath!),
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : _buildDefaultAvatar(context, profile.name)))
+                                  ? Image.asset(
+                                      profile.photoPath!,
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : (File(profile.photoPath!).existsSync()
+                                        ? Image.file(
+                                            File(profile.photoPath!),
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : _buildDefaultAvatar(
+                                            context,
+                                            profile.name,
+                                          )))
                             : _buildDefaultAvatar(context, profile.name),
                       ),
                     ),
@@ -144,10 +146,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Cloud Sync
               const _CloudSyncCard(),
-              
+
               const TrophyRoomCard(),
 
               // Menu items
@@ -169,6 +171,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () => _showGeminiKeyDialog(context, ref, profile),
               ),
               _MenuCard(
+                icon: Icons.history_rounded,
+                title: 'Recent AI Activity',
+                subtitle: 'View local diagnostic logs',
+                onTap: () => showAppBottomSheet(
+                  context: context,
+                  builder: (_) => const _AiActivitySheet(),
+                ),
+              ),
+              _MenuCard(
                 icon: Icons.fitness_center_rounded,
                 title: 'Manage Plans',
                 subtitle: 'Edit workout & meal JSON',
@@ -183,7 +194,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _MenuCard(
                 icon: Icons.swap_horiz_rounded,
                 title: 'Unit Preference',
-                subtitle: 'Currently: ${profile.useKg ? 'Kilograms (kg)' : 'Pounds (lb)'}',
+                subtitle:
+                    'Currently: ${profile.useKg ? 'Kilograms (kg)' : 'Pounds (lb)'}',
                 onTap: () {
                   ref.read(profileProvider.notifier).toggleUnit();
                 },
@@ -191,7 +203,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _MenuCard(
                 icon: Icons.dark_mode_rounded,
                 title: 'Theme',
-                subtitle: 'Currently: ${_themeLabel(ref.watch(themeModeProvider))}',
+                subtitle:
+                    'Currently: ${_themeLabel(ref.watch(themeModeProvider))}',
                 onTap: () => _showThemeDialog(context, ref),
               ),
               _SettingsSwitch(
@@ -200,39 +213,49 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Play alert sound when rest finishes',
                 value: profile.restTimerSound,
                 onChanged: (val) {
-                  ref.read(profileProvider.notifier).updateProfile(
-                        profile.copyWith(restTimerSound: val),
-                      );
+                  ref
+                      .read(profileProvider.notifier)
+                      .updateProfile(profile.copyWith(restTimerSound: val));
                 },
               ),
               if (Platform.isAndroid)
                 _SettingsSwitch(
                   icon: Icons.smartphone_rounded,
                   title: 'Screen Time Tracking',
-                  subtitle: profile.screenTimeEnabled 
-                      ? 'Enabled (Tracks device screen time)' 
+                  subtitle: profile.screenTimeEnabled
+                      ? 'Enabled (Tracks device screen time)'
                       : 'Disabled (Opt-in to track screen time)',
                   value: profile.screenTimeEnabled,
                   onChanged: (val) async {
                     if (val) {
                       // Attempt to enable
-                      final hasPermission = await ref.read(screenTimeServiceProvider).checkPermission();
+                      final hasPermission = await ref
+                          .read(screenTimeServiceProvider)
+                          .checkPermission();
                       if (hasPermission) {
                         // ignore: unawaited_futures
-                        ref.read(profileProvider.notifier).updateProfile(
-                          profile.copyWith(screenTimeEnabled: true),
-                        );
+                        ref
+                            .read(profileProvider.notifier)
+                            .updateProfile(
+                              profile.copyWith(screenTimeEnabled: true),
+                            );
                       } else {
                         if (context.mounted) {
-                          _showScreenTimePermissionDialog(context, ref, profile);
+                          _showScreenTimePermissionDialog(
+                            context,
+                            ref,
+                            profile,
+                          );
                         }
                       }
                     } else {
                       // Disable
                       // ignore: unawaited_futures
-                      ref.read(profileProvider.notifier).updateProfile(
-                        profile.copyWith(screenTimeEnabled: false),
-                      );
+                      ref
+                          .read(profileProvider.notifier)
+                          .updateProfile(
+                            profile.copyWith(screenTimeEnabled: false),
+                          );
                     }
                   },
                 ),
@@ -242,9 +265,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Vibrate when rest finishes',
                 value: profile.restTimerVibration,
                 onChanged: (val) {
-                  ref.read(profileProvider.notifier).updateProfile(
-                        profile.copyWith(restTimerVibration: val),
-                      );
+                  ref
+                      .read(profileProvider.notifier)
+                      .updateProfile(profile.copyWith(restTimerVibration: val));
                 },
               ),
               _MenuCard(
@@ -299,12 +322,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  void _showScreenTimePermissionDialog(BuildContext context, WidgetRef ref, dynamic profile) {
+  void _showScreenTimePermissionDialog(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic profile,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: context.colors.card,
-        title: Text('Enable Screen Time', style: TextStyle(color: context.colors.textDark)),
+        title: Text(
+          'Enable Screen Time',
+          style: TextStyle(color: context.colors.textDark),
+        ),
         content: Text(
           'Sthira can read your daily screen time to help you build better habits. '
           'This requires "Usage Access" permission.\n\n'
@@ -314,14 +344,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: context.colors.textLight)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.colors.textLight),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               ref.read(screenTimeServiceProvider).openSettings();
             },
-            child: Text('Open Settings', style: TextStyle(color: context.colors.primary, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Open Settings',
+              style: TextStyle(
+                color: context.colors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -416,130 +455,170 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showGeminiKeyDialog(
-      BuildContext context, WidgetRef ref, dynamic profile) {
+    BuildContext context,
+    WidgetRef ref,
+    dynamic profile,
+  ) {
     // ignore: avoid_dynamic_calls
-    final keyController = TextEditingController(text: profile.geminiApiKey ?? '');
+    final keyController = TextEditingController(
+      text: profile.geminiApiKey ?? '',
+    );
     // ignore: avoid_dynamic_calls
-    final coachController = TextEditingController(text: profile.coachName as String? ?? '');
+    final coachController = TextEditingController(
+      text: profile.coachName as String? ?? '',
+    );
     bool isVerifying = false;
     String errorMessage = '';
-    
+
     showAppBottomSheet(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AppSheet(
-        title: 'AI & Coach Settings',
-        scrollable: true,
-        subtitle:
-            'Set your coach\'s name for daily notes. A Gemini API key is ONLY required if you are not using Cloud Sync.',
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: coachController,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: 'Coach name',
-                hintText: 'e.g. Shravan',
-                prefixIcon: const Icon(Icons.sports_rounded),
-                filled: true,
-                fillColor: context.colors.inputFill,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: keyController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Gemini API Key',
-                prefixIcon: const Icon(Icons.key_rounded),
-                filled: true,
-                fillColor: context.colors.inputFill,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () => launchUrl(Uri.parse('https://aistudio.google.com/app/apikey')),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Get your Gemini API Key here',
-                  style: TextStyle(
-                    color: context.colors.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+          title: 'AI & Coach Settings',
+          scrollable: true,
+          subtitle:
+              'Set your coach\'s name for daily notes. A Gemini API key is ONLY required if you are not using Cloud Sync.',
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: coachController,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
+                    labelText: 'Coach name',
+                    hintText: 'e.g. Shravan',
+                    prefixIcon: const Icon(Icons.sports_rounded),
+                    filled: true,
+                    fillColor: context.colors.inputFill,
                   ),
                 ),
-              ),
-            ),
-            if (errorMessage.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                errorMessage,
-                style: TextStyle(color: context.colors.red, fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-            ],
-            const SizedBox(height: 24),
-            isVerifying
-                ? Center(
-                    child: CircularProgressIndicator(color: context.colors.primary),
-                  )
-                : PrimaryButton(
-              label: 'Save & Verify',
-              onPressed: () async {
-                final key = keyController.text.trim();
-                final coachName = coachController.text.trim();
-                
-                if (key.isNotEmpty) {
-                  setState(() {
-                    isVerifying = true;
-                    errorMessage = '';
-                  });
-                  try {
-                    await ref.read(geminiFoodServiceProvider).verifyApiKey(key);
-                  } catch (e) {
-                    if (ctx.mounted) {
-                      setState(() {
-                        isVerifying = false;
-                        errorMessage = e.toString().replaceAll('Exception: ', '');
-                      });
-                    }
-                    return; // Abort save if key is invalid
-                  }
-                }
-
-                final current = ref.read(profileProvider);
-                
-                await ref.read(profileProvider.notifier).updateProfile(
-                      current.copyWith(
-                        coachName: coachName,
-                        geminiApiKey: key,
-                      ),
-                    );
-                await ref.read(profileProvider.notifier).updateGeminiKey(key);
-                
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(
-                      content: Text(key.isNotEmpty ? 'Connected & Verified ✅' : 'AI settings saved successfully'),
-                      backgroundColor: context.colors.green,
+                const SizedBox(height: 16),
+                TextField(
+                  controller: keyController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Gemini API Key',
+                    prefixIcon: const Icon(Icons.key_rounded),
+                    filled: true,
+                    fillColor: context.colors.inputFill,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => launchUrl(
+                      Uri.parse('https://aistudio.google.com/app/apikey'),
                     ),
-                  );
-                  Navigator.of(ctx).pop();
-                }
-              },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'Get your Gemini API Key here',
+                      style: TextStyle(
+                        color: context.colors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                if (errorMessage.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    errorMessage,
+                    style: TextStyle(
+                      color: context.colors.red,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                isVerifying
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: context.colors.primary,
+                        ),
+                      )
+                    : PrimaryButton(
+                        label: 'Save & Verify',
+                        onPressed: () async {
+                          final key = keyController.text.trim();
+                          final coachName = coachController.text.trim();
+
+                          if (key.isNotEmpty) {
+                            setState(() {
+                              isVerifying = true;
+                              errorMessage = '';
+                            });
+                            try {
+                              await ref
+                                  .read(geminiFoodServiceProvider)
+                                  .verifyApiKey(key);
+                            } catch (e) {
+                              if (ctx.mounted) {
+                                setState(() {
+                                  isVerifying = false;
+                                  errorMessage = e.toString().replaceAll(
+                                    'Exception: ',
+                                    '',
+                                  );
+                                });
+                              }
+                              return; // Abort save if key is invalid
+                            }
+                          }
+
+                          final current = ref.read(profileProvider);
+
+                          await ref
+                              .read(profileProvider.notifier)
+                              .updateProfile(
+                                current.copyWith(
+                                  coachName: coachName,
+                                  geminiApiKey: key,
+                                ),
+                              );
+                          await ref
+                              .read(profileProvider.notifier)
+                              .updateGeminiKey(key);
+
+                          if (ctx.mounted) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  key.isNotEmpty
+                                      ? 'Connected & Verified ✅'
+                                      : 'AI settings saved successfully',
+                                ),
+                                backgroundColor: context.colors.green,
+                              ),
+                            );
+                            Navigator.of(ctx).pop();
+                          }
+                        },
+                      ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    showAppBottomSheet(
+                      context: context,
+                      builder: (_) => _DiagnosticsTestSheet(ref: ref),
+                    );
+                  },
+                  icon: const Icon(Icons.speed_rounded),
+                  label: const Text('Test AI connection'),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        ),
-      ),
       ),
     );
   }
@@ -612,10 +691,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       if (zipPath != null) {
         // ignore: deprecated_member_use
-        await Share.shareXFiles(
-          [XFile(zipPath)],
-          text: 'TruFit Data Export',
-        );
+        await Share.shareXFiles([XFile(zipPath)], text: 'TruFit Data Export');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -664,58 +740,71 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
   String _syncStatus = '';
 
   Future<void> _handleSignIn() async {
-    setState(() { _isSyncing = true; _syncStatus = 'Signing in...'; });
+    setState(() {
+      _isSyncing = true;
+      _syncStatus = 'Signing in...';
+    });
     try {
       final user = await ref.read(authServiceProvider).signInWithGoogle();
       if (user != null && mounted) {
         // Run initial sync/migration
-        setState(() { _syncStatus = 'Syncing data...'; });
+        setState(() {
+          _syncStatus = 'Syncing data...';
+        });
         await _runFullSync();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: const Text('Successfully signed in & synced!'), backgroundColor: context.colors.primary),
+            SnackBar(
+              content: const Text('Successfully signed in & synced!'),
+              backgroundColor: context.colors.primary,
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign in failed: $e'), backgroundColor: context.colors.red),
+          SnackBar(
+            content: Text('Sign in failed: $e'),
+            backgroundColor: context.colors.red,
+          ),
         );
       }
     } finally {
-      if (mounted) setState(() { _isSyncing = false; _syncStatus = ''; });
+      if (mounted)
+        setState(() {
+          _isSyncing = false;
+          _syncStatus = '';
+        });
     }
   }
 
   Future<void> _runFullSync() async {
     final syncService = ref.read(firestoreSyncServiceProvider);
-    
+
     // 1. Check if cloud has data
     final hasCloudData = await syncService.hasCloudData();
-    
+
     if (hasCloudData) {
       // Pull down to device
       final profile = await syncService.pullProfile();
       await ref.read(profileRepoProvider).importProfileFromCloud(profile);
-      
 
-      
       final dailyLogs = await syncService.pullCollection('daily_logs');
       await ref.read(dailyLogRepoProvider).importFromCloud(dailyLogs);
-      
+
       final mealLogs = await syncService.pullCollection('meal_logs');
       await ref.read(mealRepoProvider).importLogsFromCloud(mealLogs);
-      
+
       final stats = await syncService.pullCollection('body_stats');
       await ref.read(bodyStatsRepoProvider).importStatsFromCloud(stats);
-      
+
       final workoutPlans = await syncService.pullCollection('workout_plans');
       await ref.read(workoutRepoProvider).importPlansFromCloud(workoutPlans);
-      
+
       final mealPlans = await syncService.pullCollection('meal_plans');
       await ref.read(mealRepoProvider).importPlansFromCloud(mealPlans);
-      
+
       // refresh UI
       ref.invalidate(profileProvider);
       ref.invalidate(dailyLogProvider);
@@ -723,15 +812,38 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
       ref.invalidate(latestBodyStatsProvider);
     } else {
       // First time cloud user: upload local data
-      syncService.syncProfile(ref.read(profileRepoProvider).exportProfileForCloud());
+      syncService.syncProfile(
+        ref.read(profileRepoProvider).exportProfileForCloud(),
+      );
 
-      await syncService.bulkSync('daily_logs', ref.read(dailyLogRepoProvider).exportForCloud());
-      await syncService.bulkSync('meal_logs', ref.read(mealRepoProvider).exportLogsForCloud());
-      await syncService.bulkSync('body_stats', ref.read(bodyStatsRepoProvider).exportStatsForCloud());
-      await syncService.bulkSync('habit_config', ref.read(habitRepoProvider).exportConfigForCloud());
-      await syncService.bulkSync('habit_completions', ref.read(habitRepoProvider).exportCompletionsForCloud());
-      await syncService.bulkSync('workout_plans', ref.read(workoutRepoProvider).exportPlansForCloud());
-      await syncService.bulkSync('meal_plans', ref.read(mealRepoProvider).exportPlansForCloud());
+      await syncService.bulkSync(
+        'daily_logs',
+        ref.read(dailyLogRepoProvider).exportForCloud(),
+      );
+      await syncService.bulkSync(
+        'meal_logs',
+        ref.read(mealRepoProvider).exportLogsForCloud(),
+      );
+      await syncService.bulkSync(
+        'body_stats',
+        ref.read(bodyStatsRepoProvider).exportStatsForCloud(),
+      );
+      await syncService.bulkSync(
+        'habit_config',
+        ref.read(habitRepoProvider).exportConfigForCloud(),
+      );
+      await syncService.bulkSync(
+        'habit_completions',
+        ref.read(habitRepoProvider).exportCompletionsForCloud(),
+      );
+      await syncService.bulkSync(
+        'workout_plans',
+        ref.read(workoutRepoProvider).exportPlansForCloud(),
+      );
+      await syncService.bulkSync(
+        'meal_plans',
+        ref.read(mealRepoProvider).exportPlansForCloud(),
+      );
     }
   }
 
@@ -745,7 +857,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.colors.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.colors.primary.withValues(alpha: 0.2),
+        ),
         boxShadow: [
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.05),
@@ -772,23 +886,30 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
               const Spacer(),
               if (isSignedIn)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: context.colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     'Active',
-                    style: TextStyle(fontSize: 12, color: context.colors.green, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                )
+                ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            isSignedIn 
-              ? 'Your text data is securely synced as $userEmail. Photos are NOT cloud-synced. Use ZIP backup to move media.'
-              : 'Sign in to sync your text data across devices. Photos are NOT cloud-synced.',
+            isSignedIn
+                ? 'Your text data is securely synced as $userEmail. Photos are NOT cloud-synced. Use ZIP backup to move media.'
+                : 'Sign in to sync your text data across devices. Photos are NOT cloud-synced.',
             style: TextStyle(color: context.colors.textMedium, fontSize: 13),
           ),
           const SizedBox(height: 16),
@@ -796,9 +917,19 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
             Center(
               child: Column(
                 children: [
-                  const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                   const SizedBox(height: 8),
-                  Text(_syncStatus, style: TextStyle(color: context.colors.primary, fontSize: 12)),
+                  Text(
+                    _syncStatus,
+                    style: TextStyle(
+                      color: context.colors.primary,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             )
@@ -811,7 +942,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 icon: const Icon(Icons.login),
                 label: const Text('Sign in with Google'),
@@ -823,15 +956,25 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      setState(() { _isSyncing = true; _syncStatus = 'Syncing...'; });
+                      setState(() {
+                        _isSyncing = true;
+                        _syncStatus = 'Syncing...';
+                      });
                       await _runFullSync();
-                      setState(() { _isSyncing = false; _syncStatus = ''; });
+                      setState(() {
+                        _isSyncing = false;
+                        _syncStatus = '';
+                      });
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
-                      side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
+                      side: BorderSide(
+                        color: context.colors.primary.withValues(alpha: 0.5),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     icon: const Icon(Icons.sync),
                     label: const Text('Sync Now'),
@@ -844,16 +987,31 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                       context: context,
                       builder: (ctx) => AlertDialog(
                         backgroundColor: context.colors.card,
-                        title: Text('Sign Out', style: TextStyle(color: context.colors.textDark)),
-                        content: Text('Are you sure you want to sign out?', style: TextStyle(color: context.colors.textMedium)),
+                        title: Text(
+                          'Sign Out',
+                          style: TextStyle(color: context.colors.textDark),
+                        ),
+                        content: Text(
+                          'Are you sure you want to sign out?',
+                          style: TextStyle(color: context.colors.textMedium),
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: Text('Cancel', style: TextStyle(color: context.colors.textLight)),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(color: context.colors.textLight),
+                            ),
                           ),
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, true),
-                            child: Text('Sign Out', style: TextStyle(color: context.colors.red, fontWeight: FontWeight.bold)),
+                            child: Text(
+                              'Sign Out',
+                              style: TextStyle(
+                                color: context.colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -886,8 +1044,17 @@ class _ExportOptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      title: Text(title, style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.w600)),
-      trailing: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: context.colors.textDark,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: context.colors.textMedium,
+      ),
       onTap: onTap,
     );
   }
@@ -959,10 +1126,7 @@ class _MenuCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: context.colors.textLight,
-            ),
+            Icon(Icons.chevron_right_rounded, color: context.colors.textLight),
           ],
         ),
       ),
@@ -1022,12 +1186,11 @@ class _SettingsSwitch extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
-            fontSize: 13,
-            color: context.colors.textMedium,
-          ),
+          style: TextStyle(fontSize: 13, color: context.colors.textMedium),
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kCardRadius)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kCardRadius),
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
     );
@@ -1050,7 +1213,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   late TextEditingController proteinController;
   late TextEditingController carbsController;
   late TextEditingController fatController;
-  
+
   String? _localPhotoPath;
   bool _clearPhoto = false;
 
@@ -1060,11 +1223,21 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     final profile = ref.read(profileProvider);
     nameController = TextEditingController(text: profile.name);
     coachNameController = TextEditingController(text: profile.coachName);
-    heightController = TextEditingController(text: profile.height.toStringAsFixed(0));
-    targetController = TextEditingController(text: profile.targetWeight?.toStringAsFixed(1) ?? '');
-    caloriesController = TextEditingController(text: profile.targetCalories.toString());
-    proteinController = TextEditingController(text: profile.targetProteinG.toString());
-    carbsController = TextEditingController(text: profile.targetCarbsG.toString());
+    heightController = TextEditingController(
+      text: profile.height.toStringAsFixed(0),
+    );
+    targetController = TextEditingController(
+      text: profile.targetWeight?.toStringAsFixed(1) ?? '',
+    );
+    caloriesController = TextEditingController(
+      text: profile.targetCalories.toString(),
+    );
+    proteinController = TextEditingController(
+      text: profile.targetProteinG.toString(),
+    );
+    carbsController = TextEditingController(
+      text: profile.targetCarbsG.toString(),
+    );
     fatController = TextEditingController(text: profile.targetFatG.toString());
     _localPhotoPath = profile.photoPath;
   }
@@ -1113,9 +1286,12 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
 
       if (croppedFile != null) {
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName = 'profile_pic_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final savedImage = await File(croppedFile.path).copy('${appDir.path}/$fileName');
-        
+        final fileName =
+            'profile_pic_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final savedImage = await File(
+          croppedFile.path,
+        ).copy('${appDir.path}/$fileName');
+
         setState(() {
           _localPhotoPath = savedImage.path;
           _clearPhoto = false;
@@ -1124,7 +1300,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e'), backgroundColor: context.colors.red),
+          SnackBar(
+            content: Text('Error picking image: $e'),
+            backgroundColor: context.colors.red,
+          ),
         );
       }
     }
@@ -1175,7 +1354,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.delete, color: context.colors.red),
-                title: Text('Remove photo', style: TextStyle(color: context.colors.red)),
+                title: Text(
+                  'Remove photo',
+                  style: TextStyle(color: context.colors.red),
+                ),
                 onTap: () async {
                   Navigator.pop(ctx);
                   if (_localPhotoPath != null) {
@@ -1221,18 +1403,18 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                       child: ClipOval(
                         child: _localPhotoPath != null && !_clearPhoto
                             ? (_localPhotoPath!.startsWith('assets/')
-                                ? Image.asset(
-                                    _localPhotoPath!,
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    File(_localPhotoPath!),
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  ))
+                                  ? Image.asset(
+                                      _localPhotoPath!,
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      File(_localPhotoPath!),
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                    ))
                             : Center(
                                 child: nameController.text.isNotEmpty
                                     ? Text(
@@ -1243,7 +1425,11 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                           color: context.colors.primary,
                                         ),
                                       )
-                                    : Icon(Icons.person, size: 40, color: context.colors.primary),
+                                    : Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: context.colors.primary,
+                                      ),
                               ),
                       ),
                     ),
@@ -1255,9 +1441,16 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                         decoration: BoxDecoration(
                           color: context.colors.primary,
                           shape: BoxShape.circle,
-                          border: Border.all(color: context.colors.card, width: 2),
+                          border: Border.all(
+                            color: context.colors.card,
+                            width: 2,
+                          ),
                         ),
-                        child: Icon(Icons.camera_alt, color: context.colors.onPrimary, size: 14),
+                        child: Icon(
+                          Icons.camera_alt,
+                          color: context.colors.onPrimary,
+                          size: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -1289,7 +1482,9 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
               label: 'Target Weight (kg)',
               controller: targetController,
               prefixIcon: Icons.flag_rounded,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 16),
             _ProfileTextField(
@@ -1348,14 +1543,20 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 final updated = profile.copyWith(
                   name: nameController.text,
                   coachName: coachNameController.text.trim(),
-                  height: double.tryParse(heightController.text) ??
-                      profile.height,
+                  height:
+                      double.tryParse(heightController.text) ?? profile.height,
                   targetWeight: double.tryParse(targetController.text),
-                  targetCalories: int.tryParse(caloriesController.text) ??
+                  targetCalories:
+                      int.tryParse(caloriesController.text) ??
                       profile.targetCalories,
-                  targetProteinG: int.tryParse(proteinController.text) ?? profile.targetProteinG,
-                  targetCarbsG: int.tryParse(carbsController.text) ?? profile.targetCarbsG,
-                  targetFatG: int.tryParse(fatController.text) ?? profile.targetFatG,
+                  targetProteinG:
+                      int.tryParse(proteinController.text) ??
+                      profile.targetProteinG,
+                  targetCarbsG:
+                      int.tryParse(carbsController.text) ??
+                      profile.targetCarbsG,
+                  targetFatG:
+                      int.tryParse(fatController.text) ?? profile.targetFatG,
                   photoPath: _localPhotoPath,
                   clearPhoto: _clearPhoto,
                 );
@@ -1438,6 +1639,180 @@ class _ProfileTextField extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AiActivitySheet extends StatelessWidget {
+  const _AiActivitySheet();
+  @override
+  Widget build(BuildContext context) {
+    if (AiLogger.logs.isEmpty) {
+      return AppSheet(
+        title: 'Recent AI Activity',
+        scrollable: true,
+        child: const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: Text('No AI requests made yet.')),
+        ),
+      );
+    }
+    return AppSheet(
+      title: 'Recent AI Activity',
+      scrollable: true,
+      child: Column(
+        children: AiLogger.logs
+            .map(
+              (log) => ListTile(
+                title: Text(
+                  '${log.purpose} • ${log.model}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                subtitle: Text(
+                  'Outcome: ${log.outcome}\n${log.timestamp.toString().substring(11, 16)}',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                trailing: Text(
+                  '${log.durationMs} ms',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+}
+
+class _DiagnosticsTestSheet extends StatefulWidget {
+  final WidgetRef ref;
+  const _DiagnosticsTestSheet({required this.ref});
+  @override
+  State<_DiagnosticsTestSheet> createState() => _DiagnosticsTestSheetState();
+}
+
+class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
+  final Map<String, Map<String, dynamic>> _results = {};
+  bool _isTesting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _runTests();
+  }
+
+  Future<void> _runTests() async {
+    setState(() => _isTesting = true);
+    final allModels = {
+      ...AiClient.textModelsToTry,
+      ...AiClient.visionModelsToTry,
+    }.toList();
+    final client = widget.ref.read(geminiFoodServiceProvider).aiClient;
+    final useFirebase = widget.ref.read(isSignedInProvider);
+    final profile = widget.ref.read(profileProvider);
+
+    for (final model in allModels) {
+      if (!mounted) break;
+      final sw = Stopwatch()..start();
+      try {
+        await client.generateJson(
+          prompt: '{"test":"Respond with exactly {\"status\":\"ok\"}"}',
+          systemInstruction: 'Respond only in valid JSON.',
+          useFirebase: useFirebase,
+          apiKey: profile.geminiApiKey,
+          skipCache: true,
+        );
+        sw.stop();
+        if (mounted)
+          setState(() {
+            _results[model] = {
+              'status': '✓',
+              'latency': sw.elapsedMilliseconds,
+              'error': null,
+            };
+          });
+      } catch (e) {
+        sw.stop();
+        final cause = (e is AiException) ? e.cause : null;
+        if (mounted)
+          setState(() {
+            _results[model] = {
+              'status': '✗',
+              'latency': sw.elapsedMilliseconds,
+              'error': cause?.toString() ?? e.toString(),
+            };
+          });
+      }
+    }
+    if (mounted) setState(() => _isTesting = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSheet(
+      title: 'AI Connection Test',
+      scrollable: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_isTesting) const LinearProgressIndicator(),
+          const SizedBox(height: 16),
+          ..._results.entries
+              .map(
+                (e) => Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.transparent,
+                  child: Row(
+                    children: [
+                      Text(
+                        e.value['status'],
+                        style: TextStyle(
+                          color: e.value['status'] == '✓'
+                              ? Colors.green
+                              : Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              e.key,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (e.value['error'] != null)
+                              Text(
+                                e.value['error'],
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Text('${e.value['latency']} ms'),
+                    ],
+                  ),
+                ),
+              )
+              .toList(),
+        ],
+      ),
     );
   }
 }

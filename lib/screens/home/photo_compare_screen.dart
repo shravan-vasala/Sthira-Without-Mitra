@@ -30,7 +30,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
   void _initPhotos() {
     final mediaRepo = ref.read(mediaRepoProvider);
     final allEntries = mediaRepo.getAllProgressPhotos();
-    
+
     _allPhotos = [];
     for (final entry in allEntries) {
       final date = entry.key;
@@ -39,7 +39,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
         _allPhotos.add(PhotoItem(path: path, date: date, poseTag: poseTag));
       }
     }
-    
+
     if (_allPhotos.isEmpty) return;
 
     // allPhotos is sorted newest to oldest because getAllProgressPhotos sorts descending by date.
@@ -48,7 +48,10 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     PhotoItem? leftPhoto;
 
     // Try to find matching poses on different dates first
-    final poses = _allPhotos.map((p) => p.poseTag).where((p) => p != 'none').toSet();
+    final poses = _allPhotos
+        .map((p) => p.poseTag)
+        .where((p) => p != 'none')
+        .toSet();
     if (poses.isNotEmpty) {
       for (final pose in poses) {
         final posePhotos = _allPhotos.where((p) => p.poseTag == pose).toList();
@@ -56,7 +59,10 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
         if (posePhotos.length > 1) {
           final newestPose = posePhotos.first;
           // Find the next photo with a different date
-          final olderPose = posePhotos.skip(1).where((p) => p.date != newestPose.date).firstOrNull;
+          final olderPose = posePhotos
+              .skip(1)
+              .where((p) => p.date != newestPose.date)
+              .firstOrNull;
           if (olderPose != null) {
             rightPhoto = newestPose;
             leftPhoto = olderPose;
@@ -67,11 +73,13 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     }
 
     // Fallback: pick any photo from a different date
-    leftPhoto ??= _allPhotos.where((p) => p.date != rightPhoto.date).firstOrNull;
+    leftPhoto ??= _allPhotos
+        .where((p) => p.date != rightPhoto.date)
+        .firstOrNull;
 
     // Last resort: if only one date exists, use the last photo as left
     leftPhoto ??= _allPhotos.length > 1 ? _allPhotos.last : null;
-    
+
     setState(() {
       _leftPhoto = leftPhoto;
       _rightPhoto = rightPhoto;
@@ -165,7 +173,10 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                             borderRadius: BorderRadius.circular(8),
                             child: kIsWeb
                                 ? Image.network(item.path, fit: BoxFit.cover)
-                                : Image.file(File(item.path), fit: BoxFit.cover),
+                                : Image.file(
+                                    File(item.path),
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ),
                         if (item.poseTag != 'none')
@@ -173,14 +184,20 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                             bottom: 4,
                             left: 4,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.black.withValues(alpha: 0.6),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 item.poseTag,
-                                style: const TextStyle(fontSize: 9, color: Colors.white),
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -207,7 +224,11 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.add_photo_alternate, color: Colors.white54, size: 48),
+                  Icon(
+                    Icons.add_photo_alternate,
+                    color: Colors.white54,
+                    size: 48,
+                  ),
                   SizedBox(height: 8),
                   Text('Select Photo', style: TextStyle(color: Colors.white54)),
                 ],
@@ -238,7 +259,10 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
               ),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 8,
+                ),
                 color: Colors.black87,
                 child: Column(
                   children: [
@@ -290,14 +314,19 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
               ],
             ),
           ),
-          if (_leftPhoto != null && _rightPhoto != null && _getTimeDeltaText().isNotEmpty)
+          if (_leftPhoto != null &&
+              _rightPhoto != null &&
+              _getTimeDeltaText().isNotEmpty)
             Positioned(
               left: 0,
               right: 0,
               top: 32,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: context.colors.primary,
                     borderRadius: BorderRadius.circular(20),

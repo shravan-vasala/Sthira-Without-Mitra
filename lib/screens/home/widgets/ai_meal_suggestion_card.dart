@@ -24,7 +24,8 @@ class AIMealSuggestionCard extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AIMealSuggestionCard> createState() => _AIMealSuggestionCardState();
+  ConsumerState<AIMealSuggestionCard> createState() =>
+      _AIMealSuggestionCardState();
 }
 
 class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
@@ -41,7 +42,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
 
     try {
       final service = ref.read(geminiFoodServiceProvider);
-      
+
       final dateStr = ref.read(dateStringProvider);
       final mealRepo = ref.read(mealRepoProvider);
       final todayLogs = mealRepo.getLogsInRange(dateStr, dateStr);
@@ -62,7 +63,6 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         previousMeals: previousMeals,
       );
 
-      
       bool isFirstChunk = true;
       await for (final chunk in stream) {
         if (mounted) {
@@ -76,7 +76,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
           });
         }
       }
-      
+
       if (isFirstChunk && mounted) {
         // Stream completed without yielding anything
         setState(() {
@@ -103,7 +103,11 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             children: [
-              Icon(Icons.check_circle_rounded, color: context.colors.green, size: 40),
+              Icon(
+                Icons.check_circle_rounded,
+                color: context.colors.green,
+                size: 40,
+              ),
               const SizedBox(height: 12),
               Text(
                 'Calorie Goal Reached!',
@@ -137,7 +141,11 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
           children: [
             Row(
               children: [
-                Icon(Icons.auto_awesome, color: context.colors.primary, size: 20),
+                Icon(
+                  Icons.auto_awesome,
+                  color: context.colors.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Smart Meal Suggestion',
@@ -174,8 +182,12 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                   onPressed: _fetchSuggestion,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: context.colors.primary,
-                    side: BorderSide(color: context.colors.primary.withValues(alpha: 0.3)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    side: BorderSide(
+                      color: context.colors.primary.withValues(alpha: 0.3),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text('Suggest Something Else'),
                 ),

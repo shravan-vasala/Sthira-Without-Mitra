@@ -7,7 +7,9 @@ import '../services/screen_time_service.dart';
 import 'auth_provider.dart';
 import '../services/health_connect_service.dart';
 
-final syncControllerProvider = NotifierProvider<SyncController, bool>(SyncController.new);
+final syncControllerProvider = NotifierProvider<SyncController, bool>(
+  SyncController.new,
+);
 
 class SyncController extends Notifier<bool> with WidgetsBindingObserver {
   bool _isSyncing = false;
@@ -28,7 +30,7 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.paused) {
       // Flush any pending Widget state when going to background
       WidgetUpdateService.pushWidgetState(ref);
-      
+
       // Also flush firestore queue if available (Task 4)
       ref.read(firestoreSyncServiceProvider).flushNow();
     }
@@ -79,7 +81,8 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
 
         if (todaySteps != null) {
           await prefs.setBool('hc_connected', true);
-          ref.read(stepsSourceProvider.notifier).state = StepsSource.healthConnect;
+          ref.read(stepsSourceProvider.notifier).state =
+              StepsSource.healthConnect;
         }
 
         if (todaySteps != null || everConnected) {
@@ -102,17 +105,12 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
       // Batched invalidation at the end
       ref.invalidate(dailyLogProvider);
       ref.invalidate(habitCompletionsProvider);
-      
+
       // Update widget with new sync data
       WidgetUpdateService.pushWidgetState(ref);
-
     } finally {
       _isSyncing = false;
       state = false;
     }
   }
 }
-
-
-
-

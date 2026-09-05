@@ -19,21 +19,25 @@ class InsightsCard extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-           child: Row(
-             children: [
-               Icon(Icons.lightbulb_outline_rounded, color: context.colors.indigo, size: 20),
-               const SizedBox(width: 8),
-               Text(
-                 'Insights',
-                 style: TextStyle(
-                   fontSize: 16,
-                   fontWeight: FontWeight.w700,
-                   color: context.colors.textDark,
-                 ),
-               ),
-             ],
-           ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Row(
+            children: [
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                color: context.colors.indigo,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Insights',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textDark,
+                ),
+              ),
+            ],
+          ),
         ),
         SizedBox(
           height: 150,
@@ -54,9 +58,18 @@ class InsightsCard extends ConsumerWidget {
 
   Widget _buildInsightItem(BuildContext context, Insight insight) {
     final (bgColor, iconColor) = switch (insight.severity) {
-      InsightSeverity.positive => (context.colors.green.withValues(alpha: 0.1), context.colors.green),
-      InsightSeverity.warning => (context.colors.orange.withValues(alpha: 0.1), context.colors.orange),
-      InsightSeverity.neutral => (context.colors.primary.withValues(alpha: 0.1), context.colors.primary),
+      InsightSeverity.positive => (
+        context.colors.green.withValues(alpha: 0.1),
+        context.colors.green,
+      ),
+      InsightSeverity.warning => (
+        context.colors.orange.withValues(alpha: 0.1),
+        context.colors.orange,
+      ),
+      InsightSeverity.neutral => (
+        context.colors.primary.withValues(alpha: 0.1),
+        context.colors.primary,
+      ),
     };
 
     return Container(

@@ -17,11 +17,12 @@ class BadgeOverlayHost extends ConsumerStatefulWidget {
   ConsumerState<BadgeOverlayHost> createState() => _BadgeOverlayHostState();
 }
 
-class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost> with SingleTickerProviderStateMixin {
+class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _slideAnimation;
   late ConfettiController _confettiController;
-  
+
   Badge? _currentBadge;
   Timer? _hideTimer;
   bool _isShowing = false;
@@ -39,7 +40,9 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost> with Single
       curve: Curves.elasticOut,
       reverseCurve: Curves.easeInCubic,
     );
-    _confettiController = ConfettiController(duration: const Duration(milliseconds: 200));
+    _confettiController = ConfettiController(
+      duration: const Duration(milliseconds: 200),
+    );
   }
 
   @override
@@ -53,16 +56,16 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost> with Single
   void _processQueue() {
     final queue = ref.read(badgeUnlockEventProvider);
     if (queue.isEmpty) return;
-    
+
     setState(() {
       _isShowing = true;
       _currentBadge = queue.first;
     });
-    
+
     HapticFeedback.heavyImpact();
     _controller.forward(from: 0.0);
     _confettiController.play();
-    
+
     _hideTimer?.cancel();
     _hideTimer = Timer(const Duration(seconds: 5), _dismissBadge);
   }
@@ -70,15 +73,15 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost> with Single
   void _dismissBadge() {
     _hideTimer?.cancel();
     if (!mounted) return;
-    
+
     _controller.reverse().then((_) {
       if (!mounted) return;
       setState(() => _currentBadge = null);
-      
+
       // Pop the queue
       ref.read(badgeUnlockEventProvider.notifier).dequeue();
       _isShowing = false;
-      
+
       // Wait 400ms before showing the next one
       Future.delayed(const Duration(milliseconds: 400), () {
         if (mounted && ref.read(badgeUnlockEventProvider).isNotEmpty) {
@@ -98,7 +101,10 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost> with Single
 
     if (_currentBadge == null) return const SizedBox.shrink();
 
-    final unlockedCount = ref.watch(badgesProvider).where((b) => b.isUnlocked).length;
+    final unlockedCount = ref
+        .watch(badgesProvider)
+        .where((b) => b.isUnlocked)
+        .length;
     final totalCount = ref.watch(badgesProvider).length;
 
     return Positioned(
@@ -130,114 +136,143 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost> with Single
               borderRadius: BorderRadius.circular(16),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: context.colors.surface.withValues(alpha: 0.85),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: context.colors.gold.withValues(alpha: 0.5), 
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colors.gold.withValues(alpha: 0.15),
-                        blurRadius: 24,
-                        spreadRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          ConfettiWidget(
-                            confettiController: _confettiController,
-                            blastDirectionality: BlastDirectionality.explosive,
-                            colors: [context.colors.gold, context.colors.orange, context.colors.white],
-                            maxBlastForce: 25,
-                            minBlastForce: 15,
-                            emissionFrequency: 0.1,
-                            numberOfParticles: 12,
-                            gravity: 0.2,
+                child:
+                    Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [context.colors.goldMuted, context.colors.gold],
-                                radius: 0.8,
+                          decoration: BoxDecoration(
+                            color: context.colors.surface.withValues(
+                              alpha: 0.85,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: context.colors.gold.withValues(alpha: 0.5),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: context.colors.gold.withValues(
+                                  alpha: 0.15,
+                                ),
+                                blurRadius: 24,
+                                spreadRadius: 4,
                               ),
-                              border: Border.all(color: context.colors.gold, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: context.colors.gold.withValues(alpha: 0.4),
-                                  blurRadius: 8,
-                                )
-                              ],
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              _currentBadge!.iconEmoji,
-                              style: const TextStyle(fontSize: 26),
-                            ),
-                          ).animate(key: ValueKey(_currentBadge!.id))
-                           .scale(begin: const Offset(0.4, 0.4), curve: Curves.easeOutBack, duration: 600.ms),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'ACHIEVEMENT UNLOCKED',
-                              style: TextStyle(
-                                color: context.colors.gold,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.5,
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  ConfettiWidget(
+                                    confettiController: _confettiController,
+                                    blastDirectionality:
+                                        BlastDirectionality.explosive,
+                                    colors: [
+                                      context.colors.gold,
+                                      context.colors.orange,
+                                      context.colors.white,
+                                    ],
+                                    maxBlastForce: 25,
+                                    minBlastForce: 15,
+                                    emissionFrequency: 0.1,
+                                    numberOfParticles: 12,
+                                    gravity: 0.2,
+                                  ),
+                                  Container(
+                                        width: 52,
+                                        height: 52,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: RadialGradient(
+                                            colors: [
+                                              context.colors.goldMuted,
+                                              context.colors.gold,
+                                            ],
+                                            radius: 0.8,
+                                          ),
+                                          border: Border.all(
+                                            color: context.colors.gold,
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: context.colors.gold
+                                                  .withValues(alpha: 0.4),
+                                              blurRadius: 8,
+                                            ),
+                                          ],
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          _currentBadge!.iconEmoji,
+                                          style: const TextStyle(fontSize: 26),
+                                        ),
+                                      )
+                                      .animate(key: ValueKey(_currentBadge!.id))
+                                      .scale(
+                                        begin: const Offset(0.4, 0.4),
+                                        curve: Curves.easeOutBack,
+                                        duration: 600.ms,
+                                      ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _currentBadge!.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: context.colors.textDark,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'ACHIEVEMENT UNLOCKED',
+                                      style: TextStyle(
+                                        color: context.colors.gold,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _currentBadge!.title,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: context.colors.textDark,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _currentBadge!.description,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: context.colors.textMedium,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '$unlockedCount of $totalCount unlocked',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: context.colors.textLight,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _currentBadge!.description,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: context.colors.textMedium,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$unlockedCount of $totalCount unlocked',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: context.colors.textLight,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        )
+                        .animate(key: ValueKey('${_currentBadge!.id}_shimmer'))
+                        .shimmer(
+                          duration: 900.ms,
+                          color: Colors.white.withValues(alpha: 0.3),
                         ),
-                      ),
-                    ],
-                  ),
-                ).animate(key: ValueKey('${_currentBadge!.id}_shimmer'))
-                 .shimmer(duration: 900.ms, color: Colors.white.withValues(alpha: 0.3)),
               ),
             ),
           ),

@@ -48,10 +48,14 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
   Widget build(BuildContext context) {
     final selectedDateStr = ref.watch(dateStringProvider);
     final selectedDate = DateTime.parse(selectedDateStr);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
     final isFuture = selectedDate.isAfter(today);
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
-    
+
     return AppSheet(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -69,7 +73,10 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: context.colors.lavenderCard,
                   borderRadius: BorderRadius.circular(12),
@@ -86,7 +93,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           if (isFuture)
             Container(
               padding: const EdgeInsets.all(12),
@@ -96,12 +103,19 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline_rounded, color: context.colors.primary, size: 20),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: context.colors.primary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'You cannot log water for future dates.',
-                      style: TextStyle(color: context.colors.textDark, fontSize: 13),
+                      style: TextStyle(
+                        color: context.colors.textDark,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -134,7 +148,10 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: context.colors.card,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       suffixText: 'ml',
                       suffixStyle: TextStyle(
                         fontSize: 16,
@@ -150,7 +167,10 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: context.colors.primary, width: 2),
+                        borderSide: BorderSide(
+                          color: context.colors.primary,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -165,11 +185,18 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     onPressed: () => _addAmount(250),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
-                      side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: BorderSide(
+                        color: context.colors.primary.withValues(alpha: 0.5),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('+ 250ml', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      '+ 250ml',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -178,11 +205,18 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     onPressed: () => _addAmount(500),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
-                      side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: BorderSide(
+                        color: context.colors.primary.withValues(alpha: 0.5),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('+ 500ml', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      '+ 500ml',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -191,11 +225,18 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     onPressed: () => _addAmount(1000),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
-                      side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: BorderSide(
+                        color: context.colors.primary.withValues(alpha: 0.5),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('+ 1L', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      '+ 1L',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
               ],
@@ -208,23 +249,39 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     child: OutlinedButton(
                       onPressed: () async {
                         await ref.read(dailyLogProvider.notifier).clearWater();
-                        
+
                         final habits = ref.read(habitsProvider);
-                        final waterHabit = habits.where((h) => h.name.toLowerCase().contains('water')).firstOrNull;
+                        final waterHabit = habits
+                            .where(
+                              (h) => h.name.toLowerCase().contains('water'),
+                            )
+                            .firstOrNull;
                         if (waterHabit != null) {
                           // ignore: unawaited_futures
-                          ref.read(habitCompletionsProvider.notifier).setOverride(waterHabit.id, 'none');
+                          ref
+                              .read(habitCompletionsProvider.notifier)
+                              .setOverride(waterHabit.id, 'none');
                         }
-                        
+
                         if (context.mounted) Navigator.of(context).pop();
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: context.colors.red,
-                        side: BorderSide(color: context.colors.red.withValues(alpha: 0.5)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        side: BorderSide(
+                          color: context.colors.red.withValues(alpha: 0.5),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: const Text('Clear', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Clear',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -236,21 +293,32 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     onPressed: () async {
                       final amount = int.tryParse(_controller.text) ?? 0;
                       if (amount > 0) {
-                        await ref.read(dailyLogProvider.notifier).updateWater(amount);
-                        
+                        await ref
+                            .read(dailyLogProvider.notifier)
+                            .updateWater(amount);
+
                         final habits = ref.read(habitsProvider);
-                        final waterHabit = habits.where((h) => h.name.toLowerCase().contains('water')).firstOrNull;
+                        final waterHabit = habits
+                            .where(
+                              (h) => h.name.toLowerCase().contains('water'),
+                            )
+                            .firstOrNull;
                         if (waterHabit != null) {
                           double targetInMl = waterHabit.target.toDouble();
-                          if (waterHabit.unit.toLowerCase() == 'l' || waterHabit.unit.toLowerCase() == 'liters') {
+                          if (waterHabit.unit.toLowerCase() == 'l' ||
+                              waterHabit.unit.toLowerCase() == 'liters') {
                             targetInMl *= 1000;
                           }
                           if (amount >= targetInMl) {
                             // ignore: unawaited_futures
-                            ref.read(habitCompletionsProvider.notifier).setOverride(waterHabit.id, 'done');
+                            ref
+                                .read(habitCompletionsProvider.notifier)
+                                .setOverride(waterHabit.id, 'done');
                           } else {
                             // ignore: unawaited_futures
-                            ref.read(habitCompletionsProvider.notifier).setOverride(waterHabit.id, 'none');
+                            ref
+                                .read(habitCompletionsProvider.notifier)
+                                .setOverride(waterHabit.id, 'none');
                           }
                         }
                       }
@@ -266,4 +334,3 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
     );
   }
 }
-

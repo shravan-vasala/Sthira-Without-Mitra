@@ -38,10 +38,7 @@ class SectionHeader extends StatelessWidget {
               letterSpacing: 1.2,
             ),
           ),
-          if (countLabel != null) ...[
-            const SizedBox(width: 8),
-            countLabel!,
-          ],
+          if (countLabel != null) ...[const SizedBox(width: 8), countLabel!],
           const Spacer(),
           if (trailing != null) trailing!,
         ],

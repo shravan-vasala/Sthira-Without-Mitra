@@ -11,7 +11,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 
-final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin _notificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 String kTimerEndTimeKey = 'rest_timer_end_time';
 String kTimerRemainingKey = 'rest_timer_remaining';
@@ -65,8 +66,13 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
     if (_notificationsInitialized) return;
     try {
       tz_data.initializeTimeZones();
-      const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-      const initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: DarwinInitializationSettings());
+      const initializationSettingsAndroid = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
+      const initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: DarwinInitializationSettings(),
+      );
       await _notificationsPlugin.initialize(initializationSettings);
       _notificationsInitialized = true;
     } catch (e) {
@@ -77,30 +83,33 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
   Future<void> _scheduleNotification(int seconds, String? exerciseName) async {
     await _initNotifications();
     if (!_notificationsInitialized) return;
-    
+
     final title = 'Rest Complete!';
-    final body = exerciseName != null ? 'Time for $exerciseName' : 'Your rest timer has finished.';
-    
+    final body = exerciseName != null
+        ? 'Time for $exerciseName'
+        : 'Your rest timer has finished.';
+
     try {
       await _notificationsPlugin.zonedSchedule(
-          0,
-          title,
-          body,
-          tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds)),
-          const NotificationDetails(
-              android: AndroidNotificationDetails(
-                  'rest_timer',
-                  'Rest Timer',
-                  channelDescription: 'Notifications for rest timer completion',
-                  importance: Importance.max,
-                  priority: Priority.high,
-                  enableVibration: true,
-                  playSound: true,
-              ),
+        0,
+        title,
+        body,
+        tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds)),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'rest_timer',
+            'Rest Timer',
+            channelDescription: 'Notifications for rest timer completion',
+            importance: Importance.max,
+            priority: Priority.high,
+            enableVibration: true,
+            playSound: true,
           ),
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime);
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
     } catch (e) {
       // Ignore in test
     }
@@ -132,7 +141,8 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
     } else {
       final endTimeEpoch = prefs.getInt(kTimerEndTimeKey);
       if (endTimeEpoch != null) {
-        final remaining = (endTimeEpoch - DateTime.now().millisecondsSinceEpoch) ~/ 1000;
+        final remaining =
+            (endTimeEpoch - DateTime.now().millisecondsSinceEpoch) ~/ 1000;
         if (remaining > 0) {
           _targetEndTimeEpoch = endTimeEpoch;
           state = RestTimerState(
@@ -157,13 +167,13 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
       await _clearPersistedTimer();
       return;
     }
-    
+
     if (state.exerciseName != null) {
       await prefs.setString(kTimerExerciseKey, state.exerciseName!);
     } else {
       await prefs.remove(kTimerExerciseKey);
     }
-    
+
     await prefs.setBool(kTimerIsPausedKey, state.isPaused);
     if (state.isPaused) {
       await prefs.setInt(kTimerRemainingKey, state.remainingSeconds);
@@ -184,7 +194,8 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
 
   void startTimer(int seconds, {String? exerciseName}) {
     _timer?.cancel();
-    _targetEndTimeEpoch = DateTime.now().millisecondsSinceEpoch + (seconds * 1000);
+    _targetEndTimeEpoch =
+        DateTime.now().millisecondsSinceEpoch + (seconds * 1000);
     state = RestTimerState(
       remainingSeconds: seconds,
       isActive: true,
@@ -193,7 +204,7 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
     );
     _persistTimer();
     _startInternalTimer();
-    
+
     final profile = ref.read(profileProvider);
     if (profile.restTimerNotification) {
       _scheduleNotification(seconds, exerciseName);
@@ -204,7 +215,9 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_targetEndTimeEpoch != null) {
-        final remaining = (_targetEndTimeEpoch! - DateTime.now().millisecondsSinceEpoch) ~/ 1000;
+        final remaining =
+            (_targetEndTimeEpoch! - DateTime.now().millisecondsSinceEpoch) ~/
+            1000;
         if (remaining > 0) {
           if (remaining <= 3 && remaining > 0) {
             Haptics.toggle();
@@ -221,7 +234,11 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
     _timer?.cancel();
     _cancelNotification();
     final completedExercise = state.exerciseName;
-    state = RestTimerState(remainingSeconds: 0, isActive: false, isPaused: false);
+    state = RestTimerState(
+      remainingSeconds: 0,
+      isActive: false,
+      isPaused: false,
+    );
     _clearPersistedTimer();
 
     // Trigger feedback based on profile settings
@@ -254,7 +271,12 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
                     if (completedExercise != null)
                       Text(
                         'Time for $completedExercise',
-                        style: TextStyle(fontSize: 12, color: context.colors.onPrimary.withValues(alpha: 0.8)),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.colors.onPrimary.withValues(
+                            alpha: 0.8,
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -264,7 +286,9 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
           backgroundColor: context.colors.orange,
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     }
@@ -273,7 +297,11 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
   void stopTimer() {
     _timer?.cancel();
     _cancelNotification();
-    state = state.copyWith(isActive: false, isPaused: false, remainingSeconds: 0);
+    state = state.copyWith(
+      isActive: false,
+      isPaused: false,
+      remainingSeconds: 0,
+    );
     _clearPersistedTimer();
   }
 
@@ -288,7 +316,9 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
 
   void resumeTimer() {
     if (state.isActive && state.isPaused) {
-      _targetEndTimeEpoch = DateTime.now().millisecondsSinceEpoch + (state.remainingSeconds * 1000);
+      _targetEndTimeEpoch =
+          DateTime.now().millisecondsSinceEpoch +
+          (state.remainingSeconds * 1000);
       state = state.copyWith(isPaused: false);
       _persistTimer();
       _startInternalTimer();
@@ -305,7 +335,9 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
       if (state.isPaused) {
         state = state.copyWith(remainingSeconds: newRemaining);
       } else {
-        _targetEndTimeEpoch = (_targetEndTimeEpoch ?? DateTime.now().millisecondsSinceEpoch) + (seconds * 1000);
+        _targetEndTimeEpoch =
+            (_targetEndTimeEpoch ?? DateTime.now().millisecondsSinceEpoch) +
+            (seconds * 1000);
         state = state.copyWith(remainingSeconds: newRemaining);
         final profile = ref.read(profileProvider);
         if (profile.restTimerNotification) {
@@ -318,10 +350,10 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
 
   // Note: Notifier automatically handles disposal in Riverpod, but we can override it if we want.
   // Actually, we should hook into ref.onDispose instead of overriding dispose().
-
 }
 
-final restTimerProvider = NotifierProvider<RestTimerNotifier, RestTimerState>(() {
-  return RestTimerNotifier();
-});
-
+final restTimerProvider = NotifierProvider<RestTimerNotifier, RestTimerState>(
+  () {
+    return RestTimerNotifier();
+  },
+);

@@ -7,7 +7,7 @@ import '../services/widget_update_service.dart';
 final mealPlanProvider = Provider<MealPlan?>((ref) {
   final repo = ref.watch(mealRepoProvider);
   final profile = ref.watch(profileProvider);
-  
+
   final activePlanId = profile.activeMealPlan ?? 'Daily Nutrition Plan';
   return repo.getMealPlan(activePlanId);
 });
@@ -17,13 +17,13 @@ class DailyMealLogNotifier extends Notifier<DailyMealLog> {
   DailyMealLog build() {
     final repo = ref.watch(mealRepoProvider);
     final date = ref.watch(dateStringProvider);
-    
+
     final sub = repo.watchDailyLog(date).listen((log) {
       state = log ?? repo.getDailyLog(date);
     });
-    
+
     ref.onDispose(() => sub.cancel());
-    
+
     return repo.getDailyLog(date);
   }
 
@@ -44,11 +44,14 @@ class DailyMealLogNotifier extends Notifier<DailyMealLog> {
   }
 }
 
-final dailyMealLogProvider = NotifierProvider<DailyMealLogNotifier, DailyMealLog>(DailyMealLogNotifier.new);
+final dailyMealLogProvider =
+    NotifierProvider<DailyMealLogNotifier, DailyMealLog>(
+      DailyMealLogNotifier.new,
+    );
 
-final dailyMealLogsRangeProvider = Provider.family<List<DailyMealLog>, (String, String)>((ref, range) {
-  final (start, end) = range;
-  final mealRepo = ref.watch(mealRepoProvider);
-  return mealRepo.getLogsInRange(start, end);
-});
-
+final dailyMealLogsRangeProvider =
+    Provider.family<List<DailyMealLog>, (String, String)>((ref, range) {
+      final (start, end) = range;
+      final mealRepo = ref.watch(mealRepoProvider);
+      return mealRepo.getLogsInRange(start, end);
+    });

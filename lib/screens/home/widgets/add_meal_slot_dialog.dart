@@ -27,20 +27,23 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) return;
 
-    final id = '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
-    
+    final id =
+        '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
+
     if (_addToEveryDay) {
       final profile = ref.read(profileProvider);
-      final updatedSlots = List<Map<String, dynamic>>.from(profile.customMealSlots)
-        ..add({
-          'id': id,
-          'name': name,
-          'emoji': _selectedEmoji,
-          'isDefault': false,
-        });
-      ref.read(profileProvider.notifier).updateProfile(profile.copyWith(customMealSlots: updatedSlots));
+      final updatedSlots =
+          List<Map<String, dynamic>>.from(profile.customMealSlots)..add({
+            'id': id,
+            'name': name,
+            'emoji': _selectedEmoji,
+            'isDefault': false,
+          });
+      ref
+          .read(profileProvider.notifier)
+          .updateProfile(profile.copyWith(customMealSlots: updatedSlots));
     }
-    
+
     // Create an empty log entry for today so it immediately appears (and persists name/emoji)
     final slotLog = MealSlotLog(
       name: name,
@@ -51,11 +54,11 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       totalCarbs: 0,
       totalFat: 0,
     );
-    
+
     ref.read(dailyMealLogProvider.notifier).saveMealSlot(id, slotLog);
 
     Navigator.pop(context);
-    
+
     // Optionally open the scanner immediately for the new slot
     // showModalBottomSheet(
     //   context: context,
@@ -70,7 +73,10 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
     return AlertDialog(
       backgroundColor: context.colors.scaffoldBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: const Text('Add Meal Slot', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+      title: const Text(
+        'Add Meal Slot',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -81,11 +87,19 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
               decoration: InputDecoration(
                 labelText: 'Meal Name',
                 hintText: 'e.g. Post-workout shake',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            Text('Choose an icon', style: TextStyle(fontWeight: FontWeight.w600, color: context.colors.textMedium)),
+            Text(
+              'Choose an icon',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: context.colors.textMedium,
+              ),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -97,11 +111,23 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isSelected ? context.colors.primary.withValues(alpha: 0.2) : context.colors.card,
-                      border: Border.all(color: isSelected ? context.colors.primary : context.colors.border),
+                      color: isSelected
+                          ? context.colors.primary.withValues(alpha: 0.2)
+                          : context.colors.card,
+                      border: Border.all(
+                        color: isSelected
+                            ? context.colors.primary
+                            : context.colors.border,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(opt.icon, size: 24, color: isSelected ? context.colors.primary : context.colors.textMedium),
+                    child: Icon(
+                      opt.icon,
+                      size: 24,
+                      color: isSelected
+                          ? context.colors.primary
+                          : context.colors.textMedium,
+                    ),
                   ),
                 );
               }).toList(),
@@ -112,12 +138,20 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                 Switch(
                   value: _addToEveryDay,
                   onChanged: (val) => setState(() => _addToEveryDay = val),
-                  activeTrackColor: context.colors.primary.withValues(alpha: 0.5),
+                  activeTrackColor: context.colors.primary.withValues(
+                    alpha: 0.5,
+                  ),
                   activeThumbColor: context.colors.primary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text('Add to every day?', style: TextStyle(fontWeight: FontWeight.w600, color: context.colors.textDark)),
+                  child: Text(
+                    'Add to every day?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.textDark,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -125,7 +159,10 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
               padding: const EdgeInsets.only(left: 8.0, top: 4.0),
               child: Text(
                 'If enabled, this slot will appear every day. Otherwise, just today.',
-                style: TextStyle(fontSize: 12, color: context.colors.textMedium),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colors.textMedium,
+                ),
               ),
             ),
           ],
@@ -134,14 +171,19 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel', style: TextStyle(color: context.colors.textLight)),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: context.colors.textLight),
+          ),
         ),
         ElevatedButton(
           onPressed: _submit,
           style: ElevatedButton.styleFrom(
             backgroundColor: context.colors.primary,
             foregroundColor: context.colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           child: const Text('Add Slot'),
         ),

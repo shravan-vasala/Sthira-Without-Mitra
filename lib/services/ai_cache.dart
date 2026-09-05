@@ -21,8 +21,11 @@ class AiCache {
 
   Map<String, dynamic>? get(String prompt, [String? imageContext]) {
     final key = _hash(prompt, imageContext);
-    final entry = _isar.aiCacheEntrys.where().cacheKeyEqualTo(key).findFirstSync();
-    
+    final entry = _isar.aiCacheEntrys
+        .where()
+        .cacheKeyEqualTo(key)
+        .findFirstSync();
+
     if (entry == null) return null;
 
     if (DateTime.now().difference(entry.timestamp) > defaultTtl) {
@@ -31,7 +34,7 @@ class AiCache {
       });
       return null;
     }
-    
+
     try {
       return jsonDecode(entry.cachedResponse) as Map<String, dynamic>;
     } catch (e) {
@@ -42,22 +45,29 @@ class AiCache {
     }
   }
 
-  Future<void> set(String prompt, Map<String, dynamic> result, [String? imageContext]) async {
+  Future<void> set(
+    String prompt,
+    Map<String, dynamic> result, [
+    String? imageContext,
+  ]) async {
     final key = _hash(prompt, imageContext);
     final data = jsonEncode(result);
-    
-    final existing = _isar.aiCacheEntrys.where().cacheKeyEqualTo(key).findFirstSync();
-    
+
+    final existing = _isar.aiCacheEntrys
+        .where()
+        .cacheKeyEqualTo(key)
+        .findFirstSync();
+
     final entry = AiCacheEntry(
       cacheKey: key,
       cachedResponse: data,
       timestamp: DateTime.now(),
     );
-    
+
     if (existing != null) {
       entry.id = existing.id;
     }
-    
+
     await _isar.writeTxn(() async {
       await _isar.aiCacheEntrys.put(entry);
     });

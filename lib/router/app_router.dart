@@ -53,7 +53,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Page Not Found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+            Text(
+              'Page Not Found',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: context.colors.textDark,
+              ),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => context.go('/home'),
@@ -65,15 +72,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ),
     redirect: (context, state) {
       final isCompleted = ref.read(onboardingCompletedProvider);
-      
+
       if (!isCompleted && state.uri.path != '/onboarding') {
         return '/onboarding';
       }
-      
+
       if (isCompleted && state.uri.path == '/onboarding') {
         return '/home';
       }
-      
+
       if (state.uri.path == '/' || state.uri.path.isEmpty) {
         return '/home';
       }
@@ -85,157 +92,164 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OnboardingScreen(),
       ),
 
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return ScaffoldWithNavBar(navigationShell: navigationShell);
-      },
-      branches: [
-        StatefulShellBranch(
-          navigatorKey: _homeNavigatorKey,
-          routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) => const HomeScreen(),
-              routes: [
-                GoRoute(
-                  path: 'meals',
-                  builder: (context, state) => const MealDetailScreen(),
-                ),
-                GoRoute(
-                  path: 'body-stats',
-                  builder: (context, state) => const BodyStatsScreen(),
-                ),
-                GoRoute(
-                  path: 'physique-pictures',
-                  builder: (context, state) => const PhysiquePicturesScreen(),
-                ),
-                GoRoute(
-                  path: 'workout/:dayId',
-                  builder: (context, state) {
-                    final dayId = state.pathParameters['dayId']!;
-                    final sectionParam = state.uri.queryParameters['section'];
-                    final sectionIndex = sectionParam != null
-                        ? int.tryParse(sectionParam)
-                        : null;
-                    return WorkoutScreen(dayId: dayId, sectionIndex: sectionIndex);
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: _progressNavigatorKey,
-          routes: [
-            GoRoute(
-              path: '/progress',
-              builder: (context, state) {
-                final metricStr = state.uri.queryParameters['metric'];
-                MetricType? metric;
-                if (metricStr != null) {
-                  switch (metricStr) {
-                    case 'weight':
-                      metric = MetricType.weight;
-                      break;
-                    case 'steps':
-                      metric = MetricType.steps;
-                      break;
-                    case 'sleep':
-                      metric = MetricType.sleep;
-                      break;
-                    case 'bmi':
-                      metric = MetricType.bmi;
-                      break;
-                    case 'bodyFat':
-                      metric = MetricType.bodyFat;
-                      break;
-                    case 'calories':
-                      metric = MetricType.calories;
-                      break;
-                    case 'protein':
-                    case 'macros': // legacy deep link
-                      metric = MetricType.protein;
-                      break;
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return ScaffoldWithNavBar(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: _homeNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'meals',
+                    builder: (context, state) => const MealDetailScreen(),
+                  ),
+                  GoRoute(
+                    path: 'body-stats',
+                    builder: (context, state) => const BodyStatsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'physique-pictures',
+                    builder: (context, state) => const PhysiquePicturesScreen(),
+                  ),
+                  GoRoute(
+                    path: 'workout/:dayId',
+                    builder: (context, state) {
+                      final dayId = state.pathParameters['dayId']!;
+                      final sectionParam = state.uri.queryParameters['section'];
+                      final sectionIndex = sectionParam != null
+                          ? int.tryParse(sectionParam)
+                          : null;
+                      return WorkoutScreen(
+                        dayId: dayId,
+                        sectionIndex: sectionIndex,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _progressNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/progress',
+                builder: (context, state) {
+                  final metricStr = state.uri.queryParameters['metric'];
+                  MetricType? metric;
+                  if (metricStr != null) {
+                    switch (metricStr) {
+                      case 'weight':
+                        metric = MetricType.weight;
+                        break;
+                      case 'steps':
+                        metric = MetricType.steps;
+                        break;
+                      case 'sleep':
+                        metric = MetricType.sleep;
+                        break;
+                      case 'bmi':
+                        metric = MetricType.bmi;
+                        break;
+                      case 'bodyFat':
+                        metric = MetricType.bodyFat;
+                        break;
+                      case 'calories':
+                        metric = MetricType.calories;
+                        break;
+                      case 'protein':
+                      case 'macros': // legacy deep link
+                        metric = MetricType.protein;
+                        break;
+                    }
                   }
-                }
-                return ProgressScreen(initialMetric: metric);
-              },
-              routes: [
-                GoRoute(
-                  path: 'weekly-summary',
-                  builder: (context, state) => const WeeklySummaryScreen(),
-                ),
-                GoRoute(
-                  path: 'yearly-activity',
-                  builder: (context, state) => const YearlyActivityScreen(),
-                ),
-              ],
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: _socialNavigatorKey,
-          routes: [
-            GoRoute(
-              path: '/social',
-              builder: (context, state) => const SocialFeedScreen(),
-              routes: [
-                GoRoute(
-                  path: 'connect',
-                  builder: (context, state) => const ConnectScreen(),
-                ),
-              ],
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: _profileNavigatorKey,
-          routes: [
-            GoRoute(
-              path: '/profile',
-              builder: (context, state) => const ProfileScreen(),
-              routes: [
-
-                GoRoute(
-                  path: 'manage-plans',
-                  builder: (context, state) => const ManagePlansScreen(),
-                ),
-                GoRoute(
-                  path: 'backup-restore',
-                  builder: (context, state) => const BackupRestoreScreen(),
-                ),
-                GoRoute(
-                  path: 'reminders',
-                  builder: (context, state) => const RemindersScreen(),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    ),
-    // Full-screen routes (outside bottom nav)
-    GoRoute(
-      path: '/youtube-player',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final videoId = state.uri.queryParameters['videoId'] ?? '';
-        final title = state.uri.queryParameters['title'] ?? '';
-        final subtitle = state.uri.queryParameters['subtitle'] ?? '';
-        final reps = state.uri.queryParameters['reps'] ?? '';
-        return YoutubePlayerScreen(videoId: videoId, title: title, subtitle: subtitle, reps: reps);
-      },
-    ),
-    GoRoute(
-      path: '/exercise-progress',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final exerciseName = state.uri.queryParameters['name'] ?? '';
-        return ExerciseProgressScreen(exerciseName: exerciseName);
-      },
-    ),
-  ],
-);
+                  return ProgressScreen(initialMetric: metric);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'weekly-summary',
+                    builder: (context, state) => const WeeklySummaryScreen(),
+                  ),
+                  GoRoute(
+                    path: 'yearly-activity',
+                    builder: (context, state) => const YearlyActivityScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _socialNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/social',
+                builder: (context, state) => const SocialFeedScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'connect',
+                    builder: (context, state) => const ConnectScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _profileNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'manage-plans',
+                    builder: (context, state) => const ManagePlansScreen(),
+                  ),
+                  GoRoute(
+                    path: 'backup-restore',
+                    builder: (context, state) => const BackupRestoreScreen(),
+                  ),
+                  GoRoute(
+                    path: 'reminders',
+                    builder: (context, state) => const RemindersScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      // Full-screen routes (outside bottom nav)
+      GoRoute(
+        path: '/youtube-player',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final videoId = state.uri.queryParameters['videoId'] ?? '';
+          final title = state.uri.queryParameters['title'] ?? '';
+          final subtitle = state.uri.queryParameters['subtitle'] ?? '';
+          final reps = state.uri.queryParameters['reps'] ?? '';
+          return YoutubePlayerScreen(
+            videoId: videoId,
+            title: title,
+            subtitle: subtitle,
+            reps: reps,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/exercise-progress',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final exerciseName = state.uri.queryParameters['name'] ?? '';
+          return ExerciseProgressScreen(exerciseName: exerciseName);
+        },
+      ),
+    ],
+  );
 });
 
 class ScaffoldWithNavBar extends ConsumerWidget {
@@ -256,138 +270,161 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       child: Stack(
         children: [
           Scaffold(
-        body: Builder(
-          builder: (innerContext) {
-            return MediaQuery(
-              data: MediaQuery.of(innerContext).copyWith(
-                padding: MediaQuery.paddingOf(innerContext).copyWith(
-                  bottom: MediaQuery.paddingOf(innerContext).bottom + 
+            body: Builder(
+              builder: (innerContext) {
+                return MediaQuery(
+                  data: MediaQuery.of(innerContext).copyWith(
+                    padding: MediaQuery.paddingOf(innerContext).copyWith(
+                      bottom:
+                          MediaQuery.paddingOf(innerContext).bottom +
                           (timerState.isActive ? 76.0 : 0.0),
-                ),
-              ),
-              child: Stack(
-                children: [
-                  navigationShell,
-            if (timerState.isActive)
-              Positioned(
-                bottom: 16,
-                left: 20,
-                right: 20,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: context.colors.orange,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colors.orange.withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    ),
                   ),
-                  child: Row(
+                  child: Stack(
                     children: [
-                      Icon(
-                        timerState.isPaused ? Icons.pause_circle_filled : Icons.timer,
-                        color: context.colors.onPrimary,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              timerState.exerciseName != null
-                                  ? 'Resting for ${timerState.exerciseName}'
-                                  : 'Resting',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white70,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                      navigationShell,
+                      if (timerState.isActive)
+                        Positioned(
+                          bottom: 16,
+                          left: 20,
+                          right: 20,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
                             ),
-                            Text(
-                              '${timerState.remainingSeconds ~/ 60}:${(timerState.remainingSeconds % 60).toString().padLeft(2, '0')}',
-                              style: AppTheme.numeric(
-                                TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.colors.onPrimary,
+                            decoration: BoxDecoration(
+                              color: context.colors.orange,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colors.orange.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                            child: Row(
+                              children: [
+                                Icon(
+                                  timerState.isPaused
+                                      ? Icons.pause_circle_filled
+                                      : Icons.timer,
+                                  color: context.colors.onPrimary,
+                                  size: 28,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        timerState.exerciseName != null
+                                            ? 'Resting for ${timerState.exerciseName}'
+                                            : 'Resting',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white70,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        '${timerState.remainingSeconds ~/ 60}:${(timerState.remainingSeconds % 60).toString().padLeft(2, '0')}',
+                                        style: AppTheme.numeric(
+                                          TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: context.colors.onPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Controls
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _TimerControlButton(
+                                      label: '+15s',
+                                      onTap: () => ref
+                                          .read(restTimerProvider.notifier)
+                                          .addSeconds(15),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _TimerControlButton(
+                                      label: '+30s',
+                                      onTap: () => ref
+                                          .read(restTimerProvider.notifier)
+                                          .addSeconds(30),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    IconButton(
+                                      icon: Icon(
+                                        timerState.isPaused
+                                            ? Icons.play_arrow_rounded
+                                            : Icons.pause_rounded,
+                                        color: context.colors.white,
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      onPressed: () {
+                                        if (timerState.isPaused) {
+                                          ref
+                                              .read(restTimerProvider.notifier)
+                                              .resumeTimer();
+                                        } else {
+                                          ref
+                                              .read(restTimerProvider.notifier)
+                                              .pauseTimer();
+                                        }
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.close,
+                                        color: context.colors.white,
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      onPressed: () {
+                                        ref
+                                            .read(restTimerProvider.notifier)
+                                            .stopTimer();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      // Controls
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _TimerControlButton(
-                            label: '+15s',
-                            onTap: () => ref.read(restTimerProvider.notifier).addSeconds(15),
-                          ),
-                          const SizedBox(width: 8),
-                          _TimerControlButton(
-                            label: '+30s',
-                            onTap: () => ref.read(restTimerProvider.notifier).addSeconds(30),
-                          ),
-                          const SizedBox(width: 4),
-                          IconButton(
-                            icon: Icon(
-                              timerState.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                              color: context.colors.white,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: () {
-                              if (timerState.isPaused) {
-                                ref.read(restTimerProvider.notifier).resumeTimer();
-                              } else {
-                                ref.read(restTimerProvider.notifier).pauseTimer();
-                              }
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.close, color: context.colors.white),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: () {
-                              ref.read(restTimerProvider.notifier).stopTimer();
-                            },
-                          ),
-                        ],
-                      ),
                     ],
                   ),
-                ),
-              ),
-            ],
+                );
+              },
+            ),
+            bottomNavigationBar: _CustomNavBar(
+              currentIndex: navigationShell.currentIndex,
+              onItemSelected: (index) {
+                Haptics.tap();
+                navigationShell.goBranch(index);
+              },
+            ),
           ),
-        );
-      },
-    ),
-    bottomNavigationBar: _CustomNavBar(
-      currentIndex: navigationShell.currentIndex,
-      onItemSelected: (index) {
-        Haptics.tap();
-        navigationShell.goBranch(index);
-      },
-    ),
-      ),
 
-      const BadgeOverlayHost(),
-    ],
-  ),
-);
+          const BadgeOverlayHost(),
+        ],
+      ),
+    );
   }
 }
-
 
 class _TimerControlButton extends StatelessWidget {
   final String label;
@@ -516,7 +553,9 @@ class _NavBarItem extends StatelessWidget {
         ),
         child: Icon(
           isSelected ? activeIcon : icon,
-          color: isSelected ? context.colors.onPrimary : const Color(0xFF8A9A93),
+          color: isSelected
+              ? context.colors.onPrimary
+              : const Color(0xFF8A9A93),
           size: 24,
         ),
       ),

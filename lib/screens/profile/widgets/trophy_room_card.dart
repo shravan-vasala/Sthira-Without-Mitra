@@ -55,7 +55,11 @@ class TrophyRoomCard extends ConsumerWidget {
                   color: context.colors.gold.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.emoji_events_rounded, color: context.colors.gold, size: 20),
+                child: Icon(
+                  Icons.emoji_events_rounded,
+                  color: context.colors.gold,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -105,12 +109,12 @@ class TrophyRoomCard extends ConsumerWidget {
               ),
             ],
           ),
-          
+
           if (nextUpBadge != null) ...[
             const SizedBox(height: 24),
             _NextUpSpotlight(badge: nextUpBadge),
           ],
-          
+
           const SizedBox(height: 24),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -162,7 +166,10 @@ class _NextUpSpotlight extends StatelessWidget {
               alignment: Alignment.center,
               child: Opacity(
                 opacity: 0.5,
-                child: Text(badge.iconEmoji, style: const TextStyle(fontSize: 20)),
+                child: Text(
+                  badge.iconEmoji,
+                  style: const TextStyle(fontSize: 20),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -237,34 +244,46 @@ class _BadgeItem extends StatelessWidget {
         final isUnlocked = badge.isUnlocked;
         return Padding(
           padding: EdgeInsets.only(
-            left: 24, right: 24, top: 32, 
+            left: 24,
+            right: 24,
+            top: 32,
             bottom: MediaQuery.paddingOf(context).bottom + 24,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: isUnlocked 
-                      ? [context.colors.goldMuted, context.colors.gold] 
-                      : [context.colors.border, context.colors.scaffoldBg],
-                  ),
-                  border: Border.all(
-                    color: isUnlocked ? context.colors.gold : context.colors.border, 
-                    width: 2,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Opacity(
-                  opacity: isUnlocked ? 1.0 : 0.3,
-                  child: Text(badge.iconEmoji, style: const TextStyle(fontSize: 48)),
-                ),
-              ).animate(target: isUnlocked ? 1 : 0).shimmer(duration: 1.seconds, color: Colors.white30),
-              
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: isUnlocked
+                            ? [context.colors.goldMuted, context.colors.gold]
+                            : [
+                                context.colors.border,
+                                context.colors.scaffoldBg,
+                              ],
+                      ),
+                      border: Border.all(
+                        color: isUnlocked
+                            ? context.colors.gold
+                            : context.colors.border,
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Opacity(
+                      opacity: isUnlocked ? 1.0 : 0.3,
+                      child: Text(
+                        badge.iconEmoji,
+                        style: const TextStyle(fontSize: 48),
+                      ),
+                    ),
+                  )
+                  .animate(target: isUnlocked ? 1 : 0)
+                  .shimmer(duration: 1.seconds, color: Colors.white30),
+
               const SizedBox(height: 24),
               Text(
                 badge.title,
@@ -285,7 +304,7 @@ class _BadgeItem extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              
+
               if (isUnlocked) ...[
                 Text(
                   'Unlocked ${DateFormat('MMMM d, yyyy').format(badge.unlockedAt!)}',
@@ -308,7 +327,9 @@ class _BadgeItem extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: LinearProgressIndicator(
-                    value: badge.requiredProgress > 0 ? badge.currentProgress / badge.requiredProgress : 0,
+                    value: badge.requiredProgress > 0
+                        ? badge.currentProgress / badge.requiredProgress
+                        : 0,
                     backgroundColor: context.colors.border,
                     color: context.colors.textDark,
                     minHeight: 12,
@@ -323,28 +344,33 @@ class _BadgeItem extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ]
+              ],
             ],
           ),
         );
-      }
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final isUnlocked = badge.isUnlocked;
-    final isNew = isUnlocked && DateTime.now().difference(badge.unlockedAt!).inHours < 48;
-    final progressFrac = badge.requiredProgress > 0 ? badge.currentProgress / badge.requiredProgress : 0.0;
+    final isNew =
+        isUnlocked && DateTime.now().difference(badge.unlockedAt!).inHours < 48;
+    final progressFrac = badge.requiredProgress > 0
+        ? badge.currentProgress / badge.requiredProgress
+        : 0.0;
 
     Widget medallion = Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: isUnlocked ? RadialGradient(
-          colors: [context.colors.goldMuted, context.colors.gold],
-        ) : null,
+        gradient: isUnlocked
+            ? RadialGradient(
+                colors: [context.colors.goldMuted, context.colors.gold],
+              )
+            : null,
         color: isUnlocked ? null : Colors.transparent,
         border: Border.all(
           color: isUnlocked ? context.colors.gold : context.colors.border,
@@ -353,10 +379,7 @@ class _BadgeItem extends StatelessWidget {
       alignment: Alignment.center,
       child: Opacity(
         opacity: isUnlocked ? 1.0 : 0.3,
-        child: Text(
-          badge.iconEmoji,
-          style: const TextStyle(fontSize: 24),
-        ),
+        child: Text(badge.iconEmoji, style: const TextStyle(fontSize: 24)),
       ),
     );
 
@@ -373,7 +396,11 @@ class _BadgeItem extends StatelessWidget {
               ),
               width: 24,
               height: 24,
-              child: Icon(Icons.lock_rounded, size: 14, color: context.colors.textLight),
+              child: Icon(
+                Icons.lock_rounded,
+                size: 14,
+                color: context.colors.textLight,
+              ),
             ),
           ],
         );
@@ -405,9 +432,7 @@ class _BadgeItem extends StatelessWidget {
         children: [
           Container(
             width: width,
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-            ),
+            decoration: BoxDecoration(color: Colors.transparent),
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -422,20 +447,23 @@ class _BadgeItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     height: 1.1,
-                    fontWeight: isUnlocked ? FontWeight.bold : FontWeight.normal,
-                    color: isUnlocked ? context.colors.textDark : context.colors.textMedium,
+                    fontWeight: isUnlocked
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isUnlocked
+                        ? context.colors.textDark
+                        : context.colors.textMedium,
                   ),
                 ),
                 const SizedBox(height: 4),
                 if (!isUnlocked)
                   Text(
                     '${badge.currentProgress}/${badge.requiredProgress}',
-                    style: AppTheme.numeric(TextStyle(
-                      fontSize: 10,
-                      color: context.colors.textLight,
-                    )),
+                    style: AppTheme.numeric(
+                      TextStyle(fontSize: 10, color: context.colors.textLight),
+                    ),
                   )
-                else 
+                else
                   Text(
                     DateFormat('MMM d').format(badge.unlockedAt!),
                     style: TextStyle(
@@ -472,7 +500,11 @@ class _BadgeItem extends StatelessWidget {
     );
 
     if (isUnlocked) {
-      tile = tile.animate().shimmer(delay: 400.ms, duration: 1200.ms, color: Colors.white.withValues(alpha: 0.4));
+      tile = tile.animate().shimmer(
+        delay: 400.ms,
+        duration: 1200.ms,
+        color: Colors.white.withValues(alpha: 0.4),
+      );
     }
 
     return tile;

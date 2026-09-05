@@ -14,45 +14,49 @@ import 'daily_score_sheet.dart';
 /// Activity flags for each day in a week (keyed by yyyy-MM-dd).
 /// Rebuilds when selected-day logs/habits/meals or exercise logs change, then
 /// re-reads Hive for all 7 days so dots stay correct for non-selected dates.
-final calendarWeekActivityProvider =
-    Provider.family<Map<String, bool>, String>((ref, weekStartStr) {
-  ref.watch(dailyLogProvider);
-  ref.watch(habitCompletionsProvider);
-  ref.watch(dailyMealLogProvider);
-  ref.watch(exerciseLogsUpdateProvider);
+final calendarWeekActivityProvider = Provider.family<Map<String, bool>, String>(
+  (ref, weekStartStr) {
+    ref.watch(dailyLogProvider);
+    ref.watch(habitCompletionsProvider);
+    ref.watch(dailyMealLogProvider);
+    ref.watch(exerciseLogsUpdateProvider);
 
-  final weekStart = DateTime.parse(weekStartStr);
-  final dailyLogRepo = ref.watch(dailyLogRepoProvider);
-  final mealRepo = ref.watch(mealRepoProvider);
-  final habitRepo = ref.watch(habitRepoProvider);
-  final habits = habitRepo.getHabits();
+    final weekStart = DateTime.parse(weekStartStr);
+    final dailyLogRepo = ref.watch(dailyLogRepoProvider);
+    final mealRepo = ref.watch(mealRepoProvider);
+    final habitRepo = ref.watch(habitRepoProvider);
+    final habits = habitRepo.getHabits();
 
-  final result = <String, bool>{};
-  for (var i = 0; i < 7; i++) {
-    final date = weekStart.add(Duration(days: i));
-    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    final result = <String, bool>{};
+    for (var i = 0; i < 7; i++) {
+      final date = weekStart.add(Duration(days: i));
+      final dateStr = DateFormat('yyyy-MM-dd').format(date);
 
-    final hasActivity = dailyLogRepo.hasActivityOnDate(dateStr);
-    final mealLog = mealRepo.getDailyLog(dateStr);
-    final habitCompletions = habitRepo.getCompletions(dateStr);
-    final dailyLog = dailyLogRepo.getOrCreate(dateStr);
+      final hasActivity = dailyLogRepo.hasActivityOnDate(dateStr);
+      final mealLog = mealRepo.getDailyLog(dateStr);
+      final habitCompletions = habitRepo.getCompletions(dateStr);
+      final dailyLog = dailyLogRepo.getOrCreate(dateStr);
 
-    final applicableHabits = habits.where((h) {
-      final habitDate =
-          DateTime(h.createdAt.year, h.createdAt.month, h.createdAt.day);
-      final sDate = DateTime(date.year, date.month, date.day);
-      return !habitDate.isAfter(sDate);
-    }).toList();
+      final applicableHabits = habits.where((h) {
+        final habitDate = DateTime(
+          h.createdAt.year,
+          h.createdAt.month,
+          h.createdAt.day,
+        );
+        final sDate = DateTime(date.year, date.month, date.day);
+        return !habitDate.isAfter(sDate);
+      }).toList();
 
-    final completedHabits = applicableHabits
-        .where((h) => isHabitCompleted(h, habitCompletions, dailyLog))
-        .length;
+      final completedHabits = applicableHabits
+          .where((h) => isHabitCompleted(h, habitCompletions, dailyLog))
+          .length;
 
-    result[dateStr] =
-        hasActivity || mealLog.loggedSlotsCount > 0 || completedHabits > 0;
-  }
-  return result;
-});
+      result[dateStr] =
+          hasActivity || mealLog.loggedSlotsCount > 0 || completedHabits > 0;
+    }
+    return result;
+  },
+);
 
 class WeekCalendarStrip extends ConsumerStatefulWidget {
   const WeekCalendarStrip({super.key});
@@ -99,7 +103,10 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
     });
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: kScreenPadding, vertical: 8),
+      margin: const EdgeInsets.symmetric(
+        horizontal: kScreenPadding,
+        vertical: 8,
+      ),
       child: Column(
         children: [
           // Date header row
@@ -120,7 +127,10 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                             primary: context.colors.primary,
                             surface: context.colors.card,
                             onSurface: context.colors.textDark,
-                          ), dialogTheme: DialogThemeData(backgroundColor: context.colors.card),
+                          ),
+                          dialogTheme: DialogThemeData(
+                            backgroundColor: context.colors.card,
+                          ),
                         ),
                         child: child!,
                       );
@@ -128,12 +138,15 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   );
                   if (picked != null) {
                     ref.read(selectedDateProvider.notifier).state = picked;
-                    final pickedWeekStart =
-                        picked.subtract(Duration(days: picked.weekday - 1));
-                    final todayWeekStart =
-                        today.subtract(Duration(days: today.weekday - 1));
-                    final diffDays =
-                        pickedWeekStart.difference(todayWeekStart).inDays;
+                    final pickedWeekStart = picked.subtract(
+                      Duration(days: picked.weekday - 1),
+                    );
+                    final todayWeekStart = today.subtract(
+                      Duration(days: today.weekday - 1),
+                    );
+                    final diffDays = pickedWeekStart
+                        .difference(todayWeekStart)
+                        .inDays;
                     final weekOffset = (diffDays / 7).round();
                     ref.read(weekOffsetProvider.notifier).state = weekOffset;
                   }
@@ -237,9 +250,10 @@ class _WeekDaysRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weekStartStr = DateFormat('yyyy-MM-dd').format(weekStart);
-    final activityByDate = ref.watch(calendarWeekActivityProvider(weekStartStr));
-    final weekDays =
-        List.generate(7, (i) => weekStart.add(Duration(days: i)));
+    final activityByDate = ref.watch(
+      calendarWeekActivityProvider(weekStartStr),
+    );
+    final weekDays = List.generate(7, (i) => weekStart.add(Duration(days: i)));
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -280,7 +294,8 @@ class _DayCircle extends ConsumerStatefulWidget {
   ConsumerState<_DayCircle> createState() => _DayCircleState();
 }
 
-class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProviderStateMixin {
+class _DayCircleState extends ConsumerState<_DayCircle>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final Animation<double> _scaleAnim;
 
@@ -291,13 +306,13 @@ class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProvide
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _scaleAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 70),
-    ]).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeOutBack,
-    ));
+    _scaleAnim =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 30),
+          TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 70),
+        ]).animate(
+          CurvedAnimation(parent: _pulseController, curve: Curves.easeOutBack),
+        );
   }
 
   @override
@@ -372,19 +387,23 @@ class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProvide
               height: 34,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: widget.isSelected ? context.colors.primary : Colors.transparent,
+                color: widget.isSelected
+                    ? context.colors.primary
+                    : Colors.transparent,
               ),
               child: Center(
                 child: Text(
                   dayNum,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w600,
+                    fontWeight: widget.isSelected
+                        ? FontWeight.w700
+                        : FontWeight.w600,
                     color: widget.isSelected
                         ? context.colors.onPrimary
                         : (widget.isToday
-                            ? context.colors.primary
-                            : context.colors.textDark),
+                              ? context.colors.primary
+                              : context.colors.textDark),
                   ),
                 ),
               ),
@@ -407,10 +426,12 @@ class _DayCircleState extends ConsumerState<_DayCircle> with SingleTickerProvide
                         boxShadow: (dotColor == context.colors.green)
                             ? [
                                 BoxShadow(
-                                  color: context.colors.green.withValues(alpha: 0.4),
+                                  color: context.colors.green.withValues(
+                                    alpha: 0.4,
+                                  ),
                                   blurRadius: 4,
                                   spreadRadius: 1,
-                                )
+                                ),
                               ]
                             : null,
                       ),
@@ -453,25 +474,37 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
     } else if (score == 0) {
       iconColor = context.colors.textLight;
       textColor = context.colors.textDark.withValues(alpha: 0.7);
-      gradientColors = [context.colors.border.withValues(alpha: 0.3), context.colors.border.withValues(alpha: 0.1)];
+      gradientColors = [
+        context.colors.border.withValues(alpha: 0.3),
+        context.colors.border.withValues(alpha: 0.1),
+      ];
       borderColor = context.colors.border;
     } else if (score < 50) {
       // Starting to warm up
       iconColor = context.colors.orange;
       textColor = context.colors.textDark;
-      gradientColors = [context.colors.orange.withValues(alpha: 0.15), context.colors.orange.withValues(alpha: 0.05)];
+      gradientColors = [
+        context.colors.orange.withValues(alpha: 0.15),
+        context.colors.orange.withValues(alpha: 0.05),
+      ];
       borderColor = context.colors.orange.withValues(alpha: 0.3);
     } else if (score < 90) {
       // Getting hot!
       iconColor = context.colors.red;
       textColor = context.colors.textDark;
-      gradientColors = [context.colors.red.withValues(alpha: 0.15), context.colors.red.withValues(alpha: 0.05)];
+      gradientColors = [
+        context.colors.red.withValues(alpha: 0.15),
+        context.colors.red.withValues(alpha: 0.05),
+      ];
       borderColor = context.colors.red.withValues(alpha: 0.3);
     } else {
       // Top Tier Bodamma Flame!
       iconColor = context.colors.primary;
       textColor = context.colors.primary;
-      gradientColors = [context.colors.primary.withValues(alpha: 0.25), context.colors.primary.withValues(alpha: 0.05)];
+      gradientColors = [
+        context.colors.primary.withValues(alpha: 0.25),
+        context.colors.primary.withValues(alpha: 0.05),
+      ];
       borderColor = context.colors.primary.withValues(alpha: 0.3);
     }
 
@@ -494,31 +527,29 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-          color: gradientColors == null ? context.colors.border.withValues(alpha: 0.5) : null,
+          color: gradientColors == null
+              ? context.colors.border.withValues(alpha: 0.5)
+              : null,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: borderColor,
-            width: 1,
-          ),
+          border: Border.all(color: borderColor, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              iconData,
-              size: 16,
-              color: iconColor,
-            ),
+            Icon(iconData, size: 16, color: iconColor),
             const SizedBox(width: 4),
             Text(
-              displayScore,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: textColor,
-                letterSpacing: -0.2,
-              ),
-            ).animate(key: ValueKey(score)).shake(hz: 3, curve: Curves.easeInOut).scale(begin: const Offset(1.2, 1.2), end: const Offset(1, 1)),
+                  displayScore,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: textColor,
+                    letterSpacing: -0.2,
+                  ),
+                )
+                .animate(key: ValueKey(score))
+                .shake(hz: 3, curve: Curves.easeInOut)
+                .scale(begin: const Offset(1.2, 1.2), end: const Offset(1, 1)),
           ],
         ),
       ),

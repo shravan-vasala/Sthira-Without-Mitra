@@ -23,6 +23,7 @@ class MetricOverviewCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String valueText;
+
   /// e.g. "avg this period" or "−0.4 kg vs start"
   final String? subtitle;
   final List<ChartDataPoint> data;
@@ -150,10 +151,8 @@ class _MiniSparkline extends StatelessWidget {
     final spots = sorted
         .where((d) => !isCount || d.value > 0)
         .map(
-          (d) => FlSpot(
-            d.date.difference(startDate).inDays.toDouble(),
-            d.value,
-          ),
+          (d) =>
+              FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value),
         )
         .toList();
 
@@ -179,8 +178,11 @@ class _MiniSparkline extends StatelessWidget {
     }
     if (isCount && minY < 0) minY = 0;
 
-    final maxX =
-        endDate.difference(startDate).inDays.toDouble().clamp(1.0, 9999.0);
+    final maxX = endDate
+        .difference(startDate)
+        .inDays
+        .toDouble()
+        .clamp(1.0, 9999.0);
     final showDots = spots.length <= 14;
     final primary = context.colors.primary;
 

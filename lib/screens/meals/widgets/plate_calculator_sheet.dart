@@ -16,14 +16,14 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
 
   // Generic macros total for a standard 500g meal
   final double baseWeightGrams = 500.0;
-  
+
   Map<String, double> get _calculatedMacros {
     // Very rough estimations for educational purposes
     // protein is usually 25g per 100g of protein source
     // carbs are usually 30g per 100g of carb source
     // veg is usually 5g carbs per 100g
     // fat is directly 1g fat per 1g
-    
+
     final proteinWeight = (proteinPercent / 100) * baseWeightGrams;
     final carbsWeight = (carbsPercent / 100) * baseWeightGrams;
     final vegWeight = (vegPercent / 100) * baseWeightGrams;
@@ -31,10 +31,13 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
 
     final proteinG = (proteinWeight * 0.25) + (vegWeight * 0.02);
     final carbsG = (carbsWeight * 0.30) + (vegWeight * 0.05);
-    final fatG = (proteinWeight * 0.10) + (carbsWeight * 0.05) + fatWeight; // some incidental fats
-    
+    final fatG =
+        (proteinWeight * 0.10) +
+        (carbsWeight * 0.05) +
+        fatWeight; // some incidental fats
+
     final calories = (proteinG * 4) + (carbsG * 4) + (fatG * 9);
-    
+
     return {
       'protein': proteinG,
       'carbs': carbsG,
@@ -81,60 +84,57 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
           Text(
             'Adjust the sliders to roughly estimate a standard 500g meal based on plate proportions.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.colors.textMedium,
-            ),
+            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
           ),
           const SizedBox(height: 24),
-          
+
           _buildSlider(
-             title: 'Protein (Meat, Eggs, Dal)',
-             color: context.colors.primary,
-             value: proteinPercent,
-             onChanged: (v) {
-               setState(() {
-                 proteinPercent = v;
-                 _balance(protein: true);
-               });
-             }
+            title: 'Protein (Meat, Eggs, Dal)',
+            color: context.colors.primary,
+            value: proteinPercent,
+            onChanged: (v) {
+              setState(() {
+                proteinPercent = v;
+                _balance(protein: true);
+              });
+            },
           ),
           _buildSlider(
-             title: 'Carbs (Rice, Roti, Potato)',
-             color: context.colors.orange,
-             value: carbsPercent,
-             onChanged: (v) {
-               setState(() {
-                 carbsPercent = v;
-                 _balance(carbs: true);
-               });
-             }
+            title: 'Carbs (Rice, Roti, Potato)',
+            color: context.colors.orange,
+            value: carbsPercent,
+            onChanged: (v) {
+              setState(() {
+                carbsPercent = v;
+                _balance(carbs: true);
+              });
+            },
           ),
           _buildSlider(
-             title: 'Veggies & Greens',
-             color: context.colors.green,
-             value: vegPercent,
-             onChanged: (v) {
-               setState(() {
-                 vegPercent = v;
-                 _balance(veg: true);
-               });
-             }
+            title: 'Veggies & Greens',
+            color: context.colors.green,
+            value: vegPercent,
+            onChanged: (v) {
+              setState(() {
+                vegPercent = v;
+                _balance(veg: true);
+              });
+            },
           ),
           _buildSlider(
-             title: 'Added Fats & Oils',
-             color: context.colors.red,
-             value: fatPercent,
-             onChanged: (v) {
-               setState(() {
-                 fatPercent = v;
-                 _balance(fat: true);
-               });
-             }
+            title: 'Added Fats & Oils',
+            color: context.colors.red,
+            value: fatPercent,
+            onChanged: (v) {
+              setState(() {
+                fatPercent = v;
+                _balance(fat: true);
+              });
+            },
           ),
 
           const SizedBox(height: 30),
-          
+
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -146,7 +146,10 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _macroItem('Calories', "${macros['calories']!.toInt()}"),
-                _macroItem('Protein', "${macros['protein']!.toStringAsFixed(1)}g"),
+                _macroItem(
+                  'Protein',
+                  "${macros['protein']!.toStringAsFixed(1)}g",
+                ),
                 _macroItem('Carbs', "${macros['carbs']!.toStringAsFixed(1)}g"),
                 _macroItem('Fat', "${macros['fat']!.toStringAsFixed(1)}g"),
               ],
@@ -157,14 +160,21 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     );
   }
 
-  void _balance({bool protein = false, bool carbs = false, bool veg = false, bool fat = false}) {
-    final double total = proteinPercent + carbsPercent + vegPercent + fatPercent;
+  void _balance({
+    bool protein = false,
+    bool carbs = false,
+    bool veg = false,
+    bool fat = false,
+  }) {
+    final double total =
+        proteinPercent + carbsPercent + vegPercent + fatPercent;
     if (total == 100.0) return;
 
     final double diff = 100.0 - total;
-    
+
     // Distribute diff to others
-    final int othersCount = (protein ? 0 : 1) + (carbs ? 0 : 1) + (veg ? 0 : 1) + (fat ? 0 : 1);
+    final int othersCount =
+        (protein ? 0 : 1) + (carbs ? 0 : 1) + (veg ? 0 : 1) + (fat ? 0 : 1);
     final double addPerOther = diff / othersCount;
 
     if (!protein) proteinPercent = (proteinPercent + addPerOther).clamp(0, 100);
@@ -173,7 +183,12 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     if (!fat) fatPercent = (fatPercent + addPerOther).clamp(0, 100);
   }
 
-  Widget _buildSlider({required String title, required Color color, required double value, required Function(double) onChanged}) {
+  Widget _buildSlider({
+    required String title,
+    required Color color,
+    required double value,
+    required Function(double) onChanged,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -225,10 +240,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: 12,
-            color: context.colors.textLight,
-          ),
+          style: TextStyle(fontSize: 12, color: context.colors.textLight),
         ),
         const SizedBox(height: 4),
         Text(

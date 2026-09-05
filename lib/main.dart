@@ -62,38 +62,33 @@ Future<void> main() async {
 
     // Set status bar style
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-      ),
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
     );
 
     final dir = await getApplicationDocumentsDirectory();
-    final isar = await Isar.open(
-      [
-        UserProfileSchema,
-        DailyLogSchema,
-        WorkoutPlanSchema,
-        WorkoutSessionSchema,
-        DailyMealLogSchema,
-        MealPlanSchema,
-        HabitSchema,
-        HabitCompletionSchema,
-        ScannedMealLogSchema,
-        ProgressPhotoSchema,
-        ExerciseLogSchema,
-        ExercisePrSchema,
-        CoachNoteSchema,
-        BodyStatsSchema,
-        BadgeSchema,
-        AppConfigSchema,
-        AiCacheEntrySchema,
-        FoodSearchCacheSchema,
-        FriendSchema,
-        SyncQueueItemSchema,
-      ],
-      directory: dir.path,
-    );
-    
+    final isar = await Isar.open([
+      UserProfileSchema,
+      DailyLogSchema,
+      WorkoutPlanSchema,
+      WorkoutSessionSchema,
+      DailyMealLogSchema,
+      MealPlanSchema,
+      HabitSchema,
+      HabitCompletionSchema,
+      ScannedMealLogSchema,
+      ProgressPhotoSchema,
+      ExerciseLogSchema,
+      ExercisePrSchema,
+      CoachNoteSchema,
+      BodyStatsSchema,
+      BadgeSchema,
+      AppConfigSchema,
+      AiCacheEntrySchema,
+      FoodSearchCacheSchema,
+      FriendSchema,
+      SyncQueueItemSchema,
+    ], directory: dir.path);
+
     // ignore: unawaited_futures
     SchemaMigrationService.runStartupMigrations(isar);
 
@@ -128,7 +123,7 @@ Future<void> main() async {
 
     final authService = AuthService();
     final firestoreSyncService = FirestoreSyncService(authService);
-    
+
     workoutRepo.attachSync(firestoreSyncService);
     mealRepo.attachSync(firestoreSyncService);
     dailyLogRepo.attachSync(firestoreSyncService);
@@ -144,13 +139,13 @@ Future<void> main() async {
     workoutRepo.fetchGlobalPlans();
     // ignore: unawaited_futures
     mealRepo.fetchGlobalPlans();
-    
+
     // Fetch user-specific personal plans from Firebase (non-blocking)
     // ignore: unawaited_futures
     workoutRepo.fetchUserPlans();
     // ignore: unawaited_futures
     mealRepo.fetchUserPlans();
-    
+
     // Run weekly auto-backup (non-blocking)
     // ignore: unawaited_futures
     BackupService().autoBackup();
@@ -185,7 +180,7 @@ Future<void> main() async {
       final dir = await getApplicationDocumentsDirectory();
       final logFile = File('${dir.path}/crash_log.txt');
       await logFile.writeAsString('Error:\n$e\n\nStack:\n$stack');
-      
+
       runApp(
         MaterialApp(
           home: Scaffold(

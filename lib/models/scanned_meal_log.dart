@@ -55,16 +55,16 @@ class ScannedMealLog {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'date': date,
-        'photoPath': photoPath,
-        'mealType': mealType,
-        'foodName': foodName,
-        'estimatedCalories': estimatedCalories,
-        'proteinGrams': proteinGrams,
-        'carbsGrams': carbsGrams,
-        'fatGrams': fatGrams,
-        'portionMultiplier': portionMultiplier,
-        'timestamp': timestamp,
-      };
+    'id': id,
+    'date': date,
+    'photoPath': photoPath,
+    'mealType': mealType,
+    'foodName': foodName,
+    'estimatedCalories': estimatedCalories,
+    'proteinGrams': proteinGrams,
+    'carbsGrams': carbsGrams,
+    'fatGrams': fatGrams,
+    'portionMultiplier': portionMultiplier,
+    'timestamp': timestamp,
+  };
 }

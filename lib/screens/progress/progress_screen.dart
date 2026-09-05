@@ -16,12 +16,22 @@ import '../home/sleep_entry_dialog.dart';
 import '../../models/daily_meal_log.dart';
 import 'widgets/insights_card.dart';
 
-enum MetricType { weight, steps, sleep, bmi, bodyFat, calories, protein, screenTime }
+enum MetricType {
+  weight,
+  steps,
+  sleep,
+  bmi,
+  bodyFat,
+  calories,
+  protein,
+  screenTime,
+}
+
 enum TimeRange { weekly, monthly, sixMonths }
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key, this.initialMetric});
-  
+
   final MetricType? initialMetric;
 
   @override
@@ -68,11 +78,21 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   void _shiftDate(int direction) {
     setState(() {
       if (_selectedRange == TimeRange.weekly) {
-        _currentReferenceDate = _currentReferenceDate.add(Duration(days: 7 * direction));
+        _currentReferenceDate = _currentReferenceDate.add(
+          Duration(days: 7 * direction),
+        );
       } else if (_selectedRange == TimeRange.monthly) {
-        _currentReferenceDate = DateTime(_currentReferenceDate.year, _currentReferenceDate.month + direction, 1);
+        _currentReferenceDate = DateTime(
+          _currentReferenceDate.year,
+          _currentReferenceDate.month + direction,
+          1,
+        );
       } else {
-        _currentReferenceDate = DateTime(_currentReferenceDate.year, _currentReferenceDate.month + (6 * direction), 1);
+        _currentReferenceDate = DateTime(
+          _currentReferenceDate.year,
+          _currentReferenceDate.month + (6 * direction),
+          1,
+        );
       }
     });
   }
@@ -89,12 +109,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   Future<void> _handlePointLongPress(DateTime date, double value) async {
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
-    
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Entry?'),
-        content: Text('Are you sure you want to delete the ${_metricLabel(_selectedMetric)} entry for ${DateFormat('MMM dd').format(date)}?'),
+        content: Text(
+          'Are you sure you want to delete the ${_metricLabel(_selectedMetric)} entry for ${DateFormat('MMM dd').format(date)}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -117,8 +139,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           date: log.date,
           weight: _selectedMetric == MetricType.weight ? null : log.weight,
           steps: _selectedMetric == MetricType.steps ? null : log.steps,
-          stepsSource: _selectedMetric == MetricType.steps ? null : log.stepsSource,
-          sleepHours: _selectedMetric == MetricType.sleep ? null : log.sleepHours,
+          stepsSource: _selectedMetric == MetricType.steps
+              ? null
+              : log.stepsSource,
+          sleepHours: _selectedMetric == MetricType.sleep
+              ? null
+              : log.sleepHours,
           bodyFat: _selectedMetric == MetricType.bodyFat ? null : log.bodyFat,
           workoutCompleted: log.workoutCompleted,
           workoutDayId: log.workoutDayId,
@@ -131,12 +157,23 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   void _openManualEntry() {
-    if (_selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi) {
-      showAppBottomSheet(context: context, builder: (_) => const WeightEntryDialog());
+    if (_selectedMetric == MetricType.weight ||
+        _selectedMetric == MetricType.bodyFat ||
+        _selectedMetric == MetricType.bmi) {
+      showAppBottomSheet(
+        context: context,
+        builder: (_) => const WeightEntryDialog(),
+      );
     } else if (_selectedMetric == MetricType.steps) {
-      showAppBottomSheet(context: context, builder: (_) => const StepsEntryDialog());
+      showAppBottomSheet(
+        context: context,
+        builder: (_) => const StepsEntryDialog(),
+      );
     } else if (_selectedMetric == MetricType.sleep) {
-      showAppBottomSheet(context: context, builder: (_) => const SleepEntryDialog());
+      showAppBottomSheet(
+        context: context,
+        builder: (_) => const SleepEntryDialog(),
+      );
     }
   }
 
@@ -150,7 +187,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text('My Progress', style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: context.colors.textDark, fontSize: 32)),
+        title: Text(
+          'My Progress',
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            color: context.colors.textDark,
+            fontSize: 32,
+          ),
+        ),
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -196,183 +239,203 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       body: SafeArea(
         top: false,
         child: Column(
-        children: [
-          // Time range segmented control
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: TimeRange.values.map((range) {
-                final isSelected = _selectedRange == range;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() {
-                      _selectedRange = range;
-                      _currentReferenceDate = DateTime.now();
-                    }),
-                    behavior: HitTestBehavior.opaque,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _rangeLabel(range),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? context.colors.textDark : context.colors.textMedium,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 24,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: isSelected ? context.colors.primary : Colors.transparent,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Horizontal scrollable Metric tab bar
-          SizedBox(
-            height: 48,
-            child: ListView.separated(
+          children: [
+            // Time range segmented control
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-              scrollDirection: Axis.horizontal,
-              itemCount: MetricType.values.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final metric = MetricType.values[index];
-                if (metric == MetricType.screenTime && !profile.screenTimeEnabled) return const SizedBox();
-                final isSelected = _selectedMetric == metric;
-                
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedMetric = metric),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? context.colors.primary.withValues(alpha: 0.1) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: isSelected ? context.colors.primary : context.colors.border,
-                        width: 1,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: TimeRange.values.map((range) {
+                  final isSelected = _selectedRange == range;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() {
+                        _selectedRange = range;
+                        _currentReferenceDate = DateTime.now();
+                      }),
+                      behavior: HitTestBehavior.opaque,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _rangeLabel(range),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? context.colors.textDark
+                                  : context.colors.textMedium,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 24,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? context.colors.primary
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _metricIcon(metric),
-                          size: 18,
-                          color: isSelected ? context.colors.primary : context.colors.textMedium,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _metricLabel(metric),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                            color: isSelected ? context.colors.primary : context.colors.textMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Date range navigator
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.chevron_left_rounded,
-                      color: context.colors.primary),
-                  onPressed: () => _shiftDate(-1),
-                ),
-                Text(
-                  _headerText,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textDark,
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.chevron_right_rounded,
-                      color: context.colors.primary),
-                  onPressed: () => _shiftDate(1),
-                ),
-              ],
-            ),
-          ),
-
-          Center(
-            child: ActionChip(
-              backgroundColor: context.colors.lavenderCard,
-              side: BorderSide.none,
-              label: Text(
-                'This Week Summary',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: context.colors.primary,
-                ),
+                  );
+                }).toList(),
               ),
-              onPressed: () {
-                context.go('/progress/weekly-summary');
-              },
             ),
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 16),
 
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                switchInCurve: Curves.easeOut,
-                switchOutCurve: Curves.easeIn,
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
+            // Horizontal scrollable Metric tab bar
+            SizedBox(
+              height: 48,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+                scrollDirection: Axis.horizontal,
+                itemCount: MetricType.values.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final metric = MetricType.values[index];
+                  if (metric == MetricType.screenTime &&
+                      !profile.screenTimeEnabled)
+                    return const SizedBox();
+                  final isSelected = _selectedMetric == metric;
+
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedMetric = metric),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? context.colors.primary.withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: isSelected
+                              ? context.colors.primary
+                              : context.colors.border,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _metricIcon(metric),
+                            size: 18,
+                            color: isSelected
+                                ? context.colors.primary
+                                : context.colors.textMedium,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _metricLabel(metric),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? context.colors.primary
+                                  : context.colors.textMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
-                child: KeyedSubtree(
-                  key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}'),
-                  child: _selectedMetric == MetricType.calories
-                      ? _buildCaloriesChart(startStr, endStr, profile)
-                      : _selectedMetric == MetricType.protein
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Date range navigator
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.chevron_left_rounded,
+                      color: context.colors.primary,
+                    ),
+                    onPressed: () => _shiftDate(-1),
+                  ),
+                  Text(
+                    _headerText,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.textDark,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.chevron_right_rounded,
+                      color: context.colors.primary,
+                    ),
+                    onPressed: () => _shiftDate(1),
+                  ),
+                ],
+              ),
+            ),
+
+            Center(
+              child: ActionChip(
+                backgroundColor: context.colors.lavenderCard,
+                side: BorderSide.none,
+                label: Text(
+                  'This Week Summary',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: context.colors.primary,
+                  ),
+                ),
+                onPressed: () {
+                  context.go('/progress/weekly-summary');
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: KeyedSubtree(
+                    key: ValueKey(
+                      '${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}',
+                    ),
+                    child: _selectedMetric == MetricType.calories
+                        ? _buildCaloriesChart(startStr, endStr, profile)
+                        : _selectedMetric == MetricType.protein
                         ? _buildProteinChart(startStr, endStr, profile)
                         : _buildChart(logs, profile.useKg, profile),
+                  ),
                 ),
               ),
             ),
-          ),
-
-
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
-
-
 
   // ignore: unused_element
   List<ChartDataPoint> _dailyMetricSeries(
@@ -496,7 +559,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (data.isEmpty) return null;
 
     final parts = <String>['avg this period'];
-    final isTrendMetric = metric == MetricType.weight ||
+    final isTrendMetric =
+        metric == MetricType.weight ||
         metric == MetricType.bodyFat ||
         metric == MetricType.bmi ||
         metric == MetricType.sleep;
@@ -504,7 +568,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (isTrendMetric && data.length >= 2) {
       final delta = data.last.value - data.first.value;
       final abs = delta.abs();
-      final sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
+      final sign = delta > 0
+          ? '+'
+          : delta < 0
+          ? '−'
+          : '';
       switch (metric) {
         case MetricType.weight:
           parts.add(
@@ -536,19 +604,21 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final List<ChartDataPoint> data = [];
     final daysDiff = _endDate.difference(_startDate).inDays;
     final logsByDate = {for (var l in logs) l.date: l};
-    
+
     int daysWithData = 0;
 
     for (int i = 0; i <= daysDiff; i++) {
       final d = _startDate.add(Duration(days: i));
       final dateStr = DateFormat('yyyy-MM-dd').format(d);
       final log = logsByDate[dateStr];
-      
+
       if (log != null) {
         double? val;
         switch (_selectedMetric) {
           case MetricType.weight:
-            val = log.weight != null ? (useKg ? log.weight! : log.weight! * 2.20462) : null;
+            val = log.weight != null
+                ? (useKg ? log.weight! : log.weight! * 2.20462)
+                : null;
             break;
           case MetricType.steps:
             val = log.steps?.toDouble();
@@ -577,7 +647,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             val = null;
             break;
         }
-        
+
         if (val != null) {
           // Treat 0 steps as "not logged" so the line doesn't crash to zero.
           if (_selectedMetric == MetricType.steps && val <= 0) continue;
@@ -589,22 +659,25 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
     List<String> labels = [];
     List<String> values = [];
-    
+
     if (daysWithData > 0) {
       final validData = data;
-      
+
       if (_selectedMetric == MetricType.steps) {
-        final validSteps = validData.where((d) => d.value > 0).map((d) => d.value).toList();
+        final validSteps = validData
+            .where((d) => d.value > 0)
+            .map((d) => d.value)
+            .toList();
         if (validSteps.isNotEmpty) {
           final total = validSteps.reduce((a, b) => a + b);
           final avg = total ~/ validSteps.length;
           final maxVal = validSteps.reduce((a, b) => a > b ? a : b);
           final avgFmt = NumberFormat('#,###').format(avg);
           final maxFmt = NumberFormat('#,###').format(maxVal.toInt());
-          final totalFmt = total >= 10000 
-              ? '${(total / 1000).toStringAsFixed(1)}k' 
+          final totalFmt = total >= 10000
+              ? '${(total / 1000).toStringAsFixed(1)}k'
               : NumberFormat('#,###').format(total.toInt());
-              
+
           labels = ['AVERAGE', 'TOTAL', 'MAX'];
           values = [avgFmt, totalFmt, maxFmt];
         }
@@ -613,34 +686,58 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         final avg = vals.reduce((a, b) => a + b) / vals.length;
         final maxVal = vals.reduce((a, b) => a > b ? a : b);
         final minVal = vals.reduce((a, b) => a < b ? a : b);
-        
+
         if (_selectedMetric == MetricType.weight) {
           final unit = useKg ? 'kg' : 'lb';
           labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = ['${avg.toStringAsFixed(1)} $unit', '${maxVal.toStringAsFixed(1)} $unit', '${minVal.toStringAsFixed(1)} $unit'];
-        } else if (_selectedMetric == MetricType.sleep || _selectedMetric == MetricType.screenTime) {
+          values = [
+            '${avg.toStringAsFixed(1)} $unit',
+            '${maxVal.toStringAsFixed(1)} $unit',
+            '${minVal.toStringAsFixed(1)} $unit',
+          ];
+        } else if (_selectedMetric == MetricType.sleep ||
+            _selectedMetric == MetricType.screenTime) {
           labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = ['${avg.toStringAsFixed(1)}h', '${maxVal.toStringAsFixed(1)}h', '${minVal.toStringAsFixed(1)}h'];
+          values = [
+            '${avg.toStringAsFixed(1)}h',
+            '${maxVal.toStringAsFixed(1)}h',
+            '${minVal.toStringAsFixed(1)}h',
+          ];
         } else if (_selectedMetric == MetricType.bmi) {
           labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = [avg.toStringAsFixed(1), maxVal.toStringAsFixed(1), minVal.toStringAsFixed(1)];
+          values = [
+            avg.toStringAsFixed(1),
+            maxVal.toStringAsFixed(1),
+            minVal.toStringAsFixed(1),
+          ];
         } else if (_selectedMetric == MetricType.bodyFat) {
           labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = ['${avg.toStringAsFixed(1)}%', '${maxVal.toStringAsFixed(1)}%', '${minVal.toStringAsFixed(1)}%'];
+          values = [
+            '${avg.toStringAsFixed(1)}%',
+            '${maxVal.toStringAsFixed(1)}%',
+            '${minVal.toStringAsFixed(1)}%',
+          ];
         }
       }
     }
 
     ChartTimeFormat format;
     switch (_selectedRange) {
-      case TimeRange.weekly: format = ChartTimeFormat.weekly; break;
-      case TimeRange.monthly: format = ChartTimeFormat.monthly; break;
-      case TimeRange.sixMonths: format = ChartTimeFormat.sixMonths; break;
+      case TimeRange.weekly:
+        format = ChartTimeFormat.weekly;
+        break;
+      case TimeRange.monthly:
+        format = ChartTimeFormat.monthly;
+        break;
+      case TimeRange.sixMonths:
+        format = ChartTimeFormat.sixMonths;
+        break;
     }
 
     // Empty state logic: if no true valid data exists, we hide the chart
     final isEmpty = daysWithData == 0;
-    String emptyMessage = 'No ${_metricLabel(_selectedMetric).toLowerCase()} entries yet.';
+    String emptyMessage =
+        'No ${_metricLabel(_selectedMetric).toLowerCase()} entries yet.';
     if (_selectedMetric == MetricType.bmi) {
       emptyMessage = 'Log your weight to see BMI.';
     }
@@ -659,12 +756,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       timeFormat: format,
       emptyMessage: emptyMessage,
       // ignore: avoid_dynamic_calls
-      targetValue: _selectedMetric == MetricType.weight && profile.targetWeight != null
+      targetValue:
+          _selectedMetric == MetricType.weight && profile.targetWeight != null
           ? (useKg
-              // ignore: avoid_dynamic_calls
-              ? profile.targetWeight as double
-              // ignore: avoid_dynamic_calls
-              : (profile.targetWeight as double) * 2.20462)
+                // ignore: avoid_dynamic_calls
+                ? profile.targetWeight as double
+                // ignore: avoid_dynamic_calls
+                : (profile.targetWeight as double) * 2.20462)
           : null,
       onPointLongPress: _handlePointLongPress,
       expandChart: true,
@@ -676,38 +774,48 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final List<ChartDataPoint> data = [];
     final logsByDate = {for (var l in mealLogs) l.date: l};
     final daysDiff = _endDate.difference(_startDate).inDays;
-    
+
     final validCalories = <int>[];
 
     for (int i = 0; i <= daysDiff; i++) {
       final d = _startDate.add(Duration(days: i));
       final dateStr = DateFormat('yyyy-MM-dd').format(d);
       final log = logsByDate[dateStr];
-      
+
       if (log != null && log.totalCalories > 0) {
         data.add(ChartDataPoint(d, log.totalCalories.toDouble()));
         validCalories.add(log.totalCalories);
       }
       // Skip zero / missing days — chart gaps instead of fake dips.
     }
-    
+
     List<String> labels = [];
     List<String> values = [];
-    
+
     if (validCalories.isNotEmpty) {
       final sum = validCalories.reduce((a, b) => a + b);
       final avg = sum ~/ validCalories.length;
       final maxVal = validCalories.reduce((a, b) => a > b ? a : b);
       final minVal = validCalories.reduce((a, b) => a < b ? a : b);
       labels = ['AVERAGE', 'MAX', 'MIN'];
-      values = [NumberFormat('#,###').format(avg), NumberFormat('#,###').format(maxVal), NumberFormat('#,###').format(minVal)];
+      values = [
+        NumberFormat('#,###').format(avg),
+        NumberFormat('#,###').format(maxVal),
+        NumberFormat('#,###').format(minVal),
+      ];
     }
 
     ChartTimeFormat format;
     switch (_selectedRange) {
-      case TimeRange.weekly: format = ChartTimeFormat.weekly; break;
-      case TimeRange.monthly: format = ChartTimeFormat.monthly; break;
-      case TimeRange.sixMonths: format = ChartTimeFormat.sixMonths; break;
+      case TimeRange.weekly:
+        format = ChartTimeFormat.weekly;
+        break;
+      case TimeRange.monthly:
+        format = ChartTimeFormat.monthly;
+        break;
+      case TimeRange.sixMonths:
+        format = ChartTimeFormat.sixMonths;
+        break;
     }
 
     final isEmpty = validCalories.isEmpty;
@@ -733,11 +841,15 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     );
   }
 
-  Widget _buildProteinChart(String startStr, String endStr, UserProfile profile) {
+  Widget _buildProteinChart(
+    String startStr,
+    String endStr,
+    UserProfile profile,
+  ) {
     final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
     final daysDiff = _endDate.difference(_startDate).inDays;
     final logsByDate = {for (var l in mealLogs) l.date: l};
-    
+
     final data = <ChartDataPoint>[];
     for (int i = 0; i <= daysDiff; i++) {
       final d = _startDate.add(Duration(days: i));
@@ -760,9 +872,15 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
     ChartTimeFormat format;
     switch (_selectedRange) {
-      case TimeRange.weekly: format = ChartTimeFormat.weekly; break;
-      case TimeRange.monthly: format = ChartTimeFormat.monthly; break;
-      case TimeRange.sixMonths: format = ChartTimeFormat.sixMonths; break;
+      case TimeRange.weekly:
+        format = ChartTimeFormat.weekly;
+        break;
+      case TimeRange.monthly:
+        format = ChartTimeFormat.monthly;
+        break;
+      case TimeRange.sixMonths:
+        format = ChartTimeFormat.sixMonths;
+        break;
     }
 
     final isEmpty = validPoints.isEmpty;
@@ -790,51 +908,75 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   String _rangeLabel(TimeRange range) {
     switch (range) {
-      case TimeRange.weekly: return 'Weekly';
-      case TimeRange.monthly: return 'Monthly';
-      case TimeRange.sixMonths: return '6 Months';
+      case TimeRange.weekly:
+        return 'Weekly';
+      case TimeRange.monthly:
+        return 'Monthly';
+      case TimeRange.sixMonths:
+        return '6 Months';
     }
   }
 
   String _metricTitle(MetricType metric) {
     switch (metric) {
-      case MetricType.weight: return 'Body Weight';
-      case MetricType.steps: return 'Steps';
-      case MetricType.sleep: return 'Sleep';
-      case MetricType.bmi: return 'BMI';
-      case MetricType.bodyFat: return 'Body Fat';
-      case MetricType.calories: return 'Calories';
-      case MetricType.protein: return 'Protein';
-      case MetricType.screenTime: return 'Screen Time';
+      case MetricType.weight:
+        return 'Body Weight';
+      case MetricType.steps:
+        return 'Steps';
+      case MetricType.sleep:
+        return 'Sleep';
+      case MetricType.bmi:
+        return 'BMI';
+      case MetricType.bodyFat:
+        return 'Body Fat';
+      case MetricType.calories:
+        return 'Calories';
+      case MetricType.protein:
+        return 'Protein';
+      case MetricType.screenTime:
+        return 'Screen Time';
     }
   }
 
   String _metricLabel(MetricType metric) {
     switch (metric) {
-      case MetricType.weight: return 'Weight';
-      case MetricType.steps: return 'Steps';
-      case MetricType.sleep: return 'Sleep';
-      case MetricType.bmi: return 'BMI';
-      case MetricType.bodyFat: return 'Body Fat';
-      case MetricType.calories: return 'Calories';
-      case MetricType.protein: return 'Protein';
-      case MetricType.screenTime: return 'Screen Time';
+      case MetricType.weight:
+        return 'Weight';
+      case MetricType.steps:
+        return 'Steps';
+      case MetricType.sleep:
+        return 'Sleep';
+      case MetricType.bmi:
+        return 'BMI';
+      case MetricType.bodyFat:
+        return 'Body Fat';
+      case MetricType.calories:
+        return 'Calories';
+      case MetricType.protein:
+        return 'Protein';
+      case MetricType.screenTime:
+        return 'Screen Time';
     }
   }
 
   IconData _metricIcon(MetricType metric) {
     switch (metric) {
-      case MetricType.weight: return Icons.monitor_weight_rounded;
-      case MetricType.steps: return Icons.directions_walk_rounded;
-      case MetricType.sleep: return Icons.bedtime_rounded;
-      case MetricType.bmi: return Icons.speed_rounded;
-      case MetricType.bodyFat: return Icons.water_drop_rounded;
-      case MetricType.calories: return Icons.restaurant_rounded;
-      case MetricType.protein: return Icons.egg_rounded;
-      case MetricType.screenTime: return Icons.smartphone_rounded;
+      case MetricType.weight:
+        return Icons.monitor_weight_rounded;
+      case MetricType.steps:
+        return Icons.directions_walk_rounded;
+      case MetricType.sleep:
+        return Icons.bedtime_rounded;
+      case MetricType.bmi:
+        return Icons.speed_rounded;
+      case MetricType.bodyFat:
+        return Icons.water_drop_rounded;
+      case MetricType.calories:
+        return Icons.restaurant_rounded;
+      case MetricType.protein:
+        return Icons.egg_rounded;
+      case MetricType.screenTime:
+        return Icons.smartphone_rounded;
     }
   }
 }
-
-
-

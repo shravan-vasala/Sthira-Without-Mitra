@@ -57,15 +57,24 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     final existing = repo.getLog(dateStr, widget.exercise.name ?? '');
 
     if (existing != null) {
-      for (int i = 0; i < existing.sets.length && i < _repsControllers.length; i++) {
+      for (
+        int i = 0;
+        i < existing.sets.length && i < _repsControllers.length;
+        i++
+      ) {
         _repsControllers[i].text = (existing.sets[i].reps ?? 0).toString();
-        _weightControllers[i].text =
-            (existing.sets[i].weight ?? 0.0) > 0 ? (existing.sets[i].weight ?? 0.0).toString() : '';
+        _weightControllers[i].text = (existing.sets[i].weight ?? 0.0) > 0
+            ? (existing.sets[i].weight ?? 0.0).toString()
+            : '';
       }
     } else {
       _lastLog = repo.getLastLog(widget.exercise.name ?? '');
       if (_lastLog != null) {
-        for (int i = 0; i < _lastLog!.sets.length && i < _weightControllers.length; i++) {
+        for (
+          int i = 0;
+          i < _lastLog!.sets.length && i < _weightControllers.length;
+          i++
+        ) {
           final w = _lastLog!.sets[i].weight ?? 0.0;
           if (w > 0) {
             _weightControllers[i].text = w.toString();
@@ -107,12 +116,17 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     setState(() {
       for (int i = 0; i < widget.exercise.setCount; i++) {
         // ignore: dead_code, dead_null_aware_expression
-        _repsControllers[i].text = parseRepTarget(widget.exercise.repsDisplay ?? '');
+        _repsControllers[i].text = parseRepTarget(
+          widget.exercise.repsDisplay ?? '',
+        );
         final planned = widget.exercise.weightKg;
         if (planned != null && planned > 0) {
           _weightControllers[i].text = planned.toString();
-        } else if (_lastLog != null && i < _lastLog!.sets.length && (_lastLog!.sets[i].weight ?? 0.0) > 0) {
-          _weightControllers[i].text = (_lastLog!.sets[i].weight ?? 0.0).toString();
+        } else if (_lastLog != null &&
+            i < _lastLog!.sets.length &&
+            (_lastLog!.sets[i].weight ?? 0.0) > 0) {
+          _weightControllers[i].text = (_lastLog!.sets[i].weight ?? 0.0)
+              .toString();
         }
       }
     });
@@ -124,7 +138,8 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
 
     return AppSheet(
       title: 'Log: ${widget.exercise.name ?? ''}',
-      subtitle: subtitle ??
+      subtitle:
+          subtitle ??
           '${widget.exercise.setCount} set${widget.exercise.setCount > 1 ? 's' : ''}',
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -211,9 +226,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
             child: OutlinedButton(
               onPressed: () async {
                 _fillFromPlan();
-                await _persistAndClose(
-                  widget.exercise,
-                );
+                await _persistAndClose(widget.exercise);
               },
               child: const Text('Log as planned'),
             ),
@@ -237,7 +250,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
       final weight = double.tryParse(_weightControllers[i].text) ?? 0;
       sets.add(SetLog(setNumber: i + 1, reps: reps, weight: weight));
     }
-    
+
     final repo = ref.read(exerciseLogRepoProvider);
     final dateStr = ref.read(dateStringProvider);
     final newLog = ExerciseLog(
@@ -250,10 +263,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   }
 
   Future<void> _persistAndClose(Exercise exercise) async {
-    final prResult = await saveExerciseAsPlanned(
-      ref: ref,
-      exercise: exercise,
-    );
+    final prResult = await saveExerciseAsPlanned(ref: ref, exercise: exercise);
 
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -263,8 +273,9 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   void _showResultSnack(PrUpdateResult prResult) {
     String msg = 'Logged ${widget.exercise.name ?? ''}';
     if (prResult.hasAnyNewPr) {
-        if (prResult.isNewMaxWeight) {
-          msg = 'New PR! ${formatWeight(ref.watch(profileProvider), prResult.newPr.maxWeight)}';
+      if (prResult.isNewMaxWeight) {
+        msg =
+            'New PR! ${formatWeight(ref.watch(profileProvider), prResult.newPr.maxWeight)}';
       } else if (prResult.isNewMaxReps) {
         msg = 'New PR! ${prResult.newPr.maxReps} reps';
       } else if (prResult.isNewMaxVolume) {
@@ -280,14 +291,11 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor:
-            prResult.hasAnyNewPr ? context.colors.green : context.colors.primary,
+        backgroundColor: prResult.hasAnyNewPr
+            ? context.colors.green
+            : context.colors.primary,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(
-          bottom: 16,
-          left: 16,
-          right: 16,
-        ),
+        margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
@@ -310,7 +318,9 @@ class _StepperField extends StatelessWidget {
     final newVal = val + amount;
     if (newVal < 0) return;
     if (isWeight) {
-      controller.text = newVal.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+      controller.text = newVal
+          .toStringAsFixed(1)
+          .replaceAll(RegExp(r'\.0$'), '');
     } else {
       controller.text = newVal.toInt().toString();
     }
@@ -331,7 +341,11 @@ class _StepperField extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Icon(Icons.remove_rounded, size: 18, color: context.colors.primary),
+              child: Icon(
+                Icons.remove_rounded,
+                size: 18,
+                color: context.colors.primary,
+              ),
             ),
           ),
           Expanded(
@@ -360,7 +374,11 @@ class _StepperField extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Icon(Icons.add_rounded, size: 18, color: context.colors.primary),
+              child: Icon(
+                Icons.add_rounded,
+                size: 18,
+                color: context.colors.primary,
+              ),
             ),
           ),
         ],
@@ -368,4 +386,3 @@ class _StepperField extends StatelessWidget {
     );
   }
 }
-

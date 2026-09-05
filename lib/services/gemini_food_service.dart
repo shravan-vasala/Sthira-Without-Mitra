@@ -15,7 +15,12 @@ class GeminiFoodService implements IAiFoodService {
   final AiClient aiClient;
   final NutritionLookupService nutritionLookup;
 
-  GeminiFoodService({this.apiKey, this.isSignedIn = false, required this.aiClient, required this.nutritionLookup});
+  GeminiFoodService({
+    this.apiKey,
+    this.isSignedIn = false,
+    required this.aiClient,
+    required this.nutritionLookup,
+  });
 
   static const _jsonShape = '''
 Return ONLY a JSON object with the exact following structure and types. Do NOT include markdown blocks or any other text.
@@ -111,7 +116,8 @@ Portion estimation guidelines:
     final hint = userContext != null && userContext.trim().isNotEmpty
         ? '\nUser provided context/hint: "${userContext.trim()}". Use this to help identify the food, but still estimate macros realistically.'
         : '';
-    final prompt = '''
+    final prompt =
+        '''
 Analyze these food images (different angles of the SAME meal) and estimate its nutritional content.
 IMPORTANT: Since these are different angles of the same meal, do NOT double count the dishes. Identify the unique items present.
 $_cuisineHint$hint
@@ -147,7 +153,8 @@ $_jsonShape
 
     if (cached != null) {
       try {
-        final decoded = jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
+        final decoded =
+            jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
         if (!decoded.containsKey('total')) {
           // Legacy cached raw data lacking totals — process it
           return await _processAiResponse(decoded);
@@ -158,7 +165,8 @@ $_jsonShape
       }
     }
 
-    final prompt = '''
+    final prompt =
+        '''
 Estimate nutritional content for this home-cooked meal description.
 $_cuisineHint
 Meal description:
@@ -176,121 +184,196 @@ $_jsonShape
 
     if (response != null) {
       await isar.writeTxn(() async {
-        await isar.foodSearchCaches.put(FoodSearchCache(
-          normalizedQuery: normalizedQuery,
-          cachedResponseJson: jsonEncode(response),
-        ));
+        await isar.foodSearchCaches.put(
+          FoodSearchCache(
+            normalizedQuery: normalizedQuery,
+            cachedResponseJson: jsonEncode(response),
+          ),
+        );
       });
     }
 
     return _processAiResponse(response);
   }
 
-  Future<Map<String, dynamic>> _fallbackLookup(String dishName) async {
-    final normalized = dishName.toLowerCase().trim();
+  Future<Map<String, Map<String, dynamic>>> _fallbackBatchLookup(
+    List<String> dishNames,
+  ) async {
     final isar = Isar.getInstance()!;
-    final cached = isar.foodSearchCaches
-        .where()
-        .normalizedQueryEqualTo('fallback_$normalized')
-        .findFirstSync();
-    
-    if (cached != null) {
-      try {
-        return jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
-      } catch (_) {}
+    final Map<String, Map<String, dynamic>> results = {};
+    final List<String> toFetch = [];
+
+    for (final dish in dishNames) {
+      final normalized = dish.toLowerCase().trim();
+      final cached = isar.foodSearchCaches
+          .where()
+          .normalizedQueryEqualTo('fallback_$normalized')
+          .findFirstSync();
+      if (cached != null) {
+        try {
+          results[dish] =
+              jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
+        } catch (_) {
+          toFetch.add(dish);
+        }
+      } else {
+        toFetch.add(dish);
+      }
     }
 
-    final prompt = '''
-Provide the nutritional values per 100 grams for the dish: "$dishName".
-Return ONLY a JSON object:
+    if (toFetch.isEmpty) return results;
+
+    final namesList = toFetch.map((n) => '"$n"').join(', ');
+    final prompt =
+        '''
+Provide the nutritional values per 100 grams for EACH of these foods: $namesList
+Return ONLY a JSON object containing an array called "items":
 {
-  "kcal": 0,
-  "protein_g": 0.0,
-  "carbs_g": 0.0,
-  "fat_g": 0.0
+  "items": [
+    {
+      "name": "Exact Name that I queried",
+      "kcal": 0,
+      "protein_g": 0.0,
+      "carbs_g": 0.0,
+      "fat_g": 0.0
+    }
+  ]
 }
 ''';
     final response = await aiClient.generateJson(
       prompt: prompt,
-      systemInstruction: 'You are a nutrition database. Provide exact values per 100g.',
+      systemInstruction:
+          'You are a nutrition database. Provide exact values per 100g.',
       useFirebase: isSignedIn,
       apiKey: apiKey,
     );
-    
-    if (response != null) {
-      final safeResponse = {
-        'kcal': (response['kcal'] as num?)?.clamp(0, 900).toDouble() ?? 0.0,
-        'protein_g': (response['protein_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
-        'carbs_g': (response['carbs_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
-        'fat_g': (response['fat_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
-      };
 
+    if (response != null && response['items'] is List) {
       await isar.writeTxn(() async {
-        await isar.foodSearchCaches.put(FoodSearchCache(
-          normalizedQuery: 'fallback_$normalized',
-          cachedResponseJson: jsonEncode(safeResponse),
-        ));
+        for (var item in response['items']) {
+          if (item is! Map) continue;
+          final name = item['name']?.toString();
+          if (name == null) continue;
+
+          final safeResponse = {
+            'kcal': (item['kcal'] as num?)?.clamp(0, 900).toDouble() ?? 0.0,
+            'protein_g':
+                (item['protein_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
+            'carbs_g':
+                (item['carbs_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
+            'fat_g': (item['fat_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
+          };
+
+          results[name] = safeResponse;
+
+          // if there is a slight mismatch in case, store it under the original queried name as well
+          final queriedName = toFetch.firstWhere(
+            (element) =>
+                element.toLowerCase().trim() == name.toLowerCase().trim(),
+            orElse: () => name,
+          );
+          results[queriedName] = safeResponse;
+
+          final normalized = queriedName.toLowerCase().trim();
+          await isar.foodSearchCaches.put(
+            FoodSearchCache(
+              normalizedQuery: 'fallback_$normalized',
+              cachedResponseJson: jsonEncode(safeResponse),
+            ),
+          );
+        }
       });
-      return safeResponse;
     }
-    
-    return {"kcal": 0.0, "protein_g": 0.0, "carbs_g": 0.0, "fat_g": 0.0};
+
+    // Fill in default for any failures
+    for (final dish in toFetch) {
+      if (!results.containsKey(dish)) {
+        results[dish] = {
+          "kcal": 0.0,
+          "protein_g": 0.0,
+          "carbs_g": 0.0,
+          "fat_g": 0.0,
+        };
+      }
+    }
+
+    return results;
   }
 
-  Future<Map<String, dynamic>?> _processAiResponse(Map<String, dynamic>? aiResponse) async {
+  Future<Map<String, dynamic>?> _processAiResponse(
+    Map<String, dynamic>? aiResponse,
+  ) async {
     if (aiResponse == null) return null;
     await nutritionLookup.load();
-    
+
     double totalCal = 0;
     double totalP = 0;
     double totalC = 0;
     double totalF = 0;
     bool hadUnknown = false;
-    
+
     final items = aiResponse['items'] as List<dynamic>? ?? [];
+    List<String> unknownNames = [];
+
+    for (var item in items) {
+      if (item is! Map) continue;
+      final name = item['name']?.toString() ?? 'Unknown';
+      if (nutritionLookup.match(name) == null) {
+        if (!unknownNames.contains(name)) unknownNames.add(name);
+      }
+    }
+
+    Map<String, Map<String, dynamic>> batchResults = {};
+    if (unknownNames.isNotEmpty) {
+      hadUnknown = true;
+      batchResults = await _fallbackBatchLookup(unknownNames);
+    }
+
     for (var item in items) {
       if (item is! Map) continue;
       final name = item['name']?.toString() ?? 'Unknown';
       double grams = (item['estimated_grams'] as num?)?.toDouble() ?? 100.0;
       grams = grams.clamp(1.0, 1500.0);
       item['estimated_grams'] = grams;
-      
+
       final Map<String, dynamic>? match = nutritionLookup.match(name);
       Map<String, dynamic> per100g;
-      
+
       if (match != null) {
         per100g = match['per100g'] as Map<String, dynamic>;
       } else {
-        hadUnknown = true;
-        per100g = await _fallbackLookup(name);
+        per100g =
+            batchResults[name] ??
+            {"kcal": 0.0, "protein_g": 0.0, "carbs_g": 0.0, "fat_g": 0.0};
       }
-      
+
       final multiplier = grams / 100.0;
       final kcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * multiplier;
       final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * multiplier;
       final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * multiplier;
       final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * multiplier;
-      
+
       item['calories'] = kcal.round();
       item['protein_g'] = double.parse(p.toStringAsFixed(1));
       item['carbs_g'] = double.parse(c.toStringAsFixed(1));
       item['fat_g'] = double.parse(f.toStringAsFixed(1));
-      
+
       totalCal += kcal;
       totalP += p;
       totalC += c;
       totalF += f;
     }
-    
+
     aiResponse['total'] = {
       'calories': totalCal.round(),
       'protein_g': double.parse(totalP.toStringAsFixed(1)),
       'carbs_g': double.parse(totalC.toStringAsFixed(1)),
       'fat_g': double.parse(totalF.toStringAsFixed(1)),
     };
-    
+
     if (hadUnknown) {
-      final currentConfidence = aiResponse['confidence']?.toString().toLowerCase() ?? 'low';
+      final currentConfidence =
+          aiResponse['confidence']?.toString().toLowerCase() ?? 'low';
       if (currentConfidence == 'high') {
         aiResponse['confidence'] = 'medium';
       } else if (currentConfidence == 'medium') {
@@ -298,7 +381,7 @@ Return ONLY a JSON object:
       }
       aiResponse['lookup'] = 'partial';
     }
-    
+
     return aiResponse;
   }
 
@@ -319,13 +402,20 @@ Return ONLY a JSON object:
     final bucketedProtein = (remainingProtein ~/ 10) * 10;
     final dateStr = DateTime.now().toIso8601String().substring(0, 10);
     final mName = mealName?.replaceAll(' ', '_') ?? 'final';
-    final cacheKey = 'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_$bucketedProtein';
-    
+    final cacheKey =
+        'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_$bucketedProtein';
+
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Prune old keys
-    final keys = prefs.getKeys().where((k) => k.startsWith('meal_suggestion_')).toList();
-    final twoDaysAgo = DateTime.now().subtract(const Duration(days: 2)).toIso8601String().substring(0, 10);
+    final keys = prefs
+        .getKeys()
+        .where((k) => k.startsWith('meal_suggestion_'))
+        .toList();
+    final twoDaysAgo = DateTime.now()
+        .subtract(const Duration(days: 2))
+        .toIso8601String()
+        .substring(0, 10);
     for (final key in keys) {
       if (key.length >= 26) {
         final keyDate = key.substring(16, 26); // extracts YYYY-MM-DD
@@ -343,20 +433,25 @@ Return ONLY a JSON object:
 
     String mealContext = '';
     if (mealName != null && mealsLeft != null && mealsLeft > 1) {
-      mealContext = 'The user is asking for a "$mealName" suggestion. There are $mealsLeft meals left to eat today (including this one), so DO NOT use up all the remaining macros for this single meal. Instead, roughly divide the remaining macros by $mealsLeft to get a sensible target for this specific meal. Be realistic and do not suggest massive meals (e.g. keep single meal suggestions under 800-1000 calories).';
+      mealContext =
+          'The user is asking for a "$mealName" suggestion. There are $mealsLeft meals left to eat today (including this one), so DO NOT use up all the remaining macros for this single meal. Instead, roughly divide the remaining macros by $mealsLeft to get a sensible target for this specific meal. Be realistic and do not suggest massive meals (e.g. keep single meal suggestions under 800-1000 calories).';
     } else {
-      mealContext = 'This is the final meal/snack of the day, so try to use up as much of the remaining macros as possible without going over calories. If the remaining calories are very high, suggest a realistic meal and do not force an unrealistic 1200+ calorie dish.';
+      mealContext =
+          'This is the final meal/snack of the day, so try to use up as much of the remaining macros as possible without going over calories. If the remaining calories are very high, suggest a realistic meal and do not force an unrealistic 1200+ calorie dish.';
     }
 
     String historyContext = '';
     if (previousMeals != null && previousMeals.isNotEmpty) {
       final recentMeals = previousMeals.take(2).join(", ");
-      historyContext = 'The user has already eaten the following today: $recentMeals. Please balance the diet based on what they already ate, and avoid suggesting the exact same things.';
+      historyContext =
+          'The user has already eaten the following today: $recentMeals. Please balance the diet based on what they already ate, and avoid suggesting the exact same things.';
     } else {
-      historyContext = 'This is the first meal of the day. Focus purely on hitting a healthy balance for this meal.';
+      historyContext =
+          'This is the first meal of the day. Focus purely on hitting a healthy balance for this meal.';
     }
 
-    final prompt = '''
+    final prompt =
+        '''
 You are an expert dietitian. The user needs a meal suggestion to hit their remaining macros for the day.
 Make the suggestion simple and mostly home-cooked meals.
 
@@ -377,27 +472,31 @@ Keep it brief and friendly. Provide the meal name, portion, and approximate macr
 Do NOT use markdown formatting (no asterisks).
 Do NOT use JSON.
 ''';
-    
+
     try {
       final stream = aiClient.generateTextStream(
         prompt: prompt,
-        systemInstruction: 'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
+        systemInstruction:
+            'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
         useFirebase: isSignedIn,
         apiKey: apiKey,
       );
-      
+
       final buffer = StringBuffer();
       await for (final chunk in stream) {
         buffer.write(chunk);
         yield chunk;
       }
-      
+
       if (buffer.isNotEmpty) {
         // ignore: unawaited_futures
         prefs.setString(cacheKey, buffer.toString());
       }
     } catch (e) {
-      if (e is AiException && (e.message.contains('traffic') || e.message.contains('rate limited') || e.message.contains('later'))) {
+      if (e is AiException &&
+          (e.message.contains('traffic') ||
+              e.message.contains('rate limited') ||
+              e.message.contains('later'))) {
         yield "Our AI is currently taking a breather to handle traffic, but here's a quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! This should easily fit your remaining $remainingCalories calories.";
       } else {
         rethrow;
@@ -416,46 +515,54 @@ Do NOT use JSON.
   @override
   Future<void> verifyApiKey(String key) async {
     final client = GoogleAIClient(
-      config: GoogleAIConfig.googleAI(
-        authProvider: ApiKeyProvider(key.trim()),
-      ),
+      config: GoogleAIConfig.googleAI(authProvider: ApiKeyProvider(key.trim())),
     );
 
-    final modelsToTry = [
-      'gemini-3.6-flash',
-      'gemini-3.5-flash',
-      'gemini-3.1-flash-lite',
-    ];
+    final modelsToTry = AiClient.textModelsToTry;
 
     String lastError = '';
 
     try {
       for (final model in modelsToTry) {
         try {
-          final response = await client.models.generateContent(
-            model: model,
-            request: GenerateContentRequest(
-              contents: [Content.text("Respond exactly with 'OK'")],
-            ),
-          ).timeout(const Duration(seconds: 15));
+          final response = await client.models
+              .generateContent(
+                model: model,
+                request: GenerateContentRequest(
+                  contents: [Content.text("Respond exactly with 'OK'")],
+                ),
+              )
+              .timeout(const Duration(seconds: 15));
           if (response.text != null && response.text!.isNotEmpty) {
             return; // Success!
           }
         } catch (e) {
           final errorString = e.toString();
-          if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
+          if (errorString.contains('API_KEY_INVALID') ||
+              errorString.contains('API key not valid') ||
+              errorString.contains('disabled') ||
+              errorString.contains('has not been used in project')) {
             throw AiException('Your API Key is invalid or not authorized.');
-          } else if (errorString.contains('403') || errorString.contains('forbidden')) {
-            lastError = 'Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.';
+          } else if (errorString.contains('403') ||
+              errorString.contains('forbidden')) {
+            lastError =
+                'Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.';
             continue; // Try next model
-          } else if (errorString.contains('404') || errorString.contains('not found')) {
+          } else if (errorString.contains('404') ||
+              errorString.contains('not found')) {
             lastError = 'Model $model unavailable (404)';
             continue; // Try next model
-          } else if (errorString.contains('429') || errorString.contains('quota')) {
-            throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');
-          } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout') || errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
-             lastError = 'Connection timed out or offline';
-             continue; 
+          } else if (errorString.contains('429') ||
+              errorString.contains('quota')) {
+            throw AiException(
+              'We\'re experiencing heavy traffic! Please wait a minute.',
+            );
+          } else if (errorString.contains('TimeoutException') ||
+              errorString.contains('Timeout') ||
+              errorString.contains('SocketException') ||
+              errorString.contains('Failed host lookup')) {
+            lastError = 'Connection timed out or offline';
+            continue;
           }
           lastError = errorString;
           continue; // Try next model on 404 etc.

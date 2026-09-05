@@ -28,12 +28,18 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
         backgroundColor: context.colors.scaffoldBg,
         foregroundColor: context.colors.textDark,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: context.colors.textDark),
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: context.colors.textDark,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_rounded, color: context.colors.primary),
+            icon: Icon(
+              Icons.notifications_rounded,
+              color: context.colors.primary,
+            ),
             tooltip: 'Remind me daily',
             onPressed: () => context.go('/profile/reminders'),
           ),
@@ -61,10 +67,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
               },
               itemBuilder: (context, index) {
                 final habit = habits[index];
-                return _HabitListTile(
-                  key: ValueKey(habit.id),
-                  habit: habit,
-                );
+                return _HabitListTile(key: ValueKey(habit.id), habit: habit);
               },
             ),
       floatingActionButton: Padding(
@@ -131,7 +134,10 @@ class _HabitListTile extends ConsumerWidget {
               },
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline_rounded, color: context.colors.red),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: context.colors.red,
+              ),
               tooltip: 'Delete habit',
               onPressed: () {
                 showDialog(
@@ -148,11 +154,14 @@ class _HabitListTile extends ConsumerWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          ref.read(habitRepoProvider).deleteHabit(habit.id).then((_) {
-                            if (!context.mounted) return;
-                            ref.invalidate(habitsProvider);
-                            Navigator.pop(ctx);
-                          });
+                          ref
+                              .read(habitRepoProvider)
+                              .deleteHabit(habit.id)
+                              .then((_) {
+                                if (!context.mounted) return;
+                                ref.invalidate(habitsProvider);
+                                Navigator.pop(ctx);
+                              });
                         },
                         child: Text(
                           'Delete',
@@ -294,8 +303,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
     });
   }
 
-  bool get _showGoalFields =>
-      _isWaterHabit || _type != HabitType.checkbox;
+  bool get _showGoalFields => _isWaterHabit || _type != HabitType.checkbox;
 
   @override
   Widget build(BuildContext context) {
@@ -394,10 +402,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               DropdownButtonFormField<HabitType>(
                 initialValue: _type,
                 dropdownColor: context.colors.card,
-                style: TextStyle(
-                  color: context.colors.textDark,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: context.colors.textDark, fontSize: 14),
                 iconEnabledColor: context.colors.textMedium,
                 decoration: InputDecoration(
                   labelText: 'Type',
@@ -473,8 +478,9 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       onChanged: (_) {
                         if (_isWaterHabit) {
                           setState(_syncWaterNameFromGoal);
@@ -525,7 +531,9 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
             ],
           ],

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';\nimport 'ai_logger.dart';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'package:crypto/crypto.dart';
@@ -8,18 +8,40 @@ import 'dart:async';
 import 'dart:io';
 import 'image_preprocessor.dart';
 
+enum AiErrorCause { invalidKey, offline, notFound, rateLimited, overloaded, parse, timeout, unknown }
+
 class AiException implements Exception {
   final String message;
-  AiException(this.message);
+  final AiErrorCause? cause;
+  AiException(this.message, {this.cause});
   @override
   String toString() => message;
+}
+
+AiErrorCause _classifyError(String errorString) {
+  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
+    return AiErrorCause.invalidKey;
+  } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
+    return AiErrorCause.offline;
+  } else if (errorString.contains('403') || errorString.contains('forbidden') || errorString.contains('404') || errorString.contains('not found')) {
+    return AiErrorCause.notFound;
+  } else if (errorString.contains('429') || errorString.contains('quota') || errorString.contains('RESOURCE_EXHAUSTED')) {
+    return AiErrorCause.rateLimited;
+  } else if (errorString.contains('503') || errorString.contains('UNAVAILABLE') || errorString.contains('overloaded')) {
+    return AiErrorCause.overloaded;
+  } else if (errorString.contains('FormatException') || errorString.contains('json') || errorString.contains('parse')) {
+    return AiErrorCause.parse;
+  } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout')) {
+    return AiErrorCause.timeout;
+  }
+  return AiErrorCause.unknown;
 }
 
 class AiClientCircuitBreaker {
   int consecutiveFailures = 0;
   DateTime? lastFailureTime;
   static const int maxFailures = 3;
-  static const Duration resetTimeout = Duration(minutes: 5);
+  static const Duration resetTimeout = Duration(seconds: 90);
 
   bool get isOpen {
     if (consecutiveFailures >= maxFailures) {
@@ -50,13 +72,15 @@ class AiClient {
   final AiClientCircuitBreaker _textCircuitBreaker = AiClientCircuitBreaker();
   
   static const visionModelsToTry = [
+    'gemini-3.7-flash',
     'gemini-3.6-flash',
     'gemini-3.5-flash',
   ];
 
   static const textModelsToTry = [
+    'gemini-3.7-flash',
     'gemini-3.6-flash',
-    'gemini-3.5-flash',
+    'gemini-3.5-flash-lite',
     'gemini-3.1-flash-lite',
   ];
   GoogleAIClient? _cachedClient;
@@ -70,7 +94,7 @@ class AiClient {
     _cachedApiKey = null;
   }
 
-  Future<Map<String, dynamic>?> generateJson({
+    Future<Map<String, dynamic>?> generateJson({
     required String prompt,
     required String systemInstruction,
     List<Uint8List>? imageBytesList,
@@ -80,19 +104,18 @@ class AiClient {
     bool skipCache = false,
   }) async {
     if (!useFirebase && (apiKey == null || apiKey.isEmpty)) {
-      throw AiException('API Key is required if not using Firebase. Add it in Profile -> AI Settings.');
+      throw AiException('API Key is required if not using Firebase. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
     }
 
     String? imageContext;
     final List<Uint8List> processedImages = [];
     String? actualMimeType = mimeType;
     if (imageBytesList != null && imageBytesList.isNotEmpty) {
-      // ignore: deprecated_export_use
       final b = BytesBuilder();
       for (var imageBytes in imageBytesList) {
         final processed = await ImagePreprocessor.processImage(imageBytes, mimeType ?? 'image/jpeg');
         processedImages.add(processed.$1);
-        actualMimeType = processed.$2; // Assume all are same mime type after processing
+        actualMimeType = processed.$2;
         b.add(processed.$1);
       }
       imageContext = sha256.convert(b.toBytes()).toString();
@@ -103,29 +126,31 @@ class AiClient {
       if (cachedResult != null) return cachedResult;
     }
 
-    final breaker = imageBytesList != null && imageBytesList.isNotEmpty ? _visionCircuitBreaker : _textCircuitBreaker;
+    final isVision = imageBytesList != null && imageBytesList.isNotEmpty;
+    final breaker = isVision ? _visionCircuitBreaker : _textCircuitBreaker;
     
     if (breaker.isOpen) {
-      if (imageBytesList != null && imageBytesList.isNotEmpty) {
-        throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
-      } else {
-        throw AiException('AI rate limited. Please try again later.');
-      }
+      throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
     }
 
-    // ignore: unused_local_variable
-    String lastError = '';
-
-    final modelsToUse = imageBytesList != null && imageBytesList.isNotEmpty ? visionModelsToTry : textModelsToTry;
+    final modelsToUse = isVision ? visionModelsToTry : textModelsToTry;
+    final overallDeadline = DateTime.now().add(Duration(seconds: isVision ? 75 : 40));
+    final perAttemptTimeout = Duration(seconds: isVision ? 40 : 20);
+    
+    AiErrorCause? lastCause;
+    String lastErrorMsg = '';
 
     for (int i = 0; i < modelsToUse.length; i++) {
+        if (DateTime.now().isAfter(overallDeadline)) break;
       final modelName = modelsToUse[i];
-      final int maxRetries = 2;
-      final bool skipStrategy = false;
+      int maxRetries = 2; // only used for rateLimited
+      int attempt = 0;
       
-      for (int attempt = 0; attempt <= maxRetries; attempt++) {
+      while (attempt <= maxRetries) {
+        if (DateTime.now().isAfter(overallDeadline)) break;
         try {
-          debugPrint('AiClient: Trying Gemini model: $modelName (Firebase: $useFirebase, attempt ${attempt + 1})...');
+          debugPrint('AiClient: Trying model: $modelName (attempt ${attempt + 1})...');
+          final sw = Stopwatch()..start();
           final response = await _callModel(
             modelName: modelName,
             prompt: prompt,
@@ -134,66 +159,76 @@ class AiClient {
             apiKey: apiKey,
             imageBytesList: processedImages.isNotEmpty ? processedImages : null,
             mimeType: actualMimeType,
+            timeout: perAttemptTimeout,
           );
+          sw.stop();
           
-          if (response == null || response.isEmpty) throw Exception("Empty response");
+          if (response == null || response.isEmpty) throw AiException("Empty response", cause: AiErrorCause.unknown);
           
           final json = _parseJson(response);
-          if (i > 0) {
-            json['modelUsed'] = modelName;
-          }
+          if (i > 0) json['modelUsed'] = modelName;
+          
+          AiLogger.log(purpose: isVision ? 'scan plate (vision)' : 'scan description', model: modelName, durationMs: sw.elapsedMilliseconds, outcome: 'success');
+          
           breaker.recordSuccess();
-
-          if (cache != null) {
-            await cache!.set(prompt, json, imageContext);
-          }
-
+          if (cache != null) await cache!.set(prompt, json, imageContext);
           return json;
+          
         } catch (e) {
-          debugPrint('AiClient: Failed with $modelName: $e');
-          final errorString = e.toString();
+          final errStr = e.toString();
+          final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
+          lastCause = cause;
+          lastErrorMsg = errStr;
+          AiLogger.log(purpose: 'AI error fallback', model: modelName, durationMs: 0, outcome: cause.toString());
           
-          if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
-            throw AiException('Your API Key is invalid or not authorized. Please check your AI Settings.');
-          } else if (errorString.contains('403') || errorString.contains('forbidden') || errorString.contains('404') || errorString.contains('not found')) {
-            lastError = 'Model $modelName unavailable (403/404). Trying next...';
-            break; // Break retries, try next model
-          } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
-            throw AiException('You seem to be offline. Please check your internet connection.');
-          }
-          
-          if (errorString.contains('429') || errorString.contains('quota')) {
+          if (cause == AiErrorCause.invalidKey) {
+            throw AiException('Your API Key is invalid or not authorized. Please check your AI Settings.', cause: cause);
+          } else if (cause == AiErrorCause.offline) {
+            throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
+          } else if (cause == AiErrorCause.notFound) {
+            break; // Next model
+          } else if (cause == AiErrorCause.rateLimited) {
             if (attempt < maxRetries) {
-              final delaySeconds = 1 << attempt; // 1s, 2s
-              debugPrint('Rate limited. Waiting ${delaySeconds}s before retry...');
-              await Future.delayed(Duration(seconds: delaySeconds));
-              continue; // Retry
+              final delay = attempt == 0 ? 1 : 2;
+              await Future.delayed(Duration(seconds: delay));
+              attempt++;
+              continue;
             } else {
-              breaker.recordFailure();
-              throw AiException('We\'re experiencing heavy traffic. Please try again in a moment.');
+              break; // Next model
             }
-          } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout')) {
-            if (attempt < maxRetries) {
-              continue; // Retry
+          } else if (cause == AiErrorCause.overloaded) {
+            if (attempt == 0) {
+              await Future.delayed(const Duration(seconds: 2));
+              attempt++;
+              continue;
             } else {
-              lastError = 'Connection timed out';
-              break;
+              break; // Next model
             }
+          } else if (cause == AiErrorCause.parse) {
+            break; // Next model
+          } else if (cause == AiErrorCause.timeout) {
+            break; // Next model immediately
           }
-          
-          lastError = e.toString();
-          break; // For other errors, break retries, try next model immediately
+          break; // Unknown error -> next model
         }
-      }
-      
-      // ignore: dead_code
-      if (skipStrategy) {
-        break; // Break models loop
       }
     }
 
-    breaker.recordFailure();
-    throw AiException('Failed to generate response. Please try again later.');
+    if (DateTime.now().isAfter(overallDeadline)) {
+      throw AiException('The AI is taking too long right now. Please try again.', cause: AiErrorCause.timeout);
+    }
+    
+    if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
+      breaker.recordFailure();
+    }
+    
+    String reason = 'unknown error';
+    if (lastCause == AiErrorCause.rateLimited) reason = 'rate limited';
+    if (lastCause == AiErrorCause.overloaded) reason = 'model overloaded';
+    if (lastCause == AiErrorCause.timeout) reason = 'timed out';
+    if (lastCause == AiErrorCause.parse) reason = 'parsing failed';
+    
+    throw AiException('Couldn\'t analyze right now ($reason). Try again in a minute.', cause: lastCause);
   }
 
   Future<String?> _callModel({
@@ -204,13 +239,13 @@ class AiClient {
     String? apiKey,
     List<Uint8List>? imageBytesList,
     String? mimeType,
+    Duration timeout = const Duration(seconds: 30),
   }) async {
     if (useFirebase) {
       final model = vertex.FirebaseAI.vertexAI().generativeModel(
         model: modelName,
         systemInstruction: systemInstruction != null ? vertex.Content.system(systemInstruction) : null,
         generationConfig: vertex.GenerationConfig(
-          temperature: 0.1,
           responseMimeType: 'application/json',
         ),
       );
@@ -226,7 +261,7 @@ class AiClient {
           vertex.Content.text(prompt)
       ];
 
-      final response = await model.generateContent(contents).timeout(const Duration(seconds: 30));
+      final response = await model.generateContent(contents).timeout(timeout);
       return response.text;
     } else {
       if (apiKey == null || apiKey.isEmpty) {
@@ -246,7 +281,6 @@ class AiClient {
       final request = GenerateContentRequest(
         systemInstruction: systemInstruction != null ? Content.text(systemInstruction) : null,
         generationConfig: const GenerationConfig(
-          temperature: 0.1,
           responseMimeType: 'application/json',
         ),
         contents: [
@@ -264,27 +298,25 @@ class AiClient {
       final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(timeout);
       return response.text;
     }
   }
 
-  Stream<String> generateTextStream({
+    Stream<String> generateTextStream({
     required String prompt,
     required String systemInstruction,
     required bool useFirebase,
     String? apiKey,
   }) async* {
     if (_textCircuitBreaker.isOpen) {
-      throw AiException('Our AI is taking a quick breather to handle traffic. Please try again in a few minutes.');
+      throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
     }
 
-    // ignore: unused_local_variable
-    String lastError = '';
+    AiErrorCause? lastCause;
 
     for (final modelName in textModelsToTry) {
       try {
-        debugPrint('AiClient: Trying Gemini stream model: $modelName (Firebase: $useFirebase)...');
         final stream = _callModelStream(
           modelName: modelName,
           prompt: prompt,
@@ -294,37 +326,40 @@ class AiClient {
         );
         
         await for (final chunk in stream) {
-           if (chunk != null && chunk.isNotEmpty) {
-               yield chunk;
-           }
+           if (chunk != null && chunk.isNotEmpty) yield chunk;
          }
          _textCircuitBreaker.recordSuccess();
-         return; // Success, exit the loop
+         return;
        } catch (e) {
-        debugPrint('AiClient: Stream failed with $modelName: $e');
-        final errorString = e.toString();
+        final errStr = e.toString();
+        final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
+        lastCause = cause;
         
-        if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid')) {
-          throw AiException('Your API Key is invalid or not authorized. Please check your AI Settings.');
-        } else if (errorString.contains('403') || errorString.contains('forbidden')) {
-          lastError = 'Access Forbidden (403). Ensure your API key has no restrictions, your region is supported, and billing is enabled in Google Cloud.';
-          continue; // Try next model
-        } else if (errorString.contains('404') || errorString.contains('not found')) {
-          lastError = 'Model $modelName unavailable (404)';
-          continue; // Try next model
-        } else if (errorString.contains('SocketException')) {
-          throw AiException('You seem to be offline. Please check your internet connection.');
-        } else if (errorString.contains('429') || errorString.contains('quota')) {
-          _textCircuitBreaker.recordFailure();
-          throw AiException('We\'re experiencing heavy traffic. Please try again in a moment.');
+        if (cause == AiErrorCause.invalidKey) {
+          throw AiException('Your API Key is invalid or not authorized.', cause: cause);
+        } else if (cause == AiErrorCause.offline) {
+          throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
+        } else if (cause == AiErrorCause.notFound) {
+          continue;
+        } else if (cause == AiErrorCause.rateLimited) {
+          continue;
+        } else if (cause == AiErrorCause.overloaded || cause == AiErrorCause.timeout) {
+          continue;
         }
-        
-        lastError = errorString;
         continue;
       }
     }
-    _textCircuitBreaker.recordFailure();
-    throw AiException('Failed to generate response. Please try again later.');
+    
+    if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
+      _textCircuitBreaker.recordFailure();
+    }
+    
+    String reason = 'unknown error';
+    if (lastCause == AiErrorCause.rateLimited) reason = 'rate limited';
+    if (lastCause == AiErrorCause.overloaded) reason = 'model overloaded';
+    if (lastCause == AiErrorCause.timeout) reason = 'timed out';
+    
+    throw AiException('Failed to generate response ($reason). Please try again later.', cause: lastCause);
   }
 
   Stream<String?> _callModelStream({
@@ -339,14 +374,13 @@ class AiClient {
         model: modelName,
         systemInstruction: vertex.Content.system(systemInstruction),
         generationConfig: vertex.GenerationConfig(
-          temperature: 0.1,
           responseMimeType: 'text/plain',
         ),
       );
 
       yield* model.generateContentStream([vertex.Content.text(prompt)])
           .map((res) => res.text)
-          .timeout(const Duration(seconds: 30));
+          .timeout(timeout);
     } else {
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('API Key is required if not using Firebase.');
@@ -365,7 +399,6 @@ class AiClient {
       final request = GenerateContentRequest(
         systemInstruction: Content.text(systemInstruction),
         generationConfig: const GenerationConfig(
-          temperature: 0.1,
           responseMimeType: 'text/plain',
         ),
         contents: [Content.text(prompt)],
@@ -374,7 +407,7 @@ class AiClient {
       final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(timeout);
       
       yield response.text;
     }

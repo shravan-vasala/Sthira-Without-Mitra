@@ -47,17 +47,17 @@ class BodyStats {
   }
 
   Map<String, dynamic> toJson() => {
-        'date': date,
-        if (waist != null) 'waist': waist,
-        if (hips != null) 'hips': hips,
-        if (chest != null) 'chest': chest,
-        if (leftArm != null) 'leftArm': leftArm,
-        if (rightArm != null) 'rightArm': rightArm,
-        if (leftThigh != null) 'leftThigh': leftThigh,
-        if (rightThigh != null) 'rightThigh': rightThigh,
-        if (neck != null) 'neck': neck,
-        'unit': unit,
-      };
+    'date': date,
+    if (waist != null) 'waist': waist,
+    if (hips != null) 'hips': hips,
+    if (chest != null) 'chest': chest,
+    if (leftArm != null) 'leftArm': leftArm,
+    if (rightArm != null) 'rightArm': rightArm,
+    if (leftThigh != null) 'leftThigh': leftThigh,
+    if (rightThigh != null) 'rightThigh': rightThigh,
+    if (neck != null) 'neck': neck,
+    'unit': unit,
+  };
 
   BodyStats copyWith({
     double? waist,
@@ -86,13 +86,13 @@ class BodyStats {
 
   @ignore
   Map<String, double?> get allMeasurements => {
-        'Waist': waist,
-        'Hips': hips,
-        'Chest': chest,
-        'Left Arm': leftArm,
-        'Right Arm': rightArm,
-        'Left Thigh': leftThigh,
-        'Right Thigh': rightThigh,
-        'Neck': neck,
-      };
+    'Waist': waist,
+    'Hips': hips,
+    'Chest': chest,
+    'Left Arm': leftArm,
+    'Right Arm': rightArm,
+    'Left Thigh': leftThigh,
+    'Right Thigh': rightThigh,
+    'Neck': neck,
+  };
 }

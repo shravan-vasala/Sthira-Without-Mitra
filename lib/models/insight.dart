@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 
 enum InsightType {
-  trend,       // e.g., "You walked 10k steps 5 days in a row"
+  trend, // e.g., "You walked 10k steps 5 days in a row"
   correlation, // e.g., "On days you sleep 8h, you eat 200 fewer calories"
 }
 
-enum InsightSeverity {
-  positive,
-  neutral,
-  warning,
-}
+enum InsightSeverity { positive, neutral, warning }
 
 class Insight {
   final String id;

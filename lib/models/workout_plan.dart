@@ -22,9 +22,9 @@ class WorkoutPlan {
   }
 
   Map<String, dynamic> toJson() => {
-        'planName': planName,
-        'days': days.map((d) => d.toJson()).toList(),
-      };
+    'planName': planName,
+    'days': days.map((d) => d.toJson()).toList(),
+  };
 }
 
 @embedded
@@ -33,23 +33,27 @@ class WorkoutDay {
   String? label;
   List<WorkoutSection> sections;
 
-  WorkoutDay({
-    this.dayId,
-    this.label,
-    this.sections = const [],
-  });
+  WorkoutDay({this.dayId, this.label, this.sections = const []});
 
   int? get weekday {
     if (dayId == null) return null;
     switch (dayId?.toLowerCase()) {
-      case 'monday': return DateTime.monday;
-      case 'tuesday': return DateTime.tuesday;
-      case 'wednesday': return DateTime.wednesday;
-      case 'thursday': return DateTime.thursday;
-      case 'friday': return DateTime.friday;
-      case 'saturday': return DateTime.saturday;
-      case 'sunday': return DateTime.sunday;
-      default: return null;
+      case 'monday':
+        return DateTime.monday;
+      case 'tuesday':
+        return DateTime.tuesday;
+      case 'wednesday':
+        return DateTime.wednesday;
+      case 'thursday':
+        return DateTime.thursday;
+      case 'friday':
+        return DateTime.friday;
+      case 'saturday':
+        return DateTime.saturday;
+      case 'sunday':
+        return DateTime.sunday;
+      default:
+        return null;
     }
   }
 
@@ -64,10 +68,10 @@ class WorkoutDay {
   }
 
   Map<String, dynamic> toJson() => {
-        'dayId': dayId,
-        if (label != null) 'label': label,
-        'sections': sections.map((s) => s.toJson()).toList(),
-      };
+    'dayId': dayId,
+    if (label != null) 'label': label,
+    'sections': sections.map((s) => s.toJson()).toList(),
+  };
 }
 
 @embedded
@@ -75,10 +79,7 @@ class WorkoutSection {
   String? title;
   List<Exercise> exercises;
 
-  WorkoutSection({
-    this.title,
-    this.exercises = const [],
-  });
+  WorkoutSection({this.title, this.exercises = const []});
 
   factory WorkoutSection.fromJson(Map<String, dynamic> json) {
     return WorkoutSection(
@@ -90,9 +91,9 @@ class WorkoutSection {
   }
 
   Map<String, dynamic> toJson() => {
-        'title': title,
-        'exercises': exercises.map((e) => e.toJson()).toList(),
-      };
+    'title': title,
+    'exercises': exercises.map((e) => e.toJson()).toList(),
+  };
 }
 
 @embedded
@@ -123,12 +124,12 @@ class Exercise {
     if (youtubeUrl == null || youtubeUrl!.isEmpty) return null;
     final uri = Uri.tryParse(youtubeUrl!);
     if (uri == null) return null;
-    
+
     // Handle youtu.be/ID format
     if (uri.host.contains('youtu.be')) {
       return uri.pathSegments.isNotEmpty ? uri.pathSegments.first : null;
     }
-    
+
     // Handle youtube.com/watch?v=ID or youtube.com/shorts/ID format
     if (uri.host.contains('youtube.com')) {
       if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'shorts') {
@@ -173,20 +174,22 @@ class Exercise {
       note: json['note'] as String? ?? '',
       sideInfo: json['sideInfo'] as String? ?? 'None',
       restSecondsAfterSet: json['restSecondsAfterSet'] as int? ?? 0,
-      weightKg: json['weightKg'] != null ? (json['weightKg'] as num).toDouble() : null,
+      weightKg: json['weightKg'] != null
+          ? (json['weightKg'] as num).toDouble()
+          : null,
       durationSeconds: json['durationSeconds'] as int?,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        if (displayName != null) 'displayName': displayName,
-        if (youtubeUrl != null && youtubeUrl!.isNotEmpty) 'youtubeUrl': youtubeUrl,
-        'reps': reps,
-        'note': note,
-        'sideInfo': sideInfo,
-        'restSecondsAfterSet': restSecondsAfterSet,
-        if (weightKg != null) 'weightKg': weightKg,
-        if (durationSeconds != null) 'durationSeconds': durationSeconds,
-      };
+    'name': name,
+    if (displayName != null) 'displayName': displayName,
+    if (youtubeUrl != null && youtubeUrl!.isNotEmpty) 'youtubeUrl': youtubeUrl,
+    'reps': reps,
+    'note': note,
+    'sideInfo': sideInfo,
+    'restSecondsAfterSet': restSecondsAfterSet,
+    if (weightKg != null) 'weightKg': weightKg,
+    if (durationSeconds != null) 'durationSeconds': durationSeconds,
+  };
 }

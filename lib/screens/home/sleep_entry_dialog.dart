@@ -39,16 +39,16 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
 
   void _updateDurationFromTimes() {
     if (_bedtime == null || _waketime == null) return;
-    
+
     // Compute duration
     final double bedHours = _bedtime!.hour + _bedtime!.minute / 60.0;
     final double wakeHours = _waketime!.hour + _waketime!.minute / 60.0;
-    
+
     double duration = wakeHours - bedHours;
     if (duration < 0) {
       duration += 24.0;
     }
-    
+
     _controller.text = duration.toStringAsFixed(1);
   }
 
@@ -92,10 +92,14 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
   Widget build(BuildContext context) {
     final selectedDateStr = ref.watch(dateStringProvider);
     final selectedDate = DateTime.parse(selectedDateStr);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
     final isFuture = selectedDate.isAfter(today);
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
-    
+
     return AppSheet(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -116,13 +120,17 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                 TextButton(
                   onPressed: () {
                     ref.read(dailyLogProvider.notifier).clearSleep();
-                    
+
                     final habits = ref.read(habitsProvider);
-                    final sleepHabit = habits.where((h) => h.name.toLowerCase().contains('sleep')).firstOrNull;
+                    final sleepHabit = habits
+                        .where((h) => h.name.toLowerCase().contains('sleep'))
+                        .firstOrNull;
                     if (sleepHabit != null) {
-                      ref.read(habitCompletionsProvider.notifier).setOverride(sleepHabit.id, 'none');
+                      ref
+                          .read(habitCompletionsProvider.notifier)
+                          .setOverride(sleepHabit.id, 'none');
                     }
-                    
+
                     Navigator.of(context).pop();
                   },
                   style: TextButton.styleFrom(
@@ -137,10 +145,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
           const SizedBox(height: 8),
           Text(
             'Enter your sleep for $dateFormatted',
-            style: TextStyle(
-              fontSize: 14,
-              color: context.colors.textMedium,
-            ),
+            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
           ),
           const SizedBox(height: 24),
           TextField(
@@ -213,13 +218,18 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                       ref
                           .read(dailyLogProvider.notifier)
                           .updateSleep(sleepHours);
-                          
+
                       final habits = ref.read(habitsProvider);
-                      final sleepHabit = habits.where((h) => h.name.toLowerCase().contains('sleep')).firstOrNull;
-                      if (sleepHabit != null && sleepHours >= sleepHabit.target) {
-                        ref.read(habitCompletionsProvider.notifier).setOverride(sleepHabit.id, 'done');
+                      final sleepHabit = habits
+                          .where((h) => h.name.toLowerCase().contains('sleep'))
+                          .firstOrNull;
+                      if (sleepHabit != null &&
+                          sleepHours >= sleepHabit.target) {
+                        ref
+                            .read(habitCompletionsProvider.notifier)
+                            .setOverride(sleepHabit.id, 'done');
                       }
-                      
+
                       Navigator.of(context).pop();
                     } else if (sleepHours != null && sleepHours > 16) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -278,7 +288,9 @@ class _TimePickerCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: time != null ? context.colors.textDark : context.colors.textLight,
+                color: time != null
+                    ? context.colors.textDark
+                    : context.colors.textLight,
               ),
             ),
           ],
@@ -287,5 +299,3 @@ class _TimePickerCard extends StatelessWidget {
     );
   }
 }
-
-

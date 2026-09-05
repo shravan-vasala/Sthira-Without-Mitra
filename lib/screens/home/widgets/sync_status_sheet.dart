@@ -57,7 +57,11 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                     color: context.colors.green.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.sync_rounded, color: context.colors.green, size: 22),
+                  child: Icon(
+                    Icons.sync_rounded,
+                    color: context.colors.green,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -86,35 +90,45 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
               ],
             ),
             const SizedBox(height: 24),
-            Consumer(builder: (context, ref, _) {
-              final pendingCount = ref.watch(syncPendingCountProvider).value ?? 0;
-              if (pendingCount > 0) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: context.colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.cloud_upload_rounded, color: context.colors.orange, size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        '\ items pending cloud sync',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+            Consumer(
+              builder: (context, ref, _) {
+                final pendingCount =
+                    ref.watch(syncPendingCountProvider).value ?? 0;
+                if (pendingCount > 0) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cloud_upload_rounded,
                           color: context.colors.orange,
+                          size: 16,
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            }),
+                        const SizedBox(width: 8),
+                        Text(
+                          '\ items pending cloud sync',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: context.colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             Center(
               child: Column(
                 children: [
@@ -145,16 +159,23 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 title: 'Sync Failed',
                 message: _errorMessage!,
                 actionText: _errorAction,
-                onRetry: _errorAction != null ? () async {
-                  final hcService = ref.read(healthConnectServiceProvider);
-                  if (_errorAction == 'Install Health Connect') {
-                    // Provide a way to get it, or just show message
-                    setState(() => _errorMessage = 'Please install Health Connect from the Play Store.');
-                  } else if (_errorAction == 'Grant Permission') {
-                    await hcService.requestPermission();
-                    if (mounted) setState(() => _errorMessage = null);
-                  }
-                } : null,
+                onRetry: _errorAction != null
+                    ? () async {
+                        final hcService = ref.read(
+                          healthConnectServiceProvider,
+                        );
+                        if (_errorAction == 'Install Health Connect') {
+                          // Provide a way to get it, or just show message
+                          setState(
+                            () => _errorMessage =
+                                'Please install Health Connect from the Play Store.',
+                          );
+                        } else if (_errorAction == 'Grant Permission') {
+                          await hcService.requestPermission();
+                          if (mounted) setState(() => _errorMessage = null);
+                        }
+                      }
+                    : null,
               ),
             ],
             const SizedBox(height: 32),
@@ -195,15 +216,13 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
 
                     if (!canSync) {
                       setState(() {
-                        _errorMessage =
-                            'Missing permissions to read steps.';
+                        _errorMessage = 'Missing permissions to read steps.';
                         _errorAction = 'Grant Permission';
                       });
                       return;
                     }
 
-                    final steps =
-                        await hcService.syncTodayAndAutoCompleteHabit(
+                    final steps = await hcService.syncTodayAndAutoCompleteHabit(
                       dailyLogRepo,
                       habitRepo,
                     );
@@ -274,4 +293,3 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
     );
   }
 }
-

@@ -25,8 +25,14 @@ class CsvExportService {
       if (isar == null) return null;
 
       await addCsv('daily_logs.csv', await _exportDailyLogs(isar, startDate));
-      await addCsv('exercise_logs.csv', await _exportExerciseLogs(isar, startDate));
-      await addCsv('habits.csv', await _exportHabitCompletions(isar, startDate));
+      await addCsv(
+        'exercise_logs.csv',
+        await _exportExerciseLogs(isar, startDate),
+      );
+      await addCsv(
+        'habits.csv',
+        await _exportHabitCompletions(isar, startDate),
+      );
       await addCsv('body_stats.csv', await _exportBodyStats(isar, startDate));
       await addCsv('meals.csv', await _exportMeals(isar, startDate));
 
@@ -61,9 +67,19 @@ class CsvExportService {
   Future<String?> _exportDailyLogs(Isar isar, DateTime? startDate) async {
     final logs = isar.dailyLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
-    
+
     // Headers
-    rows.add(['Date', 'Weight', 'Steps', 'Steps Source', 'Sleep Hours', 'Sleep Source', 'Body Fat', 'Workout Completed', 'Workout Day ID']);
+    rows.add([
+      'Date',
+      'Weight',
+      'Steps',
+      'Steps Source',
+      'Sleep Hours',
+      'Sleep Source',
+      'Body Fat',
+      'Workout Completed',
+      'Workout Day ID',
+    ]);
 
     for (final log in logs) {
       try {
@@ -90,7 +106,7 @@ class CsvExportService {
   Future<String?> _exportExerciseLogs(Isar isar, DateTime? startDate) async {
     final logs = isar.exerciseLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
-    
+
     rows.add(['Date', 'Exercise', 'Set', 'Reps', 'Weight']);
 
     for (final log in logs) {
@@ -113,10 +129,13 @@ class CsvExportService {
     return csv.encode(rows);
   }
 
-  Future<String?> _exportHabitCompletions(Isar isar, DateTime? startDate) async {
+  Future<String?> _exportHabitCompletions(
+    Isar isar,
+    DateTime? startDate,
+  ) async {
     final completions = isar.habitCompletions.where().findAllSync();
     final habitList = isar.habits.where().findAllSync();
-    
+
     final habits = <String, Habit>{};
     for (final h in habitList) {
       habits[h.id] = h;
@@ -134,14 +153,8 @@ class CsvExportService {
           final habitName = habits[habitId]?.name ?? habitId;
           final val = entry.value;
           final override = completion.overrides[habitId] ?? '';
-          
-          rows.add([
-            completion.date,
-            habitId,
-            habitName,
-            val,
-            override,
-          ]);
+
+          rows.add([completion.date, habitId, habitName, val, override]);
         }
       } catch (_) {}
     }
@@ -153,8 +166,19 @@ class CsvExportService {
   Future<String?> _exportBodyStats(Isar isar, DateTime? startDate) async {
     final statsList = isar.bodyStats.where().findAllSync();
     final rows = <List<dynamic>>[];
-    
-    rows.add(['Date', 'Unit', 'Waist', 'Hips', 'Chest', 'Left Arm', 'Right Arm', 'Left Thigh', 'Right Thigh', 'Neck']);
+
+    rows.add([
+      'Date',
+      'Unit',
+      'Waist',
+      'Hips',
+      'Chest',
+      'Left Arm',
+      'Right Arm',
+      'Left Thigh',
+      'Right Thigh',
+      'Neck',
+    ]);
 
     for (final stats in statsList) {
       try {
@@ -182,8 +206,15 @@ class CsvExportService {
   Future<String?> _exportMeals(Isar isar, DateTime? startDate) async {
     final logs = isar.dailyMealLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
-    
-    rows.add(['Date', 'Slot', 'Total Calories', 'Total Protein (g)', 'Total Carbs (g)', 'Total Fat (g)']);
+
+    rows.add([
+      'Date',
+      'Slot',
+      'Total Calories',
+      'Total Protein (g)',
+      'Total Carbs (g)',
+      'Total Fat (g)',
+    ]);
 
     for (final log in logs) {
       try {
@@ -192,7 +223,7 @@ class CsvExportService {
         for (final entry in log.customSlots.entries) {
           final slotName = entry.key;
           final slot = entry.value;
-          
+
           if (slot.totalCalories > 0 || slot.items.isNotEmpty) {
             rows.add([
               log.date,

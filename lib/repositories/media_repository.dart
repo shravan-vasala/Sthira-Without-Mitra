@@ -86,15 +86,29 @@ class MediaRepository {
   }
 
   ProgressPhoto getProgressPhotoMeta(String date, String photoPath) {
-    return _isar.progressPhotos.where().pathEqualTo(photoPath).findFirstSync() ?? ProgressPhoto(path: photoPath, date: date, pose: 'none');
+    return _isar.progressPhotos
+            .where()
+            .pathEqualTo(photoPath)
+            .findFirstSync() ??
+        ProgressPhoto(path: photoPath, date: date, pose: 'none');
   }
 
   String getPoseTag(String photoPath) {
-    return _isar.progressPhotos.where().pathEqualTo(photoPath).findFirstSync()?.pose ?? 'none';
+    return _isar.progressPhotos
+            .where()
+            .pathEqualTo(photoPath)
+            .findFirstSync()
+            ?.pose ??
+        'none';
   }
 
   List<String> getProgressPhotos(String date) {
-    return _isar.progressPhotos.filter().dateEqualTo(date).findAllSync().map((p) => p.path).toList();
+    return _isar.progressPhotos
+        .filter()
+        .dateEqualTo(date)
+        .findAllSync()
+        .map((p) => p.path)
+        .toList();
   }
 
   List<MapEntry<String, List<String>>> getAllProgressPhotos() {
@@ -117,7 +131,10 @@ class MediaRepository {
   }
 
   Future<void> deletePhoto(String date, String photoPath) async {
-    final photo = _isar.progressPhotos.where().pathEqualTo(photoPath).findFirstSync();
+    final photo = _isar.progressPhotos
+        .where()
+        .pathEqualTo(photoPath)
+        .findFirstSync();
     if (photo != null) {
       await _isar.writeTxn(() async {
         await _isar.progressPhotos.delete(photo.id);
@@ -142,4 +159,3 @@ class MediaRepository {
     }
   }
 }
-

@@ -29,30 +29,30 @@ class PrimaryButton extends StatelessWidget {
             ),
           )
         : (icon != null
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 20, color: context.colors.onPrimary),
-                  const SizedBox(width: 8),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.onPrimary,
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 20, color: context.colors.onPrimary),
+                    const SizedBox(width: 8),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.onPrimary,
+                      ),
                     ),
+                  ],
+                )
+              : Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.onPrimary,
                   ),
-                ],
-              )
-            : Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.onPrimary,
-                ),
-              ));
+                ));
 
     return SizedBox(
       width: double.infinity,
@@ -62,7 +62,9 @@ class PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: context.colors.primary,
           foregroundColor: context.colors.onPrimary,
-          disabledBackgroundColor: context.colors.primary.withValues(alpha: 0.5),
+          disabledBackgroundColor: context.colors.primary.withValues(
+            alpha: 0.5,
+          ),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kButtonRadius),

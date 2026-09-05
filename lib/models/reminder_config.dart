@@ -4,14 +4,14 @@ import 'dart:convert';
 class ReminderConfig {
   final bool habitsEnabled;
   final TimeOfDay habitTime;
-  
+
   final bool workoutsEnabled;
   final TimeOfDay workoutTime;
-  
+
   final bool mealsEnabled;
   final TimeOfDay lunchTime;
   final TimeOfDay dinnerTime;
-  
+
   final bool backupEnabled;
   final int backupDayOfWeek; // 1 = Monday, 7 = Sunday
   final TimeOfDay backupTime;
@@ -96,21 +96,40 @@ class ReminderConfig {
 
     return ReminderConfig(
       habitsEnabled: map['habitsEnabled'] ?? false,
-      habitTime: parseTime(map['habitTime'], const TimeOfDay(hour: 21, minute: 0)),
+      habitTime: parseTime(
+        map['habitTime'],
+        const TimeOfDay(hour: 21, minute: 0),
+      ),
       workoutsEnabled: map['workoutsEnabled'] ?? false,
-      workoutTime: parseTime(map['workoutTime'], const TimeOfDay(hour: 7, minute: 0)),
+      workoutTime: parseTime(
+        map['workoutTime'],
+        const TimeOfDay(hour: 7, minute: 0),
+      ),
       mealsEnabled: map['mealsEnabled'] ?? false,
-      lunchTime: parseTime(map['lunchTime'], const TimeOfDay(hour: 13, minute: 0)),
-      dinnerTime: parseTime(map['dinnerTime'], const TimeOfDay(hour: 19, minute: 0)),
+      lunchTime: parseTime(
+        map['lunchTime'],
+        const TimeOfDay(hour: 13, minute: 0),
+      ),
+      dinnerTime: parseTime(
+        map['dinnerTime'],
+        const TimeOfDay(hour: 19, minute: 0),
+      ),
       backupEnabled: map['backupEnabled'] ?? false,
       backupDayOfWeek: map['backupDayOfWeek'] ?? DateTime.sunday,
-      backupTime: parseTime(map['backupTime'], const TimeOfDay(hour: 10, minute: 0)),
+      backupTime: parseTime(
+        map['backupTime'],
+        const TimeOfDay(hour: 10, minute: 0),
+      ),
       photosEnabled: map['photosEnabled'] ?? true,
-      photoTime: parseTime(map['photoTime'], const TimeOfDay(hour: 10, minute: 0)),
+      photoTime: parseTime(
+        map['photoTime'],
+        const TimeOfDay(hour: 10, minute: 0),
+      ),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory ReminderConfig.fromJson(String source) => ReminderConfig.fromMap(json.decode(source));
+  factory ReminderConfig.fromJson(String source) =>
+      ReminderConfig.fromMap(json.decode(source));
 }

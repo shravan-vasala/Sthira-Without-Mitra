@@ -11,13 +11,10 @@ import 'widgets/rest_timer_label.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class WorkoutScreen extends ConsumerStatefulWidget {
-  const WorkoutScreen({
-    super.key,
-    required this.dayId,
-    this.sectionIndex,
-  });
+  const WorkoutScreen({super.key, required this.dayId, this.sectionIndex});
 
   final String dayId;
+
   /// null = show all sections; 0+ = show that specific section only
   final int? sectionIndex;
 
@@ -74,17 +71,27 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     final logRepo = ref.watch(exerciseLogRepoProvider);
     final dateStr = ref.watch(dateStringProvider);
     ref.watch(exerciseLogsUpdateProvider); // Trigger rebuild on log save
-    
-    final totalExercises = workoutDay.sections
-        .fold<int>(0, (sum, s) => sum + s.exercises.length);
-    final completedExercises = workoutDay.sections
-        .fold<int>(0, (sum, s) => sum + s.exercises.where((e) => logRepo.hasLog(dateStr, e.name ?? '')).length);
-    
-    final isFinished =
-        ref.watch(workoutRepoProvider).isWorkoutFinished(dateStr, widget.dayId);
+
+    final totalExercises = workoutDay.sections.fold<int>(
+      0,
+      (sum, s) => sum + s.exercises.length,
+    );
+    final completedExercises = workoutDay.sections.fold<int>(
+      0,
+      (sum, s) =>
+          sum +
+          s.exercises
+              .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
+              .length,
+    );
+
+    final isFinished = ref
+        .watch(workoutRepoProvider)
+        .isWorkoutFinished(dateStr, widget.dayId);
 
     // Determine which sections to display
-    final bool isFiltered = _activeSectionIndex != null &&
+    final bool isFiltered =
+        _activeSectionIndex != null &&
         _activeSectionIndex! >= 0 &&
         _activeSectionIndex! < workoutDay.sections.length;
     final sectionsToShow = isFiltered
@@ -102,8 +109,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         : totalExercises;
     final viewCompleted = isFiltered
         ? workoutDay.sections[_activeSectionIndex!].exercises
-            .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
-            .length
+              .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
+              .length
         : completedExercises;
 
     return Scaffold(
@@ -126,7 +133,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       children: [
                         if (widget.sectionIndex != null)
                           Hero(
-                            tag: 'workout-${widget.dayId}-section-${widget.sectionIndex}',
+                            tag:
+                                'workout-${widget.dayId}-section-${widget.sectionIndex}',
                             child: Material(
                               color: Colors.transparent,
                               child: Text(
@@ -162,7 +170,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   if (isFinished)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: context.colors.greenLight,
                         borderRadius: BorderRadius.circular(12),
@@ -170,8 +180,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle,
-                              color: context.colors.green, size: 16),
+                          Icon(
+                            Icons.check_circle,
+                            color: context.colors.green,
+                            size: 16,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Done',
@@ -195,11 +208,15 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: LinearProgressIndicator(
-                  value:
-                      totalExercises > 0 ? completedExercises / totalExercises : 0,
-                  backgroundColor: context.colors.primary.withValues(alpha: 0.12),
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(context.colors.green),
+                  value: totalExercises > 0
+                      ? completedExercises / totalExercises
+                      : 0,
+                  backgroundColor: context.colors.primary.withValues(
+                    alpha: 0.12,
+                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    context.colors.green,
+                  ),
                   minHeight: 6,
                 ),
               ),
@@ -229,18 +246,24 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 onTap: () => setState(() => _activeSectionIndex = null),
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: context.colors.lavenderCard,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                        color: context.colors.primary.withValues(alpha: 0.2)),
+                      color: context.colors.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.grid_view_rounded,
-                          color: context.colors.primary, size: 16),
+                      Icon(
+                        Icons.grid_view_rounded,
+                        color: context.colors.primary,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Showing: ${workoutDay.sections[_activeSectionIndex!].title}',
@@ -278,12 +301,18 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       : listIndex;
                   final section = sectionsToShow[listIndex];
                   return _SectionWidget(
-                    section: section,
-                    sectionIndex: sectionIndex,
-                    dayId: widget.dayId,
-                  ).animate(delay: (listIndex * 100).ms)
-                   .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-                   .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut);
+                        section: section,
+                        sectionIndex: sectionIndex,
+                        dayId: widget.dayId,
+                      )
+                      .animate(delay: (listIndex * 100).ms)
+                      .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+                      .slideY(
+                        begin: 0.1,
+                        end: 0,
+                        duration: 400.ms,
+                        curve: Curves.easeOut,
+                      );
                 },
               ),
             ),
@@ -306,8 +335,13 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () => _finishWorkout(context, ref, widget.dayId,
-                        completedExercises, totalExercises),
+                    onPressed: () => _finishWorkout(
+                      context,
+                      ref,
+                      widget.dayId,
+                      completedExercises,
+                      totalExercises,
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
@@ -319,8 +353,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.emoji_events_rounded,
-                            color: context.colors.onPrimary, size: 24),
+                        Icon(
+                          Icons.emoji_events_rounded,
+                          color: context.colors.onPrimary,
+                          size: 24,
+                        ),
                         const SizedBox(width: 10),
                         Text(
                           'Finish Workout',
@@ -341,8 +378,13 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
 
-  void _finishWorkout(BuildContext context, WidgetRef ref, String dayId,
-      int completed, int total) {
+  void _finishWorkout(
+    BuildContext context,
+    WidgetRef ref,
+    String dayId,
+    int completed,
+    int total,
+  ) {
     if (completed < total) {
       if (completed == 0) {
         _showSkipConfirmation(context, ref, dayId);
@@ -354,14 +396,20 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     }
   }
 
-  void _showPartialConfirmation(BuildContext context, WidgetRef ref,
-      String dayId, int completed, int total) {
+  void _showPartialConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    String dayId,
+    int completed,
+    int total,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Finish early?'),
-        content:
-            Text('Only $completed of $total exercises done — finish anyway?'),
+        content: Text(
+          'Only $completed of $total exercises done — finish anyway?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -380,13 +428,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   }
 
   void _showSkipConfirmation(
-      BuildContext context, WidgetRef ref, String dayId) {
+    BuildContext context,
+    WidgetRef ref,
+    String dayId,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Skip workout?'),
         content: const Text(
-            'Nothing checked — mark this workout as skipped instead?'),
+          'Nothing checked — mark this workout as skipped instead?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -567,10 +619,7 @@ class _SectionWidget extends StatelessWidget {
             }
             final exerciseIndex = index ~/ 2;
             final exercise = section.exercises[exerciseIndex];
-            return ExerciseCard(
-              exercise: exercise,
-              dayId: dayId,
-            );
+            return ExerciseCard(exercise: exercise, dayId: dayId);
           }),
           const SizedBox(height: 8),
         ],
@@ -578,4 +627,3 @@ class _SectionWidget extends StatelessWidget {
     );
   }
 }
-

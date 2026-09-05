@@ -173,8 +173,9 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                   height: 38,
                   child: TextField(
                     controller: _controllers[field],
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,

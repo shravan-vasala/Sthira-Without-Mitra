@@ -48,12 +48,33 @@ class ManagePlansScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Active Workout', style: TextStyle(fontSize: 12, color: context.colors.textMedium, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Active Workout',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.colors.textMedium,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         DropdownButton<String>(
                           value: profile.activeWorkoutPlan,
                           isExpanded: true,
-                          hint: const Text('Select Plan', style: TextStyle(fontSize: 14)),
-                          items: workoutRepo.getPlanKeys().map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontSize: 14)))).toList(),
+                          hint: const Text(
+                            'Select Plan',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          items: workoutRepo
+                              .getPlanKeys()
+                              .map(
+                                (k) => DropdownMenuItem(
+                                  value: k,
+                                  child: Text(
+                                    k,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                           onChanged: (val) {
                             if (val != null) {
                               ref
@@ -67,7 +88,9 @@ class ManagePlansScreen extends ConsumerWidget {
                         if (profile.planStartDate != null)
                           TextButton(
                             onPressed: () {
-                              ref.read(profileProvider.notifier).updateProfile(
+                              ref
+                                  .read(profileProvider.notifier)
+                                  .updateProfile(
                                     profile.copyWith(
                                       clearPlanStart: true,
                                       currentPhaseWeek: 1,
@@ -79,7 +102,13 @@ class ManagePlansScreen extends ConsumerWidget {
                               minimumSize: const Size(0, 30),
                               alignment: Alignment.centerLeft,
                             ),
-                            child: Text('Reset phase progress', style: TextStyle(fontSize: 11, color: context.colors.red)),
+                            child: Text(
+                              'Reset phase progress',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: context.colors.red,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -89,12 +118,33 @@ class ManagePlansScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Active Meals', style: TextStyle(fontSize: 12, color: context.colors.textMedium, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Active Meals',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.colors.textMedium,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         DropdownButton<String>(
                           value: profile.activeMealPlan,
                           isExpanded: true,
-                          hint: const Text('Select Plan', style: TextStyle(fontSize: 14)),
-                          items: mealRepo.getPlanKeys().map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontSize: 14)))).toList(),
+                          hint: const Text(
+                            'Select Plan',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          items: mealRepo
+                              .getPlanKeys()
+                              .map(
+                                (k) => DropdownMenuItem(
+                                  value: k,
+                                  child: Text(
+                                    k,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                           onChanged: (val) {
                             if (val != null) {
                               ref
@@ -120,14 +170,28 @@ class ManagePlansScreen extends ConsumerWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Daily Targets', style: TextStyle(fontSize: 12, color: context.colors.textMedium, fontWeight: FontWeight.bold)),
+                      Text(
+                        'Daily Targets',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.colors.textMedium,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text('${profile.targetCalories} kcal (P:${profile.targetProteinG} C:${profile.targetCarbsG} F:${profile.targetFatG})', style: const TextStyle(fontSize: 14)),
+                      Text(
+                        '${profile.targetCalories} kcal (P:${profile.targetProteinG} C:${profile.targetCarbsG} F:${profile.targetFatG})',
+                        style: const TextStyle(fontSize: 14),
+                      ),
                     ],
                   ),
                   TextButton.icon(
                     onPressed: () {
-                      final currentKg = profile.currentWeight ?? (profile.useKg ? (profile.targetWeight ?? 70) : (profile.targetWeight ?? 154) / 2.20462);
+                      final currentKg =
+                          profile.currentWeight ??
+                          (profile.useKg
+                              ? (profile.targetWeight ?? 70)
+                              : (profile.targetWeight ?? 154) / 2.20462);
                       final targets = TargetCalculator.calculate(
                         heightCm: profile.height,
                         weightKg: currentKg,
@@ -136,7 +200,9 @@ class ManagePlansScreen extends ConsumerWidget {
                         goal: profile.primaryGoal ?? 'Maintain',
                         activityLevel: 'Sedentary',
                       );
-                      ref.read(profileProvider.notifier).updateProfile(
+                      ref
+                          .read(profileProvider.notifier)
+                          .updateProfile(
                             profile.copyWith(
                               targetCalories: targets.calories.round(),
                               targetProteinG: targets.proteinG.round(),
@@ -146,7 +212,9 @@ class ManagePlansScreen extends ConsumerWidget {
                           );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Targets recalculated: ${targets.calories} kcal'),
+                          content: Text(
+                            'Targets recalculated: ${targets.calories} kcal',
+                          ),
                           backgroundColor: context.colors.primary,
                         ),
                       );
@@ -155,8 +223,13 @@ class ManagePlansScreen extends ConsumerWidget {
                     label: const Text('Recalculate'),
                     style: TextButton.styleFrom(
                       foregroundColor: context.colors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      backgroundColor: context.colors.primary.withValues(
+                        alpha: 0.1,
+                      ),
                     ),
                   ),
                 ],
@@ -169,7 +242,8 @@ class ManagePlansScreen extends ConsumerWidget {
                     type: 'workout',
                     getKeys: () => workoutRepo.getPlanKeys(),
                     getRawJson: (key) => workoutRepo.getRawPlanJson(key),
-                    saveJson: (key, json) => workoutRepo.savePlanJson(key, json),
+                    saveJson: (key, json) =>
+                        workoutRepo.savePlanJson(key, json),
                   ),
                   _PlanEditor(
                     type: 'meal',
@@ -197,10 +271,12 @@ class _MealSlotsEditor extends ConsumerStatefulWidget {
 class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
   void _deleteSlot(Map<String, dynamic> slot) {
     final profile = ref.read(profileProvider);
-    final updatedSlots = profile.customMealSlots.where((s) => s['id'] != slot['id']).toList();
-    ref.read(profileProvider.notifier).updateProfile(
-          profile.copyWith(customMealSlots: updatedSlots),
-        );
+    final updatedSlots = profile.customMealSlots
+        .where((s) => s['id'] != slot['id'])
+        .toList();
+    ref
+        .read(profileProvider.notifier)
+        .updateProfile(profile.copyWith(customMealSlots: updatedSlots));
   }
 
   void _editSlot(Map<String, dynamic> slot, int index) {
@@ -233,11 +309,23 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        border: Border.all(color: isSelected ? context.colors.primary : context.colors.border),
+                        border: Border.all(
+                          color: isSelected
+                              ? context.colors.primary
+                              : context.colors.border,
+                        ),
                         borderRadius: BorderRadius.circular(8),
-                        color: isSelected ? context.colors.primary.withValues(alpha: 0.1) : null,
+                        color: isSelected
+                            ? context.colors.primary.withValues(alpha: 0.1)
+                            : null,
                       ),
-                      child: Icon(opt.icon, size: 24, color: isSelected ? context.colors.primary : context.colors.textMedium),
+                      child: Icon(
+                        opt.icon,
+                        size: 24,
+                        color: isSelected
+                            ? context.colors.primary
+                            : context.colors.textMedium,
+                      ),
                     ),
                   );
                 }).toList(),
@@ -245,17 +333,24 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             ElevatedButton(
               onPressed: () {
                 final profile = ref.read(profileProvider);
-                final updatedSlots = List<Map<String, dynamic>>.from(profile.customMealSlots);
+                final updatedSlots = List<Map<String, dynamic>>.from(
+                  profile.customMealSlots,
+                );
                 updatedSlots[index] = {
                   ...slot,
                   'name': nameCtrl.text.trim(),
                   'emoji': selectedEmoji,
                 };
-                ref.read(profileProvider.notifier).updateProfile(
+                ref
+                    .read(profileProvider.notifier)
+                    .updateProfile(
                       profile.copyWith(customMealSlots: updatedSlots),
                     );
                 Navigator.pop(ctx);
@@ -283,9 +378,18 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
-            leading: Icon(MealIcons.resolve(slot['emoji'] as String?), size: 24, color: context.colors.primary),
-            title: Text(slot['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(isDefault ? 'Default Slot' : 'Custom Recurring Slot'),
+            leading: Icon(
+              MealIcons.resolve(slot['emoji'] as String?),
+              size: 24,
+              color: context.colors.primary,
+            ),
+            title: Text(
+              slot['name'] as String,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              isDefault ? 'Default Slot' : 'Custom Recurring Slot',
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -295,21 +399,32 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
                 ),
                 if (!isDefault)
                   IconButton(
-                    icon: Icon(Icons.delete_outline_rounded, color: context.colors.red),
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: context.colors.red,
+                    ),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Delete Slot?'),
-                          content: const Text('Removing this recurring slot means it will no longer appear on future days. Previously logged food will still be kept.'),
+                          content: const Text(
+                            'Removing this recurring slot means it will no longer appear on future days. Previously logged food will still be kept.',
+                          ),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Cancel'),
+                            ),
                             TextButton(
                               onPressed: () {
                                 _deleteSlot(slot);
                                 Navigator.pop(ctx);
                               },
-                              child: Text('Delete', style: TextStyle(color: context.colors.red)),
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: context.colors.red),
+                              ),
                             ),
                           ],
                         ),
@@ -416,7 +531,10 @@ class _PlanEditorState extends State<_PlanEditor> {
                 icon: const Icon(Icons.save_rounded, size: 18),
                 label: const Text('Save'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
@@ -466,7 +584,8 @@ class _PlanEditorState extends State<_PlanEditor> {
             backgroundColor: context.colors.green,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -479,7 +598,8 @@ class _PlanEditorState extends State<_PlanEditor> {
             backgroundColor: context.colors.red,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }

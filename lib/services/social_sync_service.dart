@@ -19,23 +19,26 @@ class SocialSyncService {
 
     _debouncer?.cancel();
     _debouncer = Timer(const Duration(seconds: 3), () {
-      _db.collection('social_profiles').doc(_auth.uid!).set(
-        profile.toJson(),
-        SetOptions(merge: true),
-      ).catchError((e) {
-        debugPrint('SocialSyncService: Error pushing profile: $e');
-      });
+      _db
+          .collection('social_profiles')
+          .doc(_auth.uid!)
+          .set(profile.toJson(), SetOptions(merge: true))
+          .catchError((e) {
+            debugPrint('SocialSyncService: Error pushing profile: $e');
+          });
     });
   }
 
   Stream<SocialProfile?> streamFriendProfile(String friendUid) {
     if (!canSync) return const Stream.empty();
-    return _db.collection('social_profiles').doc(friendUid).snapshots().map((snap) {
+    return _db.collection('social_profiles').doc(friendUid).snapshots().map((
+      snap,
+    ) {
       if (!snap.exists || snap.data() == null) return null;
       return SocialProfile.fromJson(snap.data()!);
     });
   }
-  
+
   Future<SocialProfile?> fetchProfileOnce(String uid) async {
     if (!canSync) return null;
     try {
@@ -48,7 +51,11 @@ class SocialSyncService {
     }
   }
 
-  Future<void> sendFriendRequest(String targetUid, String myName, String? myAvatar) async {
+  Future<void> sendFriendRequest(
+    String targetUid,
+    String myName,
+    String? myAvatar,
+  ) async {
     if (!canSync) return;
     try {
       await _db
@@ -57,12 +64,12 @@ class SocialSyncService {
           .collection('requests')
           .doc(currentUid)
           .set({
-        'fromUid': currentUid,
-        'fromName': myName,
-        'fromAvatar': myAvatar,
-        'sentAt': FieldValue.serverTimestamp(),
-        'accepted': false,
-      });
+            'fromUid': currentUid,
+            'fromName': myName,
+            'fromAvatar': myAvatar,
+            'sentAt': FieldValue.serverTimestamp(),
+            'accepted': false,
+          });
     } catch (e) {
       debugPrint('SocialSyncService: Error sending friend request: $e');
       rethrow;
@@ -79,7 +86,7 @@ class SocialSyncService {
         .snapshots()
         .map((snap) => snap.docs.map((doc) => doc.data()).toList());
   }
-  
+
   Future<List<Map<String, dynamic>>> getPendingAcceptances() async {
     if (!canSync) return [];
     try {
@@ -101,9 +108,9 @@ class SocialSyncService {
     try {
       // Add requester to my allowedReaders
       await _db.collection('social_profiles').doc(currentUid).update({
-        'allowedReaders': FieldValue.arrayUnion([requesterUid])
+        'allowedReaders': FieldValue.arrayUnion([requesterUid]),
       });
-      
+
       // Delete the request from my requests
       await _db
           .collection('friend_requests')
@@ -111,17 +118,14 @@ class SocialSyncService {
           .collection('requests')
           .doc(requesterUid)
           .delete();
-          
+
       // Write an acceptance marker for the requester
       await _db
           .collection('friend_requests')
           .doc(requesterUid)
           .collection('requests')
           .doc(currentUid)
-          .set({
-        'fromUid': currentUid,
-        'accepted': true,
-      });
+          .set({'fromUid': currentUid, 'accepted': true});
     } catch (e) {
       debugPrint('SocialSyncService: Error accepting friend request: $e');
       rethrow;
@@ -141,18 +145,18 @@ class SocialSyncService {
       debugPrint('SocialSyncService: Error declining friend request: $e');
     }
   }
-  
+
   Future<void> removeFriendAccess(String friendUid) async {
     if (!canSync) return;
     try {
       await _db.collection('social_profiles').doc(currentUid).update({
-        'allowedReaders': FieldValue.arrayRemove([friendUid])
+        'allowedReaders': FieldValue.arrayRemove([friendUid]),
       });
     } catch (e) {
       debugPrint('SocialSyncService: Error removing friend access: $e');
     }
   }
-  
+
   Future<void> clearAcceptanceMarker(String friendUid) async {
     if (!canSync) return;
     try {

@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AnalyticsService {
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
-  
+
   // Singleton instance
   static final AnalyticsService instance = AnalyticsService._();
-  
+
   AnalyticsService._();
 
   Future<void> logEvent(String name, [Map<String, Object>? parameters]) async {

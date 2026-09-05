@@ -17,17 +17,24 @@ class WeeklySummaryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(weeklySummaryProvider);
     final selectedDate = ref.watch(selectedDateProvider);
-    
+
     // Get week bounds for title
     final weekday = selectedDate.weekday;
     final startOfWeek = selectedDate.subtract(Duration(days: weekday - 1));
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
-    final titleText = '${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d').format(endOfWeek)}';
+    final titleText =
+        '${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d').format(endOfWeek)}';
 
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text('Weekly Progress', style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.w700)),
+        title: Text(
+          'Weekly Progress',
+          style: TextStyle(
+            color: context.colors.textDark,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -50,37 +57,42 @@ class WeeklySummaryScreen extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ).animate().fade().slideY(begin: -0.2),
-              
+
               const SizedBox(height: 32),
-              
+
               // 3.1 Animated Score Card Hero
               _ScoreHeroCard(
-                score: summary.weekScore,
-                prevScore: summary.previousWeekScore,
-                dailyScores: summary.dailyScores,
-              ).animate().fade(delay: 100.ms).scale(begin: const Offset(0.95, 0.95)),
-              
+                    score: summary.weekScore,
+                    prevScore: summary.previousWeekScore,
+                    dailyScores: summary.dailyScores,
+                  )
+                  .animate()
+                  .fade(delay: 100.ms)
+                  .scale(begin: const Offset(0.95, 0.95)),
+
               const SizedBox(height: 24),
-              
+
               // 3.4 Insights Strip
               _InsightsStrip(summary: summary).animate().fade(delay: 200.ms),
 
               const SizedBox(height: 32),
-              
+
               // 3.2 Daily Scores Chart
               _DailyScoresChartCard(
                 dailyScores: summary.dailyScores,
                 startOfWeek: startOfWeek,
               ).animate().fade(delay: 300.ms).slideY(begin: 0.1),
-              
+
               const SizedBox(height: 16),
 
               // Secondary Habit Chart
               if (summary.habitCompletionRate > 0)
-                _HabitChartCard(rates: summary.dailyHabitRates).animate().fade(delay: 400.ms).slideY(begin: 0.1),
-              
+                _HabitChartCard(
+                  rates: summary.dailyHabitRates,
+                ).animate().fade(delay: 400.ms).slideY(begin: 0.1),
+
               const SizedBox(height: 32),
-              
+
               Text(
                 'Stats Overview',
                 style: TextStyle(
@@ -99,55 +111,85 @@ class WeeklySummaryScreen extends ConsumerWidget {
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.05,
-                children: [
-                  _StatCard(
-                    title: 'Workouts',
-                    icon: Icons.fitness_center_rounded,
-                    primaryValue: '${summary.workoutsCompleted}/${summary.workoutsTotal}',
-                    subtitle: 'Sessions',
-                    trendValue: _calculateTrendInt(summary.workoutsCompleted, summary.prevWorkoutsCompleted),
-                  ),
-                  _StatCard(
-                    title: 'Habits',
-                    icon: Icons.checklist_rounded,
-                    primaryValue: '${(summary.habitCompletionRate * 100).toInt()}%',
-                    subtitle: 'Completion',
-                    trendValue: _calculateTrendDouble(summary.habitCompletionRate, summary.prevHabitCompletionRate, isPercent: true),
-                  ),
-                  _StatCard(
-                    title: 'Steps',
-                    icon: Icons.directions_walk_rounded,
-                    primaryValue: '${summary.avgSteps}',
-                    subtitle: 'Avg / day',
-                    trendValue: _calculateTrendInt(summary.avgSteps, summary.prevAvgSteps),
-                  ),
-                  _StatCard(
-                    title: 'Sleep',
-                    icon: Icons.nightlight_round,
-                    primaryValue: '${summary.avgSleep.toStringAsFixed(1)}h',
-                    subtitle: 'Avg / night',
-                    trendValue: _calculateTrendDouble(summary.avgSleep, summary.prevAvgSleep),
-                  ),
-                  _StatCard(
-                    title: 'Nutrition',
-                    icon: Icons.local_fire_department_rounded,
-                    primaryValue: '${summary.avgCalories}',
-                    subtitle: 'Avg kcal / day',
-                    trendValue: _calculateTrendInt(summary.avgCalories, summary.prevAvgCalories, invertGoodness: true),
-                  ),
-                  _StatCard(
-                    title: 'Weight',
-                    icon: Icons.monitor_weight_rounded,
-                    primaryValue: summary.weightDelta != 0 
-                      ? (summary.weightDelta > 0 ? '+${summary.weightDelta.toStringAsFixed(1)}' : summary.weightDelta.toStringAsFixed(1))
-                      : '-',
-                    subtitle: 'Delta this week',
-                    trendValue: _calculateTrendDouble(summary.weightDelta, summary.prevWeightDelta, invertGoodness: true),
-                  ),
-                ].animate(interval: 50.ms).fade(delay: 600.ms).scale(begin: const Offset(0.9, 0.9)),
+                children:
+                    [
+                          _StatCard(
+                            title: 'Workouts',
+                            icon: Icons.fitness_center_rounded,
+                            primaryValue:
+                                '${summary.workoutsCompleted}/${summary.workoutsTotal}',
+                            subtitle: 'Sessions',
+                            trendValue: _calculateTrendInt(
+                              summary.workoutsCompleted,
+                              summary.prevWorkoutsCompleted,
+                            ),
+                          ),
+                          _StatCard(
+                            title: 'Habits',
+                            icon: Icons.checklist_rounded,
+                            primaryValue:
+                                '${(summary.habitCompletionRate * 100).toInt()}%',
+                            subtitle: 'Completion',
+                            trendValue: _calculateTrendDouble(
+                              summary.habitCompletionRate,
+                              summary.prevHabitCompletionRate,
+                              isPercent: true,
+                            ),
+                          ),
+                          _StatCard(
+                            title: 'Steps',
+                            icon: Icons.directions_walk_rounded,
+                            primaryValue: '${summary.avgSteps}',
+                            subtitle: 'Avg / day',
+                            trendValue: _calculateTrendInt(
+                              summary.avgSteps,
+                              summary.prevAvgSteps,
+                            ),
+                          ),
+                          _StatCard(
+                            title: 'Sleep',
+                            icon: Icons.nightlight_round,
+                            primaryValue:
+                                '${summary.avgSleep.toStringAsFixed(1)}h',
+                            subtitle: 'Avg / night',
+                            trendValue: _calculateTrendDouble(
+                              summary.avgSleep,
+                              summary.prevAvgSleep,
+                            ),
+                          ),
+                          _StatCard(
+                            title: 'Nutrition',
+                            icon: Icons.local_fire_department_rounded,
+                            primaryValue: '${summary.avgCalories}',
+                            subtitle: 'Avg kcal / day',
+                            trendValue: _calculateTrendInt(
+                              summary.avgCalories,
+                              summary.prevAvgCalories,
+                              invertGoodness: true,
+                            ),
+                          ),
+                          _StatCard(
+                            title: 'Weight',
+                            icon: Icons.monitor_weight_rounded,
+                            primaryValue: summary.weightDelta != 0
+                                ? (summary.weightDelta > 0
+                                      ? '+${summary.weightDelta.toStringAsFixed(1)}'
+                                      : summary.weightDelta.toStringAsFixed(1))
+                                : '-',
+                            subtitle: 'Delta this week',
+                            trendValue: _calculateTrendDouble(
+                              summary.weightDelta,
+                              summary.prevWeightDelta,
+                              invertGoodness: true,
+                            ),
+                          ),
+                        ]
+                        .animate(interval: 50.ms)
+                        .fade(delay: 600.ms)
+                        .scale(begin: const Offset(0.9, 0.9)),
               ),
               const SizedBox(height: 40),
-              
+
               // Share Button
               ElevatedButton.icon(
                 onPressed: () {
@@ -164,7 +206,9 @@ class WeeklySummaryScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: context.colors.primary.withValues(alpha: 0.2)),
+                    side: BorderSide(
+                      color: context.colors.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
               ).animate().fade(delay: 800.ms),
@@ -175,8 +219,12 @@ class WeeklySummaryScreen extends ConsumerWidget {
       ),
     );
   }
-  
-  String? _calculateTrendInt(int current, int? prev, {bool invertGoodness = false}) {
+
+  String? _calculateTrendInt(
+    int current,
+    int? prev, {
+    bool invertGoodness = false,
+  }) {
     if (prev == null || prev == 0) return null;
     final diff = current - prev;
     if (diff == 0) return null;
@@ -184,7 +232,12 @@ class WeeklySummaryScreen extends ConsumerWidget {
     return '$sign$diff';
   }
 
-  String? _calculateTrendDouble(double current, double? prev, {bool isPercent = false, bool invertGoodness = false}) {
+  String? _calculateTrendDouble(
+    double current,
+    double? prev, {
+    bool isPercent = false,
+    bool invertGoodness = false,
+  }) {
     if (prev == null || prev == 0) return null;
     final diff = current - prev;
     if (diff.abs() < 0.1) return null; // Too small to care
@@ -200,7 +253,7 @@ class _ScoreHeroCard extends StatelessWidget {
   final int score;
   final int? prevScore;
   final List<int?> dailyScores;
-  
+
   const _ScoreHeroCard({
     required this.score,
     required this.prevScore,
@@ -219,7 +272,7 @@ class _ScoreHeroCard extends StatelessWidget {
     } else {
       message = 'Room to grow';
     }
-    
+
     // Check for perfect week (all elapsed days >= 80)
     int elapsedDays = 0;
     int daysOver80 = 0;
@@ -234,14 +287,26 @@ class _ScoreHeroCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
       decoration: BoxDecoration(
-        color: isPerfectWeek ? context.colors.green.withValues(alpha: 0.1) : context.colors.card,
-        gradient: isPerfectWeek ? LinearGradient(
-          colors: [context.colors.green.withValues(alpha: 0.2), context.colors.green.withValues(alpha: 0.05)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ) : null,
+        color: isPerfectWeek
+            ? context.colors.green.withValues(alpha: 0.1)
+            : context.colors.card,
+        gradient: isPerfectWeek
+            ? LinearGradient(
+                colors: [
+                  context.colors.green.withValues(alpha: 0.2),
+                  context.colors.green.withValues(alpha: 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
         borderRadius: BorderRadius.circular(24),
-        border: isPerfectWeek ? Border.all(color: context.colors.green.withValues(alpha: 0.3), width: 1) : Border.all(color: Colors.white.withValues(alpha: 0.05), width: 1),
+        border: isPerfectWeek
+            ? Border.all(
+                color: context.colors.green.withValues(alpha: 0.3),
+                width: 1,
+              )
+            : Border.all(color: Colors.white.withValues(alpha: 0.05), width: 1),
       ),
       child: Column(
         children: [
@@ -273,9 +338,9 @@ class _ScoreHeroCard extends StatelessWidget {
                 letterSpacing: 1.2,
               ),
             ),
-            
+
           const SizedBox(height: 12),
-          
+
           TweenAnimationBuilder<double>(
             tween: Tween<double>(begin: 0, end: score.toDouble()),
             duration: const Duration(milliseconds: 1500),
@@ -283,9 +348,11 @@ class _ScoreHeroCard extends StatelessWidget {
             builder: (context, value, child) {
               final intScore = value.round();
               Color scoreColor = context.colors.green;
-              if (intScore < 50) scoreColor = context.colors.red;
-              else if (intScore < 80) scoreColor = context.colors.orange;
-              
+              if (intScore < 50)
+                scoreColor = context.colors.red;
+              else if (intScore < 80)
+                scoreColor = context.colors.orange;
+
               if (isPerfectWeek) scoreColor = context.colors.green; // override
 
               return Column(
@@ -314,7 +381,7 @@ class _ScoreHeroCard extends StatelessWidget {
               );
             },
           ),
-          
+
           if (prevScore != null) ...[
             const SizedBox(height: 20),
             _DeltaChip(
@@ -322,7 +389,7 @@ class _ScoreHeroCard extends StatelessWidget {
               previous: prevScore!,
               label: 'vs last week',
             ),
-          ]
+          ],
         ],
       ),
     );
@@ -347,7 +414,9 @@ class _DeltaChip extends StatelessWidget {
 
     final isPositive = diff > 0;
     final color = isPositive ? context.colors.green : context.colors.red;
-    final icon = isPositive ? Icons.arrow_drop_up_rounded : Icons.arrow_drop_down_rounded;
+    final icon = isPositive
+        ? Icons.arrow_drop_up_rounded
+        : Icons.arrow_drop_down_rounded;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -382,21 +451,22 @@ class _InsightsStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final insights = <String>[];
-    
+
     if (summary.habitCompletionRate > 0.8) {
       insights.add("Incredible consistency with habits.");
     } else if (summary.habitCompletionRate < 0.4 && summary.workoutsTotal > 0) {
       insights.add("Habits need a little more focus.");
     }
-    
-    if (summary.workoutsCompleted == summary.workoutsTotal && summary.workoutsTotal > 0) {
+
+    if (summary.workoutsCompleted == summary.workoutsTotal &&
+        summary.workoutsTotal > 0) {
       insights.add("Hit every planned workout!");
     }
-    
+
     if (summary.nightsUnder7h == 0 && summary.avgSleep >= 7) {
       insights.add("Excellent sleep hygiene.");
     }
-    
+
     if (insights.isEmpty) {
       insights.add("Keep building your steady aura.");
     }
@@ -409,7 +479,11 @@ class _InsightsStrip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.lightbulb_outline_rounded, color: context.colors.primary, size: 20),
+          Icon(
+            Icons.lightbulb_outline_rounded,
+            color: context.colors.primary,
+            size: 20,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -430,12 +504,15 @@ class _InsightsStrip extends StatelessWidget {
 class _DailyScoresChartCard extends ConsumerWidget {
   final List<int?> dailyScores;
   final DateTime startOfWeek;
-  const _DailyScoresChartCard({required this.dailyScores, required this.startOfWeek});
+  const _DailyScoresChartCard({
+    required this.dailyScores,
+    required this.startOfWeek,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -448,7 +525,11 @@ class _DailyScoresChartCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.insights_rounded, color: context.colors.textDark, size: 20),
+              Icon(
+                Icons.insights_rounded,
+                color: context.colors.textDark,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Daily Scores',
@@ -471,13 +552,16 @@ class _DailyScoresChartCard extends ConsumerWidget {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchCallback: (FlTouchEvent event, barTouchResponse) {
-                    if (!event.isInterestedForInteractions || barTouchResponse == null || barTouchResponse.spot == null) {
+                    if (!event.isInterestedForInteractions ||
+                        barTouchResponse == null ||
+                        barTouchResponse.spot == null) {
                       return;
                     }
                     if (event is FlTapUpEvent) {
                       final index = barTouchResponse.spot!.touchedBarGroupIndex;
                       final d = startOfWeek.add(Duration(days: index));
-                      if (d.isBefore(DateTime.now()) || d.isAtSameMomentAs(DateTime.now())) {
+                      if (d.isBefore(DateTime.now()) ||
+                          d.isAtSameMomentAs(DateTime.now())) {
                         ref.read(selectedDateProvider.notifier).state = d;
                         context.pop();
                       }
@@ -506,9 +590,15 @@ class _DailyScoresChartCard extends ConsumerWidget {
                       },
                     ),
                   ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
@@ -517,10 +607,12 @@ class _DailyScoresChartCard extends ConsumerWidget {
                   Color barColor = context.colors.border; // Future
                   if (score != null) {
                     barColor = context.colors.green;
-                    if (score < 50) barColor = context.colors.red;
-                    else if (score < 80) barColor = context.colors.orange;
+                    if (score < 50)
+                      barColor = context.colors.red;
+                    else if (score < 80)
+                      barColor = context.colors.orange;
                   }
-                  
+
                   return BarChartGroupData(
                     x: i,
                     barRods: [
@@ -528,7 +620,9 @@ class _DailyScoresChartCard extends ConsumerWidget {
                         toY: (score ?? 0).toDouble(),
                         color: barColor,
                         width: 16,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(6),
+                        ),
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: 100,
@@ -554,7 +648,7 @@ class _HabitChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -567,7 +661,11 @@ class _HabitChartCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.bar_chart_rounded, color: context.colors.primary, size: 16),
+              Icon(
+                Icons.bar_chart_rounded,
+                color: context.colors.primary,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Habit Completion',
@@ -610,9 +708,15 @@ class _HabitChartCard extends StatelessWidget {
                       },
                     ),
                   ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
@@ -624,7 +728,9 @@ class _HabitChartCard extends StatelessWidget {
                         toY: rates[i],
                         color: context.colors.primary,
                         width: 10,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(3),
+                        ),
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: 1.0,
@@ -750,10 +856,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: TextStyle(
-              fontSize: 11,
-              color: context.colors.textLight,
-            ),
+            style: TextStyle(fontSize: 11, color: context.colors.textLight),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

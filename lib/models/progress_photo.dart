@@ -32,10 +32,10 @@ class ProgressPhoto {
   }
 
   Map<String, dynamic> toJson() => {
-        'path': path,
-        'date': date,
-        'pose': pose,
-        if (weight != null) 'weight': weight,
-        if (note != null && note!.isNotEmpty) 'note': note,
-      };
+    'path': path,
+    'date': date,
+    'pose': pose,
+    if (weight != null) 'weight': weight,
+    if (note != null && note!.isNotEmpty) 'note': note,
+  };
 }

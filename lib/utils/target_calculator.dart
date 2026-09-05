@@ -56,7 +56,8 @@ class TargetCalculator {
     if (goal != null) {
       if (goal.toLowerCase().contains('lose')) {
         tdee *= 0.8; // -20%
-      } else if (goal.toLowerCase().contains('gain') || goal.toLowerCase().contains('build')) {
+      } else if (goal.toLowerCase().contains('gain') ||
+          goal.toLowerCase().contains('build')) {
         tdee *= 1.1; // +10%
       }
     }
@@ -67,7 +68,7 @@ class TargetCalculator {
     // Macros:
     // Protein: 1.8g / kg
     double protein = weight * 1.8;
-    
+
     // Fat: 25% of total calories
     double fat = (targetCalories * 0.25) / 9;
 

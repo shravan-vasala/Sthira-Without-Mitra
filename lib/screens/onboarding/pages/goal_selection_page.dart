@@ -16,7 +16,8 @@ class GoalSelectionPage extends ConsumerStatefulWidget {
   ConsumerState<GoalSelectionPage> createState() => _GoalSelectionPageState();
 }
 
-class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with TickerProviderStateMixin {
+class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage>
+    with TickerProviderStateMixin {
   late AnimationController _contentController;
   late Animation<double> _contentFade;
   late Animation<Offset> _contentSlide;
@@ -54,9 +55,20 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
   @override
   void initState() {
     super.initState();
-    _contentController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _contentFade = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _contentController, curve: Curves.easeOut));
-    _contentSlide = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(CurvedAnimation(parent: _contentController, curve: Curves.easeOutCubic));
+    _contentController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _contentFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeOut),
+    );
+    _contentSlide = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _contentController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     final p = ref.read(profileProvider);
     if (p.primaryGoal != null && p.primaryGoal!.isNotEmpty) {
@@ -84,7 +96,9 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
 
     // Save
     final profile = ref.read(profileProvider);
-    ref.read(profileProvider.notifier).updateProfile(profile.copyWith(primaryGoal: _selectedGoal));
+    ref
+        .read(profileProvider.notifier)
+        .updateProfile(profile.copyWith(primaryGoal: _selectedGoal));
     widget.onNext();
   }
 
@@ -95,10 +109,7 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
       builder: (context, child) {
         return Opacity(
           opacity: _contentFade.value,
-          child: SlideTransition(
-            position: _contentSlide,
-            child: child,
-          ),
+          child: SlideTransition(position: _contentSlide, child: child),
         );
       },
       child: Padding(
@@ -109,17 +120,23 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
             const SizedBox(height: 24), // kSpace4
             Text(
               'WHAT IS YOUR MAIN GOAL?',
-              style: context.text.display.copyWith(color: context.colors.textDark, fontSize: 32, height: 1.0),
+              style: context.text.display.copyWith(
+                color: context.colors.textDark,
+                fontSize: 32,
+                height: 1.0,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8), // kSpace2
             Text(
               'This helps your AI Coach personalize recommendations and motivation.',
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.body.copyWith(
+                color: context.colors.textMedium,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32), // kSpace5
-            
+
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -138,10 +155,16 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           decoration: BoxDecoration(
-                            color: isSelected ? context.colors.primary : context.colors.card,
-                            borderRadius: BorderRadius.circular(24), // kRadiusLg
+                            color: isSelected
+                                ? context.colors.primary
+                                : context.colors.card,
+                            borderRadius: BorderRadius.circular(
+                              24,
+                            ), // kRadiusLg
                             border: Border.all(
-                              color: isSelected ? context.colors.primary : context.colors.border,
+                              color: isSelected
+                                  ? context.colors.primary
+                                  : context.colors.border,
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -151,7 +174,9 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
                               Icon(
                                 goal['icon'] as IconData,
                                 size: 32,
-                                color: isSelected ? context.colors.onPrimary : context.colors.primary,
+                                color: isSelected
+                                    ? context.colors.onPrimary
+                                    : context.colors.primary,
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -160,20 +185,37 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
                                   children: [
                                     Text(
                                       goal['title']!,
-                                      style: context.text.titleLarge.copyWith(color: isSelected ? context.colors.onPrimary : context.colors.textDark),
+                                      style: context.text.titleLarge.copyWith(
+                                        color: isSelected
+                                            ? context.colors.onPrimary
+                                            : context.colors.textDark,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       goal['subtitle']!,
-                                      style: context.text.bodyBold.copyWith(color: isSelected ? context.colors.onPrimary.withValues(alpha: 0.8) : context.colors.textMedium),
+                                      style: context.text.bodyBold.copyWith(
+                                        color: isSelected
+                                            ? context.colors.onPrimary
+                                                  .withValues(alpha: 0.8)
+                                            : context.colors.textMedium,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                               if (isSelected)
-                                Icon(Icons.check_circle_rounded, color: context.colors.onPrimary, size: 28)
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: context.colors.onPrimary,
+                                  size: 28,
+                                )
                               else
-                                Icon(Icons.radio_button_unchecked_rounded, color: context.colors.border, size: 28),
+                                Icon(
+                                  Icons.radio_button_unchecked_rounded,
+                                  color: context.colors.border,
+                                  size: 28,
+                                ),
                             ],
                           ),
                         ),
@@ -183,7 +225,7 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
                 ),
               ),
             ),
-            
+
             if (_error != null) ...[
               const SizedBox(height: 8), // kSpace2
               Text(
@@ -193,10 +235,7 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage> with Tick
               ),
             ],
             const SizedBox(height: 24), // kSpace4
-            PrimaryButton(
-              label: 'Continue',
-              onPressed: _onSaveAndNext,
-            ),
+            PrimaryButton(label: 'Continue', onPressed: _onSaveAndNext),
             const SizedBox(height: 24), // kSpace4
           ],
         ),

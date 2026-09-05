@@ -13,7 +13,8 @@ class ConnectScreen extends ConsumerStatefulWidget {
   ConsumerState<ConnectScreen> createState() => _ConnectScreenState();
 }
 
-class _ConnectScreenState extends ConsumerState<ConnectScreen> with SingleTickerProviderStateMixin {
+class _ConnectScreenState extends ConsumerState<ConnectScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -43,10 +44,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> with SingleTicker
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _MyCodeTab(),
-          _ScanCodeTab(),
-        ],
+        children: const [_MyCodeTab(), _ScanCodeTab()],
       ),
     );
   }
@@ -71,7 +69,7 @@ class _MyCodeTab extends ConsumerWidget {
           Text(
             'Scan this code to connect!',
             style: TextStyle(
-              fontSize: 20, 
+              fontSize: 20,
               fontWeight: FontWeight.w800,
               color: context.colors.primary,
             ),
@@ -146,7 +144,7 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
 
   void _onDetect(BarcodeCapture capture) async {
     if (_isProcessing) return;
-    
+
     final List<Barcode> barcodes = capture.barcodes;
     if (barcodes.isEmpty) return;
 
@@ -175,7 +173,9 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
         // ignore: unawaited_futures
         _scannerController.start();
         if (mounted) {
-          setState(() { _isProcessing = false; });
+          setState(() {
+            _isProcessing = false;
+          });
         }
         return;
       }
@@ -189,7 +189,9 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
         // ignore: unawaited_futures
         _scannerController.start();
         if (mounted) {
-          setState(() { _isProcessing = false; });
+          setState(() {
+            _isProcessing = false;
+          });
         }
         return;
       }
@@ -198,41 +200,54 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
       if (existingFriend != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You are already friends with this person!')),
+            const SnackBar(
+              content: Text('You are already friends with this person!'),
+            ),
           );
         }
         // ignore: unawaited_futures
         _scannerController.start();
         if (mounted) {
-          setState(() { _isProcessing = false; });
+          setState(() {
+            _isProcessing = false;
+          });
         }
         return;
       }
-      
+
       final targetProfile = await syncService.fetchProfileOnce(code);
       if (targetProfile == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not find a user with this code.')),
+            const SnackBar(
+              content: Text('Could not find a user with this code.'),
+            ),
           );
         }
         // ignore: unawaited_futures
         _scannerController.start();
         if (mounted) {
-          setState(() { _isProcessing = false; });
+          setState(() {
+            _isProcessing = false;
+          });
         }
         return;
       }
 
-      final String? safeAvatar = (profile.photoPath?.startsWith('assets/') ?? false) 
-          ? profile.photoPath 
+      final String? safeAvatar =
+          (profile.photoPath?.startsWith('assets/') ?? false)
+          ? profile.photoPath
           : null;
 
       await syncService.sendFriendRequest(code, profile.name, safeAvatar);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Friend request sent to ${targetProfile.name} successfully!')),
+          SnackBar(
+            content: Text(
+              'Friend request sent to ${targetProfile.name} successfully!',
+            ),
+          ),
         );
         Navigator.of(context).pop();
       }

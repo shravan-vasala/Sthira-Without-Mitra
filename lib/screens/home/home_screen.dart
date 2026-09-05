@@ -25,7 +25,6 @@ import 'package:confetti/confetti.dart';
 import '../../providers/gamification_provider.dart';
 import 'share_preview_sheet.dart';
 
-
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -33,8 +32,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
-    {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   late ConfettiController _confettiController;
   final _habitsKey = GlobalKey();
   final _mealsKey = GlobalKey();
@@ -43,8 +41,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void initState() {
     super.initState();
-    
-    
+
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
@@ -74,9 +71,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _staggerWrap(int index, Widget child) {
-    return child.animate(delay: (index * 80).ms)
-      .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-      .slideY(begin: 0.08, end: 0, duration: 400.ms, curve: Curves.easeOut);
+    return child
+        .animate(delay: (index * 80).ms)
+        .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+        .slideY(begin: 0.08, end: 0, duration: 400.ms, curve: Curves.easeOut);
   }
 
   @override
@@ -132,7 +130,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           backgroundColor: context.colors.scaffoldBg,
           body: RefreshIndicator(
             color: context.colors.primary,
-            onRefresh: () => ref.read(syncControllerProvider.notifier).sync(isManualRefresh: true),
+            onRefresh: () => ref
+                .read(syncControllerProvider.notifier)
+                .sync(isManualRefresh: true),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
@@ -156,79 +156,86 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     children: [
                       const SizedBox(height: 16),
 
-                    // 2. Week calendar + score
-                    _staggerWrap(1, const WeekCalendarStrip()),
-                    const SizedBox(height: 24),
+                      // 2. Week calendar + score
+                      _staggerWrap(1, const WeekCalendarStrip()),
+                      const SizedBox(height: 24),
 
-                    // 3. Workout (primary daily action)
-                    if (plan != null && plan.days.isNotEmpty) ...[
-                      _staggerWrap(2, _WorkoutsSection(plan: plan)),
+                      // 3. Workout (primary daily action)
+                      if (plan != null && plan.days.isNotEmpty) ...[
+                        _staggerWrap(2, _WorkoutsSection(plan: plan)),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // 4. Habits
+                      _staggerWrap(
+                        3,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            KeyedSubtree(
+                              key: _habitsKey,
+                              child: const SectionHeader(
+                                'HABITS',
+                                trailing: _HabitsEditButton(),
+                                countLabel: _HabitsCountLabel(),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const HabitsCard(),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // 5. Meals
+                      _staggerWrap(
+                        4,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            KeyedSubtree(
+                              key: _mealsKey,
+                              child: const SectionHeader('MEALS'),
+                            ),
+                            const SizedBox(height: 12),
+                            const MealsCard(),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // 6. Daily progress metrics
+                      _staggerWrap(
+                        5,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            KeyedSubtree(
+                              key: _progressKey,
+                              child: const SectionHeader(
+                                'DAILY PROGRESS',
+                                icon: Icons.show_chart_rounded,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const DailyProgressGrid(),
+                            const SizedBox(height: 16),
+                            const _WeeklySummaryLink(),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // 7. Coach notes last (below fold)
+                      _staggerWrap(6, const CoachNotesCard()),
                       const SizedBox(height: 24),
                     ],
-
-                    // 4. Habits
-                    _staggerWrap(3, Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        KeyedSubtree(
-                          key: _habitsKey,
-                          child: const SectionHeader(
-                            'HABITS',
-                            trailing: _HabitsEditButton(),
-                            countLabel: _HabitsCountLabel(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const HabitsCard(),
-                      ],
-                    )),
-                    const SizedBox(height: 24),
-
-                    // 5. Meals
-                    _staggerWrap(4, Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        KeyedSubtree(
-                          key: _mealsKey,
-                          child: const SectionHeader('MEALS'),
-                        ),
-                        const SizedBox(height: 12),
-                        const MealsCard(),
-                      ],
-                    )),
-                    const SizedBox(height: 24),
-
-                    // 6. Daily progress metrics
-                    _staggerWrap(5, Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        KeyedSubtree(
-                          key: _progressKey,
-                          child: const SectionHeader(
-                            'DAILY PROGRESS',
-                            icon: Icons.show_chart_rounded,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const DailyProgressGrid(),
-                        const SizedBox(height: 16),
-                        const _WeeklySummaryLink(),
-                      ],
-                    )),
-                    const SizedBox(height: 24),
-
-                    // 7. Coach notes last (below fold)
-                    _staggerWrap(6, const CoachNotesCard()),
-                    const SizedBox(height: 24),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-        
-
 
         Align(
           alignment: Alignment.topCenter,
@@ -299,7 +306,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
       ],
     );
   }
-  
+
   DateTime selectedDay(DateTime s) => DateTime(s.year, s.month, s.day);
 }
 
@@ -424,7 +431,8 @@ class _WorkoutsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final workoutPlan = ref.watch(workoutPlanProvider);
     final phaseProgress = ref.watch(phaseProgressProvider);
-    if (workoutPlan == null || workoutPlan.days.isEmpty) return const SizedBox();
+    if (workoutPlan == null || workoutPlan.days.isEmpty)
+      return const SizedBox();
 
     final dateStr = ref.watch(dateStringProvider);
 
@@ -634,14 +642,10 @@ class _WorkoutsSection extends ConsumerWidget {
                   color: context.colors.textMedium,
                   size: 24,
                 ),
-              )
+              ),
           ],
         ),
       ),
     );
   }
 }
-
-
-
-

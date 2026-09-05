@@ -6,11 +6,8 @@ class AppTheme {
   AppTheme._();
 
   static TextStyle numeric(TextStyle base) => base.copyWith(
-        fontFeatures: [
-          ...?base.fontFeatures,
-          const FontFeature.tabularFigures(),
-        ],
-      );
+    fontFeatures: [...?base.fontFeatures, const FontFeature.tabularFigures()],
+  );
 
   static ThemeData get light {
     return ThemeData(
@@ -28,86 +25,87 @@ class AppTheme {
         onSurface: AppColorsLight().textDark,
         onError: AppColorsLight().white,
       ),
-      textTheme: TextTheme(
-          headlineLarge: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: AppColorsLight().textDark,
-            letterSpacing: -0.5,
+      textTheme:
+          TextTheme(
+            headlineLarge: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: AppColorsLight().textDark,
+              letterSpacing: -0.5,
+            ),
+            headlineMedium: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColorsLight().textDark,
+              letterSpacing: -0.3,
+            ),
+            headlineSmall: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColorsLight().textDark,
+            ),
+            titleLarge: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColorsLight().textDark,
+            ),
+            titleMedium: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColorsLight().textDark,
+            ),
+            titleSmall: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColorsLight().textMedium,
+            ),
+            bodyLarge: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: AppColorsLight().textDark,
+            ),
+            bodyMedium: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColorsLight().textMedium,
+            ),
+            bodySmall: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: AppColorsLight().textLight,
+            ),
+            labelLarge: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColorsLight().textDark,
+            ),
+            labelMedium: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColorsLight().textMedium,
+            ),
+            labelSmall: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: AppColorsLight().textLight,
+              letterSpacing: 0.5,
+            ),
+          ).apply(
+            bodyColor: AppColorsLight().textDark,
+            displayColor: AppColorsLight().textDark,
           ),
-          headlineMedium: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: AppColorsLight().textDark,
-            letterSpacing: -0.3,
-          ),
-          headlineSmall: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColorsLight().textDark,
-          ),
-          titleLarge: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColorsLight().textDark,
-          ),
-          titleMedium: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColorsLight().textDark,
-          ),
-          titleSmall: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppColorsLight().textMedium,
-          ),
-          bodyLarge: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: AppColorsLight().textDark,
-          ),
-          bodyMedium: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: AppColorsLight().textMedium,
-          ),
-          bodySmall: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: AppColorsLight().textLight,
-          ),
-          labelLarge: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColorsLight().textDark,
-          ),
-          labelMedium: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColorsLight().textMedium,
-          ),
-          labelSmall: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: AppColorsLight().textLight,
-            letterSpacing: 0.5,
-          ),
-        ).apply(
-        bodyColor: AppColorsLight().textDark,
-        displayColor: AppColorsLight().textDark,
-      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
@@ -117,9 +115,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColorsLight().card,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         shadowColor: AppColorsLight().textDark.withValues(alpha: 0.03),
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
@@ -163,7 +159,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: TextStyle(
-          fontFamily: 'General Sans',
+            fontFamily: 'General Sans',
             fontSize: 16,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -177,7 +173,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: TextStyle(
-          fontFamily: 'General Sans',
+            fontFamily: 'General Sans',
             fontSize: 14,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -194,7 +190,10 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColorsLight().textDark,
-        contentTextStyle: TextStyle(fontFamily: 'General Sans', color: AppColorsLight().white),
+        contentTextStyle: TextStyle(
+          fontFamily: 'General Sans',
+          color: AppColorsLight().white,
+        ),
         behavior: SnackBarBehavior.floating,
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -212,7 +211,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: AppColorsLight().primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: TextStyle(
           color: AppColorsLight().textMedium,
@@ -224,10 +226,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        hintStyle: TextStyle(
-          color: AppColorsLight().textLight,
-          fontSize: 14,
-        ),
+        hintStyle: TextStyle(color: AppColorsLight().textLight, fontSize: 14),
       ),
       dividerTheme: DividerThemeData(
         color: AppColorsLight().divider,
@@ -291,7 +290,6 @@ class AppTheme {
     );
   }
 
-
   static ThemeData get dark {
     return ThemeData(
       useMaterial3: true,
@@ -309,86 +307,88 @@ class AppTheme {
         onSurface: AppColorsDark().onSurface,
         onError: AppColorsDark().onPrimary,
       ),
-      textTheme: ThemeData(brightness: Brightness.dark).textTheme.apply(
-        bodyColor: AppColorsDark().textDark,
-        displayColor: AppColorsDark().textDark,
-      ).copyWith(
-        headlineLarge: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          color: AppColorsDark().textDark,
-          letterSpacing: -0.5,
-        ),
-        headlineMedium: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          color: AppColorsDark().textDark,
-          letterSpacing: -0.3,
-        ),
-        headlineSmall: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: AppColorsDark().textDark,
-        ),
-        titleLarge: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColorsDark().textDark,
-        ),
-        titleMedium: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColorsDark().textDark,
-        ),
-        titleSmall: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: AppColorsDark().textMedium,
-        ),
-        bodyLarge: TextStyle(
-            fontFamily: 'General Sans',
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: AppColorsDark().textDark,
-        ),
-        bodyMedium: TextStyle(
-            fontFamily: 'General Sans',
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: AppColorsDark().textMedium,
-        ),
-        bodySmall: TextStyle(
-            fontFamily: 'General Sans',
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: AppColorsDark().textLight,
-        ),
-        labelLarge: TextStyle(
-            fontFamily: 'General Sans',
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColorsDark().textDark,
-        ),
-        labelMedium: TextStyle(
-            fontFamily: 'General Sans',
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppColorsDark().textMedium,
-        ),
-        labelSmall: TextStyle(
-            fontFamily: 'General Sans',
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          color: AppColorsDark().textLight,
-          letterSpacing: 0.5,
-        ),
-      ),
+      textTheme: ThemeData(brightness: Brightness.dark).textTheme
+          .apply(
+            bodyColor: AppColorsDark().textDark,
+            displayColor: AppColorsDark().textDark,
+          )
+          .copyWith(
+            headlineLarge: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: AppColorsDark().textDark,
+              letterSpacing: -0.5,
+            ),
+            headlineMedium: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColorsDark().textDark,
+              letterSpacing: -0.3,
+            ),
+            headlineSmall: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColorsDark().textDark,
+            ),
+            titleLarge: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColorsDark().textDark,
+            ),
+            titleMedium: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColorsDark().textDark,
+            ),
+            titleSmall: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColorsDark().textMedium,
+            ),
+            bodyLarge: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: AppColorsDark().textDark,
+            ),
+            bodyMedium: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColorsDark().textMedium,
+            ),
+            bodySmall: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: AppColorsDark().textLight,
+            ),
+            labelLarge: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColorsDark().textDark,
+            ),
+            labelMedium: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColorsDark().textMedium,
+            ),
+            labelSmall: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: AppColorsDark().textLight,
+              letterSpacing: 0.5,
+            ),
+          ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
@@ -398,9 +398,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColorsDark().card,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         shadowColor: AppColorsDark().textDark.withValues(alpha: 0.03),
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
@@ -444,7 +442,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: TextStyle(
-          fontFamily: 'General Sans',
+            fontFamily: 'General Sans',
             fontSize: 16,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -458,7 +456,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
           textStyle: TextStyle(
-          fontFamily: 'General Sans',
+            fontFamily: 'General Sans',
             fontSize: 14,
             fontWeight: FontWeight.w700,
             height: 1.2,
@@ -475,7 +473,10 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColorsDark().surface,
-        contentTextStyle: TextStyle(fontFamily: 'General Sans', color: AppColorsDark().textDark),
+        contentTextStyle: TextStyle(
+          fontFamily: 'General Sans',
+          color: AppColorsDark().textDark,
+        ),
         behavior: SnackBarBehavior.floating,
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -493,7 +494,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: AppColorsDark().primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: TextStyle(
           color: AppColorsDark().textMedium,
@@ -505,10 +509,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        hintStyle: TextStyle(
-          color: AppColorsDark().textLight,
-          fontSize: 14,
-        ),
+        hintStyle: TextStyle(color: AppColorsDark().textLight, fontSize: 14),
       ),
       dividerTheme: DividerThemeData(
         color: AppColorsDark().divider,

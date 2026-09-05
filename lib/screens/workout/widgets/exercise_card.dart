@@ -15,11 +15,7 @@ import '../log_data_dialog.dart';
 import '../../../utils/format_units.dart';
 
 class ExerciseCard extends ConsumerWidget {
-  const ExerciseCard({
-    super.key,
-    required this.exercise,
-    required this.dayId,
-  });
+  const ExerciseCard({super.key, required this.exercise, required this.dayId});
 
   final Exercise exercise;
   final String dayId;
@@ -32,16 +28,19 @@ class ExerciseCard extends ConsumerWidget {
     final dateStr = ref.watch(dateStringProvider);
     final log = logRepo.getLog(dateStr, exercise.name ?? '');
     final isCompleted = log != null;
-    
+
     String? loggedText;
     if (log != null && log.sets.isNotEmpty) {
-      final repsList = log.sets.map((s) {
-        if ((s.weight ?? 0) > 0) return '${s.reps}x${(s.weight ?? 0).toInt()}kg';
-        return '${s.reps}';
-      }).join(', ');
+      final repsList = log.sets
+          .map((s) {
+            if ((s.weight ?? 0) > 0)
+              return '${s.reps}x${(s.weight ?? 0).toInt()}kg';
+            return '${s.reps}';
+          })
+          .join(', ');
       loggedText = 'Done: $repsList';
     }
-    
+
     return SurfaceCard(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: EdgeInsets.zero,
@@ -56,101 +55,121 @@ class ExerciseCard extends ConsumerWidget {
               children: [
                 // YouTube Thumbnail
                 Semantics(
-                  label: 'Play ${exercise.displayName ?? exercise.name ?? ''} video tutorial',
+                  label:
+                      'Play ${exercise.displayName ?? exercise.name ?? ''} video tutorial',
                   button: true,
                   child: GestureDetector(
-                  onTap: () async {
-                    final videoId = exercise.youtubeVideoId;
-                    if (videoId != null && videoId != 'XXXX' && videoId.isNotEmpty) {
-                      // ignore: unawaited_futures
-                      context.push(
-                        '/youtube-player?videoId=$videoId&title=${Uri.encodeComponent(exercise.displayName ?? exercise.name ?? '')}&subtitle=${Uri.encodeComponent(exercise.name ?? '')}&reps=${Uri.encodeComponent(exercise.repsDisplay ?? '')}',
-                      );
-                    } else {
-                      final query = Uri.encodeComponent('${exercise.displayName ?? exercise.name ?? ''} exercise tutorial');
-                      final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                    onTap: () async {
+                      final videoId = exercise.youtubeVideoId;
+                      if (videoId != null &&
+                          videoId != 'XXXX' &&
+                          videoId.isNotEmpty) {
+                        // ignore: unawaited_futures
+                        context.push(
+                          '/youtube-player?videoId=$videoId&title=${Uri.encodeComponent(exercise.displayName ?? exercise.name ?? '')}&subtitle=${Uri.encodeComponent(exercise.name ?? '')}&reps=${Uri.encodeComponent(exercise.repsDisplay ?? '')}',
+                        );
+                      } else {
+                        final query = Uri.encodeComponent(
+                          '${exercise.displayName ?? exercise.name ?? ''} exercise tutorial',
+                        );
+                        final url = Uri.parse(
+                          'https://www.youtube.com/results?search_query=$query',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
                       }
-                    }
-                  },
-                  child: Container(
-                    width: 90,
-                    height: 68,
-                    decoration: BoxDecoration(
-                      color: context.colors.lavenderCard,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: (exercise.youtubeVideoId == null || exercise.youtubeVideoId == 'XXXX' || exercise.youtubeVideoId!.isEmpty)
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.search_rounded, color: context.colors.primary, size: 24),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Search YT',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.colors.primary,
-                                ),
-                              ),
-                            ],
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Stack(
-                              fit: StackFit.expand,
+                    },
+                    child: Container(
+                      width: 90,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: context.colors.lavenderCard,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child:
+                          (exercise.youtubeVideoId == null ||
+                              exercise.youtubeVideoId == 'XXXX' ||
+                              exercise.youtubeVideoId!.isEmpty)
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                if (exercise.thumbnailUrl.isNotEmpty)
-                                  CachedNetworkImage(
-                                    imageUrl: exercise.thumbnailUrl,
-                                    fit: BoxFit.cover,
-                                    placeholder: (ctx, url) => Center(
-                                      child: Icon(
-                                        Icons.fitness_center_rounded,
-                                        color: context.colors.primary,
-                                        size: 30,
-                                      ),
-                                    ),
-                                    errorWidget: (ctx, url, error) => Center(
-                                      child: Icon(
-                                        Icons.fitness_center_rounded,
-                                        color: context.colors.primary,
-                                        size: 30,
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  Center(
-                                    child: Icon(
-                                      Icons.fitness_center_rounded,
-                                      color: context.colors.primary,
-                                      size: 30,
-                                    ),
+                                Icon(
+                                  Icons.search_rounded,
+                                  color: context.colors.primary,
+                                  size: 24,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Search YT',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.colors.primary,
                                   ),
-                                // Play overlay
-                                if (exercise.youtubeUrl != null && exercise.youtubeUrl!.isNotEmpty)
-                                  Center(
-                                    child: Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.5),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.play_arrow_rounded,
-                                        color: context.colors.card,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
+                                ),
                               ],
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  if (exercise.thumbnailUrl.isNotEmpty)
+                                    CachedNetworkImage(
+                                      imageUrl: exercise.thumbnailUrl,
+                                      fit: BoxFit.cover,
+                                      placeholder: (ctx, url) => Center(
+                                        child: Icon(
+                                          Icons.fitness_center_rounded,
+                                          color: context.colors.primary,
+                                          size: 30,
+                                        ),
+                                      ),
+                                      errorWidget: (ctx, url, error) => Center(
+                                        child: Icon(
+                                          Icons.fitness_center_rounded,
+                                          color: context.colors.primary,
+                                          size: 30,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Center(
+                                      child: Icon(
+                                        Icons.fitness_center_rounded,
+                                        color: context.colors.primary,
+                                        size: 30,
+                                      ),
+                                    ),
+                                  // Play overlay
+                                  if (exercise.youtubeUrl != null &&
+                                      exercise.youtubeUrl!.isNotEmpty)
+                                    Center(
+                                      child: Container(
+                                        width: 32,
+                                        height: 32,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.play_arrow_rounded,
+                                          color: context.colors.card,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
-                          ),
+                    ),
                   ),
-                ),
                 ),
                 const SizedBox(width: 12),
 
@@ -172,7 +191,9 @@ class ExerciseCard extends ConsumerWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: context.colors.lavenderCard,
                               borderRadius: BorderRadius.circular(8),
@@ -192,7 +213,9 @@ class ExerciseCard extends ConsumerWidget {
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: context.colors.lavenderCard,
                                 borderRadius: BorderRadius.circular(8),
@@ -213,7 +236,9 @@ class ExerciseCard extends ConsumerWidget {
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: context.colors.mint,
                                 borderRadius: BorderRadius.circular(8),
@@ -232,17 +257,27 @@ class ExerciseCard extends ConsumerWidget {
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFFD700).withValues(alpha: 0.2), // Gold tint
+                                color: const Color(
+                                  0xFFFFD700,
+                                ).withValues(alpha: 0.2), // Gold tint
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.emoji_events, size: 12, color: Color(0xFFB8860B)),
+                                  const Icon(
+                                    Icons.emoji_events,
+                                    size: 12,
+                                    color: Color(0xFFB8860B),
+                                  ),
                                   const SizedBox(width: 2),
                                   Text(
-                                    pr.maxWeight > 0 ? '${pr.maxWeight}kg' : '${pr.maxReps} reps',
+                                    pr.maxWeight > 0
+                                        ? '${pr.maxWeight}kg'
+                                        : '${pr.maxReps} reps',
                                     style: AppTheme.numeric(
                                       const TextStyle(
                                         fontSize: 11,
@@ -274,7 +309,8 @@ class ExerciseCard extends ConsumerWidget {
 
                 // Checkmark
                 Semantics(
-                  label: 'Mark ${exercise.displayName ?? exercise.name ?? ''} as ${isCompleted ? 'incomplete' : 'complete'}',
+                  label:
+                      'Mark ${exercise.displayName ?? exercise.name ?? ''} as ${isCompleted ? 'incomplete' : 'complete'}',
                   button: true,
                   child: GestureDetector(
                     onTap: () {
@@ -293,13 +329,22 @@ class ExerciseCard extends ConsumerWidget {
                           height: 32,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isCompleted ? context.colors.green : Colors.transparent,
+                            color: isCompleted
+                                ? context.colors.green
+                                : Colors.transparent,
                             border: isCompleted
                                 ? null
-                                : Border.all(color: context.colors.border, width: 2),
+                                : Border.all(
+                                    color: context.colors.border,
+                                    width: 2,
+                                  ),
                           ),
                           child: isCompleted
-                              ? Icon(Icons.check, color: context.colors.onPrimary, size: 18)
+                              ? Icon(
+                                  Icons.check,
+                                  color: context.colors.onPrimary,
+                                  size: 18,
+                                )
                               : null,
                         ),
                       ),
@@ -414,23 +459,17 @@ class ExerciseCard extends ConsumerWidget {
 
     // ignore: unused_local_variable
     final timerActive = ref.read(restTimerProvider).isActive;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor:
-            prResult.hasAnyNewPr ? context.colors.green : context.colors.primary,
+        backgroundColor: prResult.hasAnyNewPr
+            ? context.colors.green
+            : context.colors.primary,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(
-          bottom: 16,
-          left: 16,
-          right: 16,
-        ),
+        margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 }
-
-
-

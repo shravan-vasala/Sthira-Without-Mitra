@@ -8,8 +8,13 @@ class SchemaMigrationService {
 
   /// Run migrations for the active data on application startup.
   static Future<void> runStartupMigrations(Isar isar) async {
-    final config = isar.appConfigs.where().keyEqualTo(_versionKey).findFirstSync();
-    final int storedVersion = config != null ? int.tryParse(config.value) ?? 1 : 1;
+    final config = isar.appConfigs
+        .where()
+        .keyEqualTo(_versionKey)
+        .findFirstSync();
+    final int storedVersion = config != null
+        ? int.tryParse(config.value) ?? 1
+        : 1;
 
     if (storedVersion >= currentSchemaVersion) {
       // Check if we need to scrub geminiApiKey for existing users
@@ -17,7 +22,9 @@ class SchemaMigrationService {
       if (allProfiles.isNotEmpty) {
         await isar.writeTxn(() async {
           for (final profile in allProfiles) {
-            await isar.userProfiles.put(profile.copyWith(clearGeminiApiKey: true));
+            await isar.userProfiles.put(
+              profile.copyWith(clearGeminiApiKey: true),
+            );
           }
         });
       }
@@ -34,7 +41,9 @@ class SchemaMigrationService {
         await isar.userProfiles.put(profile.copyWith(clearGeminiApiKey: true));
       }
 
-      await isar.appConfigs.put(AppConfig(key: _versionKey, value: currentSchemaVersion.toString()));
+      await isar.appConfigs.put(
+        AppConfig(key: _versionKey, value: currentSchemaVersion.toString()),
+      );
     });
   }
 
@@ -47,4 +56,3 @@ class SchemaMigrationService {
     return boxes;
   }
 }
-

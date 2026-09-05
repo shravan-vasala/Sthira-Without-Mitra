@@ -13,8 +13,12 @@ class BadgeRepository {
       _sync!.streamCollection('badges').listen((data) async {
         for (final entry in data.entries) {
           final b = Badge.fromJson(entry.value);
-          final existing = _isar.badges.where().idEqualTo(entry.key).findFirstSync();
-          if (existing == null || jsonEncode(existing.toJson()) != jsonEncode(b.toJson())) {
+          final existing = _isar.badges
+              .where()
+              .idEqualTo(entry.key)
+              .findFirstSync();
+          if (existing == null ||
+              jsonEncode(existing.toJson()) != jsonEncode(b.toJson())) {
             if (existing != null) b.idInternal = existing.idInternal;
             await _isar.writeTxn(() async {
               await _isar.badges.put(b);
@@ -105,7 +109,9 @@ class BadgeRepository {
   }
 
   /// Bulk import from Firestore (used on new-device sign-in).
-  Future<void> importFromCloud(Map<String, Map<String, dynamic>> cloudData) async {
+  Future<void> importFromCloud(
+    Map<String, Map<String, dynamic>> cloudData,
+  ) async {
     for (final entry in cloudData.entries) {
       final cloudBadge = Badge.fromJson(entry.value);
       final localBadge = getBadge(entry.key);
@@ -117,7 +123,9 @@ class BadgeRepository {
       } else {
         final localDate = localBadge.unlockedAt ?? DateTime.parse('2000-01-01');
         final cloudDate = cloudBadge.unlockedAt ?? DateTime.parse('2000-01-01');
-        if (cloudDate.isAfter(localDate) || (cloudBadge.currentProgress > localBadge.currentProgress && localBadge.unlockedAt == null)) {
+        if (cloudDate.isAfter(localDate) ||
+            (cloudBadge.currentProgress > localBadge.currentProgress &&
+                localBadge.unlockedAt == null)) {
           cloudBadge.idInternal = localBadge.idInternal;
         }
         await _isar.writeTxn(() async {
@@ -169,4 +177,3 @@ class BadgeRepository {
     }
   }
 }
-

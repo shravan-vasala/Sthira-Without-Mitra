@@ -27,7 +27,7 @@ final phaseProgressProvider = Provider<PhaseProgress>((ref) {
   final profile = ref.watch(profileProvider);
   final dateStr = ref.watch(dateStringProvider);
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
-  
+
   // Rebuild if logs change
   ref.watch(dailyLogProvider);
 
@@ -45,16 +45,16 @@ final phaseProgressProvider = Provider<PhaseProgress>((ref) {
   }
 
   final today = DateTime.parse(dateStr);
-  
+
   // Strip time from start date just in case
   final startDate = DateTime(
-    profile.planStartDate!.year, 
-    profile.planStartDate!.month, 
-    profile.planStartDate!.day
+    profile.planStartDate!.year,
+    profile.planStartDate!.month,
+    profile.planStartDate!.day,
   );
 
   final daysSinceStart = today.difference(startDate).inDays;
-  
+
   // If today is before start date (shouldn't happen, but just in case)
   if (daysSinceStart < 0) {
     return PhaseProgress(
@@ -80,7 +80,7 @@ final phaseProgressProvider = Provider<PhaseProgress>((ref) {
 
     final checkStr = DateFormat('yyyy-MM-dd').format(checkDate);
     final log = dailyLogRepo.getLog(checkStr) ?? DailyLog(date: checkStr);
-    
+
     if (workoutPlan != null && workoutPlan.days.isNotEmpty) {
       final day = WorkoutCompletion.resolveWorkoutDay(workoutPlan, checkDate);
       if (WorkoutCompletion.isDayWorkoutDoneWithRepo(

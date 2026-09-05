@@ -5,15 +5,18 @@ import 'package:image/image.dart' as img;
 class ImagePreprocessor {
   /// Downscales an image so the longest side is 1280px and encodes as JPEG.
   /// Uses a background isolate. Returns (bytes, mimeType).
-  static Future<(Uint8List, String)> processImage(Uint8List bytes, String fallbackMimeType) async {
+  static Future<(Uint8List, String)> processImage(
+    Uint8List bytes,
+    String fallbackMimeType,
+  ) async {
     try {
       return await Isolate.run(() {
         final image = img.decodeImage(bytes);
         if (image == null) throw Exception('Cannot decode image');
-        
+
         int width = image.width;
         int height = image.height;
-        
+
         if (width > 1280 || height > 1280) {
           if (width > height) {
             height = (height * 1280 ~/ width);

@@ -13,7 +13,8 @@ class CoachService {
   CoachService({this.apiKey, this.isSignedIn = false, required this.aiClient});
 
   FeatureAvailability get availability {
-    if (!isSignedIn && (apiKey == null || apiKey!.isEmpty)) return FeatureAvailability.disabled;
+    if (!isSignedIn && (apiKey == null || apiKey!.isEmpty))
+      return FeatureAvailability.disabled;
     return FeatureAvailability.available;
   }
 
@@ -41,12 +42,22 @@ class CoachService {
 
     if (strategies.isEmpty) {
       yield _generateTemplatedNote(
-        userName, steps, sleep, habitsDone, habitsTotal, calories, workoutsDone, workoutsTotal, isRestDay, daysSinceLastWorkout
+        userName,
+        steps,
+        sleep,
+        habitsDone,
+        habitsTotal,
+        calories,
+        workoutsDone,
+        workoutsTotal,
+        isRestDay,
+        daysSinceLastWorkout,
       );
       return;
     }
 
-    final prompt = '''
+    final prompt =
+        '''
 You are an enthusiastic, supportive personal fitness coach named $coachLabel. 
 Your client's name is ${userName.isEmpty ? 'friend' : userName}.
 
@@ -62,7 +73,8 @@ ${isRestDay ? "- Days since their last workout: $daysSinceLastWorkout" : ""}
 
 ''';
 
-    final systemInstruction = '''
+    final systemInstruction =
+        '''
 You are an enthusiastic, supportive personal fitness coach named $coachLabel.
 Your client's name is ${userName.isEmpty ? 'friend' : userName}.
 
@@ -79,7 +91,7 @@ Return exactly the note text, and nothing else.
         useFirebase: isSignedIn,
         apiKey: apiKey,
       );
-      
+
       await for (final chunk in stream) {
         yield chunk;
       }
@@ -90,12 +102,30 @@ Return exactly the note text, and nothing else.
 
     // Fallback if Gemini fails
     yield _generateTemplatedNote(
-      userName, steps, sleep, habitsDone, habitsTotal, calories, workoutsDone, workoutsTotal, isRestDay, daysSinceLastWorkout
+      userName,
+      steps,
+      sleep,
+      habitsDone,
+      habitsTotal,
+      calories,
+      workoutsDone,
+      workoutsTotal,
+      isRestDay,
+      daysSinceLastWorkout,
     );
   }
 
   String _generateTemplatedNote(
-    String name, int steps, double sleep, int habitsDone, int habitsTotal, int calories, int workoutsDone, int workoutsTotal, bool isRestDay, int daysSinceLastWorkout
+    String name,
+    int steps,
+    double sleep,
+    int habitsDone,
+    int habitsTotal,
+    int calories,
+    int workoutsDone,
+    int workoutsTotal,
+    bool isRestDay,
+    int daysSinceLastWorkout,
   ) {
     final n = name.isNotEmpty ? name : 'friend';
     final random = Random();
@@ -112,7 +142,7 @@ Return exactly the note text, and nothing else.
         "Wakey wakey, $n! Time to get those endorphins flowing. ⚡",
         "Good morning! Let's start the day with a healthy choice, $n. 🍎",
         "A new day is a new opportunity, $n. Go get 'em!",
-        "Morning, $n! Take a deep breath and let's tackle your goals. 🧘"
+        "Morning, $n! Take a deep breath and let's tackle your goals. 🧘",
       ];
     } else if (hour < 18) {
       generics = [
@@ -122,7 +152,7 @@ Return exactly the note text, and nothing else.
         "Halfway through the day, $n! Keep up the great work. ⭐",
         "Good afternoon! Don't forget to hydrate, $n. 🥤",
         "Keep crushing it this afternoon, $n! 💪",
-        "You've got this, $n! The day isn't over yet. ⏱️"
+        "You've got this, $n! The day isn't over yet. ⏱️",
       ];
     } else {
       generics = [
@@ -132,26 +162,26 @@ Return exactly the note text, and nothing else.
         "Good evening! Make sure to get some quality sleep tonight, $n. 💤",
         "Day is done, $n. Be proud of the effort you put in! 👏",
         "Evening, $n! Recovery is just as important as the workout. 🛁",
-        "Time to relax, $n. You earned it today! 🛋️"
+        "Time to relax, $n. You earned it today! 🛋️",
       ];
     }
-    
+
     // Performance based overrides
     if (!isRestDay && workoutsDone == workoutsTotal && workoutsTotal > 0) {
       final messages = [
         "Awesome job crushing your workout today, $n! 💪 Make sure to rest up and hydrate.",
         "You absolutely nailed your workout, $n! 🔥 I'm so proud of you.",
         "Workout complete! Way to show up for yourself today, $n. 🏅",
-        "Boom! Workout done. Your body will thank you later, $n. 🙌"
+        "Boom! Workout done. Your body will thank you later, $n. 🙌",
       ];
       return messages[random.nextInt(messages.length)];
     }
-    
+
     if (isRestDay && daysSinceLastWorkout == 0) {
       final messages = [
         "It's a rest day, $n! Enjoy the recovery, you earned it yesterday. 🛋️",
         "Take it easy today, $n. Your muscles need time to rebuild! 🧘",
-        "Rest day vibes! Listen to your body and just relax today, $n. 🍃"
+        "Rest day vibes! Listen to your body and just relax today, $n. 🍃",
       ];
       return messages[random.nextInt(messages.length)];
     }
@@ -160,7 +190,7 @@ Return exactly the note text, and nothing else.
       final messages = [
         "Over 10K steps?! Look at you go, $n! 🏃 Keep that momentum up!",
         "You're a walking machine today, $n! Incredible step count. 👟",
-        "10,000 steps crushed! Your energy is inspiring, $n. ⚡"
+        "10,000 steps crushed! Your energy is inspiring, $n. ⚡",
       ];
       return messages[random.nextInt(messages.length)];
     }
@@ -169,11 +199,11 @@ Return exactly the note text, and nothing else.
       final messages = [
         "Perfect habit streak today! 🌟 Consistency is the secret to results, $n.",
         "All habits checked off! You're building an incredible foundation, $n. 🧱",
-        "100% on habits today! That's how we build lasting change, $n. 🎯"
+        "100% on habits today! That's how we build lasting change, $n. 🎯",
       ];
       return messages[random.nextInt(messages.length)];
     }
-    
+
     return generics[random.nextInt(generics.length)];
   }
 }

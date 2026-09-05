@@ -11,7 +11,8 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
 
@@ -19,7 +20,7 @@ class NotificationService {
     if (_initialized) return;
 
     tz.initializeTimeZones();
-    
+
     try {
       final tzInfo = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
@@ -40,12 +41,16 @@ class NotificationService {
 
   Future<bool> requestPermissions() async {
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+        _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
 
     if (androidImplementation != null) {
-      final bool? granted = await androidImplementation.requestNotificationsPermission();
-      final bool? exactGranted = await androidImplementation.requestExactAlarmsPermission();
+      final bool? granted = await androidImplementation
+          .requestNotificationsPermission();
+      final bool? exactGranted = await androidImplementation
+          .requestExactAlarmsPermission();
       return (granted ?? false) && (exactGranted ?? false);
     }
     return false;
@@ -64,7 +69,10 @@ class NotificationService {
     );
   }
 
-  Future<void> scheduleMealReminders(TimeOfDay lunchTime, TimeOfDay dinnerTime) async {
+  Future<void> scheduleMealReminders(
+    TimeOfDay lunchTime,
+    TimeOfDay dinnerTime,
+  ) async {
     await _scheduleDaily(
       id: 20,
       title: 'Lunch Logging',
@@ -89,7 +97,10 @@ class NotificationService {
     );
   }
 
-  Future<void> scheduleWorkoutReminders(List<int> workoutDaysOfWeek, TimeOfDay time) async {
+  Future<void> scheduleWorkoutReminders(
+    List<int> workoutDaysOfWeek,
+    TimeOfDay time,
+  ) async {
     // Cancel old workout reminders (ids 40-46)
     for (int i = 0; i < 7; i++) {
       await _notificationsPlugin.cancel(40 + i);
@@ -106,14 +117,17 @@ class NotificationService {
     }
   }
 
-  Future<void> schedulePhotoReminder(TimeOfDay time, DateTime? lastPhotoDate) async {
+  Future<void> schedulePhotoReminder(
+    TimeOfDay time,
+    DateTime? lastPhotoDate,
+  ) async {
     // ID 50 for photo reminder
     await _notificationsPlugin.cancel(50);
-    
+
     // If last photo is null, or it's been more than 14 days, remind them today/tomorrow
     final now = DateTime.now();
     bool needsNudge = false;
-    
+
     if (lastPhotoDate == null) {
       needsNudge = true;
     } else {
@@ -133,11 +147,20 @@ class NotificationService {
     } else {
       // Schedule exactly 14 days from the last photo date at the preferred time
       final scheduledDay = lastPhotoDate!.add(const Duration(days: 14));
-      var scheduledDate = tz.TZDateTime(tz.local, scheduledDay.year, scheduledDay.month, scheduledDay.day, time.hour, time.minute);
-      
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        scheduledDay.year,
+        scheduledDay.month,
+        scheduledDay.day,
+        time.hour,
+        time.minute,
+      );
+
       if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-         // Fallback if we somehow got here
-         scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(days: 1));
+        // Fallback if we somehow got here
+        scheduledDate = tz.TZDateTime.now(
+          tz.local,
+        ).add(const Duration(days: 1));
       }
 
       await _notificationsPlugin.zonedSchedule(
@@ -155,7 +178,8 @@ class NotificationService {
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
     }
   }
@@ -181,7 +205,8 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -208,15 +233,22 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
 
   tz.TZDateTime _nextInstanceOfTime(TimeOfDay time) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }

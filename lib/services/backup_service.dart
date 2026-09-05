@@ -32,15 +32,28 @@ class BackupVerificationResult {
 class BackupService {
   /// Temporarily disabled. Firebase Cloud Sync is the primary backup.
   Future<String?> createBackup({String? password}) async {
-    debugPrint('BackupService: Local zip backups are disabled in this version (migrated to Isar). Use Cloud Sync.');
+    debugPrint(
+      'BackupService: Local zip backups are disabled in this version (migrated to Isar). Use Cloud Sync.',
+    );
     return null;
   }
 
-  Future<BackupVerificationResult> verifyBackup(String zipPath, {String? password}) async {
-    return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, errorMessage: 'Local zip backups are disabled.');
+  Future<BackupVerificationResult> verifyBackup(
+    String zipPath, {
+    String? password,
+  }) async {
+    return BackupVerificationResult(
+      isValid: false,
+      totalEntries: 0,
+      photoCount: 0,
+      errorMessage: 'Local zip backups are disabled.',
+    );
   }
 
-  Future<BackupRestoreResult> restoreBackup(String zipPath, {String? password}) async {
+  Future<BackupRestoreResult> restoreBackup(
+    String zipPath, {
+    String? password,
+  }) async {
     return BackupRestoreResult(success: false);
   }
 
