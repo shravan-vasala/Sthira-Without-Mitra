@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../theme/app_theme.dart';
+import '../../../theme/app_typography.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
@@ -225,18 +226,12 @@ class MealsCard extends ConsumerWidget {
                 children: [
                   Text(
                     slot.name,
-                    style: context.text.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.bodyBold.copyWith(color: context.colors.textDark),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     isLogged ? '$slotCalories kcal' : 'Tap to log',
-                    style: context.text.bodySmall?.copyWith(
-                      color: context.colors.textMedium,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                   ),
                 ],
               ),
