@@ -4,14 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/layout_insets.dart';
-import '../../providers/app_providers.dart';
-import '../../providers/badge_engine_provider.dart';
+import '../../providers/sync_controller.dart';
+import '../../providers/midnight_tick_provider.dart';
+import '../../services/widget_update_service.dart';
 import '../../services/health_connect_service.dart';
 import '../../services/screen_time_service.dart';
 import '../../models/habit.dart';
 import '../../utils/workout_completion.dart';
 import '../../widgets/section_header.dart';
+import '../../theme/layout_insets.dart';
+import '../../providers/app_providers.dart';
+import '../../providers/badge_engine_provider.dart';
 import '../../widgets/surface_card.dart';
 import '../profile/manage_habits_screen.dart';
 import 'widgets/week_calendar_strip.dart';
@@ -272,6 +275,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(midnightTickProvider);
     final name = ref.watch(profileProvider.select((p) => p.name)).trim();
     final selected = ref.watch(selectedDateProvider);
     final now = DateTime.now();
@@ -280,29 +284,46 @@ class _HomeGreetingTitle extends ConsumerWidget {
 
     final title = name.isEmpty ? _timeGreeting() : '${_timeGreeting()},\n$name';
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: context.colors.textDark,
-            height: 1.15,
-            fontSize: 32,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            'assets/icon/sunflower_logo.jpg',
+            width: 48,
+            height: 48,
+            fit: BoxFit.cover,
           ),
         ),
-        if (!isToday) ...[
-          const SizedBox(height: 4),
-          Text(
-            'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: context.colors.primary,
-            ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: context.colors.textDark,
+                  height: 1.15,
+                  fontSize: 28, // Slightly reduced to fit with logo
+                ),
+              ),
+              if (!isToday) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: context.colors.primary,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+        ),
       ],
     );
   }

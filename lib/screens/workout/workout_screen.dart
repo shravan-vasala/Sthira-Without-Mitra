@@ -9,6 +9,9 @@ import '../../models/workout_plan.dart';
 import 'widgets/exercise_card.dart';
 import 'widgets/rest_timer_label.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:confetti/confetti.dart';
+import '../../../widgets/primary_button.dart';
+import '../../providers/rest_timer_provider.dart';
 
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key, required this.dayId, this.sectionIndex});
@@ -26,17 +29,20 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   /// When non-null, only show that section. When null, show all.
   int? _activeSectionIndex;
   final ScrollController _scrollController = ScrollController();
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
     _activeSectionIndex = widget.sectionIndex;
+    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
     WakelockPlus.enable();
   }
 
   @override
   void dispose() {
     WakelockPlus.disable();
+    _confettiController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -317,58 +323,23 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               ),
             ),
 
+            // ── Rest Timer Floating Bar ───────────────────────────────────
+            if (ref.watch(restTimerProvider).isActive)
+              _buildRestTimerBar(context, ref, ref.read(restTimerProvider)),
+
             // ── Finish Workout Button ─────────────────────────────────────
             if (!isFinished)
-              Container(
-                width: double.infinity,
+              Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: context.colors.primaryGradient,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colors.primary.withValues(alpha: 0.35),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () => _finishWorkout(
-                      context,
-                      ref,
-                      widget.dayId,
-                      completedExercises,
-                      totalExercises,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.emoji_events_rounded,
-                          color: context.colors.onPrimary,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Finish Workout',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: context.colors.onPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
+                child: PrimaryButton(
+                  label: 'Finish Workout',
+                  icon: Icons.emoji_events_rounded,
+                  onPressed: () => _finishWorkout(
+                    context,
+                    ref,
+                    widget.dayId,
+                    completedExercises,
+                    totalExercises,
                   ),
                 ),
               ),
@@ -392,7 +363,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         _showPartialConfirmation(context, ref, dayId, completed, total);
       }
     } else {
-      _executeFinish(context, ref, dayId);
+      _executeFinish(context, ref, dayId, completed, total);
     }
   }
 
@@ -418,7 +389,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _executeFinish(context, ref, dayId);
+              _executeFinish(context, ref, dayId, completed, total);
             },
             child: const Text('Finish'),
           ),
@@ -463,84 +434,200 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     ref.read(dailyLogProvider.notifier).markWorkoutCompleted(dayId);
   }
 
-  void _executeFinish(BuildContext context, WidgetRef ref, String dayId) {
+  void _executeFinish(
+      BuildContext context, WidgetRef ref, String dayId, int completed, int total) {
     _persistWorkoutFinished(ref, dayId);
     Haptics.toggle();
+    _confettiController.play();
 
     final name = ref.read(profileProvider).name.trim();
     final title = name.isEmpty ? 'Workout complete!' : 'Nice work, $name!';
 
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        backgroundColor: context.colors.card,
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      barrierDismissible: false,
+      builder: (ctx) => Stack(
+        alignment: Alignment.center,
+        children: [
+          Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            backgroundColor: context.colors.card,
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.12), // gold
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.emoji_events_rounded,
+                      color: const Color(0xFFFFD700), // gold
+                      size: 40,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: context.colors.textDark,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$completed / $total exercises completed.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.primary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Session saved. Head home to finish habits and meals if you have any left.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: context.colors.textMedium,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  PrimaryButton(
+                    label: 'Back to Home',
+                    onPressed: () {
+                      _confettiController.stop();
+                      Navigator.of(ctx).pop();
+                      context.go('/home');
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            colors: [
+              context.colors.primary,
+              context.colors.green,
+              const Color(0xFFFFD700),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRestTimerBar(BuildContext context, WidgetRef ref, RestTimerState state) {
+    if (!state.isActive) return const SizedBox.shrink();
+    
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: context.colors.lavenderCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: context.colors.primary.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          // Circle countdown
+          Stack(
+            alignment: Alignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: context.colors.green.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.emoji_events_rounded,
-                  color: context.colors.green,
-                  size: 40,
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: CircularProgressIndicator(
+                  value: (state.remainingSeconds % 60) / 60, // visual only, assumes mostly < 2 mins
+                  strokeWidth: 4,
+                  backgroundColor: context.colors.primary.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation(context.colors.primary),
                 ),
               ),
-              const SizedBox(height: 16),
               Text(
-                title,
+                '${state.remainingSeconds}',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: context.colors.textDark,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Session saved. Head home to finish habits and meals if you have any left.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.colors.textMedium,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                    context.go('/home');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colors.primary,
-                    foregroundColor: context.colors.onPrimary,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    'Back to Home',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.onPrimary,
-                    ),
-                  ),
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Resting',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textMedium,
+                  ),
+                ),
+                Text(
+                  state.exerciseName ?? 'Rest Timer',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: context.colors.textDark,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          // Actions
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                padding: EdgeInsets.zero,
+                icon: Icon(Icons.exposure_plus_1, color: context.colors.primary), // 30s roughly
+                onPressed: () => ref.read(restTimerProvider.notifier).addSeconds(30),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                icon: Icon(
+                  state.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded, 
+                  color: context.colors.primary,
+                ),
+                onPressed: () {
+                  if (state.isPaused) {
+                    ref.read(restTimerProvider.notifier).resumeTimer();
+                  } else {
+                    ref.read(restTimerProvider.notifier).pauseTimer();
+                  }
+                },
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                icon: Icon(Icons.skip_next_rounded, color: context.colors.textDark),
+                onPressed: () => ref.read(restTimerProvider.notifier).stopTimer(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -604,23 +691,35 @@ class _SectionWidget extends StatelessWidget {
               ],
             ),
           ),
-          // Exercises
-          ...List.generate(section.exercises.length * 2 - 1, (index) {
-            if (index.isOdd) {
+          if (section.exercises.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Text(
+                'No exercises in this section.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.colors.textMedium,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            )
+          else
+            ...List.generate(section.exercises.length * 2 - 1, (index) {
+              if (index.isOdd) {
+                final exerciseIndex = index ~/ 2;
+                final exercise = section.exercises[exerciseIndex];
+                if (exercise.restSecondsAfterSet > 0) {
+                  return RestTimerLabel(
+                    seconds: exercise.restSecondsAfterSet,
+                    exerciseName: exercise.name ?? '',
+                  );
+                }
+                return const SizedBox(height: 4);
+              }
               final exerciseIndex = index ~/ 2;
               final exercise = section.exercises[exerciseIndex];
-              if (exercise.restSecondsAfterSet > 0) {
-                return RestTimerLabel(
-                  seconds: exercise.restSecondsAfterSet,
-                  exerciseName: exercise.name ?? '',
-                );
-              }
-              return const SizedBox(height: 4);
-            }
-            final exerciseIndex = index ~/ 2;
-            final exercise = section.exercises[exerciseIndex];
-            return ExerciseCard(exercise: exercise, dayId: dayId);
-          }),
+              return ExerciseCard(exercise: exercise, dayId: dayId);
+            }),
           const SizedBox(height: 8),
         ],
       ),

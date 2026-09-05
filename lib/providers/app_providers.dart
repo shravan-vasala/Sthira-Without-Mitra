@@ -30,11 +30,9 @@ import '../services/auth_service.dart';
 import '../services/social_sync_service.dart';
 import '../services/nutrition_lookup_service.dart';
 import '../interfaces/i_ai_food_service.dart';
-
+import '../utils/time_utils.dart';
 import 'auth_provider.dart';
 import 'profile_providers.dart';
-
-// used for daily log habit auto-complete
 
 export 'rest_timer_provider.dart';
 export 'phase_progress_provider.dart';
@@ -85,7 +83,7 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
 
 final dateStringProvider = Provider<String>((ref) {
   final date = ref.watch(selectedDateProvider);
-  return DateFormat('yyyy-MM-dd').format(date);
+  return todayKey(date);
 });
 
 final weekOffsetProvider = StateProvider<int>((ref) => 0);
@@ -143,13 +141,13 @@ final socialSyncServiceProvider = Provider<SocialSyncService>((ref) {
 
 final socialPushControllerProvider = Provider<void>((ref) {
   ref.listen(dailyLogProvider, (prev, next) {
-    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+    final todayStr = todayKey();
     if (next.date == todayStr) {
       _pushProfile(ref, next);
     }
   });
   ref.listen(profileProvider, (prev, next) {
-    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+    final todayStr = todayKey();
     final repo = ref.read(dailyLogRepoProvider);
     final todayLog = repo.getOrCreate(todayStr);
     _pushProfile(ref, todayLog);
@@ -227,7 +225,7 @@ void _pushProfile(Ref ref, DailyLog todayLog) {
 
   for (int i = 0; i <= diff; i++) {
     final d = monday.add(Duration(days: i));
-    final dStr = d.toIso8601String().substring(0, 10);
+    final dStr = todayKey(d);
     final log = dailyLogRepo.getLog(dStr);
     if (log != null) {
       weeklySteps += log.steps ?? 0;

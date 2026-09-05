@@ -194,30 +194,30 @@ class _PrSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFD700).withValues(alpha: 0.1),
+        color: context.colors.goldMuted,
         border: Border.all(
-          color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+          color: context.colors.gold.withValues(alpha: 0.5),
         ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(
                 Icons.emoji_events_rounded,
-                color: Color(0xFFB8860B),
+                color: context.colors.gold,
                 size: 24,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'PERSONAL RECORDS',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
-                  color: Color(0xFFB8860B),
+                  color: context.colors.gold,
                 ),
               ),
             ],
@@ -227,22 +227,24 @@ class _PrSummary extends StatelessWidget {
             _buildPrRow(
               'Max Weight',
               '${pr.maxWeight}kg × ${pr.maxWeightReps}',
+              context,
             ),
           if (pr.maxReps > 0 &&
               (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
             _buildPrRow(
               'Max Reps',
               '${pr.maxReps} reps @ ${pr.maxRepsWeight}kg',
+              context,
             ),
           if (pr.estimated1RM > 0)
-            _buildPrRow('Est. 1RM', '${pr.estimated1RM.toStringAsFixed(1)}kg'),
-          if (pr.maxVolume > 0) _buildPrRow('Max Volume', '${pr.maxVolume}kg'),
+            _buildPrRow('Est. 1RM', '${pr.estimated1RM.toStringAsFixed(1)}kg', context),
+          if (pr.maxVolume > 0) _buildPrRow('Max Volume', '${pr.maxVolume}kg', context),
         ],
       ),
     );
   }
 
-  Widget _buildPrRow(String label, String value) {
+  Widget _buildPrRow(String label, String value, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -250,14 +252,14 @@ class _PrSummary extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF8B6508)),
+            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF8B6508),
+              color: context.colors.textDark,
             ),
           ),
         ],

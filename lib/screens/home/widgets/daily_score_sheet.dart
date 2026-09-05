@@ -66,52 +66,47 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                 else if (intScore < 80)
                   animColor = context.colors.orange;
 
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 24,
-                  ),
-                  decoration: BoxDecoration(
-                    color: intScore == 100
-                        ? null
-                        : animColor.withValues(alpha: 0.1),
-                    gradient: intScore == 100
-                        ? context.colors.primaryGradient
-                        : null,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        '$intScore',
-                        style: AppTheme.numeric(
-                          TextStyle(
-                            fontSize: 56,
-                            fontWeight: FontWeight.w900,
-                            color: intScore == 100
-                                ? context.colors.onPrimary
-                                : animColor,
-                            height: 1.0,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'of 100',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                return Column(
+                  children: [
+                    Text(
+                      '$intScore',
+                      style: AppTheme.numeric(
+                        TextStyle(
+                          fontSize: 64,
+                          fontWeight: FontWeight.w800,
                           color: intScore == 100
-                              ? context.colors.onPrimary.withValues(alpha: 0.8)
-                              : animColor.withValues(alpha: 0.8),
+                              ? context.colors.green
+                              : animColor,
+                          height: 1.0,
+                          letterSpacing: -2.0,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'of 100',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.textMedium,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(1),
+                      child: LinearProgressIndicator(
+                        value: value / 100,
+                        backgroundColor: context.colors.border.withValues(alpha: 0.3),
+                        color: intScore == 100 ? context.colors.green : animColor,
+                        minHeight: 2,
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
-          ).animate().fade().scale(begin: const Offset(0.9, 0.9)),
+          ).animate().fade().scale(begin: const Offset(0.95, 0.95)),
 
           const SizedBox(height: 16),
 
@@ -127,27 +122,24 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     previous: scoreData.yesterdayScore!,
                     label: 'vs yesterday',
                   ),
-                  if (scoreData.sevenDayAverage != null)
+                    Text(
+                      '·',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.textMedium,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                 ],
                 if (scoreData.sevenDayAverage != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.colors.border.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '7-day avg ${scoreData.sevenDayAverage}',
-                      style: AppTheme.numeric(
-                        TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textMedium,
-                        ),
+                  Text(
+                    '7-day avg ${scoreData.sevenDayAverage}',
+                    style: AppTheme.numeric(
+                      TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.textMedium,
                       ),
                     ),
                   ),
@@ -212,29 +204,37 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
             ),
             const SizedBox(height: 12),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 16,
+              runSpacing: 12,
               children: scoreData.remainingLabels.map((label) {
-                return ActionChip(
-                  label: Text(label.toUpperCase()),
-                  labelStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.primary,
-                  ),
-                  backgroundColor: context.colors.primary.withValues(
-                    alpha: 0.1,
-                  ),
-                  side: BorderSide.none,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  onPressed: () {
+                return GestureDetector(
+                  onTap: () {
                     Navigator.pop(context);
                     if (label == 'workout') {
                       context.go('/workout');
                     }
                   },
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                          color: context.colors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                        color: context.colors.primary,
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             ).animate().fade(delay: 340.ms),
@@ -428,7 +428,7 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isRestDay ? context.colors.green : color,
                       ),
-                      minHeight: 6,
+                      minHeight: 2,
                     ),
                   );
                 },

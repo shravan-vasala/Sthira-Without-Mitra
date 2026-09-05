@@ -6,6 +6,7 @@ import '../models/daily_log.dart';
 import '../services/screen_time_service.dart';
 import 'auth_provider.dart';
 import '../services/health_connect_service.dart';
+import '../utils/time_utils.dart';
 
 final syncControllerProvider = NotifierProvider<SyncController, bool>(
   SyncController.new,
@@ -49,7 +50,7 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
 
       // Coach note is date-scoped — only auto-refresh when viewing today
       final selectedDate = ref.read(dateStringProvider);
-      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+      final todayStr = todayKey();
       if (selectedDate == todayStr) {
         // ignore: unawaited_futures
         ref.read(coachNoteProvider.notifier).fetchNote(force: isManualRefresh);

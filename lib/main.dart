@@ -21,6 +21,7 @@ import 'services/notification_service.dart';
 import 'services/schema_migration_service.dart';
 import 'providers/app_providers.dart';
 import 'providers/reminders_provider.dart';
+import 'services/diagnostic_logger.dart';
 import 'router/app_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
@@ -153,8 +154,12 @@ Future<void> main() async {
     final initialGeminiKey = await profileRepo.getSecureGeminiKey();
     final prefs = await SharedPreferences.getInstance();
 
+    final logger = DiagnosticLogger(prefs);
+    logger.info('Sthira started cleanly');
+
     runApp(
       ProviderScope(
+        observers: [DiagnosticProviderObserver(logger)],
         overrides: [
           workoutRepoProvider.overrideWithValue(workoutRepo),
           mealRepoProvider.overrideWithValue(mealRepo),

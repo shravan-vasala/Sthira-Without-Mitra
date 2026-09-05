@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../utils/time_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
@@ -14,7 +15,7 @@ Future<void> maybeShowDayCompleteSheet(
   if (!score.isPrimaryComplete || score.isFutureDate) return;
 
   final dateStr = ref.read(dateStringProvider);
-  final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+  final todayStr = todayKey();
   if (dateStr != todayStr) return;
 
   final prefs = ref.read(sharedPreferencesProvider);

@@ -210,7 +210,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
 
           // Week day circles
           SizedBox(
-            height: 70,
+            height: 70 * MediaQuery.textScaleFactorOf(context).clamp(1.0, 1.5),
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (idx) {

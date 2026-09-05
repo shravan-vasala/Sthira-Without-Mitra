@@ -8,6 +8,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../models/badge.dart';
 import '../../../share/share_card_exporter.dart';
+import '../../../widgets/primary_button.dart';
 
 class TrophyRoomCard extends ConsumerWidget {
   const TrophyRoomCard({super.key});
@@ -377,6 +378,22 @@ class _BadgeItem extends StatelessWidget {
                     ],
                   ),
                 ],
+                
+                const SizedBox(height: 32),
+                if (isUnlocked)
+                  PrimaryButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Share action could go here
+                    },
+                    icon: Icons.share_rounded,
+                    label: 'Share Badge',
+                  )
+                else
+                  PrimaryButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    label: 'Got it',
+                  ),
               ],
             ),
           ),

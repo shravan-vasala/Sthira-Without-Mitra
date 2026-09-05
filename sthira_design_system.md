@@ -67,7 +67,8 @@ When building or refactoring lists, menus, or repeating items, strictly adhere t
 3. **Leading Elements:** The far-left element should be a simple, slightly rounded icon container or image that anchors the row.
 4. **Typography Contrast:** Use strong, bold titles (`context.text.bodyBold` or `title`) paired with highly muted subtitles (`context.text.caption` colored with `context.colors.textMedium` or `textLight`).
 5. **Trailing Actions:** The far-right element should be minimal, utilizing simple `IconButton`s (like a vertical 3-dot menu or a simple thin-outline icon) without heavy button backgrounds.
-6. **Goal:** The interface should feel infinitely open, lightweight, and modern, using alignment and space rather than boxes and borders to group information.
+6. **Hero Data vs Visual Clutter:** For primary screens (like meal details or daily scores), **avoid thick structural rings and avoid blocky colored cards** for hero metrics. Instead, rely entirely on *massive, flush typography* (e.g. Cabinet Grotesk 56px) resting directly on the scaffold background, paired with ultra-thin (1-2px) linear progress indicators. Place secondary metrics (macros) directly in a flat row beneath it utilizing purely typographic color contrast (`Off-White` values next to `Muted Sage` labels). The goal is maximum data density with absolute zero "boxiness" or generic gamified styles.
+7. **Goal:** The interface should feel infinitely open, lightweight, and modern, using alignment and space rather than boxes and borders to group information.
 
 ## BOTTOM NAVIGATION STYLE: "Floating Pill Navigation"
 

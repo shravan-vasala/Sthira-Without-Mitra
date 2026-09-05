@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
@@ -17,6 +18,7 @@ import 'widgets/photo_calorie_scanner_sheet.dart';
 import 'widgets/add_meal_slot_dialog.dart';
 import 'widgets/ai_meal_suggestion_card.dart';
 import '../meals/widgets/plate_calculator_sheet.dart';
+import '../../theme/app_theme.dart';
 
 class MealDetailScreen extends ConsumerWidget {
   const MealDetailScreen({super.key});
@@ -121,7 +123,10 @@ class MealDetailScreen extends ConsumerWidget {
               slotEmoji: s.emoji,
               slotLog: dailyLog.customSlots[s.id],
               plannedMeal: MealPlanComplete.plannedForSlot(mealPlan, s.id),
-            );
+            )
+            .animate(delay: ((index - 1) * 80).ms)
+            .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+            .slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOut);
           } else if (index == slotsToDisplay.length + 1) {
             final unloggedSlots = slotsToDisplay.where((s) {
               final slotLog = dailyLog.customSlots[s.id];
@@ -241,106 +246,129 @@ class _CalorieHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = isOverTarget
-        ? context.colors.orange
-        : context.colors.primary;
+    final accent = isOverTarget ? context.colors.orange : context.colors.primary;
 
-    return SurfaceCard(
-      elevation: SurfaceCardElevation.nested,
-      child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 112,
-            height: 112,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 112,
-                  height: 112,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 10,
-                    strokeCap: StrokeCap.round,
-                    backgroundColor: accent.withValues(alpha: 0.12),
-                    valueColor: AlwaysStoppedAnimation(accent),
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '${eaten.toInt()}',
+                style: TextStyle(
+                  fontFamily: 'CabinetGrotesk',
+                  fontSize: 56,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1.5,
+                  height: 1.0,
+                  color: context.colors.textDark,
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$eaten',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                        height: 1.1,
-                      ),
-                    ),
-                    Text(
-                      'kcal',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.textMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              ),
+              const SizedBox(width: 8),
+              if (isOverTarget)
                 Text(
-                  'of $target kcal',
+                  '+${(eaten - target).toInt()} over target',
                   style: TextStyle(
                     fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.orange,
+                  ),
+                )
+              else
+                Text(
+                  '/ ${target.toInt()} kcal',
+                  style: TextStyle(
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: context.colors.textMedium,
                   ),
                 ),
-                if (isOverTarget) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    '+${eaten - target} over',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.orange,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 14),
-                _MacroBar(
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: context.colors.border,
+              color: accent,
+              minHeight: 2,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _MinimalMacroStat(
                   label: 'Protein',
                   current: protein,
                   target: proteinTarget,
-                  color: context.colors.green,
                 ),
-                const SizedBox(height: 10),
-                _MacroBar(
+              ),
+              Container(width: 1, height: 24, color: context.colors.border),
+              Expanded(
+                child: _MinimalMacroStat(
                   label: 'Carbs',
                   current: carbs,
                   target: carbsTarget,
-                  color: context.colors.orange,
                 ),
-                const SizedBox(height: 10),
-                _MacroBar(
+              ),
+              Container(width: 1, height: 24, color: context.colors.border),
+              Expanded(
+                child: _MinimalMacroStat(
                   label: 'Fat',
                   current: fat,
                   target: fatTarget,
-                  color: context.colors.indigo,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MinimalMacroStat extends StatelessWidget {
+  const _MinimalMacroStat({
+    required this.label,
+    required this.current,
+    required this.target,
+  });
+
+  final String label;
+  final double current;
+  final double target;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: context.colors.textMedium,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${current.toInt()} / ${target.toInt()}g',
+          style: AppTheme.numeric(
+            TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: context.colors.textDark,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -435,9 +463,13 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       margin: const EdgeInsets.only(bottom: 16),
       elevation: SurfaceCardElevation.nested,
       padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: AnimatedSize(
+        duration: 300.ms,
+        curve: Curves.easeOutCubic,
+        alignment: Alignment.topCenter,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
@@ -735,6 +767,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
           if (planned != null && planned.suggestions.isNotEmpty)
             _buildSuggestions(context, planned),
         ],
+      ),
       ),
     );
   }

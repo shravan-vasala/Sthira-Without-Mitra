@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_search_cache.dart';
 import '../interfaces/i_ai_food_service.dart';
 import 'nutrition_lookup_service.dart';
+import '../utils/time_utils.dart';
 
 import 'ai_client.dart';
 
@@ -400,7 +401,7 @@ Return ONLY a JSON object containing an array called "items":
 
     final bucketedCalories = (remainingCalories ~/ 100) * 100;
     final bucketedProtein = (remainingProtein ~/ 10) * 10;
-    final dateStr = DateTime.now().toIso8601String().substring(0, 10);
+    final dateStr = todayKey();
     final mName = mealName?.replaceAll(' ', '_') ?? 'final';
     final cacheKey =
         'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_$bucketedProtein';

@@ -16,9 +16,11 @@ import '../../theme/layout_insets.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 import 'widgets/trophy_room_card.dart';
+import 'widgets/journey_stats_strip.dart';
 import '../../providers/app_providers.dart';
 import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
+import '../../services/diagnostic_logger.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -29,6 +31,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _appVersion = '';
+  int _devTapCount = 0;
 
   @override
   void initState() {
@@ -61,7 +64,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 24, top: 12),
                 child: Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: Text(
                     'My Profile',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -84,38 +87,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Column(
                   children: [
                     // Avatar
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: context.colors.primary.withValues(alpha: 0.1),
-                        border: Border.all(
-                          color: context.colors.primary.withValues(alpha: 0.2),
-                          width: 2,
+                    GestureDetector(
+                      onTap: () {
+                        showAppBottomSheet(
+                          context: context,
+                          builder: (_) => const AvatarPickerSheet(),
+                        );
+                      },
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: context.colors.primary.withValues(alpha: 0.1),
+                          border: Border.all(
+                            color: context.colors.primary.withValues(alpha: 0.2),
+                            width: 2,
+                          ),
                         ),
-                      ),
-                      child: ClipOval(
-                        child: profile.photoPath != null
-                            ? (profile.photoPath!.startsWith('assets/')
-                                  ? Image.asset(
-                                      profile.photoPath!,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : (File(profile.photoPath!).existsSync()
-                                        ? Image.file(
-                                            File(profile.photoPath!),
-                                            width: 80,
-                                            height: 80,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : _buildDefaultAvatar(
-                                            context,
-                                            profile.name,
-                                          )))
-                            : _buildDefaultAvatar(context, profile.name),
+                        child: ClipOval(
+                          child: profile.photoPath != null
+                              ? (profile.photoPath!.startsWith('assets/')
+                                    ? Image.asset(
+                                        profile.photoPath!,
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : (File(profile.photoPath!).existsSync()
+                                          ? Image.file(
+                                              File(profile.photoPath!),
+                                              width: 100,
+                                              height: 100,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : _buildDefaultAvatar(
+                                              context,
+                                              profile.name,
+                                            )))
+                              : _buildDefaultAvatar(context, profile.name),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -148,6 +159,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+              
+              // Journey Stats Strip
+              const JourneyStatsStrip(),
+              
               const SizedBox(height: 24),
 
               // Cloud Sync
@@ -288,24 +304,59 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () => _showExportDataSheet(context, ref),
               ),
               const SizedBox(height: 16),
-              Text(
-                'Made with ❤️ for Bodamma',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.primary,
+              GestureDetector(
+                onTap: () {
+                  _devTapCount++;
+                  if (_devTapCount >= 7) {
+                    _devTapCount = 0;
+                    showAppBottomSheet(
+                      context: context,
+                      builder: (ctx) => const _SystemDiagnosticsSheet(),
+                    );
+                  }
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Made with ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.colors.primary,
+                          ),
+                        ),
+                        Icon(
+                          Icons.eco_rounded,
+                          size: 14,
+                          color: context.colors.primary,
+                        ),
+                        Text(
+                          ' for Bodamma',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.colors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_appVersion.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        _appVersion,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: context.colors.textLight.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              if (_appVersion.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  _appVersion,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: context.colors.textLight.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
               const SizedBox(height: 8),
             ],
           ),
@@ -525,7 +576,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       if (zipPath != null) {
         // ignore: deprecated_member_use
-        await Share.shareXFiles([XFile(zipPath)], text: 'TruFit Data Export');
+        await Share.shareXFiles([XFile(zipPath)], text: 'Sthira Data Export');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1194,10 +1245,6 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 ),
                 onTap: () async {
                   Navigator.pop(ctx);
-                  if (_localPhotoPath != null) {
-                    final f = File(_localPhotoPath!);
-                    if (await f.exists()) await f.delete();
-                  }
                   setState(() {
                     _localPhotoPath = null;
                     _clearPhoto = true;
@@ -1394,6 +1441,13 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   photoPath: _localPhotoPath,
                   clearPhoto: _clearPhoto,
                 );
+                if (_clearPhoto &&
+                    profile.photoPath != null &&
+                    !profile.photoPath!.startsWith('assets/')) {
+                  final f = File(profile.photoPath!);
+                  if (f.existsSync()) f.deleteSync();
+                }
+
                 ref.read(profileProvider.notifier).updateProfile(updated);
                 Navigator.of(context).pop();
               },
@@ -1645,6 +1699,136 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
                 ),
               )
               .toList(),
+        ],
+      ),
+    );
+  }
+}
+
+class _SystemDiagnosticsSheet extends ConsumerWidget {
+  const _SystemDiagnosticsSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final logger = ref.watch(diagnosticLoggerProvider);
+    final logs = logger.getLogs();
+
+    return AppSheet(
+      title: 'System Diagnostics',
+      scrollable: true,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${logs.length} logs in ring buffer',
+                  style: TextStyle(color: context.colors.textMedium),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    logger.clear();
+                    // ignore: use_build_context_synchronously
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.delete_sweep_rounded),
+                  label: const Text('Clear'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (logs.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Center(child: Text('No diagnostic logs.')),
+            )
+          else
+            ...logs.map((log) => _buildLogRow(context, log)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogRow(BuildContext context, DiagnosticLog log) {
+    Color lvlColor;
+    switch (log.level) {
+      case 'ERROR':
+        lvlColor = context.colors.red;
+        break;
+      case 'WARN':
+        lvlColor = context.colors.orange;
+        break;
+      default:
+        lvlColor = context.colors.green;
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.colors.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: lvlColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  log.level,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: lvlColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  log.timestamp.toString().substring(0, 19),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.colors.textLight,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            log.message,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: context.colors.textDark,
+            ),
+          ),
+          if (log.error != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              log.error!,
+              style: TextStyle(
+                fontSize: 12,
+                color: context.colors.red,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -457,9 +457,6 @@ class ExerciseCard extends ConsumerWidget {
       }
     }
 
-    // ignore: unused_local_variable
-    final timerActive = ref.read(restTimerProvider).isActive;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),

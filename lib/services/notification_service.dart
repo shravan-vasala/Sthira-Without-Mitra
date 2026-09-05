@@ -91,7 +91,7 @@ class NotificationService {
     await _scheduleWeekly(
       id: 30,
       title: 'Weekly Backup',
-      body: 'Time for your weekly TruFit backup!',
+      body: 'Time for your weekly Sthira backup!',
       dayOfWeek: dayOfWeek,
       time: time,
     );

@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import '../models/app_config.dart';
 import '../models/user_profile.dart';
+import '../models/ai_cache_entry.dart';
 
 class SchemaMigrationService {
   static const int currentSchemaVersion = 4; // Bumping for Isar
@@ -44,6 +45,20 @@ class SchemaMigrationService {
       await isar.appConfigs.put(
         AppConfig(key: _versionKey, value: currentSchemaVersion.toString()),
       );
+    });
+
+    // --- Cache Pruning ---
+    // Drop AiCacheEntry elements older than 90 days
+    final cutoff = DateTime.now().subtract(const Duration(days: 90));
+    await isar.writeTxn(() async {
+      final oldEntries = isar.aiCacheEntrys
+          .where()
+          .filter()
+          .timestampLessThan(cutoff)
+          .findAllSync();
+      if (oldEntries.isNotEmpty) {
+        await isar.aiCacheEntrys.deleteAll(oldEntries.map((e) => e.id).toList());
+      }
     });
   }
 

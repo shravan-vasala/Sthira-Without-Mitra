@@ -237,7 +237,10 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
             button: true,
             child: PrimaryButton(label: 'Save Log', onPressed: _save),
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
+          SizedBox(
+            height: MediaQuery.viewInsetsOf(context).bottom +
+                MediaQuery.paddingOf(context).bottom,
+          ),
         ],
       ),
     );
@@ -285,8 +288,6 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
       }
     }
 
-    // ignore: unused_local_variable
-    final timerActive = ref.read(restTimerProvider).isActive;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

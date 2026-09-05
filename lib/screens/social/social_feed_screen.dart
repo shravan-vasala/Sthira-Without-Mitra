@@ -8,6 +8,8 @@ import '../../theme/app_colors.dart';
 import '../../widgets/surface_card.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
+
+import '../../utils/time_utils.dart';
 import 'widgets/friend_status_card.dart';
 import 'package:flutter/services.dart';
 
@@ -443,7 +445,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   SocialProfile _computeMyProfile(WidgetRef ref, String myUid) {
     final profile = ref.watch(profileProvider);
     final dailyLogRepo = ref.read(dailyLogRepoProvider);
-    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+    final todayStr = todayKey();
     final todayLog = dailyLogRepo.getOrCreate(todayStr);
 
     final now = DateTime.now();
@@ -454,7 +456,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     int weeklyWorkouts = 0;
     for (int i = 0; i <= diff; i++) {
       final d = monday.add(Duration(days: i));
-      final dStr = d.toIso8601String().substring(0, 10);
+      final dStr = todayKey(d);
       final log = dailyLogRepo.getLog(dStr);
       if (log != null) {
         weeklySteps += log.steps ?? 0;

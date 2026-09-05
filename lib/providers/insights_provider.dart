@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import '../models/insight.dart';
 import 'app_providers.dart';
+import '../utils/time_utils.dart';
 
 final insightsProvider = Provider<List<Insight>>((ref) {
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
@@ -49,10 +50,7 @@ final insightsProvider = Provider<List<Insight>>((ref) {
   }
 
   // 2. Sleep vs Steps Correlation (Real 30-day computation)
-  final thirtyDaysAgoStr = DateTime.now()
-      .subtract(const Duration(days: 30))
-      .toIso8601String()
-      .substring(0, 10);
+  final thirtyDaysAgoStr = todayKey(DateTime.now().subtract(const Duration(days: 30)));
   final recentLogs = logs
       .where((l) => l.date.compareTo(thirtyDaysAgoStr) >= 0)
       .toList();

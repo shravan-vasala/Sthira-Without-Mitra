@@ -17,6 +17,33 @@ class PhotoMealRepository {
     } else {
       _baseDir = 'trufit_meal_photos';
     }
+    
+    // ignore: unawaited_futures
+    _cleanupOldPhotos(30);
+  }
+
+  Future<void> _cleanupOldPhotos(int daysOld) async {
+    final cutoff = DateTime.now().subtract(Duration(days: daysOld)).toIso8601String();
+    final oldLogs = _isar.scannedMealLogs
+        .filter()
+        .timestampLessThan(cutoff)
+        .findAllSync();
+
+    for (final log in oldLogs) {
+      if (!kIsWeb) {
+        final file = File(log.photoPath);
+        if (await file.exists()) {
+          try {
+            await file.delete();
+          } catch (e) {
+            debugPrint('Failed to delete old meal photo: $e');
+          }
+        }
+      }
+      await _isar.writeTxn(() async {
+        await _isar.scannedMealLogs.delete(log.idInternal);
+      });
+    }
   }
 
   Future<ScannedMealLog> saveScannedMeal({
