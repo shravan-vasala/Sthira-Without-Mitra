@@ -13,7 +13,7 @@ import '../../../models/daily_meal_log.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../widgets/app_bottom_sheet.dart';
-import '../../../widgets/async_error_card.dart';
+import '../../../widgets/surface_card.dart';
 import '../../../widgets/offline_banner.dart';
 import '../../../widgets/primary_button.dart';
 
