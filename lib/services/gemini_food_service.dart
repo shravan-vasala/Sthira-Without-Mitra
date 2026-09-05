@@ -12,6 +12,9 @@ import 'ai_client.dart';
 
 class GeminiFoodService implements IAiFoodService {
   final String? apiKey;
+  final AiClient aiClient;
+  final NutritionLookupService nutritionLookup;
+
   GeminiFoodService({
     this.apiKey,
     required this.aiClient,
