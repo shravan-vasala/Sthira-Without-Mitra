@@ -20,8 +20,18 @@ class WeeklySummary {
   final int daysOverCalories;
   final int daysUnderCalories;
   final double weightDelta; // end - start
-  final List<double> dailyHabitRates; // 7 items (Mon-Sun)
   final int weekScore; // 0 to 100
+  final List<double> dailyHabitRates;
+  final List<int?> dailyScores;
+  
+  // Previous week stats for trend deltas
+  final int? previousWeekScore;
+  final int? prevAvgSteps;
+  final double? prevAvgSleep;
+  final int? prevAvgCalories;
+  final int? prevWorkoutsCompleted;
+  final double? prevHabitCompletionRate;
+  final double? prevWeightDelta;
 
   WeeklySummary({
     required this.workoutsCompleted,
@@ -38,7 +48,15 @@ class WeeklySummary {
     required this.daysUnderCalories,
     required this.weightDelta,
     required this.dailyHabitRates,
+    required this.dailyScores,
     required this.weekScore,
+    this.previousWeekScore,
+    this.prevAvgSteps,
+    this.prevAvgSleep,
+    this.prevAvgCalories,
+    this.prevWorkoutsCompleted,
+    this.prevHabitCompletionRate,
+    this.prevWeightDelta,
   });
 
   String generateShareText() {
@@ -78,8 +96,17 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
   final startStr = DateFormat('yyyy-MM-dd').format(startOfWeek);
   final endStr = DateFormat('yyyy-MM-dd').format(endOfWeek);
   
+  final prevStartOfWeek = startOfWeek.subtract(const Duration(days: 7));
+  final prevEndOfWeek = prevStartOfWeek.add(const Duration(days: 6));
+  final prevStartStr = DateFormat('yyyy-MM-dd').format(prevStartOfWeek);
+  final prevEndStr = DateFormat('yyyy-MM-dd').format(prevEndOfWeek);
+  
   final dailyLogs = ref.watch(dailyLogsRangeProvider((startStr, endStr)));
   final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
+  
+  final prevDailyLogs = ref.watch(dailyLogsRangeProvider((prevStartStr, prevEndStr)));
+  final prevMealLogs = ref.watch(dailyMealLogsRangeProvider((prevStartStr, prevEndStr)));
+  
   final profile = ref.watch(profileProvider);
   
   final habitRepo = ref.watch(habitRepoProvider);
@@ -97,6 +124,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
   int totalHabitInstances = 0;
   int completedHabitInstances = 0;
   final List<double> dailyRates = List.filled(7, 0.0);
+  final List<int?> dailyScores = List.filled(7, null);
   final Map<String, int> habitStreaksThisWeek = {};
   
   // Calculate Steps & Sleep
@@ -137,6 +165,27 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
     totalHabitInstances += stats.habitsTotal;
     completedHabitInstances += stats.habitsDone;
     dailyRates[i] = stats.habitRate;
+    
+    final today = DateTime.now();
+    final isFuture = d.isAfter(DateTime(today.year, today.month, today.day));
+    
+    if (!isFuture) {
+      final score = DailyScore.calculate(
+        date: d,
+        dateStr: dateStr,
+        habits: habits,
+        habitCompletions: completions,
+        dailyLog: log,
+        workoutPlan: workoutPlan,
+        logRepo: exerciseLogRepo,
+        mealPlan: mealPlan,
+        mealLog: mealLog,
+        targetWeight: profile.targetWeight ?? 0.0,
+        targetCalories: profile.targetCalories,
+        dailyLogRepo: dailyLogRepo,
+      ).totalScore;
+      dailyScores[i] = score;
+    }
 
     for (final h in habits) {
       if (isHabitCompleted(h, completions, log)) {
@@ -206,15 +255,88 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
       ? (lastWeight - firstWeight) 
       : 0.0;
       
-  // Calculate Week Score (0-100)
-  final double workoutScore = wTotal > 0 ? (wCompleted / wTotal) : 1.0;
-  final double habitScore = habitCompletionRate;
+  // Calculate Week Score (0-100) by averaging elapsed days
+  int sumScores = 0;
+  int elapsedDays = 0;
+  for (final s in dailyScores) {
+    if (s != null) {
+      sumScores += s;
+      elapsedDays++;
+    }
+  }
+  final int weekScore = elapsedDays > 0 ? (sumScores / elapsedDays).round() : 0;
   
-  int weekScore = ((workoutScore * 0.5 + habitScore * 0.5) * 100).toInt();
-  if (wTotal == 0) {
-    weekScore = (habitScore * 100).toInt();
-  } else if (habits.isEmpty) {
-    weekScore = (workoutScore * 100).toInt();
+  // Calculate Previous Week Stats
+  int? prevWeekScore;
+  int prevSumScores = 0;
+  int prevElapsedDays = 0;
+  
+  int prevWCompleted = 0;
+  int prevHabitsTotal = 0;
+  int prevHabitsDone = 0;
+  int prevSumSteps = 0;
+  int prevDaysWithSteps = 0;
+  double prevSumSleep = 0;
+  int prevDaysWithSleep = 0;
+  int prevSumCalories = 0;
+  int prevDaysWithCalories = 0;
+  double prevFirstWeight = 0;
+  double prevLastWeight = 0;
+
+  for (int i = 0; i < 7; i++) {
+    final pd = prevStartOfWeek.add(Duration(days: i));
+    final pDateStr = DateFormat('yyyy-MM-dd').format(pd);
+    final isFuture = pd.isAfter(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+    if (!isFuture) {
+      final pLog = prevDailyLogs.firstWhere((dl) => dl.date == pDateStr, orElse: () => DailyLog(date: pDateStr));
+      final pMealLog = prevMealLogs.firstWhere((ml) => ml.date == pDateStr, orElse: () => DailyMealLog(date: pDateStr));
+      final pCompletions = habitRepo.getCompletions(pDateStr);
+      
+      final pStats = DailyStatsSnapshot.compute(
+        date: pd,
+        dateStr: pDateStr,
+        habits: habits,
+        habitCompletions: pCompletions,
+        dailyLog: pLog,
+        workoutPlan: workoutPlan,
+        hasLog: exerciseLogRepo.hasLog,
+        mealPlan: mealPlan,
+        mealLog: pMealLog,
+        targetWeight: profile.targetWeight ?? 0.0,
+        dailyLogRepo: dailyLogRepo,
+      );
+      
+      prevWCompleted += pStats.workoutsDone;
+      prevHabitsTotal += pStats.habitsTotal;
+      prevHabitsDone += pStats.habitsDone;
+      if (pStats.steps > 0) { prevSumSteps += pStats.steps; prevDaysWithSteps++; }
+      if (pStats.sleepHours > 0) { prevSumSleep += pStats.sleepHours; prevDaysWithSleep++; }
+      if (pMealLog.totalCalories > 0) { prevSumCalories += pMealLog.totalCalories; prevDaysWithCalories++; }
+      if (pLog.weight != null && pLog.weight! > 0) {
+        if (prevFirstWeight == 0) prevFirstWeight = pLog.weight!;
+        prevLastWeight = pLog.weight!;
+      }
+
+      final score = DailyScore.calculate(
+        date: pd,
+        dateStr: pDateStr,
+        habits: habits,
+        habitCompletions: pCompletions,
+        dailyLog: pLog,
+        workoutPlan: workoutPlan,
+        logRepo: exerciseLogRepo,
+        mealPlan: mealPlan,
+        mealLog: pMealLog,
+        targetWeight: profile.targetWeight ?? 0.0,
+        targetCalories: profile.targetCalories,
+        dailyLogRepo: dailyLogRepo,
+      ).totalScore;
+      prevSumScores += score;
+      prevElapsedDays++;
+    }
+  }
+  if (prevElapsedDays > 0) {
+    prevWeekScore = (prevSumScores / prevElapsedDays).round();
   }
 
   return WeeklySummary(
@@ -232,7 +354,15 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
     daysUnderCalories: daysUnder,
     weightDelta: weightDelta,
     dailyHabitRates: dailyRates,
+    dailyScores: dailyScores,
     weekScore: weekScore,
+    previousWeekScore: prevWeekScore,
+    prevAvgSteps: prevDaysWithSteps > 0 ? (prevSumSteps / prevDaysWithSteps).round() : null,
+    prevAvgSleep: prevDaysWithSleep > 0 ? prevSumSleep / prevDaysWithSleep : null,
+    prevAvgCalories: prevDaysWithCalories > 0 ? (prevSumCalories / prevDaysWithCalories).round() : null,
+    prevWorkoutsCompleted: prevWCompleted,
+    prevHabitCompletionRate: prevHabitsTotal > 0 ? prevHabitsDone / prevHabitsTotal : null,
+    prevWeightDelta: (prevFirstWeight > 0 && prevLastWeight > 0) ? (prevLastWeight - prevFirstWeight) : null,
   );
 });
 

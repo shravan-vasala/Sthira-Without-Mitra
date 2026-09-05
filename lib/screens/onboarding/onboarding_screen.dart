@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../utils/habit_icons.dart';
 import '../../utils/target_calculator.dart';
+import '../../models/habit.dart';
 import 'widgets/sthira_aura_background.dart';
 
 String kOnboardingCompletedKey = 'onboarding_completed';

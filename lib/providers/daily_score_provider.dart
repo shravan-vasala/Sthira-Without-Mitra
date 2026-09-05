@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'app_providers.dart';
 import '../models/habit.dart';
 import '../models/daily_log.dart';
@@ -27,7 +28,12 @@ class DailyScore {
     required this.workoutsMax,
     required this.mealsScore,
     required this.mealsMax,
+    this.yesterdayScore,
+    this.sevenDayAverage,
   });
+
+  final int? yesterdayScore;
+  final int? sevenDayAverage;
 
   static bool _bucketFull(double score, double max) =>
       max <= 0 || score >= max - 0.01;
@@ -66,6 +72,7 @@ class DailyScore {
     required MealPlan? mealPlan,
     required DailyMealLog mealLog,
     required double targetWeight,
+    required int targetCalories,
     required DailyLogRepository dailyLogRepo,
   }) {
     final today = DateTime.now();
@@ -114,11 +121,28 @@ class DailyScore {
       workoutsScore = (stats.workoutsDone / stats.workoutsTotal) * workoutsMax;
     }
 
-    // 3. Meals (Max 20)
+    // 3. Meals (Max 20 = 14 completion + 6 accuracy)
     double mealsScore = 0;
     final double mealsMax = 20;
     if (stats.mealsTotal > 0) {
-      mealsScore = (stats.mealsLogged / stats.mealsTotal) * mealsMax;
+      double completionScore = (stats.mealsLogged / stats.mealsTotal) * 14.0;
+      double accuracyScore = 0;
+      
+      // Accuracy bonus only applies if they logged something
+      if (stats.mealsLogged > 0 && targetCalories > 0) {
+        final double consumed = mealLog.totalCalories.toDouble();
+        final double variance = (consumed - targetCalories).abs() / targetCalories;
+        
+        if (variance <= 0.10) {
+          accuracyScore = 6.0; // Perfect within 10%
+        } else if (variance < 0.35) {
+          // Linearly scale down from 6 to 0 between 10% and 35%
+          final double ratio = (0.35 - variance) / (0.35 - 0.10);
+          accuracyScore = 6.0 * ratio;
+        }
+      }
+      
+      mealsScore = completionScore + accuracyScore;
     }
 
     final totalEarned = habitsScore + workoutsScore + mealsScore;
@@ -140,6 +164,21 @@ class DailyScore {
       mealsMax: mealsMax,
     );
   }
+
+  DailyScore copyWithContext({int? yesterdayScore, int? sevenDayAverage}) {
+    return DailyScore(
+      totalScore: totalScore,
+      isFutureDate: isFutureDate,
+      habitsScore: habitsScore,
+      habitsMax: habitsMax,
+      workoutsScore: workoutsScore,
+      workoutsMax: workoutsMax,
+      mealsScore: mealsScore,
+      mealsMax: mealsMax,
+      yesterdayScore: yesterdayScore,
+      sevenDayAverage: sevenDayAverage,
+    );
+  }
 }
 
 final dailyScoreProvider = Provider<DailyScore>((ref) {
@@ -158,9 +197,67 @@ final dailyScoreProvider = Provider<DailyScore>((ref) {
   final mealLog = ref.watch(dailyMealLogProvider);
 
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
-  final targetWeight = ref.watch(profileProvider.select((p) => p.targetWeight)) ?? 0.0;
+  final profile = ref.watch(profileProvider);
+  final targetWeight = profile.targetWeight ?? 0.0;
+  final targetCalories = profile.targetCalories;
+  
+  // To compute yesterday/7-day avg, we need past logs.
+  final sevenDaysAgoStr = DateFormat('yyyy-MM-dd').format(date.subtract(const Duration(days: 7)));
+  final allDailyLogs = ref.watch(dailyLogsRangeProvider((sevenDaysAgoStr, dateStr)));
+  final allMealLogs = ref.watch(dailyMealLogsRangeProvider((sevenDaysAgoStr, dateStr)));
+  
+  int? yesterdayScore;
+  int? sevenDayAverage;
+  
+  if (!date.isAfter(DateTime.now())) {
+    final yesterdayStr = DateFormat('yyyy-MM-dd').format(date.subtract(const Duration(days: 1)));
+    
+    // Helper to calculate score for a specific date in the past
+    int? calcScoreForDate(DateTime d) {
+      final dStr = DateFormat('yyyy-MM-dd').format(d);
+      // Skip if completely inactive (no daily log, no meal log, no habit completions)
+      final hasDailyLog = allDailyLogs.any((l) => l.date == dStr);
+      final hasMealLog = allMealLogs.any((l) => l.date == dStr);
+      final completions = ref.read(habitRepoProvider).getCompletions(dStr);
+      if (!hasDailyLog && !hasMealLog && completions.completions.isEmpty) return null;
+      
+      final log = allDailyLogs.firstWhere((l) => l.date == dStr, orElse: () => DailyLog(date: dStr));
+      final mLog = allMealLogs.firstWhere((l) => l.date == dStr, orElse: () => DailyMealLog(date: dStr));
+      
+      return DailyScore.calculate(
+        date: d,
+        dateStr: dStr,
+        habits: habits,
+        habitCompletions: completions,
+        dailyLog: log,
+        workoutPlan: workoutPlan,
+        logRepo: logRepo,
+        mealPlan: mealPlan,
+        mealLog: mLog,
+        targetWeight: targetWeight,
+        targetCalories: targetCalories,
+        dailyLogRepo: dailyLogRepo,
+      ).totalScore;
+    }
 
-  return DailyScore.calculate(
+    yesterdayScore = calcScoreForDate(date.subtract(const Duration(days: 1)));
+    
+    int sum = 0;
+    int count = 0;
+    for (int i = 1; i <= 7; i++) {
+      final pastDate = date.subtract(Duration(days: i));
+      final s = calcScoreForDate(pastDate);
+      if (s != null) {
+        sum += s;
+        count++;
+      }
+    }
+    if (count > 0) {
+      sevenDayAverage = (sum / count).round();
+    }
+  }
+
+  final todayScore = DailyScore.calculate(
     date: date,
     dateStr: dateStr,
     habits: habits,
@@ -171,6 +268,12 @@ final dailyScoreProvider = Provider<DailyScore>((ref) {
     mealPlan: mealPlan,
     mealLog: mealLog,
     targetWeight: targetWeight,
+    targetCalories: targetCalories,
     dailyLogRepo: dailyLogRepo,
+  );
+  
+  return todayScore.copyWithContext(
+    yesterdayScore: yesterdayScore,
+    sevenDayAverage: sevenDayAverage,
   );
 });

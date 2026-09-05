@@ -49,6 +49,7 @@ final yearlyActivityHeatmapProvider = FutureProvider.family<Map<DateTime, int>, 
       mealPlan: mealPlan,
       mealLog: mealLog,
       targetWeight: profile.targetWeight ?? 0.0,
+      targetCalories: profile.targetCalories,
       dailyLogRepo: dailyLogRepo,
     );
     
