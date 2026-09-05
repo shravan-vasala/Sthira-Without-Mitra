@@ -652,12 +652,14 @@ class _PhotoCalorieScannerSheetState
               child: OfflineBanner(),
             ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: context.colors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: context.colors.card,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: context.colors.border),
                 ),
                 child: Icon(
                   widget.appendToLog != null
@@ -669,7 +671,7 @@ class _PhotoCalorieScannerSheetState
                   size: 24,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,11 +679,15 @@ class _PhotoCalorieScannerSheetState
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontFamily: 'CabinetGrotesk',
+                        fontSize: 28,
                         fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
                         color: context.colors.textDark,
+                        height: 1.1,
                       ),
                     ),
+                    const SizedBox(height: 6),
                     Text(
                       widget.appendToLog != null
                           ? 'Add another serving to this meal'
@@ -689,7 +695,8 @@ class _PhotoCalorieScannerSheetState
                           ? 'Describe home cooking — AI estimates macros'
                           : 'Photo of your plate works best for home meals',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                         color: context.colors.textMedium,
                       ),
                     ),
@@ -698,85 +705,140 @@ class _PhotoCalorieScannerSheetState
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           if (showChooser && !_describeMode) ...[
-            Container(
-              width: double.infinity,
+            SurfaceCard(
               padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-              decoration: BoxDecoration(
-                color: context.colors.lavenderCard,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: context.colors.primary.withValues(alpha: 0.2),
-                ),
-              ),
               child: Column(
                 children: [
                   Icon(
                     Icons.camera_alt_rounded,
-                    size: 48,
-                    color: context.colors.primary,
+                    size: 40,
+                    color: context.colors.textDark,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
                     'Snap what you ate',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: context.colors.textDark,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     'Best for home-cooked plates',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                       color: context.colors.textMedium,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () => _pickImage(ImageSource.camera),
-                        icon: const Icon(Icons.camera_rounded, size: 18),
-                        label: const Text('Camera'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.colors.primary,
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickImage(ImageSource.camera),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: context.colors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.camera_rounded, size: 18, color: context.colors.primary),
+                                const SizedBox(width: 8),
+                                Text('Camera', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.colors.primary)),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      OutlinedButton.icon(
-                        onPressed: () => _pickImage(ImageSource.gallery),
-                        icon: const Icon(Icons.photo_library_rounded, size: 18),
-                        label: const Text('Gallery'),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _pickImage(ImageSource.gallery),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: context.colors.scaffoldBg,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: context.colors.border),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.photo_library_rounded, size: 18, color: context.colors.textDark),
+                                const SizedBox(width: 8),
+                                Text('Gallery', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.colors.textDark)),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _switchToDescribe,
-                icon: const Icon(Icons.notes_rounded, size: 18),
-                label: const Text('Or describe in text'),
+            const SizedBox(height: 16),
+            
+            // Minimalist Tile for secondary action
+            InkWell(
+              onTap: _switchToDescribe,
+              borderRadius: BorderRadius.circular(20),
+              child: SurfaceCard(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Icon(Icons.notes_rounded, color: context.colors.textDark, size: 20),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Or describe in text',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.textDark,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios_rounded, color: context.colors.textMedium, size: 16),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Center(
-              child: TextButton(
-                onPressed: _enterManualItems,
-                child: Text(
-                  'Enter macros yourself',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.colors.textMedium,
-                  ),
+            const SizedBox(height: 16),
+            
+            // Minimalist Tile for manual macros
+            InkWell(
+              onTap: _enterManualItems,
+              borderRadius: BorderRadius.circular(20),
+              child: SurfaceCard(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_note_rounded, color: context.colors.textDark, size: 20),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Enter macros yourself',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.textDark,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios_rounded, color: context.colors.textMedium, size: 16),
+                  ],
                 ),
               ),
             ),
