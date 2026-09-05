@@ -553,12 +553,16 @@ class SharedChartCard extends StatelessWidget {
       for (final segment in segments)
         LineChartBarData(
           spots: segment,
-          isCurved: useCurve && segment.length > 2,
+          isCurved: timeFormat == ChartTimeFormat.sixMonths 
+              ? false 
+              : (useCurve && segment.length > 2),
           curveSmoothness: spots.length > 31 ? 0.40 : 0.25,
           preventCurveOverShooting: spots.length <= 31, 
           color: hasTrend ? primary.withValues(alpha: 0.2) : primary,
-          barWidth: hasTrend ? 0.0 : (spots.length > 31 ? 1.5 : 2.5), 
-          isStrokeCapRound: true,
+          barWidth: hasTrend 
+              ? 0.0 
+              : (timeFormat == ChartTimeFormat.sixMonths ? 1.5 : (spots.length > 31 ? 1.5 : 2.5)), 
+          isStrokeCapRound: timeFormat != ChartTimeFormat.sixMonths,
           dotData: FlDotData(
             show: true,
             checkToShowDot: (spot, barData) {
