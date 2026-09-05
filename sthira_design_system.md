@@ -1,6 +1,6 @@
-# Sthira Design System Reference
+# Sasirekha Design System Reference
 
-Here is your beautifully structured **Sthira Design System** cheat sheet, updated to perfectly reflect the dark, grounded, and premium "Steady Aura" aesthetic that we love and are sticking with!
+Here is your beautifully structured **Sasirekha Design System** cheat sheet, reflecting our dark, grounded, borderless, and premium "Steady Aura" aesthetic!
 
 <br>
 
@@ -8,8 +8,8 @@ Here is your beautifully structured **Sthira Design System** cheat sheet, update
   
   <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
     <div>
-      <h2 style="margin: 0; font-family: 'Cabinet Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #E29B65; letter-spacing: -1px;">Sthira</h2>
-      <div style="color: #7FA35C; font-weight: 500; font-size: 16px; margin-top: 4px;">steady, every day</div>
+      <h2 style="margin: 0; font-family: 'Cabinet Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #E29B65; letter-spacing: -1px;">Sasirekha</h2>
+      <div style="color: #7FA35C; font-weight: 500; font-size: 16px; margin-top: 4px;">steady, borderless, every day</div>
     </div>
     <div style="text-align: right;">
       <div style="font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px;">Design System</div>
@@ -59,9 +59,9 @@ Here is your beautifully structured **Sthira Design System** cheat sheet, update
   </div>
 </div>
 
-## DESIGN CONTEXT: "Sasirekha Minimalist Tile Style"
+## DESIGN CONTEXT: "Sasirekha Minimalist Style"
 
-When building or refactoring lists, menus, or repeating items, strictly adhere to the "Sasirekha Minimalist Tile Style":
+When building or refactoring any screens, strictly adhere to the "Sasirekha Minimalist Style":
 1. **Completely Flat & Borderless:** Do NOT wrap list items in Card widgets or explicit container borders. Items must have a transparent background (`Colors.transparent`) to sit entirely flush against the app's `scaffoldBg`.
 2. **Negative Space over Lines:** Never use `Divider` lines or distinct card margins. Separate items purely using consistent vertical spacing/padding (e.g., `Padding(padding: EdgeInsets.only(bottom: kSpace2))`).
 3. **Leading Elements:** The far-left element should be a simple, slightly rounded icon container or image that anchors the row.
