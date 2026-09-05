@@ -294,10 +294,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     } 
     
     // Unify all metrics to the beautifully flat Triple-Circle Sesireka Layout
-    final valid = data.map((d) => d.value).toList();
-    final avg = valid.reduce((a, b) => a + b) / valid.length;
-    final maxVal = valid.reduce((a, b) => a > b ? a : b);
-    final minVal = valid.reduce((a, b) => a < b ? a : b);
+    // Displaying "The Journey": Start, Latest, and Delta (Change)
+    final start = data.first.value;
+    final latest = data.last.value;
+    final delta = latest - start;
+    final sign = delta > 0 ? '+' : '';
     
     final unit = _overviewUnit(metric, useKg);
 
@@ -306,9 +307,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildCircularStat('min $unit', minVal.toStringAsFixed(metric == MetricType.steps ? 0 : 1), Icons.south_east_rounded),
-          _buildCircularStat('average', avg.toStringAsFixed(metric == MetricType.steps ? 0 : 1), Icons.assessment_rounded),
-          _buildCircularStat('max $unit', maxVal.toStringAsFixed(metric == MetricType.steps ? 0 : 1), Icons.north_east_rounded),
+          _buildCircularStat('start $unit', start.toStringAsFixed(1), Icons.flag_rounded),
+          _buildCircularStat('latest', latest.toStringAsFixed(1), Icons.today_rounded),
+          if (data.length > 1)
+            _buildCircularStat('change', '$sign${delta.toStringAsFixed(1)}', delta > 0 ? Icons.trending_up_rounded : (delta < 0 ? Icons.trending_down_rounded : Icons.trending_flat_rounded))
+          else
+            _buildCircularStat('change', '0.0', Icons.trending_flat_rounded),
         ],
       ),
     );
