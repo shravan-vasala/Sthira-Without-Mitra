@@ -35,6 +35,8 @@ abstract class AppColorsPalette {
   LinearGradient get primaryGradientVertical;
   Color get shadow;
   Color get accentGlow;
+  Color get gold;
+  Color get goldMuted;
 }
 
 class AppColorsLight implements AppColorsPalette {
@@ -78,6 +80,8 @@ class AppColorsLight implements AppColorsPalette {
       );
   @override Color get shadow => textDark.withValues(alpha: 0.08);
   @override Color get accentGlow => const Color(0x29E29B65);
+  @override Color get gold => const Color(0xFFD4AF37);
+  @override Color get goldMuted => const Color(0xFFF9F1D8);
 }
 
 class AppColorsDark implements AppColorsPalette {
@@ -122,6 +126,8 @@ class AppColorsDark implements AppColorsPalette {
       );
   @override Color get shadow => const Color(0xFF000000).withValues(alpha: 0.3);
   @override Color get accentGlow => const Color(0x33E29B65);
+  @override Color get gold => const Color(0xFFFFD700);
+  @override Color get goldMuted => const Color(0xFF4A3D12);
 }
 
 class AppColors {

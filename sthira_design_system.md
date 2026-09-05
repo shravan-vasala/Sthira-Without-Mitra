@@ -68,3 +68,41 @@ When building or refactoring lists, menus, or repeating items, strictly adhere t
 4. **Typography Contrast:** Use strong, bold titles (`context.text.bodyBold` or `title`) paired with highly muted subtitles (`context.text.caption` colored with `context.colors.textMedium` or `textLight`).
 5. **Trailing Actions:** The far-right element should be minimal, utilizing simple `IconButton`s (like a vertical 3-dot menu or a simple thin-outline icon) without heavy button backgrounds.
 6. **Goal:** The interface should feel infinitely open, lightweight, and modern, using alignment and space rather than boxes and borders to group information.
+
+## BOTTOM NAVIGATION STYLE: "Floating Pill Navigation"
+
+Our Bottom Navigation Bar breaks away from the standard material design to provide a highly tactile, premium feel:
+1. **Floating Pill Layout:** The bar is not anchored directly to the bottom edge. It uses `SafeArea` and floats above the screen bottom (`padding: EdgeInsets.only(left: 32, right: 32, bottom: 16)`). The container height is `64` with `BorderRadius.circular(40)` and the `Dark Surface` color (`#171F1B`).
+2. **Animated Selection Pills:** Navigation items use an `AnimatedContainer` (`250ms`, `Curves.easeOutCubic`) that expands horizontally when selected (`horizontal: 24` padding when active vs `12` when inactive). The active item receives a pill background in `Sandy Peach` (`#E29B65`) with `BorderRadius.circular(32)`.
+3. **Icon State Swapping:** We use distinctly different icons for active vs inactive states to enhance feedback:
+   - **Inactive:** Use `_outlined` icons (e.g., `Icons.home_outlined`) colored in a muted grey-green (`Color(0xFF8A9A93)`).
+   - **Active:** Use `_rounded` (filled) icons (e.g., `Icons.home_rounded`) colored in dark text (`OnPrimary`).
+4. **Haptics:** Tapping a navigation item must trigger a light haptic feedback (`Haptics.tap()`).
+
+## APP ARCHITECTURE & SYSTEM DESIGN
+
+When building or modifying core features, adhere to the following system architecture:
+
+### 1. State Management (Riverpod)
+- Use **Riverpod** for all state management.
+- Prefer `NotifierProvider` and `AsyncNotifierProvider` over `StateProvider` for complex logic.
+- UI components should only use `ref.watch()` to react to state changes, not to handle heavy computation. Keep business logic in the Notifiers or Providers.
+- Provide dependencies globally in `app_providers.dart` (e.g., `dailyLogRepoProvider`).
+
+### 2. Data Layer (Repository Pattern & Isar)
+- Use **Isar** for local, offline-first data storage.
+- All database interactions must go through a **Repository** (e.g., `HabitRepository`, `DailyLogRepository`).
+- Repositories should hide Isar-specific syntax from the rest of the app.
+- For generated models, ensure all Isar collections (`@collection`) have `part 'model_name.g.dart';` and run `build_runner` after changes.
+
+### 3. Service Layer
+- External APIs, third-party integrations, and complex operations go into the **Services** layer (e.g., `HealthConnectService`, `GeminiFoodService`).
+- Services are stateless and injected via Riverpod.
+
+### 4. Code Organization
+- **`/models`**: Isar collections and pure data classes.
+- **`/repositories`**: DB wrapper classes.
+- **`/services`**: External API and sync logic.
+- **`/providers`**: Riverpod state and dependency injection.
+- **`/screens`**: Feature-based UI organization.
+- **`/theme`**: Global styles (`app_colors.dart`, `app_theme.dart`).

@@ -9,7 +9,25 @@ final badgesProvider = Provider<List<Badge>>((ref) {
 });
 
 // Provides access exactly when the engine fires an unlock
-final badgeUnlockEventProvider = StateProvider<Badge?>((ref) => null);
+class BadgeUnlockQueue extends Notifier<List<Badge>> {
+  @override
+  List<Badge> build() => [];
+
+  void enqueue(Badge badge) {
+    if (state.any((b) => b.id == badge.id)) return; // Ignore duplicates
+    state = [...state, badge];
+  }
+
+  void dequeue() {
+    if (state.isNotEmpty) {
+      state = state.sublist(1);
+    }
+  }
+}
+
+final badgeUnlockEventProvider = NotifierProvider<BadgeUnlockQueue, List<Badge>>(() {
+  return BadgeUnlockQueue();
+});
 
 final badgeEngineProvider = Provider<BadgeEngine>((ref) {
   return BadgeEngine(ref);
@@ -76,7 +94,7 @@ class BadgeEngine {
         await badgeRepo.saveBadge(unlockedBadge);
         
         // Fire event to UI
-        ref.read(badgeUnlockEventProvider.notifier).state = unlockedBadge;
+        ref.read(badgeUnlockEventProvider.notifier).enqueue(unlockedBadge);
       }
     }
   }
