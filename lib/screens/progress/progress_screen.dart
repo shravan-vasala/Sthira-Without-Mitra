@@ -293,24 +293,22 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       );
     } 
     
-    // Weight / Health Metrics (Side by Side Cards)
+    // Unify all metrics to the beautifully flat Triple-Circle Sesireka Layout
     final valid = data.map((d) => d.value).toList();
     final avg = valid.reduce((a, b) => a + b) / valid.length;
     final maxVal = valid.reduce((a, b) => a > b ? a : b);
     final minVal = valid.reduce((a, b) => a < b ? a : b);
     
-    String label1 = 'AVERAGE';
-    String val1 = '${avg.toStringAsFixed(1)}';
-    String label2 = 'MAX';
-    String val2 = '${maxVal.toStringAsFixed(1)}';
+    final unit = _overviewUnit(metric, useKg);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(child: _buildRectStat(label1, val1, _overviewUnit(metric, useKg), context.colors.primary)),
-          const SizedBox(width: 16),
-          Expanded(child: _buildRectStat(label2, val2, _overviewUnit(metric, useKg), context.colors.red)),
+          _buildCircularStat('min $unit', minVal.toStringAsFixed(metric == MetricType.steps ? 0 : 1), Icons.south_east_rounded),
+          _buildCircularStat('average', avg.toStringAsFixed(metric == MetricType.steps ? 0 : 1), Icons.assessment_rounded),
+          _buildCircularStat('max $unit', maxVal.toStringAsFixed(metric == MetricType.steps ? 0 : 1), Icons.north_east_rounded),
         ],
       ),
     );
