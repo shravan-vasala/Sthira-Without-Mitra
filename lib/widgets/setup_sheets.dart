@@ -83,7 +83,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
     return AppSheet(
       title: 'AI & Coach Settings',
       scrollable: true,
-      subtitle: 'Set your coach\'s name for daily notes. A Gemini API key is ONLY required if you are not using Cloud Sync.',
+      subtitle: 'Set your coach\'s name. Food scanning and coach features use your Gemini API key.',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

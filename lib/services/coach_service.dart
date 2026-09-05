@@ -7,13 +7,12 @@ import 'ai_client.dart';
 
 class CoachService {
   final String? apiKey;
-  final bool isSignedIn;
   final AiClient aiClient;
 
-  CoachService({this.apiKey, this.isSignedIn = false, required this.aiClient});
+  CoachService({this.apiKey, required this.aiClient});
 
   FeatureAvailability get availability {
-    if (!isSignedIn && (apiKey == null || apiKey!.isEmpty))
+    if (apiKey == null || apiKey!.isEmpty)
       return FeatureAvailability.disabled;
     return FeatureAvailability.available;
   }
@@ -36,11 +35,8 @@ class CoachService {
     final coachLabel = coachName.trim().isEmpty ? 'Coach' : coachName.trim();
 
     final hasManualKey = apiKey != null && apiKey!.isNotEmpty;
-    final strategies = <bool>[];
-    if (isSignedIn) strategies.add(true);
-    if (hasManualKey) strategies.add(false);
 
-    if (strategies.isEmpty) {
+    if (!hasManualKey) {
       yield _generateTemplatedNote(
         userName,
         steps,
@@ -88,7 +84,6 @@ Return exactly the note text, and nothing else.
       final stream = aiClient.generateTextStream(
         prompt: prompt,
         systemInstruction: systemInstruction,
-        useFirebase: isSignedIn,
         apiKey: apiKey,
       );
 

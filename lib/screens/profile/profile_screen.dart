@@ -186,7 +186,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _MenuCard(
                 icon: Icons.auto_awesome_rounded,
                 title: 'AI Settings',
-                subtitle: 'Coach name & Gemini API key (optional)',
+                subtitle: 'Coach name & Gemini API key',
                 onTap: () => showAppBottomSheet(context: context, builder: (_) => const AiSetupSheet()),
               ),
               _MenuCard(

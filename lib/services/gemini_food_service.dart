@@ -12,13 +12,8 @@ import 'ai_client.dart';
 
 class GeminiFoodService implements IAiFoodService {
   final String? apiKey;
-  final bool isSignedIn;
-  final AiClient aiClient;
-  final NutritionLookupService nutritionLookup;
-
   GeminiFoodService({
     this.apiKey,
-    this.isSignedIn = false,
     required this.aiClient,
     required this.nutritionLookup,
   });
@@ -129,7 +124,6 @@ $_jsonShape
       systemInstruction: _systemInstruction,
       imageBytesList: imageBytesList,
       mimeType: mimeType,
-      useFirebase: isSignedIn,
       apiKey: apiKey,
       skipCache: skipCache,
     );
@@ -179,7 +173,6 @@ $_jsonShape
     final response = await aiClient.generateJson(
       prompt: prompt,
       systemInstruction: _systemInstruction,
-      useFirebase: isSignedIn,
       apiKey: apiKey,
     );
 
@@ -245,7 +238,6 @@ Return ONLY a JSON object containing an array called "items":
       prompt: prompt,
       systemInstruction:
           'You are a nutrition database. Provide exact values per 100g.',
-      useFirebase: isSignedIn,
       apiKey: apiKey,
     );
 
@@ -479,7 +471,6 @@ Do NOT use JSON.
         prompt: prompt,
         systemInstruction:
             'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
-        useFirebase: isSignedIn,
         apiKey: apiKey,
       );
 
@@ -506,9 +497,9 @@ Do NOT use JSON.
   }
 
   void _ensureApiKey() {
-    if (!isSignedIn && (apiKey == null || apiKey!.isEmpty)) {
+    if (apiKey == null || apiKey!.isEmpty) {
       throw Exception(
-        'Gemini API key is not configured. Please add it in Profile -> AI Settings, or sign in to Cloud Sync.',
+        'Gemini API key is not configured. Please add it in Profile -> AI Settings.',
       );
     }
   }
@@ -542,8 +533,11 @@ Do NOT use JSON.
           if (errorString.contains('API_KEY_INVALID') ||
               errorString.contains('API key not valid') ||
               errorString.contains('disabled') ||
-              errorString.contains('has not been used in project')) {
-            throw AiException('Your API Key is invalid or not authorized.');
+              errorString.contains('has not been used in project') ||
+              errorString.contains('deactivated') ||
+              errorString.contains('SERVICE_DISABLED') ||
+              errorString.contains('PERMISSION_DENIED')) {
+            throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.');
           } else if (errorString.contains('403') ||
               errorString.contains('forbidden')) {
             lastError =

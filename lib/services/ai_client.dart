@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'ai_logger.dart';
 import 'package:googleai_dart/googleai_dart.dart';
-import 'package:firebase_ai/firebase_ai.dart' as vertex;
 import 'package:crypto/crypto.dart';
 import 'ai_cache.dart';
 import 'dart:async';
@@ -20,7 +19,7 @@ class AiException implements Exception {
 }
 
 AiErrorCause _classifyError(String errorString) {
-  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project')) {
+  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project') || errorString.contains('deactivated') || errorString.contains('SERVICE_DISABLED') || errorString.contains('PERMISSION_DENIED')) {
     return AiErrorCause.invalidKey;
   } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
     return AiErrorCause.offline;
@@ -100,12 +99,11 @@ class AiClient {
     required String systemInstruction,
     List<Uint8List>? imageBytesList,
     String? mimeType,
-    required bool useFirebase,
     String? apiKey,
     bool skipCache = false,
   }) async {
-    if (!useFirebase && (apiKey == null || apiKey.isEmpty)) {
-      throw AiException('API Key is required if not using Firebase. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
+    if (apiKey == null || apiKey.isEmpty) {
+      throw AiException('API Key is required. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
     }
 
     String? imageContext;
@@ -156,7 +154,6 @@ class AiClient {
             modelName: modelName,
             prompt: prompt,
             systemInstruction: systemInstruction,
-            useFirebase: useFirebase,
             apiKey: apiKey,
             imageBytesList: processedImages.isNotEmpty ? processedImages : null,
             mimeType: actualMimeType,
@@ -183,7 +180,7 @@ class AiClient {
           AiLogger.log(purpose: 'AI error fallback', model: modelName, durationMs: 0, outcome: cause.toString());
           
           if (cause == AiErrorCause.invalidKey) {
-            throw AiException('Your API Key is invalid or not authorized. Please check your AI Settings.', cause: cause);
+            throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.', cause: cause);
           } else if (cause == AiErrorCause.offline) {
             throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
           } else if (cause == AiErrorCause.notFound) {
@@ -236,37 +233,13 @@ class AiClient {
     required String modelName,
     required String prompt,
     String? systemInstruction,
-    required bool useFirebase,
     String? apiKey,
     List<Uint8List>? imageBytesList,
     String? mimeType,
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    if (useFirebase) {
-      final model = vertex.FirebaseAI.vertexAI().generativeModel(
-        model: modelName,
-        systemInstruction: systemInstruction != null ? vertex.Content.system(systemInstruction) : null,
-        generationConfig: vertex.GenerationConfig(
-          responseMimeType: 'application/json',
-        ),
-      );
-
-      final contents = [
-        if (imageBytesList != null && imageBytesList.isNotEmpty)
-          vertex.Content.multi([
-            vertex.TextPart(prompt),
-            for (var imageBytes in imageBytesList)
-              vertex.InlineDataPart(mimeType ?? 'image/jpeg', imageBytes)
-          ])
-        else
-          vertex.Content.text(prompt)
-      ];
-
-      final response = await model.generateContent(contents).timeout(timeout);
-      return response.text;
-    } else {
       if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('API Key is required if not using Firebase.');
+        throw Exception('API Key is required.');
       }
       
       if (_cachedApiKey != apiKey || _cachedClient == null) {
@@ -301,13 +274,11 @@ class AiClient {
         request: request,
       ).timeout(const Duration(seconds: 20));
       return response.text;
-    }
   }
 
     Stream<String> generateTextStream({
     required String prompt,
     required String systemInstruction,
-    required bool useFirebase,
     String? apiKey,
   }) async* {
     if (_textCircuitBreaker.isOpen) {
@@ -322,7 +293,6 @@ class AiClient {
           modelName: modelName,
           prompt: prompt,
           systemInstruction: systemInstruction,
-          useFirebase: useFirebase,
           apiKey: apiKey,
         );
         
@@ -337,7 +307,7 @@ class AiClient {
         lastCause = cause;
         
         if (cause == AiErrorCause.invalidKey) {
-          throw AiException('Your API Key is invalid or not authorized.', cause: cause);
+          throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.', cause: cause);
         } else if (cause == AiErrorCause.offline) {
           throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
         } else if (cause == AiErrorCause.notFound) {
@@ -367,24 +337,10 @@ class AiClient {
     required String modelName,
     required String prompt,
     required String systemInstruction,
-    required bool useFirebase,
     String? apiKey,
   }) async* {
-    if (useFirebase) {
-      final model = vertex.FirebaseAI.vertexAI().generativeModel(
-        model: modelName,
-        systemInstruction: vertex.Content.system(systemInstruction),
-        generationConfig: vertex.GenerationConfig(
-          responseMimeType: 'text/plain',
-        ),
-      );
-
-      yield* model.generateContentStream([vertex.Content.text(prompt)])
-          .map((res) => res.text)
-          .timeout(const Duration(seconds: 20));
-    } else {
       if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('API Key is required if not using Firebase.');
+        throw Exception('API Key is required.');
       }
       
       if (_cachedApiKey != apiKey || _cachedClient == null) {
@@ -411,7 +367,6 @@ class AiClient {
       ).timeout(const Duration(seconds: 20));
       
       yield response.text;
-    }
   }
 
   Map<String, dynamic> _parseJson(String text) {

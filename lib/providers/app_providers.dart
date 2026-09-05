@@ -276,10 +276,8 @@ final nutritionLookupServiceProvider = Provider<NutritionLookupService>((ref) {
 
 final geminiFoodServiceProvider = Provider<IAiFoodService>((ref) {
   final profile = ref.watch(profileProvider);
-  final isSignedIn = ref.watch(isSignedInProvider);
   return GeminiFoodService(
     apiKey: profile.geminiApiKey,
-    isSignedIn: isSignedIn,
     aiClient: ref.watch(aiClientProvider),
     nutritionLookup: ref.watch(nutritionLookupServiceProvider),
   );
@@ -287,10 +285,8 @@ final geminiFoodServiceProvider = Provider<IAiFoodService>((ref) {
 
 final coachServiceProvider = Provider<CoachService>((ref) {
   final apiKey = ref.watch(profileProvider.select((p) => p.geminiApiKey));
-  final isSignedIn = ref.watch(isSignedInProvider);
   return CoachService(
     apiKey: apiKey,
-    isSignedIn: isSignedIn,
     aiClient: ref.watch(aiClientProvider),
   );
 });
