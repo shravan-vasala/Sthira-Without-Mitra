@@ -459,10 +459,8 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     final planned = widget.plannedMeal;
     final slotLog = widget.slotLog;
 
-    return SurfaceCard(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: SurfaceCardElevation.nested,
-      padding: EdgeInsets.zero,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32),
       child: AnimatedSize(
         duration: 300.ms,
         curve: Curves.easeOutCubic,
@@ -471,15 +469,19 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  MealIcons.resolve(widget.slotEmoji),
-                  size: 18,
-                  color: context.colors.textDark,
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Icon(
+                    MealIcons.resolve(widget.slotEmoji),
+                    size: 24,
+                    color: context.colors.textDark,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -487,9 +489,12 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       Text(
                         widget.slotName,
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontFamily: 'CabinetGrotesk',
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
                           color: context.colors.textDark,
+                          height: 1.1,
                         ),
                       ),
                       if (!_hasLog && planned != null) ...[
@@ -498,7 +503,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           Text(
                             'Target ~${planned.calories} kcal',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: context.colors.textLight,
                             ),
@@ -509,45 +514,55 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                   ),
                 ),
                 if (_hasLog)
-                  Text(
-                    '${slotLog!.totalCalories} kcal',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: context.colors.primary,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '${slotLog!.totalCalories}',
+                      style: TextStyle(
+                        fontFamily: 'CabinetGrotesk',
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                        color: context.colors.primary,
+                      ),
                     ),
                   ),
                 if (_hasLog) ...[
                   const SizedBox(width: 8),
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: context.colors.green,
-                    size: 20,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      color: context.colors.green,
+                      size: 20,
+                    ),
                   ),
                 ] else if (slotLog != null) ...[
-                  IconButton(
-                    icon: Icon(
-                      Icons.close_rounded,
-                      size: 20,
-                      color: context.colors.textMedium,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: 20,
+                        color: context.colors.textMedium,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        ref
+                            .read(dailyMealLogProvider.notifier)
+                            .clearMealSlot(widget.slotId);
+                      },
                     ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      ref
-                          .read(dailyMealLogProvider.notifier)
-                          .clearMealSlot(widget.slotId);
-                    },
                   ),
                 ],
               ],
             ),
           ),
 
-          // Logged non-planned content
           if (_hasLog && !_isPlannedComplete) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              padding: const EdgeInsets.fromLTRB(52, 0, 16, 16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -604,65 +619,79 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(52, 0, 16, 16),
+              child: Wrap(
+                spacing: 24,
+                runSpacing: 12,
                 children: [
-                  Expanded(
-                    child: CompactButton(
-                      label: 'Add serving',
-                      icon: Icons.add_circle_outline_rounded,
-                      onPressed: () =>
-                          _openScanner(context, false, append: true),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.primary,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    onPressed: () => _openScanner(context, false, append: true),
+                    icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+                    label: const Text('Add Serving', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: CompactButton(
-                      label: 'Replace meal',
-                      icon: Icons.refresh_rounded,
-                      onPressed: () => _openScanner(context, false),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.textMedium,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    onPressed: () => _openScanner(context, false),
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                   ),
                 ],
               ),
             ),
           ],
 
-          // Photo & describe first — home cooking primary path
           if (!_hasLog)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-              child: Column(
+              padding: const EdgeInsets.fromLTRB(52, 4, 16, 16),
+              child: Wrap(
+                spacing: 24,
+                runSpacing: 16,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CompactButton(
-                          label: 'Take photo',
-                          icon: Icons.camera_alt_outlined,
-                          filled: true,
-                          onPressed: () => _openScanner(context, false),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: CompactButton(
-                          label: 'Describe',
-                          icon: Icons.notes_rounded,
-                          onPressed: () => _openScanner(context, true),
-                        ),
-                      ),
-                    ],
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.primary,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () => _openScanner(context, false),
+                    icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                    label: const Text('Log with Photo', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                  ),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.textMedium,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () => _openScanner(context, true),
+                    icon: const Icon(Icons.notes_rounded, size: 18),
+                    label: const Text('Describe', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                   ),
                   if (planned != null)
-                    TextButton(
-                      onPressed: () => _toggleCompletedAsPlanned(planned),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(4),
+                      onTap: () => _toggleCompletedAsPlanned(planned),
                       child: Text(
-                        'Or mark completed as planned',
+                        'Mark exact',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: context.colors.textMedium,
+                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ),
@@ -671,23 +700,32 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             )
           else if (_isPlannedComplete)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(52, 4, 16, 16),
+              child: Wrap(
+                spacing: 24,
+                runSpacing: 16,
                 children: [
-                  Expanded(
-                    child: CompactButton(
-                      label: 'Replace with photo',
-                      icon: Icons.camera_alt_outlined,
-                      onPressed: () => _openScanner(context, false),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.textMedium,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    onPressed: () => _openScanner(context, false),
+                    icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                    label: const Text('Replace with Photo', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: CompactButton(
-                      label: 'Describe',
-                      icon: Icons.notes_rounded,
-                      onPressed: () => _openScanner(context, true),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.textMedium,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    onPressed: () => _openScanner(context, true),
+                    icon: const Icon(Icons.notes_rounded, size: 18),
+                    label: const Text('Describe', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                   ),
                 ],
               ),
@@ -695,74 +733,58 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
           if (planned != null && _hasLog && !_isPlannedComplete)
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(52, 0, 16, 16),
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(4),
                 onTap: () => _toggleCompletedAsPlanned(planned),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.check_box_outline_blank_rounded,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_box_outline_blank_rounded,
+                      color: context.colors.textMedium,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Completed exactly as planned',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                         color: context.colors.textMedium,
-                        size: 22,
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Switch to completed as planned',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.textMedium,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             )
           else if (planned != null && _isPlannedComplete)
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(52, 0, 16, 16),
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(4),
                 onTap: () => _toggleCompletedAsPlanned(planned),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.check_box_rounded,
-                        color: context.colors.green,
-                        size: 22,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_box_rounded,
+                      color: context.colors.green,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Completed exactly as planned',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.textDark,
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Completed as planned',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.textDark,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            )
-          else
-            const SizedBox(height: 8),
+            ),
 
           if (planned != null && planned.suggestions.isNotEmpty)
             _buildSuggestions(context, planned),
@@ -774,42 +796,33 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
   Widget _buildSuggestions(BuildContext context, Meal planned) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.fromLTRB(52, 8, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.lightbulb_outline_rounded,
-                size: 16,
-                color: context.colors.primary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Suggestions',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textDark,
-                ),
-              ),
-            ],
+          Text(
+            'SUGGESTIONS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              color: context.colors.primary.withValues(alpha: 0.8),
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           ...planned.suggestions.map((suggestion) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 4, right: 8),
+                    padding: const EdgeInsets.only(top: 6, right: 12),
                     child: Container(
-                      width: 6,
-                      height: 6,
+                      width: 4,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: context.colors.primary.withValues(alpha: 0.6),
+                        color: context.colors.textMedium.withValues(alpha: 0.4),
                         shape: BoxShape.circle,
                       ),
                     ),
