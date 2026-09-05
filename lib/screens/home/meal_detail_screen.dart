@@ -475,21 +475,12 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: context.colors.card, 
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: context.colors.border),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        widget.slotEmoji,
-                        style: const TextStyle(fontSize: 24),
-                      ),
+                    Icon(
+                      MealIcons.resolve(widget.slotEmoji),
+                      size: 24,
+                      color: context.colors.textDark,
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,7 +493,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                               color: context.colors.textDark,
                             ),
                           ),
-                          const SizedBox(height: 4),
                           if (_hasLog)
                             Text(
                               '${slotLog!.totalCalories} kcal',
@@ -534,22 +524,13 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       ),
                     ),
                     if (_hasLog)
-                      IconButton(
-                        icon: Icon(Icons.close_rounded, size: 20, color: context.colors.textMedium),
-                        constraints: const BoxConstraints(),
-                        padding: EdgeInsets.zero,
-                        onPressed: () => ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId),
-                      )
-                    else 
-                      Icon(Icons.arrow_forward_ios_rounded, color: context.colors.textMedium, size: 16),
+                      Icon(Icons.check_circle_rounded, color: context.colors.green, size: 20),
                   ],
                 ),
 
-                // Separator if logged or has buttons
+                // If logged, show items
                 if (_hasLog) ...[
-                  const SizedBox(height: 20),
-                  Container(height: 2, width: double.infinity, color: context.colors.border.withValues(alpha: 0.5)),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   
                   // Logged Items
                   if (slotLog!.photoPath != null) ...[
@@ -591,115 +572,95 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       }).toList(),
                     ),
                   
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 12,
+                  const SizedBox(height: 24),
+                  Row(
                     children: [
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: context.colors.primary,
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: context.colors.primary,
+                            side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: () => _openScanner(context, false, append: true),
+                          icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+                          label: const Text('Add Serving', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                         ),
-                        onPressed: () => _openScanner(context, false, append: true),
-                        icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
-                        label: const Text('Add Serving', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                       ),
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: context.colors.textMedium,
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: context.colors.textMedium,
+                            side: BorderSide(color: context.colors.border),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: () => _openScanner(context, false),
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                         ),
-                        onPressed: () => _openScanner(context, false),
-                        icon: const Icon(Icons.refresh_rounded, size: 18),
-                        label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(Icons.delete_outline_rounded, color: context.colors.textMedium),
+                        onPressed: () => ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId),
                       ),
                     ],
                   ),
                 ] else ...[
                    // NOT logged actions 
-                   const SizedBox(height: 20),
-                   Container(height: 2, width: double.infinity, color: context.colors.border.withValues(alpha: 0.5)),
-                   const SizedBox(height: 16),
+                   const SizedBox(height: 24),
                    
-                   Wrap(
-                     spacing: 16,
-                     runSpacing: 16,
-                     crossAxisAlignment: WrapCrossAlignment.center,
+                   Row(
                      children: [
-                       TextButton.icon(
-                         style: TextButton.styleFrom(
-                           foregroundColor: context.colors.primary,
-                           padding: EdgeInsets.zero,
-                           minimumSize: Size.zero,
-                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                         ),
-                         onPressed: () => _openScanner(context, false),
-                         icon: const Icon(Icons.camera_alt_outlined, size: 16),
-                         label: const Text('Log with Photo', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                       ),
-                       TextButton.icon(
-                         style: TextButton.styleFrom(
-                           foregroundColor: context.colors.textMedium,
-                           padding: EdgeInsets.zero,
-                           minimumSize: Size.zero,
-                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                         ),
-                         onPressed: () => _openScanner(context, true),
-                         icon: const Icon(Icons.notes_rounded, size: 16),
-                         label: const Text('Describe', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                       ),
-                       if (planned != null)
-                         InkWell(
-                           borderRadius: BorderRadius.circular(4),
-                           onTap: () => _toggleCompletedAsPlanned(planned),
-                           child: Text(
-                             'Mark exact',
-                             style: TextStyle(
-                               fontSize: 12,
-                               fontWeight: FontWeight.w600,
-                               color: context.colors.textMedium,
-                               decoration: TextDecoration.underline,
-                             ),
+                       Expanded(
+                         child: ElevatedButton.icon(
+                           style: ElevatedButton.styleFrom(
+                             backgroundColor: context.colors.primary,
+                             foregroundColor: context.colors.onPrimary,
+                             elevation: 0,
+                             padding: const EdgeInsets.symmetric(vertical: 14),
+                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                            ),
+                           onPressed: () => _openScanner(context, false),
+                           icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                           label: const Text('Take photo', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                          ),
+                       ),
+                       const SizedBox(width: 12),
+                       Expanded(
+                         child: OutlinedButton.icon(
+                           style: OutlinedButton.styleFrom(
+                             foregroundColor: context.colors.primary,
+                             side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
+                             padding: const EdgeInsets.symmetric(vertical: 14),
+                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                           ),
+                           onPressed: () => _openScanner(context, true),
+                           icon: const Icon(Icons.notes_rounded, size: 18),
+                           label: const Text('Describe', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                         ),
+                       ),
                      ],
                    ),
-                ],
-
-                // planned completion toggle
-                if (planned != null && _hasLog && !_isPlannedComplete) ...[
-                   const SizedBox(height: 16),
-                   InkWell(
-                     borderRadius: BorderRadius.circular(4),
-                     onTap: () => _toggleCompletedAsPlanned(planned),
-                     child: Row(
-                       mainAxisSize: MainAxisSize.min,
-                       children: [
-                         Icon(Icons.check_box_outline_blank_rounded, color: context.colors.textMedium, size: 16),
-                         const SizedBox(width: 8),
-                         Text('Completed exactly as planned', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.colors.textMedium)),
-                       ],
+                   if (planned != null) ...[
+                     const SizedBox(height: 20),
+                     Center(
+                       child: InkWell(
+                         onTap: () => _toggleCompletedAsPlanned(planned),
+                         child: Text(
+                           'Or mark completed as planned',
+                           style: TextStyle(
+                             fontSize: 13,
+                             fontWeight: FontWeight.w600,
+                             color: context.colors.textMedium,
+                           ),
+                         ),
+                       ),
                      ),
-                   )
-                ] else if (planned != null && _isPlannedComplete) ...[
-                   const SizedBox(height: 16),
-                   InkWell(
-                     borderRadius: BorderRadius.circular(4),
-                     onTap: () => _toggleCompletedAsPlanned(planned),
-                     child: Row(
-                       mainAxisSize: MainAxisSize.min,
-                       children: [
-                         Icon(Icons.check_box_rounded, color: context.colors.green, size: 16),
-                         const SizedBox(width: 8),
-                         Text('Completed exactly as planned', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.colors.textDark)),
-                       ],
-                     ),
-                   )
+                   ],
                 ],
 
                 // Suggestions
@@ -715,20 +676,25 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
   Widget _buildSuggestions(BuildContext context, Meal planned) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(52, 8, 16, 16),
+      padding: const EdgeInsets.only(top: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'SUGGESTIONS',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
-              color: context.colors.primary.withValues(alpha: 0.8),
-            ),
+          Row(
+            children: [
+               Icon(Icons.lightbulb_outline_rounded, size: 16, color: context.colors.primary),
+               const SizedBox(width: 8),
+               Text(
+                 'Suggestions',
+                 style: TextStyle(
+                   fontSize: 14,
+                   fontWeight: FontWeight.w700,
+                   color: context.colors.textDark,
+                 ),
+               ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           ...planned.suggestions.map((suggestion) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -741,7 +707,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       width: 4,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: context.colors.textMedium.withValues(alpha: 0.4),
+                        color: context.colors.primary.withValues(alpha: 0.6),
                         shape: BoxShape.circle,
                       ),
                     ),
