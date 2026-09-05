@@ -284,46 +284,29 @@ class _HomeGreetingTitle extends ConsumerWidget {
 
     final title = name.isEmpty ? _timeGreeting() : '${_timeGreeting()},\n$name';
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
-            'assets/icon/sunflower_logo.jpg',
-            width: 48,
-            height: 48,
-            fit: BoxFit.cover,
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            color: context.colors.textDark,
+            height: 1.15,
+            fontSize: 32,
           ),
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: context.colors.textDark,
-                  height: 1.15,
-                  fontSize: 28, // Slightly reduced to fit with logo
-                ),
-              ),
-              if (!isToday) ...[
-                const SizedBox(height: 4),
-                Text(
-                  'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.primary,
-                  ),
-                ),
-              ],
-            ],
+        if (!isToday) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: context.colors.primary,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
