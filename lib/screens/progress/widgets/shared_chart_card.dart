@@ -429,13 +429,14 @@ class SharedChartCard extends StatelessWidget {
   }
 
   /// Split into contiguous day segments so missing days show as gaps, not zeros.
+  /// For 6-month views, we connect all points to preserve the macro trend line, regardless of gaps.
   List<List<FlSpot>> _segmentSpots(List<FlSpot> sorted) {
     if (sorted.isEmpty) return const [];
     final segments = <List<FlSpot>>[];
     var current = <FlSpot>[sorted.first];
     for (int i = 1; i < sorted.length; i++) {
       final gap = sorted[i].x - sorted[i - 1].x;
-      if (gap > 1.5) {
+      if (gap > 1.5 && timeFormat != ChartTimeFormat.sixMonths) {
         segments.add(current);
         current = <FlSpot>[sorted[i]];
       } else {
