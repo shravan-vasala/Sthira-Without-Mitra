@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sthira_without_mitra/models/social_profile.dart';
+import 'package:trufit_bodamma/models/social_profile.dart';
 
 void main() {
   group('SocialProfile backward compatibility', () {

@@ -230,16 +230,16 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                                       style: TextStyle(
                                         color: context.colors.gold,
                                         fontSize: 11,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w900,
                                         letterSpacing: 1.5,
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 4),
                                     Text(
                                       _currentBadge!.title,
                                       style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w900,
                                         color: context.colors.textDark,
                                       ),
                                     ),
