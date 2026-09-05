@@ -99,10 +99,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: context.colors.primary.withValues(alpha: 0.1),
+                          color: Colors.transparent,
                           border: Border.all(
-                            color: context.colors.primary.withValues(alpha: 0.2),
-                            width: 2,
+                            color: context.colors.primary.withValues(alpha: 0.3),
+                            width: 1,
                           ),
                         ),
                         child: ClipOval(

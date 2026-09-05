@@ -114,26 +114,31 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mimic the faded appearance in the screenshot for lower-tier stats when zero
+    final bool isZero = value == '0';
+    final bool isTopTier = title == 'Streak' || title == 'Workouts';
+    final Color effectiveColor = (!isTopTier && isZero) ? color.withValues(alpha: 0.3) : color;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: color),
+              Icon(icon, size: 16, color: effectiveColor),
               const SizedBox(width: 6),
               Text(
                 title,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: color,
+                  color: effectiveColor,
                 ),
               ),
             ],
