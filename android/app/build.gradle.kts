@@ -66,8 +66,6 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
     }
 }
 
-
-
 flutter {
     source = "../.."
 }
@@ -77,3 +75,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}

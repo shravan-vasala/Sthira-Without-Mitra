@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/ai_client.dart';
 import '../../services/ai_logger.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/setup_sheets.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io';
@@ -170,7 +171,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 icon: Icons.auto_awesome_rounded,
                 title: 'AI Settings',
                 subtitle: 'Coach name & Gemini API key (optional)',
-                onTap: () => _showGeminiKeyDialog(context, ref, profile),
+                onTap: () => showAppBottomSheet(context: context, builder: (_) => const AiSetupSheet()),
               ),
               _MenuCard(
                 icon: Icons.history_rounded,
@@ -453,175 +454,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           },
         );
       },
-    );
-  }
-
-  void _showGeminiKeyDialog(
-    BuildContext context,
-    WidgetRef ref,
-    dynamic profile,
-  ) {
-    // ignore: avoid_dynamic_calls
-    final keyController = TextEditingController(
-      text: profile.geminiApiKey ?? '',
-    );
-    // ignore: avoid_dynamic_calls
-    final coachController = TextEditingController(
-      text: profile.coachName as String? ?? '',
-    );
-    bool isVerifying = false;
-    String errorMessage = '';
-
-    showAppBottomSheet(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AppSheet(
-          title: 'AI & Coach Settings',
-          scrollable: true,
-          subtitle:
-              'Set your coach\'s name for daily notes. A Gemini API key is ONLY required if you are not using Cloud Sync.',
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: coachController,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(
-                    labelText: 'Coach name',
-                    hintText: 'e.g. Shravan',
-                    prefixIcon: const Icon(Icons.sports_rounded),
-                    filled: true,
-                    fillColor: context.colors.inputFill,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: keyController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Gemini API Key',
-                    prefixIcon: const Icon(Icons.key_rounded),
-                    filled: true,
-                    fillColor: context.colors.inputFill,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () => launchUrl(
-                      Uri.parse('https://aistudio.google.com/app/apikey'),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      'Get your Gemini API Key here',
-                      style: TextStyle(
-                        color: context.colors.primary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                if (errorMessage.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    errorMessage,
-                    style: TextStyle(
-                      color: context.colors.red,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                isVerifying
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: context.colors.primary,
-                        ),
-                      )
-                    : PrimaryButton(
-                        label: 'Save & Verify',
-                        onPressed: () async {
-                          final key = keyController.text.trim();
-                          final coachName = coachController.text.trim();
-
-                          if (key.isNotEmpty) {
-                            setState(() {
-                              isVerifying = true;
-                              errorMessage = '';
-                            });
-                            try {
-                              await ref
-                                  .read(geminiFoodServiceProvider)
-                                  .verifyApiKey(key);
-                            } catch (e) {
-                              if (ctx.mounted) {
-                                setState(() {
-                                  isVerifying = false;
-                                  errorMessage = e.toString().replaceAll(
-                                    'Exception: ',
-                                    '',
-                                  );
-                                });
-                              }
-                              return; // Abort save if key is invalid
-                            }
-                          }
-
-                          final current = ref.read(profileProvider);
-
-                          await ref
-                              .read(profileProvider.notifier)
-                              .updateProfile(
-                                current.copyWith(
-                                  coachName: coachName,
-                                  geminiApiKey: key,
-                                ),
-                              );
-                          await ref
-                              .read(profileProvider.notifier)
-                              .updateGeminiKey(key);
-
-                          if (ctx.mounted) {
-                            ScaffoldMessenger.of(ctx).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  key.isNotEmpty
-                                      ? 'Connected & Verified ✅'
-                                      : 'AI settings saved successfully',
-                                ),
-                                backgroundColor: context.colors.green,
-                              ),
-                            );
-                            Navigator.of(ctx).pop();
-                          }
-                        },
-                      ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    showAppBottomSheet(
-                      context: context,
-                      builder: (_) => _DiagnosticsTestSheet(ref: ref),
-                    );
-                  },
-                  icon: const Icon(Icons.speed_rounded),
-                  label: const Text('Test AI connection'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
