@@ -377,10 +377,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   Widget _buildChart(List<DailyLog> logs, bool useKg, dynamic profile) {
     List<ChartDataPoint> data = _dailyMetricSeries(logs, _selectedMetric, profile);
     
-    // Smooth exactly the 6 Months Graph!
-    if (_selectedRange == TimeRange.sixMonths) {
-      data = _downsampleToWeekly(data);
-    }
+    // We intentionally bypass downsampling (like _downsampleToWeekly) for 6 Months 
+    // to preserve massive daily volatility (like a stock/Sensex graph).
     
     final daysWithData = data.length;
     final isEmpty = daysWithData == 0;
