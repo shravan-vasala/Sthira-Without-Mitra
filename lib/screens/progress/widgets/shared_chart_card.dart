@@ -19,6 +19,7 @@ class SharedChartCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.data,
+    this.trendData,
     required this.startDate,
     required this.endDate,
     this.isSteps = false,
@@ -38,6 +39,7 @@ class SharedChartCard extends StatelessWidget {
 
   final String title;
   final List<ChartDataPoint> data;
+  final List<ChartDataPoint>? trendData;
   final DateTime startDate;
   final DateTime endDate;
   final bool isSteps;
@@ -105,7 +107,7 @@ class SharedChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget chartArea = data.isEmpty
+    Widget chartArea = (data.isEmpty && (trendData == null || trendData!.isEmpty))
         ? Center(
             child: Text(
               emptyMessage,
@@ -542,6 +544,7 @@ class SharedChartCard extends StatelessWidget {
     final showDots = spots.length <= 14;
     final useCurve = spots.length > 2;
     final primary = context.colors.primary;
+    final hasTrend = trendData != null && trendData!.isNotEmpty;
 
     final lineBars = <LineChartBarData>[
       for (final segment in segments)
@@ -549,57 +552,24 @@ class SharedChartCard extends StatelessWidget {
           spots: segment,
           isCurved: useCurve && segment.length > 2,
           curveSmoothness: spots.length > 31 ? 0.40 : 0.25,
-          preventCurveOverShooting:
-              spots.length <=
-              31, // Disable clamping on dense graphs for smoother waves
-          color: primary,
-          barWidth: spots.length > 31
-              ? 1.5
-              : 2.5, // Thinner line for dense data
+          preventCurveOverShooting: spots.length <= 31, 
+          color: hasTrend ? primary.withValues(alpha: 0.2) : primary,
+          barWidth: hasTrend ? 0.0 : (spots.length > 31 ? 1.5 : 2.5), 
           isStrokeCapRound: true,
           dotData: FlDotData(
             show: true,
             checkToShowDot: (spot, barData) {
-              if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
-                final minyData = spots.map((s) => s.y).reduce(min);
-                final maxyData = spots.map((s) => s.y).reduce(max);
-                if (spot.y == minyData ||
-                    spot.y == maxyData ||
-                    spot.x == barData.spots.last.x) {
-                  return true;
-                }
-                return false;
-              }
+              if (hasTrend) return true;
               return showDots || segment.length == 1;
             },
             getDotPainter: (spot, percent, bar, index) {
-              if (timeFormat == ChartTimeFormat.sixMonths && spots.isNotEmpty) {
-                final minyData = spots.map((s) => s.y).reduce(min);
-                final maxyData = spots.map((s) => s.y).reduce(max);
-                if (spot.y == minyData && spot.y != maxyData) {
-                  return FlDotCirclePainter(
-                    radius: 4.5,
-                    color: context.colors.red,
-                    strokeWidth: 1.5,
-                    strokeColor: context.colors.card,
-                  );
-                }
-                if (spot.y == maxyData) {
-                  return FlDotCirclePainter(
-                    radius: 4.5,
-                    color: context.colors.primary,
-                    strokeWidth: 1.5,
-                    strokeColor: context.colors.card,
-                  );
-                }
-                if (spot.x == bar.spots.last.x) {
-                  return FlDotCirclePainter(
-                    radius: 4.5,
-                    color: context.colors.primary,
-                    strokeWidth: 1.5,
-                    strokeColor: context.colors.card,
-                  );
-                }
+              if (hasTrend) {
+                return FlDotCirclePainter(
+                  radius: 3.0,
+                  color: primary.withValues(alpha: 0.3),
+                  strokeWidth: 0,
+                  strokeColor: Colors.transparent,
+                );
               }
               return FlDotCirclePainter(
                 radius: 3.5,
@@ -623,6 +593,27 @@ class SharedChartCard extends StatelessWidget {
                       primary.withValues(alpha: 0.22),
                       primary.withValues(alpha: 0.0),
                     ],
+            ),
+          ),
+        ),
+      if (hasTrend)
+        LineChartBarData(
+          spots: trendData!.map((d) => FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value)).toList(),
+          isCurved: true,
+          curveSmoothness: 0.3,
+          color: primary,
+          barWidth: 2.5,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                primary.withValues(alpha: 0.3),
+                Colors.transparent,
+              ],
             ),
           ),
         ),

@@ -5,10 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/layout_insets.dart';
+import '../../widgets/app_bottom_sheet.dart';
+import '../../widgets/primary_button.dart';
+import '../../widgets/empty_state_view.dart';
+import '../../../services/haptics.dart';
+import 'widgets/add_progress_photo_sheet.dart';
 import '../../providers/app_providers.dart';
-import 'photo_viewer_screen.dart';
+import '../../repositories/media_repository.dart';
 import 'photo_compare_screen.dart';
+import 'photo_viewer_screen.dart';
+import '../../theme/layout_insets.dart';
 
 class PhysiquePicturesScreen extends ConsumerStatefulWidget {
   const PhysiquePicturesScreen({super.key});
@@ -41,44 +47,43 @@ class _PhysiquePicturesScreenState
 
   void _deleteSelected(Map<String, List<String>> photosByDate) {
     if (_selectedPhotos.isEmpty) return;
-
-    showDialog(
+    
+    showAppBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Photos?'),
-        content: Text(
-          'Delete ${_selectedPhotos.length} photo(s)? This can\'t be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-
-              // Map selected paths back to their dates
-              final toDelete = <String, List<String>>{};
-              for (final path in _selectedPhotos) {
-                // Find date for this path
-                for (final entry in photosByDate.entries) {
-                  if (entry.value.contains(path)) {
-                    toDelete.putIfAbsent(entry.key, () => []).add(path);
-                    break;
+      builder: (ctx) => AppSheet(
+        title: 'Delete Photos?',
+        subtitle: 'Delete ${_selectedPhotos.length} photo(s)? This can\'t be undone.',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PrimaryButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final toDelete = <String, List<String>>{};
+                for (final path in _selectedPhotos) {
+                  for (final entry in photosByDate.entries) {
+                    if (entry.value.contains(path)) {
+                      toDelete.putIfAbsent(entry.key, () => []).add(path);
+                      break;
+                    }
                   }
                 }
-              }
-
-              await ref.read(mediaRepoProvider).deletePhotos(toDelete);
-              setState(() {
-                _selectedPhotos.clear();
-                _isSelectionMode = false;
-              });
-            },
-            child: Text('Delete', style: TextStyle(color: context.colors.red)),
-          ),
-        ],
+                await ref.read(mediaRepoProvider).deletePhotos(toDelete);
+                setState(() {
+                  _selectedPhotos.clear();
+                  _isSelectionMode = false;
+                });
+              },
+              label: 'Delete',
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel', style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -156,14 +161,15 @@ class _PhysiquePicturesScreenState
         ],
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: kFloatingNavClearance),
-        child: FloatingActionButton(
+        padding: EdgeInsets.only(bottom: kFloatingNavClearance),
+        child: FloatingActionButton.extended(
           onPressed: _addPhoto,
           backgroundColor: context.colors.primary,
-          child: Icon(
+          icon: Icon(
             Icons.add_a_photo_rounded,
             color: context.colors.onPrimary,
           ),
+          label: Text('Add photo', style: TextStyle(color: context.colors.onPrimary, fontWeight: FontWeight.w700)),
         ),
       ),
       body: Column(
@@ -178,27 +184,39 @@ class _PhysiquePicturesScreenState
                 child: Row(
                   children: [
                     _FilterChip(
-                      label: 'All',
+                      label: 'All · ${rawPhotos.fold<int>(0, (p, c) => p + c.value.length)}',
                       isSelected: _currentFilter == 'all',
-                      onTap: () => setState(() => _currentFilter = 'all'),
+                      onTap: () {
+                            Haptics.tap();
+                        setState(() => _currentFilter = 'all');
+                      },
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
-                      label: 'Front',
+                      label: 'Front · ${rawPhotos.fold<int>(0, (p, c) => p + c.value.where((ph) => ref.read(mediaRepoProvider).getPoseTag(ph) == 'front').length)}',
                       isSelected: _currentFilter == 'front',
-                      onTap: () => setState(() => _currentFilter = 'front'),
+                      onTap: () {
+                            Haptics.tap();
+                        setState(() => _currentFilter = 'front');
+                      },
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
-                      label: 'Side',
+                      label: 'Side · ${rawPhotos.fold<int>(0, (p, c) => p + c.value.where((ph) => ref.read(mediaRepoProvider).getPoseTag(ph) == 'side').length)}',
                       isSelected: _currentFilter == 'side',
-                      onTap: () => setState(() => _currentFilter = 'side'),
+                      onTap: () {
+                            Haptics.tap();
+                        setState(() => _currentFilter = 'side');
+                      },
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
-                      label: 'Back',
+                      label: 'Back · ${rawPhotos.fold<int>(0, (p, c) => p + c.value.where((ph) => ref.read(mediaRepoProvider).getPoseTag(ph) == 'back').length)}',
                       isSelected: _currentFilter == 'back',
-                      onTap: () => setState(() => _currentFilter = 'back'),
+                      onTap: () {
+                            Haptics.tap();
+                        setState(() => _currentFilter = 'back');
+                      },
                     ),
                   ],
                 ),
@@ -208,30 +226,19 @@ class _PhysiquePicturesScreenState
             child: rawPhotos.isEmpty
                 ? Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.photo_library_outlined,
-                          size: 64,
-                          color: context.colors.textLight.withValues(
-                            alpha: 0.5,
-                          ),
+                        EmptyStateView(
+                          icon: Icons.photo_library_outlined,
+                          title: 'No progress photos yet',
+                          subtitle: 'Add your first photo to track your journey.',
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          'No progress photos yet',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.textMedium,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Tap the + button to add your first photo',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.colors.textLight,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: PrimaryButton(
+                            label: 'Take First Photo',
+                            onPressed: _openCamera,
                           ),
                         ),
                       ],
@@ -309,43 +316,48 @@ class _PhysiquePicturesScreenState
                                 child: Stack(
                                   children: [
                                     Positioned.fill(
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: kIsWeb
-                                            ? Image.network(
-                                                photoPath,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (_, e, s) =>
-                                                    Container(
-                                                      color: context
-                                                          .colors
-                                                          .lavender,
-                                                      child: Icon(
-                                                        Icons
-                                                            .broken_image_rounded,
+                                      child: Hero(
+                                        tag: photoPath,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: kIsWeb
+                                              ? Image.network(
+                                                  photoPath,
+                                                  fit: BoxFit.cover,
+                                                  cacheWidth: 400,
+                                                  errorBuilder: (_, e, s) =>
+                                                      Container(
                                                         color: context
                                                             .colors
-                                                            .textLight,
+                                                            .lavender,
+                                                        child: Icon(
+                                                          Icons
+                                                              .broken_image_rounded,
+                                                          color: context
+                                                              .colors
+                                                              .textLight,
+                                                        ),
                                                       ),
-                                                    ),
-                                              )
-                                            : Image.file(
-                                                File(photoPath),
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (_, e, s) =>
-                                                    Container(
-                                                      color: context
-                                                          .colors
-                                                          .lavender,
-                                                      child: Icon(
-                                                        Icons
-                                                            .broken_image_rounded,
+                                                )
+                                              : Image.file(
+                                                  File(photoPath),
+                                                  fit: BoxFit.cover,
+                                                  cacheWidth: 400,
+                                                  errorBuilder: (_, e, s) =>
+                                                      Container(
                                                         color: context
                                                             .colors
-                                                            .textLight,
+                                                            .lavender,
+                                                        child: Icon(
+                                                          Icons
+                                                              .broken_image_rounded,
+                                                          color: context
+                                                              .colors
+                                                              .textLight,
+                                                        ),
                                                       ),
-                                                    ),
-                                              ),
+                                                ),
+                                        ),
                                       ),
                                     ),
                                     if (poseTag != 'none')
@@ -439,367 +451,60 @@ class _PhysiquePicturesScreenState
     );
   }
 
-  // ignore: unused_element
-  String _poseLabel(String tag) {
-    switch (tag) {
-      case 'front':
-        return '🧍 Front';
-      case 'side':
-        return '🔄 Side';
-      case 'back':
-        return '🔙 Back';
-      default:
-        return tag;
-    }
-  }
-
-  void _openViewer(
-    List<MapEntry<String, List<String>>> allPhotos,
-    int dateIndex,
-    int photoIndex,
-  ) {
-    // Flatten all photos into a list of PhotoItems
-    final List<PhotoItem> flatPhotos = [];
-    int initialIndex = 0;
-
-    for (int d = 0; d < allPhotos.length; d++) {
-      final date = allPhotos[d].key;
-      final photos = allPhotos[d].value;
-
-      for (int p = 0; p < photos.length; p++) {
-        final path = photos[p];
-        final poseTag = ref.read(mediaRepoProvider).getPoseTag(path);
-
-        if (d == dateIndex && p == photoIndex) {
-          initialIndex = flatPhotos.length;
-        }
-
-        flatPhotos.add(PhotoItem(path: path, date: date, poseTag: poseTag));
-      }
-    }
-
-    Navigator.of(context)
-        .push(
-          MaterialPageRoute(
-            builder: (_) => PhotoViewerScreen(
-              photos: flatPhotos,
-              initialIndex: initialIndex,
-            ),
-          ),
-        )
-        .then((_) {
-          // Re-fetch in case a photo was deleted
-          setState(() {});
-        });
-  }
-
-  void _openCompareMode(List<MapEntry<String, List<String>>> allPhotos) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const PhotoCompareScreen(), // Will implement next
-      ),
+  Future<void> _addPhoto() async {
+    final result = await showAppBottomSheet<bool>(
+      context: context,
+      builder: (_) => const AddProgressPhotoSheet(),
     );
+    if (result == true && mounted) {
+      setState(() {});
+    }
   }
 
   String _formatDate(String dateStr) {
     try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('EEEE, dd MMM yyyy').format(date);
+      final dt = DateTime.parse(dateStr);
+      return DateFormat('dd MMM yyyy').format(dt);
     } catch (_) {
       return dateStr;
     }
   }
 
-  Future<void> _addPhoto() async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      useRootNavigator: true,
-      backgroundColor: context.colors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Add Progress Photo',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              leading: Icon(Icons.camera_alt, color: context.colors.primary),
-              title: const Text('Take Photo'),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
-            ),
-            ListTile(
-              leading: Icon(Icons.photo_library, color: context.colors.primary),
-              title: const Text('Choose from Gallery'),
-              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-
-    if (source == null || !mounted) return;
-
-    final image = await _picker.pickImage(
-      source: source,
-      maxWidth: 1920,
-      imageQuality: 85,
-    );
-    if (image == null || !mounted) return;
-
-    // Prompt for metadata (Pose, Weight, Note)
-    final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final currentWeight = ref.read(dailyLogRepoProvider).getLog(date)?.weight;
-
-    final metadata = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      useRootNavigator: true,
-      backgroundColor: context.colors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Photo Details',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 16),
-            _CaptureMetadataForm(
-              initialWeight: currentWeight ?? 0.0,
-              onComplete: (data) => Navigator.pop(ctx, data),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (!mounted || metadata == null) return;
-
-    final selectedPose = metadata['pose'] as String;
-    final weight = metadata['weight'] as double?;
-    final note = metadata['note'] as String?;
-
-    final imageBytes = await image.readAsBytes();
-    await ref
-        .read(mediaRepoProvider)
-        .saveProgressPhoto(
-          date,
-          imageBytes,
-          poseTag: selectedPose,
-          weight: weight,
-          note: note,
-        );
-    setState(() {}); // refresh
+  void _openCamera() {
+    _addPhoto();
   }
-}
 
-// ignore: unused_element
-class _PoseOption extends StatelessWidget {
-  const _PoseOption({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: context.colors.lavender,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: context.colors.primary, size: 28),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textDark,
-              ),
-            ),
-          ],
+  void _openViewer(List<MapEntry<String, List<String>>> allPhotos, int dateIndex, int photoIndex) {
+    final flatPhotos = <PhotoItem>[];
+    int targetIndex = 0;
+    for (int i = 0; i < allPhotos.length; i++) {
+      final date = allPhotos[i].key;
+      for (int j = 0; j < allPhotos[i].value.length; j++) {
+        final path = allPhotos[i].value[j];
+        final meta = ref.read(mediaRepoProvider).getProgressPhotoMeta(date, path);
+        flatPhotos.add(PhotoItem(path: path, date: date, poseTag: meta.pose));
+        if (i == dateIndex && j == photoIndex) {
+          targetIndex = flatPhotos.length - 1;
+        }
+      }
+    }
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PhotoViewerScreen(
+          photos: flatPhotos,
+          initialIndex: targetIndex,
         ),
       ),
     );
   }
-}
 
-class _CaptureMetadataForm extends StatefulWidget {
-  final double initialWeight;
-  final Function(Map<String, dynamic>) onComplete;
-
-  const _CaptureMetadataForm({
-    required this.initialWeight,
-    required this.onComplete,
-  });
-
-  @override
-  State<_CaptureMetadataForm> createState() => _CaptureMetadataFormState();
-}
-
-class _CaptureMetadataFormState extends State<_CaptureMetadataForm> {
-  String? _selectedPose;
-  late TextEditingController _weightController;
-  late TextEditingController _noteController;
-
-  @override
-  void initState() {
-    super.initState();
-    _weightController = TextEditingController(
-      text: widget.initialWeight > 0 ? widget.initialWeight.toString() : '',
-    );
-    _noteController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _weightController.dispose();
-    _noteController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'Pose (Required)',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _SelectablePoseOption(
-                icon: Icons.accessibility_new_rounded,
-                label: 'Front',
-                isSelected: _selectedPose == 'front',
-                onTap: () => setState(() => _selectedPose = 'front'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _SelectablePoseOption(
-                icon: Icons.sync_alt_rounded,
-                label: 'Side',
-                isSelected: _selectedPose == 'side',
-                onTap: () => setState(() => _selectedPose = 'side'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _SelectablePoseOption(
-                icon: Icons.turn_left_rounded,
-                label: 'Back',
-                isSelected: _selectedPose == 'back',
-                onTap: () => setState(() => _selectedPose = 'back'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _weightController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(
-            labelText: 'Weight (Optional)',
-            prefixIcon: Icon(Icons.monitor_weight_outlined),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _noteController,
-          decoration: const InputDecoration(
-            labelText: 'Note (Optional)',
-            prefixIcon: Icon(Icons.notes_rounded),
-            hintText: 'e.g. Post-workout pump',
-          ),
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: _selectedPose == null
-              ? null
-              : () {
-                  widget.onComplete({
-                    'pose': _selectedPose,
-                    'weight': double.tryParse(_weightController.text),
-                    'note': _noteController.text,
-                  });
-                },
-          child: const Text('Save Photo'),
-        ),
-      ],
-    );
-  }
-}
-
-class _SelectablePoseOption extends StatelessWidget {
-  const _SelectablePoseOption({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? context.colors.primary : context.colors.lavender,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? context.colors.onPrimary
-                  : context.colors.primary,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: isSelected
-                    ? context.colors.onPrimary
-                    : context.colors.textDark,
-              ),
-            ),
-          ],
-        ),
+  void _openCompareMode(List<MapEntry<String, List<String>>> allPhotos) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PhotoCompareScreen(),
       ),
     );
   }

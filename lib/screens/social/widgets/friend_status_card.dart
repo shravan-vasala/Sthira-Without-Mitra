@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../models/friend.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
+import '../../../models/social_profile.dart';
+
 
 class FriendStatusCard extends ConsumerWidget {
   final Friend friend;
@@ -20,7 +24,7 @@ class FriendStatusCard extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 24),
             child: ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: _buildAvatar(null, friend.name, context),
+              leading: _buildAvatar(null, friend.name, friend.uid, context),
               title: Text(
                 friend.name,
                 style: TextStyle(
@@ -33,23 +37,15 @@ class FriendStatusCard extends ConsumerWidget {
                 'No recent activity.',
                 style: TextStyle(color: context.colors.textMedium),
               ),
-              trailing: IconButton(
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: context.colors.textMedium.withValues(alpha: 0.5),
-                ),
-                onPressed: () => _showRemoveDialog(context, ref, friend),
-              ),
+              trailing: _buildOverflowMenu(context, ref, friend),
             ),
           );
         }
 
         final now = DateTime.now();
-        // Stale if it's not the same day (meaning previous day or older)
         final isStale =
             profile.lastUpdatedAt.day != now.day ||
             diffInDays(profile.lastUpdatedAt, now) > 0;
-        final diff = now.difference(profile.lastUpdatedAt);
 
         final Color iconColor = isStale
             ? context.colors.textMedium.withValues(alpha: 0.5)
@@ -65,23 +61,31 @@ class FriendStatusCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  _buildAvatar(profile.avatarUrl, profile.name, context),
+                   _buildAvatar(profile.avatarUrl, profile.name, profile.uid, context),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          profile.name,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: context.colors.textDark,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              profile.name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: context.colors.textDark,
+                              ),
+                            ),
+                            if (profile.todayScore != null) ...[
+                              const SizedBox(width: 8),
+                              _ScoreRing(score: profile.todayScore!, isStale: isStale),
+                            ]
+                          ],
                         ),
                         Text(
                           isStale
-                              ? 'Last active ${diff.inDays > 0 ? diff.inDays : 1}d ago'
+                              ? 'Last active ${diffInDays(profile.lastUpdatedAt, now) > 0 ? diffInDays(profile.lastUpdatedAt, now) : 1}d ago'
                               : 'Updated ${_timeAgo(profile.lastUpdatedAt)}',
                           style: TextStyle(
                             color: context.colors.textMedium,
@@ -91,13 +95,7 @@ class FriendStatusCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: context.colors.textMedium.withValues(alpha: 0.5),
-                    ),
-                    onPressed: () => _showRemoveDialog(context, ref, friend),
-                  ),
+                  _buildOverflowMenu(context, ref, friend),
                 ],
               ),
               const SizedBox(height: 16),
@@ -106,10 +104,11 @@ class FriendStatusCard extends ConsumerWidget {
                 children: [
                   _StatBlock(
                     icon: Icons.directions_walk,
-                    value: profile.todaySteps.toString(),
+                    value: NumberFormat.decimalPattern().format(profile.todaySteps),
                     label: 'Steps',
                     color: iconColor,
                     textColor: textColor,
+                    progress: profile.todaySteps / 10000.0,
                   ),
                   _StatBlock(
                     icon: Icons.fitness_center,
@@ -117,6 +116,7 @@ class FriendStatusCard extends ConsumerWidget {
                     label: 'Workouts',
                     color: iconColor,
                     textColor: textColor,
+                    progress: profile.todayWorkouts >= 1 ? 1.0 : 0.0,
                   ),
                   _StatBlock(
                     icon: Icons.local_fire_department,
@@ -124,6 +124,7 @@ class FriendStatusCard extends ConsumerWidget {
                     label: 'Streak',
                     color: iconColor,
                     textColor: textColor,
+                    progress: null,
                   ),
                 ],
               ),
@@ -148,6 +149,33 @@ class FriendStatusCard extends ConsumerWidget {
     );
   }
 
+  Widget _buildOverflowMenu(BuildContext context, WidgetRef ref, Friend friend) {
+    return PopupMenuButton<String>(
+      icon: Icon(
+        Icons.more_vert,
+        color: context.colors.textMedium.withValues(alpha: 0.5),
+      ),
+      color: context.colors.card,
+      onSelected: (value) {
+        if (value == 'remove') {
+          _showRemoveDialog(context, ref, friend);
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'remove',
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline, color: context.colors.red, size: 20),
+              const SizedBox(width: 12),
+              Text('Remove Friend', style: TextStyle(color: context.colors.red)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   int diffInDays(DateTime a, DateTime b) {
     return DateTime(
       b.year,
@@ -156,7 +184,7 @@ class FriendStatusCard extends ConsumerWidget {
     ).difference(DateTime(a.year, a.month, a.day)).inDays;
   }
 
-  Widget _buildAvatar(String? avatarUrl, String name, BuildContext context) {
+  Widget _buildAvatar(String? avatarUrl, String name, String uid, BuildContext context) {
     if (avatarUrl != null && avatarUrl.startsWith('assets/')) {
       return CircleAvatar(
         radius: 24,
@@ -165,14 +193,26 @@ class FriendStatusCard extends ConsumerWidget {
       );
     }
 
+    // Deterministic pastel color based on uid
+    final hash = uid.hashCode.abs();
+    final pastelColors = [
+      context.colors.primary.withValues(alpha: 0.2), // Peach
+      context.colors.green.withValues(alpha: 0.2),
+      context.colors.indigo.withValues(alpha: 0.2),
+      context.colors.orange.withValues(alpha: 0.2),
+      const Color(0xFFB5A5AA).withValues(alpha: 0.3), // Muted Sage
+    ];
+    final color = pastelColors[hash % pastelColors.length];
+    final textColor = color.withValues(alpha: 1.0); // Make it fully opaque for text
+
     final initials = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?';
     return CircleAvatar(
       radius: 24,
-      backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+      backgroundColor: color,
       child: Text(
         initials,
         style: TextStyle(
-          color: context.colors.primary,
+          color: context.colors.textDark, // So it pops against the pastel
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -220,11 +260,19 @@ class FriendStatusCard extends ConsumerWidget {
   }
 
   String _timeAgo(DateTime date) {
-    final diff = DateTime.now().difference(date);
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'Just now';
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inDays == 0) {
+      if (diff.inHours > 0) {
+         if (date.hour < 12) return 'this morning';
+         if (date.hour < 17) return 'this afternoon';
+         return 'this evening';
+      }
+      if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
+      return 'Just now';
+    }
+    if (diff.inDays == 1) return 'yesterday';
+    return '${diff.inDays}d ago';
   }
 }
 
@@ -234,6 +282,7 @@ class _StatBlock extends StatelessWidget {
   final String label;
   final Color color;
   final Color textColor;
+  final double? progress;
 
   const _StatBlock({
     required this.icon,
@@ -241,6 +290,7 @@ class _StatBlock extends StatelessWidget {
     required this.label,
     required this.color,
     required this.textColor,
+    this.progress,
   });
 
   @override
@@ -265,7 +315,52 @@ class _StatBlock extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
+        if (progress != null) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 48,
+            height: 4,
+            child: LinearProgressIndicator(
+              value: progress!.clamp(0.0, 1.0),
+              backgroundColor: context.colors.inputFill,
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          )
+        ]
       ],
+    );
+  }
+}
+
+class _ScoreRing extends StatelessWidget {
+  final int score;
+  final bool isStale;
+  const _ScoreRing({required this.score, required this.isStale});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isStale ? context.colors.textMedium.withValues(alpha: 0.5) : context.colors.primary;
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 2,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          score.toString(),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ),
     );
   }
 }

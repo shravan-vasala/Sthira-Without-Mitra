@@ -10,6 +10,8 @@ class SocialProfile {
   final String? latestBadge;
   final DateTime lastUpdatedAt;
   final List<String> allowedReaders;
+  final int? todayScore;
+  final int? weekScore;
 
   SocialProfile({
     required this.uid,
@@ -23,6 +25,8 @@ class SocialProfile {
     this.latestBadge,
     required this.lastUpdatedAt,
     this.allowedReaders = const [],
+    this.todayScore,
+    this.weekScore,
   });
 
   factory SocialProfile.fromJson(Map<String, dynamic> json) {
@@ -44,6 +48,8 @@ class SocialProfile {
               ?.map((e) => e as String)
               .toList() ??
           [],
+      todayScore: json['todayScore'] as int?,
+      weekScore: json['weekScore'] as int?,
     );
   }
 
@@ -60,6 +66,8 @@ class SocialProfile {
       'latestBadge': latestBadge,
       'lastUpdatedAt': lastUpdatedAt.millisecondsSinceEpoch,
       'allowedReaders': allowedReaders,
+      if (todayScore != null) 'todayScore': todayScore,
+      if (weekScore != null) 'weekScore': weekScore,
     };
   }
 }

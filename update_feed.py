@@ -1,4 +1,10 @@
-import 'package:flutter/material.dart';
+import re
+
+with open('lib/screens/social/social_feed_screen.dart', 'r') as f:
+    content = f.read()
+
+# I will write the python script to generate social_feed_screen entirely since we're replacing the whole logic.
+new_code = """import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -224,9 +230,9 @@ class _FriendsTab extends ConsumerWidget {
     final pastelColors = [
       context.colors.primary.withValues(alpha: 0.2), 
       context.colors.green.withValues(alpha: 0.2),
-      context.colors.indigo.withValues(alpha: 0.2),
+      context.colors.blue.withValues(alpha: 0.2),
       context.colors.orange.withValues(alpha: 0.2),
-      const Color(0xFFB5A5AA).withValues(alpha: 0.3), // Muted Sage
+      const Color(0xFFB5A5AA).withValues(alpha: 0.3),
     ];
     final color = pastelColors[hash % pastelColors.length];
     return CircleAvatar(
@@ -590,7 +596,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     final pastelColors = [
       context.colors.primary.withValues(alpha: isInactive ? 0.05 : 0.2), 
       context.colors.green.withValues(alpha: isInactive ? 0.05 : 0.2),
-      context.colors.indigo.withValues(alpha: isInactive ? 0.05 : 0.2),
+      context.colors.blue.withValues(alpha: isInactive ? 0.05 : 0.2),
       context.colors.orange.withValues(alpha: isInactive ? 0.05 : 0.2),
       const Color(0xFFB5A5AA).withValues(alpha: isInactive ? 0.1 : 0.3),
     ];
@@ -660,7 +666,7 @@ class _PodiumView extends ConsumerWidget {
              child: CircleAvatar(
                 backgroundColor: context.colors.inputFill,
                 backgroundImage: p.avatarUrl != null && p.avatarUrl!.startsWith('assets/') ? AssetImage(p.avatarUrl!) : null,
-                child: p.avatarUrl == null || !p.avatarUrl!.startsWith('assets/') ? Text(p.name.isNotEmpty ? p.name.substring(0,1).toUpperCase() : '?', style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold, fontSize: size * 0.4)) : null,
+                child: p.avatarUrl == null || !p.avatarUrl!.startsWith('assets/') ? Text(p.name.substring(0,1).toUpperCase(), style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold, fontSize: size * 0.4)) : null,
              ),
            ),
         ),
@@ -702,3 +708,11 @@ class _SkeletonRow extends StatelessWidget {
       );
    }
 }
+"""
+
+with open('update_feed.py', 'w') as f:
+    f.write(f'''
+with open('lib/screens/social/social_feed_screen.dart', 'w', encoding='utf-8') as main_file:
+    main_file.write("""{new_code}""")
+print("done")
+''')

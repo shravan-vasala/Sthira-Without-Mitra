@@ -167,7 +167,10 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
       if (!RegExp(r'^[A-Za-z0-9]{20,40}$').hasMatch(code)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Not a valid Sthira code')),
+            SnackBar(
+              content: Text('That code doesn\'t look quite right. Give it another try.'),
+              backgroundColor: context.colors.red,
+            ),
           );
         }
         // ignore: unawaited_futures
@@ -219,8 +222,9 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
       if (targetProfile == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not find a user with this code.'),
+            SnackBar(
+              content: const Text('We couldn\'t find anyone with that code. Is it correct?'),
+              backgroundColor: context.colors.orange,
             ),
           );
         }
@@ -254,7 +258,11 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send friend request: $e')),
+          SnackBar(
+             content: const Text('Something went wrong. Let\'s try that again.'),
+             backgroundColor: context.colors.red,
+             behavior: SnackBarBehavior.floating,
+          ),
         );
       }
       // ignore: unawaited_futures

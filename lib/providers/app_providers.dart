@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
 import '../models/social_profile.dart';
+import '../models/friend.dart';
 import 'daily_log_notifier.dart';
 import '../models/daily_log.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -121,6 +123,10 @@ final badgeRepoProvider = Provider<BadgeRepository>((ref) {
 });
 final friendRepoProvider = Provider<FriendRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
+});
+final friendsListStreamProvider = StreamProvider<List<Friend>>((ref) {
+  final repo = ref.watch(friendRepoProvider);
+  return repo.isar.friends.where().sortByAddedAtDesc().watch(fireImmediately: true);
 });
 final healthConnectServiceProvider = Provider<HealthConnectService>((ref) {
   throw UnimplementedError('Must be overridden in main');
@@ -247,6 +253,8 @@ void _pushProfile(Ref ref, DailyLog todayLog) {
     weeklyWorkouts: weeklyWorkouts,
     latestBadge: null,
     lastUpdatedAt: DateTime.now(),
+    todayScore: 0,
+    weekScore: 0,
     // We do NOT overwrite allowedReaders here because pushProfile uses SetOptions(merge: true)
   );
   syncService.pushProfile(profileData);

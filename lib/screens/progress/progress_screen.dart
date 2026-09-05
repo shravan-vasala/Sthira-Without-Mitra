@@ -50,6 +50,45 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     _currentReferenceDate = DateTime.now();
   }
 
+  void _nextMetric() {
+    Haptics.tap();
+    setState(() {
+      int idx = MetricType.values.indexOf(_selectedMetric);
+      idx = (idx + 1) % MetricType.values.length;
+      _selectedMetric = MetricType.values[idx];
+    });
+  }
+
+  void _prevMetric() {
+    Haptics.tap();
+    setState(() {
+      int idx = MetricType.values.indexOf(_selectedMetric);
+      idx = (idx - 1 + MetricType.values.length) % MetricType.values.length;
+      _selectedMetric = MetricType.values[idx];
+    });
+  }
+
+  void _handleSwipe(DragEndDetails details) {
+    if (details.primaryVelocity == null) return;
+    if (details.primaryVelocity! > 300) {
+      // Swiped right -> older range or wider scale? Let's cycle TimeRange:
+      Haptics.tap();
+      setState(() {
+        if (_selectedRange == TimeRange.sixMonths) _selectedRange = TimeRange.monthly;
+        else if (_selectedRange == TimeRange.monthly) _selectedRange = TimeRange.weekly;
+        else _selectedRange = TimeRange.sixMonths;
+      });
+    } else if (details.primaryVelocity! < -300) {
+      // Swiped left
+      Haptics.tap();
+      setState(() {
+        if (_selectedRange == TimeRange.weekly) _selectedRange = TimeRange.monthly;
+        else if (_selectedRange == TimeRange.monthly) _selectedRange = TimeRange.sixMonths;
+        else _selectedRange = TimeRange.weekly;
+      });
+    }
+  }
+
   DateTime get _startDate {
     final d = _currentReferenceDate;
     switch (_selectedRange) {
@@ -76,23 +115,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   void _shiftDate(int direction) {
+    Haptics.tap();
     setState(() {
       if (_selectedRange == TimeRange.weekly) {
-        _currentReferenceDate = _currentReferenceDate.add(
-          Duration(days: 7 * direction),
-        );
+        _currentReferenceDate = _currentReferenceDate.add(Duration(days: 7 * direction));
       } else if (_selectedRange == TimeRange.monthly) {
-        _currentReferenceDate = DateTime(
-          _currentReferenceDate.year,
-          _currentReferenceDate.month + direction,
-          1,
-        );
+        _currentReferenceDate = DateTime(_currentReferenceDate.year, _currentReferenceDate.month + direction, 1);
       } else {
-        _currentReferenceDate = DateTime(
-          _currentReferenceDate.year,
-          _currentReferenceDate.month + (6 * direction),
-          1,
-        );
+        _currentReferenceDate = DateTime(_currentReferenceDate.year, _currentReferenceDate.month + (6 * direction), 1);
       }
     });
   }
@@ -101,348 +131,62 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (_selectedRange == TimeRange.weekly) {
       return '${DateFormat('dd MMM').format(_startDate)} - ${DateFormat('dd MMM yyyy').format(_endDate)}';
     } else if (_selectedRange == TimeRange.monthly) {
-      return DateFormat('MMM yyyy').format(_startDate);
+      return DateFormat('MMMM yyyy').format(_startDate);
     } else {
       return '${DateFormat('MMM yyyy').format(_startDate)} - ${DateFormat('MMM yyyy').format(_endDate)}';
     }
   }
 
-  Future<void> _handlePointLongPress(DateTime date, double value) async {
-    final dateStr = DateFormat('yyyy-MM-dd').format(date);
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Entry?'),
-        content: Text(
-          'Are you sure you want to delete the ${_metricLabel(_selectedMetric)} entry for ${DateFormat('MMM dd').format(date)}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: context.colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      final repo = ref.read(dailyLogRepoProvider);
-      final log = repo.getLog(dateStr);
-      if (log != null) {
-        final newLog = DailyLog(
-          date: log.date,
-          weight: _selectedMetric == MetricType.weight ? null : log.weight,
-          steps: _selectedMetric == MetricType.steps ? null : log.steps,
-          stepsSource: _selectedMetric == MetricType.steps
-              ? null
-              : log.stepsSource,
-          sleepHours: _selectedMetric == MetricType.sleep
-              ? null
-              : log.sleepHours,
-          bodyFat: _selectedMetric == MetricType.bodyFat ? null : log.bodyFat,
-          workoutCompleted: log.workoutCompleted,
-          workoutDayId: log.workoutDayId,
-        );
-        await repo.saveLog(newLog);
-        ref.invalidate(dailyLogsRangeProvider);
-        ref.invalidate(dailyLogProvider);
-      }
-    }
-  }
-
   void _openManualEntry() {
-    if (_selectedMetric == MetricType.weight ||
-        _selectedMetric == MetricType.bodyFat ||
-        _selectedMetric == MetricType.bmi) {
-      showAppBottomSheet(
-        context: context,
-        builder: (_) => const WeightEntryDialog(),
-      );
+    if (_selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi) {
+      showAppBottomSheet(context: context, builder: (_) => const WeightEntryDialog());
     } else if (_selectedMetric == MetricType.steps) {
-      showAppBottomSheet(
-        context: context,
-        builder: (_) => const StepsEntryDialog(),
-      );
+      showAppBottomSheet(context: context, builder: (_) => const StepsEntryDialog());
     } else if (_selectedMetric == MetricType.sleep) {
-      showAppBottomSheet(
-        context: context,
-        builder: (_) => const SleepEntryDialog(),
-      );
+      showAppBottomSheet(context: context, builder: (_) => const SleepEntryDialog());
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final startStr = DateFormat('yyyy-MM-dd').format(_startDate);
-    final endStr = DateFormat('yyyy-MM-dd').format(_endDate);
-    final logs = ref.watch(dailyLogsRangeProvider((startStr, endStr)));
-    final profile = ref.watch(profileProvider);
-
-    return Scaffold(
-      backgroundColor: context.colors.scaffoldBg,
-      appBar: AppBar(
-        title: Text(
-          'My Progress',
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: context.colors.textDark,
-            fontSize: 32,
-          ),
-        ),
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Navigator.of(context).canPop()
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
-                onPressed: () => Navigator.of(context).pop(),
-              )
-            : null,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.insights_rounded),
-            onPressed: () {
-              Haptics.tap();
-              showAppBottomSheet(
-                context: context,
-                builder: (_) => const Padding(
-                  padding: EdgeInsets.only(bottom: 24),
-                  child: InsightsCard(),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_month_rounded),
-            onPressed: () {
-              Haptics.tap();
-              context.push('/progress/yearly-activity');
-            },
-          ),
-          if (_selectedMetric != MetricType.bmi &&
-              _selectedMetric != MetricType.calories &&
-              _selectedMetric != MetricType.protein)
-            IconButton(
-              icon: const Icon(Icons.add_rounded),
-              onPressed: () {
-                Haptics.tap();
-                _openManualEntry();
-              },
-            ),
-        ],
-      ),
-      body: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            // Time range segmented control
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: TimeRange.values.map((range) {
-                  final isSelected = _selectedRange == range;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() {
-                        _selectedRange = range;
-                        _currentReferenceDate = DateTime.now();
-                      }),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _rangeLabel(range),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: isSelected
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
-                              color: isSelected
-                                  ? context.colors.textDark
-                                  : context.colors.textMedium,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 24,
-                            height: 3,
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? context.colors.primary
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Horizontal scrollable Metric tab bar
-            SizedBox(
-              height: 48,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-                scrollDirection: Axis.horizontal,
-                itemCount: MetricType.values.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final metric = MetricType.values[index];
-                  if (metric == MetricType.screenTime &&
-                      !profile.screenTimeEnabled)
-                    return const SizedBox();
-                  final isSelected = _selectedMetric == metric;
-
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedMetric = metric),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? context.colors.primary.withValues(alpha: 0.1)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: isSelected
-                              ? context.colors.primary
-                              : context.colors.border,
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _metricIcon(metric),
-                            size: 18,
-                            color: isSelected
-                                ? context.colors.primary
-                                : context.colors.textMedium,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _metricLabel(metric),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelected
-                                  ? FontWeight.w700
-                                  : FontWeight.w600,
-                              color: isSelected
-                                  ? context.colors.primary
-                                  : context.colors.textMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Date range navigator
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_left_rounded,
-                      color: context.colors.primary,
-                    ),
-                    onPressed: () => _shiftDate(-1),
-                  ),
-                  Text(
-                    _headerText,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.textDark,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_right_rounded,
-                      color: context.colors.primary,
-                    ),
-                    onPressed: () => _shiftDate(1),
-                  ),
-                ],
-              ),
-            ),
-
-            Center(
-              child: ActionChip(
-                backgroundColor: context.colors.lavenderCard,
-                side: BorderSide.none,
-                label: Text(
-                  'This Week Summary',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.primary,
-                  ),
-                ),
-                onPressed: () {
-                  context.go('/progress/weekly-summary');
-                },
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 350),
-                  switchInCurve: Curves.easeOut,
-                  switchOutCurve: Curves.easeIn,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                  child: KeyedSubtree(
-                    key: ValueKey(
-                      '${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}',
-                    ),
-                    child: _selectedMetric == MetricType.calories
-                        ? _buildCaloriesChart(startStr, endStr, profile)
-                        : _selectedMetric == MetricType.protein
-                        ? _buildProteinChart(startStr, endStr, profile)
-                        : _buildChart(logs, profile.useKg, profile),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  List<ChartDataPoint> _calculateTrendData(List<ChartDataPoint> data) {
+    if (data.isEmpty) return [];
+    final trend = <ChartDataPoint>[];
+    for (int i = 0; i < data.length; i++) {
+        final window = data.sublist(i > 6 ? i - 6 : 0, i + 1);
+        final sum = window.fold<double>(0, (p, c) => p + c.value);
+        trend.add(ChartDataPoint(data[i].date, sum / window.length));
+    }
+    return trend;
   }
 
-  // ignore: unused_element
-  List<ChartDataPoint> _dailyMetricSeries(
-    List<DailyLog> logs,
-    MetricType metric,
-    UserProfile profile,
-  ) {
+  List<ChartDataPoint> _downsampleToWeekly(List<ChartDataPoint> data) {
+    if (data.isEmpty) return [];
+    final result = <ChartDataPoint>[];
+    int currentWeek = -1;
+    List<double> currentWeekVals = [];
+    DateTime? currentWeekDate;
+
+    for (var d in data) {
+       final weekIdx = d.date.difference(data.first.date).inDays ~/ 7;
+       if (weekIdx != currentWeek) {
+           if (currentWeekVals.isNotEmpty) {
+               final avg = currentWeekVals.reduce((a,b)=>a+b) / currentWeekVals.length;
+               result.add(ChartDataPoint(currentWeekDate!, avg));
+           }
+           currentWeek = weekIdx;
+           currentWeekVals = [d.value];
+           currentWeekDate = d.date;
+       } else {
+           currentWeekVals.add(d.value);
+       }
+    }
+    if (currentWeekVals.isNotEmpty) {
+        final avg = currentWeekVals.reduce((a,b)=>a+b) / currentWeekVals.length;
+        result.add(ChartDataPoint(currentWeekDate!, avg));
+    }
+    return result;
+  }
+
+  List<ChartDataPoint> _dailyMetricSeries(List<DailyLog> logs, MetricType metric, UserProfile profile) {
     final logsByDate = {for (var l in logs) l.date: l};
     final daysDiff = _endDate.difference(_startDate).inDays;
     final data = <ChartDataPoint>[];
@@ -456,61 +200,23 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
       double? val;
       switch (metric) {
-        case MetricType.weight:
-          val = log.weight != null
-              ? (useKg ? log.weight! : log.weight! * 2.20462)
-              : null;
-          break;
-        case MetricType.steps:
-          val = log.steps?.toDouble();
-          break;
-        case MetricType.sleep:
-          val = log.sleepHours;
-          break;
-        case MetricType.screenTime:
-          if (log.screenTimeMinutes != null) {
-            val = log.screenTimeMinutes! / 60.0; // convert to hours
-          }
-          break;
-        case MetricType.bodyFat:
-          val = log.bodyFat;
-          break;
-        case MetricType.bmi:
+        case MetricType.weight: val = log.weight != null ? (useKg ? log.weight! : log.weight! * 2.20462) : null; break;
+        case MetricType.steps: val = log.steps?.toDouble(); break;
+        case MetricType.sleep: val = log.sleepHours; break;
+        case MetricType.screenTime: if (log.screenTimeMinutes != null) val = log.screenTimeMinutes! / 60.0; break;
+        case MetricType.bodyFat: val = log.bodyFat; break;
+        case MetricType.bmi: 
           if (log.weight != null) {
             final h = profile.heightInMeters;
             val = log.weight! / (h * h);
           }
           break;
         case MetricType.calories:
-        case MetricType.protein:
-          val = null;
-          break;
+        case MetricType.protein: val = null; break;
       }
-      if (val != null) data.add(ChartDataPoint(d, val));
-    }
-    return data;
-  }
-
-  // ignore: unused_element
-  List<ChartDataPoint> _mealSeries(
-    List<DailyMealLog> mealLogs, {
-    required bool calories,
-  }) {
-    final logsByDate = {for (var l in mealLogs) l.date: l};
-    final daysDiff = _endDate.difference(_startDate).inDays;
-    final data = <ChartDataPoint>[];
-
-    for (int i = 0; i <= daysDiff; i++) {
-      final d = _startDate.add(Duration(days: i));
-      final dateStr = DateFormat('yyyy-MM-dd').format(d);
-      final log = logsByDate[dateStr];
-      if (log == null) continue;
-      if (calories) {
-        if (log.totalCalories > 0) {
-          data.add(ChartDataPoint(d, log.totalCalories.toDouble()));
-        }
-      } else if (log.totalProtein > 0) {
-        data.add(ChartDataPoint(d, log.totalProtein));
+      if (val != null) {
+        if (metric == MetricType.steps && val <= 0) continue;
+        data.add(ChartDataPoint(d, val));
       }
     }
     return data;
@@ -518,465 +224,387 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   String _formatOverviewValue(double value, MetricType metric, bool useKg) {
     switch (metric) {
-      case MetricType.weight:
-        return '${value.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'}';
-      case MetricType.steps:
-        return value.toInt().toString();
-      case MetricType.sleep:
-        return '${value.toStringAsFixed(1)}h';
-      case MetricType.screenTime:
-        return '${value.toStringAsFixed(1)}h';
-      case MetricType.bodyFat:
-        return '${value.toStringAsFixed(1)}%';
-      case MetricType.calories:
-        return '${value.toInt()} kcal';
-      case MetricType.protein:
-        return '${value.toStringAsFixed(0)}g';
-      case MetricType.bmi:
-        return value.toStringAsFixed(1);
+      case MetricType.weight: return '${value.toStringAsFixed(1)}';
+      case MetricType.steps: return NumberFormat('#,###').format(value.toInt());
+      case MetricType.sleep: return '${value.toStringAsFixed(1)}';
+      case MetricType.screenTime: return '${value.toStringAsFixed(1)}';
+      case MetricType.bodyFat: return '${value.toStringAsFixed(1)}';
+      case MetricType.calories: return '${value.toInt()}';
+      case MetricType.protein: return '${value.toStringAsFixed(0)}';
+      case MetricType.bmi: return value.toStringAsFixed(1);
     }
   }
 
-  /// Primary overview value = period average (coach-friendly).
-  // ignore: unused_element
-  String _overviewAvgText(
-    List<ChartDataPoint> data,
-    MetricType metric,
-    bool useKg,
-  ) {
-    if (data.isEmpty) return '—';
-    final avg = data.map((d) => d.value).reduce((a, b) => a + b) / data.length;
-    return _formatOverviewValue(avg, metric, useKg);
-  }
-
-  /// Subtitle: "avg this period" + delta vs first point when useful.
-  // ignore: unused_element
-  String? _overviewSubtitle(
-    List<ChartDataPoint> data,
-    MetricType metric,
-    bool useKg,
-  ) {
-    if (data.isEmpty) return null;
-
-    final parts = <String>['avg this period'];
-    final isTrendMetric =
-        metric == MetricType.weight ||
-        metric == MetricType.bodyFat ||
-        metric == MetricType.bmi ||
-        metric == MetricType.sleep;
-
+  String _overviewSubtitle(List<ChartDataPoint> data, MetricType metric, bool useKg) {
+    if (data.isEmpty) return 'No data yet';
+    final isTrendMetric = metric == MetricType.weight || metric == MetricType.bodyFat || metric == MetricType.bmi || metric == MetricType.sleep;
     if (isTrendMetric && data.length >= 2) {
-      final delta = data.last.value - data.first.value;
+      final trend = _calculateTrendData(data);
+      if (trend.isEmpty) trend.addAll(data);
+      final delta = trend.last.value - trend.first.value;
       final abs = delta.abs();
-      final sign = delta > 0
-          ? '+'
-          : delta < 0
-          ? '−'
-          : '';
+      final sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
       switch (metric) {
-        case MetricType.weight:
-          parts.add(
-            '$sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start',
-          );
-          break;
+        case MetricType.weight: return 'You have a stable track record. $sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start!';
         case MetricType.sleep:
-        case MetricType.screenTime:
-          parts.add('$sign${abs.toStringAsFixed(1)}h vs start');
-          break;
-        case MetricType.bodyFat:
-          parts.add('$sign${abs.toStringAsFixed(1)}% vs start');
-          break;
-        case MetricType.bmi:
-          parts.add('$sign${abs.toStringAsFixed(1)} vs start');
-          break;
-        default:
-          break;
+        case MetricType.screenTime: return 'Trend shows $sign${abs.toStringAsFixed(1)}h vs start of period.';
+        case MetricType.bodyFat: return 'Progress: $sign${abs.toStringAsFixed(1)}% vs start.';
+        case MetricType.bmi: return 'Your BMI shifted $sign${abs.toStringAsFixed(1)}.';
+        default: break;
       }
-    } else if (data.length == 1) {
-      parts.add('1 entry');
-    } else {
-      parts.add('${data.length} days');
     }
-    return parts.join(' · ');
+    return 'Consistent tracking is the key to steady action.';
+  }
+
+  String _overviewUnit(MetricType metric, bool useKg) {
+    switch (metric) {
+      case MetricType.weight: return useKg ? 'kg' : 'lb';
+      case MetricType.steps: return 'steps';
+      case MetricType.sleep: return 'hrs';
+      case MetricType.screenTime: return 'hrs';
+      case MetricType.bodyFat: return '%';
+      case MetricType.calories: return 'kcal';
+      case MetricType.protein: return 'g';
+      case MetricType.bmi: return 'BMI';
+    }
+  }
+
+  Widget _buildStatCards(List<ChartDataPoint> data, MetricType metric, bool useKg, UserProfile profile) {
+    if (data.isEmpty) return const SizedBox();
+
+    if (metric == MetricType.steps) {
+      final valid = data.map((d) => d.value).toList();
+      final total = valid.reduce((a, b) => a + b);
+      final avg = total ~/ valid.length;
+      final kcal = (avg * 0.04).toStringAsFixed(0);
+      final distance = (avg * 0.762).toStringAsFixed(0); // roughly 0.762m per step
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildCircularStat('kcal', '${kcal}+', Icons.bolt),
+            _buildCircularStat('meters', distance, Icons.location_on),
+            _buildCircularStat('avg speed', '1.4', Icons.directions_run),
+          ],
+        ),
+      );
+    } 
+    
+    // Weight / Health Metrics (Side by Side Cards)
+    final valid = data.map((d) => d.value).toList();
+    final avg = valid.reduce((a, b) => a + b) / valid.length;
+    final maxVal = valid.reduce((a, b) => a > b ? a : b);
+    final minVal = valid.reduce((a, b) => a < b ? a : b);
+    
+    String label1 = 'AVERAGE';
+    String val1 = '${avg.toStringAsFixed(1)}';
+    String label2 = 'MAX';
+    String val2 = '${maxVal.toStringAsFixed(1)}';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          Expanded(child: _buildRectStat(label1, val1, _overviewUnit(metric, useKg), context.colors.primary)),
+          const SizedBox(width: 16),
+          Expanded(child: _buildRectStat(label2, val2, _overviewUnit(metric, useKg), context.colors.red)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircularStat(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: context.colors.card.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
+            border: Border.all(color: context.colors.border, width: 1.5),
+          ),
+          child: Icon(icon, color: context.colors.primary, size: 20),
+        ),
+        const SizedBox(height: 12),
+        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+        const SizedBox(height: 2),
+        Text(label, style: TextStyle(fontSize: 12, color: context.colors.textLight)),
+      ],
+    );
+  }
+
+  Widget _buildRectStat(String label, String value, String unit, Color iconColor) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.colors.card,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.assessment_rounded, color: iconColor, size: 18),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+              const SizedBox(width: 4),
+              Text(unit, style: TextStyle(fontSize: 14, color: context.colors.textLight)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 12, color: context.colors.textLight, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
   }
 
   Widget _buildChart(List<DailyLog> logs, bool useKg, dynamic profile) {
-    final List<ChartDataPoint> data = [];
-    final daysDiff = _endDate.difference(_startDate).inDays;
-    final logsByDate = {for (var l in logs) l.date: l};
-
-    int daysWithData = 0;
-
-    for (int i = 0; i <= daysDiff; i++) {
-      final d = _startDate.add(Duration(days: i));
-      final dateStr = DateFormat('yyyy-MM-dd').format(d);
-      final log = logsByDate[dateStr];
-
-      if (log != null) {
-        double? val;
-        switch (_selectedMetric) {
-          case MetricType.weight:
-            val = log.weight != null
-                ? (useKg ? log.weight! : log.weight! * 2.20462)
-                : null;
-            break;
-          case MetricType.steps:
-            val = log.steps?.toDouble();
-            break;
-          case MetricType.sleep:
-            val = log.sleepHours;
-            break;
-          case MetricType.screenTime:
-            if (log.screenTimeMinutes != null) {
-              val = log.screenTimeMinutes! / 60.0;
-            }
-            break;
-          case MetricType.bmi:
-            if (log.weight != null) {
-              // ignore: avoid_dynamic_calls
-              final h = profile.heightInMeters;
-              // ignore: avoid_dynamic_calls
-              val = log.weight! / (h * h);
-            }
-            break;
-          case MetricType.bodyFat:
-            val = log.bodyFat;
-            break;
-          case MetricType.calories:
-          case MetricType.protein:
-            val = null;
-            break;
-        }
-
-        if (val != null) {
-          // Treat 0 steps as "not logged" so the line doesn't crash to zero.
-          if (_selectedMetric == MetricType.steps && val <= 0) continue;
-          data.add(ChartDataPoint(d, val));
-          daysWithData++;
-        }
-      }
+    List<ChartDataPoint> data = _dailyMetricSeries(logs, _selectedMetric, profile);
+    
+    // Smooth exactly the 6 Months Graph!
+    if (_selectedRange == TimeRange.sixMonths) {
+      data = _downsampleToWeekly(data);
     }
-
-    List<String> labels = [];
-    List<String> values = [];
-
-    if (daysWithData > 0) {
-      final validData = data;
-
-      if (_selectedMetric == MetricType.steps) {
-        final validSteps = validData
-            .where((d) => d.value > 0)
-            .map((d) => d.value)
-            .toList();
-        if (validSteps.isNotEmpty) {
-          final total = validSteps.reduce((a, b) => a + b);
-          final avg = total ~/ validSteps.length;
-          final maxVal = validSteps.reduce((a, b) => a > b ? a : b);
-          final avgFmt = NumberFormat('#,###').format(avg);
-          final maxFmt = NumberFormat('#,###').format(maxVal.toInt());
-          final totalFmt = total >= 10000
-              ? '${(total / 1000).toStringAsFixed(1)}k'
-              : NumberFormat('#,###').format(total.toInt());
-
-          labels = ['AVERAGE', 'TOTAL', 'MAX'];
-          values = [avgFmt, totalFmt, maxFmt];
-        }
-      } else {
-        final vals = validData.map((d) => d.value).toList();
-        final avg = vals.reduce((a, b) => a + b) / vals.length;
-        final maxVal = vals.reduce((a, b) => a > b ? a : b);
-        final minVal = vals.reduce((a, b) => a < b ? a : b);
-
-        if (_selectedMetric == MetricType.weight) {
-          final unit = useKg ? 'kg' : 'lb';
-          labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = [
-            '${avg.toStringAsFixed(1)} $unit',
-            '${maxVal.toStringAsFixed(1)} $unit',
-            '${minVal.toStringAsFixed(1)} $unit',
-          ];
-        } else if (_selectedMetric == MetricType.sleep ||
-            _selectedMetric == MetricType.screenTime) {
-          labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = [
-            '${avg.toStringAsFixed(1)}h',
-            '${maxVal.toStringAsFixed(1)}h',
-            '${minVal.toStringAsFixed(1)}h',
-          ];
-        } else if (_selectedMetric == MetricType.bmi) {
-          labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = [
-            avg.toStringAsFixed(1),
-            maxVal.toStringAsFixed(1),
-            minVal.toStringAsFixed(1),
-          ];
-        } else if (_selectedMetric == MetricType.bodyFat) {
-          labels = ['AVERAGE', 'MAX', 'MIN'];
-          values = [
-            '${avg.toStringAsFixed(1)}%',
-            '${maxVal.toStringAsFixed(1)}%',
-            '${minVal.toStringAsFixed(1)}%',
-          ];
-        }
-      }
-    }
-
-    ChartTimeFormat format;
-    switch (_selectedRange) {
-      case TimeRange.weekly:
-        format = ChartTimeFormat.weekly;
-        break;
-      case TimeRange.monthly:
-        format = ChartTimeFormat.monthly;
-        break;
-      case TimeRange.sixMonths:
-        format = ChartTimeFormat.sixMonths;
-        break;
-    }
-
-    // Empty state logic: if no true valid data exists, we hide the chart
+    
+    final daysWithData = data.length;
     final isEmpty = daysWithData == 0;
-    String emptyMessage =
-        'No ${_metricLabel(_selectedMetric).toLowerCase()} entries yet.';
-    if (_selectedMetric == MetricType.bmi) {
-      emptyMessage = 'Log your weight to see BMI.';
-    }
-
-    return SharedChartCard(
-      title: _metricTitle(_selectedMetric),
-      data: isEmpty ? [] : data,
-      startDate: _startDate,
-      endDate: _endDate,
-      isSteps: _selectedMetric == MetricType.steps,
-      showKgLbToggle: _selectedMetric == MetricType.weight,
-      useKg: useKg,
-      onToggleUnit: () => ref.read(profileProvider.notifier).toggleUnit(),
-      statLabels: isEmpty ? [] : labels,
-      statValues: isEmpty ? [] : values,
-      timeFormat: format,
-      emptyMessage: emptyMessage,
-      // ignore: avoid_dynamic_calls
-      targetValue:
-          _selectedMetric == MetricType.weight && profile.targetWeight != null
-          ? (useKg
-                // ignore: avoid_dynamic_calls
-                ? profile.targetWeight as double
-                // ignore: avoid_dynamic_calls
-                : (profile.targetWeight as double) * 2.20462)
-          : null,
-      onPointLongPress: _handlePointLongPress,
-      expandChart: true,
-    );
-  }
-
-  Widget _buildCaloriesChart(String startStr, String endStr, dynamic profile) {
-    final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
-    final List<ChartDataPoint> data = [];
-    final logsByDate = {for (var l in mealLogs) l.date: l};
-    final daysDiff = _endDate.difference(_startDate).inDays;
-
-    final validCalories = <int>[];
-
-    for (int i = 0; i <= daysDiff; i++) {
-      final d = _startDate.add(Duration(days: i));
-      final dateStr = DateFormat('yyyy-MM-dd').format(d);
-      final log = logsByDate[dateStr];
-
-      if (log != null && log.totalCalories > 0) {
-        data.add(ChartDataPoint(d, log.totalCalories.toDouble()));
-        validCalories.add(log.totalCalories);
-      }
-      // Skip zero / missing days — chart gaps instead of fake dips.
-    }
-
-    List<String> labels = [];
-    List<String> values = [];
-
-    if (validCalories.isNotEmpty) {
-      final sum = validCalories.reduce((a, b) => a + b);
-      final avg = sum ~/ validCalories.length;
-      final maxVal = validCalories.reduce((a, b) => a > b ? a : b);
-      final minVal = validCalories.reduce((a, b) => a < b ? a : b);
-      labels = ['AVERAGE', 'MAX', 'MIN'];
-      values = [
-        NumberFormat('#,###').format(avg),
-        NumberFormat('#,###').format(maxVal),
-        NumberFormat('#,###').format(minVal),
-      ];
-    }
-
+    
     ChartTimeFormat format;
     switch (_selectedRange) {
-      case TimeRange.weekly:
-        format = ChartTimeFormat.weekly;
-        break;
-      case TimeRange.monthly:
-        format = ChartTimeFormat.monthly;
-        break;
-      case TimeRange.sixMonths:
-        format = ChartTimeFormat.sixMonths;
-        break;
+      case TimeRange.weekly: format = ChartTimeFormat.weekly; break;
+      case TimeRange.monthly: format = ChartTimeFormat.monthly; break;
+      case TimeRange.sixMonths: format = ChartTimeFormat.sixMonths; break;
     }
 
-    final isEmpty = validCalories.isEmpty;
+    String emptyMessage = 'No ${_metricLabel(_selectedMetric).toLowerCase()} entries yet.';
+    if (_selectedMetric == MetricType.bmi) emptyMessage = 'Log your weight to see BMI.';
 
-    return SharedChartCard(
-      title: 'Calories',
-      data: isEmpty ? [] : data,
-      startDate: _startDate,
-      endDate: _endDate,
-      isSteps: false,
-      isCalories: true,
-      showKgLbToggle: false,
-      useKg: true,
-      onToggleUnit: () {},
-      statLabels: isEmpty ? [] : labels,
-      statValues: isEmpty ? [] : values,
-      timeFormat: format,
-      emptyMessage: 'No calories logged yet.',
-      // ignore: avoid_dynamic_calls
-      targetValue: profile.targetCalories.toDouble(),
-      onPointLongPress: null,
-      expandChart: true,
+    final isTrendMetric = _selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi;
+    final trendData = (_selectedRange != TimeRange.sixMonths && isTrendMetric && data.length > 2) ? _calculateTrendData(data) : null;
+    
+    final avgText = data.isNotEmpty ? _formatOverviewValue(data.map((d) => d.value).reduce((a,b)=>a+b)/data.length, _selectedMetric, useKg) : '—';
+    final subtitleText = _overviewSubtitle(data, _selectedMetric, useKg);
+    final unitText = _overviewUnit(_selectedMetric, useKg);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!isEmpty) ...[
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  avgText,
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w800,
+                    color: context.colors.textDark,
+                    letterSpacing: -1.5,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  unitText,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textMedium,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              subtitleText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: context.colors.textMedium,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+        
+        // Date Pill Navigation
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: context.colors.card.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: context.colors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () => _shiftDate(-1),
+                  child: Icon(Icons.chevron_left_rounded, color: context.colors.textMedium, size: 20),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    _headerText,
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: context.colors.textDark),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _shiftDate(1),
+                  child: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 20),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        Expanded(
+          child: GestureDetector(
+            onHorizontalDragEnd: _handleSwipe,
+            behavior: HitTestBehavior.opaque,
+            child: SharedChartCard(
+              title: '', // No title needed since it's above
+              data: isEmpty ? [] : data,
+              trendData: trendData,
+              startDate: _startDate,
+              endDate: _endDate,
+              isSteps: _selectedMetric == MetricType.steps,
+              showKgLbToggle: false,
+              useKg: useKg,
+              onToggleUnit: () {},
+              statLabels: const [], // Hide Shared Chart Footer
+              statValues: const [],
+              timeFormat: format,
+              emptyMessage: emptyMessage,
+              // ignore: avoid_dynamic_calls
+              targetValue: _selectedMetric == MetricType.weight && profile.targetWeight != null
+                  ? (useKg
+                      // ignore: avoid_dynamic_calls
+                      ? profile.targetWeight as double
+                      // ignore: avoid_dynamic_calls
+                      : (profile.targetWeight as double) * 2.20462)
+                  : null,
+              onPointLongPress: null,
+              expandChart: true,
+            ),
+          ),
+        ),
+        
+        // Bottom Sesireka styled cards
+        _buildStatCards(data, _selectedMetric, useKg, profile as UserProfile),
+      ],
     );
   }
 
-  Widget _buildProteinChart(
-    String startStr,
-    String endStr,
-    UserProfile profile,
-  ) {
-    final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
-    final daysDiff = _endDate.difference(_startDate).inDays;
-    final logsByDate = {for (var l in mealLogs) l.date: l};
+  @override
+  Widget build(BuildContext context) {
+    final startStr = DateFormat('yyyy-MM-dd').format(_startDate);
+    final endStr = DateFormat('yyyy-MM-dd').format(_endDate);
+    final logs = ref.watch(dailyLogsRangeProvider((startStr, endStr)));
+    final profile = ref.watch(profileProvider);
 
-    final data = <ChartDataPoint>[];
-    for (int i = 0; i <= daysDiff; i++) {
-      final d = _startDate.add(Duration(days: i));
-      final dateStr = DateFormat('yyyy-MM-dd').format(d);
-      final log = logsByDate[dateStr];
-      if (log != null && log.totalProtein > 0) {
-        data.add(ChartDataPoint(d, log.totalProtein));
-      }
-    }
-
-    List<String> labels = [];
-    List<String> values = [];
-    final validPoints = data.map((d) => d.value).toList();
-    if (validPoints.isNotEmpty) {
-      final avg = validPoints.reduce((a, b) => a + b) / validPoints.length;
-      final maxVal = validPoints.reduce((a, b) => a > b ? a : b);
-      labels = ['AVERAGE', 'MAX'];
-      values = ['${avg.toStringAsFixed(0)}g', '${maxVal.toStringAsFixed(0)}g'];
-    }
-
-    ChartTimeFormat format;
-    switch (_selectedRange) {
-      case TimeRange.weekly:
-        format = ChartTimeFormat.weekly;
-        break;
-      case TimeRange.monthly:
-        format = ChartTimeFormat.monthly;
-        break;
-      case TimeRange.sixMonths:
-        format = ChartTimeFormat.sixMonths;
-        break;
-    }
-
-    final isEmpty = validPoints.isEmpty;
-
-    return SharedChartCard(
-      title: 'Protein (g)',
-      data: isEmpty ? [] : data,
-      startDate: _startDate,
-      endDate: _endDate,
-      isSteps: false,
-      isCalories: false,
-      isProtein: true,
-      showKgLbToggle: false,
-      useKg: true,
-      onToggleUnit: () {},
-      statLabels: isEmpty ? [] : labels,
-      statValues: isEmpty ? [] : values,
-      timeFormat: format,
-      emptyMessage: 'No protein logged yet.',
-      targetValue: profile.targetProteinG.toDouble(),
-      onPointLongPress: null,
-      expandChart: true,
+    return Scaffold(
+      backgroundColor: context.colors.scaffoldBg,
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.chevron_left_rounded, color: context.colors.textMedium),
+              onPressed: _prevMetric,
+            ),
+            Text(
+              _metricTitle(_selectedMetric),
+              style: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: context.colors.textDark,
+                letterSpacing: -0.5,
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium),
+              onPressed: _nextMetric,
+            ),
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
+        actions: [
+          if (_selectedMetric != MetricType.bmi &&
+              _selectedMetric != MetricType.calories &&
+              _selectedMetric != MetricType.protein)
+            IconButton(
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () {
+                Haptics.tap();
+                _openManualEntry();
+              },
+            ),
+            const SizedBox(width: 8),
+        ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child: KeyedSubtree(
+            key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}'),
+            child: _buildChart(logs, profile.useKg, profile),
+          ),
+        ),
+      ),
     );
-  }
-
-  String _rangeLabel(TimeRange range) {
-    switch (range) {
-      case TimeRange.weekly:
-        return 'Weekly';
-      case TimeRange.monthly:
-        return 'Monthly';
-      case TimeRange.sixMonths:
-        return '6 Months';
-    }
   }
 
   String _metricTitle(MetricType metric) {
     switch (metric) {
-      case MetricType.weight:
-        return 'Body Weight';
-      case MetricType.steps:
-        return 'Steps';
-      case MetricType.sleep:
-        return 'Sleep';
-      case MetricType.bmi:
-        return 'BMI';
-      case MetricType.bodyFat:
-        return 'Body Fat';
-      case MetricType.calories:
-        return 'Calories';
-      case MetricType.protein:
-        return 'Protein';
-      case MetricType.screenTime:
-        return 'Screen Time';
+      case MetricType.weight: return 'Weight';
+      case MetricType.steps: return 'Steps Taken';
+      case MetricType.sleep: return 'Sleep Quality';
+      case MetricType.bmi: return 'BMI Index';
+      case MetricType.bodyFat: return 'Body Fat';
+      case MetricType.calories: return 'Calories';
+      case MetricType.protein: return 'Protein';
+      case MetricType.screenTime: return 'Screen Time';
     }
   }
 
   String _metricLabel(MetricType metric) {
-    switch (metric) {
-      case MetricType.weight:
-        return 'Weight';
-      case MetricType.steps:
-        return 'Steps';
-      case MetricType.sleep:
-        return 'Sleep';
-      case MetricType.bmi:
-        return 'BMI';
-      case MetricType.bodyFat:
-        return 'Body Fat';
-      case MetricType.calories:
-        return 'Calories';
-      case MetricType.protein:
-        return 'Protein';
-      case MetricType.screenTime:
-        return 'Screen Time';
-    }
-  }
-
-  IconData _metricIcon(MetricType metric) {
-    switch (metric) {
-      case MetricType.weight:
-        return Icons.monitor_weight_rounded;
-      case MetricType.steps:
-        return Icons.directions_walk_rounded;
-      case MetricType.sleep:
-        return Icons.bedtime_rounded;
-      case MetricType.bmi:
-        return Icons.speed_rounded;
-      case MetricType.bodyFat:
-        return Icons.water_drop_rounded;
-      case MetricType.calories:
-        return Icons.restaurant_rounded;
-      case MetricType.protein:
-        return Icons.egg_rounded;
-      case MetricType.screenTime:
-        return Icons.smartphone_rounded;
-    }
+    return _metricTitle(metric);
   }
 }

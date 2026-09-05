@@ -39,6 +39,8 @@ abstract class AppColorsPalette {
   Color get accentGlow;
   Color get gold;
   Color get goldMuted;
+  Color get silver;
+  Color get bronze;
 }
 
 class AppColorsLight implements AppColorsPalette {
@@ -118,6 +120,10 @@ class AppColorsLight implements AppColorsPalette {
   Color get gold => const Color(0xFFD4AF37);
   @override
   Color get goldMuted => const Color(0xFFF9F1D8);
+  @override
+  Color get silver => const Color(0xFFC0C0C0);
+  @override
+  Color get bronze => const Color(0xFFCD7F32);
 }
 
 class AppColorsDark implements AppColorsPalette {
@@ -198,6 +204,10 @@ class AppColorsDark implements AppColorsPalette {
   Color get gold => const Color(0xFFFFD700);
   @override
   Color get goldMuted => const Color(0xFF4A3D12);
+  @override
+  Color get silver => const Color(0xFFE0E0E0);
+  @override
+  Color get bronze => const Color(0xFFE48C3B);
 }
 
 class AppColors {
