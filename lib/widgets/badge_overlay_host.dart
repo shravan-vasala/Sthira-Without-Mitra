@@ -126,26 +126,24 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
           },
           child: Semantics(
             label: "Achievement unlocked: ${_currentBadge!.title}",
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child:
-                    Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: context.colors.surface.withValues(
-                              alpha: 0.85,
+            child: Material(
+              type: MaterialType.transparency,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child:
+                      Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
                             ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: context.colors.gold.withValues(alpha: 0.5),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
+                            decoration: BoxDecoration(
+                              color: context.colors.surface.withValues(
+                                alpha: 0.85,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
                               BoxShadow(
                                 color: context.colors.gold.withValues(
                                   alpha: 0.15,
@@ -209,7 +207,7 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                                       style: TextStyle(
                                         color: context.colors.gold,
                                         fontSize: 11,
-                                        fontWeight: FontWeight.w900,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 1.5,
                                       ),
                                     ),
@@ -217,8 +215,9 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                                     Text(
                                       _currentBadge!.title,
                                       style: TextStyle(
+                                        fontFamily: 'Cabinet Grotesk',
                                         fontSize: 18,
-                                        fontWeight: FontWeight.w900,
+                                        fontWeight: FontWeight.w800,
                                         color: context.colors.textDark,
                                       ),
                                     ),
@@ -252,6 +251,7 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                           duration: 900.ms,
                           color: Colors.white.withValues(alpha: 0.3),
                         ),
+                ),
               ),
             ),
           ),
