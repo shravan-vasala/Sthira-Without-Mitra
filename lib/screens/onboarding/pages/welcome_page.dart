@@ -32,12 +32,11 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
     showAppBottomSheet(
       context: context,
       builder: (ctx) => AppSheet(
-        title: '2:47',
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
             Text(
               'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
               textAlign: TextAlign.center,
@@ -46,10 +45,22 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 fontSize: 16,
                 height: 1.8,
                 color: context.colors.textDark,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w400,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            Text(
+              '2:47',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
+                fontSize: 14,
+                color: const Color(0xFFE29B65).withValues(alpha: 0.8),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2.0,
+              ),
+            ),
+            const SizedBox(height: 32),
           ],
         ),
       ),
