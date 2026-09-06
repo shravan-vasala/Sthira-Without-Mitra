@@ -55,65 +55,43 @@ class DailyProgressGrid extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
       child: Column(
         children: [
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _ProgressCard(
-                    title: 'Body Stats',
-                    icon: Icons.straighten_rounded,
-                    color: context.colors.pink,
-                    iconColor: context.colors.pinkIcon,
-                    subtitle: 'Tap to view',
-                    onTap: () => context.go('/home/body-stats'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ProgressCard(
-                    title: 'Photos',
-                    icon: Icons.camera_alt_rounded,
-                    color: context.colors.pink,
-                    iconColor: context.colors.pinkIcon,
-                    subtitle: 'Progress',
-                    thumbnails: flattenedPhotos,
-                    onTap: () => context.go('/home/physique-pictures'),
-                  ),
-                ),
-              ],
-            ),
+          _ProgressCard(
+            title: 'Body Stats',
+            icon: Icons.straighten_rounded,
+            color: context.colors.pink,
+            iconColor: context.colors.pinkIcon,
+            subtitle: 'Tap to view',
+            onTap: () => context.go('/home/body-stats'),
           ),
           const SizedBox(height: 12),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _ProgressCard(
-                    title: 'Body Weight',
-                    icon: Icons.monitor_weight_rounded,
-                    color: context.colors.lavenderCard,
-                    iconColor: context.colors.primary,
-                    subtitle: weightSubtitle,
-                    onTap: isFuture
-                        ? () {}
-                        : () {
-                            showAppBottomSheet(
-                              context: context,
-                              builder: (_) => const WeightEntryDialog(),
-                            );
-                          },
-                    onChartTap: () => context.push('/progress?metric=weight'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StepsCard(isFuture: isFuture, isToday: isToday),
-                ),
-              ],
-            ),
+          _ProgressCard(
+            title: 'Photos',
+            icon: Icons.camera_alt_rounded,
+            color: context.colors.pink,
+            iconColor: context.colors.pinkIcon,
+            subtitle: 'Progress',
+            thumbnails: flattenedPhotos,
+            onTap: () => context.go('/home/physique-pictures'),
           ),
+          const SizedBox(height: 12),
+          _ProgressCard(
+            title: 'Body Weight',
+            icon: Icons.monitor_weight_rounded,
+            color: context.colors.lavenderCard,
+            iconColor: context.colors.primary,
+            subtitle: weightSubtitle,
+            onTap: isFuture
+                ? () {}
+                : () {
+                    showAppBottomSheet(
+                      context: context,
+                      builder: (_) => const WeightEntryDialog(),
+                    );
+                  },
+            onChartTap: () => context.push('/progress?metric=weight'),
+          ),
+          const SizedBox(height: 12),
+          _StepsCard(isFuture: isFuture, isToday: isToday),
         ],
       ),
     );
@@ -273,16 +251,16 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: context.colors.onPrimary.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   Icons.sync_rounded,
                   color: context.colors.onPrimary,
-                  size: 22,
+                  size: 24,
                 ),
               ),
               const SizedBox(height: 14),
@@ -348,101 +326,85 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               }
             },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: context.colors.card,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: context.colors.border),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(Icons.directions_walk_rounded, size: 16, color: context.colors.mintIcon),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: context.colors.mintIcon.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(Icons.directions_walk_rounded, size: 20, color: context.colors.mintIcon),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     'Steps',
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.mintIcon,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.textDark,
                     ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: () => context.push('/progress?metric=steps'),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Icon(
-                      Icons.show_chart_rounded,
-                      size: 16,
-                      color: context.colors.mintIcon.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                String val = stepsSubtitle;
-                String unit = '';
-                
-                if (stepsSubtitle.contains(' steps')) {
-                  val = stepsSubtitle.replaceAll(' steps', '');
-                  unit = 'Steps';
-                }
-                if (val == 'Tap to log' || val == 'No data') {
-                  val = '--';
-                  unit = stepsSubtitle;
-                }
-
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      val,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                        height: 1.0,
-                      ),
-                    ),
-                    if (unit.isNotEmpty) ...[
-                      const SizedBox(width: 4),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 2),
-                        child: Text(
-                          unit,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.textMedium,
-                          ),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        stepsSubtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: context.colors.textMedium,
                         ),
                       ),
-                    ],
-                  ],
-                ).animate(key: ValueKey(stepsSubtitle)).fade().scale(begin: const Offset(0.95, 0.95));
-              },
+                      if (sourceHint != null) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: (sourceHint == 'Synced via Health Connect' || sourceHint == 'Synced')
+                                ? context.colors.green.withValues(alpha: 0.1)
+                                : context.colors.border,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            sourceHint == 'Health Connect or manual' ? 'HC/Manual' : sourceHint,
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: (sourceHint == 'Synced via Health Connect' || sourceHint == 'Synced')
+                                  ? context.colors.green
+                                  : context.colors.textMedium,
+                            ),
+                          ),
+                        ),
+                      ]
+                    ]
+                  )
+                ],
+              ),
             ),
-            if (sourceHint != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                sourceHint!,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: sourceHint == 'Synced via Health Connect' ||
-                          sourceHint == 'Synced'
-                      ? context.colors.green
-                      : context.colors.textLight,
+            if (steps != null) ...[
+              GestureDetector(
+                onTap: () => context.push('/progress?metric=steps'),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(Icons.show_chart_rounded, size: 22, color: context.colors.textMedium),
                 ),
               ),
+              const SizedBox(width: 8),
             ],
+            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
           ],
         ),
       ),
@@ -473,82 +435,85 @@ class _ProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String displaySubtitle = subtitle;
+    if (subtitle.contains(' Tap to log') || subtitle == 'Tap to log' || subtitle == 'Tap to view' || subtitle == 'Progress photos' || subtitle == 'Progress' || subtitle == 'No data') {
+      displaySubtitle = subtitle == 'No data' ? 'No data yet' : subtitle.replaceAll('--', '').trim();
+    } else if (subtitle.contains('Last:')) {
+      displaySubtitle = subtitle;
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: context.colors.card,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: context.colors.border),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(icon, size: 16, color: iconColor),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, size: 20, color: iconColor),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     title,
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: iconColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.textDark,
                     ),
                   ),
-                ),
-                if (onChartTap != null)
-                  GestureDetector(
-                    onTap: onChartTap,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Icon(
-                        Icons.show_chart_rounded,
-                        size: 16,
-                        color: iconColor.withValues(alpha: 0.7),
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    displaySubtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: context.colors.textMedium,
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
             if (thumbnails != null && thumbnails!.isNotEmpty)
               Row(
                 children: [
-                  ...thumbnails!
-                      .take(3)
-                      .map(
-                        (path) => Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: kIsWeb
-                                ? Image.network(
-                                    path,
-                                    width: 32,
-                                    height: 32,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    File(path),
-                                    width: 32,
-                                    height: 32,
-                                    fit: BoxFit.cover,
-                                    cacheWidth: 96,
-                                    cacheHeight: 96,
-                                  ),
-                          ),
-                        ),
+                  ...thumbnails!.take(3).map(
+                    (path) => Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: kIsWeb
+                            ? Image.network(path, width: 36, height: 36, fit: BoxFit.cover)
+                            : Image.file(
+                                File(path),
+                                width: 36,
+                                height: 36,
+                                fit: BoxFit.cover,
+                                cacheWidth: 108,
+                                cacheHeight: 108,
+                              ),
                       ),
+                    ),
+                  ),
                   if (thumbnails!.length > 3)
                     Container(
-                      width: 32,
-                      height: 32,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: context.colors.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -560,58 +525,23 @@ class _ProgressCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
                 ],
               )
-            else
-              LayoutBuilder(builder: (context, constraints) {
-                String val = subtitle;
-                String unit = '';
-
-                if (subtitle.contains(' kg')) {
-                  val = subtitle.replaceAll('Last: ', '').replaceAll(' kg', '');
-                  unit = 'kg';
-                } else if (subtitle.contains(' lbs')) {
-                  val = subtitle.replaceAll('Last: ', '').replaceAll(' lbs', '');
-                  unit = 'lbs';
-                } else if (subtitle.contains(' cm')) {
-                  val = subtitle.replaceAll('Last: ', '').replaceAll(' cm', '');
-                  unit = 'cm';
-                }
-
-                if (val == 'Tap to log' || val == 'Tap to view' || val == 'Progress photos' || val == 'No data') {
-                  val = '--';
-                  unit = subtitle;
-                }
-
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      val,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                        height: 1.0,
-                      ),
-                    ),
-                    if (unit.isNotEmpty) ...[
-                      const SizedBox(width: 4),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 2),
-                        child: Text(
-                          unit,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.textMedium,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ).animate(key: ValueKey(subtitle)).fade().scale(begin: const Offset(0.95, 0.95));
-              }),
+            else ...[
+              if (onChartTap != null && displaySubtitle != 'Tap to log' && displaySubtitle != 'Tap to view' && displaySubtitle != 'No data yet') ...[
+                GestureDetector(
+                  onTap: onChartTap,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Icon(Icons.show_chart_rounded, size: 22, color: context.colors.textMedium),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
+            ]
           ],
         ),
       ),
