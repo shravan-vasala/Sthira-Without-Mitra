@@ -559,6 +559,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               )
             : null,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_rounded),
+            onPressed: () {
+              Haptics.tap();
+              context.push('/progress/yearly-activity');
+            },
+          ),
           if (_selectedMetric != MetricType.bmi &&
               _selectedMetric != MetricType.calories &&
               _selectedMetric != MetricType.protein)
