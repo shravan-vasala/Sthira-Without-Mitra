@@ -919,25 +919,25 @@ class _ProvenanceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    IconData icon;
+    String emoji;
     Color color;
     String label = provenance;
     
     switch (provenance) {
       case 'verified':
-        icon = Icons.verified_rounded;
-        color = context.colors.green;
+        emoji = '🛡️';
+        color = context.colors.textMedium;
         break;
       case 'estimated':
-        icon = Icons.auto_awesome_rounded;
-        color = context.colors.primary;
+        emoji = '✨';
+        color = context.colors.primary.withValues(alpha: 0.8);
         break;
       case 'yours':
-        icon = Icons.edit_rounded;
-        color = context.colors.indigo;
+        emoji = '✏️';
+        color = context.colors.textLight;
         break;
       default:
-        icon = Icons.info_outline_rounded;
+        emoji = 'ℹ️';
         color = context.colors.textLight;
     }
 
@@ -949,27 +949,20 @@ class _ProvenanceBadge extends StatelessWidget {
           builder: (ctx) => _ProvenanceExplanationSheet(provenance: provenance),
         );
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 10, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label.substring(0, 1).toUpperCase() + label.substring(1),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 10)),
+          const SizedBox(width: 4),
+          Text(
+            label.substring(0, 1).toUpperCase() + label.substring(1),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: color,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -983,13 +976,13 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     String title, desc;
     if (provenance == 'verified') {
-      title = 'Verified Local Food';
+      title = '🛡️ Verified Local Food';
       desc = 'This item was matched instantly against your personal food database. No AI estimation was used, ensuring 100% precision.';
     } else if (provenance == 'estimated') {
-      title = 'AI Estimated';
+      title = '✨ AI Estimated';
       desc = 'Gemini estimated the macros for this food using Atwater culinary physics (4-4-9 rule). It has now been saved to your local database.';
     } else {
-      title = 'User Edited';
+      title = '✏️ Yours';
       desc = 'You manually adjusted the macros or portion size for this item.';
     }
 

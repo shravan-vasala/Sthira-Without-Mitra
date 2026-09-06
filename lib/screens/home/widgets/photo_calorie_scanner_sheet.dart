@@ -12,6 +12,10 @@ import '../../../providers/app_providers.dart';
 import '../../../models/daily_meal_log.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:isar/isar.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:isar/isar.dart';
+import '../../../models/user_food_log.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/offline_banner.dart';
@@ -564,6 +568,7 @@ class _PhotoCalorieScannerSheetState
                   fatG: double.tryParse(fCtrl.text) ?? 0.0,
                 );
                 _items[index].resolved = true; // Manual edit resolves it
+                _items[index].provenance = 'yours'; // Flag as manual edit
                 _baseItems[index] = _cloneItem(_items[index]);
                 _itemScales[index] = 1.0;
                 _recalculateTotals();
@@ -656,10 +661,40 @@ class _PhotoCalorieScannerSheetState
       items: _items,
       totalCalories: _totalCalories,
       totalProtein: _totalProtein,
-      totalCarbs: _totalCarbs,
-      totalFat: _totalFat,
       confidence: _confidence ?? widget.appendToLog?.confidence,
     );
+    
+    // Personal Portion Memory: Ensure 'yours' modifications are written back to the local brain
+    try {
+      final isar = Isar.getInstance();
+      if (isar != null) {
+        for (var i in _items) {
+          if (i.provenance == 'yours' && (i.calories ?? 0) > 0) {
+            final normalized = i.name?.toLowerCase().trim();
+            if (normalized != null && normalized.isNotEmpty) {
+              await isar.writeTxn(() async {
+                // If it already exists, overwrite it so prioritizing her latest manual portion
+                await isar.userFoodLogs.filter().normalizedNameEqualTo(normalized).deleteAll();
+                await isar.userFoodLogs.put(
+                  UserFoodLog(
+                    normalizedName: normalized,
+                    originalName: i.name!,
+                    kcal: (i.calories ?? 0).toDouble(),
+                    proteinG: i.proteinG ?? 0.0,
+                    carbsG: i.carbsG ?? 0.0,
+                    fatG: i.fatG ?? 0.0,
+                    addedAt: DateTime.now(),
+                  )
+                );
+              });
+            }
+          }
+        }
+      }
+    } catch (_) {
+       // silently fail portion memory if db throws
+    }
+
     await ref
         .read(dailyMealLogProvider.notifier)
         .saveMealSlot(widget.slotId, slotLog);
@@ -901,6 +936,40 @@ class _PhotoCalorieScannerSheetState
                 fontWeight: FontWeight.w700,
                 color: context.colors.textDark,
               ),
+            ),
+            const SizedBox(height: 8),
+            _MyFoodsScroller(
+              onFoodTap: (food) {
+                // Instantly inject validated personal food
+                if (!mounted) return;
+                setState(() {
+                  _describeMode = false;
+                  _isAnalyzing = false;
+                  _analysisComplete = true;
+                  _errorMessage = null; 
+                  final item = MealItemLog(
+                    name: food.originalName,
+                    portion: '1 serving',
+                    calories: food.kcal.toInt(),
+                    proteinG: food.proteinG,
+                    carbsG: food.carbsG,
+                    fatG: food.fatG,
+                    resolved: true,
+                  );
+                  item.provenance = 'verified'; // It's from Personal memory
+                  
+                  if (_items.isEmpty) {
+                    if (widget.appendToLog != null) {
+                      _items = List.from(widget.appendToLog!.items);
+                    }
+                  }
+                  _items.add(item);
+                  final newIndex = _items.length - 1;
+                  _baseItems[newIndex] = _cloneItem(item);
+                  _itemScales[newIndex] = 1.0;
+                  _recalculateTotals();
+                });
+              },
             ),
             const SizedBox(height: 8),
             TextField(
@@ -1617,5 +1686,89 @@ class _PhotoCalorieScannerSheetState
     if (pCal >= cCal && pCal >= fCal) return context.colors.green;
     if (cCal >= pCal && cCal >= fCal) return context.colors.orange;
     return context.colors.primary;
+  }
+}
+
+class _MyFoodsScroller extends StatefulWidget {
+  final Function(UserFoodLog) onFoodTap;
+
+  const _MyFoodsScroller({required this.onFoodTap});
+
+  @override
+  State<_MyFoodsScroller> createState() => _MyFoodsScrollerState();
+}
+
+class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
+  List<UserFoodLog> _myFoods = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMyFoods();
+  }
+
+  Future<void> _loadMyFoods() async {
+    final isar = Isar.getInstance();
+    if (isar == null) return;
+    
+    // Sort by most recently added/edited for "Recent" effect
+    final foods = await isar.userFoodLogs.where().sortByAddedAtDesc().limit(10).findAll();
+    if (mounted) {
+      setState(() {
+        _myFoods = foods;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_myFoods.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 36,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _myFoods.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final food = _myFoods[index];
+              return InkWell(
+                onTap: () {
+                  Haptics.tap();
+                  widget.onFoodTap(food);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: context.colors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.history_rounded, size: 14, color: context.colors.primary),
+                      const SizedBox(width: 6),
+                      Text(
+                        food.originalName,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
   }
 }
