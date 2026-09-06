@@ -71,6 +71,18 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.inputFill,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
               hintText: '0.0',
               hintStyle: TextStyle(
                 fontSize: 32,
