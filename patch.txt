@@ -1,111 +1,90 @@
-commit 272b54e471456cceaac18c24081767ed19704246
-Author: shravan-vasala <shravanvasala999@gmail.com>
-Date:   Sat Sep 5 23:07:36 2026 +0530
-
-    refactor(home): remove individual meal slots from home screen to simplify UI
-
-diff --git a/lib/screens/home/widgets/meals_card.dart b/lib/screens/home/widgets/meals_card.dart
-index 4aecf6a..29a51da 100644
---- a/lib/screens/home/widgets/meals_card.dart
-+++ b/lib/screens/home/widgets/meals_card.dart
-@@ -191,60 +191,10 @@ class MealsCard extends ConsumerWidget {
-           ],
-         ),
-       ),
--          const SizedBox(height: 8),
--          ...slots.map((s) => _buildSasirekhaSlot(context, s, dailyLog)),
-         ],
-       ),
-     );
-   }
--
--  Widget _buildSasirekhaSlot(BuildContext context, ({String id, String name, String emoji}) slot, dynamic dailyLog) {
--    final loggedSlot = dailyLog.customSlots[slot.id];
--    final isLogged = loggedSlot != null && (loggedSlot.items.isNotEmpty || loggedSlot.photoPath != null || loggedSlot.totalCalories > 0);
--    final slotCalories = loggedSlot?.totalCalories ?? 0;
--
--    return InkWell(
--      onTap: () => _openLogSheet(context, slotId: slot.id, slotName: slot.name, describe: false),
--      child: Padding(
--        padding: const EdgeInsets.symmetric(horizontal: kScreenPadding, vertical: 12),
--        child: Row(
--          children: [
--            Container(
--              width: 56,
--              height: 56,
--              decoration: BoxDecoration(
--                color: context.colors.card,
--                borderRadius: BorderRadius.circular(16),
--              ),
--              alignment: Alignment.center,
--              child: Text(slot.emoji, style: const TextStyle(fontSize: 28)),
--            ),
--            const SizedBox(width: 16),
--            Expanded(
--              child: Column(
--                crossAxisAlignment: CrossAxisAlignment.start,
--                children: [
--                  Text(
--                    slot.name,
--                    style: context.text.bodyBold.copyWith(color: context.colors.textDark),
--                  ),
--                  const SizedBox(height: 4),
--                  Text(
--                    isLogged ? '$slotCalories kcal' : 'Tap to log',
--                    style: context.text.caption.copyWith(color: context.colors.textMedium),
--                  ),
--                ],
--              ),
--            ),
--            Icon(
--              isLogged ? Icons.more_vert : Icons.add_rounded,
--              color: context.colors.textMedium,
--            ),
--          ],
--        ),
--      ),
--    );
--  }
- }
- 
- class _MacroPill extends StatelessWidget {
-
-commit 17562dd72e23cef3a715963b43e29e6f53656f51
-Author: Shravan Kumar Vasala <shravan.vasala@xebia.com>
-Date:   Sat Sep 5 19:56:46 2026 +0530
-
-    fix: Resolve text theme extension error in meals_card
-
-diff --git a/lib/screens/home/widgets/meals_card.dart b/lib/screens/home/widgets/meals_card.dart
-index 90467d7..4aecf6a 100644
---- a/lib/screens/home/widgets/meals_card.dart
-+++ b/lib/screens/home/widgets/meals_card.dart
-@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
- import '../../../theme/app_colors.dart';
- import '../../../theme/layout_insets.dart';
- import '../../../theme/app_theme.dart';
-+import '../../../theme/app_typography.dart';
- import '../../../providers/app_providers.dart';
- import '../../../widgets/app_bottom_sheet.dart';
- import '../../../widgets/surface_card.dart';
-@@ -225,18 +226,12 @@ class MealsCard extends ConsumerWidget {
-                 children: [
-                   Text(
-                     slot.name,
--                    style: context.text.bodyLarge?.copyWith(
--                      fontWeight: FontWeight.w700,
--                      color: context.colors.textDark,
--                    ),
-+                    style: context.text.bodyBold.copyWith(color: context.colors.textDark),
-                   ),
-                   const SizedBox(height: 4),
-                   Text(
-                     isLogged ? '$slotCalories kcal' : 'Tap to log',
--                    style: context.text.bodySmall?.copyWith(
--                      color: context.colors.textMedium,
--                      fontWeight: FontWeight.w500,
--                    ),
-+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
-                   ),
-                 ],
+diff --git a/lib/screens/home/widgets/photo_calorie_scanner_sheet.dart b/lib/screens/home/widgets/photo_calorie_scanner_sheet.dart
+index 465e008..886286d 100644
+--- a/lib/screens/home/widgets/photo_calorie_scanner_sheet.dart
++++ b/lib/screens/home/widgets/photo_calorie_scanner_sheet.dart
+@@ -1125,11 +1125,6 @@ class _PhotoCalorieScannerSheetState
+                                   alpha: 0.1,
+                                 ),
+                                 borderRadius: BorderRadius.circular(16),
+-                                border: Border.all(
+-                                  color: context.colors.primary.withValues(
+-                                    alpha: 0.3,
+-                                  ),
+-                                ),
+                               ),
+                               child: Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+@@ -1214,9 +1209,6 @@ class _PhotoCalorieScannerSheetState
+                       decoration: BoxDecoration(
+                         color: context.colors.primary.withValues(alpha: 0.1),
+                         borderRadius: BorderRadius.circular(16),
+-                        border: Border.all(
+-                          color: context.colors.primary.withValues(alpha: 0.3),
+-                        ),
+                       ),
+                       child: Row(
+                         mainAxisAlignment: MainAxisAlignment.center,
+@@ -1283,62 +1275,7 @@ class _PhotoCalorieScannerSheetState
+                 onPressed: _isOffline ? null : _analyzeImage,
+                 isLoading: _isAnalyzing,
                ),
+-            ] else if (_isAnalyzing)
+-              Container(
+-                margin: const EdgeInsets.symmetric(
+-                  vertical: 40,
+-                  horizontal: 20,
+-                ),
+-                padding: const EdgeInsets.all(24),
+-                decoration: BoxDecoration(
+-                  color: context.colors.primary.withValues(alpha: 0.05),
+-                  borderRadius: BorderRadius.circular(24),
+-                  border: Border.all(
+-                    color: context.colors.primary.withValues(alpha: 0.2),
+-                  ),
+-                ),
+-                child: Column(
+-                  children: [
+-                    SizedBox(
+-                      width: 48,
+-                      height: 48,
+-                      child: CircularProgressIndicator(
+-                        color: context.colors.primary,
+-                        strokeWidth: 3,
+-                      ),
+-                    ),
+-                    const SizedBox(height: 20),
+-                    Text(
+-                      _elapsedSeconds > 15
+-                          ? 'Still working — big requests take a moment...'
+-                          : 'AI is estimating macros...',
+-                      style: TextStyle(
+-                        fontWeight: FontWeight.w700,
+-                        fontSize: 16,
+-                        color: context.colors.textDark,
+-                      ),
+-                    ),
+-                    const SizedBox(height: 8),
+-                    Text(
+-                      'This usually takes 2-4 seconds',
+-                      style: TextStyle(
+-                        fontSize: 13,
+-                        color: context.colors.textMedium,
+-                      ),
+-                    ),
+-                    const SizedBox(height: 12),
+-                    TextButton.icon(
+-                      onPressed: _cancelAnalysis,
+-                      icon: const Icon(Icons.cancel),
+-                      label: const Text('Cancel Analysis'),
+-                      style: TextButton.styleFrom(
+-                        foregroundColor: context.colors.textMedium,
+-                      ),
+-                    ),
+-                  ],
+-                ),
+-              ),
+-          ],
++            ],
+ 
+           if (_analysisComplete) ...[
+             const SizedBox(height: 16),

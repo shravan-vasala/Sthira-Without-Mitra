@@ -452,6 +452,7 @@ class _AnimatedProgressBarRow extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }

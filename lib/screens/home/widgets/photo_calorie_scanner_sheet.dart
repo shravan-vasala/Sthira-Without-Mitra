@@ -1276,6 +1276,7 @@ class _PhotoCalorieScannerSheetState
                 isLoading: _isAnalyzing,
               ),
             ],
+          ],
 
           if (_analysisComplete) ...[
             const SizedBox(height: 16),
