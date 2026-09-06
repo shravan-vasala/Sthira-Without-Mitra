@@ -55,7 +55,15 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: const Text('Reminders'),
+        title: Text(
+          'Reminders',
+          style: TextStyle(
+            fontFamily: 'Cabinet Grotesk',
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: context.colors.textDark,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.of(context).pop(),
@@ -244,9 +252,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: FontWeight.w800,
-          letterSpacing: 1.2,
+          letterSpacing: 1.5,
           color: context.colors.primary,
         ),
       ),
@@ -264,7 +272,6 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.border),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -333,7 +340,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: context.colors.lavender,
+                color: context.colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
