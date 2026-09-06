@@ -99,9 +99,6 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
               decoration: BoxDecoration(
                  color: _copied ? context.colors.primary.withValues(alpha: 0.1) : context.colors.card,
                  borderRadius: BorderRadius.circular(24),
-                 border: Border.all(
-                    color: _copied ? context.colors.primary : context.colors.border,
-                 ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

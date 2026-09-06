@@ -514,9 +514,8 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
 
     final container = Container(
       decoration: isMe ? BoxDecoration(
-         border: Border.all(color: context.colors.primary.withValues(alpha: 0.5), width: 1.5),
          borderRadius: BorderRadius.circular(12),
-         color: context.colors.primary.withValues(alpha: 0.05),
+         color: context.colors.primary.withValues(alpha: 0.1),
       ) : null,
       padding: isMe ? const EdgeInsets.all(8) : const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
@@ -615,14 +614,11 @@ class _PodiumView extends ConsumerWidget {
   final LeaderboardMetric metric;
 
   const _PodiumView({required this.top3, required this.myUid, required this.period, required this.metric});
-  
-  String _getVal(SocialProfile p) {
+  int? _getRawVal(SocialProfile p) {
     if (metric == LeaderboardMetric.score) {
-       final s = period == LeaderboardPeriod.week ? p.weekScore : p.todayScore;
-       return s == null ? '—' : s.toString();
+       return period == LeaderboardPeriod.week ? p.weekScore : p.todayScore;
     } else {
-       final s = period == LeaderboardPeriod.week ? p.weeklySteps : p.todaySteps;
-       return NumberFormat.compact().format(s); 
+       return period == LeaderboardPeriod.week ? p.weeklySteps : p.todaySteps;
     }
   }
 
@@ -648,9 +644,8 @@ class _PodiumView extends ConsumerWidget {
         Container(
            width: size,
            height: size,
-           decoration: BoxDecoration(
+           decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: ringColor, width: rank == 1 ? 4 : 2),
            ),
            child: Padding(
              padding: const EdgeInsets.all(2.0),
@@ -663,7 +658,24 @@ class _PodiumView extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         Text(isMe ? 'You' : p.name, style: TextStyle(fontWeight: FontWeight.bold, color: isMe ? context.colors.primary : context.colors.textDark), overflow: TextOverflow.ellipsis),
-        Text(_getVal(p), style: TextStyle(fontWeight: FontWeight.w800, color: ringColor)),
+        
+        (() {
+          final rawVal = _getRawVal(p);
+          if (rawVal == null) {
+             return Text('—', style: TextStyle(fontWeight: FontWeight.w800, color: ringColor));
+          }
+          return TweenAnimationBuilder<int>(
+            tween: IntTween(begin: 0, end: rawVal),
+            duration: const Duration(milliseconds: 1400),
+            curve: Curves.easeOutQuart,
+            builder: (context, val, child) {
+              final displayStr = metric == LeaderboardMetric.score 
+                  ? val.toString() 
+                  : NumberFormat.compact().format(val);
+              return Text(displayStr, style: TextStyle(fontWeight: FontWeight.w800, color: ringColor));
+            },
+          );
+        })(),
       ],
     );
   }

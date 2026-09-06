@@ -79,7 +79,7 @@ class FriendStatusCard extends ConsumerWidget {
                             ),
                             if (profile.todayScore != null) ...[
                               const SizedBox(width: 8),
-                              _ScoreRing(score: profile.todayScore!, isStale: isStale),
+                              _ScoreBadge(score: profile.todayScore!, isStale: isStale),
                             ]
                           ],
                         ),
@@ -104,7 +104,8 @@ class FriendStatusCard extends ConsumerWidget {
                 children: [
                   _StatBlock(
                     icon: Icons.directions_walk,
-                    value: NumberFormat.decimalPattern().format(profile.todaySteps),
+                    rawValue: profile.todaySteps,
+                    useDecimalFormat: true,
                     label: 'Steps',
                     color: iconColor,
                     textColor: textColor,
@@ -112,7 +113,8 @@ class FriendStatusCard extends ConsumerWidget {
                   ),
                   _StatBlock(
                     icon: Icons.fitness_center,
-                    value: profile.todayWorkouts.toString(),
+                    rawValue: profile.todayWorkouts,
+                    useDecimalFormat: false,
                     label: 'Workouts',
                     color: iconColor,
                     textColor: textColor,
@@ -120,7 +122,8 @@ class FriendStatusCard extends ConsumerWidget {
                   ),
                   _StatBlock(
                     icon: Icons.local_fire_department,
-                    value: profile.currentStreak.toString(),
+                    rawValue: profile.currentStreak,
+                    useDecimalFormat: false,
                     label: 'Streak',
                     color: iconColor,
                     textColor: textColor,
@@ -278,7 +281,8 @@ class FriendStatusCard extends ConsumerWidget {
 
 class _StatBlock extends StatelessWidget {
   final IconData icon;
-  final String value;
+  final int rawValue;
+  final bool useDecimalFormat;
   final String label;
   final Color color;
   final Color textColor;
@@ -286,7 +290,8 @@ class _StatBlock extends StatelessWidget {
 
   const _StatBlock({
     required this.icon,
-    required this.value,
+    required this.rawValue,
+    required this.useDecimalFormat,
     required this.label,
     required this.color,
     required this.textColor,
@@ -299,13 +304,21 @@ class _StatBlock extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 28),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-            color: textColor,
-          ),
+        TweenAnimationBuilder<int>(
+          tween: IntTween(begin: 0, end: rawValue),
+          duration: const Duration(milliseconds: 1000),
+          curve: Curves.easeOutQuart,
+          builder: (context, val, child) {
+            final displayString = useDecimalFormat ? NumberFormat.decimalPattern().format(val) : val.toString();
+            return Text(
+              displayString,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+                color: textColor,
+              ),
+            );
+          },
         ),
         Text(
           label,
@@ -320,11 +333,18 @@ class _StatBlock extends StatelessWidget {
           SizedBox(
             width: 48,
             height: 4,
-            child: LinearProgressIndicator(
-              value: progress!.clamp(0.0, 1.0),
-              backgroundColor: context.colors.inputFill,
-              color: color,
-              borderRadius: BorderRadius.circular(2),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: progress!.clamp(0.0, 1.0)),
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOutCubic,
+              builder: (context, val, child) {
+                return LinearProgressIndicator(
+                  value: val,
+                  backgroundColor: context.colors.inputFill,
+                  color: color,
+                  borderRadius: BorderRadius.circular(2),
+                );
+              },
             ),
           )
         ]
@@ -333,23 +353,19 @@ class _StatBlock extends StatelessWidget {
   }
 }
 
-class _ScoreRing extends StatelessWidget {
+class _ScoreBadge extends StatelessWidget {
   final int score;
   final bool isStale;
-  const _ScoreRing({required this.score, required this.isStale});
+  const _ScoreBadge({required this.score, required this.isStale});
 
   @override
   Widget build(BuildContext context) {
     final color = isStale ? context.colors.textMedium.withValues(alpha: 0.5) : context.colors.primary;
     return Container(
-      width: 24,
-      height: 24,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 2,
-        ),
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Center(
         child: Text(
