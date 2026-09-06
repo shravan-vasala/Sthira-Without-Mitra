@@ -243,7 +243,6 @@ class _CalorieHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = isOverTarget ? context.colors.orange : context.colors.primary;
-    final isPerfectDay = eaten > 0 && progress >= 0.90 && progress <= 1.05;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -303,43 +302,7 @@ class _CalorieHeader extends StatelessWidget {
               minHeight: 2,
             ),
           ),
-          if (isPerfectDay) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 16,
-                  color: context.colors.green,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'TARGET ACHIEVED',
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.5,
-                    color: context.colors.textDark,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16,
-                  color: context.colors.textMedium,
-                ),
-              ],
-            )
-                .animate(onPlay: (controller) => controller.repeat())
-                .shimmer(
-                  duration: 2500.ms,
-                  color: context.colors.green.withValues(alpha: 0.2),
-                ),
-            const SizedBox(height: 16),
-          ] else ...[
-            const SizedBox(height: 24),
-          ],
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
