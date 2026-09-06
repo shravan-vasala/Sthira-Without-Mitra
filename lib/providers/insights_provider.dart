@@ -6,14 +6,51 @@ import '../utils/time_utils.dart';
 
 final insightsProvider = Provider<List<Insight>>((ref) {
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
+  final mealRepo = ref.watch(mealRepoProvider);
   final logs = dailyLogRepo.getAllLogs();
-
-  if (logs.isEmpty) return [];
-
-  logs.sort((a, b) => b.date.compareTo(a.date)); // Newest first
 
   final insights = <Insight>[];
   final now = DateTime.now();
+
+  // 0. Meal Appreciation Insight
+  final thirtyDaysAgoStr = todayKey(now.subtract(const Duration(days: 30)));
+  final todayStr = todayKey(now);
+  final mealLogs = mealRepo.getLogsInRange(thirtyDaysAgoStr, todayStr);
+  
+  if (mealLogs.isNotEmpty) {
+    mealLogs.sort((a,b) => b.date.compareTo(a.date));
+    final recentMealLog = mealLogs.first;
+    
+    if (recentMealLog.totalProtein >= 50) {
+      insights.add(
+        Insight(
+          id: 'nutrition_protein',
+          type: InsightType.trend,
+          title: 'Protein Powerhouse',
+          description: 'You crushed ${recentMealLog.totalProtein.toInt()}g of protein recently. This is the cornerstone of preserving lean muscle and staying satiated!',
+          severity: InsightSeverity.positive,
+          dateGenerated: now,
+          icon: Icons.restaurant_rounded,
+        )
+      );
+    } else if (mealLogs.length >= 3) {
+      insights.add(
+        Insight(
+          id: 'nutrition_consistency',
+          type: InsightType.trend,
+          title: 'Consistent Tracking',
+          description: 'You\'ve been diligently logging your meals. Being mindful of what you eat is the single biggest driver of long-term sustainable results.',
+          severity: InsightSeverity.positive,
+          dateGenerated: now,
+          icon: Icons.check_circle_outline_rounded,
+        )
+      );
+    }
+  }
+
+  if (logs.isEmpty) return insights;
+
+  logs.sort((a, b) => b.date.compareTo(a.date)); // Newest first
 
   // 1. Step Trend Insight
   int highStepDays = 0;
