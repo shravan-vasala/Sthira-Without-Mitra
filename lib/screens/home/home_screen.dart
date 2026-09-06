@@ -26,7 +26,7 @@ import 'widgets/day_complete_sheet.dart';
 
 import 'package:confetti/confetti.dart';
 import '../../providers/gamification_provider.dart';
-import 'share_preview_sheet.dart';
+
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -145,12 +145,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   pinned: true,
                   backgroundColor: context.colors.scaffoldBg.withValues(alpha: 0.9),
                   surfaceTintColor: Colors.transparent,
-                  actions: const [
-                    Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: _HomeShareButton(),
-                    ),
-                  ],
+                  actions: const [],
                 ),
                 SliverToBoxAdapter(
                   child: Column(
@@ -315,29 +310,6 @@ class _HomeGreetingTitle extends ConsumerWidget {
   }
 
   DateTime selectedDay(DateTime s) => DateTime(s.year, s.month, s.day);
-}
-
-class _HomeShareButton extends StatelessWidget {
-  const _HomeShareButton();
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => const SharePreviewSheet(),
-        );
-      },
-      icon: Icon(Icons.ios_share_rounded, color: context.colors.primary),
-      style: IconButton.styleFrom(
-        backgroundColor: context.colors.primary.withValues(alpha: 0.1),
-        padding: const EdgeInsets.all(12),
-      ),
-    );
-  }
 }
 
 class _WeeklySummaryLink extends StatelessWidget {

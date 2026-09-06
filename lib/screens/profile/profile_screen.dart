@@ -21,6 +21,7 @@ import '../../providers/app_providers.dart';
 import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../services/diagnostic_logger.dart';
+import '../home/share_preview_sheet.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -294,6 +295,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Export or restore all data & photos',
                 onTap: () {
                   context.go('/profile/backup-restore');
+                },
+              ),
+              _MenuCard(
+                icon: Icons.ios_share_rounded,
+                title: 'Share Progress',
+                subtitle: 'Generate a progress summary card',
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    useRootNavigator: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const SharePreviewSheet(),
+                  );
                 },
               ),
               _MenuCard(
