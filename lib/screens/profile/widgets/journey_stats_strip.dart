@@ -149,7 +149,7 @@ class _StatCard extends StatelessWidget {
               TweenAnimationBuilder<int>(
                 tween: IntTween(begin: 0, end: value),
                 duration: const Duration(milliseconds: 1200),
-                curve: Curves.easeOutExp,
+                curve: Curves.easeOutExpo,
                 builder: (context, val, _) {
                   return Text(
                     val.toString(),

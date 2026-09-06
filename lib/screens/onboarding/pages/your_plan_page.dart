@@ -144,7 +144,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                 TweenAnimationBuilder<int>(
                   tween: IntTween(begin: 0, end: _currentCalories.round()),
                   duration: const Duration(milliseconds: 1200),
-                  curve: Curves.easeOutExp,
+                  curve: Curves.easeOutExpo,
                   builder: (context, val, child) {
                     return Text(
                       '$val kcal',
@@ -274,7 +274,7 @@ class _MacroChip extends StatelessWidget {
       child: TweenAnimationBuilder<int>(
         tween: IntTween(begin: 0, end: value),
         duration: const Duration(milliseconds: 1000),
-        curve: Curves.easeOutExp,
+        curve: Curves.easeOutExpo,
         builder: (context, val, child) {
           return Text(
             '${val}g',

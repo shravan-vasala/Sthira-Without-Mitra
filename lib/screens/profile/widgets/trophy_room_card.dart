@@ -44,7 +44,7 @@ class TrophyRoomCard extends ConsumerWidget {
             child: TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: unlocked),
               duration: const Duration(milliseconds: 1500),
-              curve: Curves.easeOutExp,
+              curve: Curves.easeOutExpo,
               builder: (context, val, child) {
                 return Text(
                   'TROPHY ROOM ($val/${badges.length})',
