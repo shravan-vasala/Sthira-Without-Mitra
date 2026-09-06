@@ -33,7 +33,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _weightController = TextEditingController();
   bool _useKg = true;
 
-  double _targetCalories = 1400;
+  double _targetCalories = 1250;
   final List<String> _selectedHabitIds = ['sleep', 'walk', 'water'];
 
   @override

@@ -112,7 +112,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
       return SurfaceCard(
         elevation: SurfaceCardElevation.nested,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               Icon(
@@ -147,7 +147,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
     return SurfaceCard(
       elevation: SurfaceCardElevation.nested,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -6,6 +6,7 @@ import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
+import '../../../widgets/surface_card.dart';
 
 class DailyScoreSheet extends ConsumerStatefulWidget {
   const DailyScoreSheet({super.key});
@@ -159,37 +160,41 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
           const SizedBox(height: 16),
 
           // 2.3 Breakdown as progress bars (Staggered)
-          _AnimatedProgressBarRow(
-            label: 'Habits',
-            score: scoreData.habitsScore,
-            max: scoreData.habitsMax,
-            icon: Icons.check_circle_outline_rounded,
-            color: context.colors.primary,
-          ).animate().fade(delay: 100.ms).slideX(begin: 0.05),
-
-          const SizedBox(height: 16),
-
-          _AnimatedProgressBarRow(
-            label: 'Workouts',
-            score: scoreData.workoutsScore,
-            max: scoreData.workoutsMax,
-            icon: Icons.fitness_center_rounded,
-            color: context.colors.orange,
-            isRestDay:
-                scoreData.workoutsScore == scoreData.workoutsMax &&
-                scoreData.totalScore > 0 &&
-                ref.watch(workoutPlanProvider) != null,
-          ).animate().fade(delay: 180.ms).slideX(begin: 0.05),
-
-          const SizedBox(height: 16),
-
-          _AnimatedProgressBarRow(
-            label: 'Meals',
-            score: scoreData.mealsScore,
-            max: scoreData.mealsMax,
-            icon: Icons.restaurant_rounded,
-            color: context.colors.green,
-          ).animate().fade(delay: 260.ms).slideX(begin: 0.05),
+          SurfaceCard(
+            padding: const EdgeInsets.all(24),
+            border: null,
+            child: Column(
+              children: [
+                _AnimatedProgressBarRow(
+                  label: 'Habits',
+                  score: scoreData.habitsScore,
+                  max: scoreData.habitsMax,
+                  icon: Icons.check_circle_outline_rounded,
+                  color: context.colors.primary,
+                ).animate().fade(delay: 100.ms).slideX(begin: 0.05),
+                const SizedBox(height: 24),
+                _AnimatedProgressBarRow(
+                  label: 'Workouts',
+                  score: scoreData.workoutsScore,
+                  max: scoreData.workoutsMax,
+                  icon: Icons.fitness_center_rounded,
+                  color: context.colors.orange,
+                  isRestDay:
+                      scoreData.workoutsScore == scoreData.workoutsMax &&
+                      scoreData.totalScore > 0 &&
+                      ref.watch(workoutPlanProvider) != null,
+                ).animate().fade(delay: 180.ms).slideX(begin: 0.05),
+                const SizedBox(height: 24),
+                _AnimatedProgressBarRow(
+                  label: 'Meals',
+                  score: scoreData.mealsScore,
+                  max: scoreData.mealsMax,
+                  icon: Icons.restaurant_rounded,
+                  color: context.colors.green,
+                ).animate().fade(delay: 260.ms).slideX(begin: 0.05),
+              ],
+            ),
+          ),
 
           const SizedBox(height: 32),
 
@@ -363,24 +368,18 @@ class _AnimatedProgressBarRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final fraction = max > 0 ? (score / max).clamp(0.0, 1.0) : 0.0;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 20),
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
           ),
-          const SizedBox(width: 16),
-          Expanded(
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -437,8 +436,8 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: val,
-                      backgroundColor: context.colors.border.withValues(
-                        alpha: 0.3,
+                      backgroundColor: context.colors.primary.withValues(
+                        alpha: 0.12,
                       ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isRestDay ? context.colors.green : color,
@@ -452,7 +451,6 @@ class _AnimatedProgressBarRow extends StatelessWidget {
           ),
         ),
       ],
-      ),
     );
   }
 }

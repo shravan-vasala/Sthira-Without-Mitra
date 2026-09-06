@@ -271,9 +271,9 @@ UserProfile _userProfileDeserialize(
     restTimerVibration: reader.readBoolOrNull(offsets[18]) ?? true,
     screenTimeEnabled: reader.readBoolOrNull(offsets[19]) ?? false,
     targetCalories: reader.readLongOrNull(offsets[20]) ?? 1250,
-    targetCarbsG: reader.readLongOrNull(offsets[21]) ?? 120,
+    targetCarbsG: reader.readLongOrNull(offsets[21]) ?? 135,
     targetFatG: reader.readLongOrNull(offsets[22]) ?? 40,
-    targetProteinG: reader.readLongOrNull(offsets[23]) ?? 80,
+    targetProteinG: reader.readLongOrNull(offsets[23]) ?? 85,
     targetWeight: reader.readDoubleOrNull(offsets[24]),
     useKg: reader.readBoolOrNull(offsets[25]) ?? true,
   );
@@ -333,11 +333,11 @@ P _userProfileDeserializeProp<P>(
     case 20:
       return (reader.readLongOrNull(offset) ?? 1250) as P;
     case 21:
-      return (reader.readLongOrNull(offset) ?? 120) as P;
+      return (reader.readLongOrNull(offset) ?? 135) as P;
     case 22:
       return (reader.readLongOrNull(offset) ?? 40) as P;
     case 23:
-      return (reader.readLongOrNull(offset) ?? 80) as P;
+      return (reader.readLongOrNull(offset) ?? 85) as P;
     case 24:
       return (reader.readDoubleOrNull(offset)) as P;
     case 25:

@@ -197,11 +197,11 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _MacroChip(value: dynamicMacros.proteinG, color: context.colors.red),
+                        _MacroChip(value: dynamicMacros.proteinG, label: 'P'),
                         const SizedBox(width: 8),
-                        _MacroChip(value: dynamicMacros.carbsG, color: context.colors.orange),
+                        _MacroChip(value: dynamicMacros.carbsG, label: 'C'),
                         const SizedBox(width: 8),
-                        _MacroChip(value: dynamicMacros.fatG, color: context.colors.primary),
+                        _MacroChip(value: dynamicMacros.fatG, label: 'F'),
                       ],
                     ),
                   ),
@@ -259,17 +259,17 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
 
 class _MacroChip extends StatelessWidget {
   final int value;
-  final Color color;
+  final String label;
 
-  const _MacroChip({required this.value, required this.color});
+  const _MacroChip({required this.value, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
+        color: context.colors.primary.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: TweenAnimationBuilder<int>(
         tween: IntTween(begin: 0, end: value),
@@ -277,10 +277,10 @@ class _MacroChip extends StatelessWidget {
         curve: Curves.easeOutExpo,
         builder: (context, val, child) {
           return Text(
-            '${val}g',
+            '$label ${val}g',
             style: TextStyle(
               fontFamily: 'General Sans',
-              color: color,
+              color: context.colors.primary,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),

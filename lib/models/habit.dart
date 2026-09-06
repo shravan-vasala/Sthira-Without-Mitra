@@ -32,6 +32,7 @@ class Habit {
   final int order;
   @enumerated
   final GoalDirection goalDirection;
+  final List<int>? activeDays;
   final DateTime? updatedAt;
 
   Habit({
@@ -45,6 +46,7 @@ class Habit {
     DateTime? initialCreatedAt,
     this.order = 0,
     this.goalDirection = GoalDirection.atLeast,
+    this.activeDays,
     this.updatedAt,
   }) : createdAt = initialCreatedAt ?? DateTime.now();
 
@@ -68,6 +70,7 @@ class Habit {
         (e) => e.name == json['goalDirection'],
         orElse: () => GoalDirection.atLeast,
       ),
+      activeDays: (json['activeDays'] as List<dynamic>?)?.map((e) => e as int).toList(),
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : null,
@@ -85,6 +88,7 @@ class Habit {
     'createdAt': createdAt.toIso8601String(),
     'order': order,
     'goalDirection': goalDirection.name,
+    if (activeDays != null) 'activeDays': activeDays,
     if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
   };
 
@@ -97,6 +101,7 @@ class Habit {
     double? step,
     int? order,
     GoalDirection? goalDirection,
+    List<int>? activeDays,
     DateTime? updatedAt,
   }) {
     return Habit(
@@ -110,6 +115,7 @@ class Habit {
       initialCreatedAt: createdAt,
       order: order ?? this.order,
       goalDirection: goalDirection ?? this.goalDirection,
+      activeDays: activeDays ?? this.activeDays,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }

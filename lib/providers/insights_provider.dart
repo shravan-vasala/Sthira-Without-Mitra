@@ -21,13 +21,39 @@ final insightsProvider = Provider<List<Insight>>((ref) {
     mealLogs.sort((a,b) => b.date.compareTo(a.date));
     final recentMealLog = mealLogs.first;
     
-    if (recentMealLog.totalProtein >= 50) {
+    final allItems = recentMealLog.customSlots.values.expand((slot) => slot.items).toList();
+    if (allItems.isNotEmpty) {
+      MealItemLog? topProteinItem;
+      for (final item in allItems) {
+        if ((item.proteinG ?? 0) > (topProteinItem?.proteinG ?? 0)) {
+          topProteinItem = item;
+        }
+      }
+
+      String foodName = 'your recent meals';
+      if (topProteinItem != null && topProteinItem.name != null && topProteinItem.name!.trim().isNotEmpty && topProteinItem.name!.toLowerCase() != 'unknown') {
+        foodName = topProteinItem.name!.trim();
+      }
+
+      final double totalP = recentMealLog.totalProtein;
+      final double totalC = recentMealLog.totalCarbs;
+
+      String description = 'Incorporating ${foodName.toLowerCase()} provides an excellent nutritional foundation. ';
+      
+      if (totalP < 40) {
+        description += 'To elevate this, consider introducing an additional lean protein source to ensure steady recovery and sustained energy.';
+      } else if (totalC > totalP * 3 && totalC > 150) {
+        description += 'Your energy intake is robust. Pairing it with a proportional increase in protein will anchor your baseline energy levels.';
+      } else {
+        description += 'Your macronutrient balance is impeccably structured. Maintaining this rhythm will yield steady, long-term results.';
+      }
+
       insights.add(
         Insight(
-          id: 'nutrition_protein',
+          id: 'nutrition_analysis',
           type: InsightType.trend,
-          title: 'Protein Powerhouse',
-          description: 'You crushed ${recentMealLog.totalProtein.toInt()}g of protein recently. This is the cornerstone of preserving lean muscle and staying satiated!',
+          title: 'Mindful Nutrient Balance',
+          description: description,
           severity: InsightSeverity.positive,
           dateGenerated: now,
           icon: Icons.restaurant_rounded,
@@ -38,8 +64,8 @@ final insightsProvider = Provider<List<Insight>>((ref) {
         Insight(
           id: 'nutrition_consistency',
           type: InsightType.trend,
-          title: 'Consistent Tracking',
-          description: 'You\'ve been diligently logging your meals. Being mindful of what you eat is the single biggest driver of long-term sustainable results.',
+          title: 'Consistent Awareness',
+          description: 'Your daily logging builds a strong foundation. Mindful awareness of your intake is the cornerstone of steady, sustainable progress.',
           severity: InsightSeverity.positive,
           dateGenerated: now,
           icon: Icons.check_circle_outline_rounded,

@@ -28,8 +28,16 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
     if (year == now.year && _scrollController.hasClients) {
       final screenWidth = MediaQuery.sizeOf(context).width;
       final cardWidth = (screenWidth - 40 - 16) / 2;
-      final clampedWidth = cardWidth.clamp(160.0, 240.0);
-      final offset = (now.month - 1) * (clampedWidth + 16.0);
+      
+      final innerPadding = 12.0;
+      final availableGridWidth = cardWidth - (innerPadding * 2);
+      final double cellSize = (availableGridWidth / 8.2).floorToDouble();
+      final estimatedHeight = 20.0 + 16.0 + 12.0 + 8.0 + (6 * (cellSize + 3.0)) + 24.0;
+      final rowHeight = estimatedHeight + 16.0;
+      
+      final int rowIndex = (now.month - 1) ~/ 2;
+      final double offset = rowIndex * rowHeight;
+      
       _scrollController.animateTo(
         offset,
         duration: const Duration(milliseconds: 500),
@@ -127,27 +135,36 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
               ),
             ),
             const SizedBox(height: 16),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final double cardWidth = (constraints.maxWidth - 40 - 16) / 2; // Taking outer padding and gap into account
-                final double clampedWidth = cardWidth.clamp(160.0, 240.0);
-                
-                return SizedBox(
-                  height: 215, // Reduced height for the tighter side-by-side squares
-                  child: ListView.separated(
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double cardWidth = (constraints.maxWidth - 40 - 16) / 2;
+                  
+                  final innerPadding = 12.0;
+                  final availableGridWidth = cardWidth - (innerPadding * 2);
+                  final double cellSize = (availableGridWidth / 8.2).floorToDouble();
+                  final estimatedHeight = 20.0 + 16.0 + 12.0 + 8.0 + (6 * (cellSize + 3.0)) + 24.0;
+                  final aspectRatio = cardWidth / estimatedHeight;
+                  
+                  return GridView.builder(
                     controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
+                    scrollDirection: Axis.vertical,
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: 12,
-                    separatorBuilder: (context, index) => const SizedBox(width: 16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: aspectRatio,
+                    ),
                     itemBuilder: (context, index) {
                       final month = index + 1;
-                      return _buildMonthCard(context, year, month, heatmapData, clampedWidth);
+                      return _buildMonthCard(context, year, month, heatmapData, cardWidth);
                     },
-                  ),
-                );
-              }
+                  );
+                }
+              ),
             ),
             const SizedBox(height: 24),
             Padding(
@@ -231,15 +248,13 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_view_month_rounded, size: 16, color: context.colors.textDark),
-              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   monthName,
                   style: TextStyle(
                     fontFamily: 'Cabinet Grotesk',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
                     color: context.colors.textDark,
                   ),
                 ),

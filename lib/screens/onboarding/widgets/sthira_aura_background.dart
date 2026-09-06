@@ -19,11 +19,11 @@ class _SthiraAuraBackgroundState extends State<SthiraAuraBackground>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 8),
     )..repeat(reverse: true);
 
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
     );
   }
 
@@ -49,11 +49,11 @@ class _SthiraAuraBackgroundState extends State<SthiraAuraBackground>
               center: const Alignment(0, 0.2),
               radius: 1.2 * _scaleAnimation.value,
               colors: [
-                primaryAura.withValues(alpha: 0.5),
-                secondaryAura.withValues(alpha: 0.2),
+                primaryAura.withValues(alpha: 0.8),
+                secondaryAura.withValues(alpha: 0.3),
                 const Color(0xFF0F1513),
               ],
-              stops: const [0.0, 0.6, 1.0],
+              stops: const [0.0, 0.5, 1.0],
             ),
           ),
           child: Stack(
@@ -70,7 +70,7 @@ class _SthiraAuraBackgroundState extends State<SthiraAuraBackground>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          primaryAura.withValues(alpha: 0.4),
+                          primaryAura.withValues(alpha: 0.5),
                           Colors.transparent,
                         ],
                       ),

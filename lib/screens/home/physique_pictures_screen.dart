@@ -116,13 +116,6 @@ class _PhysiquePicturesScreenState
           _isSelectionMode
               ? '${_selectedPhotos.length} Selected'
               : 'Physique Pictures',
-          style: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: _isSelectionMode ? context.colors.textDark : context.colors.primary,
-            letterSpacing: -0.5,
-          ),
         ),
         leading: IconButton(
           icon: Icon(

@@ -77,8 +77,8 @@ class UserProfile {
     this.restTimerSound = true,
     this.restTimerVibration = true,
     this.restTimerNotification = true,
-    this.targetProteinG = 80,
-    this.targetCarbsG = 120,
+    this.targetProteinG = 85,
+    this.targetCarbsG = 135,
     this.targetFatG = 40,
     this.planStartDate,
     this.currentPhaseWeek = 1,
@@ -194,8 +194,8 @@ class UserProfile {
       restTimerSound: json['restTimerSound'] as bool? ?? true,
       restTimerVibration: json['restTimerVibration'] as bool? ?? true,
       restTimerNotification: json['restTimerNotification'] as bool? ?? true,
-      targetProteinG: (json['targetProteinG'] as num?)?.toInt() ?? 80,
-      targetCarbsG: (json['targetCarbsG'] as num?)?.toInt() ?? 120,
+      targetProteinG: (json['targetProteinG'] as num?)?.toInt() ?? 85,
+      targetCarbsG: (json['targetCarbsG'] as num?)?.toInt() ?? 135,
       targetFatG: (json['targetFatG'] as num?)?.toInt() ?? 40,
       planStartDate: json['planStartDate'] != null
           ? DateTime.parse(json['planStartDate'] as String)

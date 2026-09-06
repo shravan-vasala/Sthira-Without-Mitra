@@ -1,59 +1,62 @@
 {
-  "planName": "Daily Nutrition Plan",
-  "totalCalories": 1200,
+  "planName": "Bodamma's Glow & Lean Master Routine",
+  "totalCalories": 1250,
   "meals": [
     {
-      "name": "Breakfast",
+      "name": "Awakening & Breakfast",
       "type": "breakfast",
-      "calories": 250,
-      "items": [
-        {"name": "Whole Boiled Eggs", "quantity": "2 large", "calories": 140},
-        {"name": "Sprout Chaat / Veggies", "quantity": "1 bowl", "calories": 110}
-      ],
-      "suggestions": [
-        "2 Whole Boiled Eggs + 1 bowl of Sprout/Chaat / Veggies.",
-        "150g Milkmist Plain Greek Yogurt mixed with seeds or a handful of sprouts."
-      ]
-    },
-    {
-      "name": "Lunch",
-      "type": "lunch",
-      "calories": 425,
-      "items": [
-        {"name": "Cooked White/Brown Rice", "quantity": "150g", "calories": 195},
-        {"name": "Chicken Breast Curry or Paneer", "quantity": "100g", "calories": 150},
-        {"name": "Veggies / Dal", "quantity": "1 bowl", "calories": 80}
-      ],
-      "suggestions": [
-        "100g to 150g Cooked White/Brown Rice (or 2 small Chapathis) + 80g Paneer / 100g Chicken breast curry (cooked with minimal oil) + 1 bowl Veggies/Dal.",
-        "150g Rice + Generous portion of Soya Chunks (~40g dry weight) + Veggie curry."
-      ]
-    },
-    {
-      "name": "Evening Snack",
-      "type": "snack",
-      "calories": 125,
-      "items": [
-        {"name": "Guava or Dragonfruit", "quantity": "1 cup", "calories": 60},
-        {"name": "Almonds / Walnuts", "quantity": "Small handful", "calories": 65}
-      ],
-      "suggestions": [
-        "1 cup Guava or Dragonfruit.",
-        "Black Coffee / Green Tea + a small handful of almonds/walnuts."
-      ]
-    },
-    {
-      "name": "Dinner",
-      "type": "dinner",
       "calories": 400,
       "items": [
-        {"name": "Chapathis", "quantity": "2 small", "calories": 180},
-        {"name": "Grilled/Curry Chicken or Soya", "quantity": "80g", "calories": 140},
-        {"name": "Veggies", "quantity": "1 bowl", "calories": 80}
+        {"name": "Warm water + lemon/amla", "quantity": "1 glass", "calories": 5},
+        {"name": "Soaked Almonds, Walnut & Seeds", "quantity": "Handful", "calories": 75},
+        {"name": "Whole Boiled Eggs or Greek Yogurt", "quantity": "2 large / 150g", "calories": 150},
+        {"name": "Sprouted Moong & Chana Chaat", "quantity": "1 bowl", "calories": 170}
       ],
       "suggestions": [
-        "2 Small Chapathis (or 100g Idli/Dosa batter cooked into thin dosas) + 60–80g Grilled/Curry Chicken or Soya Chunks + Veggies.",
-        "1 bowl of leafy green dal + 1 cup low-fat curd + 1 small Chapathi or light rice portion."
+        "Phase 1 (Wake-up): 1 glass warm lemon water + 4 soaked almonds, 1 walnut, 1 tsp seeds.",
+        "Phase 2 (Breakfast): 2 Boiled Eggs OR 150g Greek Yogurt + 1 bowl Sprouted Moong Chaat."
+      ]
+    },
+    {
+      "name": "Muscle Recovery & Bone Density",
+      "type": "lunch",
+      "calories": 420,
+      "items": [
+        {"name": "Cooked Rice or Phulkas", "quantity": "100-120g / 2 small", "calories": 150},
+        {"name": "Chicken / Soya / Paneer", "quantity": "120g / 40g / 80g", "calories": 160},
+        {"name": "Aaku Kura (Greens) / Veggies", "quantity": "1 katori", "calories": 70},
+        {"name": "Fresh set curd / Buttermilk", "quantity": "1 cup", "calories": 40}
+      ],
+      "suggestions": [
+        "100g–120g cooked rice OR 2 small phulkas + 120g chicken breast curry (max 1 tsp oil) + 1 large katori Aaku Kura (Palakura/Thotakura).",
+        "40g dry soya chunks OR 80g low-fat paneer/tofu curry + Kakarakaya/Bhindi/mixed vegetables + 1 glass buttermilk with roasted jeera."
+      ]
+    },
+    {
+      "name": "Evening Antioxidant Snack",
+      "type": "snack",
+      "calories": 90,
+      "items": [
+        {"name": "Guava / Papaya / Pomegranate", "quantity": "1 medium / 1 cup", "calories": 85},
+        {"name": "Green Tea", "quantity": "1 cup", "calories": 5}
+      ],
+      "suggestions": [
+        "1 medium Guava OR 1 cup Papaya / Pomegranate / Dragonfruit.",
+        "1 cup Green Tea (rich in catechins/EGCG to combat skin oxidative stress)."
+      ]
+    },
+    {
+      "name": "Light Digestion & Tissue Repair",
+      "type": "dinner",
+      "calories": 340,
+      "items": [
+        {"name": "Phulkas or Thin Ragi dosa", "quantity": "1 to 2", "calories": 140},
+        {"name": "Grilled Chicken or Soya Chunks", "quantity": "60g", "calories": 120},
+        {"name": "Dal with rajma / veggies", "quantity": "1 bowl", "calories": 80}
+      ],
+      "suggestions": [
+        "1 to 2 Phulkas + 1 bowl Dal with 50g boiled rajma/chana OR 60g grilled chicken/soya chunks + generous stir-fried veggies.",
+        "1 bowl thin Ragi dosa / light vegetable-lentil soup + light protein."
       ]
     }
   ]

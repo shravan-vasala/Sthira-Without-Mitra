@@ -17,60 +17,65 @@ const HabitSchema = CollectionSchema(
   name: r'Habit',
   id: 3896650575830519340,
   properties: {
-    r'createdAt': PropertySchema(
+    r'activeDays': PropertySchema(
       id: 0,
+      name: r'activeDays',
+      type: IsarType.longList,
+    ),
+    r'createdAt': PropertySchema(
+      id: 1,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'goalDirection': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'goalDirection',
       type: IsarType.byte,
       enumMap: _HabitgoalDirectionEnumValueMap,
     ),
     r'icon': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'icon',
       type: IsarType.string,
     ),
     r'id': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'id',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'name',
       type: IsarType.string,
     ),
     r'order': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'order',
       type: IsarType.long,
     ),
     r'step': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'step',
       type: IsarType.double,
     ),
     r'target': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'target',
       type: IsarType.double,
     ),
     r'type': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'type',
       type: IsarType.byte,
       enumMap: _HabittypeEnumValueMap,
     ),
     r'unit': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'unit',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -109,6 +114,12 @@ int _habitEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.activeDays;
+    if (value != null) {
+      bytesCount += 3 + value.length * 8;
+    }
+  }
   bytesCount += 3 + object.icon.length * 3;
   bytesCount += 3 + object.id.length * 3;
   bytesCount += 3 + object.name.length * 3;
@@ -122,17 +133,18 @@ void _habitSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.createdAt);
-  writer.writeByte(offsets[1], object.goalDirection.index);
-  writer.writeString(offsets[2], object.icon);
-  writer.writeString(offsets[3], object.id);
-  writer.writeString(offsets[4], object.name);
-  writer.writeLong(offsets[5], object.order);
-  writer.writeDouble(offsets[6], object.step);
-  writer.writeDouble(offsets[7], object.target);
-  writer.writeByte(offsets[8], object.type.index);
-  writer.writeString(offsets[9], object.unit);
-  writer.writeDateTime(offsets[10], object.updatedAt);
+  writer.writeLongList(offsets[0], object.activeDays);
+  writer.writeDateTime(offsets[1], object.createdAt);
+  writer.writeByte(offsets[2], object.goalDirection.index);
+  writer.writeString(offsets[3], object.icon);
+  writer.writeString(offsets[4], object.id);
+  writer.writeString(offsets[5], object.name);
+  writer.writeLong(offsets[6], object.order);
+  writer.writeDouble(offsets[7], object.step);
+  writer.writeDouble(offsets[8], object.target);
+  writer.writeByte(offsets[9], object.type.index);
+  writer.writeString(offsets[10], object.unit);
+  writer.writeDateTime(offsets[11], object.updatedAt);
 }
 
 Habit _habitDeserialize(
@@ -142,21 +154,22 @@ Habit _habitDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Habit(
+    activeDays: reader.readLongList(offsets[0]),
     goalDirection:
-        _HabitgoalDirectionValueEnumMap[reader.readByteOrNull(offsets[1])] ??
+        _HabitgoalDirectionValueEnumMap[reader.readByteOrNull(offsets[2])] ??
             GoalDirection.atLeast,
-    icon: reader.readString(offsets[2]),
-    id: reader.readString(offsets[3]),
-    name: reader.readString(offsets[4]),
-    order: reader.readLongOrNull(offsets[5]) ?? 0,
-    step: reader.readDoubleOrNull(offsets[6]) ?? 1.0,
-    target: reader.readDouble(offsets[7]),
-    type: _HabittypeValueEnumMap[reader.readByteOrNull(offsets[8])] ??
+    icon: reader.readString(offsets[3]),
+    id: reader.readString(offsets[4]),
+    name: reader.readString(offsets[5]),
+    order: reader.readLongOrNull(offsets[6]) ?? 0,
+    step: reader.readDoubleOrNull(offsets[7]) ?? 1.0,
+    target: reader.readDouble(offsets[8]),
+    type: _HabittypeValueEnumMap[reader.readByteOrNull(offsets[9])] ??
         HabitType.checkbox,
-    unit: reader.readStringOrNull(offsets[9]) ?? '',
-    updatedAt: reader.readDateTimeOrNull(offsets[10]),
+    unit: reader.readStringOrNull(offsets[10]) ?? '',
+    updatedAt: reader.readDateTimeOrNull(offsets[11]),
   );
-  object.createdAt = reader.readDateTime(offsets[0]);
+  object.createdAt = reader.readDateTime(offsets[1]);
   object.idInternal = id;
   return object;
 }
@@ -169,28 +182,30 @@ P _habitDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongList(offset)) as P;
     case 1:
+      return (reader.readDateTime(offset)) as P;
+    case 2:
       return (_HabitgoalDirectionValueEnumMap[reader.readByteOrNull(offset)] ??
           GoalDirection.atLeast) as P;
-    case 2:
-      return (reader.readString(offset)) as P;
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readDoubleOrNull(offset) ?? 1.0) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 7:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset) ?? 1.0) as P;
     case 8:
+      return (reader.readDouble(offset)) as P;
+    case 9:
       return (_HabittypeValueEnumMap[reader.readByteOrNull(offset)] ??
           HabitType.checkbox) as P;
-    case 9:
-      return (reader.readStringOrNull(offset) ?? '') as P;
     case 10:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 11:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -411,6 +426,160 @@ extension HabitQueryWhere on QueryBuilder<Habit, Habit, QWhereClause> {
 }
 
 extension HabitQueryFilter on QueryBuilder<Habit, Habit, QFilterCondition> {
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'activeDays',
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'activeDays',
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysElementEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'activeDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition>
+      activeDaysElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'activeDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'activeDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'activeDays',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeDays',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeDays',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeDays',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeDays',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeDays',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> activeDaysLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'activeDays',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<Habit, Habit, QAfterFilterCondition> createdAtEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1666,6 +1835,12 @@ extension HabitQuerySortThenBy on QueryBuilder<Habit, Habit, QSortThenBy> {
 }
 
 extension HabitQueryWhereDistinct on QueryBuilder<Habit, Habit, QDistinct> {
+  QueryBuilder<Habit, Habit, QDistinct> distinctByActiveDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'activeDays');
+    });
+  }
+
   QueryBuilder<Habit, Habit, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -1741,6 +1916,12 @@ extension HabitQueryProperty on QueryBuilder<Habit, Habit, QQueryProperty> {
   QueryBuilder<Habit, int, QQueryOperations> idInternalProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'idInternal');
+    });
+  }
+
+  QueryBuilder<Habit, List<int>?, QQueryOperations> activeDaysProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'activeDays');
     });
   }
 

@@ -120,8 +120,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Scaffold(
           backgroundColor: context.colors.scaffoldBg,
-          body: RefreshIndicator(
-            color: context.colors.primary,
+          body: SafeArea(
+            bottom: false,
+            child: RefreshIndicator(
+              color: context.colors.primary,
             onRefresh: () => ref
                 .read(syncControllerProvider.notifier)
                 .sync(isManualRefresh: true),
@@ -130,12 +132,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 parent: BouncingScrollPhysics(),
               ),
               slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  backgroundColor: context.colors.scaffoldBg.withValues(alpha: 0.9),
-                  surfaceTintColor: Colors.transparent,
-                  actions: const [],
-                ),
                 SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,6 +225,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
+          ),
         ),
 
         Align(
@@ -258,20 +255,48 @@ class _HomeGreetingTitle extends ConsumerWidget {
     final today = DateTime(now.year, now.month, now.day);
     final isToday = selectedDay(selected) == today;
 
-    final title = name.isEmpty ? _timeGreeting() : '${_timeGreeting()},\n$name';
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: context.colors.textDark,
-            height: 1.15,
-            fontSize: 32,
+        if (name.isEmpty)
+          Text(
+            _timeGreeting(),
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w500,
+              height: 1.3,
+              letterSpacing: -0.5,
+              color: context.colors.textMedium,
+            ),
+          )
+        else
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '${_timeGreeting()}, ',
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
+                    letterSpacing: -0.5,
+                    color: context.colors.textMedium,
+                  ),
+                ),
+                TextSpan(
+                  text: name,
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    height: 1.3,
+                    letterSpacing: -0.5,
+                    color: context.colors.textDark,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         if (!isToday) ...[
           const SizedBox(height: 4),
           Text(

@@ -221,6 +221,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
   String _selectedIcon = 'check';
   HabitType _type = HabitType.checkbox;
   bool _isWaterHabit = false;
+  List<int>? _activeDays;
 
   @override
   void initState() {
@@ -234,6 +235,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
       _targetCtrl.text = h.target.toString();
       _stepCtrl.text = h.step.toString();
       _unitCtrl.text = h.unit;
+      _activeDays = h.activeDays != null ? List<int>.from(h.activeDays!) : null;
     } else {
       _targetCtrl.text = '1';
       _stepCtrl.text = '1';
@@ -290,6 +292,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
       icon: HabitIcons.normalize(_selectedIcon),
       type: type,
       target: target,
+      activeDays: (_activeDays != null && _activeDays!.isEmpty) ? null : _activeDays,
       step: step,
       unit: unit,
       order: isNew ? ref.read(habitsProvider).length : widget.habit!.order,
@@ -389,6 +392,59 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                   ),
                 );
               }).toList(),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Active Days',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: context.colors.textMedium,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(7, (index) {
+                final day = index + 1;
+                final labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+                final isSelected = _activeDays == null || _activeDays!.contains(day);
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (_activeDays == null) {
+                        _activeDays = [1, 2, 3, 4, 5, 6, 7];
+                      }
+                      if (isSelected) {
+                        _activeDays!.remove(day);
+                      } else {
+                        _activeDays!.add(day);
+                        if (_activeDays!.length == 7) {
+                          _activeDays = null;
+                        }
+                      }
+                    });
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected 
+                          ? context.colors.primary.withValues(alpha: 0.15) 
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      labels[index],
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? context.colors.primary : context.colors.textMedium,
+                      ),
+                    ),
+                  ),
+                );
+              }),
             ),
             if (!_isWaterHabit) ...[
               const SizedBox(height: 20),

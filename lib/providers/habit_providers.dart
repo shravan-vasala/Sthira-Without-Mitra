@@ -5,7 +5,12 @@ import '../models/habit.dart';
 import '../models/daily_log.dart';
 
 final habitsProvider = Provider<List<Habit>>((ref) {
-  return ref.watch(habitRepoProvider).getHabits();
+  final habits = ref.watch(habitRepoProvider).getHabits();
+  final dateStr = ref.watch(dateStringProvider);
+  final date = DateTime.parse(dateStr);
+  final weekday = date.weekday;
+
+  return habits.where((h) => h.activeDays == null || h.activeDays!.contains(weekday)).toList();
 });
 
 class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
