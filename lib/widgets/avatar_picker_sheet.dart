@@ -1,97 +1,105 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class AvatarPickerSheet extends StatelessWidget {
   const AvatarPickerSheet({super.key});
 
   static const List<Map<String, String>> avatars = [
-    {'name': 'Lion', 'path': 'assets/avatars/lion.jpg'},
-    {'name': 'Rabbit', 'path': 'assets/avatars/rabbit.jpg'},
-    {'name': 'Owl', 'path': 'assets/avatars/owl.jpg'},
-    {'name': 'Fox', 'path': 'assets/avatars/fox.jpg'},
-    {'name': 'Bear', 'path': 'assets/avatars/bear.jpg'},
-    {'name': 'Panda', 'path': 'assets/avatars/panda.jpg'},
-    {'name': 'Tiger', 'path': 'assets/avatars/tiger.jpg'},
-    {'name': 'Koala', 'path': 'assets/avatars/koala.jpg'},
+    {'name': 'Lion', 'path': 'assets/avatars/lion.png'},
+    {'name': 'Rabbit', 'path': 'assets/avatars/rabbit.png'},
+    {'name': 'Owl', 'path': 'assets/avatars/owl.png'},
+    {'name': 'Fox', 'path': 'assets/avatars/fox.png'},
+    {'name': 'Bear', 'path': 'assets/avatars/bear.png'},
+    {'name': 'Panda', 'path': 'assets/avatars/panda.png'},
+    {'name': 'Tiger', 'path': 'assets/avatars/tiger.png'},
+    {'name': 'Koala', 'path': 'assets/avatars/koala.png'},
   ];
-
-  static Future<String?> show(BuildContext context) {
-    return showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => const AvatarPickerSheet(),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Choose an Avatar',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: context.colors.textLight.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(2),
             ),
-            const SizedBox(height: 24),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+          ),
+          const SizedBox(height: 24),
+          
+          Text(
+            'Sesireka Spirit',
+            style: TextStyle(
+              fontSize: 24,
+              fontFamily: 'Cabinet Grotesk',
+              fontWeight: FontWeight.w800,
+              color: context.colors.textDark,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Select your companion',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: context.colors.textMedium,
+            ),
+          ),
+          const SizedBox(height: 32),
+          
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 24,
+            ),
+            itemCount: avatars.length,
+            itemBuilder: (context, index) {
+              final avatar = avatars[index];
+              return GestureDetector(
+                onTap: () => Navigator.of(context).pop(avatar['path']),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Image.asset(
+                        avatar['path']!,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 32),
+          
+          // Remove Avatar Action
+          InkWell(
+            onTap: () => Navigator.of(context).pop('DELETE'),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              child: Text(
+                'Remove Avatar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textMedium,
+                ),
               ),
-              itemCount: avatars.length,
-              itemBuilder: (context, index) {
-                final avatar = avatars[index];
-                return GestureDetector(
-                  onTap: () => Navigator.of(context).pop(avatar['path']),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(
-                                context,
-                              ).primaryColor.withValues(alpha: 0.3),
-                              width: 2,
-                            ),
-                            image: DecorationImage(
-                              image: AssetImage(avatar['path']!),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        avatar['name']!,
-                        style: const TextStyle(fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+

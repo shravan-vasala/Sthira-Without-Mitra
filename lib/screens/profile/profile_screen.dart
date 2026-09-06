@@ -90,11 +90,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     // Avatar
                     GestureDetector(
-                      onTap: () {
-                        showAppBottomSheet(
+                      onTap: () async {
+                        final result = await showAppBottomSheet<String>(
                           context: context,
                           builder: (_) => const AvatarPickerSheet(),
                         );
+                        if (result != null) {
+                          if (result == 'DELETE') {
+                            ref.read(profileProvider.notifier).updateProfile(
+                                  profile.copyWith(clearPhoto: true),
+                                );
+                          } else {
+                            ref.read(profileProvider.notifier).updateProfile(
+                                  profile.copyWith(photoPath: result),
+                                );
+                          }
+                        }
                       },
                       child: Container(
                         width: 100,
