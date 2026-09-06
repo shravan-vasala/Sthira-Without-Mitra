@@ -264,7 +264,6 @@ class _MacroChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
         label,
@@ -302,10 +301,6 @@ class _HabitTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? context.colors.primary.withOpacity(0.15) : context.colors.inputFill,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? context.colors.primary : context.colors.border.withOpacity(0.5),
-            width: selected ? 2 : 1,
-          ),
         ),
         child: Row(
           children: [

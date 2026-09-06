@@ -158,15 +158,7 @@ class _GoalSelectionPageState extends ConsumerState<GoalSelectionPage>
                             color: isSelected
                                 ? context.colors.primary
                                 : context.colors.card,
-                            borderRadius: BorderRadius.circular(
-                              24,
-                            ), // kRadiusLg
-                            border: Border.all(
-                              color: isSelected
-                                  ? context.colors.primary
-                                  : context.colors.border,
-                              width: isSelected ? 2 : 1,
-                            ),
+                            borderRadius: BorderRadius.circular(24),
                           ),
                           padding: const EdgeInsets.all(20),
                           child: Row(

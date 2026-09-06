@@ -253,7 +253,6 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(100),
-                    border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
