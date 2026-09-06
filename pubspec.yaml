@@ -44,7 +44,6 @@ dependencies:
   crypto: ^3.0.7
   csv: ^8.0.0
   flutter_timezone: ^5.1.0
-  confetti: ^0.8.0
   wakelock_plus: ^1.2.8
   flutter_animate: ^4.5.2
   pointycastle: any

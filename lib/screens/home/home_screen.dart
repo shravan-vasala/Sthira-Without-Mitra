@@ -24,7 +24,7 @@ import 'widgets/daily_progress_grid.dart';
 import 'widgets/coach_notes_card.dart';
 import 'widgets/day_complete_sheet.dart';
 
-import 'package:confetti/confetti.dart';
+import 'widgets/day_complete_sheet.dart';
 import '../../providers/gamification_provider.dart';
 
 
@@ -36,7 +36,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  late ConfettiController _confettiController;
   final _habitsKey = GlobalKey();
   final _mealsKey = GlobalKey();
   final _progressKey = GlobalKey();
@@ -44,10 +43,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
-    _confettiController = ConfettiController(
-      duration: const Duration(seconds: 3),
-    );
 
     // Initial sync when screen first loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -57,7 +52,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
-    _confettiController.dispose();
     super.dispose();
   }
 
@@ -99,14 +93,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     ref.listen<int>(stepsStreakProvider, (prev, next) {
       if (next > 5 && (prev == null || prev <= 5)) {
-        _confettiController.play();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Woohoo! You hit your steps goal for $next days in a row! 💃',
+              '$next-day steps goal streak unlocked.',
             ),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: context.colors.green,
           ),
         );
       }
@@ -114,14 +105,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     ref.listen<int>(mealStreakProvider, (prev, next) {
       if (next == 3 && (prev == null || prev < 3)) {
-        _confettiController.play();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
-              'Amazing! You\'ve logged your meals for 3 days in a row! 🌻',
+              '3-day meal tracking streak achieved.',
             ),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: context.colors.green,
           ),
         );
       }
@@ -240,21 +228,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         Align(
           alignment: Alignment.topCenter,
-          child: ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            emissionFrequency: 0.05,
-            numberOfParticles: 50,
-            gravity: 0.1,
-            shouldLoop: false,
-            colors: const [
-              Colors.green,
-              Colors.blue,
-              Colors.pink,
-              Colors.orange,
-              Colors.purple,
-            ],
-          ),
         ),
       ],
     );

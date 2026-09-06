@@ -9,7 +9,6 @@ import '../../models/workout_plan.dart';
 import 'widgets/exercise_card.dart';
 import 'widgets/rest_timer_label.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:confetti/confetti.dart';
 import '../../../widgets/primary_button.dart';
 import '../../providers/rest_timer_provider.dart';
 
@@ -29,20 +28,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   /// When non-null, only show that section. When null, show all.
   int? _activeSectionIndex;
   final ScrollController _scrollController = ScrollController();
-  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
     _activeSectionIndex = widget.sectionIndex;
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
     WakelockPlus.enable();
   }
 
   @override
   void dispose() {
     WakelockPlus.disable();
-    _confettiController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -443,7 +439,6 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       BuildContext context, WidgetRef ref, String dayId, int completed, int total) {
     _persistWorkoutFinished(ref, dayId);
     Haptics.toggle();
-    _confettiController.play();
 
     final name = ref.read(profileProvider).name.trim();
     final title = name.isEmpty ? 'Workout complete!' : 'Nice work, $name!';
@@ -508,7 +503,6 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   PrimaryButton(
                     label: 'Back to Home',
                     onPressed: () {
-                      _confettiController.stop();
                       Navigator.of(ctx).pop();
                       context.go('/home');
                     },
@@ -516,15 +510,6 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ],
               ),
             ),
-          ),
-          ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            colors: [
-              context.colors.primary,
-              context.colors.green,
-              const Color(0xFFFFD700),
-            ],
           ),
         ],
       ),

@@ -189,12 +189,16 @@ class AppTheme {
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColorsLight().textDark,
+        backgroundColor: AppColorsLight().card,
         contentTextStyle: TextStyle(
           fontFamily: 'General Sans',
-          color: AppColorsLight().white,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColorsLight().textDark,
         ),
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 12,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -472,12 +476,16 @@ class AppTheme {
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColorsDark().surface,
+        backgroundColor: AppColorsDark().card,
         contentTextStyle: TextStyle(
           fontFamily: 'General Sans',
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
           color: AppColorsDark().textDark,
         ),
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 12,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

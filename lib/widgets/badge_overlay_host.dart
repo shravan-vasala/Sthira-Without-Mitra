@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:confetti/confetti.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/badge_engine_provider.dart';
 import '../models/badge.dart';
@@ -21,7 +21,6 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _slideAnimation;
-  late ConfettiController _confettiController;
 
   Badge? _currentBadge;
   Timer? _hideTimer;
@@ -40,15 +39,11 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
       curve: Curves.elasticOut,
       reverseCurve: Curves.easeInCubic,
     );
-    _confettiController = ConfettiController(
-      duration: const Duration(milliseconds: 200),
-    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _confettiController.dispose();
     _hideTimer?.cancel();
     super.dispose();
   }
@@ -64,7 +59,6 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
 
     HapticFeedback.heavyImpact();
     _controller.forward(from: 0.0);
-    _confettiController.play();
 
     _hideTimer?.cancel();
     _hideTimer = Timer(const Duration(seconds: 5), _dismissBadge);
@@ -166,21 +160,6 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                               Stack(
                                 alignment: Alignment.center,
                                 children: [
-                                  ConfettiWidget(
-                                    confettiController: _confettiController,
-                                    blastDirectionality:
-                                        BlastDirectionality.explosive,
-                                    colors: [
-                                      context.colors.gold,
-                                      context.colors.orange,
-                                      context.colors.white,
-                                    ],
-                                    maxBlastForce: 25,
-                                    minBlastForce: 15,
-                                    emissionFrequency: 0.1,
-                                    numberOfParticles: 12,
-                                    gravity: 0.2,
-                                  ),
                                   Container(
                                         width: 52,
                                         height: 52,
