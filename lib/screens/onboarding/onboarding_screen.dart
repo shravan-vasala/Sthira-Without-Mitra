@@ -37,7 +37,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final List<String> _selectedHabitIds = ['sleep', 'walk', 'water'];
 
   @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_triggerRebuild);
+    _heightController.addListener(_triggerRebuild);
+    _weightController.addListener(_triggerRebuild);
+  }
+
+  void _triggerRebuild() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_triggerRebuild);
+    _heightController.removeListener(_triggerRebuild);
+    _weightController.removeListener(_triggerRebuild);
     _pageController.dispose();
     _nameController.dispose();
     _coachNameController.dispose();
