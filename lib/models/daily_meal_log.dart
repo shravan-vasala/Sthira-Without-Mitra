@@ -164,6 +164,7 @@ class MealItemLog {
   double? carbsG;
   double? fatG;
   bool resolved;
+  String? provenance; // 'verified', 'estimated', 'yours'
 
   MealItemLog({
     this.name,
@@ -173,6 +174,7 @@ class MealItemLog {
     this.carbsG,
     this.fatG,
     this.resolved = true,
+    this.provenance,
   });
 
   factory MealItemLog.fromJson(Map<String, dynamic> json) {
@@ -184,6 +186,7 @@ class MealItemLog {
       carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0.0,
       fatG: (json['fat_g'] as num?)?.toDouble() ?? 0.0,
       resolved: json['resolved'] as bool? ?? true,
+      provenance: json['provenance'] as String?,
     );
   }
 
@@ -195,5 +198,6 @@ class MealItemLog {
     'carbs_g': carbsG,
     'fat_g': fatG,
     'resolved': resolved,
+    if (provenance != null) 'provenance': provenance,
   };
 }

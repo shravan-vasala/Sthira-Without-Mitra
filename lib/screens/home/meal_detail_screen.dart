@@ -641,18 +641,30 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 padding: const EdgeInsets.only(top: 4, bottom: 8),
                                 child: Text.rich(
                                   TextSpan(
-                                    children: slotLog.items.asMap().entries.map((entry) {
+                                    children: slotLog.items.asMap().entries.expand((entry) {
                                       final isLast = entry.key == slotLog.items.length - 1;
                                       final item = entry.value;
-                                      return TextSpan(
-                                        text: '• ${item.portion} ${item.name}${isLast ? "" : "   "}',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          height: 1.5,
-                                          fontWeight: FontWeight.w500,
-                                          color: context.colors.textMedium,
+                                      return <InlineSpan>[
+                                        TextSpan(
+                                          text: '• ${item.portion} ${item.name} ',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            height: 1.5,
+                                            fontWeight: FontWeight.w500,
+                                            color: context.colors.textMedium,
+                                          ),
                                         ),
-                                      );
+                                        if (item.provenance != null)
+                                          WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: Padding(
+                                              padding: EdgeInsets.only(right: isLast ? 0 : 12),
+                                              child: _ProvenanceBadge(provenance: item.provenance!),
+                                            ),
+                                          )
+                                        else if (!isLast)
+                                          const TextSpan(text: '   '),
+                                      ];
                                     }).toList(),
                                   ),
                                 ),
@@ -896,6 +908,120 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
         slotDisplayName: widget.slotName,
         isManualEntry: isManualEntry,
         appendToLog: append ? widget.slotLog : null,
+      ),
+    );
+  }
+}
+
+class _ProvenanceBadge extends StatelessWidget {
+  const _ProvenanceBadge({required this.provenance});
+  final String provenance;
+
+  @override
+  Widget build(BuildContext context) {
+    IconData icon;
+    Color color;
+    String label = provenance;
+    
+    switch (provenance) {
+      case 'verified':
+        icon = Icons.verified_rounded;
+        color = context.colors.green;
+        break;
+      case 'estimated':
+        icon = Icons.auto_awesome_rounded;
+        color = context.colors.primary;
+        break;
+      case 'yours':
+        icon = Icons.edit_rounded;
+        color = context.colors.indigo;
+        break;
+      default:
+        icon = Icons.info_outline_rounded;
+        color = context.colors.textLight;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        Haptics.tap();
+        showAppBottomSheet(
+          context: context,
+          builder: (ctx) => _ProvenanceExplanationSheet(provenance: provenance),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 10, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label.substring(0, 1).toUpperCase() + label.substring(1),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProvenanceExplanationSheet extends StatelessWidget {
+  const _ProvenanceExplanationSheet({required this.provenance});
+  final String provenance;
+
+  @override
+  Widget build(BuildContext context) {
+    String title, desc;
+    if (provenance == 'verified') {
+      title = 'Verified Local Food';
+      desc = 'This item was matched instantly against your personal food database. No AI estimation was used, ensuring 100% precision.';
+    } else if (provenance == 'estimated') {
+      title = 'AI Estimated';
+      desc = 'Gemini estimated the macros for this food using Atwater culinary physics (4-4-9 rule). It has now been saved to your local database.';
+    } else {
+      title = 'User Edited';
+      desc = 'You manually adjusted the macros or portion size for this item.';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 48),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.colors.textLight.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            desc,
+            style: TextStyle(fontSize: 15, color: context.colors.textMedium, height: 1.5),
+          ),
+          const SizedBox(height: 12),
+        ],
       ),
     );
   }

@@ -47,6 +47,7 @@ import 'models/badge.dart';
 import 'models/app_config.dart';
 import 'models/ai_cache_entry.dart';
 import 'models/food_search_cache.dart';
+import 'models/user_food_log.dart';
 import 'models/friend.dart';
 import 'models/sync_queue_item.dart';
 
@@ -86,6 +87,7 @@ Future<void> main() async {
       AppConfigSchema,
       AiCacheEntrySchema,
       FoodSearchCacheSchema,
+      UserFoodLogSchema,
       FriendSchema,
       SyncQueueItemSchema,
     ], directory: dir.path);

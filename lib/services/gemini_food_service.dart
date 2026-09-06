@@ -7,6 +7,7 @@ import '../models/food_search_cache.dart';
 import '../interfaces/i_ai_food_service.dart';
 import 'nutrition_lookup_service.dart';
 import '../utils/time_utils.dart';
+import '../models/user_food_log.dart';
 
 import 'ai_client.dart';
 
@@ -163,13 +164,91 @@ $_jsonShape
       }
     }
 
+    // 0. Heuristic Local Parser (Zero-Latency Interceptor)
+    bool isFullyLocal = true;
+    final List<Map<String, dynamic>> localItems = [];
+    final List<String> unresolvedParts = [];
+    
+    final splitParts = normalizedQuery.split(RegExp(r'\+|and|,')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    await nutritionLookup.load();
+    
+    for (var part in splitParts) {
+      final match = RegExp(r'^(\d+(?:\.\d+)?)\s*(bowl|cup|plate|piece|idlis?|dosas?|chapatis?|rotis?|tbsp|tsp)?\s*(.*)$', caseSensitive: false).firstMatch(part);
+      String queryName = part;
+      double quantity = 1.0;
+      
+      if (match != null) {
+        quantity = double.tryParse(match.group(1) ?? '1') ?? 1.0;
+        final possibleName = match.group(3)?.trim() ?? '';
+        if (possibleName.isNotEmpty) {
+           queryName = possibleName;
+        } else if (match.group(2) != null) {
+           queryName = match.group(2)!;
+        }
+      }
+      
+      if (queryName.endsWith('s') && !queryName.endsWith('ss')) {
+        queryName = queryName.substring(0, queryName.length - 1);
+      }
+      
+      final localMatch = nutritionLookup.match(queryName);
+      if (localMatch != null) {
+         final per100g = localMatch['per100g'] as Map<String, dynamic>;
+         double defGrams = (localMatch['defaultPortionG'] as num?)?.toDouble() ?? 100.0;
+         double totalGrams = defGrams * quantity;
+         
+         final multiplier = totalGrams / 100.0;
+         final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * multiplier;
+         final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * multiplier;
+         final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * multiplier;
+         final calculatedKcal = (p * 4.0) + (c * 4.0) + (f * 9.0);
+         double rawKcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * multiplier;
+         double kcal = rawKcal == 0 || (rawKcal - calculatedKcal).abs() > 25 ? calculatedKcal : rawKcal;
+         
+         localItems.add({
+           "name": localMatch['name'] ?? queryName,
+           "portion": "$quantity (${defGrams}g)",
+           "estimated_grams": totalGrams,
+           "calories": kcal.round(),
+           "protein_g": double.parse(p.toStringAsFixed(1)),
+           "carbs_g": double.parse(c.toStringAsFixed(1)),
+           "fat_g": double.parse(f.toStringAsFixed(1)),
+           "resolved": true,
+           "provenance": "verified"
+         });
+      } else {
+         isFullyLocal = false;
+         unresolvedParts.add(part);
+      }
+    }
+    
+    if (isFullyLocal && localItems.isNotEmpty) {
+      double tCal = 0, tP = 0, tC = 0, tF = 0;
+      for (var item in localItems) {
+         tCal += item['calories']; tP += item['protein_g']; tC += item['carbs_g']; tF += item['fat_g'];
+      }
+      return {
+        "items": localItems,
+        "confidence": "high",
+        "total": {
+          "calories": tCal.round(),
+          "protein_g": double.parse(tP.toStringAsFixed(1)),
+          "carbs_g": double.parse(tC.toStringAsFixed(1)),
+          "fat_g": double.parse(tF.toStringAsFixed(1))
+        }
+      };
+    }
+
+    // AI is only given what the local parser failed to understand
+    final aiTargetText = unresolvedParts.join(" and ");
+
     final prompt =
         '''
 Estimate nutritional content for this home-cooked meal description.
 $_cuisineHint
 Meal description:
 """
-$trimmed
+$aiTargetText
 """
 $_jsonShape
 ''';
@@ -190,7 +269,31 @@ $_jsonShape
       });
     }
 
-    return _processAiResponse(response);
+    // Merge AI response with Local items
+    final aiParsed = await _processAiResponse(response);
+    if (aiParsed != null && localItems.isNotEmpty) {
+       final allItems = [...localItems, ...(aiParsed['items'] ?? [])];
+       double tCal = 0, tP = 0, tC = 0, tF = 0;
+       int unresolvedCount = 0;
+       for (var item in allItems) {
+          tCal += item['calories'] ?? 0;
+          tP += item['protein_g'] ?? 0;
+          tC += item['carbs_g'] ?? 0;
+          tF += item['fat_g'] ?? 0;
+          if (item['resolved'] == false) unresolvedCount++;
+       }
+       aiParsed['items'] = allItems;
+       aiParsed['total'] = {
+          "calories": tCal.round(),
+          "protein_g": double.parse(tP.toStringAsFixed(1)),
+          "carbs_g": double.parse(tC.toStringAsFixed(1)),
+          "fat_g": double.parse(tF.toStringAsFixed(1)),
+          if (unresolvedCount > 0) 'unresolved_count': unresolvedCount,
+       };
+       return aiParsed;
+    }
+
+    return aiParsed;
   }
 
   Future<Map<String, Map<String, dynamic>>> _fallbackBatchLookup(
@@ -293,6 +396,22 @@ Return ONLY a JSON object containing an array called "items":
                 cachedResponseJson: jsonEncode(safeResponse),
               ),
             );
+
+            // Self-Growing DB: Promote verified unknown foods to permanent local memory
+            final exists = await isar.userFoodLogs.where().normalizedNameEqualTo(normalized).count();
+            if (exists == 0) {
+               await isar.userFoodLogs.put(
+                  UserFoodLog(
+                    normalizedName: normalized,
+                    originalName: queriedName,
+                    kcal: finalKcal,
+                    proteinG: prot,
+                    carbsG: carb,
+                    fatG: fat,
+                    addedAt: DateTime.now(),
+                  )
+               );
+            }
           }
         }
       });

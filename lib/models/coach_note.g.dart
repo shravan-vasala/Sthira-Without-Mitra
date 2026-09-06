@@ -17,9 +17,21 @@ const CoachNoteSchema = CollectionSchema(
   name: r'CoachNote',
   id: -5801687421539017738,
   properties: {
-    r'date': PropertySchema(id: 0, name: r'date', type: IsarType.string),
-    r'isAi': PropertySchema(id: 1, name: r'isAi', type: IsarType.bool),
-    r'note': PropertySchema(id: 2, name: r'note', type: IsarType.string),
+    r'date': PropertySchema(
+      id: 0,
+      name: r'date',
+      type: IsarType.string,
+    ),
+    r'isAi': PropertySchema(
+      id: 1,
+      name: r'isAi',
+      type: IsarType.bool,
+    ),
+    r'note': PropertySchema(
+      id: 2,
+      name: r'note',
+      type: IsarType.string,
+    )
   },
   estimateSize: _coachNoteEstimateSize,
   serialize: _coachNoteSerialize,
@@ -37,9 +49,9 @@ const CoachNoteSchema = CollectionSchema(
           name: r'date',
           type: IndexType.hash,
           caseSensitive: true,
-        ),
+        )
       ],
-    ),
+    )
   },
   links: {},
   embeddedSchemas: {},
@@ -183,7 +195,10 @@ extension CoachNoteQueryWhere
     on QueryBuilder<CoachNote, CoachNote, QWhereClause> {
   QueryBuilder<CoachNote, CoachNote, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
     });
   }
 
@@ -209,10 +224,8 @@ extension CoachNoteQueryWhere
     });
   }
 
-  QueryBuilder<CoachNote, CoachNote, QAfterWhereClause> idGreaterThan(
-    Id id, {
-    bool include = false,
-  }) {
+  QueryBuilder<CoachNote, CoachNote, QAfterWhereClause> idGreaterThan(Id id,
+      {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -220,10 +233,8 @@ extension CoachNoteQueryWhere
     });
   }
 
-  QueryBuilder<CoachNote, CoachNote, QAfterWhereClause> idLessThan(
-    Id id, {
-    bool include = false,
-  }) {
+  QueryBuilder<CoachNote, CoachNote, QAfterWhereClause> idLessThan(Id id,
+      {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -238,67 +249,56 @@ extension CoachNoteQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.between(
-          lower: lowerId,
-          includeLower: includeLower,
-          upper: upperId,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterWhereClause> dateEqualTo(
-    String date,
-  ) {
+      String date) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IndexWhereClause.equalTo(indexName: r'date', value: [date]),
-      );
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'date',
+        value: [date],
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterWhereClause> dateNotEqualTo(
-    String date,
-  ) {
+      String date) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [],
-                upper: [date],
-                includeUpper: false,
-              ),
-            )
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [date],
-                includeLower: false,
-                upper: [],
-              ),
-            );
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [],
+              upper: [date],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [date],
+              includeLower: false,
+              upper: [],
+            ));
       } else {
         return query
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [date],
-                includeLower: false,
-                upper: [],
-              ),
-            )
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [],
-                upper: [date],
-                includeUpper: false,
-              ),
-            );
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [date],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [],
+              upper: [date],
+              includeUpper: false,
+            ));
       }
     });
   }
@@ -311,13 +311,11 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -327,14 +325,12 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -344,14 +340,12 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -363,16 +357,14 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'date',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'date',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -381,13 +373,11 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -396,69 +386,63 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> dateContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> dateMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'date',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'date',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> dateIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'date', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'date',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> dateIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'date', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'date',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> idEqualTo(
-    Id value,
-  ) {
+      Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'id', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
@@ -467,13 +451,11 @@ extension CoachNoteQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
@@ -482,13 +464,11 @@ extension CoachNoteQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
@@ -499,25 +479,23 @@ extension CoachNoteQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'id',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> isAiEqualTo(
-    bool value,
-  ) {
+      bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'isAi', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isAi',
+        value: value,
+      ));
     });
   }
 
@@ -526,13 +504,11 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'note',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'note',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -542,14 +518,12 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'note',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'note',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -559,14 +533,12 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'note',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'note',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -578,16 +550,14 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'note',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'note',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -596,13 +566,11 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'note',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'note',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -611,59 +579,53 @@ extension CoachNoteQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'note',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'note',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> noteContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'note',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'note',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> noteMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'note',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'note',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> noteIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'note', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'note',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<CoachNote, CoachNote, QAfterFilterCondition> noteIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'note', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'note',
+        value: '',
+      ));
     });
   }
 }
@@ -765,9 +727,8 @@ extension CoachNoteQuerySortThenBy
 
 extension CoachNoteQueryWhereDistinct
     on QueryBuilder<CoachNote, CoachNote, QDistinct> {
-  QueryBuilder<CoachNote, CoachNote, QDistinct> distinctByDate({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<CoachNote, CoachNote, QDistinct> distinctByDate(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'date', caseSensitive: caseSensitive);
     });
@@ -779,9 +740,8 @@ extension CoachNoteQueryWhereDistinct
     });
   }
 
-  QueryBuilder<CoachNote, CoachNote, QDistinct> distinctByNote({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<CoachNote, CoachNote, QDistinct> distinctByNote(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'note', caseSensitive: caseSensitive);
     });

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:isar/isar.dart';
+import '../models/user_food_log.dart';
 
 class NutritionLookupService {
   List<Map<String, dynamic>> _nutritionTable = [];
@@ -28,7 +30,27 @@ class NutritionLookupService {
     if (queryTokens.isEmpty) return null;
     final queryStr = queryTokens.join(' ');
 
-    // 1. Exact match on name
+    // 0. Check UserFoodLog (Personalized Local DB) first (Exact match)
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      final userFood = isar.userFoodLogs
+          .where()
+          .normalizedNameEqualTo(queryStr)
+          .findFirstSync();
+      if (userFood != null) {
+        return {
+          'name': userFood.originalName,
+          'per100g': {
+            'kcal': userFood.kcal,
+            'protein_g': userFood.proteinG,
+            'carbs_g': userFood.carbsG,
+            'fat_g': userFood.fatG,
+          },
+        };
+      }
+    }
+
+    // 1. Exact match on static table name
     for (var item in _nutritionTable) {
       if (_normalize(item['name'] as String) == queryStr) {
         return item;
