@@ -603,29 +603,53 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                             ),
                             const SizedBox(height: 12),
                           ],
-                          if (slotLog.items.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4, bottom: 8),
-                              child: Text.rich(
-                                TextSpan(
-                                  children: slotLog.items.asMap().entries.map((entry) {
-                                    final isLast = entry.key == slotLog.items.length - 1;
-                                    final item = entry.value;
-                                    return TextSpan(
-                                      text: '• ${item.portion} ${item.name}${isLast ? "" : "   "}',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        height: 1.5,
-                                        fontWeight: FontWeight.w500,
-                                        color: context.colors.textMedium,
-                                      ),
-                                    );
-                                  }).toList(),
+                            if (slotLog.items.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 8),
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: slotLog.items.asMap().entries.map((entry) {
+                                      final isLast = entry.key == slotLog.items.length - 1;
+                                      final item = entry.value;
+                                      return TextSpan(
+                                        text: '• ${item.portion} ${item.name}${isLast ? "" : "   "}',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          height: 1.5,
+                                          fontWeight: FontWeight.w500,
+                                          color: context.colors.textMedium,
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
                                 ),
                               ),
+
+                            // MACRO PILLS INJECTED HERE
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _MealMacroPill(
+                                  label: 'P',
+                                  value: '${slotLog.totalProtein.toStringAsFixed(0)}g',
+                                  color: context.colors.green,
+                                ),
+                                const SizedBox(width: 8),
+                                _MealMacroPill(
+                                  label: 'C',
+                                  value: '${slotLog.totalCarbs.toStringAsFixed(0)}g',
+                                  color: context.colors.orange,
+                                ),
+                                const SizedBox(width: 8),
+                                _MealMacroPill(
+                                  label: 'F',
+                                  value: '${slotLog.totalFat.toStringAsFixed(0)}g',
+                                  color: context.colors.primary,
+                                ),
+                              ],
                             ),
                           
-                          const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                           Row(
                             children: [
                               TextButton.icon(
@@ -862,6 +886,35 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
         slotDisplayName: widget.slotName,
         isManualEntry: isManualEntry,
         appendToLog: append ? widget.slotLog : null,
+      ),
+    );
+  }
+}
+
+class _MealMacroPill extends StatelessWidget {
+  const _MealMacroPill({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        '$label: $value',
+        style: AppTheme.numeric(
+          TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+        ),
       ),
     );
   }
