@@ -167,11 +167,9 @@ class MealDetailScreen extends ConsumerWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
                       backgroundColor: context.colors.primary.withValues(
-                        alpha: 0.08,
+                        alpha: 0.12,
                       ),
-                      side: BorderSide(
-                        color: context.colors.primary.withValues(alpha: 0.35),
-                      ),
+                      side: BorderSide.none,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -198,11 +196,9 @@ class MealDetailScreen extends ConsumerWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.indigo,
                       backgroundColor: context.colors.indigo.withValues(
-                        alpha: 0.08,
+                        alpha: 0.12,
                       ),
-                      side: BorderSide(
-                        color: context.colors.indigo.withValues(alpha: 0.35),
-                      ),
+                      side: BorderSide.none,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -715,7 +711,8 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                  child: OutlinedButton.icon(
                                    style: OutlinedButton.styleFrom(
                                      foregroundColor: context.colors.primary,
-                                     side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
+                                     backgroundColor: context.colors.primary.withValues(alpha: 0.12),
+                                     side: BorderSide.none,
                                      padding: const EdgeInsets.symmetric(vertical: 14),
                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                    ),
