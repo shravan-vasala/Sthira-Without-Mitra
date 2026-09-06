@@ -26,7 +26,10 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
     final year = ref.read(selectedYearProvider);
     final now = DateTime.now();
     if (year == now.year && _scrollController.hasClients) {
-      final offset = (now.month - 1) * (210.0 + 16.0);
+      final screenWidth = MediaQuery.sizeOf(context).width;
+      final cardWidth = (screenWidth - 40 - 16) / 2;
+      final clampedWidth = cardWidth.clamp(160.0, 240.0);
+      final offset = (now.month - 1) * (clampedWidth + 16.0);
       _scrollController.animateTo(
         offset,
         duration: const Duration(milliseconds: 500),
@@ -124,20 +127,27 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 260, 
-              child: ListView.separated(
-                controller: _scrollController,
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: 12,
-                separatorBuilder: (context, index) => const SizedBox(width: 16),
-                itemBuilder: (context, index) {
-                  final month = index + 1;
-                  return _buildMonthCard(context, year, month, heatmapData);
-                },
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final double cardWidth = (constraints.maxWidth - 40 - 16) / 2; // Taking outer padding and gap into account
+                final double clampedWidth = cardWidth.clamp(160.0, 240.0);
+                
+                return SizedBox(
+                  height: 215, // Reduced height for the tighter side-by-side squares
+                  child: ListView.separated(
+                    controller: _scrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: 12,
+                    separatorBuilder: (context, index) => const SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      final month = index + 1;
+                      return _buildMonthCard(context, year, month, heatmapData, clampedWidth);
+                    },
+                  ),
+                );
+              }
             ),
             const SizedBox(height: 24),
             Padding(
@@ -189,7 +199,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
     );
   }
 
-  Widget _buildMonthCard(BuildContext context, int year, int month, Map<DateTime, int> heatmapData) {
+  Widget _buildMonthCard(BuildContext context, int year, int month, Map<DateTime, int> heatmapData, double width) {
     final firstDayOfMonth = DateTime(year, month, 1);
     final daysInMonth = DateUtils.getDaysInMonth(year, month);
     
@@ -200,10 +210,17 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
     final totalRows = (totalCells / 7).ceil();
 
     final monthName = DateFormat('MMM').format(firstDayOfMonth).toLowerCase();
+    
+    // Calculate cell size organically
+    final innerPadding = 12.0;
+    final availableGridWidth = width - (innerPadding * 2);
+    // 7 days in a week. Need to account for small spacing. If cell is W, spacing is roughly W/5.
+    // 7 * W + 6 * (W/5) = availableGridWidth => W = availableGridWidth / 8.2
+    final double cellSize = (availableGridWidth / 8.2).floorToDouble();
 
     return Container(
-      width: 210, 
-      padding: const EdgeInsets.all(16),
+      width: width, 
+      padding: EdgeInsets.all(innerPadding),
       decoration: BoxDecoration(
         color: context.colors.card, 
         borderRadius: BorderRadius.circular(16),
@@ -234,12 +251,12 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) {
               return SizedBox(
-                width: 22,
+                width: cellSize,
                 child: Text(
                   day,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: FontWeight.w700,
                     color: context.colors.textMedium,
                   ),
@@ -251,7 +268,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
           Column(
             children: List.generate(totalRows, (rowIndex) {
               return Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.only(bottom: 3),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(7, (colIndex) {
@@ -259,7 +276,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     final dayOffset = cellIndex - startWeekday;
 
                     if (dayOffset < 0 || dayOffset >= daysInMonth) {
-                      return const SizedBox(width: 22, height: 22);
+                      return SizedBox(width: cellSize, height: cellSize);
                     }
 
                     final currentDate = DateTime(year, month, dayOffset + 1);
@@ -270,8 +287,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     return Tooltip(
                       message: tooltipMsg,
                       child: Container(
-                        width: 22,
-                        height: 22,
+                        width: cellSize,
+                        height: cellSize,
                         decoration: BoxDecoration(
                           color: _getColorForScore(context, score),
                           borderRadius: BorderRadius.circular(4),
