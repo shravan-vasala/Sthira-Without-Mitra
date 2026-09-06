@@ -54,7 +54,6 @@ class TrophyRoomCard extends ConsumerWidget {
           SurfaceCard(
             padding: const EdgeInsets.all(20),
             color: context.colors.card,
-            border: Border.all(color: context.colors.border),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return Wrap(
