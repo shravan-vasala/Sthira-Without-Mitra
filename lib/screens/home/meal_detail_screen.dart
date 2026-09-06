@@ -261,7 +261,7 @@ class _CalorieHeader extends StatelessWidget {
                   return Text(
                     '$val',
                     style: TextStyle(
-                      fontFamily: 'CabinetGrotesk',
+                      fontFamily: 'Cabinet Grotesk',
                       fontSize: 56,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1.5,

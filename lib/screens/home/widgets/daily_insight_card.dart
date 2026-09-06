@@ -58,7 +58,6 @@ class DailyInsightCard extends ConsumerWidget {
                   child: Text(
                     insight.type == InsightType.trend ? 'TREND' : 'INSIGHT',
                     style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       color: context.colors.textMedium,

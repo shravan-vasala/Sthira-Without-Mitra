@@ -547,7 +547,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
                   isFuture ? '--' : value.toString(),
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                     color: textColor,
                     letterSpacing: -0.2,
                   ),
