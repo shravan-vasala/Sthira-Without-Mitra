@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../share/share_card_exporter.dart';
-import '../share/daily_share_layout.dart';
+import '../../providers/habit_providers.dart';
+import '../../share/share_card_exporter.dart';
+import '../../share/daily_share_layout.dart';
 
 class SharePreviewSheet extends ConsumerStatefulWidget {
   const SharePreviewSheet({super.key});
@@ -48,14 +49,20 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     final log = ref.watch(dailyLogProvider);
     final steps = log.steps ?? 0;
     final meals = ref.watch(dailyMealLogProvider);
+    final habitsList = ref.watch(habitsProvider);
+    final completions = ref.watch(habitCompletionsProvider);
     
     int habitsDone = 0;
-    if (log.habits != null) {
-      for (final h in log.habits!.values) {
-        if (h) habitsDone++;
+    int totalHabits = 0;
+    final weekday = DateTime.parse(log.date).weekday;
+    for (final h in habitsList) {
+      if (h.scheduleDays.contains(weekday)) {
+        totalHabits++;
+        if (isHabitCompleted(h, completions, log)) {
+          habitsDone++;
+        }
       }
     }
-    final totalHabits = log.habits?.length ?? 0;
 
     final subtitle = _getSubtitle(score);
     // Base color tied to score

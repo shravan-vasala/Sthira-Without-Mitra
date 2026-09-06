@@ -600,7 +600,7 @@ class _PhotoCalorieScannerSheetState
 
   void _setPortionScale(int index, double scale) {
     if (_baseItems[index] == null) return;
-    Haptics.selection();
+    Haptics.tap();
     setState(() {
       _itemScales[index] = scale;
       final base = _baseItems[index]!;
@@ -1526,7 +1526,8 @@ class _PhotoCalorieScannerSheetState
                         ],
                       ),
                     ),
-                  );
+                  ),
+                );
                 },
               ),
             ),
