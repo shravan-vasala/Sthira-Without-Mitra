@@ -199,17 +199,19 @@ class CoachNotesCard extends ConsumerWidget {
                 ],
               ],
             ),
-            loading: () => Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: context.colors.primary,
-                  ),
+            loading: () => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                'Coach is writing...',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: context.colors.textMedium,
+                  fontStyle: FontStyle.italic,
                 ),
+              ).animate(onPlay: (c) => c.repeat()).shimmer(
+                duration: 1500.ms,
+                color: context.colors.primary,
               ),
             ),
             error: (err, stack) => AsyncErrorCard(

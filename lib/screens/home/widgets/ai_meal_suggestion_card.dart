@@ -178,36 +178,36 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                     height: 16,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: context.colors.border,
+                      color: context.colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ).animate(onPlay: (c) => c.repeat()).shimmer(
                     duration: 1200.ms,
-                    color: context.colors.surface.withValues(alpha: 0.5),
+                    color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 8),
                   Container(
                     height: 16,
                     width: MediaQuery.of(context).size.width * 0.7,
                     decoration: BoxDecoration(
-                      color: context.colors.border,
+                      color: context.colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ).animate(onPlay: (c) => c.repeat()).shimmer(
                     duration: 1200.ms,
-                    color: context.colors.surface.withValues(alpha: 0.5),
+                    color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 8),
                   Container(
                     height: 16,
                     width: MediaQuery.of(context).size.width * 0.4,
                     decoration: BoxDecoration(
-                      color: context.colors.border,
+                      color: context.colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ).animate(onPlay: (c) => c.repeat()).shimmer(
                     duration: 1200.ms,
-                    color: context.colors.surface.withValues(alpha: 0.5),
+                    color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                 ],
               )
