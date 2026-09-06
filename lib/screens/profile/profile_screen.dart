@@ -99,13 +99,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: Container(
                         width: 100,
                         height: 100,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.transparent,
-                          border: Border.all(
-                            color: context.colors.primary.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
                         ),
                         child: ClipOval(
                           child: profile.photoPath != null
@@ -1314,10 +1310,6 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                         decoration: BoxDecoration(
                           color: context.colors.primary,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: context.colors.card,
-                            width: 2,
-                          ),
                         ),
                         child: Icon(
                           Icons.camera_alt,
@@ -1764,7 +1756,6 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

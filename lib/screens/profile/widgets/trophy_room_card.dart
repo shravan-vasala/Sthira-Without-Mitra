@@ -41,14 +41,21 @@ class TrophyRoomCard extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 12),
-            child: Text(
-              'TROPHY ROOM ($unlocked/${badges.length})',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: context.colors.primary,
-                letterSpacing: 1.5,
-              ),
+            child: TweenAnimationBuilder<int>(
+              tween: IntTween(begin: 0, end: unlocked),
+              duration: const Duration(milliseconds: 1500),
+              curve: Curves.easeOutExp,
+              builder: (context, val, child) {
+                return Text(
+                  'TROPHY ROOM ($val/${badges.length})',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: context.colors.primary,
+                    letterSpacing: 1.5,
+                  ),
+                );
+              },
             ),
           ),
           SurfaceCard(
@@ -108,10 +115,6 @@ class _BadgeItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isUnlocked ? context.colors.primary.withValues(alpha: 0.1) : context.colors.inputFill,
-                    border: Border.all(
-                      color: isUnlocked ? context.colors.primary : context.colors.border,
-                      width: 1,
-                    ),
                   ),
                   alignment: Alignment.center,
                   child: Opacity(
@@ -244,10 +247,6 @@ class _BadgeItem extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isUnlocked ? context.colors.primary.withValues(alpha: 0.1) : context.colors.inputFill,
-        border: Border.all(
-          color: isUnlocked ? context.colors.primary : context.colors.border,
-          width: 1.0,
-        ),
       ),
       alignment: Alignment.center,
       child: Opacity(

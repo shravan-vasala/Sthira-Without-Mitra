@@ -87,8 +87,11 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
               decoration: InputDecoration(
                 labelText: 'Meal Name',
                 hintText: 'e.g. Post-workout shake',
+                filled: true,
+                fillColor: context.colors.inputFill,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
@@ -113,12 +116,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? context.colors.primary.withValues(alpha: 0.2)
-                          : context.colors.card,
-                      border: Border.all(
-                        color: isSelected
-                            ? context.colors.primary
-                            : context.colors.border,
-                      ),
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(

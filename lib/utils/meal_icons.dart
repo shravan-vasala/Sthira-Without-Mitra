@@ -16,6 +16,11 @@ class MealIcons {
     (id: 'restaurant', icon: Icons.restaurant_outlined),
     (id: 'set_meal', icon: Icons.set_meal_outlined),
     (id: 'egg', icon: Icons.egg_alt_outlined),
+    (id: 'pizza', icon: Icons.local_pizza_outlined),
+    (id: 'ramen', icon: Icons.ramen_dining_outlined),
+    (id: 'icecream', icon: Icons.icecream_outlined),
+    (id: 'cookie', icon: Icons.cookie_outlined),
+    (id: 'kebab', icon: Icons.kebab_dining_outlined),
   ];
 
   static IconData resolve(String? keyOrEmoji) {
@@ -54,6 +59,16 @@ class MealIcons {
         return Icons.soup_kitchen_outlined;
       case '🥗':
         return Icons.eco_outlined;
+      case 'pizza':
+        return Icons.local_pizza_outlined;
+      case 'ramen':
+        return Icons.ramen_dining_outlined;
+      case 'icecream':
+        return Icons.icecream_outlined;
+      case 'cookie':
+        return Icons.cookie_outlined;
+      case 'kebab':
+        return Icons.kebab_dining_outlined;
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.icon;
@@ -98,6 +113,16 @@ class MealIcons {
         return 'soup';
       case '🥗':
         return 'healthy';
+      case 'pizza':
+        return 'pizza';
+      case 'ramen':
+        return 'ramen';
+      case 'icecream':
+        return 'icecream';
+      case 'cookie':
+        return 'cookie';
+      case 'kebab':
+        return 'kebab';
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.id;

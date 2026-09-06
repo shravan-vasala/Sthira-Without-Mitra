@@ -69,17 +69,17 @@ class JourneyStatsStrip extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Expanded(child: _StatCard(title: 'Streak', value: '$currentStreak', unit: 'Days', icon: Icons.local_fire_department_rounded, color: context.colors.orange)),
+            Expanded(child: _StatCard(title: 'Streak', value: currentStreak, unit: 'Days', icon: Icons.local_fire_department_rounded, color: context.colors.orange)),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(title: 'Workouts', value: '$totalWorkouts', unit: 'Total', icon: Icons.fitness_center_rounded, color: context.colors.primary)),
+            Expanded(child: _StatCard(title: 'Workouts', value: totalWorkouts, unit: 'Total', icon: Icons.fitness_center_rounded, color: context.colors.primary)),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _StatCard(title: 'Tracked', value: '$daysTracked', unit: 'Days', icon: Icons.calendar_month_rounded, color: context.colors.mint)),
+            Expanded(child: _StatCard(title: 'Tracked', value: daysTracked, unit: 'Days', icon: Icons.calendar_month_rounded, color: context.colors.mint)),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(title: 'Badges', value: '$earnedBadges', unit: 'Earned', icon: Icons.military_tech_rounded, color: context.colors.pink)),
+            Expanded(child: _StatCard(title: 'Badges', value: earnedBadges, unit: 'Earned', icon: Icons.military_tech_rounded, color: context.colors.pink)),
           ],
         ),
         const SizedBox(height: 16),
@@ -107,7 +107,7 @@ class _StatCard extends StatelessWidget {
   });
 
   final String title;
-  final String value;
+  final int value;
   final String unit;
   final IconData icon;
   final Color color;
@@ -115,7 +115,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Mimic the faded appearance in the screenshot for lower-tier stats when zero
-    final bool isZero = value == '0';
+    final bool isZero = value == 0;
     final bool isTopTier = title == 'Streak' || title == 'Workouts';
     final Color effectiveColor = (!isTopTier && isZero) ? color.withValues(alpha: 0.3) : color;
 
@@ -146,14 +146,21 @@ class _StatCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                  height: 1.0,
-                ),
+              TweenAnimationBuilder<int>(
+                tween: IntTween(begin: 0, end: value),
+                duration: const Duration(milliseconds: 1200),
+                curve: Curves.easeOutExp,
+                builder: (context, val, _) {
+                  return Text(
+                    val.toString(),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: context.colors.textDark,
+                      height: 1.0,
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 4),
               Padding(

@@ -23,6 +23,9 @@ class HabitIcons {
     (id: 'sun', icon: Icons.wb_sunny_outlined),
     (id: 'skin', icon: Icons.face_retouching_natural_outlined),
     (id: 'hair', icon: Icons.spa_outlined),
+    (id: 'no_screen', icon: Icons.phonelink_erase_outlined),
+    (id: 'no_fried', icon: Icons.fastfood_outlined),
+    (id: 'no_package', icon: Icons.takeout_dining_outlined),
   ];
 
   static IconData resolve(String keyOrEmoji) {
@@ -75,6 +78,12 @@ class HabitIcons {
         return Icons.grain_outlined;
       case 'sun':
         return Icons.wb_sunny_outlined;
+      case 'no_screen':
+        return Icons.phonelink_erase_outlined;
+      case 'no_fried':
+        return Icons.fastfood_outlined;
+      case 'no_package':
+        return Icons.takeout_dining_outlined;
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.icon;
@@ -122,6 +131,12 @@ class HabitIcons {
         return 'nuts';
       case 'sun':
         return 'sun';
+      case 'no_screen':
+        return 'no_screen';
+      case 'no_fried':
+        return 'no_fried';
+      case 'no_package':
+        return 'no_package';
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.id;

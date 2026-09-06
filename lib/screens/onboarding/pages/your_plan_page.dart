@@ -141,14 +141,21 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
             1,
             Column(
               children: [
-                Text(
-                  '${_currentCalories.round()} kcal',
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 40,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.primary,
-                  ),
+                TweenAnimationBuilder<int>(
+                  tween: IntTween(begin: 0, end: _currentCalories.round()),
+                  duration: const Duration(milliseconds: 1200),
+                  curve: Curves.easeOutExp,
+                  builder: (context, val, child) {
+                    return Text(
+                      '$val kcal',
+                      style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
+                        fontSize: 40,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.primary,
+                      ),
+                    );
+                  },
                 ),
                 if (_macroPreview != null)
                   Padding(
@@ -161,8 +168,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                           color: context.colors.primary,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'General Sans'),
-                      side: BorderSide(
-                          color: context.colors.primary.withOpacity(0.3)),
+                      side: BorderSide.none,
                       onPressed: _suggestMacros,
                     ),
                   ),
@@ -191,11 +197,11 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _MacroChip(label: '${dynamicMacros.proteinG}g', color: context.colors.red),
+                        _MacroChip(value: dynamicMacros.proteinG, color: context.colors.red),
                         const SizedBox(width: 8),
-                        _MacroChip(label: '${dynamicMacros.carbsG}g', color: context.colors.orange),
+                        _MacroChip(value: dynamicMacros.carbsG, color: context.colors.orange),
                         const SizedBox(width: 8),
-                        _MacroChip(label: '${dynamicMacros.fatG}g', color: context.colors.primary),
+                        _MacroChip(value: dynamicMacros.fatG, color: context.colors.primary),
                       ],
                     ),
                   ),
@@ -252,10 +258,10 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
 }
 
 class _MacroChip extends StatelessWidget {
-  final String label;
+  final int value;
   final Color color;
 
-  const _MacroChip({required this.label, required this.color});
+  const _MacroChip({required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -265,14 +271,21 @@ class _MacroChip extends StatelessWidget {
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'General Sans',
-          color: color,
-          fontWeight: FontWeight.w700,
-          fontSize: 13,
-        ),
+      child: TweenAnimationBuilder<int>(
+        tween: IntTween(begin: 0, end: value),
+        duration: const Duration(milliseconds: 1000),
+        curve: Curves.easeOutExp,
+        builder: (context, val, child) {
+          return Text(
+            '${val}g',
+            style: TextStyle(
+              fontFamily: 'General Sans',
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          );
+        },
       ),
     );
   }

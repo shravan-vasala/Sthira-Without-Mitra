@@ -309,15 +309,10 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isSelected
-                              ? context.colors.primary
-                              : context.colors.border,
-                        ),
                         borderRadius: BorderRadius.circular(8),
                         color: isSelected
-                            ? context.colors.primary.withValues(alpha: 0.1)
-                            : null,
+                            ? context.colors.primary.withValues(alpha: 0.15)
+                            : Colors.transparent,
                       ),
                       child: Icon(
                         opt.icon,
@@ -548,7 +543,6 @@ class _PlanEditorState extends State<_PlanEditor> {
               decoration: BoxDecoration(
                 color: context.colors.card,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.colors.border),
               ),
               child: TextField(
                 controller: _controller,

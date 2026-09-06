@@ -101,14 +101,7 @@ class _HabitListTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       key: key,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: context.colors.border.withValues(alpha: 0.5),
-            width: 1,
-          ),
-        ),
-      ),
+      // No border, floating item
       child: ListTile(
         leading: Icon(
           HabitIcons.resolve(habit.icon),
@@ -337,13 +330,12 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                   labelText: 'Habit Name',
                   hintText: 'e.g. Meditate 10 min',
                   filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark
-                      ? context.colors.scaffoldBg
-                      : context.colors.lavender,
+                  fillColor: context.colors.inputFill,
                   labelStyle: TextStyle(color: context.colors.textMedium),
                   hintStyle: TextStyle(color: context.colors.textLight),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                 ),
               )
@@ -384,12 +376,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? context.colors.primary.withValues(alpha: 0.2)
-                          : context.colors.scaffoldBg,
-                      border: Border.all(
-                        color: isSelected
-                            ? context.colors.primary
-                            : context.colors.border,
-                      ),
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -414,11 +401,10 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                   labelText: 'Type',
                   labelStyle: TextStyle(color: context.colors.textMedium),
                   filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark
-                      ? context.colors.scaffoldBg
-                      : context.colors.lavender,
+                  fillColor: context.colors.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                 ),
                 items: [
@@ -480,8 +466,11 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                       style: TextStyle(color: context.colors.textDark),
                       decoration: InputDecoration(
                         labelText: _isWaterHabit ? 'Amount' : 'Target',
+                        filled: true,
+                        fillColor: context.colors.inputFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
                         ),
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
@@ -501,8 +490,11 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                       style: TextStyle(color: context.colors.textDark),
                       decoration: InputDecoration(
                         labelText: _isWaterHabit ? 'Unit' : 'Unit (e.g. L)',
+                        filled: true,
+                        fillColor: context.colors.inputFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
                         ),
                       ),
                       onChanged: (_) {
@@ -533,8 +525,11 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 style: TextStyle(color: context.colors.textDark),
                 decoration: InputDecoration(
                   labelText: 'Increment Step (e.g. 0.25)',
+                  filled: true,
+                  fillColor: context.colors.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
