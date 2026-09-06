@@ -237,34 +237,11 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
               ),
               const SizedBox(height: 16),
               if (!_isStreaming)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: _fetchSuggestion,
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.refresh_rounded,
-                            size: 16,
-                            color: context.colors.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Suggest something else',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                CompactButton(
+                  label: 'Suggest something else',
+                  icon: Icons.refresh_rounded,
+                  filled: false,
+                  onPressed: _fetchSuggestion,
                 ),
             ] else ...[
               Text(
