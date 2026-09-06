@@ -919,25 +919,25 @@ class _ProvenanceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String emoji;
+    IconData iconData;
     Color color;
     String label = provenance;
     
     switch (provenance) {
       case 'verified':
-        emoji = '🛡️';
+        iconData = Icons.verified_outlined;
         color = context.colors.textMedium;
         break;
       case 'estimated':
-        emoji = '✨';
+        iconData = Icons.auto_awesome_rounded;
         color = context.colors.primary.withValues(alpha: 0.8);
         break;
       case 'yours':
-        emoji = '✏️';
+        iconData = Icons.edit_outlined;
         color = context.colors.textLight;
         break;
       default:
-        emoji = 'ℹ️';
+        iconData = Icons.info_outline_rounded;
         color = context.colors.textLight;
     }
 
@@ -952,7 +952,7 @@ class _ProvenanceBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 10)),
+          Icon(iconData, size: 12, color: color),
           const SizedBox(width: 4),
           Text(
             label.substring(0, 1).toUpperCase() + label.substring(1),
@@ -975,14 +975,23 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String title, desc;
+    IconData headerIcon;
+    Color headerColor;
+    
     if (provenance == 'verified') {
-      title = '🛡️ Verified Local Food';
+      title = 'Verified Local Food';
+      headerIcon = Icons.verified_outlined;
+      headerColor = context.colors.textMedium;
       desc = 'This item was matched instantly against your personal food database. No AI estimation was used, ensuring 100% precision.';
     } else if (provenance == 'estimated') {
-      title = '✨ AI Estimated';
+      title = 'AI Estimated';
+      headerIcon = Icons.auto_awesome_rounded;
+      headerColor = context.colors.primary.withValues(alpha: 0.8);
       desc = 'Gemini estimated the macros for this food using Atwater culinary physics (4-4-9 rule). It has now been saved to your local database.';
     } else {
-      title = '✏️ Yours';
+      title = 'Yours';
+      headerIcon = Icons.edit_outlined;
+      headerColor = context.colors.textLight;
       desc = 'You manually adjusted the macros or portion size for this item.';
     }
 
@@ -1004,9 +1013,17 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Icon(headerIcon, size: 24, color: headerColor),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Text(
