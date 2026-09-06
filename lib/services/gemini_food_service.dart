@@ -251,13 +251,26 @@ Return ONLY a JSON object containing an array called "items":
           final name = item['name']?.toString();
           if (name == null) continue;
 
+          double prot = (item['protein_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0;
+          double carb = (item['carbs_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0;
+          double fat = (item['fat_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0;
+
+          // MACRO-ENERGY VALIDATION (AI Fallback Math Fix)
+          // 4 kcal per gram of protein/carbs, 9 kcal per gram of fat
+          double calculatedKcal = (prot * 4) + (carb * 4) + (fat * 9);
+          double aiKcal = (item['kcal'] as num?)?.clamp(0, 900).toDouble() ?? 0.0;
+
+          // If AI hallucinated calories that deviate wildly from physics, overwrite it
+          double finalKcal = aiKcal;
+          if (aiKcal == 0 || (aiKcal - calculatedKcal).abs() > 20) {
+            finalKcal = calculatedKcal;
+          }
+
           final safeResponse = {
-            'kcal': (item['kcal'] as num?)?.clamp(0, 900).toDouble() ?? 0.0,
-            'protein_g':
-                (item['protein_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
-            'carbs_g':
-                (item['carbs_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
-            'fat_g': (item['fat_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0,
+            'kcal': finalKcal,
+            'protein_g': prot,
+            'carbs_g': carb,
+            'fat_g': fat,
           };
 
           results[name] = safeResponse;
@@ -348,10 +361,18 @@ Return ONLY a JSON object containing an array called "items":
       }
 
       final multiplier = grams / 100.0;
-      final kcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * multiplier;
       final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * multiplier;
       final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * multiplier;
       final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * multiplier;
+
+      // MACRO-ENERGY VALIDATION: Ensure final item calories respect Atwater physics
+      final calculatedKcal = (p * 4.0) + (c * 4.0) + (f * 9.0);
+      double rawKcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * multiplier;
+      
+      double kcal = rawKcal;
+      if (rawKcal == 0 || (rawKcal - calculatedKcal).abs() > 25) {
+        kcal = calculatedKcal;
+      }
 
       item['calories'] = kcal.round();
       item['protein_g'] = double.parse(p.toStringAsFixed(1));
