@@ -1225,7 +1225,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
               title: const Text('Choose preset avatar'),
               onTap: () async {
                 Navigator.pop(ctx);
-                final selectedAvatar = await AvatarPickerSheet.show(context);
+                final selectedAvatar = await showAppBottomSheet<String>(
+                  context: context,
+                  builder: (_) => const AvatarPickerSheet(),
+                );
                 if (selectedAvatar != null) {
                   setState(() {
                     _localPhotoPath = selectedAvatar;

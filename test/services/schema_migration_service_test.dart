@@ -35,8 +35,8 @@ void main() {
       expect(profile.targetCalories, 2000);
 
       // v2 fields added
-      expect(profile.targetProteinG, 80);
-      expect(profile.targetCarbsG, 120);
+      expect(profile.targetProteinG, 85);
+      expect(profile.targetCarbsG, 135);
       expect(profile.targetFatG, 40);
     },
   );
