@@ -441,7 +441,15 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: const Text('Backup & Restore'),
+        title: Text(
+          'Backup & Restore',
+          style: TextStyle(
+            fontFamily: 'Cabinet Grotesk',
+            fontSize: 24,
+            color: context.colors.textDark,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         backgroundColor: context.colors.scaffoldBg,
       ),
       body: _isLoading
@@ -455,7 +463,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: context.colors.lavender,
+                      color: context.colors.card,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -525,11 +533,12 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                   Row(
                     children: [
                       Text(
-                        'Encrypt Backup',
+                        'ENCRYPT BACKUP',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textDark,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.5,
+                          color: context.colors.primary,
                         ),
                       ),
                       const Spacer(),
@@ -609,13 +618,6 @@ class _ActionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: context.colors.textDark.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Row(
           children: [
