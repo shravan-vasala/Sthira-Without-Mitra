@@ -118,15 +118,18 @@ class PastDaySummarySheet extends ConsumerWidget {
 
     // 3) Status pill logic
     String statusText = "Nothing logged";
-    Color statusColor = context.colors.textMedium;
+    Color statusColor = context.colors.red;
     if (totalDone == 0) {
-      if (isRestDay) statusText = "Rest day / Nothing logged";
+      if (isRestDay) {
+        statusText = "Rest day";
+        statusColor = context.colors.textMedium;
+      }
     } else if (totalDone >= (totalThings * 0.75).round()) {
       statusText = "Great day";
       statusColor = context.colors.green;
     } else {
       statusText = "Partial";
-      statusColor = Colors.amber.shade700;
+      statusColor = context.colors.orange;
     }
 
     final missedHabits = applicableHabits
@@ -141,7 +144,7 @@ class PastDaySummarySheet extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: context.colors.lavender,
+        color: context.colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -172,12 +175,13 @@ class PastDaySummarySheet extends ConsumerWidget {
                       Text(
                         DateFormat('EEE, dd MMM').format(date),
                         style: TextStyle(
-                          fontSize: 20,
+                          fontFamily: 'Cabinet Grotesk',
+                          fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: context.colors.textDark,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         '$totalDone of $totalThings things completed',
                         style: TextStyle(
