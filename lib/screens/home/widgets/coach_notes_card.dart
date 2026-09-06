@@ -39,9 +39,8 @@ class CoachNotesCard extends ConsumerWidget {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: context.colors.background,
+                        color: context.colors.card,
                         borderRadius: BorderRadius.circular(kCardRadius),
-                        border: Border.all(color: context.colors.border),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
