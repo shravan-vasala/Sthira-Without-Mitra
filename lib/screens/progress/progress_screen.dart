@@ -327,7 +327,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           decoration: BoxDecoration(
             color: context.colors.card.withValues(alpha: 0.5),
             shape: BoxShape.circle,
-            border: Border.all(color: context.colors.border, width: 1.5),
           ),
           child: Icon(icon, color: context.colors.primary, size: 20),
         ),
@@ -454,7 +453,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             decoration: BoxDecoration(
               color: context.colors.card.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: context.colors.border),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

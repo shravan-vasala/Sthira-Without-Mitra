@@ -130,13 +130,6 @@ class SharedChartCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(kCardRadius),
-        boxShadow: [
-          BoxShadow(
-            color: context.colors.primary.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,13 +155,6 @@ class SharedChartCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: context.colors.card,
               borderRadius: BorderRadius.circular(kCardRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colors.primary.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
