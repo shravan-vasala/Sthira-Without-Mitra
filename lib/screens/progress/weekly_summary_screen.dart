@@ -132,8 +132,8 @@ class WeeklySummaryScreen extends ConsumerWidget {
                           _StatCard(
                             title: 'Habits',
                             icon: Icons.checklist_rounded,
-                            primaryValue:
-                                '${(summary.habitCompletionRate * 100).toInt()}%',
+                            numericValue: summary.habitCompletionRate * 100,
+                            unit: '%',
                             subtitle: 'Completion',
                             trendValue: _calculateTrendDouble(
                               summary.habitCompletionRate,
@@ -144,7 +144,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
                           _StatCard(
                             title: 'Steps',
                             icon: Icons.directions_walk_rounded,
-                            primaryValue: '${summary.avgSteps}',
+                            numericValue: summary.avgSteps.toDouble(),
                             subtitle: 'Avg / day',
                             trendValue: _calculateTrendInt(
                               summary.avgSteps,
@@ -154,8 +154,9 @@ class WeeklySummaryScreen extends ConsumerWidget {
                           _StatCard(
                             title: 'Sleep',
                             icon: Icons.nightlight_round,
-                            primaryValue:
-                                '${summary.avgSleep.toStringAsFixed(1)}h',
+                            numericValue: summary.avgSleep,
+                            unit: 'h',
+                            decimals: 1,
                             subtitle: 'Avg / night',
                             trendValue: _calculateTrendDouble(
                               summary.avgSleep,
@@ -165,7 +166,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
                           _StatCard(
                             title: 'Nutrition',
                             icon: Icons.local_fire_department_rounded,
-                            primaryValue: '${summary.avgCalories}',
+                            numericValue: summary.avgCalories.toDouble(),
                             subtitle: 'Avg kcal / day',
                             trendValue: _calculateTrendInt(
                               summary.avgCalories,
@@ -717,14 +718,20 @@ class _HabitChartCard extends StatelessWidget {
 class _StatCard extends StatelessWidget {
   final String title;
   final IconData icon;
-  final String primaryValue;
+  final String? primaryValue;
+  final double? numericValue;
+  final String? unit;
+  final int decimals;
   final String subtitle;
   final String? trendValue;
 
   const _StatCard({
     required this.title,
     required this.icon,
-    required this.primaryValue,
+    this.primaryValue,
+    this.numericValue,
+    this.unit,
+    this.decimals = 0,
     required this.subtitle,
     this.trendValue,
   });
@@ -786,19 +793,42 @@ class _StatCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                primaryValue,
-                style: AppTheme.numeric(
-                  TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    color: context.colors.textDark,
-                    height: 1.0,
+              if (numericValue != null) 
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0, end: numericValue!),
+                  duration: const Duration(milliseconds: 1400),
+                  curve: Curves.easeOutQuart,
+                  builder: (context, val, child) {
+                    final display = '${val.toStringAsFixed(decimals)}${unit ?? ''}';
+                    return Text(
+                      display,
+                      style: AppTheme.numeric(
+                        TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: context.colors.textDark,
+                          height: 1.0,
+                        ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  }
+                )
+              else
+                Text(
+                  primaryValue ?? '',
+                  style: AppTheme.numeric(
+                    TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: context.colors.textDark,
+                      height: 1.0,
+                    ),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
               if (trendValue != null) ...[
                 const SizedBox(width: 6),
                 Padding(

@@ -395,7 +395,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final isTrendMetric = _selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi;
     final trendData = (_selectedRange != TimeRange.sixMonths && isTrendMetric && data.length > 2) ? _calculateTrendData(data) : null;
     
-    final avgText = data.isNotEmpty ? _formatOverviewValue(data.map((d) => d.value).reduce((a,b)=>a+b)/data.length, _selectedMetric, useKg) : '—';
+    final double avgValue = data.isNotEmpty ? data.map((d) => d.value).reduce((a,b)=>a+b)/data.length : 0;
+    
     final subtitleText = _overviewSubtitle(data, _selectedMetric, useKg);
     final unitText = _overviewUnit(_selectedMetric, useKg);
 
@@ -409,14 +410,23 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(
-                  avgText,
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.textDark,
-                    letterSpacing: -1.5,
-                  ),
+                TweenAnimationBuilder<double>(
+                  key: ValueKey('$_selectedMetric-$_selectedRange'),
+                  tween: Tween<double>(begin: avgValue * 0.5, end: avgValue),
+                  duration: const Duration(milliseconds: 1200),
+                  curve: Curves.easeOutQuart,
+                  builder: (context, value, child) {
+                    final displayValue = data.isNotEmpty ? _formatOverviewValue(value, _selectedMetric, useKg) : '—';
+                    return Text(
+                      displayValue,
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.w800,
+                        color: context.colors.textDark,
+                        letterSpacing: -1.5,
+                      ),
+                    );
+                  }
                 ),
                 const SizedBox(width: 6),
                 Text(

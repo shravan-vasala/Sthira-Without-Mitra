@@ -11,7 +11,8 @@ class MetricOverviewCard extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
-    required this.valueText,
+    required this.value,
+    required this.unit,
     required this.data,
     required this.startDate,
     required this.endDate,
@@ -22,7 +23,8 @@ class MetricOverviewCard extends StatelessWidget {
 
   final IconData icon;
   final String title;
-  final String valueText;
+  final double value;
+  final String unit;
 
   /// e.g. "avg this period" or "−0.4 kg vs start"
   final String? subtitle;
@@ -72,13 +74,20 @@ class MetricOverviewCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                valueText,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: value),
+                duration: const Duration(milliseconds: 1400),
+                curve: Curves.easeOutQuart,
+                builder: (context, val, child) {
+                  return Text(
+                    '${isCount ? val.toInt() : val.toStringAsFixed(1)}$unit',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: context.colors.textDark,
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 4),
               Icon(

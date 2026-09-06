@@ -78,7 +78,7 @@ class InsightsCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: context.colors.card.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.border),
+        // Sthira: No borders!
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
