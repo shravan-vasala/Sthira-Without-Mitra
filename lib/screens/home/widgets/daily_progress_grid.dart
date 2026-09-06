@@ -58,8 +58,7 @@ class DailyProgressGrid extends ConsumerWidget {
           _ProgressCard(
             title: 'Body Stats',
             icon: Icons.straighten_rounded,
-            color: context.colors.pink,
-            iconColor: context.colors.pinkIcon,
+            iconColor: context.colors.primary,
             subtitle: 'Tap to view',
             onTap: () => context.go('/home/body-stats'),
           ),
@@ -67,8 +66,7 @@ class DailyProgressGrid extends ConsumerWidget {
           _ProgressCard(
             title: 'Physique',
             icon: Icons.camera_alt_rounded,
-            color: context.colors.pink,
-            iconColor: context.colors.pinkIcon,
+            iconColor: context.colors.orange,
             subtitle: 'Progress',
             thumbnails: flattenedPhotos,
             onTap: () => context.go('/home/physique-pictures'),
@@ -77,8 +75,7 @@ class DailyProgressGrid extends ConsumerWidget {
           _ProgressCard(
             title: 'Body Weight',
             icon: Icons.monitor_weight_rounded,
-            color: context.colors.lavenderCard,
-            iconColor: context.colors.primary,
+            iconColor: context.colors.indigo,
             subtitle: weightSubtitle,
             onTap: isFuture
                 ? () {}
@@ -330,17 +327,16 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: context.colors.border),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colors.mintIcon.withValues(alpha: 0.1),
+                color: context.colors.green.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(Icons.directions_walk_rounded, size: 20, color: context.colors.mintIcon),
+              child: Icon(Icons.directions_walk_rounded, size: 20, color: context.colors.green),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -416,7 +412,6 @@ class _ProgressCard extends StatelessWidget {
   const _ProgressCard({
     required this.title,
     required this.icon,
-    required this.color,
     required this.iconColor,
     required this.subtitle,
     required this.onTap,
@@ -426,7 +421,6 @@ class _ProgressCard extends StatelessWidget {
 
   final String title;
   final IconData icon;
-  final Color color;
   final Color iconColor;
   final String subtitle;
   final VoidCallback onTap;
@@ -449,7 +443,6 @@ class _ProgressCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: context.colors.border),
         ),
         child: Row(
           children: [
