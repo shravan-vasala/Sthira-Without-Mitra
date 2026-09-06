@@ -253,16 +253,23 @@ class _CalorieHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
-                '${eaten.toInt()}',
-                style: TextStyle(
-                  fontFamily: 'CabinetGrotesk',
-                  fontSize: 56,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -1.5,
-                  height: 1.0,
-                  color: context.colors.textDark,
-                ),
+              TweenAnimationBuilder<int>(
+                tween: IntTween(begin: 0, end: eaten.toInt()),
+                duration: const Duration(milliseconds: 1400),
+                curve: Curves.easeOutQuart,
+                builder: (context, val, child) {
+                  return Text(
+                    '$val',
+                    style: TextStyle(
+                      fontFamily: 'CabinetGrotesk',
+                      fontSize: 56,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1.5,
+                      height: 1.0,
+                      color: context.colors.textDark,
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 8),
               if (isOverTarget)

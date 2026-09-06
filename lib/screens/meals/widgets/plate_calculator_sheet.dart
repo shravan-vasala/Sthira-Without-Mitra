@@ -140,7 +140,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             decoration: BoxDecoration(
               color: context.colors.scaffoldBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.colors.border),
+              // Sthira: No borders!
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
