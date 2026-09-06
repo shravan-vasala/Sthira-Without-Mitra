@@ -21,7 +21,7 @@ class YearlyActivityScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -30,33 +30,36 @@ class YearlyActivityScreen extends ConsumerWidget {
 
               const SizedBox(height: 32),
 
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: context.colors.lavenderCard,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.insights_rounded,
-                      color: context.colors.primary,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        'Consistency is key. The more days you track your habits, log your workouts, and hit your nutrition goals, the brighter your heatmap will shine.',
-                        style: TextStyle(
-                          color: context.colors.textDark,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          height: 1.5,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: context.colors.lavenderCard,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.insights_rounded,
+                        color: context.colors.primary,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          'Consistency is key. The more days you track your habits, log your workouts, and hit your nutrition goals, the brighter your heatmap will shine.',
+                          style: TextStyle(
+                            color: context.colors.textDark,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

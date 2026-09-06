@@ -4,8 +4,38 @@ import 'package:intl/intl.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
 
-class ActivityHeatmap extends ConsumerWidget {
+class ActivityHeatmap extends ConsumerStatefulWidget {
   const ActivityHeatmap({super.key});
+
+  @override
+  ConsumerState<ActivityHeatmap> createState() => _ActivityHeatmapState();
+}
+
+class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentMonth();
+    });
+  }
+
+  void _scrollToCurrentMonth() {
+    final year = ref.read(selectedYearProvider);
+    final now = DateTime.now();
+    if (year == now.year && _scrollController.hasClients) {
+      final offset = (now.month - 1) * (210.0 + 16.0);
+      _scrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+      );
+    } else if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
+  }
 
   Color _getColorForScore(BuildContext context, int score) {
     if (score == 0) return context.colors.inputFill;
@@ -16,29 +46,25 @@ class ActivityHeatmap extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final year = ref.watch(selectedYearProvider);
     final heatmapAsync = ref.watch(yearlyActivityHeatmapProvider(year));
 
+    ref.listen(selectedYearProvider, (prev, next) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToCurrentMonth();
+      });
+    });
+
     return heatmapAsync.when(
       data: (heatmapData) {
-        final startDate = DateTime(year, 1, 1);
-        final isLeapYear =
-            (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-        final daysInYear = isLeapYear ? 366 : 365;
-
-        // DateTime.weekday is 1 (Monday) to 7 (Sunday). Let's make Monday = 0, Sunday = 6.
-        final startWeekday = startDate.weekday - 1;
-
-        final totalCells = daysInYear + startWeekday;
-        final totalColumns = (totalCells / 7).ceil();
-
-        int lastMonth = -1;
-
-        // Calculate some basic stats
         int activeDays = 0;
         int currentStreak = 0;
         int maxStreak = 0;
+
+        final startDate = DateTime(year, 1, 1);
+        final isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        final daysInYear = isLeapYear ? 366 : 365;
 
         for (int i = 0; i < daysInYear; i++) {
           final date = startDate.add(Duration(days: i));
@@ -53,29 +79,19 @@ class ActivityHeatmap extends ConsumerWidget {
           }
         }
 
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: context.colors.card,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize:
-                MainAxisSize.min, // Fix for bottom sheet expanding too much
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
                       IconButton(
-                        icon: Icon(
-                          Icons.chevron_left_rounded,
-                          color: context.colors.textDark,
-                        ),
-                        onPressed: () =>
-                            ref.read(selectedYearProvider.notifier).state--,
+                        icon: Icon(Icons.chevron_left_rounded, color: context.colors.textDark),
+                        onPressed: () => ref.read(selectedYearProvider.notifier).state--,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
@@ -97,217 +113,67 @@ class ActivityHeatmap extends ConsumerWidget {
                               : context.colors.textLight,
                         ),
                         onPressed: year < DateTime.now().year
-                            ? () => ref
-                                  .read(selectedYearProvider.notifier)
-                                  .state++
+                            ? () => ref.read(selectedYearProvider.notifier).state++
                             : null,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Text(
-                        'Less',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: context.colors.textLight,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      _buildLegendSquare(context, 0),
-                      _buildLegendSquare(context, 20),
-                      _buildLegendSquare(context, 45),
-                      _buildLegendSquare(context, 70),
-                      _buildLegendSquare(context, 100),
-                      const SizedBox(width: 4),
-                      Text(
-                        'More',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: context.colors.textLight,
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
-              const SizedBox(height: 24),
-              // Scrollable Horizontal Heatmap
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    // Height is distributed among 7 rows + 1 row for month labels
-                    // Available height for the 7 rows = maxHeight - 20 (for months)
-                    final availableHeight = constraints.maxHeight - 20;
-                    // Divide by 7, subtract 2 for margins (1px each side)
-                    final double calculatedCellSize = (availableHeight / 7) - 2;
-                    // Clamp the size to avoid it being ridiculously large or too small
-                    final double cellSize = calculatedCellSize.clamp(
-                      12.0,
-                      40.0,
-                    );
-
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left labels for days of week
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 20), // Spacer for month row
-                            ...['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(
-                              (day) => Container(
-                                height:
-                                    cellSize +
-                                    2, // Include margin to align with cells
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Text(
-                                  day,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: context.colors.textMedium,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Horizontal scrollable heatmap
-                        Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: List.generate(totalColumns, (colIndex) {
-                                // Check if a new month starts in this column
-                                String monthLabel = '';
-                                for (
-                                  int rowIndex = 0;
-                                  rowIndex < 7;
-                                  rowIndex++
-                                ) {
-                                  final cellIndex = colIndex * 7 + rowIndex;
-                                  final dayOffset = cellIndex - startWeekday;
-                                  if (dayOffset >= 0 && dayOffset < 365) {
-                                    final currentDate = startDate.add(
-                                      Duration(days: dayOffset),
-                                    );
-                                    if (currentDate.month != lastMonth) {
-                                      monthLabel = DateFormat(
-                                        'MMM',
-                                      ).format(currentDate);
-                                      lastMonth = currentDate.month;
-                                      break; // found the first month boundary in this column
-                                    }
-                                  }
-                                }
-
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Month Label
-                                    Container(
-                                      height: 20,
-                                      width: cellSize + 2, // Match column width
-                                      alignment: Alignment.bottomLeft,
-                                      // Ensure the text doesn't get clipped or force column width expansion
-                                      child: monthLabel.isNotEmpty
-                                          ? OverflowBox(
-                                              maxWidth: double.infinity,
-                                              alignment: Alignment.bottomLeft,
-                                              child: Text(
-                                                monthLabel,
-                                                style: TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600,
-                                                  color:
-                                                      context.colors.textLight,
-                                                ),
-                                              ),
-                                            )
-                                          : null,
-                                    ),
-
-                                    // Column of 7 days
-                                    ...List.generate(7, (rowIndex) {
-                                      final cellIndex = colIndex * 7 + rowIndex;
-                                      final dayOffset =
-                                          cellIndex - startWeekday;
-
-                                      if (dayOffset < 0 ||
-                                          dayOffset >= daysInYear) {
-                                        return Container(
-                                          width: cellSize,
-                                          height: cellSize,
-                                          margin: const EdgeInsets.all(1),
-                                        );
-                                      }
-
-                                      final currentDate = startDate.add(
-                                        Duration(days: dayOffset),
-                                      );
-                                      final score =
-                                          heatmapData[currentDate] ?? 0;
-                                      final dateStr = DateFormat(
-                                        'MMM dd, yyyy',
-                                      ).format(currentDate);
-
-                                      return Tooltip(
-                                        message: '$dateStr\nScore: $score',
-                                        child: Container(
-                                          width: cellSize,
-                                          height: cellSize,
-                                          margin: const EdgeInsets.all(1),
-                                          decoration: BoxDecoration(
-                                            color: _getColorForScore(
-                                              context,
-                                              score,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              2,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                );
-                              }),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 260, 
+              child: ListView.separated(
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: 12,
+                separatorBuilder: (context, index) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final month = index + 1;
+                  return _buildMonthCard(context, year, month, heatmapData);
+                },
               ),
-              const SizedBox(height: 24),
-              Row(
+            ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
                 children: [
                   Expanded(
-                    child: _buildStatCard(
-                      context,
-                      'Active Days',
-                      '$activeDays',
-                    ),
+                    child: _buildStatCard(context, 'Active Days', '$activeDays'),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildStatCard(
-                      context,
-                      'Longest Streak',
-                      '$maxStreak',
-                    ),
+                    child: _buildStatCard(context, 'Longest Streak', '$maxStreak'),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Less', style: TextStyle(fontSize: 10, color: context.colors.textLight)),
+                  const SizedBox(width: 4),
+                  _buildLegendSquare(context, 0),
+                  _buildLegendSquare(context, 20),
+                  _buildLegendSquare(context, 45),
+                  _buildLegendSquare(context, 70),
+                  _buildLegendSquare(context, 100),
+                  const SizedBox(width: 4),
+                  Text('More', style: TextStyle(fontSize: 10, color: context.colors.textLight)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
         );
       },
       loading: () => Container(
@@ -318,7 +184,106 @@ class ActivityHeatmap extends ConsumerWidget {
       error: (e, st) => Container(
         height: 150,
         alignment: Alignment.center,
-        child: Text('Error: \$e', style: TextStyle(color: context.colors.red)),
+        child: Text('Error: $e', style: TextStyle(color: context.colors.red)),
+      ),
+    );
+  }
+
+  Widget _buildMonthCard(BuildContext context, int year, int month, Map<DateTime, int> heatmapData) {
+    final firstDayOfMonth = DateTime(year, month, 1);
+    final daysInMonth = DateUtils.getDaysInMonth(year, month);
+    
+    // We want Sunday to be 0 for standard layout
+    final startWeekday = firstDayOfMonth.weekday == 7 ? 0 : firstDayOfMonth.weekday;
+    
+    final totalCells = daysInMonth + startWeekday;
+    final totalRows = (totalCells / 7).ceil();
+
+    final monthName = DateFormat('MMM').format(firstDayOfMonth).toLowerCase();
+
+    return Container(
+      width: 210, 
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.colors.card, 
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.calendar_view_month_rounded, size: 16, color: context.colors.textDark),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  monthName,
+                  style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) {
+              return SizedBox(
+                width: 22,
+                child: Text(
+                  day,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textMedium,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: List.generate(totalRows, (rowIndex) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(7, (colIndex) {
+                    final cellIndex = rowIndex * 7 + colIndex;
+                    final dayOffset = cellIndex - startWeekday;
+
+                    if (dayOffset < 0 || dayOffset >= daysInMonth) {
+                      return const SizedBox(width: 22, height: 22);
+                    }
+
+                    final currentDate = DateTime(year, month, dayOffset + 1);
+                    final score = heatmapData[currentDate] ?? 0;
+                    
+                    String tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score';
+
+                    return Tooltip(
+                      message: tooltipMsg,
+                      child: Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: _getColorForScore(context, score),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
@@ -347,9 +312,11 @@ class ActivityHeatmap extends ConsumerWidget {
           Text(
             value,
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
               color: context.colors.primary,
+              height: 1.0,
             ),
           ),
           const SizedBox(height: 4),
