@@ -36,7 +36,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 '2:47',
@@ -55,7 +55,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 style: TextStyle(
                   fontFamily: 'General Sans',
                   fontSize: 15,
-                  height: 1.8,
+                  height: 1.5,
                   color: context.colors.textMedium,
                   fontWeight: FontWeight.w400,
                 ),
