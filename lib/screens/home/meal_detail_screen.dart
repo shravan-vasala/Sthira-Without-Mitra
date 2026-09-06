@@ -496,13 +496,43 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                             ),
                           ),
                           if (_hasLog)
-                            Text(
-                              '${slotLog!.totalCalories} kcal',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: context.colors.primary,
-                              ),
+                            TweenAnimationBuilder<double>(
+                              key: ValueKey(slotLog!.totalCalories),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 800),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, val, _) {
+                                final cal = (slotLog.totalCalories * val).toInt();
+                                final p = (slotLog.totalProtein * val).toInt();
+                                final c = (slotLog.totalCarbs * val).toInt();
+                                final f = (slotLog.totalFat * val).toInt();
+
+                                return Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '$cal kcal',
+                                        style: TextStyle(
+                                          color: context.colors.primary,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const TextSpan(text: '   '),
+                                      TextSpan(text: 'P: ', style: TextStyle(color: context.colors.green.withValues(alpha: 0.9), fontSize: 11)),
+                                      TextSpan(text: '${p}g   '),
+                                      TextSpan(text: 'C: ', style: TextStyle(color: context.colors.orange.withValues(alpha: 0.9), fontSize: 11)),
+                                      TextSpan(text: '${c}g   '),
+                                      TextSpan(text: 'F: ', style: TextStyle(color: context.colors.primary.withValues(alpha: 0.9), fontSize: 11)),
+                                      TextSpan(text: '${f}g'),
+                                    ],
+                                  ),
+                                  style: AppTheme.numeric(TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.colors.textMedium,
+                                  )),
+                                );
+                              },
                             )
                           else if (planned != null && planned.calories > 0)
                             Text(
@@ -624,32 +654,8 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                   ),
                                 ),
                               ),
-
-                            // MACRO PILLS INJECTED HERE
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                _MealMacroPill(
-                                  label: 'P',
-                                  value: '${slotLog.totalProtein.toStringAsFixed(0)}g',
-                                  color: context.colors.green,
-                                ),
-                                const SizedBox(width: 8),
-                                _MealMacroPill(
-                                  label: 'C',
-                                  value: '${slotLog.totalCarbs.toStringAsFixed(0)}g',
-                                  color: context.colors.orange,
-                                ),
-                                const SizedBox(width: 8),
-                                _MealMacroPill(
-                                  label: 'F',
-                                  value: '${slotLog.totalFat.toStringAsFixed(0)}g',
-                                  color: context.colors.primary,
-                                ),
-                              ],
-                            ),
                           
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                           Row(
                             children: [
                               TextButton.icon(
@@ -886,35 +892,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
         slotDisplayName: widget.slotName,
         isManualEntry: isManualEntry,
         appendToLog: append ? widget.slotLog : null,
-      ),
-    );
-  }
-}
-
-class _MealMacroPill extends StatelessWidget {
-  const _MealMacroPill({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        '$label: $value',
-        style: AppTheme.numeric(
-          TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
-        ),
       ),
     );
   }
