@@ -65,7 +65,7 @@ class DailyProgressGrid extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _ProgressCard(
-            title: 'Photos',
+            title: 'Physique',
             icon: Icons.camera_alt_rounded,
             color: context.colors.pink,
             iconColor: context.colors.pinkIcon,
