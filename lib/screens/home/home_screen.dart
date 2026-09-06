@@ -22,6 +22,7 @@ import 'widgets/meals_card.dart';
 import 'widgets/habits_card.dart';
 import 'widgets/daily_progress_grid.dart';
 import 'widgets/coach_notes_card.dart';
+import 'widgets/daily_insight_card.dart';
 import 'widgets/day_complete_sheet.dart';
 
 import 'widgets/day_complete_sheet.dart';
@@ -149,15 +150,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       _staggerWrap(1, const WeekCalendarStrip()),
                       const SizedBox(height: 24),
 
+                      // 2.5 Daily Insight
+                      _staggerWrap(2, const DailyInsightCard()),
+                      const SizedBox(height: 24),
+
                       // 3. Workout (primary daily action)
                       if (plan != null && plan.days.isNotEmpty) ...[
-                        _staggerWrap(2, _WorkoutsSection(plan: plan)),
+                        _staggerWrap(3, _WorkoutsSection(plan: plan)),
                         const SizedBox(height: 24),
                       ],
 
                       // 4. Habits
                       _staggerWrap(
-                        3,
+                        4,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -178,7 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 5. Meals
                       _staggerWrap(
-                        4,
+                        5,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -195,7 +200,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 6. Daily progress metrics
                       _staggerWrap(
-                        5,
+                        6,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -216,7 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 7. Coach notes last (below fold)
-                      _staggerWrap(6, const CoachNotesCard()),
+                      _staggerWrap(7, const CoachNotesCard()),
                       const SizedBox(height: 24),
                     ],
                   ),
