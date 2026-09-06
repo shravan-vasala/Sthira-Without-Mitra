@@ -202,7 +202,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                       AppTextField(
                         controller: widget.heightController,
                         labelText: 'Height',
-                        hintText: '175 cm',
+                        hintText: '153 cm',
                         keyboardType: TextInputType.number,
                       ),
                       if (_heightError.isNotEmpty)
@@ -224,7 +224,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                       AppTextField(
                         controller: widget.weightController,
                         labelText: 'Goal Weight',
-                        hintText: widget.useKg ? '70 kg' : '154 lb',
+                        hintText: widget.useKg ? '63 kg' : '138 lb',
                         keyboardType: TextInputType.number,
                       ),
                       if (_weightError.isNotEmpty)
