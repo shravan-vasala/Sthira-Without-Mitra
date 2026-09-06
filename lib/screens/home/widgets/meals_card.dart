@@ -145,8 +145,13 @@ class MealsCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-                  '$completedMeals/$totalMeals meals  ·  $completedCal/$totalCal kcal',
+            TweenAnimationBuilder<int>(
+              tween: IntTween(begin: 0, end: completedCal),
+              duration: const Duration(milliseconds: 1400),
+              curve: Curves.easeOutQuart,
+              builder: (context, val, child) {
+                return Text(
+                  '$completedMeals/$totalMeals meals  ·  $val/$totalCal kcal',
                   style: AppTheme.numeric(
                     Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
@@ -154,36 +159,29 @@ class MealsCard extends ConsumerWidget {
                         ) ??
                         const TextStyle(),
                   ),
-                )
-                .animate(key: ValueKey('$completedMeals-$completedCal'))
-                .fade()
-                .scale(begin: const Offset(0.95, 0.95)),
+                );
+              }
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
                 _MacroPill(
                       label: 'P',
-                      value: '${dailyLog.totalProtein.toStringAsFixed(0)}g',
+                      value: dailyLog.totalProtein,
                       color: context.colors.green,
-                    )
-                    .animate(key: ValueKey(dailyLog.totalProtein))
-                    .scale(begin: const Offset(0.9, 0.9)),
+                    ),
                 const SizedBox(width: 6),
                 _MacroPill(
                       label: 'C',
-                      value: '${dailyLog.totalCarbs.toStringAsFixed(0)}g',
+                      value: dailyLog.totalCarbs,
                       color: context.colors.orange,
-                    )
-                    .animate(key: ValueKey(dailyLog.totalCarbs))
-                    .scale(begin: const Offset(0.9, 0.9)),
+                    ),
                 const SizedBox(width: 6),
                 _MacroPill(
                       label: 'F',
-                      value: '${dailyLog.totalFat.toStringAsFixed(0)}g',
+                      value: dailyLog.totalFat,
                       color: context.colors.primary,
-                    )
-                    .animate(key: ValueKey(dailyLog.totalFat))
-                    .scale(begin: const Offset(0.9, 0.9)),
+                    ),
               ],
             ),
 
@@ -204,7 +202,7 @@ class _MacroPill extends StatelessWidget {
     required this.color,
   });
   final String label;
-  final String value;
+  final double value;
   final Color color;
 
   @override
@@ -212,15 +210,22 @@ class _MacroPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.15), // Bumped alpha slightly after removing border
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        // Sthira: Borders eradicated
       ),
-      child: Text(
-        '$label: $value',
-        style: AppTheme.numeric(
-          TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
-        ),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: value),
+        duration: const Duration(milliseconds: 1400),
+        curve: Curves.easeOutQuart,
+        builder: (context, val, child) {
+          return Text(
+            '$label: ${val.toStringAsFixed(0)}g',
+            style: AppTheme.numeric(
+              TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+            ),
+          );
+        }
       ),
     );
   }

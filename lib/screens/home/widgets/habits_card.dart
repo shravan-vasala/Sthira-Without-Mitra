@@ -561,14 +561,12 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
         height: 28,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: widget.isCompleted || widget.isFuture
-              ? null
-              : Border.all(color: context.colors.border, width: 2),
+          // Sthira: No borders!
           color: widget.isCompleted
               ? context.colors.green
               : (widget.isFuture
                     ? context.colors.textLight.withValues(alpha: 0.1)
-                    : Colors.transparent),
+                    : context.colors.textLight.withValues(alpha: 0.15)), // Soft alpha fill instead of border
           boxShadow: widget.isCompleted
               ? [
                   BoxShadow(

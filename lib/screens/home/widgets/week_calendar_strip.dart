@@ -531,25 +531,29 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
               ? context.colors.border.withValues(alpha: 0.5)
               : null,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor, width: 1),
+          // Sthira: No borders! Let the soft gradient fill float the pill.
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(iconData, size: 16, color: iconColor),
             const SizedBox(width: 4),
-            Text(
-                  displayScore,
+            TweenAnimationBuilder<int>(
+              tween: IntTween(begin: 0, end: isFuture ? 0 : score),
+              duration: const Duration(milliseconds: 1500),
+              curve: Curves.easeOutExpo,
+              builder: (context, value, child) {
+                return Text(
+                  isFuture ? '--' : value.toString(),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
                     color: textColor,
                     letterSpacing: -0.2,
                   ),
-                )
-                .animate(key: ValueKey(score))
-                .shake(hz: 3, curve: Curves.easeInOut)
-                .scale(begin: const Offset(1.2, 1.2), end: const Offset(1, 1)),
+                );
+              },
+            ),
           ],
         ),
       ),

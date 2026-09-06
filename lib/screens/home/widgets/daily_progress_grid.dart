@@ -355,14 +355,31 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        stepsSubtitle,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.textMedium,
+                      if (steps != null)
+                        TweenAnimationBuilder<int>(
+                          tween: IntTween(begin: 0, end: steps),
+                          duration: const Duration(milliseconds: 1400),
+                          curve: Curves.easeOutQuart,
+                          builder: (context, val, child) {
+                            return Text(
+                              '$val steps',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: context.colors.textMedium,
+                              ),
+                            );
+                          }
+                        )
+                      else
+                        Text(
+                          stepsSubtitle,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: context.colors.textMedium,
+                          ),
                         ),
-                      ),
                       if (sourceHint != null) ...[
                         const SizedBox(width: 6),
                         Container(
