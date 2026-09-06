@@ -15,6 +15,8 @@ class ConnectPage extends ConsumerStatefulWidget {
 
 class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
+  bool _healthConnected = false;
+  bool _cloudConnected = false;
 
   @override
   void initState() {
@@ -114,13 +116,16 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
               icon: Icons.favorite_rounded,
               title: 'Health Connect',
               subtitle: 'Sync workouts & weight natively.',
-              statusText: 'Optional', // Could dynamically check
-              statusActive: false,
-              onTap: () {
-                showAppBottomSheet(
+              statusText: _healthConnected ? 'Connected' : 'Optional',
+              statusActive: _healthConnected,
+              onTap: () async {
+                final result = await showAppBottomSheet<bool>(
                   context: context,
                   builder: (_) => const HealthConnectSheet(),
                 );
+                if (result == true) {
+                  setState(() => _healthConnected = true);
+                }
               },
             ),
           ),
@@ -148,13 +153,16 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
               icon: Icons.cloud_sync_rounded,
               title: 'Cloud Backup',
               subtitle: 'Securely sync your progress.',
-              statusText: 'Local-only',
-              statusActive: false,
-              onTap: () {
-                showAppBottomSheet(
+              statusText: _cloudConnected ? 'Syncing...' : 'Local-only',
+              statusActive: _cloudConnected,
+              onTap: () async {
+                final result = await showAppBottomSheet<String>(
                   context: context,
                   builder: (_) => const CloudSyncSheet(),
                 );
+                if (result == 'trigger_sync') {
+                  setState(() => _cloudConnected = true);
+                }
               },
             ),
           ),
