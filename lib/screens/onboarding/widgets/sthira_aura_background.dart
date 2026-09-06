@@ -35,20 +35,9 @@ class _SthiraAuraBackgroundState extends State<SthiraAuraBackground>
 
   @override
   Widget build(BuildContext context) {
-    // Determine aura colors based on the current page to give a sense of progression
-    Color primaryAura;
-    Color secondaryAura;
-
-    if (widget.currentPage <= 1) {
-      primaryAura = const Color(0xFFE29B65); // Sandy Peach
-      secondaryAura = const Color(0xFF171F1B); // Dark Surface
-    } else if (widget.currentPage == 2) {
-      primaryAura = const Color(0xFFE29B65); // Sandy Peach
-      secondaryAura = const Color(0xFFB5A5AA); // Muted Sage
-    } else {
-      primaryAura = const Color(0xFFB5A5AA); // Muted Sage
-      secondaryAura = const Color(0xFF171F1B); // Dark Surface
-    }
+    // We enforce the strict monochromatic aura requested, completely overriding the previous colored gradient logic.
+    const Color primaryAura = Color(0xFF171F1B); // Dark Surface
+    const Color secondaryAura = Color(0xFF171F1B); // Monolithic
 
     return AnimatedBuilder(
       animation: _scaleAnimation,
@@ -60,8 +49,8 @@ class _SthiraAuraBackgroundState extends State<SthiraAuraBackground>
               center: const Alignment(0, 0.2),
               radius: 1.2 * _scaleAnimation.value,
               colors: [
-                primaryAura.withValues(alpha: 0.15),
-                secondaryAura.withValues(alpha: 0.05),
+                primaryAura.withValues(alpha: 0.5),
+                secondaryAura.withValues(alpha: 0.2),
                 const Color(0xFF0F1513),
               ],
               stops: const [0.0, 0.6, 1.0],
@@ -81,7 +70,7 @@ class _SthiraAuraBackgroundState extends State<SthiraAuraBackground>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          primaryAura.withValues(alpha: 0.08),
+                          primaryAura.withValues(alpha: 0.4),
                           Colors.transparent,
                         ],
                       ),

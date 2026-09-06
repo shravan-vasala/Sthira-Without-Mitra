@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/primary_button.dart';
@@ -30,12 +31,14 @@ class AIMealSuggestionCard extends ConsumerStatefulWidget {
 
 class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
   bool _isLoading = false;
+  bool _isStreaming = false;
   String? _suggestionText;
   String? _error;
 
   Future<void> _fetchSuggestion() async {
     setState(() {
       _isLoading = true;
+      _isStreaming = false;
       _error = null;
       _suggestionText = null;
     });
@@ -69,6 +72,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
           setState(() {
             if (isFirstChunk) {
               _isLoading = false;
+              _isStreaming = true;
               _suggestionText = '';
               isFirstChunk = false;
             }
@@ -77,10 +81,17 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         }
       }
 
+      if (mounted) {
+        setState(() {
+          _isStreaming = false;
+        });
+      }
+
       if (isFirstChunk && mounted) {
         // Stream completed without yielding anything
         setState(() {
           _isLoading = false;
+          _isStreaming = false;
           _error = 'Failed to generate a suggestion. Please try again.';
         });
       }
@@ -89,6 +100,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         setState(() {
           _error = e.toString();
           _isLoading = false;
+          _isStreaming = false;
         });
       }
     }
@@ -159,39 +171,88 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
             ),
             const SizedBox(height: 16),
             if (_isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: CircularProgressIndicator(),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 16,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: context.colors.border,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ).animate(onPlay: (c) => c.repeat()).shimmer(
+                    duration: 1200.ms,
+                    color: context.colors.surface.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 16,
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    decoration: BoxDecoration(
+                      color: context.colors.border,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ).animate(onPlay: (c) => c.repeat()).shimmer(
+                    duration: 1200.ms,
+                    color: context.colors.surface.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 16,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    decoration: BoxDecoration(
+                      color: context.colors.border,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ).animate(onPlay: (c) => c.repeat()).shimmer(
+                    duration: 1200.ms,
+                    color: context.colors.surface.withValues(alpha: 0.5),
+                  ),
+                ],
               )
             else if (_suggestionText != null) ...[
-              Text(
-                _suggestionText!,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.textDark,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: _fetchSuggestion,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: context.colors.primary,
-                    side: BorderSide(
-                      color: context.colors.primary.withValues(alpha: 0.3),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              Wrap(
+                children: [
+                   Text(
+                    _suggestionText!,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: context.colors.textDark,
+                      height: 1.4,
                     ),
                   ),
-                  child: const Text('Suggest Something Else'),
-                ),
+                  if (_isStreaming)
+                    Text(
+                      '▍',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: context.colors.primary,
+                        height: 1.4,
+                      ),
+                    ).animate(onPlay: (c) => c.repeat()).fade(duration: 400.ms),
+                ]
               ),
+              const SizedBox(height: 16),
+              if (!_isStreaming)
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: _fetchSuggestion,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: context.colors.primary,
+                      side: BorderSide(
+                        color: context.colors.primary.withValues(alpha: 0.3),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Suggest Something Else'),
+                  ),
+                ),
             ] else ...[
               Text(
                 'Need ideas for your next meal? I can suggest a dish that perfectly fits your remaining macros (${widget.remainingCalories} kcal left).',

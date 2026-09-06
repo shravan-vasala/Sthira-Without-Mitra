@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -86,6 +87,9 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                       width: 120,
                       height: 120,
                       fit: BoxFit.cover,
+                    ).animate(onPlay: (controller) => controller.repeat()).shimmer(
+                      duration: 4.seconds,
+                      color: Colors.white.withValues(alpha: 0.1),
                     ),
                   ),
                 ),
@@ -297,7 +301,13 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                     ),
                   ],
                 ),
-              ),
+              ).animate(
+                  delay: (start * 1000 + 1000).ms, 
+                  onPlay: (controller) => controller.repeat(reverse: false),
+                ).shimmer(
+                  duration: 3.seconds,
+                  color: Colors.white.withValues(alpha: 0.05),
+                ),
             ),
           ),
         );

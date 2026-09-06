@@ -256,6 +256,7 @@ class AiClient {
         systemInstruction: systemInstruction != null ? Content.text(systemInstruction) : null,
         generationConfig: const GenerationConfig(
           responseMimeType: 'application/json',
+          temperature: 0.1,
         ),
         contents: [
           if (imageBytesList != null && imageBytesList.isNotEmpty)

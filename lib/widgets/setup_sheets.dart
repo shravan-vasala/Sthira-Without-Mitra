@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_colors.dart';
 import '../providers/app_providers.dart';
 import 'app_bottom_sheet.dart';
@@ -20,6 +21,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
   late TextEditingController _geminiController;
   late TextEditingController _coachController;
   bool _isVerifying = false;
+  bool _isSuccess = false;
   String _errorMessage = '';
   bool _obscureKey = true;
 
@@ -67,15 +69,17 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
     );
 
     if (mounted) {
-      Navigator.pop(context, true);
+      setState(() => _isSuccess = true);
+      await Future.delayed(const Duration(milliseconds: 1200));
+      if (mounted) Navigator.pop(context, true);
     }
   }
 
   void _launchUrl(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
   }
 
   @override
@@ -147,11 +151,14 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
           ),
           const SizedBox(height: 32),
           PrimaryButton(
-            onPressed: _isVerifying ? null : _save,
-            label: _isVerifying ? 'Verifying...' : 'Save Changes',
+            onPressed: _isSuccess ? () {} : (_isVerifying ? null : _save),
+            label: _isSuccess ? 'Saved!' : (_isVerifying ? 'Verifying...' : 'Save Changes'),
             isLoading: _isVerifying,
-            icon: Icons.check_rounded,
-          ),
+            icon: _isSuccess ? Icons.check_circle_rounded : Icons.check_rounded,
+          ).animate(target: _isSuccess ? 1 : 0)
+           .tint(color: const Color(0xFF4CAF50), duration: 400.ms)
+           .scaleXY(end: 1.05, duration: 200.ms, curve: Curves.easeOutBack)
+           .then(delay: 200.ms).scaleXY(end: 1.0, duration: 150.ms),
         ],
       ),
     );

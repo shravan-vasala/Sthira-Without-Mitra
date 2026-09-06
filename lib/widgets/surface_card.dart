@@ -56,14 +56,16 @@ class _SurfaceCardState extends State<SurfaceCard> {
   @override
   Widget build(BuildContext context) {
     final radius = widget.borderRadius ?? kCardRadius;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    
     final List<BoxShadow> shadows;
     switch (widget.elevation) {
       case SurfaceCardElevation.home:
         shadows = [
           BoxShadow(
-            color: context.colors.textLight.withValues(alpha: 0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: context.colors.textDark.withValues(alpha: isLight ? 0.05 : 0.0),
+            blurRadius: isLight ? 12 : 16,
+            offset: Offset(0, isLight ? 4 : 6),
           ),
         ];
       case SurfaceCardElevation.nested:
@@ -82,7 +84,7 @@ class _SurfaceCardState extends State<SurfaceCard> {
       decoration: BoxDecoration(
         color: widget.color ?? context.colors.card,
         borderRadius: BorderRadius.circular(radius),
-        border: widget.border,
+        border: widget.border ?? (isLight ? Border.all(color: context.colors.border, width: 1.0) : null),
         boxShadow: shadows,
       ),
       child: widget.child,

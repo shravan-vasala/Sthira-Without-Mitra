@@ -245,16 +245,31 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
           _buildAnimEntrance(
             4,
             Center(
-              child: ActionChip(
-                onPressed: widget.onToggleUnit,
-                backgroundColor: context.colors.inputFill,
-                side: BorderSide(color: context.colors.border.withOpacity(0.5)),
-                label: Text(
-                  'Switch to ${widget.useKg ? 'Pounds' : 'Kilograms'}',
-                  style: TextStyle(
-                    fontFamily: 'General Sans',
-                    color: context.colors.primary,
-                    fontWeight: FontWeight.w600,
+              child: GestureDetector(
+                onTap: widget.onToggleUnit,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: context.colors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.swap_horiz_rounded, color: context.colors.primary, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Switch to ${widget.useKg ? 'Pounds' : 'Kilograms'}',
+                        style: TextStyle(
+                          fontFamily: 'General Sans',
+                          fontSize: 13,
+                          color: context.colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

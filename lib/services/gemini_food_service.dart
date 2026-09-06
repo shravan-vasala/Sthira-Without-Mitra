@@ -263,25 +263,29 @@ Return ONLY a JSON object containing an array called "items":
           results[name] = safeResponse;
 
           // if there is a slight mismatch in case, store it under the original queried name as well
+          // Improve matching by removing punctuation before matching
+          String normalizeName(String src) => src.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '');
+          
           final queriedName = toFetch.firstWhere(
-            (element) =>
-                element.toLowerCase().trim() == name.toLowerCase().trim(),
+            (element) => normalizeName(element) == normalizeName(name),
             orElse: () => name,
           );
           results[queriedName] = safeResponse;
 
-          final normalized = queriedName.toLowerCase().trim();
-          await isar.foodSearchCaches.put(
-            FoodSearchCache(
-              normalizedQuery: 'fallback_$normalized',
-              cachedResponseJson: jsonEncode(safeResponse),
-            ),
-          );
+          if (safeResponse['kcal']! > 0.0) {
+            final normalized = queriedName.toLowerCase().trim();
+            await isar.foodSearchCaches.put(
+              FoodSearchCache(
+                normalizedQuery: 'fallback_$normalized',
+                cachedResponseJson: jsonEncode(safeResponse),
+              ),
+            );
+          }
         }
       });
     }
 
-    // Fill in default for any failures
+    // Fill in default for any failures (but do NOT cache them)
     for (final dish in toFetch) {
       if (!results.containsKey(dish)) {
         results[dish] = {
@@ -354,20 +358,28 @@ Return ONLY a JSON object containing an array called "items":
       item['carbs_g'] = double.parse(c.toStringAsFixed(1));
       item['fat_g'] = double.parse(f.toStringAsFixed(1));
 
-      totalCal += kcal;
-      totalP += p;
-      totalC += c;
-      totalF += f;
+      if (kcal == 0 && (per100g['kcal'] as num?) == 0) {
+        item['resolved'] = false;
+      } else {
+        item['resolved'] = true;
+        totalCal += kcal;
+        totalP += p;
+        totalC += c;
+        totalF += f;
+      }
     }
+
+    final unresolvedCount = items.where((i) => i is Map && i['resolved'] == false).length;
 
     aiResponse['total'] = {
       'calories': totalCal.round(),
       'protein_g': double.parse(totalP.toStringAsFixed(1)),
       'carbs_g': double.parse(totalC.toStringAsFixed(1)),
       'fat_g': double.parse(totalF.toStringAsFixed(1)),
+      if (unresolvedCount > 0) 'unresolved_count': unresolvedCount,
     };
 
-    if (hadUnknown) {
+    if (hadUnknown || unresolvedCount > 0) {
       final currentConfidence =
           aiResponse['confidence']?.toString().toLowerCase() ?? 'low';
       if (currentConfidence == 'high') {

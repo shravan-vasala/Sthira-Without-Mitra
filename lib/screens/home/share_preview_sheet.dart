@@ -1,12 +1,9 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'dart:io';
 import '../../theme/app_colors.dart';
-import 'widgets/daily_share_card.dart';
+import '../../providers/app_providers.dart';
+import '../share/share_card_exporter.dart';
+import '../share/daily_share_layout.dart';
 
 class SharePreviewSheet extends ConsumerStatefulWidget {
   const SharePreviewSheet({super.key});
@@ -16,50 +13,78 @@ class SharePreviewSheet extends ConsumerStatefulWidget {
 }
 
 class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
-  final GlobalKey _cardKey = GlobalKey();
+  ShareFormat _format = ShareFormat.post;
   bool _isSharing = false;
 
-  Future<void> _shareImage() async {
+  void _shareImage(Widget layout, String subtitle) async {
     if (_isSharing) return;
     setState(() => _isSharing = true);
     try {
-      // 1. Capture the image from RepaintBoundary
-      final boundary =
-          _cardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return;
-
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      final pngBytes = byteData?.buffer.asUint8List();
-
-      if (pngBytes == null) return;
-
-      // 2. Save it to a temporary file
-      final tempDir = await getTemporaryDirectory();
-      final file = await File(
-        '${tempDir.path}/sthira_daily_status.png',
-      ).create();
-      await file.writeAsBytes(pngBytes);
-
-      // 3. Share the file via OS Share Sheet
-      final xFile = XFile(file.path, mimeType: 'image/png');
-      // ignore: deprecated_member_use
-      await Share.shareXFiles([
-        xFile,
-      ], text: 'Just finished my daily goals on Sthira! 💪');
-    } catch (e) {
-      debugPrint('Error sharing image: $e');
+      await ShareCardExporter.exportAndShareWidget(
+        context: context,
+        widget: layout,
+        fileName: 'sthira_daily_status',
+        text: subtitle,
+        format: _format,
+      );
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }
   }
 
+  String _getSubtitle(int totalScore) {
+    if (totalScore >= 100) return 'Crushed all daily goals! 🔥';
+    if (totalScore >= 80) return 'Almost perfect today! ⭐';
+    if (totalScore >= 50) return 'Making steady progress 🌿';
+    if (totalScore >= 20) return 'Getting moving today 🏃';
+    return 'Just getting started 🌅';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final name = ref.watch(profileProvider.select((p) => p.name));
+    final scoreData = ref.watch(dailyScoreProvider);
+    final score = scoreData.totalScore;
+    final log = ref.watch(dailyLogProvider);
+    final steps = log.steps ?? 0;
+    final meals = ref.watch(dailyMealLogProvider);
+    
+    int habitsDone = 0;
+    if (log.habits != null) {
+      for (final h in log.habits!.values) {
+        if (h) habitsDone++;
+      }
+    }
+    final totalHabits = log.habits?.length ?? 0;
+
+    final subtitle = _getSubtitle(score);
+    // Base color tied to score
+    Color baseColor = context.colors.green;
+    if (score < 50) {
+      baseColor = context.colors.red;
+    } else if (score < 80) {
+      baseColor = context.colors.orange;
+    }
+
+    final layout = DailyShareLayout(
+      format: _format,
+      userName: name,
+      score: score,
+      subtitle: subtitle,
+      steps: steps,
+      mealsKcal: meals.totalCalories.toInt(),
+      workoutDone: log.workoutCompleted,
+      habitsDone: totalHabits > 0 ? '$habitsDone/$totalHabits' : '0/0',
+      baseColor: baseColor,
+    );
+
+    final previewWidth = 360.0;
+    final previewHeight = _format == ShareFormat.post ? 450.0 : 640.0;
+
     return SafeArea(
       bottom: true,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
         decoration: BoxDecoration(
           color: context.colors.scaffoldBg,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -76,7 +101,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Text(
               'Share Your Progress',
               style: TextStyle(
@@ -85,22 +110,53 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
                 color: context.colors.textDark,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              "Inspire your friends by sharing today's stats!",
-              style: TextStyle(fontSize: 14, color: context.colors.textMedium),
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
 
-            // The actual card we are capturing
-            Center(
-              child: RepaintBoundary(
-                key: _cardKey,
-                child: const DailyShareCard(),
+            // Format Toggle Chips
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _FormatChip(
+                  label: 'Post 4:5',
+                  isSelected: _format == ShareFormat.post,
+                  onTap: () => setState(() => _format = ShareFormat.post),
+                ),
+                const SizedBox(width: 8),
+                _FormatChip(
+                  label: 'Story 9:16',
+                  isSelected: _format == ShareFormat.story,
+                  onTap: () => setState(() => _format = ShareFormat.story),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Live Preview Box bounded by constraints
+            Flexible(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.fastOutSlowIn,
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.45,
+                  ),
+                  child: AspectRatio(
+                    aspectRatio: previewWidth / previewHeight,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: SizedBox(
+                        width: previewWidth,
+                        height: previewHeight,
+                        child: layout,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -114,7 +170,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
                   elevation: 4,
                   shadowColor: context.colors.primary.withValues(alpha: 0.4),
                 ),
-                onPressed: _isSharing ? null : _shareImage,
+                onPressed: _isSharing ? null : () => _shareImage(layout, subtitle),
                 icon: _isSharing
                     ? const SizedBox(
                         width: 20,
@@ -128,7 +184,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
                       )
                     : const Icon(Icons.ios_share_rounded),
                 label: Text(
-                  _isSharing ? 'Preparing...' : 'Share to Story',
+                  _isSharing ? 'Preparing...' : 'Share Image',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -137,6 +193,45 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FormatChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _FormatChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? context.colors.primary : context.colors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.transparent : context.colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? context.colors.onPrimary : context.colors.textMedium,
+          ),
         ),
       ),
     );

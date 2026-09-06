@@ -449,6 +449,8 @@ class _MealSlotCard extends ConsumerStatefulWidget {
 }
 
 class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
+  bool _showSuggestions = false;
+
   bool get _hasLog => MealPlanComplete.isSlotLogged(widget.slotLog);
 
   bool get _isPlannedComplete =>
@@ -554,21 +556,50 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           
                           // Logged Items
                           if (slotLog!.photoPath != null) ...[
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: kIsWeb
-                                  ? Image.network(
-                                      slotLog.photoPath!,
-                                      width: double.infinity,
-                                      height: 120,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.file(
-                                      File(slotLog.photoPath!),
-                                      width: double.infinity,
-                                      height: 120,
-                                      fit: BoxFit.cover,
+                            GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    insetPadding: EdgeInsets.zero,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        InteractiveViewer(
+                                          child: kIsWeb
+                                            ? Image.network(slotLog.photoPath!)
+                                            : Image.file(File(slotLog.photoPath!)),
+                                        ),
+                                        Positioned(
+                                          top: MediaQuery.paddingOf(context).top + 16,
+                                          right: 16,
+                                          child: IconButton(
+                                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 32),
+                                            onPressed: () => Navigator.of(context).pop(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                                  ),
+                                );
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: kIsWeb
+                                    ? Image.network(
+                                        slotLog.photoPath!,
+                                        width: double.infinity,
+                                        height: 120,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.file(
+                                        File(slotLog.photoPath!),
+                                        width: double.infinity,
+                                        height: 120,
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
                             ),
                             const SizedBox(height: 12),
                           ],
@@ -700,57 +731,72 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
   Widget _buildSuggestions(BuildContext context, Meal planned) {
     return Padding(
-      padding: const EdgeInsets.only(top: 28),
+      padding: const EdgeInsets.only(top: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-               Icon(Icons.lightbulb_outline_rounded, size: 16, color: context.colors.primary),
-               const SizedBox(width: 8),
-               Text(
-                 'Suggestions',
-                 style: TextStyle(
-                   fontSize: 14,
-                   fontWeight: FontWeight.w700,
-                   color: context.colors.textDark,
+          GestureDetector(
+            onTap: () {
+               setState(() => _showSuggestions = !_showSuggestions);
+               Haptics.tap();
+            },
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                 Icon(Icons.lightbulb_outline_rounded, size: 16, color: context.colors.primary),
+                 const SizedBox(width: 8),
+                 Text(
+                   'Suggestions',
+                   style: TextStyle(
+                     fontSize: 14,
+                     fontWeight: FontWeight.w700,
+                     color: context.colors.textDark,
+                   ),
                  ),
-               ),
-            ],
+                 const Spacer(),
+                 Icon(
+                   _showSuggestions ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                   color: context.colors.textMedium,
+                   size: 20,
+                 ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          ...planned.suggestions.map((suggestion) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6, right: 12),
-                    child: Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: context.colors.primary.withValues(alpha: 0.6),
-                        shape: BoxShape.circle,
+          if (_showSuggestions) ...[
+            const SizedBox(height: 16),
+            ...planned.suggestions.map((suggestion) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, right: 12),
+                      child: Container(
+                        width: 4,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: context.colors.primary.withValues(alpha: 0.6),
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      suggestion,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.textMedium,
-                        height: 1.4,
+                    Expanded(
+                      child: Text(
+                        suggestion,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: context.colors.textMedium,
+                          height: 1.4,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                  ],
+                ),
+              );
+            }),
+          ]
         ],
       ),
     );

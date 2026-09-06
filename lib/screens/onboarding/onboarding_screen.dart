@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/habit.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'widgets/sthira_aura_background.dart';
 
 import 'pages/welcome_page.dart';
@@ -331,6 +332,12 @@ class _NavButtons extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
+                ).animate(
+                  target: canGoNext ? 1 : 0, 
+                  onPlay: (controller) => controller.repeat(),
+                ).shimmer(
+                  duration: 2000.ms,
+                  color: Colors.white.withValues(alpha: 0.15),
                 ),
               ),
             ],

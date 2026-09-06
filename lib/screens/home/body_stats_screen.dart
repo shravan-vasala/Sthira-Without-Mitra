@@ -88,40 +88,18 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: context.colors.lavender,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.straighten_rounded,
-                  color: context.colors.primary,
-                  size: 36,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Body Measurements',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'All measurements in cm',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.colors.textMedium,
-                  ),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 16),
+            child: Text(
+              'ALL MEASUREMENTS',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: context.colors.primary,
+                letterSpacing: 1.5,
+              ),
             ),
           ),
-          const SizedBox(height: 20),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -141,17 +119,11 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
 
   Widget _buildField(String field) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: context.colors.primary.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,44 +139,70 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 12),
           _isEditing
-              ? SizedBox(
-                  height: 38,
-                  child: TextField(
-                    controller: _controllers[field],
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.primary,
-                    ),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 0,
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 32,
+                        child: TextField(
+                          controller: _controllers[field],
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: context.colors.primary,
+                            height: 1.0,
+                          ),
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.zero,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                          ),
+                        ),
                       ),
-                      suffixText: 'cm',
-                      suffixStyle: TextStyle(
-                        fontSize: 13,
-                        color: context.colors.textLight,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        'cm',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.textMedium,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 )
-              : Text(
-                  _controllers[field]!.text.isEmpty
-                      ? '-- cm'
-                      : '${_controllers[field]!.text} cm',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: _controllers[field]!.text.isEmpty
-                        ? context.colors.textLight
-                        : context.colors.primary,
-                  ),
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      _controllers[field]!.text.isEmpty ? '--' : _controllers[field]!.text,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: _controllers[field]!.text.isEmpty ? context.colors.textLight : context.colors.textDark,
+                        height: 1.0,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        'cm',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.textMedium,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
         ],
       ),

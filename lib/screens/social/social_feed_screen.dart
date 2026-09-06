@@ -189,12 +189,7 @@ class _FriendsTab extends ConsumerWidget {
                     const EmptyStateView(
                       icon: Icons.people_outline,
                       title: 'No friends connected yet.',
-                      subtitle: 'Connect with friends to share your progress.',
-                    ),
-                    const SizedBox(height: 24),
-                    PrimaryButton(
-                      label: 'Add Friends',
-                      onPressed: () => context.go('/social/connect'),
+                      subtitle: 'Tap the top right icon to connect and share your progress.',
                     ),
                   ],
                 );

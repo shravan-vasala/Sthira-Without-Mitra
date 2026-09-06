@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../providers/app_providers.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/surface_card.dart';
+import '../../widgets/app_text_field.dart';
+import '../../widgets/primary_button.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -37,24 +38,31 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'My Code'),
-            Tab(text: 'Scan Code'),
+            Tab(text: 'My ID'),
+            Tab(text: 'Enter ID'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [_MyCodeTab(), _ScanCodeTab()],
+        children: const [_MyIdTab(), _EnterIdTab()],
       ),
     );
   }
 }
 
-class _MyCodeTab extends ConsumerWidget {
-  const _MyCodeTab();
+class _MyIdTab extends ConsumerStatefulWidget {
+  const _MyIdTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_MyIdTab> createState() => _MyIdTabState();
+}
+
+class _MyIdTabState extends ConsumerState<_MyIdTab> {
+  bool _copied = false;
+
+  @override
+  Widget build(BuildContext context) {
     final authService = ref.watch(authServiceProvider);
     final uid = authService.uid;
 
@@ -67,57 +75,74 @@ class _MyCodeTab extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Scan this code to connect!',
+            'YOUR UNIQUE ID',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 13,
               fontWeight: FontWeight.w800,
               color: context.colors.primary,
+              letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 32),
-          SurfaceCard(
-            padding: const EdgeInsets.all(16),
-            child: QrImageView(
-              data: uid,
-              version: QrVersions.auto,
-              size: 200.0,
-              backgroundColor: Colors.transparent,
-              eyeStyle: QrEyeStyle(
-                eyeShape: QrEyeShape.circle,
-                color: context.colors.primary,
+          const SizedBox(height: 24),
+          GestureDetector(
+            onTap: () async {
+               HapticFeedback.lightImpact();
+               await Clipboard.setData(ClipboardData(text: uid));
+               setState(() => _copied = true);
+               Future.delayed(const Duration(seconds: 2), () {
+                 if (mounted) setState(() => _copied = false);
+               });
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              decoration: BoxDecoration(
+                 color: _copied ? context.colors.primary.withValues(alpha: 0.1) : context.colors.card,
+                 borderRadius: BorderRadius.circular(24),
+                 border: Border.all(
+                    color: _copied ? context.colors.primary : context.colors.border,
+                 ),
               ),
-              dataModuleStyle: QrDataModuleStyle(
-                dataModuleShape: QrDataModuleShape.circle,
-                color: context.colors.primary,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                   Text(
+                      uid,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'monospace',
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.w700,
+                        color: _copied ? context.colors.primary : context.colors.textDark,
+                      ),
+                   ),
+                   const SizedBox(height: 24),
+                   Row(
+                     mainAxisSize: MainAxisSize.min,
+                     children: [
+                       Icon(
+                          _copied ? Icons.check_circle_rounded : Icons.copy_rounded, 
+                          color: _copied ? context.colors.primary : context.colors.textMedium, 
+                          size: 18,
+                       ),
+                       const SizedBox(width: 8),
+                       Text(
+                         _copied ? 'Copied to Clipboard!' : 'Tap to Copy',
+                         style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: _copied ? context.colors.primary : context.colors.textMedium,
+                         ),
+                       ),
+                     ],
+                   ),
+                ],
               ),
-            ),
-          ),
-          const SizedBox(height: 40),
-          Text(
-            'Or share this ID:',
-            style: TextStyle(
-              color: context.colors.textMedium,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: context.colors.inputFill,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SelectableText(
-              uid,
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'monospace',
-                letterSpacing: 2,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textDark,
-              ),
-            ),
+            ).animate(target: _copied ? 1 : 0)
+             .scaleXY(end: 0.95, duration: 150.ms, curve: Curves.easeOut)
+             .then().scaleXY(end: 1.0, duration: 250.ms, curve: Curves.easeOutBack)
+             .tint(color: context.colors.primary.withValues(alpha: 0.1), duration: 200.ms),
           ),
         ],
       ),
@@ -125,38 +150,34 @@ class _MyCodeTab extends ConsumerWidget {
   }
 }
 
-class _ScanCodeTab extends ConsumerStatefulWidget {
-  const _ScanCodeTab();
+class _EnterIdTab extends ConsumerStatefulWidget {
+  const _EnterIdTab();
 
   @override
-  ConsumerState<_ScanCodeTab> createState() => _ScanCodeTabState();
+  ConsumerState<_EnterIdTab> createState() => _EnterIdTabState();
 }
 
-class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
-  final MobileScannerController _scannerController = MobileScannerController();
+class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
+  final TextEditingController _controller = TextEditingController();
   bool _isProcessing = false;
 
   @override
   void dispose() {
-    _scannerController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  void _onDetect(BarcodeCapture capture) async {
+  void _submit() async {
     if (_isProcessing) return;
-
-    final List<Barcode> barcodes = capture.barcodes;
-    if (barcodes.isEmpty) return;
-
-    final String? code = barcodes.first.rawValue;
-    if (code == null) return;
+    
+    final code = _controller.text.trim();
+    if (code.isEmpty) return;
 
     setState(() {
       _isProcessing = true;
     });
 
-    // ignore: unawaited_futures
-    _scannerController.stop();
+    FocusScope.of(context).unfocus();
 
     try {
       final syncService = ref.read(socialSyncServiceProvider);
@@ -168,17 +189,10 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('That code doesn\'t look quite right. Give it another try.'),
+              content: const Text('That code doesn\'t look quite right. Give it another try.'),
               backgroundColor: context.colors.red,
             ),
           );
-        }
-        // ignore: unawaited_futures
-        _scannerController.start();
-        if (mounted) {
-          setState(() {
-            _isProcessing = false;
-          });
         }
         return;
       }
@@ -188,13 +202,6 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('That\'s your own code!')),
           );
-        }
-        // ignore: unawaited_futures
-        _scannerController.start();
-        if (mounted) {
-          setState(() {
-            _isProcessing = false;
-          });
         }
         return;
       }
@@ -208,13 +215,6 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
             ),
           );
         }
-        // ignore: unawaited_futures
-        _scannerController.start();
-        if (mounted) {
-          setState(() {
-            _isProcessing = false;
-          });
-        }
         return;
       }
 
@@ -223,17 +223,10 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('We couldn\'t find anyone with that code. Is it correct?'),
+              content: const Text('We couldn\'t find anyone with that ID. Is it correct?'),
               backgroundColor: context.colors.orange,
             ),
           );
-        }
-        // ignore: unawaited_futures
-        _scannerController.start();
-        if (mounted) {
-          setState(() {
-            _isProcessing = false;
-          });
         }
         return;
       }
@@ -265,8 +258,6 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
           ),
         );
       }
-      // ignore: unawaited_futures
-      _scannerController.start();
     } finally {
       if (mounted) {
         setState(() {
@@ -278,49 +269,37 @@ class _ScanCodeTabState extends ConsumerState<_ScanCodeTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          flex: 4,
-          child: Stack(
-            children: [
-              MobileScanner(
-                controller: _scannerController,
-                onDetect: _onDetect,
-              ),
-              Center(
-                child: Container(
-                  width: 260,
-                  height: 260,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: context.colors.primary.withValues(alpha: 0.8),
-                      width: 4,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(
-            color: context.colors.scaffoldBg,
-            child: Center(
-              child: Text(
-                'Position the QR code in the frame.',
-                style: TextStyle(
-                  color: context.colors.textMedium,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 32),
+          Text(
+            'ENTER FRIEND ID',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: context.colors.primary,
+              letterSpacing: 1.5,
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          AppTextField(
+             controller: _controller,
+             labelText: 'User ID',
+             hintText: 'Paste ID here...',
+             prefixIcon: Icons.badge_rounded,
+          ),
+          const SizedBox(height: 32),
+          PrimaryButton(
+             label: _isProcessing ? 'Sending...' : 'Send Request',
+             icon: Icons.send_rounded,
+             isLoading: _isProcessing,
+             onPressed: _submit,
+          ),
+        ],
+      ),
     );
   }
 }

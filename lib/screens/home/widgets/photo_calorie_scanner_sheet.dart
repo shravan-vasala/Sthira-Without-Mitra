@@ -103,6 +103,10 @@ class _PhotoCalorieScannerSheetState
   double _totalProtein = 0.0;
   double _totalCarbs = 0.0;
   double _totalFat = 0.0;
+  int _unresolvedCount = 0;
+
+  final Map<int, MealItemLog> _baseItems = {};
+  final Map<int, double> _itemScales = {};
 
   @override
   void initState() {
@@ -144,6 +148,7 @@ class _PhotoCalorieScannerSheetState
         proteinG: (m['protein_g'] as num?)?.toDouble() ?? 0.0,
         carbsG: (m['carbs_g'] as num?)?.toDouble() ?? 0.0,
         fatG: (m['fat_g'] as num?)?.toDouble() ?? 0.0,
+        resolved: m['resolved'] as bool? ?? true,
       );
     }).toList();
 
@@ -169,11 +174,31 @@ class _PhotoCalorieScannerSheetState
         _totalCarbs = (totalData?['carbs_g'] as num?)?.toDouble() ?? 0.0;
         _totalFat = (totalData?['fat_g'] as num?)?.toDouble() ?? 0.0;
       }
+      _unresolvedCount = (totalData?['unresolved_count'] as num?)?.toInt() ?? 0;
       _confidence = result['confidence']?.toString();
       _isAnalyzing = false;
       _analysisComplete = true;
       _errorMessage = null;
+
+      _baseItems.clear();
+      _itemScales.clear();
+      for (int i = 0; i < _items.length; i++) {
+        _baseItems[i] = _cloneItem(_items[i]);
+        _itemScales[i] = 1.0;
+      }
     });
+  }
+
+  MealItemLog _cloneItem(MealItemLog src) {
+    return MealItemLog(
+      name: src.name,
+      portion: src.portion,
+      calories: src.calories,
+      proteinG: src.proteinG,
+      carbsG: src.carbsG,
+      fatG: src.fatG,
+      resolved: src.resolved,
+    );
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -374,6 +399,10 @@ class _PhotoCalorieScannerSheetState
           ];
         }
       }
+      for (int i = 0; i < _items.length; i++) {
+        _baseItems[i] = _cloneItem(_items[i]);
+        _itemScales[i] = 1.0;
+      }
     });
     if (_items.length == 1 && _items.first.calories == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _editItem(0));
@@ -534,6 +563,9 @@ class _PhotoCalorieScannerSheetState
                   carbsG: double.tryParse(cCtrl.text) ?? 0.0,
                   fatG: double.tryParse(fCtrl.text) ?? 0.0,
                 );
+                _items[index].resolved = true; // Manual edit resolves it
+                _baseItems[index] = _cloneItem(_items[index]);
+                _itemScales[index] = 1.0;
                 _recalculateTotals();
               });
               Navigator.pop(ctx);
@@ -564,6 +596,25 @@ class _PhotoCalorieScannerSheetState
       ),
     );
     _editItem(_items.length - 1);
+  }
+
+  void _setPortionScale(int index, double scale) {
+    if (_baseItems[index] == null) return;
+    Haptics.selection();
+    setState(() {
+      _itemScales[index] = scale;
+      final base = _baseItems[index]!;
+      _items[index] = MealItemLog(
+        name: base.name,
+        portion: base.portion,
+        calories: ((base.calories ?? 0) * scale).round(),
+        proteinG: double.parse(((base.proteinG ?? 0.0) * scale).toStringAsFixed(1)),
+        carbsG: double.parse(((base.carbsG ?? 0.0) * scale).toStringAsFixed(1)),
+        fatG: double.parse(((base.fatG ?? 0.0) * scale).toStringAsFixed(1)),
+        resolved: base.resolved,
+      );
+      _recalculateTotals();
+    });
   }
 
   void _recalculateTotals() {
@@ -1291,40 +1342,50 @@ class _PhotoCalorieScannerSheetState
 
           if (_analysisComplete) ...[
             const SizedBox(height: 16),
-            if (_confidence == 'low' || _confidence == 'medium')
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _confidence == 'low'
-                      ? context.colors.red.withValues(alpha: 0.1)
-                      : context.colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+            if (_confidence != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
                   children: [
-                    Icon(
-                      _confidence == 'low'
-                          ? Icons.error_outline_rounded
-                          : Icons.warning_amber_rounded,
-                      color: _confidence == 'low'
-                          ? context.colors.red
-                          : context.colors.orange,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _confidence == 'low'
-                            ? 'Low confidence estimate — please check portions carefully.'
-                            : 'AI is somewhat unsure about this meal — please verify portions.',
-                        style: TextStyle(
-                          color: _confidence == 'low'
-                              ? context.colors.red
-                              : context.colors.orange,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _confidence == 'low' 
+                          ? context.colors.red.withValues(alpha: 0.1) 
+                          : _confidence == 'medium' 
+                            ? context.colors.orange.withValues(alpha: 0.1) 
+                            : context.colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _confidence == 'low' 
+                                ? context.colors.red 
+                                : _confidence == 'medium' 
+                                  ? context.colors.orange 
+                                  : context.colors.green,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${_confidence![0].toUpperCase()}${_confidence!.substring(1)} confidence',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: _confidence == 'low' 
+                                ? context.colors.red 
+                                : _confidence == 'medium' 
+                                  ? context.colors.orange 
+                                  : context.colors.green,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -1337,6 +1398,9 @@ class _PhotoCalorieScannerSheetState
                 separatorBuilder: (_, index) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final item = _items[index];
+                  final isResolved = item.resolved;
+                  final scale = _itemScales[index] ?? 1.0;
+
                   return Dismissible(
                     key: ValueKey('${item.name}_$index'),
                     direction: DismissDirection.endToStart,
@@ -1354,11 +1418,34 @@ class _PhotoCalorieScannerSheetState
                     ),
                     onDismissed: (_) => _removeItem(index),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      color: Colors.transparent,
-                      child: Row(
-                        children: [
-                          Expanded(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isResolved 
+                             ? Colors.transparent 
+                             : context.colors.orange.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: isResolved 
+                             ? null 
+                             : Border.all(
+                                color: context.colors.orange.withValues(alpha: 0.4),
+                                width: 1,
+                                style: BorderStyle.solid, // Should ideally be dashed, but sticking to standard border
+                              ),
+                      ),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          children: [
+                            if (isResolved) ...[
+                              Container(
+                                width: 4,
+                                margin: const EdgeInsets.only(right: 12),
+                                decoration: BoxDecoration(
+                                  color: _getDominantMacroColor(item, context),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ],
+                            Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -1367,43 +1454,64 @@ class _PhotoCalorieScannerSheetState
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 16,
-                                    color: context.colors.textDark,
+                                    color: isResolved ? context.colors.textDark : context.colors.orange,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  '${item.portion} • ${item.calories} kcal',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: context.colors.primary,
+                                if (isResolved) ...[
+                                  Text(
+                                    '${item.portion} • ${item.calories} kcal',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: context.colors.primary,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    _buildMacroPill(
-                                      context,
-                                      'Protein',
-                                      '${item.proteinG?.toStringAsFixed(1) ?? '0'}g',
-                                      const Color(0xFFE8A163),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      _buildMacroPill(
+                                        context,
+                                        'Protein',
+                                        '${item.proteinG?.toStringAsFixed(1) ?? '0'}g',
+                                        const Color(0xFFE8A163),
+                                      ),
+                                      _buildMacroPill(
+                                        context,
+                                        'Carbs',
+                                        '${item.carbsG?.toStringAsFixed(1) ?? '0'}g',
+                                        const Color(0xFF8FB896),
+                                      ),
+                                      _buildMacroPill(
+                                        context,
+                                        'Fat',
+                                        '${item.fatG?.toStringAsFixed(1) ?? '0'}g',
+                                        const Color(0xFFE58B88),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      _buildPortionChip(context, index, 0.5, '½', scale),
+                                      const SizedBox(width: 6),
+                                      _buildPortionChip(context, index, 1.0, '1×', scale),
+                                      const SizedBox(width: 6),
+                                      _buildPortionChip(context, index, 1.5, '1½', scale),
+                                    ],
+                                  ),
+                                ] else ...[
+                                  Text(
+                                    'Couldn\'t estimate — tap edit to fix',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: context.colors.textMedium,
                                     ),
-                                    const SizedBox(width: 8),
-                                    _buildMacroPill(
-                                      context,
-                                      'Carbs',
-                                      '${item.carbsG?.toStringAsFixed(1) ?? '0'}g',
-                                      const Color(0xFF8FB896),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildMacroPill(
-                                      context,
-                                      'Fat',
-                                      '${item.fatG?.toStringAsFixed(1) ?? '0'}g',
-                                      const Color(0xFFE58B88),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -1411,7 +1519,7 @@ class _PhotoCalorieScannerSheetState
                             icon: Icon(
                               Icons.edit_rounded,
                               size: 20,
-                              color: context.colors.textMedium,
+                              color: isResolved ? context.colors.textMedium : context.colors.orange,
                             ),
                             onPressed: () => _editItem(index),
                           ),
@@ -1425,23 +1533,61 @@ class _PhotoCalorieScannerSheetState
             const SizedBox(height: 12),
             Row(
               children: [
+                if (!_describeMode && _selectedImages.isNotEmpty) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      _selectedImages.first,
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: context.colors.primary.withValues(alpha: 0.08),
+                      color: _unresolvedCount > 0 
+                           ? context.colors.orange.withValues(alpha: 0.1) 
+                           : context.colors.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'TOTAL',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: context.colors.primary,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              'TOTAL',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _unresolvedCount > 0 ? context.colors.orange : context.colors.primary,
+                              ),
+                            ),
+                            if (_unresolvedCount > 0) ...[
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: context.colors.orange,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '+$_unresolvedCount to review',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: context.colors.onPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           '$_totalCalories kcal',
                           style: TextStyle(
@@ -1496,5 +1642,41 @@ class _PhotoCalorieScannerSheetState
         ),
       ),
     );
+  }
+
+  Widget _buildPortionChip(BuildContext context, int itemIndex, double scaleValue, String label, double currentScale) {
+    final isSelected = currentScale == scaleValue;
+    return GestureDetector(
+      onTap: () => _setPortionScale(itemIndex, scaleValue),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? context.colors.primary.withValues(alpha: 0.15) : context.colors.inputFill,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? context.colors.primary.withValues(alpha: 0.5) : context.colors.border.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? context.colors.primary : context.colors.textMedium,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getDominantMacroColor(MealItemLog item, BuildContext context) {
+    final pCal = (item.proteinG ?? 0) * 4;
+    final cCal = (item.carbsG ?? 0) * 4;
+    final fCal = (item.fatG ?? 0) * 9;
+    
+    if (pCal >= cCal && pCal >= fCal) return context.colors.green;
+    if (cCal >= pCal && cCal >= fCal) return context.colors.orange;
+    return context.colors.primary;
   }
 }

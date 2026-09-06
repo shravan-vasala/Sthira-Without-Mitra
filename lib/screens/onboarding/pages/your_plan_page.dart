@@ -3,6 +3,7 @@ import '../../../theme/app_colors.dart';
 import '../../../models/habit.dart';
 import '../../../utils/habit_icons.dart';
 import '../../../utils/target_calculator.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class YourPlanPage extends StatefulWidget {
   final double initialCalories;
@@ -329,7 +330,21 @@ class _HabitTile extends StatelessWidget {
               Icon(Icons.check_circle_rounded, color: context.colors.primary, size: 24),
           ],
         ),
-      ),
+      ).animate(target: selected ? 1 : 0)
+       .scale(
+         begin: const Offset(1, 1), 
+         end: const Offset(0.97, 0.97), 
+         duration: 100.ms, 
+         curve: Curves.easeOutCubic,
+       )
+       .then()
+       .scale(
+         begin: const Offset(0.97, 0.97), 
+         end: const Offset(1, 1), 
+         duration: 200.ms, 
+         curve: Curves.easeOutBack,
+       )
+       .shimmer(duration: 500.ms, color: Colors.white.withValues(alpha: 0.2)),
     );
   }
 }

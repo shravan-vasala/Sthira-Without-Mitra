@@ -141,11 +141,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 parent: BouncingScrollPhysics(),
               ),
               slivers: [
-                SliverAppBar.large(
+                SliverAppBar(
                   pinned: true,
-                  backgroundColor: context.colors.scaffoldBg,
+                  backgroundColor: context.colors.scaffoldBg.withValues(alpha: 0.9),
                   surfaceTintColor: Colors.transparent,
-                  title: const _HomeGreetingTitle(),
                   actions: const [
                     Padding(
                       padding: EdgeInsets.only(right: 8),
@@ -157,7 +156,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 16),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        child: _HomeGreetingTitle(),
+                      ),
+                      const SizedBox(height: 24),
 
                       // 2. Week calendar + score
                       _staggerWrap(1, const WeekCalendarStrip()),
@@ -486,6 +489,15 @@ class _WorkoutsSection extends ConsumerWidget {
         if (isCompleted) completedCount++;
 
         String title = (i == 0) ? (day.dayId ?? '') : (sec.title ?? '');
+        
+        if (title.startsWith('beg_day')) {
+          title = 'Beginner Day ${title.substring(7)}';
+        } else if (title.startsWith('int_day')) {
+          title = 'Intermediate Day ${title.substring(7)}';
+        } else if (title.startsWith('adv_day')) {
+          title = 'Advanced Day ${title.substring(7)}';
+        }
+
         if ((sec.title?.toLowerCase() ?? '').contains('cooldown') ||
             (sec.title?.toLowerCase() ?? '').contains('cool down')) {
           title = 'Cool down';
@@ -635,16 +647,12 @@ class _WorkoutsSection extends ConsumerWidget {
                 size: 32,
               )
             else
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: context.colors.textLight.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Icon(
-                  Icons.arrow_forward_rounded,
+                  Icons.chevron_right_rounded,
                   color: context.colors.textMedium,
-                  size: 24,
+                  size: 28,
                 ),
               ),
           ],

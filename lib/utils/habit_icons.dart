@@ -16,9 +16,11 @@ class HabitIcons {
     (id: 'food', icon: Icons.restaurant_outlined),
     (id: 'train', icon: Icons.fitness_center_outlined),
     (id: 'run', icon: Icons.directions_run_outlined),
-    (id: 'smoke_free', icon: Icons.smoke_free_outlined),
     (id: 'greens', icon: Icons.eco_outlined),
     (id: 'amla', icon: Icons.local_drink_outlined),
+    (id: 'shots', icon: Icons.emoji_food_beverage_outlined),
+    (id: 'nuts', icon: Icons.grain_outlined),
+    (id: 'sun', icon: Icons.wb_sunny_outlined),
     (id: 'skin', icon: Icons.face_retouching_natural_outlined),
     (id: 'hair', icon: Icons.spa_outlined),
   ];
@@ -67,6 +69,12 @@ class HabitIcons {
         return Icons.face_retouching_natural_outlined;
       case 'hair':
         return Icons.spa_outlined;
+      case 'shots':
+        return Icons.emoji_food_beverage_outlined;
+      case 'nuts':
+        return Icons.grain_outlined;
+      case 'sun':
+        return Icons.wb_sunny_outlined;
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.icon;
@@ -108,6 +116,12 @@ class HabitIcons {
         return 'skin';
       case 'hair':
         return 'hair';
+      case 'shots':
+        return 'shots';
+      case 'nuts':
+        return 'nuts';
+      case 'sun':
+        return 'sun';
       default:
         for (final o in options) {
           if (o.id == keyOrEmoji) return o.id;
