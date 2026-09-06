@@ -33,8 +33,10 @@ class WeeklySummaryScreen extends ConsumerWidget {
         title: Text(
           'Weekly Progress',
           style: TextStyle(
+            fontFamily: 'Cabinet Grotesk',
+            fontSize: 24,
             color: context.colors.textDark,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
           ),
         ),
         centerTitle: true,
@@ -96,11 +98,12 @@ class WeeklySummaryScreen extends ConsumerWidget {
               const SizedBox(height: 32),
 
               Text(
-                'Stats Overview',
+                'STATS OVERVIEW',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 13,
                   fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
+                  letterSpacing: 1.5,
+                  color: context.colors.primary,
                 ),
               ).animate().fade(delay: 500.ms),
               const SizedBox(height: 16),
@@ -270,28 +273,6 @@ class _ScoreHeroCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-      decoration: BoxDecoration(
-        color: isPerfectWeek
-            ? context.colors.green.withValues(alpha: 0.1)
-            : context.colors.card,
-        gradient: isPerfectWeek
-            ? LinearGradient(
-                colors: [
-                  context.colors.green.withValues(alpha: 0.2),
-                  context.colors.green.withValues(alpha: 0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        borderRadius: BorderRadius.circular(24),
-        border: isPerfectWeek
-            ? Border.all(
-                color: context.colors.green.withValues(alpha: 0.3),
-                width: 1,
-              )
-            : Border.all(color: Colors.white.withValues(alpha: 0.05), width: 1),
-      ),
       child: Column(
         children: [
           if (isPerfectWeek)
@@ -502,7 +483,6 @@ class _DailyScoresChartCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,11 +496,12 @@ class _DailyScoresChartCard extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Daily Scores',
+                'DAILY SCORES',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 13,
                   fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
+                  letterSpacing: 1.5,
+                  color: context.colors.primary,
                 ),
               ),
             ],
@@ -638,7 +619,6 @@ class _HabitChartCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -652,11 +632,12 @@ class _HabitChartCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Habit Completion',
+                'HABIT COMPLETION',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textDark,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  color: context.colors.primary,
                 ),
               ),
             ],
@@ -772,7 +753,6 @@ class _StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
