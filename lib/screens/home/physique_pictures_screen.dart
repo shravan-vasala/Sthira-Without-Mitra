@@ -116,6 +116,13 @@ class _PhysiquePicturesScreenState
           _isSelectionMode
               ? '${_selectedPhotos.length} Selected'
               : 'Physique Pictures',
+          style: TextStyle(
+            fontFamily: 'CabinetGrotesk',
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: _isSelectionMode ? context.colors.textDark : context.colors.primary,
+            letterSpacing: -0.5,
+          ),
         ),
         leading: IconButton(
           icon: Icon(
@@ -160,7 +167,7 @@ class _PhysiquePicturesScreenState
             ),
         ],
       ),
-      floatingActionButton: Padding(
+      floatingActionButton: rawPhotos.isEmpty ? null : Padding(
         padding: EdgeInsets.only(bottom: kFloatingNavClearance),
         child: FloatingActionButton.extended(
           onPressed: _addPhoto,

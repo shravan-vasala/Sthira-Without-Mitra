@@ -72,11 +72,11 @@ class DailyProgressGrid extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _ProgressCard(
-                    title: 'Physique\nPictures',
+                    title: 'Photos',
                     icon: Icons.camera_alt_rounded,
                     color: context.colors.pink,
                     iconColor: context.colors.pinkIcon,
-                    subtitle: 'Progress photos',
+                    subtitle: 'Progress',
                     thumbnails: flattenedPhotos,
                     onTap: () => context.go('/home/physique-pictures'),
                   ),
@@ -348,80 +348,95 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               }
             },
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: context.colors.mint,
+          color: context.colors.card,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: context.colors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: context.colors.mintIcon.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.directions_walk_rounded,
-                    color: context.colors.mintIcon,
-                    size: 22,
+                Icon(Icons.directions_walk_rounded, size: 16, color: context.colors.mintIcon),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Steps',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.mintIcon,
+                    ),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => context.push('/progress?metric=steps'),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      shape: BoxShape.circle,
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 4),
                     child: Icon(
                       Icons.show_chart_rounded,
-                      color: context.colors.mintIcon,
-                      size: 18,
+                      size: 16,
+                      color: context.colors.mintIcon.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              'Steps',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textDark,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-                  stepsSubtitle,
-                  style: AppTheme.numeric(
-                    TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textMedium,
+            const SizedBox(height: 12),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                String val = stepsSubtitle;
+                String unit = '';
+                
+                if (stepsSubtitle.contains(' steps')) {
+                  val = stepsSubtitle.replaceAll(' steps', '');
+                  unit = 'Steps';
+                }
+                if (val == 'Tap to log' || val == 'No data') {
+                  val = '--';
+                  unit = stepsSubtitle;
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      val,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: context.colors.textDark,
+                        height: 1.0,
+                      ),
                     ),
-                  ),
-                )
-                .animate(key: ValueKey(stepsSubtitle))
-                .fade()
-                .scale(begin: const Offset(0.95, 0.95)),
+                    if (unit.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Text(
+                          unit,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: context.colors.textMedium,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ).animate(key: ValueKey(stepsSubtitle)).fade().scale(begin: const Offset(0.95, 0.95));
+              },
+            ),
             if (sourceHint != null) ...[
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
-                sourceHint,
+                sourceHint!,
                 style: TextStyle(
                   fontSize: 10,
-                  color:
-                      sourceHint == 'Synced via Health Connect' ||
+                  fontWeight: FontWeight.w500,
+                  color: sourceHint == 'Synced via Health Connect' ||
                           sourceHint == 'Synced'
                       ? context.colors.green
                       : context.colors.textLight,
@@ -461,56 +476,44 @@ class _ProgressCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color,
+          color: context.colors.card,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: context.colors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
+                Icon(icon, size: 16, color: iconColor),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: iconColor,
+                    ),
                   ),
-                  child: Icon(icon, color: iconColor, size: 22),
                 ),
                 if (onChartTap != null)
                   GestureDetector(
                     onTap: onChartTap,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4),
                       child: Icon(
                         Icons.show_chart_rounded,
-                        color: iconColor,
-                        size: 18,
+                        size: 16,
+                        color: iconColor.withValues(alpha: 0.7),
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textDark,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             if (thumbnails != null && thumbnails!.isNotEmpty)
               Row(
                 children: [
@@ -560,19 +563,55 @@ class _ProgressCard extends StatelessWidget {
                 ],
               )
             else
-              Text(
-                    subtitle,
-                    style: AppTheme.numeric(
-                      TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.textMedium,
+              LayoutBuilder(builder: (context, constraints) {
+                String val = subtitle;
+                String unit = '';
+
+                if (subtitle.contains(' kg')) {
+                  val = subtitle.replaceAll('Last: ', '').replaceAll(' kg', '');
+                  unit = 'kg';
+                } else if (subtitle.contains(' lbs')) {
+                  val = subtitle.replaceAll('Last: ', '').replaceAll(' lbs', '');
+                  unit = 'lbs';
+                } else if (subtitle.contains(' cm')) {
+                  val = subtitle.replaceAll('Last: ', '').replaceAll(' cm', '');
+                  unit = 'cm';
+                }
+
+                if (val == 'Tap to log' || val == 'Tap to view' || val == 'Progress photos' || val == 'No data') {
+                  val = '--';
+                  unit = subtitle;
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      val,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: context.colors.textDark,
+                        height: 1.0,
                       ),
                     ),
-                  )
-                  .animate(key: ValueKey(subtitle))
-                  .fade()
-                  .scale(begin: const Offset(0.95, 0.95)),
+                    if (unit.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Text(
+                          unit,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: context.colors.textMedium,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ).animate(key: ValueKey(subtitle)).fade().scale(begin: const Offset(0.95, 0.95));
+              }),
           ],
         ),
       ),

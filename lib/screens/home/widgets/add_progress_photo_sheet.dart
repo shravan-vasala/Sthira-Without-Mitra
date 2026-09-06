@@ -121,11 +121,12 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Pose (Required)',
+              'POSE (REQUIRED)',
               style: TextStyle(
-                fontWeight: FontWeight.w600, 
-                fontSize: 14,
-                color: context.colors.textMedium,
+                fontWeight: FontWeight.w800, 
+                fontSize: 13,
+                letterSpacing: 1.5,
+                color: context.colors.primary,
               ),
             ),
             const SizedBox(height: 12),
@@ -163,11 +164,12 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
             
             if (_pickedImage == null) ...[
               Text(
-                'Source',
+                'SOURCE',
                 style: TextStyle(
-                  fontWeight: FontWeight.w600, 
-                  fontSize: 14,
-                  color: context.colors.textMedium,
+                  fontWeight: FontWeight.w800, 
+                  fontSize: 13,
+                  letterSpacing: 1.5,
+                  color: context.colors.primary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -289,11 +291,19 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
               decoration: InputDecoration(
                 labelText: 'Weight (Optional)',
                 prefixIcon: Icon(Icons.monitor_weight_outlined, color: context.colors.textLight),
-                fillColor: context.colors.inputFill,
+                fillColor: context.colors.card,
                 filled: true,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.colors.primary, width: 2),
                 ),
               ),
             ),
@@ -305,11 +315,19 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                 labelText: 'Note (Optional)',
                 prefixIcon: Icon(Icons.notes_rounded, color: context.colors.textLight),
                 hintText: 'e.g. Post-workout pump',
-                fillColor: context.colors.inputFill,
+                fillColor: context.colors.card,
                 filled: true,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.colors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.colors.primary, width: 2),
                 ),
               ),
             ),
@@ -356,10 +374,10 @@ class _PoseSelectorOption extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? context.colors.primary : context.colors.inputFill,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? context.colors.primary : context.colors.card,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? context.colors.primary : Colors.transparent,
+            color: isSelected ? context.colors.primary : context.colors.border,
           ),
         ),
         child: Column(
@@ -403,8 +421,11 @@ class _SourceTile extends StatelessWidget {
       child: Container(
         height: 80,
         decoration: BoxDecoration(
-          color: context.colors.lavender,
-          borderRadius: BorderRadius.circular(12),
+          color: context.colors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: context.colors.border,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

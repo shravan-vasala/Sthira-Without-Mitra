@@ -524,144 +524,168 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       ),
                     ),
                     if (_hasLog)
-                      Icon(Icons.check_circle_rounded, color: context.colors.green, size: 20),
+                      TweenAnimationBuilder<double>(
+                        key: const ValueKey('check'),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.elasticOut,
+                        builder: (context, val, child) {
+                          return Transform.scale(
+                            scale: val,
+                            child: Icon(Icons.check_circle_rounded, color: context.colors.green, size: 20),
+                          );
+                        },
+                      ),
                   ],
                 ),
 
-                // If logged, show items
-                if (_hasLog) ...[
-                  const SizedBox(height: 24),
-                  
-                  // Logged Items
-                  if (slotLog!.photoPath != null) ...[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: kIsWeb
-                          ? Image.network(
-                              slotLog.photoPath!,
-                              width: double.infinity,
-                              height: 120,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.file(
-                              File(slotLog.photoPath!),
-                              width: double.infinity,
-                              height: 120,
-                              fit: BoxFit.cover,
+                // State dependent body
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child: KeyedSubtree(
+                    key: ValueKey(_hasLog),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (_hasLog) ...[
+                          const SizedBox(height: 20),
+                          
+                          // Logged Items
+                          if (slotLog!.photoPath != null) ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: kIsWeb
+                                  ? Image.network(
+                                      slotLog.photoPath!,
+                                      width: double.infinity,
+                                      height: 120,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      File(slotLog.photoPath!),
+                                      width: double.infinity,
+                                      height: 120,
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
+                            const SizedBox(height: 12),
+                          ],
+                          if (slotLog.items.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4, bottom: 8),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: slotLog.items.asMap().entries.map((entry) {
+                                    final isLast = entry.key == slotLog.items.length - 1;
+                                    final item = entry.value;
+                                    return TextSpan(
+                                      text: '• ${item.portion} ${item.name}${isLast ? "" : "   "}',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        height: 1.5,
+                                        fontWeight: FontWeight.w500,
+                                        color: context.colors.textMedium,
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: context.colors.primary,
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: () => _openScanner(context, false, append: true),
+                                icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
+                                label: const Text('Add Serving', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                              ),
+                              const SizedBox(width: 20),
+                              TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: context.colors.textMedium,
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: () => _openScanner(context, false),
+                                icon: const Icon(Icons.refresh_rounded, size: 16),
+                                label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.delete_outline_rounded, color: context.colors.textMedium, size: 20),
+                                constraints: const BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                                onPressed: () => ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                           // NOT logged actions 
+                           const SizedBox(height: 24),
+                           
+                           Row(
+                             children: [
+                               Expanded(
+                                 child: ElevatedButton.icon(
+                                   style: ElevatedButton.styleFrom(
+                                     backgroundColor: context.colors.primary,
+                                     foregroundColor: context.colors.onPrimary,
+                                     elevation: 0,
+                                     padding: const EdgeInsets.symmetric(vertical: 14),
+                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                   ),
+                                   onPressed: () => _openScanner(context, false),
+                                   icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                                   label: const Text('Take photo', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                                 ),
+                               ),
+                               const SizedBox(width: 12),
+                               Expanded(
+                                 child: OutlinedButton.icon(
+                                   style: OutlinedButton.styleFrom(
+                                     foregroundColor: context.colors.primary,
+                                     side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
+                                     padding: const EdgeInsets.symmetric(vertical: 14),
+                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                   ),
+                                   onPressed: () => _openScanner(context, true),
+                                   icon: const Icon(Icons.notes_rounded, size: 18),
+                                   label: const Text('Describe', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                                 ),
+                               ),
+                             ],
+                           ),
+                           if (planned != null) ...[
+                             const SizedBox(height: 20),
+                             Center(
+                               child: InkWell(
+                                 onTap: () => _toggleCompletedAsPlanned(planned),
+                                 child: Text(
+                                   'Or mark completed as planned',
+                                   style: TextStyle(
+                                     fontSize: 13,
+                                     fontWeight: FontWeight.w600,
+                                     color: context.colors.textMedium,
+                                   ),
+                                 ),
+                               ),
+                             ),
+                           ],
+                        ],
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                  if (slotLog.items.isNotEmpty)
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: slotLog.items.map((item) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: context.colors.scaffoldBg,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: context.colors.border),
-                          ),
-                          child: Text(
-                            '${item.name} · ${item.portion}',
-                            style: TextStyle(fontSize: 12, color: context.colors.textDark, fontWeight: FontWeight.w500),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: context.colors.primary,
-                            side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: () => _openScanner(context, false, append: true),
-                          icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
-                          label: const Text('Add Serving', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: context.colors.textMedium,
-                            side: BorderSide(color: context.colors.border),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: () => _openScanner(context, false),
-                          icon: const Icon(Icons.refresh_rounded, size: 18),
-                          label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: Icon(Icons.delete_outline_rounded, color: context.colors.textMedium),
-                        onPressed: () => ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId),
-                      ),
-                    ],
                   ),
-                ] else ...[
-                   // NOT logged actions 
-                   const SizedBox(height: 24),
-                   
-                   Row(
-                     children: [
-                       Expanded(
-                         child: ElevatedButton.icon(
-                           style: ElevatedButton.styleFrom(
-                             backgroundColor: context.colors.primary,
-                             foregroundColor: context.colors.onPrimary,
-                             elevation: 0,
-                             padding: const EdgeInsets.symmetric(vertical: 14),
-                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                           ),
-                           onPressed: () => _openScanner(context, false),
-                           icon: const Icon(Icons.camera_alt_outlined, size: 18),
-                           label: const Text('Take photo', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                         ),
-                       ),
-                       const SizedBox(width: 12),
-                       Expanded(
-                         child: OutlinedButton.icon(
-                           style: OutlinedButton.styleFrom(
-                             foregroundColor: context.colors.primary,
-                             side: BorderSide(color: context.colors.primary.withValues(alpha: 0.5)),
-                             padding: const EdgeInsets.symmetric(vertical: 14),
-                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                           ),
-                           onPressed: () => _openScanner(context, true),
-                           icon: const Icon(Icons.notes_rounded, size: 18),
-                           label: const Text('Describe', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                         ),
-                       ),
-                     ],
-                   ),
-                   if (planned != null) ...[
-                     const SizedBox(height: 20),
-                     Center(
-                       child: InkWell(
-                         onTap: () => _toggleCompletedAsPlanned(planned),
-                         child: Text(
-                           'Or mark completed as planned',
-                           style: TextStyle(
-                             fontSize: 13,
-                             fontWeight: FontWeight.w600,
-                             color: context.colors.textMedium,
-                           ),
-                         ),
-                       ),
-                     ),
-                   ],
-                ],
+                ),
 
                 // Suggestions
                 if (planned != null && planned.suggestions.isNotEmpty)

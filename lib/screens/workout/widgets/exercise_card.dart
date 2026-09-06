@@ -42,9 +42,9 @@ class ExerciseCard extends ConsumerWidget {
     }
 
     return SurfaceCard(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.zero,
-      elevation: SurfaceCardElevation.nested,
+      elevation: SurfaceCardElevation.home,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -187,107 +187,69 @@ class ExerciseCard extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: context.colors.lavenderCard,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Reps: ${exercise.repsDisplay}',
-                              style: AppTheme.numeric(
-                                TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.colors.primary,
-                                ),
+                          Text(
+                            '${exercise.repsDisplay} Reps',
+                            style: AppTheme.numeric(
+                              TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: context.colors.primary,
                               ),
                             ),
                           ),
                           if (exercise.weightKg != null) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: context.colors.lavenderCard,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${exercise.weightKg} kg',
-                                style: AppTheme.numeric(
-                                  TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: context.colors.primary,
-                                  ),
+                            Text('•', style: TextStyle(color: context.colors.border, fontSize: 10)),
+                            Text(
+                              '${exercise.weightKg} kg',
+                              style: AppTheme.numeric(
+                                TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.colors.primary,
                                 ),
                               ),
                             ),
                           ],
                           if (exercise.sideInfo != 'None') ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: context.colors.mint,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                exercise.sideInfo ?? '',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.colors.mintIcon,
-                                ),
+                            Text('•', style: TextStyle(color: context.colors.border, fontSize: 10)),
+                            Text(
+                              exercise.sideInfo ?? '',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: context.colors.mintIcon,
                               ),
                             ),
                           ],
                           if (pr != null) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFFFFD700,
-                                ).withValues(alpha: 0.2), // Gold tint
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.emoji_events,
-                                    size: 12,
-                                    color: Color(0xFFB8860B),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    pr.maxWeight > 0
-                                        ? '${pr.maxWeight}kg'
-                                        : '${pr.maxReps} reps',
-                                    style: AppTheme.numeric(
-                                      const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFFB8860B),
-                                      ),
+                            Text('•', style: TextStyle(color: context.colors.border, fontSize: 10)),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.emoji_events,
+                                  size: 14,
+                                  color: Color(0xFFB8860B),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  pr.maxWeight > 0
+                                      ? '${pr.maxWeight}kg'
+                                      : '${pr.maxReps} reps',
+                                  style: AppTheme.numeric(
+                                    const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFFB8860B),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ],
@@ -394,36 +356,29 @@ class ExerciseCard extends ConsumerWidget {
 
           // Button row
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-            child: Row(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+            child: Wrap(
+              spacing: 24,
+              runSpacing: 12,
               children: [
-                if (!isCompleted) ...[
-                  Expanded(
-                    child: CompactButton(
-                      label: 'As planned',
-                      filled: true,
-                      onPressed: () => _logAsPlanned(context, ref),
-                    ),
+                if (!isCompleted)
+                  _MinimalAction(
+                    label: 'As planned',
+                    icon: Icons.check_circle_outline_rounded,
+                    onTap: () => _logAsPlanned(context, ref),
+                    color: context.colors.primary,
                   ),
-                  const SizedBox(width: 8),
-                ],
-                Expanded(
-                  child: CompactButton(
-                    label: isCompleted ? 'Edit Log' : 'Adjust',
-                    filled: isCompleted,
-                    onPressed: () => _openLogSheet(context),
-                  ),
+                _MinimalAction(
+                  label: isCompleted ? 'Edit Log' : 'Adjust',
+                  icon: Icons.edit_outlined,
+                  onTap: () => _openLogSheet(context),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: CompactButton(
-                    label: 'Progress',
-                    onPressed: () {
-                      context.push(
-                        '/exercise-progress?name=${Uri.encodeComponent(exercise.name ?? '')}',
-                      );
-                    },
-                  ),
+                _MinimalAction(
+                  label: 'Progress',
+                  icon: Icons.bar_chart_rounded,
+                  onTap: () {
+                    context.push('/exercise-progress?name=${Uri.encodeComponent(exercise.name ?? '')}');
+                  },
                 ),
               ],
             ),
@@ -466,6 +421,47 @@ class ExerciseCard extends ConsumerWidget {
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+}
+
+class _MinimalAction extends StatelessWidget {
+  const _MinimalAction({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.color,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = color ?? context.colors.textMedium;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: baseColor),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: baseColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

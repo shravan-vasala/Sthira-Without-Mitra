@@ -649,17 +649,13 @@ class _SectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: context.colors.lavenderCard,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      margin: const EdgeInsets.only(bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Sticky-style section header
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
+            padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
             child: Row(
               children: [
                 Container(

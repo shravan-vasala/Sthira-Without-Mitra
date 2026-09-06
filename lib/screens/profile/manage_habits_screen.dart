@@ -99,10 +99,16 @@ class _HabitListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
+    return Container(
       key: key,
-      color: context.colors.card,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.5),
+            width: 1,
+          ),
+        ),
+      ),
       child: ListTile(
         leading: Icon(
           HabitIcons.resolve(habit.icon),
@@ -124,7 +130,7 @@ class _HabitListTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.edit_rounded, color: context.colors.primary),
+              icon: Icon(Icons.edit_rounded, color: context.colors.textMedium),
               tooltip: 'Edit habit',
               onPressed: () {
                 showDialog(
@@ -136,7 +142,7 @@ class _HabitListTile extends ConsumerWidget {
             IconButton(
               icon: Icon(
                 Icons.delete_outline_rounded,
-                color: context.colors.red,
+                color: context.colors.textMedium,
               ),
               tooltip: 'Delete habit',
               onPressed: () {
