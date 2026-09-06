@@ -148,11 +148,12 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
 
           const SizedBox(height: 32),
           Text(
-            'Score Breakdown',
+            'SCORE BREAKDOWN',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: context.colors.textDark,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+              color: context.colors.primary,
             ),
           ),
           const SizedBox(height: 16),
@@ -195,14 +196,15 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
           // 2.4 "What's left" actionable row
           if (scoreData.remainingLabels.isNotEmpty) ...[
             Text(
-              'Still to do',
+              'STILL TO DO',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: context.colors.textDark,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5,
+                color: context.colors.primary,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 16,
               runSpacing: 12,
@@ -215,25 +217,32 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     }
                   },
                   behavior: HitTestBehavior.opaque,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        label.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: context.colors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          label.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                            color: context.colors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: 16,
                           color: context.colors.primary,
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 16,
-                        color: context.colors.primary,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
@@ -354,18 +363,24 @@ class _AnimatedProgressBarRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final fraction = max > 0 ? (score / max).clamp(0.0, 1.0) : 0.0;
 
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.colors.card,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 20),
           ),
-          child: Icon(icon, color: color, size: 18),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
+          const SizedBox(width: 16),
+          Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -428,7 +443,7 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isRestDay ? context.colors.green : color,
                       ),
-                      minHeight: 2,
+                      minHeight: 4,
                     ),
                   );
                 },
