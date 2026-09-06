@@ -263,6 +263,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
           Text(
             _timeGreeting(),
             style: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
               fontSize: 26,
               fontWeight: FontWeight.w500,
               height: 1.3,
@@ -277,6 +278,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
                 TextSpan(
                   text: '${_timeGreeting()}, ',
                   style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
                     fontSize: 26,
                     fontWeight: FontWeight.w500,
                     height: 1.3,
@@ -287,6 +289,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
                 TextSpan(
                   text: name,
                   style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     height: 1.3,

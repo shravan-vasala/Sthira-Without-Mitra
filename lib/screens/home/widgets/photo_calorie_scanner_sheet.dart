@@ -661,6 +661,8 @@ class _PhotoCalorieScannerSheetState
       items: _items,
       totalCalories: _totalCalories,
       totalProtein: _totalProtein,
+      totalCarbs: _totalCarbs,
+      totalFat: _totalFat,
       confidence: _confidence ?? widget.appendToLog?.confidence,
     );
     
