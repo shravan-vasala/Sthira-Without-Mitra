@@ -162,14 +162,21 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                               color: context.colors.textDark,
                             ),
                           ),
-                        Text(
-                          '$viewCompleted/$viewExercises exercises done',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: context.colors.textMedium,
+                          TweenAnimationBuilder<int>(
+                            tween: IntTween(begin: 0, end: viewCompleted),
+                            duration: const Duration(milliseconds: 600),
+                            curve: Curves.easeOutQuart,
+                            builder: (context, value, child) {
+                              return Text(
+                                '$value/$viewExercises exercises done',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: context.colors.textMedium,
+                                ),
+                              );
+                            }
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -256,13 +263,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     horizontal: 16,
                     vertical: 10,
                   ),
-                  decoration: BoxDecoration(
-                    color: context.colors.lavenderCard,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: context.colors.primary.withValues(alpha: 0.2),
+                    decoration: BoxDecoration(
+                      color: context.colors.lavenderCard,
+                      borderRadius: BorderRadius.circular(14),
+                      // Sthira: No borders! Let floating backgrounds separate space
                     ),
-                  ),
                   child: Row(
                     children: [
                       Icon(
@@ -535,7 +540,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       decoration: BoxDecoration(
         color: context.colors.lavenderCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+        // Sthira: No borders! Use shadow for elevation
         boxShadow: [
           BoxShadow(
             color: context.colors.primary.withValues(alpha: 0.1),

@@ -293,19 +293,23 @@ class ExerciseCard extends ConsumerWidget {
                             shape: BoxShape.circle,
                             color: isCompleted
                                 ? context.colors.green
-                                : Colors.transparent,
-                            border: isCompleted
-                                ? null
-                                : Border.all(
-                                    color: context.colors.border,
-                                    width: 2,
-                                  ),
+                                : context.colors.textLight.withValues(alpha: 0.15),
                           ),
                           child: isCompleted
-                              ? Icon(
-                                  Icons.check,
-                                  color: context.colors.onPrimary,
-                                  size: 18,
+                              ? TweenAnimationBuilder<double>(
+                                  tween: Tween<double>(begin: 0, end: 1),
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.elasticOut,
+                                  builder: (context, scale, child) {
+                                    return Transform.scale(
+                                      scale: scale,
+                                      child: Icon(
+                                        Icons.check,
+                                        color: context.colors.onPrimary,
+                                        size: 18,
+                                      ),
+                                    );
+                                  },
                                 )
                               : null,
                         ),
