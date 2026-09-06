@@ -9,12 +9,14 @@ class PrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.iconColor,
     this.isLoading = false,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final Color? iconColor;
   final bool isLoading;
 
   @override
@@ -33,7 +35,7 @@ class PrimaryButton extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 20, color: context.colors.onPrimary),
+                    Icon(icon, size: 20, color: iconColor ?? context.colors.onPrimary),
                     const SizedBox(width: 8),
                     Text(
                       label,

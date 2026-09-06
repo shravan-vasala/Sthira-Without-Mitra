@@ -155,8 +155,8 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
             label: _isSuccess ? 'Saved!' : (_isVerifying ? 'Verifying...' : 'Save Changes'),
             isLoading: _isVerifying,
             icon: _isSuccess ? Icons.check_circle_rounded : Icons.check_rounded,
+            iconColor: _isSuccess ? const Color(0xFF4CAF50) : null,
           ).animate(target: _isSuccess ? 1 : 0)
-           .tint(color: const Color(0xFF4CAF50), duration: 400.ms)
            .scaleXY(end: 1.05, duration: 200.ms, curve: Curves.easeOutBack)
            .then(delay: 200.ms).scaleXY(end: 1.0, duration: 150.ms),
         ],
