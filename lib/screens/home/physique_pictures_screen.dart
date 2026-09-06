@@ -117,7 +117,7 @@ class _PhysiquePicturesScreenState
               ? '${_selectedPhotos.length} Selected'
               : 'Physique Pictures',
           style: TextStyle(
-            fontFamily: 'CabinetGrotesk',
+            fontFamily: 'Cabinet Grotesk',
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: _isSelectionMode ? context.colors.textDark : context.colors.primary,
@@ -428,10 +428,6 @@ class _PhysiquePicturesScreenState
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
-                                            border: Border.all(
-                                              color: context.colors.primary,
-                                              width: 3,
-                                            ),
                                           ),
                                           child: Center(
                                             child: Icon(
@@ -535,7 +531,7 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? context.colors.primary : context.colors.lavender,
+          color: isSelected ? context.colors.primary : context.colors.primary.withOpacity(0.15),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
