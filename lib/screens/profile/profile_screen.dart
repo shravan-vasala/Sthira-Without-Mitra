@@ -1510,11 +1510,11 @@ class _ProfileTextField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: context.colors.border, width: 1),
+              borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: context.colors.primary, width: 1.5),
+              borderSide: BorderSide.none,
             ),
           ),
         ),
