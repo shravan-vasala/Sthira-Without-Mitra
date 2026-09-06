@@ -226,40 +226,72 @@ class _IntegrationRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusActive ? context.colors.primary.withOpacity(0.15) : context.colors.inputFill,
-                    borderRadius: BorderRadius.circular(12),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              switchInCurve: Curves.easeOutBack,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.4),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
                   ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: statusActive ? context.colors.primary : context.colors.textMedium,
+                );
+              },
+              child: Column(
+                key: ValueKey(statusActive),
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusActive ? context.colors.primary.withOpacity(0.15) : context.colors.inputFill,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      statusText,
+                      style: TextStyle(
+                        fontFamily: 'General Sans',
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: statusActive ? context.colors.primary : context.colors.textMedium,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: onTap,
-                  child: Text(
-                    statusActive ? 'Edit' : 'Set up',
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.primary,
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: onTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (statusActive) ...[
+                          Icon(
+                            Icons.check_circle_rounded,
+                            size: 14,
+                            color: context.colors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                        Text(
+                          statusActive ? 'Edit' : 'Set up',
+                          style: TextStyle(
+                            fontFamily: 'General Sans',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: context.colors.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            )
+                ],
+              ),
+            ),
           ],
         ),
       ),
