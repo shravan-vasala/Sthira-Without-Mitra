@@ -8,7 +8,7 @@ final mealPlanProvider = Provider<MealPlan?>((ref) {
   final repo = ref.watch(mealRepoProvider);
   final profile = ref.watch(profileProvider);
 
-  final activePlanId = profile.activeMealPlan ?? 'Daily Nutrition Plan';
+  final activePlanId = profile.activeMealPlan ?? "Bodamma's Glow & Lean Master Routine";
   return repo.getMealPlan(activePlanId);
 });
 

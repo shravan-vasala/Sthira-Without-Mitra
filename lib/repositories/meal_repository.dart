@@ -71,7 +71,12 @@ class MealRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    if (_isar.mealPlans.where().countSync() == 0) {
+    final bodammaPlan = _isar.mealPlans
+        .where()
+        .planNameEqualTo("Bodamma's Glow & Lean Master Routine")
+        .findFirstSync();
+
+    if (bodammaPlan == null) {
       final jsonStr = await rootBundle.loadString(
         'assets/data/seed_meal_plan.json',
       );
