@@ -121,7 +121,6 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
               decoration: BoxDecoration(
                 color: context.colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.colors.red.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
