@@ -68,9 +68,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   alignment: Alignment.center,
                   child: Text(
                     'My Profile',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: context.colors.textDark,
+                    style: TextStyle(
+                      fontFamily: 'Cabinet Grotesk',
                       fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: context.colors.textDark,
                     ),
                   ),
                 ),
@@ -756,13 +758,6 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: context.colors.primary.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -979,13 +974,6 @@ class _MenuCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colors.card,
           borderRadius: BorderRadius.circular(kCardRadius),
-          boxShadow: [
-            BoxShadow(
-              color: context.colors.primary.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Row(
           children: [
@@ -993,7 +981,7 @@ class _MenuCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: context.colors.lavender,
+                color: context.colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(icon, color: context.colors.primary, size: 22),
@@ -1052,13 +1040,6 @@ class _SettingsSwitch extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(kCardRadius),
-        boxShadow: [
-          BoxShadow(
-            color: context.colors.primary.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: SwitchListTile(
         value: value,
@@ -1067,7 +1048,7 @@ class _SettingsSwitch extends StatelessWidget {
         secondary: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: context.colors.lavender,
+            color: context.colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(icon, color: context.colors.primary, size: 22),
