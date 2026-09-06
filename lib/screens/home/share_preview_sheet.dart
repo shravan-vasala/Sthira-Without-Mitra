@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/habit_providers.dart';
+import '../../models/habit.dart';
 import '../../share/share_card_exporter.dart';
 import '../../share/daily_share_layout.dart';
 
@@ -54,13 +55,10 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     
     int habitsDone = 0;
     int totalHabits = 0;
-    final weekday = DateTime.parse(log.date).weekday;
     for (final h in habitsList) {
-      if (h.scheduleDays.contains(weekday)) {
-        totalHabits++;
-        if (isHabitCompleted(h, completions, log)) {
-          habitsDone++;
-        }
+      totalHabits++;
+      if (isHabitCompleted(h, completions, log)) {
+        habitsDone++;
       }
     }
 
