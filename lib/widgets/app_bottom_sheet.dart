@@ -43,7 +43,7 @@ class AppSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = Column(
-      mainAxisSize: scrollable ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Center(
@@ -81,7 +81,7 @@ class AppSheet extends StatelessWidget {
           const SizedBox(height: 20),
         ] else
           const SizedBox(height: 16),
-        if (scrollable) Expanded(child: child) else child,
+        if (scrollable) Flexible(child: child) else child,
       ],
     );
 

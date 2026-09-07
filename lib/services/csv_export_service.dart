@@ -79,6 +79,9 @@ class CsvExportService {
       'Body Fat',
       'Workout Completed',
       'Workout Day ID',
+      'Water (ml)',
+      'Screen Time (mins)',
+      'Updated At',
     ]);
 
     for (final log in logs) {
@@ -95,6 +98,9 @@ class CsvExportService {
           log.bodyFat ?? '',
           log.workoutCompleted,
           log.workoutDayId ?? '',
+          log.waterMl ?? '',
+          log.screenTimeMinutes ?? '',
+          log.updatedAt?.toIso8601String() ?? '',
         ]);
       } catch (_) {}
     }

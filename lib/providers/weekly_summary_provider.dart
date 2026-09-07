@@ -133,6 +133,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
   final List<double> dailyRates = List.filled(7, 0.0);
   final List<int?> dailyScores = List.filled(7, null);
   final Map<String, int> habitStreaksThisWeek = {};
+  final Map<String, int> currentHabitStreak = {};
 
   // Calculate Steps & Sleep
   int sumSteps = 0;
@@ -202,7 +203,12 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
 
     for (final h in habits) {
       if (isHabitCompleted(h, completions, log)) {
-        habitStreaksThisWeek[h.name] = (habitStreaksThisWeek[h.name] ?? 0) + 1;
+        currentHabitStreak[h.name] = (currentHabitStreak[h.name] ?? 0) + 1;
+        if (currentHabitStreak[h.name]! > (habitStreaksThisWeek[h.name] ?? 0)) {
+          habitStreaksThisWeek[h.name] = currentHabitStreak[h.name]!;
+        }
+      } else {
+        currentHabitStreak[h.name] = 0;
       }
     }
 

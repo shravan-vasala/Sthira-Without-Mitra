@@ -11,6 +11,7 @@ class YourPlanPage extends StatefulWidget {
   final double? weightKg;
   final List<String> selectedHabitIds;
   final ValueChanged<double> onCaloriesChanged;
+  final ValueChanged<TargetMacros?>? onMacrosChanged;
   final void Function(String id, bool selected) onHabitToggled;
 
   const YourPlanPage({
@@ -20,6 +21,7 @@ class YourPlanPage extends StatefulWidget {
     this.weightKg,
     required this.selectedHabitIds,
     required this.onCaloriesChanged,
+    this.onMacrosChanged,
     required this.onHabitToggled,
   });
 
@@ -60,6 +62,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
       setState(() {
         _currentCalories = _macroPreview!.calories.toDouble();
         widget.onCaloriesChanged(_currentCalories);
+        widget.onMacrosChanged?.call(_macroPreview);
       });
     }
   }
@@ -188,6 +191,10 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     onChanged: (v) {
                       setState(() => _currentCalories = v);
                       widget.onCaloriesChanged(v);
+                      final dynamicMacros = _getDynamicMacrosForCalories(v);
+                      if (dynamicMacros != null) {
+                        widget.onMacrosChanged?.call(dynamicMacros);
+                      }
                     },
                   ),
                 ),

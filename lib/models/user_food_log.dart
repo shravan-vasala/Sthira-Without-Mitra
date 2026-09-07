@@ -16,6 +16,10 @@ class UserFoodLog {
   final double carbsG;
   final double fatG;
 
+  final bool isPer100g;
+  final double? servingGrams;
+  final String? provenance; // 'verified', 'estimated', 'yours'
+
   final DateTime addedAt;
 
   UserFoodLog({
@@ -25,6 +29,9 @@ class UserFoodLog {
     required this.proteinG,
     required this.carbsG,
     required this.fatG,
+    this.isPer100g = false,
+    this.servingGrams,
+    this.provenance,
     required this.addedAt,
   });
 
@@ -34,5 +41,8 @@ class UserFoodLog {
         'protein_g': proteinG,
         'carbs_g': carbsG,
         'fat_g': fatG,
+        'is_per_100g': isPer100g,
+        if (servingGrams != null) 'serving_grams': servingGrams,
+        if (provenance != null) 'provenance': provenance,
       };
 }

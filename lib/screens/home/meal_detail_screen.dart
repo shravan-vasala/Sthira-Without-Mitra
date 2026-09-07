@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../services/haptics.dart';
+import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/layout_insets.dart';
@@ -124,7 +125,7 @@ class MealDetailScreen extends ConsumerWidget {
               slotLog: dailyLog.customSlots[s.id],
               plannedMeal: MealPlanComplete.plannedForSlot(mealPlan, s.id),
             )
-            .animate(delay: ((index - 1) * 80).ms)
+            .animate()
             .fadeIn(duration: 400.ms, curve: Curves.easeOut)
             .slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOut);
           } else if (index == slotsToDisplay.length + 1) {
@@ -459,6 +460,78 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
   bool get _isPlannedComplete =>
       MealPlanComplete.isPlannedComplete(widget.slotLog);
 
+  void _repeatMeal() async {
+    final oldLog = widget.slotLog;
+    if (oldLog == null || oldLog.items.isEmpty) return;
+
+    final repo = ref.read(mealRepoProvider);
+    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    
+    // Check if today's same slot is empty
+    final todayLog = repo.getDailyLog(todayStr);
+    String targetSlotId = widget.slotId;
+    
+    if (todayLog.customSlots[targetSlotId] != null && todayLog.customSlots[targetSlotId]!.items.isNotEmpty) {
+      final profile = ref.read(profileProvider);
+      final recurringIds = profile.customMealSlots.map((s) => s['id'] as String).toList();
+      String? nextEmpty;
+      for (final id in recurringIds) {
+        final slot = todayLog.customSlots[id];
+        if (slot == null || slot.items.isEmpty) {
+          nextEmpty = id;
+          break;
+        }
+      }
+      if (nextEmpty != null) {
+        targetSlotId = nextEmpty;
+      } else {
+        // If all are full, we just use a fallback slot
+        targetSlotId = 'repeated_${DateTime.now().millisecondsSinceEpoch}';
+      }
+    }
+    
+    final newItems = oldLog.items.map((i) {
+      return MealItemLog(
+        name: i.name,
+        portion: i.portion,
+        calories: i.calories,
+        proteinG: i.proteinG,
+        carbsG: i.carbsG,
+        fatG: i.fatG,
+        resolved: i.resolved,
+        provenance: i.provenance,
+        isPer100g: i.isPer100g,
+        servingGrams: i.servingGrams,
+      );
+    }).toList();
+
+    final newSlotLog = MealSlotLog(
+      name: widget.slotName,
+      emoji: widget.slotEmoji,
+      items: newItems,
+      totalCalories: oldLog.totalCalories,
+      totalProtein: oldLog.totalProtein,
+      totalCarbs: oldLog.totalCarbs,
+      totalFat: oldLog.totalFat,
+      photoPath: oldLog.photoPath,
+    );
+    
+    await repo.saveMealSlot(todayStr, targetSlotId, newSlotLog);
+    ref.read(dailyMealLogProvider.notifier).state = repo.getDailyLog(ref.read(dateStringProvider));
+    
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Meal copied to today!'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    
+    // Switch global date back to today
+    ref.read(selectedDateProvider.notifier).state = DateTime.now();
+    Navigator.of(context).pop(); // Close detail screen and go back to home? Or we can let it be, but the global date has changed. Let's not pop, since it's the meal detail screen, they might want to see the new date. Actually, meal_detail_screen listens to `dailyMealLogProvider` which reacts to `dateStringProvider`. So it will just update.
+  }
+
   @override
   Widget build(BuildContext context) {
     final planned = widget.plannedMeal;
@@ -602,7 +675,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                         InteractiveViewer(
                                           child: kIsWeb
                                             ? Image.network(slotLog.photoPath!)
-                                            : Image.file(File(slotLog.photoPath!)),
+                                            : Image.file(File(ref.read(photoMealRepoProvider).getAbsolutePath(slotLog.photoPath!))),
                                         ),
                                         Positioned(
                                           top: MediaQuery.paddingOf(context).top + 16,
@@ -627,7 +700,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                         fit: BoxFit.cover,
                                       )
                                     : Image.file(
-                                        File(slotLog.photoPath!),
+                                        File(ref.read(photoMealRepoProvider).getAbsolutePath(slotLog.photoPath!)),
                                         width: double.infinity,
                                         height: 120,
                                         fit: BoxFit.cover,
@@ -685,23 +758,57 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 label: const Text('Add Serving', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                               ),
                               const SizedBox(width: 20),
-                              TextButton.icon(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: context.colors.textMedium,
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              if (ref.watch(dateStringProvider) != DateFormat('yyyy-MM-dd').format(DateTime.now()))
+                                TextButton.icon(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: context.colors.textMedium,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  onPressed: _repeatMeal,
+                                  icon: const Icon(Icons.copy_rounded, size: 16),
+                                  label: const Text('Repeat', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                )
+                              else
+                                TextButton.icon(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: context.colors.textMedium,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  onPressed: () => _openScanner(context, false),
+                                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                                  label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                                 ),
-                                onPressed: () => _openScanner(context, false),
-                                icon: const Icon(Icons.refresh_rounded, size: 16),
-                                label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                              ),
                               const Spacer(),
                               IconButton(
                                 icon: Icon(Icons.delete_outline_rounded, color: context.colors.textMedium, size: 20),
                                 constraints: const BoxConstraints(),
                                 padding: EdgeInsets.zero,
-                                onPressed: () => ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId),
+                                onPressed: () {
+                                  final oldLog = widget.slotLog;
+                                  ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId);
+                                  
+                                  ScaffoldMessenger.of(context).clearSnackBars();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${widget.slotName} removed'),
+                                      behavior: SnackBarBehavior.floating,
+                                      action: SnackBarAction(
+                                        label: 'Undo',
+                                        textColor: context.colors.primary,
+                                        onPressed: () {
+                                          if (oldLog != null) {
+                                            ref.read(dailyMealLogProvider.notifier).saveMealSlot(widget.slotId, oldLog);
+                                          }
+                                        },
+                                      ),
+                                      duration: const Duration(seconds: 4),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -1036,3 +1143,4 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
     );
   }
 }
+

@@ -75,12 +75,11 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
             : null;
         final everConnected = prefs.getBool('hc_connected') ?? false;
 
-        final todaySteps = await hcService.syncTodayAndAutoCompleteHabit(
-          dailyLogRepo,
-          habitRepo,
-        );
+        final todayData = await hcService.syncToday();
+        final todaySteps = todayData?.steps;
 
-        if (todaySteps != null) {
+        if (todayData != null) {
+          await dailyLogRepo.updateFromHealthConnect([todayData]);
           await prefs.setBool('hc_connected', true);
           ref.read(stepsSourceProvider.notifier).state =
               StepsSource.healthConnect;
@@ -94,9 +93,15 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
               now.difference(lastSync).inMinutes >= 15;
 
           if (shouldFullSync) {
-            await hcService.syncLast7Days(dailyLogRepo, habitRepo);
+            final last7 = await hcService.syncLast7Days();
+            if (last7.isNotEmpty) {
+              await dailyLogRepo.updateFromHealthConnect(last7);
+            }
             if (!hcService.isBackfillDone) {
-              await hcService.backfillLast90Days(dailyLogRepo, habitRepo);
+              final backfill = await hcService.backfillLast90Days();
+              if (backfill.isNotEmpty) {
+                await dailyLogRepo.updateFromHealthConnect(backfill);
+              }
             }
             await prefs.setString('last_hc_sync_time', now.toIso8601String());
           }

@@ -179,11 +179,11 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
     // Trigger sync
     final dailyLogRepo = ref.read(dailyLogRepoProvider);
     final habitRepo = ref.read(habitRepoProvider);
-    final steps = await hcService.syncTodayAndAutoCompleteHabit(
-      dailyLogRepo,
-      habitRepo,
-    );
-    await hcService.syncLast7Days(dailyLogRepo, habitRepo);
+    final todayData = await hcService.syncToday();
+    final steps = todayData?.steps;
+    if (todayData != null) await dailyLogRepo.updateFromHealthConnect([todayData]);
+    final last7 = await hcService.syncLast7Days();
+    if (last7.isNotEmpty) await dailyLogRepo.updateFromHealthConnect(last7);
 
     await prefs.setBool('hc_connected', true);
     await prefs.setString(
@@ -204,9 +204,13 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
     // Backfill in background
     if (!hcService.isBackfillDone) {
       // ignore: unawaited_futures
-      hcService.backfillLast90Days(dailyLogRepo, habitRepo).then((_) {
-        ref.invalidate(dailyLogProvider);
-        ref.invalidate(habitCompletionsProvider);
+      hcService.backfillLast90Days().then((backfill) {
+        if (backfill.isNotEmpty) {
+          dailyLogRepo.updateFromHealthConnect(backfill).then((_) {
+            ref.invalidate(dailyLogProvider);
+            ref.invalidate(habitCompletionsProvider);
+          });
+        }
       });
     }
 
@@ -425,7 +429,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
   }
 }
 
-class _ProgressCard extends StatelessWidget {
+class _ProgressCard extends ConsumerWidget {
   const _ProgressCard({
     required this.title,
     required this.icon,
@@ -445,7 +449,7 @@ class _ProgressCard extends StatelessWidget {
   final VoidCallback? onChartTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     String displaySubtitle = subtitle;
     if (subtitle.contains(' Tap to log') || subtitle == 'Tap to log' || subtitle == 'Tap to view' || subtitle == 'Progress photos' || subtitle == 'Progress' || subtitle == 'No data') {
       displaySubtitle = subtitle == 'No data' ? 'No data yet' : subtitle.replaceAll('--', '').trim();
@@ -507,7 +511,7 @@ class _ProgressCard extends StatelessWidget {
                         child: kIsWeb
                             ? Image.network(path, width: 36, height: 36, fit: BoxFit.cover)
                             : Image.file(
-                                File(path),
+                                File(ref.read(mediaRepoProvider).getAbsolutePath(path)),
                                 width: 36,
                                 height: 36,
                                 fit: BoxFit.cover,
@@ -558,3 +562,6 @@ class _ProgressCard extends StatelessWidget {
     );
   }
 }
+
+
+

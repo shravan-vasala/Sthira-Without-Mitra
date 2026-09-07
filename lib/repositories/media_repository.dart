@@ -29,18 +29,18 @@ class MediaRepository {
     String? note,
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final destPath = kIsWeb
-        ? 'web_photo_${date}_$timestamp.jpg'
-        : '$_baseDir/progress_photos/${date}_$timestamp.jpg';
+    final relPath = 'progress_photos/${date}_$timestamp.jpg';
+    final destPath = kIsWeb ? 'web_photo_${date}_$timestamp.jpg' : '$_baseDir/$relPath';
 
     if (!kIsWeb) {
       final file = File(destPath);
       await file.writeAsBytes(imageBytes);
     }
 
-    // Save detailed metadata
+    // Save detailed metadata with relative path if not web
+    final storedPath = kIsWeb ? destPath : relPath;
     final meta = ProgressPhoto(
-      path: destPath,
+      path: storedPath,
       date: date,
       pose: poseTag,
       weight: weight,
@@ -50,7 +50,7 @@ class MediaRepository {
       await _isar.progressPhotos.put(meta);
     });
 
-    return destPath;
+    return storedPath;
   }
 
   // Save a progress photo from a file path (legacy, mobile-only)
@@ -62,17 +62,17 @@ class MediaRepository {
     String? note,
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final destPath = kIsWeb
-        ? sourcePath
-        : '$_baseDir/progress_photos/${date}_$timestamp.jpg';
+    final relPath = 'progress_photos/${date}_$timestamp.jpg';
+    final destPath = kIsWeb ? sourcePath : '$_baseDir/$relPath';
 
     if (!kIsWeb) {
       await File(sourcePath).copy(destPath);
     }
 
     // Save detailed metadata
+    final storedPath = kIsWeb ? destPath : relPath;
     final meta = ProgressPhoto(
-      path: destPath,
+      path: storedPath,
       date: date,
       pose: poseTag,
       weight: weight,
@@ -82,7 +82,19 @@ class MediaRepository {
       await _isar.progressPhotos.put(meta);
     });
 
-    return destPath;
+    return storedPath;
+  }
+
+  String getAbsolutePath(String storedPath) {
+    if (kIsWeb) return storedPath;
+    if (storedPath.startsWith('/')) { // legacy absolute path
+      if (storedPath.contains('trufit_media/')) {
+        final rel = storedPath.split('trufit_media/').last;
+        return '$_baseDir/$rel';
+      }
+      return storedPath;
+    }
+    return '$_baseDir/$storedPath';
   }
 
   ProgressPhoto getProgressPhotoMeta(String date, String photoPath) {

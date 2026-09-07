@@ -1,18 +1,14 @@
+import '../services/notification_service.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../services/haptics.dart';
+import '../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import 'app_providers.dart'; // to get profileProvider for settings
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz_data;
 
-final FlutterLocalNotificationsPlugin _notificationsPlugin =
-    FlutterLocalNotificationsPlugin();
 
 String kTimerEndTimeKey = 'rest_timer_end_time';
 String kTimerRemainingKey = 'rest_timer_remaining';
@@ -56,71 +52,24 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
     ref.onDispose(() {
       _timer?.cancel();
     });
-    _initNotifications();
     _loadPersistedTimer();
     return RestTimerState(remainingSeconds: 0);
   }
 
-  bool _notificationsInitialized = false;
-  Future<void> _initNotifications() async {
-    if (_notificationsInitialized) return;
-    try {
-      tz_data.initializeTimeZones();
-      const initializationSettingsAndroid = AndroidInitializationSettings(
-        '@mipmap/ic_launcher',
-      );
-      const initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid,
-        iOS: DarwinInitializationSettings(),
-      );
-      await _notificationsPlugin.initialize(initializationSettings);
-      _notificationsInitialized = true;
-    } catch (e) {
-      // Ignore in test environments or if plugin is missing
-    }
-  }
-
   Future<void> _scheduleNotification(int seconds, String? exerciseName) async {
-    await _initNotifications();
-    if (!_notificationsInitialized) return;
+    final profile = ref.read(profileProvider);
+    if (!profile.restTimerNotification) return;
 
-    final title = 'Rest Complete!';
-    final body = exerciseName != null
-        ? 'Time for $exerciseName'
-        : 'Your rest timer has finished.';
-
-    try {
-      await _notificationsPlugin.zonedSchedule(
-        0,
-        title,
-        body,
-        tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds)),
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'rest_timer',
-            'Rest Timer',
-            channelDescription: 'Notifications for rest timer completion',
-            importance: Importance.max,
-            priority: Priority.high,
-            enableVibration: true,
-            playSound: true,
-          ),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-    } catch (e) {
-      // Ignore in test
-    }
+    await ref.read(notificationServiceProvider).scheduleRestTimer(
+          seconds,
+          exerciseName,
+          playSound: profile.restTimerSound,
+          enableVibration: profile.restTimerVibration,
+        );
   }
 
   void _cancelNotification() {
-    try {
-      _notificationsPlugin.cancel(0);
-    } catch (e) {
-      // Ignore in test
-    }
+    ref.read(notificationServiceProvider).cancelRestTimer();
   }
 
   Future<void> _loadPersistedTimer() async {
@@ -357,3 +306,5 @@ final restTimerProvider = NotifierProvider<RestTimerNotifier, RestTimerState>(
     return RestTimerNotifier();
   },
 );
+
+

@@ -8,6 +8,7 @@ import '../interfaces/i_ai_food_service.dart';
 import 'nutrition_lookup_service.dart';
 import '../utils/time_utils.dart';
 import '../models/user_food_log.dart';
+import 'package:crypto/crypto.dart';
 
 import 'ai_client.dart';
 
@@ -169,7 +170,7 @@ $_jsonShape
     final List<Map<String, dynamic>> localItems = [];
     final List<String> unresolvedParts = [];
     
-    final splitParts = normalizedQuery.split(RegExp(r'\+|and|,')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final splitParts = normalizedQuery.split(RegExp(r'\+|\b(and)\b|,')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
     await nutritionLookup.load();
     
     for (var part in splitParts) {
@@ -194,15 +195,32 @@ $_jsonShape
       final localMatch = nutritionLookup.match(queryName);
       if (localMatch != null) {
          final per100g = localMatch['per100g'] as Map<String, dynamic>;
-         double defGrams = (localMatch['defaultPortionG'] as num?)?.toDouble() ?? 100.0;
+         
+         final bool isPer100g = localMatch['is_per_100g'] == true;
+         final double? userServing = localMatch['serving_grams'] as double?;
+         final String? userProv = localMatch['provenance'] as String?;
+         
+         double defGrams = 100.0;
+         if (!isPer100g && userServing != null) {
+           defGrams = userServing;
+         } else {
+           defGrams = (localMatch['defaultPortionG'] as num?)?.toDouble() ?? 100.0;
+         }
+         
          double totalGrams = defGrams * quantity;
          
          final multiplier = totalGrams / 100.0;
-         final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * multiplier;
-         final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * multiplier;
-         final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * multiplier;
+         // If it's NOT per 100g, and it's from user memory, the values are already per serving.
+         // So if isPer100g is false, we just multiply by quantity. If true, we multiply by (totalGrams/100).
+         final actualMultiplier = isPer100g ? multiplier : quantity;
+
+         final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * actualMultiplier;
+         final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * actualMultiplier;
+         final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * actualMultiplier;
          final calculatedKcal = (p * 4.0) + (c * 4.0) + (f * 9.0);
-         double rawKcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * multiplier;
+         double rawKcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * actualMultiplier;
+         
+         // Only correct if it's wildly off.
          double kcal = rawKcal == 0 || (rawKcal - calculatedKcal).abs() > 25 ? calculatedKcal : rawKcal;
          
          localItems.add({
@@ -214,7 +232,9 @@ $_jsonShape
            "carbs_g": double.parse(c.toStringAsFixed(1)),
            "fat_g": double.parse(f.toStringAsFixed(1)),
            "resolved": true,
-           "provenance": "verified"
+           "provenance": userProv ?? "database",
+           "is_per_100g": isPer100g,
+           "serving_grams": defGrams,
          });
       } else {
          isFullyLocal = false;
@@ -258,17 +278,6 @@ $_jsonShape
       apiKey: apiKey,
     );
 
-    if (response != null) {
-      await isar.writeTxn(() async {
-        await isar.foodSearchCaches.put(
-          FoodSearchCache(
-            normalizedQuery: normalizedQuery,
-            cachedResponseJson: jsonEncode(response),
-          ),
-        );
-      });
-    }
-
     // Merge AI response with Local items
     final aiParsed = await _processAiResponse(response);
     if (aiParsed != null && localItems.isNotEmpty) {
@@ -290,7 +299,27 @@ $_jsonShape
           "fat_g": double.parse(tF.toStringAsFixed(1)),
           if (unresolvedCount > 0) 'unresolved_count': unresolvedCount,
        };
+       // Store the final merged result
+       await isar.writeTxn(() async {
+         await isar.foodSearchCaches.put(
+           FoodSearchCache(
+             normalizedQuery: normalizedQuery,
+             cachedResponseJson: jsonEncode(aiParsed),
+           ),
+         );
+       });
        return aiParsed;
+    }
+
+    if (aiParsed != null) {
+      await isar.writeTxn(() async {
+         await isar.foodSearchCaches.put(
+           FoodSearchCache(
+             normalizedQuery: normalizedQuery,
+             cachedResponseJson: jsonEncode(aiParsed),
+           ),
+         );
+       });
     }
 
     return aiParsed;
@@ -548,10 +577,15 @@ Return ONLY a JSON object containing an array called "items":
 
     final bucketedCalories = (remainingCalories ~/ 100) * 100;
     final bucketedProtein = (remainingProtein ~/ 10) * 10;
+    final bucketedCarbs = (remainingCarbs ~/ 10) * 10;
+    final bucketedFat = (remainingFat ~/ 5) * 5;
+    final historyHash = previousMeals != null ? sha256.convert(utf8.encode(previousMeals.join())).toString().substring(0, 8) : 'none';
+    final ml = mealsLeft ?? 1;
+
     final dateStr = todayKey();
     final mName = mealName?.replaceAll(' ', '_') ?? 'final';
     final cacheKey =
-        'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_$bucketedProtein';
+        'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_${bucketedProtein}_${bucketedCarbs}_${bucketedFat}_${ml}_$historyHash';
 
     final prefs = await SharedPreferences.getInstance();
 

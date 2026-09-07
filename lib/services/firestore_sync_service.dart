@@ -86,13 +86,15 @@ class FirestoreSyncService implements ICloudSyncService {
           'FirestoreSync: Error syncing $collection/$docId: $e, queuing...',
         );
         final isar = Isar.getInstance();
-        if (isar != null) {
+        final uid = _auth.uid;
+        if (isar != null && uid != null) {
           await isar.writeTxn(() async {
             final item = SyncQueueItem(
               collection: collection,
               docId: docId,
               payload: jsonEncode(data),
               timestamp: DateTime.now(),
+              uid: uid,
             );
             await isar.syncQueueItems.put(item);
           });

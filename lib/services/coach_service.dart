@@ -37,6 +37,7 @@ class CoachService {
     final hasManualKey = apiKey != null && apiKey!.isNotEmpty;
 
     if (!hasManualKey) {
+      yield '__LOCAL__';
       yield _generateTemplatedNote(
         userName,
         steps,
@@ -87,6 +88,7 @@ Return exactly the note text, and nothing else.
         apiKey: apiKey,
       );
 
+      yield '__AI__';
       await for (final chunk in stream) {
         yield chunk;
       }
@@ -96,6 +98,7 @@ Return exactly the note text, and nothing else.
     }
 
     // Fallback if Gemini fails
+    yield '__LOCAL__';
     yield _generateTemplatedNote(
       userName,
       steps,

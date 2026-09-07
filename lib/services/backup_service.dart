@@ -17,7 +17,11 @@ import '../models/workout_plan.dart';
 import '../models/workout_session.dart';
 import '../models/coach_note.dart';
 import '../models/body_stats.dart';
+import '../models/daily_meal_log.dart';
+import '../models/habit.dart';
+import '../models/user_food_log.dart';
 import 'schema_migration_service.dart';
+import 'backup_encryption_service.dart';
 
 class BackupRestoreResult {
   final bool success;
@@ -88,6 +92,9 @@ class BackupService {
       dataMap['workoutSessions'] = isar.workoutSessions.where().exportJsonSync();
       dataMap['coachNotes'] = isar.coachNotes.where().exportJsonSync();
       dataMap['bodyStats'] = isar.bodyStats.where().exportJsonSync();
+      dataMap['dailyMealLogs'] = isar.dailyMealLogs.where().exportJsonSync();
+      dataMap['habitCompletions'] = isar.habitCompletions.where().exportJsonSync();
+      dataMap['userFoodLogs'] = isar.userFoodLogs.where().exportJsonSync();
 
       int recordCount = 0;
       for (final collection in dataMap.values) {
@@ -127,6 +134,13 @@ class BackupService {
 
       encoder.close();
 
+      if (password != null && password.isNotEmpty) {
+        final zipFile = File(zipPath);
+        final zipBytes = await zipFile.readAsBytes();
+        final encryptedZip = BackupEncryptionService.encryptBytes(zipBytes, password);
+        await zipFile.writeAsBytes(encryptedZip);
+      }
+
       // Clean up staging
       await backupStagingDir.delete(recursive: true);
 
@@ -144,7 +158,22 @@ class BackupService {
         return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, errorMessage: 'File not found');
       }
       
-      final bytes = file.readAsBytesSync();
+      Uint8List bytes = file.readAsBytesSync();
+      bool isEncrypted = false;
+      
+      // Check for magic bytes 'TFBK'
+      if (bytes.length > 4 && bytes[0] == 84 && bytes[1] == 70 && bytes[2] == 66 && bytes[3] == 75) {
+        isEncrypted = true;
+        if (password == null || password.isEmpty) {
+          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Password required');
+        }
+        try {
+          bytes = BackupEncryptionService.decryptBytes(bytes, password);
+        } catch (e) {
+          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Incorrect password or corrupted file');
+        }
+      }
+
       final archive = ZipDecoder().decodeBytes(bytes);
 
       ArchiveFile? manifestFile;
@@ -159,7 +188,7 @@ class BackupService {
       }
 
       if (manifestFile == null) {
-        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, errorMessage: 'Invalid backup format (no manifest.json)');
+        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid backup format (no manifest.json)');
       }
 
       final content = utf8.decode(manifestFile.content as List<int>);
@@ -169,6 +198,7 @@ class BackupService {
         isValid: true,
         totalEntries: map['totalEntries'] ?? 0,
         photoCount: photoCount,
+        isEncrypted: isEncrypted,
         schemaVersion: map['schemaVersion'] ?? 1,
         appVersion: map['appVersion'] ?? 'Unknown',
         createdAt: map['createdAt'] ?? 'Unknown',
@@ -185,7 +215,16 @@ class BackupService {
       final isar = Isar.getInstance();
       if (isar == null) throw Exception('Isar instance not found.');
 
-      final bytes = File(zipPath).readAsBytesSync();
+      Uint8List bytes = File(zipPath).readAsBytesSync();
+      
+      // Check for magic bytes 'TFBK'
+      if (bytes.length > 4 && bytes[0] == 84 && bytes[1] == 70 && bytes[2] == 66 && bytes[3] == 75) {
+        if (password == null || password.isEmpty) {
+          throw Exception('Password required to restore encrypted backup');
+        }
+        bytes = BackupEncryptionService.decryptBytes(bytes, password);
+      }
+
       final archive = ZipDecoder().decodeBytes(bytes);
       
       ArchiveFile? dataFile;
@@ -229,6 +268,9 @@ class BackupService {
         if (migratedData['workoutSessions'] != null) isar.workoutSessions.importJsonSync(migratedData['workoutSessions']);
         if (migratedData['coachNotes'] != null) isar.coachNotes.importJsonSync(migratedData['coachNotes']);
         if (migratedData['bodyStats'] != null) isar.bodyStats.importJsonSync(migratedData['bodyStats']);
+        if (migratedData['dailyMealLogs'] != null) isar.dailyMealLogs.importJsonSync(migratedData['dailyMealLogs']);
+        if (migratedData['habitCompletions'] != null) isar.habitCompletions.importJsonSync(migratedData['habitCompletions']);
+        if (migratedData['userFoodLogs'] != null) isar.userFoodLogs.importJsonSync(migratedData['userFoodLogs']);
       });
 
       // Restore photos
@@ -238,7 +280,9 @@ class BackupService {
         if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
           try {
              // Extract directly into the media directory structure
-             final extractedFile = File('${appDir.path}/trufit_media/${file.name}');
+             // Using relative path mapping is safer
+             final safePath = file.name.replaceAll('..', ''); 
+             final extractedFile = File('${appDir.path}/trufit_media/$safePath');
              extractedFile.createSync(recursive: true);
              extractedFile.writeAsBytesSync(file.content as List<int>);
           } catch (_) {

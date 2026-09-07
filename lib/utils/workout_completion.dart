@@ -12,18 +12,24 @@ class WorkoutCompletion {
     return date.weekday == DateTime.sunday || day.sections.isEmpty;
   }
 
-  /// Resolves the scheduled [WorkoutDay] for [date] using the same index rules
-  /// as Home / daily score (Sunday → Rest id, else weekday-1).
+  /// Resolves the scheduled [WorkoutDay] for [date] using stored schedule semantics.
   static WorkoutDay resolveWorkoutDay(WorkoutPlan plan, DateTime date) {
-    final isSunday = date.weekday == DateTime.sunday;
-    final dayIndex = isSunday
-        ? 0
-        : (date.weekday - 1).clamp(0, plan.days.length - 1);
-    final dayIdTarget = isSunday ? 'Rest' : plan.days[dayIndex].dayId;
-    return plan.days.firstWhere(
-      (d) => d.dayId == dayIdTarget,
-      orElse: () => plan.days[dayIndex],
-    );
+    // 1. Find a day matching the explicit weekday
+    for (final day in plan.days) {
+      if (day.weekday == date.weekday) {
+        return day;
+      }
+    }
+    
+    // 2. If no weekday match, maybe fallback to 'Rest'
+    for (final day in plan.days) {
+      if (day.dayId?.toLowerCase() == 'rest') {
+        return day;
+      }
+    }
+
+    // 3. Last resort fallback
+    return WorkoutDay(dayId: 'Rest', label: 'Rest Day', sections: []);
   }
 
   static bool isSectionComplete(

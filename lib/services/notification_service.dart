@@ -184,6 +184,54 @@ class NotificationService {
     }
   }
 
+  Future<void> scheduleRestTimer(
+    int seconds,
+    String? exerciseName, {
+    bool playSound = true,
+    bool enableVibration = true,
+  }) async {
+    if (!_initialized) await init();
+
+    final title = 'Rest Complete!';
+    final body = exerciseName != null
+        ? 'Time for $exerciseName'
+        : 'Your rest timer has finished.';
+
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        // Use ID 1000 for rest timer to clearly separate from habit IDs
+        1000,
+        title,
+        body,
+        tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds)),
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'rest_timer',
+            'Rest Timer',
+            channelDescription: 'Notifications for rest timer completion',
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: playSound,
+            enableVibration: enableVibration,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  Future<void> cancelRestTimer() async {
+    try {
+      await _notificationsPlugin.cancel(1000);
+    } catch (e) {
+      // Ignore
+    }
+  }
+
   Future<void> _scheduleDaily({
     required int id,
     required String title,

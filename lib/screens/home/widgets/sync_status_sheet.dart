@@ -222,10 +222,9 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                       return;
                     }
 
-                    final steps = await hcService.syncTodayAndAutoCompleteHabit(
-                      dailyLogRepo,
-                      habitRepo,
-                    );
+                    final todayData = await hcService.syncToday();
+                    final steps = todayData?.steps;
+                    if (todayData != null) await dailyLogRepo.updateFromHealthConnect([todayData]);
                     if (steps != null) {
                       await prefs.setBool('hc_connected', true);
                       ref.read(stepsSourceProvider.notifier).state =
@@ -293,3 +292,4 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
     );
   }
 }
+

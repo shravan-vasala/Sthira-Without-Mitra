@@ -86,6 +86,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                 ? _buildTimeSelector(
                     label: 'Time',
                     time: config.habitTime,
+                    previewText: 'Hey! Time to log your daily habits and keep your streak alive.',
                     onTap: () => _pickTime(context, config.habitTime, (t) {
                       ref
                           .read(remindersProvider.notifier)
@@ -109,6 +110,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                 ? _buildTimeSelector(
                     label: 'Time',
                     time: config.workoutTime,
+                    previewText: 'Time to crush today\'s workout! Are you ready?',
                     onTap: () => _pickTime(context, config.workoutTime, (t) {
                       ref
                           .read(remindersProvider.notifier)
@@ -134,16 +136,18 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       _buildTimeSelector(
                         label: 'Lunch Time',
                         time: config.lunchTime,
+                        previewText: 'Time to log your lunch! Let\'s see what you had.',
                         onTap: () => _pickTime(context, config.lunchTime, (t) {
                           ref
                               .read(remindersProvider.notifier)
                               .updateConfig(config.copyWith(lunchTime: t));
                         }),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       _buildTimeSelector(
                         label: 'Dinner Time',
                         time: config.dinnerTime,
+                        previewText: 'Don\'t forget to log your dinner!',
                         onTap: () => _pickTime(context, config.dinnerTime, (t) {
                           ref
                               .read(remindersProvider.notifier)
@@ -231,6 +235,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       _buildTimeSelector(
                         label: 'Time',
                         time: config.backupTime,
+                        previewText: 'Time for your weekly data backup. Keep your progress safe!',
                         onTap: () => _pickTime(context, config.backupTime, (t) {
                           ref
                               .read(remindersProvider.notifier)
@@ -325,36 +330,65 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     required String label,
     required TimeOfDay time,
     required VoidCallback onTap,
+    String? previewText,
   }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 14, color: context.colors.textDark),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 14, color: context.colors.textDark),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: context.colors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _formatTime(time),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.primary,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: context.colors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        if (previewText != null) ...[
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(Icons.notifications_active_outlined, size: 12, color: context.colors.textLight),
               ),
-              child: Text(
-                _formatTime(time),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.primary,
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '"$previewText"',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.textLight,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

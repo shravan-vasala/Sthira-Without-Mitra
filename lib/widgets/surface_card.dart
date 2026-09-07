@@ -84,7 +84,7 @@ class _SurfaceCardState extends State<SurfaceCard> {
       decoration: BoxDecoration(
         color: widget.color ?? context.colors.card,
         borderRadius: BorderRadius.circular(radius),
-        border: widget.border ?? (isLight ? Border.all(color: context.colors.border, width: 1.0) : null),
+        border: widget.border,
         boxShadow: shadows,
       ),
       child: widget.child,

@@ -7,7 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import 'photo_viewer_screen.dart'; // To reuse PhotoItem
 import '../../share/share_card_exporter.dart';
-import '../../../services/haptics.dart';
+import '../../services/haptics.dart';
 
 enum CompareMode { sideBySide, slider }
 
@@ -238,7 +238,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: kIsWeb
                                     ? Image.network(item.path, fit: BoxFit.cover, cacheWidth: 400)
-                                    : Image.file(File(item.path), fit: BoxFit.cover, cacheWidth: 400),
+                                    : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.cover, cacheWidth: 400),
                               ),
                             ),
                             if (item.poseTag != 'none')
@@ -311,7 +311,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     }
     return kIsWeb
         ? Image.network(item.path, fit: BoxFit.contain)
-        : Image.file(File(item.path), fit: BoxFit.contain);
+        : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.contain);
   }
   
   Widget _buildCompareContent() {
@@ -425,6 +425,15 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     );
   }
 
+  String _getCaption(String dateStr) {
+    String datePart = _formatDateShort(dateStr);
+    final log = ref.read(dailyLogRepoProvider).getLog(dateStr);
+    if (log != null && log.weight != null && log.weight! > 0) {
+      return '$datePart, ${log.weight!.toStringAsFixed(1)}kg';
+    }
+    return datePart;
+  }
+
   @override
   Widget build(BuildContext context) {
     final wData = _getWeightDelta();
@@ -502,14 +511,14 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              _formatDateShort(_leftPhoto!.date),
+                              _getCaption(_leftPhoto!.date),
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                             ),
                           ),
                           Expanded(
                             child: Text(
-                              _formatDateShort(_rightPhoto!.date),
+                              _getCaption(_rightPhoto!.date),
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                             ),
@@ -569,3 +578,4 @@ class _SliderClipper extends CustomClipper<Rect> {
     return oldClipper.splitFraction != splitFraction;
   }
 }
+

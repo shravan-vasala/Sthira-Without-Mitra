@@ -36,6 +36,11 @@ const SyncQueueItemSchema = CollectionSchema(
       id: 3,
       name: r'timestamp',
       type: IsarType.dateTime,
+    ),
+    r'uid': PropertySchema(
+      id: 4,
+      name: r'uid',
+      type: IsarType.string,
     )
   },
   estimateSize: _syncQueueItemEstimateSize,
@@ -88,6 +93,7 @@ int _syncQueueItemEstimateSize(
   bytesCount += 3 + object.collection.length * 3;
   bytesCount += 3 + object.docId.length * 3;
   bytesCount += 3 + object.payload.length * 3;
+  bytesCount += 3 + object.uid.length * 3;
   return bytesCount;
 }
 
@@ -101,6 +107,7 @@ void _syncQueueItemSerialize(
   writer.writeString(offsets[1], object.docId);
   writer.writeString(offsets[2], object.payload);
   writer.writeDateTime(offsets[3], object.timestamp);
+  writer.writeString(offsets[4], object.uid);
 }
 
 SyncQueueItem _syncQueueItemDeserialize(
@@ -114,6 +121,7 @@ SyncQueueItem _syncQueueItemDeserialize(
     docId: reader.readString(offsets[1]),
     payload: reader.readString(offsets[2]),
     timestamp: reader.readDateTime(offsets[3]),
+    uid: reader.readString(offsets[4]),
   );
   object.id = id;
   return object;
@@ -134,6 +142,8 @@ P _syncQueueItemDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 3:
       return (reader.readDateTime(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }

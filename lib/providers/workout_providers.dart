@@ -3,6 +3,7 @@ import 'app_providers.dart';
 import '../models/workout_plan.dart';
 import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';
+import '../utils/workout_completion.dart';
 
 final workoutPlanProvider = Provider<WorkoutPlan?>((ref) {
   final repo = ref.watch(workoutRepoProvider);
@@ -14,6 +15,12 @@ final workoutPlanProvider = Provider<WorkoutPlan?>((ref) {
 
 final workoutDayProvider = Provider.family<WorkoutDay?, String>((ref, dayId) {
   return ref.watch(workoutRepoProvider).getWorkoutDay(dayId);
+});
+
+final resolvedWorkoutDayProvider = Provider.family<WorkoutDay?, DateTime>((ref, date) {
+  final plan = ref.watch(workoutPlanProvider);
+  if (plan == null) return null;
+  return WorkoutCompletion.resolveWorkoutDay(plan, date);
 });
 
 // Keep as StateProvider to avoid breaking UI code that uses .state++

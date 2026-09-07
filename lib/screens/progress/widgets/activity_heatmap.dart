@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
+import 'package:go_router/go_router.dart';
 
 class ActivityHeatmap extends ConsumerStatefulWidget {
   const ActivityHeatmap({super.key});
@@ -299,14 +300,20 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     
                     String tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score';
 
-                    return Tooltip(
-                      message: tooltipMsg,
-                      child: Container(
-                        width: cellSize,
-                        height: cellSize,
-                        decoration: BoxDecoration(
-                          color: _getColorForScore(context, score),
-                          borderRadius: BorderRadius.circular(4),
+                    return GestureDetector(
+                      onTap: () {
+                        ref.read(selectedDateProvider.notifier).state = currentDate;
+                        context.go('/home');
+                      },
+                      child: Tooltip(
+                        message: tooltipMsg,
+                        child: Container(
+                          width: cellSize,
+                          height: cellSize,
+                          decoration: BoxDecoration(
+                            color: _getColorForScore(context, score),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
                       ),
                     );

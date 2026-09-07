@@ -106,10 +106,14 @@ class AiClient {
       throw AiException('API Key is required. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
     }
 
+    final fullOpSw = Stopwatch()..start();
+    int? preprocessMs;
+
     String? imageContext;
     final List<Uint8List> processedImages = [];
     String? actualMimeType = mimeType;
     if (imageBytesList != null && imageBytesList.isNotEmpty) {
+      final prepSw = Stopwatch()..start();
       final b = BytesBuilder();
       for (var imageBytes in imageBytesList) {
         final processed = await ImagePreprocessor.processImage(imageBytes, mimeType ?? 'image/jpeg');
@@ -118,10 +122,12 @@ class AiClient {
         b.add(processed.$1);
       }
       imageContext = sha256.convert(b.toBytes()).toString();
+      prepSw.stop();
+      preprocessMs = prepSw.elapsedMilliseconds;
     }
 
     if (cache != null && !skipCache) {
-      final cachedResult = cache!.get(prompt, imageContext);
+      final cachedResult = cache!.get(prompt, systemInstruction, imageContext);
       if (cachedResult != null) return cachedResult;
     }
 
@@ -147,9 +153,12 @@ class AiClient {
       
       while (attempt <= maxRetries) {
         if (DateTime.now().isAfter(overallDeadline)) break;
+        final remaining = overallDeadline.difference(DateTime.now());
+        final attemptTimeout = remaining < perAttemptTimeout ? remaining : perAttemptTimeout;
+
+        final sw = Stopwatch()..start();
         try {
           debugPrint('AiClient: Trying model: $modelName (attempt ${attempt + 1})...');
-          final sw = Stopwatch()..start();
           final response = await _callModel(
             modelName: modelName,
             prompt: prompt,
@@ -157,7 +166,7 @@ class AiClient {
             apiKey: apiKey,
             imageBytesList: processedImages.isNotEmpty ? processedImages : null,
             mimeType: actualMimeType,
-            timeout: perAttemptTimeout,
+            timeout: attemptTimeout,
           );
           sw.stop();
           
@@ -166,18 +175,32 @@ class AiClient {
           final json = _parseJson(response);
           if (i > 0) json['modelUsed'] = modelName;
           
-          AiLogger.log(purpose: isVision ? 'scan plate (vision)' : 'scan description', model: modelName, durationMs: sw.elapsedMilliseconds, outcome: 'success');
+          AiLogger.log(
+            purpose: isVision ? 'scan plate (vision)' : 'scan description', 
+            model: modelName, 
+            durationMs: sw.elapsedMilliseconds, 
+            preprocessMs: preprocessMs,
+            outcome: 'success'
+          );
           
           breaker.recordSuccess();
-          if (cache != null) await cache!.set(prompt, json, imageContext);
+          if (cache != null) await cache!.set(prompt, systemInstruction, json, imageContext);
           return json;
           
         } catch (e) {
+          sw.stop();
           final errStr = e.toString();
           final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
           lastCause = cause;
           lastErrorMsg = errStr;
-          AiLogger.log(purpose: 'AI error fallback', model: modelName, durationMs: 0, outcome: cause.toString());
+          
+          AiLogger.log(
+            purpose: 'AI error fallback', 
+            model: modelName, 
+            durationMs: sw.elapsedMilliseconds, 
+            preprocessMs: preprocessMs,
+            outcome: cause.toString()
+          );
           
           if (cause == AiErrorCause.invalidKey) {
             throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.', cause: cause);
@@ -273,7 +296,7 @@ class AiClient {
       final response = await _cachedClient!.models.generateContent(
         model: modelName,
         request: request,
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(timeout);
       return response.text;
   }
 
@@ -281,14 +304,21 @@ class AiClient {
     required String prompt,
     required String systemInstruction,
     String? apiKey,
+    Duration overallTimeout = const Duration(seconds: 40),
   }) async* {
     if (_textCircuitBreaker.isOpen) {
       throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
     }
 
     AiErrorCause? lastCause;
+    final overallDeadline = DateTime.now().add(overallTimeout);
 
     for (final modelName in textModelsToTry) {
+      if (DateTime.now().isAfter(overallDeadline)) break;
+      final sw = Stopwatch()..start();
+      int? firstTokenMs;
+      bool yieldedAny = false;
+
       try {
         final stream = _callModelStream(
           modelName: modelName,
@@ -298,14 +328,49 @@ class AiClient {
         );
         
         await for (final chunk in stream) {
-           if (chunk != null && chunk.isNotEmpty) yield chunk;
+           if (chunk != null && chunk.isNotEmpty) {
+             if (firstTokenMs == null) {
+               firstTokenMs = sw.elapsedMilliseconds;
+             }
+             yieldedAny = true;
+             yield chunk;
+           }
          }
+         
+         if (!yieldedAny) {
+           throw AiException("Empty response from stream", cause: AiErrorCause.unknown);
+         }
+
+         sw.stop();
+         AiLogger.log(
+           purpose: 'text stream',
+           model: modelName,
+           durationMs: sw.elapsedMilliseconds,
+           firstTokenMs: firstTokenMs,
+           outcome: 'success'
+         );
          _textCircuitBreaker.recordSuccess();
          return;
        } catch (e) {
+        sw.stop();
         final errStr = e.toString();
         final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
         lastCause = cause;
+
+        AiLogger.log(
+          purpose: 'text stream fallback',
+          model: modelName,
+          durationMs: sw.elapsedMilliseconds,
+          firstTokenMs: firstTokenMs,
+          outcome: cause.toString()
+        );
+
+        if (yieldedAny) {
+          // If we already started streaming text to the user, we cannot seamlessly fallback
+          // to another model because it will just append the new start to the old partial text.
+          // We must throw here.
+          throw AiException('Stream failed midway. Please try again.', cause: cause);
+        }
         
         if (cause == AiErrorCause.invalidKey) {
           throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.', cause: cause);
@@ -322,6 +387,10 @@ class AiClient {
       }
     }
     
+    if (DateTime.now().isAfter(overallDeadline)) {
+      lastCause = AiErrorCause.timeout;
+    }
+
     if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
       _textCircuitBreaker.recordFailure();
     }
@@ -362,12 +431,16 @@ class AiClient {
         contents: [Content.text(prompt)],
       );
 
-      final response = await _cachedClient!.models.generateContent(
+      final responseStream = _cachedClient!.models.streamGenerateContent(
         model: modelName,
         request: request,
-      ).timeout(const Duration(seconds: 20));
+      );
       
-      yield response.text;
+      await for (final response in responseStream) {
+        if (response.text != null && response.text!.isNotEmpty) {
+          yield response.text;
+        }
+      }
   }
 
   Map<String, dynamic> _parseJson(String text) {

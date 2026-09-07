@@ -16,10 +16,13 @@ class SyncQueueItem {
 
   final DateTime timestamp;
 
+  final String uid;
+
   SyncQueueItem({
     required this.collection,
     required this.docId,
     required this.payload,
     required this.timestamp,
+    required this.uid,
   });
 }

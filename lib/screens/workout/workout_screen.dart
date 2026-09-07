@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../services/haptics.dart';
+import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -625,16 +625,42 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
 // ─── Section Widget ───────────────────────────────────────────────────────────
 
-class _SectionWidget extends StatelessWidget {
+class _SectionWidget extends StatefulWidget {
   const _SectionWidget({
     required this.section,
     required this.sectionIndex,
     required this.dayId,
+    this.jumpToIndex,
   });
 
   final WorkoutSection section;
   final int sectionIndex;
   final String dayId;
+  final int? jumpToIndex;
+
+  @override
+  State<_SectionWidget> createState() => _SectionWidgetState();
+}
+
+class _SectionWidgetState extends State<_SectionWidget> {
+  final _jumpKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.jumpToIndex != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_jumpKey.currentContext != null) {
+          Scrollable.ensureVisible(
+            _jumpKey.currentContext!,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            alignment: 0.2,
+          );
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -658,7 +684,7 @@ class _SectionWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  section.title?.toUpperCase() ?? '',
+                  widget.section.title?.toUpperCase() ?? '',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -668,7 +694,7 @@ class _SectionWidget extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  '${section.exercises.length} exercises',
+                  '${widget.section.exercises.length} exercises',
                   style: TextStyle(
                     fontSize: 12,
                     color: context.colors.textMedium,
@@ -677,7 +703,7 @@ class _SectionWidget extends StatelessWidget {
               ],
             ),
           ),
-          if (section.exercises.isEmpty)
+          if (widget.section.exercises.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text(
@@ -690,10 +716,10 @@ class _SectionWidget extends StatelessWidget {
               ),
             )
           else
-            ...List.generate(section.exercises.length * 2 - 1, (index) {
+            ...List.generate(widget.section.exercises.length * 2 - 1, (index) {
               if (index.isOdd) {
                 final exerciseIndex = index ~/ 2;
-                final exercise = section.exercises[exerciseIndex];
+                final exercise = widget.section.exercises[exerciseIndex];
                 if (exercise.restSecondsAfterSet > 0) {
                   return RestTimerLabel(
                     seconds: exercise.restSecondsAfterSet,
@@ -703,8 +729,15 @@ class _SectionWidget extends StatelessWidget {
                 return const SizedBox(height: 4);
               }
               final exerciseIndex = index ~/ 2;
-              final exercise = section.exercises[exerciseIndex];
-              return ExerciseCard(exercise: exercise, dayId: dayId);
+              final exercise = widget.section.exercises[exerciseIndex];
+              return Container(
+                key: (widget.jumpToIndex == exerciseIndex) ? _jumpKey : null,
+                child: ExerciseCard(
+                  exercise: exercise, 
+                  dayId: widget.dayId,
+                  highlight: widget.jumpToIndex == exerciseIndex,
+                ),
+              );
             }),
           const SizedBox(height: 8),
         ],

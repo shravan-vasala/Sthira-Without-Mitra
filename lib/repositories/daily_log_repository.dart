@@ -81,6 +81,34 @@ class DailyLogRepository {
     await saveLog(log.copyWith(sleepHours: hours, sleepSource: source));
   }
 
+  Future<void> updateFromHealthConnect(List<dynamic> healthDataList) async {
+    for (final data in healthDataList) {
+      final log = getOrCreate(data.dateStr);
+      var updatedLog = log;
+      bool changed = false;
+
+      // Don't overwrite manual steps
+      if (data.steps != null && data.steps > 0) {
+        if (log.stepsSource != 'manual') {
+          updatedLog = updatedLog.copyWith(steps: data.steps, stepsSource: 'healthConnect');
+          changed = true;
+        }
+      }
+
+      // Don't overwrite manual sleep
+      if (data.sleepHours != null && data.sleepHours > 0) {
+        if (log.sleepSource != 'manual') {
+          updatedLog = updatedLog.copyWith(sleepHours: data.sleepHours, sleepSource: 'healthConnect');
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        await saveLog(updatedLog);
+      }
+    }
+  }
+
   Future<void> clearSleep(String date) async {
     final log = getOrCreate(date);
     await saveLog(log.clearSleep());

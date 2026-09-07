@@ -480,9 +480,27 @@ class _WorkoutsSection extends ConsumerWidget {
           title = 'Cool down';
         }
 
-        final String subtitle = (i == 0)
-            ? 'Complete your scheduled workout'
-            : '${sec.exercises.length} exercises';
+        int exercisesLogged = 0;
+        int firstUnloggedIndex = -1;
+        String? firstUnlogged;
+        for (int e = 0; e < sec.exercises.length; e++) {
+          final ex = sec.exercises[e];
+          if (logRepo.hasLog(dateStr, ex.name ?? '')) {
+            exercisesLogged++;
+          } else if (firstUnlogged == null) {
+            firstUnlogged = ex.name;
+            firstUnloggedIndex = e;
+          }
+        }
+
+        String subtitle;
+        if (exercisesLogged == 0) {
+          subtitle = '${sec.exercises.length} exercises · Ready to start';
+        } else if (exercisesLogged == sec.exercises.length) {
+          subtitle = '${sec.exercises.length}/${sec.exercises.length} logged · View workout';
+        } else {
+          subtitle = 'Continue · $exercisesLogged/${sec.exercises.length} logged · Next: $firstUnlogged';
+        }
 
         cards.add(
           _buildCard(
@@ -493,7 +511,13 @@ class _WorkoutsSection extends ConsumerWidget {
             isFuture: isFuture,
             isRest: false,
             heroTag: 'workout-${day.dayId}-section-$i',
-            onTap: () => context.go('/home/workout/${day.dayId}?section=$i'),
+            onTap: () {
+               String route = '/home/workout/${day.dayId}?section=$i';
+               if (firstUnloggedIndex != -1 && exercisesLogged > 0) {
+                 route += '&jumpTo=$firstUnloggedIndex';
+               }
+               context.go(route);
+            },
           ),
         );
       }

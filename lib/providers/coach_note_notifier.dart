@@ -119,9 +119,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         dailyLogRepo: dailyLogRepo,
       );
 
-      final isAi =
-          coachService.apiKey != null && coachService.apiKey!.isNotEmpty;
-
+      // We pass down to coach service. We don't assume isAi here.
       final stream = coachService.generateNoteStream(
         userName: profile.name,
         coachName: profile.coachName,
@@ -139,31 +137,47 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       );
 
       String accumulatedNote = "";
+      bool resolvedIsAi = false;
+
+      // Ensure we only save for the date we requested
+      final targetDateStr = dateStr;
 
       await for (final chunk in stream) {
+        if (chunk.startsWith('__AI__')) {
+           resolvedIsAi = true;
+           continue;
+        }
+        if (chunk.startsWith('__LOCAL__')) {
+           resolvedIsAi = false;
+           continue;
+        }
         accumulatedNote += chunk;
-        state = AsyncValue.data(
-          CoachNote(date: dateStr, note: accumulatedNote, isAi: isAi),
-        );
+        if (dateStr == targetDateStr) {
+          state = AsyncValue.data(
+            CoachNote(date: targetDateStr, note: accumulatedNote, isAi: resolvedIsAi),
+          );
+        }
       }
 
       if (accumulatedNote.isEmpty)
         throw Exception('Failed to generate note stream');
 
       final finalNote = CoachNote(
-        date: dateStr,
+        date: targetDateStr,
         note: accumulatedNote,
-        isAi: isAi,
+        isAi: resolvedIsAi,
       );
       await repo.saveNote(finalNote);
 
       final currentPrefs = ref.read(sharedPreferencesProvider);
       await currentPrefs.setString(
-        'coach_note_last_gen_$dateStr',
+        'coach_note_last_gen_$targetDateStr',
         DateTime.now().toIso8601String(),
       );
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (state.isLoading) {
+        state = AsyncValue.error(e, st);
+      }
     }
   }
 }

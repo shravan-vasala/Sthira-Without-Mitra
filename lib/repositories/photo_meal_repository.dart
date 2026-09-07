@@ -31,7 +31,7 @@ class PhotoMealRepository {
 
     for (final log in oldLogs) {
       if (!kIsWeb) {
-        final file = File(log.photoPath);
+        final file = File(getAbsolutePath(log.photoPath));
         if (await file.exists()) {
           try {
             await file.delete();
@@ -61,18 +61,20 @@ class PhotoMealRepository {
     final ext = sourcePhotoPath.contains('.')
         ? sourcePhotoPath.split('.').last
         : 'jpg';
-    final destPath = kIsWeb
-        ? sourcePhotoPath
-        : '$_baseDir/${date}_$timestampMs.$ext';
+    
+    final relPath = '${date}_$timestampMs.$ext';
+    final destPath = kIsWeb ? sourcePhotoPath : '$_baseDir/$relPath';
 
     if (!kIsWeb) {
       await File(sourcePhotoPath).copy(destPath);
     }
 
+    final storedPath = kIsWeb ? destPath : relPath;
+
     final log = ScannedMealLog(
       id: 'photo_meal_$timestampMs',
       date: date,
-      photoPath: destPath,
+      photoPath: storedPath,
       mealType: mealType,
       foodName: foodName,
       estimatedCalories: estimatedCalories,
@@ -87,6 +89,18 @@ class PhotoMealRepository {
       await _isar.scannedMealLogs.put(log);
     });
     return log;
+  }
+
+  String getAbsolutePath(String storedPath) {
+    if (kIsWeb) return storedPath;
+    if (storedPath.startsWith('/')) { // legacy absolute path
+      if (storedPath.contains('trufit_meal_photos/')) {
+        final rel = storedPath.split('trufit_meal_photos/').last;
+        return '$_baseDir/$rel';
+      }
+      return storedPath;
+    }
+    return '$_baseDir/$storedPath';
   }
 
   List<ScannedMealLog> getScannedMealsForDate(String date) {
@@ -106,7 +120,7 @@ class PhotoMealRepository {
     final log = _isar.scannedMealLogs.where().idEqualTo(id).findFirstSync();
     if (log != null) {
       if (!kIsWeb) {
-        final file = File(log.photoPath);
+        final file = File(getAbsolutePath(log.photoPath));
         if (await file.exists()) {
           await file.delete();
         }

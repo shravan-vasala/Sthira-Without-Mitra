@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../services/haptics.dart';
+import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
@@ -515,6 +515,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                       : (profile.targetWeight as double) * 2.20462)
                   : null,
               onPointLongPress: null,
+              onPointTap: (date, value) {
+                ref.read(selectedDateProvider.notifier).state = date;
+                context.go('/home');
+              },
               expandChart: true,
             ),
           ),

@@ -15,6 +15,7 @@ import '../repositories/daily_log_repository.dart';
 import '../repositories/habit_repository.dart';
 import '../repositories/body_stats_repository.dart';
 import '../repositories/media_repository.dart';
+import '../repositories/photo_meal_repository.dart';
 import '../repositories/profile_repository.dart';
 import '../repositories/exercise_log_repository.dart';
 import '../repositories/badge_repository.dart';
@@ -33,6 +34,7 @@ import '../interfaces/i_ai_food_service.dart';
 import '../utils/time_utils.dart';
 import 'auth_provider.dart';
 import 'profile_providers.dart';
+import 'daily_score_provider.dart';
 
 export 'rest_timer_provider.dart';
 export 'phase_progress_provider.dart';
@@ -105,6 +107,9 @@ final bodyStatsRepoProvider = Provider<BodyStatsRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
 final mediaRepoProvider = Provider<MediaRepository>((ref) {
+  throw UnimplementedError('Must be overridden in main');
+});
+final photoMealRepoProvider = Provider<PhotoMealRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
 final profileRepoProvider = Provider<ProfileRepository>((ref) {
@@ -240,6 +245,8 @@ void _pushProfile(Ref ref, DailyLog todayLog) {
       ? profile.photoPath
       : null;
 
+  final dailyScore = ref.read(dailyScoreProvider);
+
   final profileData = SocialProfile(
     uid: authService.uid!,
     name: profile.name,
@@ -251,8 +258,8 @@ void _pushProfile(Ref ref, DailyLog todayLog) {
     weeklyWorkouts: weeklyWorkouts,
     latestBadge: null,
     lastUpdatedAt: DateTime.now(),
-    todayScore: 0,
-    weekScore: 0,
+    todayScore: dailyScore.totalScore,
+    weekScore: dailyScore.sevenDayAverage,
     // We do NOT overwrite allowedReaders here because pushProfile uses SetOptions(merge: true)
   );
   syncService.pushProfile(profileData);

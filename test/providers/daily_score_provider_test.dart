@@ -61,7 +61,7 @@ void main() {
       planName: 'beginner_plan', // Must match the key used in savePlan
       days: [
         WorkoutDay(
-          dayId: 'day_1',
+          dayId: 'monday',
           label: 'Monday',
           sections: [
             WorkoutSection(

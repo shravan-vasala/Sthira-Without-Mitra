@@ -15,10 +15,11 @@ import '../log_data_dialog.dart';
 import '../../../utils/format_units.dart';
 
 class ExerciseCard extends ConsumerWidget {
-  const ExerciseCard({super.key, required this.exercise, required this.dayId});
+  const ExerciseCard({super.key, required this.exercise, required this.dayId, this.highlight = false});
 
   final Exercise exercise;
   final String dayId;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,6 +46,7 @@ class ExerciseCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.zero,
       elevation: SurfaceCardElevation.home,
+      color: highlight ? context.colors.primary.withValues(alpha: 0.05) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

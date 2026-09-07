@@ -208,7 +208,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                                 borderRadius: BorderRadius.circular(10),
                                 child: kIsWeb 
                                   ? Image.network(referencePhoto.path, fit: BoxFit.cover)
-                                  : Image.file(File(referencePhoto.path), fit: BoxFit.cover, cacheWidth: 200),
+                                  : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(referencePhoto.path)), fit: BoxFit.cover, cacheWidth: 200),
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -446,3 +446,4 @@ class _SourceTile extends StatelessWidget {
     );
   }
 }
+

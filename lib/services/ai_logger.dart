@@ -3,6 +3,10 @@ class AiLogEntry {
   final String purpose;
   final String model;
   final int durationMs;
+  final int? preprocessMs;
+  final int? cacheMs;
+  final int? fallbackMs;
+  final int? firstTokenMs;
   final String outcome;
 
   AiLogEntry({
@@ -10,6 +14,10 @@ class AiLogEntry {
     required this.purpose,
     required this.model,
     required this.durationMs,
+    this.preprocessMs,
+    this.cacheMs,
+    this.fallbackMs,
+    this.firstTokenMs,
     required this.outcome,
   });
 }
@@ -21,6 +29,10 @@ class AiLogger {
     required String purpose,
     required String model,
     required int durationMs,
+    int? preprocessMs,
+    int? cacheMs,
+    int? fallbackMs,
+    int? firstTokenMs,
     required String outcome,
   }) {
     logs.insert(
@@ -30,6 +42,10 @@ class AiLogger {
         purpose: purpose,
         model: model,
         durationMs: durationMs,
+        preprocessMs: preprocessMs,
+        cacheMs: cacheMs,
+        fallbackMs: fallbackMs,
+        firstTokenMs: firstTokenMs,
         outcome: outcome,
       ),
     );

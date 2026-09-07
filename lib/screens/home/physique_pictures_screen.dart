@@ -8,7 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
-import '../../../services/haptics.dart';
+import '../../services/haptics.dart';
 import 'widgets/add_progress_photo_sheet.dart';
 import '../../providers/app_providers.dart';
 import '../../repositories/media_repository.dart';
@@ -340,7 +340,7 @@ class _PhysiquePicturesScreenState
                                                       ),
                                                 )
                                               : Image.file(
-                                                  File(photoPath),
+                                                  File(ref.read(mediaRepoProvider).getAbsolutePath(photoPath)),
                                                   fit: BoxFit.cover,
                                                   cacheWidth: 400,
                                                   errorBuilder: (_, e, s) =>
@@ -541,3 +541,4 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
+

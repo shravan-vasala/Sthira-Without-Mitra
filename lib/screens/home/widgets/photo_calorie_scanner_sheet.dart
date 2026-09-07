@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:async';
-import '../../../../services/ai_client.dart';
+import '../../../services/ai_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../services/haptics.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../theme/app_colors.dart';
@@ -414,10 +414,49 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _removeItem(int index) {
+    final removedItem = _items[index];
+    final removedBase = _baseItems[index];
+    final removedScale = _itemScales[index];
+
     setState(() {
       _items.removeAt(index);
+      
+      for (int i = index; i < _items.length; i++) {
+        _baseItems[i] = _baseItems[i + 1]!;
+        _itemScales[i] = _itemScales[i + 1]!;
+      }
+      _baseItems.remove(_items.length);
+      _itemScales.remove(_items.length);
+
       _recalculateTotals();
     });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${removedItem.name} removed'),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'Undo',
+          textColor: context.colors.primary,
+          onPressed: () {
+            setState(() {
+              _items.insert(index, removedItem);
+              
+              for (int i = _items.length - 1; i > index; i--) {
+                _baseItems[i] = _baseItems[i - 1]!;
+                _itemScales[i] = _itemScales[i - 1]!;
+              }
+              if (removedBase != null) _baseItems[index] = removedBase;
+              if (removedScale != null) _itemScales[index] = removedScale;
+
+              _recalculateTotals();
+            });
+          },
+        ),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   void _editItem(int index) {
@@ -1295,9 +1334,13 @@ class _PhotoCalorieScannerSheetState
                           const SizedBox(width: 16),
                           Expanded(
                             child: Text(
-                              _elapsedSeconds > 15
-                                  ? 'Still working — big plates take a moment...'
-                                  : 'AI is analyzing your meal...',
+                              _elapsedSeconds < 2
+                                  ? 'Preparing image...'
+                                  : _elapsedSeconds < 6
+                                      ? 'AI is analyzing your meal...'
+                                      : _elapsedSeconds < 12
+                                          ? 'Looking up nutrition details...'
+                                          : 'Still working — big plates take a moment...',
                               style: TextStyle(
                                 color: context.colors.textDark,
                                 fontWeight: FontWeight.w700,

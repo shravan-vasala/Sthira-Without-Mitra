@@ -61,6 +61,12 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
         return;
       }
       await ref.read(profileProvider.notifier).updateGeminiKey(key);
+      if (mounted) {
+        setState(() => _isVerifying = false);
+      }
+    } else {
+      // Allow clearing the key if it was removed by the user
+      await ref.read(profileProvider.notifier).updateGeminiKey('');
     }
     
     final current = ref.read(profileProvider);

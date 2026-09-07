@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/layout_insets.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
 /// Full-width primary save CTA (52dp, flat primary).
-class PrimaryButton extends StatelessWidget {
+class PrimaryButton extends StatefulWidget {
   const PrimaryButton({
     super.key,
     required this.label,
@@ -20,8 +22,15 @@ class PrimaryButton extends StatelessWidget {
   final bool isLoading;
 
   @override
+  State<PrimaryButton> createState() => _PrimaryButtonState();
+}
+
+class _PrimaryButtonState extends State<PrimaryButton> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final child = isLoading
+    final child = widget.isLoading
         ? SizedBox(
             width: 22,
             height: 22,
@@ -30,15 +39,15 @@ class PrimaryButton extends StatelessWidget {
               color: context.colors.onPrimary,
             ),
           )
-        : (icon != null
+        : (widget.icon != null
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 20, color: iconColor ?? context.colors.onPrimary),
+                    Icon(widget.icon, size: 20, color: widget.iconColor ?? context.colors.onPrimary),
                     const SizedBox(width: 8),
                     Text(
-                      label,
+                      widget.label,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -48,7 +57,7 @@ class PrimaryButton extends StatelessWidget {
                   ],
                 )
               : Text(
-                  label,
+                  widget.label,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -56,11 +65,11 @@ class PrimaryButton extends StatelessWidget {
                   ),
                 ));
 
-    return SizedBox(
+    final btn = SizedBox(
       width: double.infinity,
       height: kPrimaryButtonHeight,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: widget.isLoading ? null : widget.onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: context.colors.primary,
           foregroundColor: context.colors.onPrimary,
@@ -70,15 +79,30 @@ class PrimaryButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kButtonRadius),
           ),
+          splashFactory: NoSplash.splashFactory, // Handled by scale
         ),
         child: child,
+      ),
+    );
+
+    return GestureDetector(
+      onTapDown: widget.isLoading || widget.onPressed == null ? null : (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeInOut,
+        child: widget.isLoading
+            ? btn.animate(onPlay: (c) => c.repeat()).shimmer(duration: 1500.ms, color: Colors.white.withValues(alpha: 0.2))
+            : btn,
       ),
     );
   }
 }
 
 /// Compact row action (Photo / Describe / Adjust) — 40dp min height.
-class CompactButton extends StatelessWidget {
+class CompactButton extends StatefulWidget {
   const CompactButton({
     super.key,
     required this.label,
@@ -93,56 +117,77 @@ class CompactButton extends StatelessWidget {
   final bool filled;
 
   @override
+  State<CompactButton> createState() => _CompactButtonState();
+}
+
+class _CompactButtonState extends State<CompactButton> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final textStyle = const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
     );
 
-    final child = icon != null
+    final child = widget.icon != null
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16),
+              Icon(widget.icon, size: 16),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  label,
+                  widget.label,
                   overflow: TextOverflow.ellipsis,
                   style: textStyle,
                 ),
               ),
             ],
           )
-        : Text(label, style: textStyle);
+        : Text(widget.label, style: textStyle);
 
-    return SizedBox(
+    final btn = SizedBox(
       height: kCompactButtonHeight,
       width: double.infinity,
-      child: filled
+      child: widget.filled
           ? ElevatedButton(
-              onPressed: onPressed,
+              onPressed: widget.onPressed,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 textStyle: textStyle,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(kOutlinedButtonRadius),
                 ),
+                splashFactory: NoSplash.splashFactory,
               ),
               child: child,
             )
           : OutlinedButton(
-              onPressed: onPressed,
+              onPressed: widget.onPressed,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 textStyle: textStyle,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(kOutlinedButtonRadius),
                 ),
+                splashFactory: NoSplash.splashFactory,
               ),
               child: child,
             ),
+    );
+
+    return GestureDetector(
+      onTapDown: widget.onPressed == null ? null : (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeInOut,
+        child: btn,
+      ),
     );
   }
 }

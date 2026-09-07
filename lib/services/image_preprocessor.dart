@@ -1,16 +1,25 @@
 import 'dart:isolate';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 
 class ImagePreprocessor {
+  static final Map<String, (Uint8List, String)> _cache = {};
+
   /// Downscales an image so the longest side is 1280px and encodes as JPEG.
   /// Uses a background isolate. Returns (bytes, mimeType).
   static Future<(Uint8List, String)> processImage(
     Uint8List bytes,
     String fallbackMimeType,
   ) async {
+    final hash = sha256.convert(bytes).toString();
+    if (_cache.containsKey(hash)) {
+      return _cache[hash]!;
+    }
+
     try {
-      return await Isolate.run(() {
+      final result = await Isolate.run(() {
         final image = img.decodeImage(bytes);
         if (image == null) throw Exception('Cannot decode image');
 
@@ -33,6 +42,8 @@ class ImagePreprocessor {
           return (Uint8List.fromList(encoded), 'image/jpeg');
         }
       });
+      _cache[hash] = result;
+      return result;
     } catch (e) {
       debugPrint('Image processing failed, returning original bytes: $e');
       return (bytes, fallbackMimeType);

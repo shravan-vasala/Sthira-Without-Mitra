@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../services/haptics.dart';
+import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -106,7 +106,7 @@ class MealsCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Today's Meals",
+                          isToday ? "Today's Meals" : (isFuture ? "Upcoming Meals" : "Meals"),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -184,7 +184,19 @@ class MealsCard extends ConsumerWidget {
                     ),
               ],
             ),
-
+            const SizedBox(height: 12),
+            Text(
+              isFuture || isToday
+                  ? (isOverTarget
+                      ? '${completedCal - totalCal} kcal above target'
+                      : '${totalCal - completedCal} kcal remaining · ${(profile.targetProteinG - dailyLog.totalProtein).clamp(0, 999).toStringAsFixed(0)}g protein to target')
+                  : 'Below target by ${totalCal - completedCal > 0 ? (totalCal - completedCal).toString() : '0'} kcal',
+              style: TextStyle(
+                fontFamily: 'General Sans',
+                fontSize: 12,
+                color: context.colors.textMedium,
+              ),
+            ),
             const SizedBox(height: 16),
           ],
         ),

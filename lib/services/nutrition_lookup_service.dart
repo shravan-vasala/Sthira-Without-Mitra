@@ -40,6 +40,9 @@ class NutritionLookupService {
       if (userFood != null) {
         return {
           'name': userFood.originalName,
+          'is_per_100g': userFood.isPer100g,
+          'serving_grams': userFood.servingGrams,
+          'provenance': userFood.provenance,
           'per100g': {
             'kcal': userFood.kcal,
             'protein_g': userFood.proteinG,

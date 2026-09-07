@@ -124,9 +124,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       final sectionIndex = sectionParam != null
                           ? int.tryParse(sectionParam)
                           : null;
+                      final jumpToParam = state.uri.queryParameters['jumpTo'];
+                      final jumpToIndex = jumpToParam != null
+                          ? int.tryParse(jumpToParam)
+                          : null;
                       return WorkoutScreen(
                         dayId: dayId,
-                        sectionIndex: sectionIndex,
+                        sectionIndex: jumpToIndex ?? sectionIndex,
                       );
                     },
                   ),

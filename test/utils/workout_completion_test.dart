@@ -5,7 +5,7 @@ import 'package:trufit_bodamma/utils/workout_completion.dart';
 
 void main() {
   final trainingDay = WorkoutDay(
-    dayId: 'day_1',
+    dayId: 'monday',
     label: 'Monday',
     sections: [
       WorkoutSection(
@@ -121,17 +121,17 @@ void main() {
     final plan = WorkoutPlan(
       planName: 'Test',
       days: [
-        WorkoutDay(dayId: 'day_1', sections: trainingDay.sections),
-        WorkoutDay(dayId: 'day_2', sections: trainingDay.sections),
-        WorkoutDay(dayId: 'day_3', sections: trainingDay.sections),
-        WorkoutDay(dayId: 'day_4', sections: trainingDay.sections),
-        WorkoutDay(dayId: 'day_5', sections: trainingDay.sections),
-        WorkoutDay(dayId: 'day_6', sections: trainingDay.sections),
+        WorkoutDay(dayId: 'monday', sections: trainingDay.sections),
+        WorkoutDay(dayId: 'tuesday', sections: trainingDay.sections),
+        WorkoutDay(dayId: 'wednesday', sections: trainingDay.sections),
+        WorkoutDay(dayId: 'thursday', sections: trainingDay.sections),
+        WorkoutDay(dayId: 'friday', sections: trainingDay.sections),
+        WorkoutDay(dayId: 'saturday', sections: trainingDay.sections),
         restDay,
       ],
     );
 
-    expect(WorkoutCompletion.resolveWorkoutDay(plan, monday).dayId, 'day_1');
+    expect(WorkoutCompletion.resolveWorkoutDay(plan, monday).dayId, 'monday');
     expect(
       WorkoutCompletion.isRestDay(
         WorkoutCompletion.resolveWorkoutDay(plan, sunday),

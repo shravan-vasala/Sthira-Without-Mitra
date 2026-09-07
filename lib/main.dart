@@ -98,6 +98,7 @@ Future<void> main() async {
     // Initialize all repositories
     final workoutRepo = WorkoutRepository();
     final mealRepo = MealRepository();
+    final photoMealRepo = PhotoMealRepository();
     final dailyLogRepo = DailyLogRepository();
     final habitRepo = HabitRepository();
     final bodyStatsRepo = BodyStatsRepository();
@@ -112,6 +113,7 @@ Future<void> main() async {
     await Future.wait([
       workoutRepo.init(isar),
       mealRepo.init(isar),
+      photoMealRepo.init(isar),
       dailyLogRepo.init(isar),
       habitRepo.init(isar),
       bodyStatsRepo.init(isar),
@@ -165,6 +167,7 @@ Future<void> main() async {
         overrides: [
           workoutRepoProvider.overrideWithValue(workoutRepo),
           mealRepoProvider.overrideWithValue(mealRepo),
+          photoMealRepoProvider.overrideWithValue(photoMealRepo),
           dailyLogRepoProvider.overrideWithValue(dailyLogRepo),
           habitRepoProvider.overrideWithValue(habitRepo),
           bodyStatsRepoProvider.overrideWithValue(bodyStatsRepo),

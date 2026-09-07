@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../../../services/haptics.dart';
+import '../../../services/haptics.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
@@ -34,6 +34,7 @@ class SharedChartCard extends StatelessWidget {
     this.emptyMessage = 'No data available for this period',
     this.targetValue,
     this.onPointLongPress,
+    this.onPointTap,
     this.expandChart = false,
   });
 
@@ -54,6 +55,7 @@ class SharedChartCard extends StatelessWidget {
   final String emptyMessage;
   final double? targetValue;
   final void Function(DateTime date, double value)? onPointLongPress;
+  final void Function(DateTime date, double value)? onPointTap;
   final bool expandChart;
 
   bool get _isCount => isSteps || isCalories || isProtein;
@@ -494,6 +496,21 @@ class SharedChartCard extends StatelessWidget {
         barGroups: groups,
         barTouchData: BarTouchData(
           enabled: true,
+          touchCallback: (FlTouchEvent event, BarTouchResponse? response) {
+            if (response != null && response.spot != null) {
+              if (event is FlTapUpEvent || event is FlPanStartEvent) {
+                Haptics.tap();
+              }
+              if (event is FlTapUpEvent && onPointTap != null) {
+                final date = startDate.add(Duration(days: response.spot!.touchedBarGroup.x));
+                onPointTap!(date, response.spot!.touchedRodData.toY);
+              }
+              if (event is FlLongPressEnd && onPointLongPress != null) {
+                final date = startDate.add(Duration(days: response.spot!.touchedBarGroup.x));
+                onPointLongPress!(date, response.spot!.touchedRodData.toY);
+              }
+            }
+          },
           touchTooltipData: BarTouchTooltipData(
             getTooltipColor: (_) => context.colors.textDark,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
@@ -652,6 +669,11 @@ class SharedChartCard extends StatelessWidget {
                 response.lineBarSpots!.isNotEmpty) {
               if (event is FlTapUpEvent || event is FlPanStartEvent) {
                 Haptics.tap();
+              }
+              if (event is FlTapUpEvent && onPointTap != null) {
+                final spot = response.lineBarSpots!.first;
+                final date = startDate.add(Duration(days: spot.x.toInt()));
+                onPointTap!(date, spot.y);
               }
               if (event is FlLongPressEnd && onPointLongPress != null) {
                 final spot = response.lineBarSpots!.first;

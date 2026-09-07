@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/habit.dart';
+import '../../utils/target_calculator.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'widgets/sthira_aura_background.dart';
 
@@ -34,6 +35,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _useKg = true;
 
   double _targetCalories = 1250;
+  TargetMacros? _targetMacros;
   final List<String> _selectedHabitIds = ['sleep', 'walk', 'water'];
 
   @override
@@ -115,7 +117,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (w != null) {
         final double wKg = _useKg ? w : w / 2.20462;
         if (wKg < 30 || wKg > 200) return false;
-        finalWeight = w;
+        finalWeight = wKg;
       } else {
         return false;
       }
@@ -137,7 +139,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _saveGoals() {
     final current = ref.read(profileProvider);
     ref.read(profileProvider.notifier).updateProfile(
-      current.copyWith(targetCalories: _targetCalories.round()),
+      current.copyWith(
+        targetCalories: _targetCalories.round(),
+        targetProteinG: _targetMacros?.proteinG,
+        targetCarbsG: _targetMacros?.carbsG,
+        targetFatG: _targetMacros?.fatG,
+      ),
     );
     final habitRepo = ref.read(habitRepoProvider);
 
@@ -214,6 +221,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             : null,
                         selectedHabitIds: _selectedHabitIds,
                         onCaloriesChanged: (v) => _targetCalories = v,
+                        onMacrosChanged: (m) => _targetMacros = m,
                         onHabitToggled: (id, selected) {
                           HapticFeedback.selectionClick();
                           setState(() {
