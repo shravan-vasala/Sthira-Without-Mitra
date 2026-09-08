@@ -78,7 +78,7 @@ class DailyProgressGrid extends ConsumerWidget {
             iconColor: context.colors.indigo,
             subtitle: weightSubtitle,
             onTap: isFuture
-                ? () {}
+                ? null
                 : () {
                     showAppBottomSheet(
                       context: context,
@@ -310,7 +310,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
 
     return GestureDetector(
       onTap: widget.isFuture
-          ? () {}
+          ? null
           : () {
               if (_isAuth) {
                 showAppBottomSheet(
@@ -420,7 +420,8 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               ),
               const SizedBox(width: 8),
             ],
-            Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
+            if (!widget.isFuture)
+              Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
           ],
         ),
       ),
@@ -434,7 +435,7 @@ class _ProgressCard extends ConsumerWidget {
     required this.icon,
     required this.iconColor,
     required this.subtitle,
-    required this.onTap,
+    this.onTap,
     this.thumbnails,
     this.onChartTap,
   });
@@ -443,7 +444,7 @@ class _ProgressCard extends ConsumerWidget {
   final IconData icon;
   final Color iconColor;
   final String subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final List<String>? thumbnails;
   final VoidCallback? onChartTap;
 
@@ -539,7 +540,8 @@ class _ProgressCard extends ConsumerWidget {
                       ),
                     ),
                   const SizedBox(width: 8),
-                  Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
+                  if (onTap != null)
+                    Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
                 ],
               )
             else ...[
@@ -553,7 +555,8 @@ class _ProgressCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
+              if (onTap != null)
+                Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
             ]
           ],
         ),

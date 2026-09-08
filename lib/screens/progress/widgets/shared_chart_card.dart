@@ -404,7 +404,7 @@ class SharedChartCard extends StatelessWidget {
   }
 
   String _tooltipText(DateTime date, double value) {
-    final dateStr = DateFormat('dd MMM yyyy').format(date);
+    final dateStr = DateFormat('EEE, d MMM yyyy').format(date);
     final valStr = value.toStringAsFixed(_isCount ? 0 : 1);
     final unit = _unitSuffix();
     String extra = '';

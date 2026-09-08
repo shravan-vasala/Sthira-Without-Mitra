@@ -360,7 +360,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
               children: [
                 if (_hasExistingEntry) ...[
                   Expanded(
-                    child: OutlinedButton(
+                    child: TextButton(
                       onPressed: _isSaving
                           ? null
                           : () async {
@@ -379,11 +379,8 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                                 setState(() => _isSaving = false);
                               }
                             },
-                      style: OutlinedButton.styleFrom(
+                      style: TextButton.styleFrom(
                         foregroundColor: context.colors.red,
-                        side: BorderSide(
-                          color: context.colors.red.withValues(alpha: 0.5),
-                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),

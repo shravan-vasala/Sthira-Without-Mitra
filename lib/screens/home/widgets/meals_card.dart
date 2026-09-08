@@ -87,121 +87,123 @@ class MealsCard extends ConsumerWidget {
           'Meals Card. $completedMeals of $totalMeals meals logged. $completedCal of $totalCal calories consumed.',
       child: Column(
         children: [
-          SurfaceCard(
-            margin: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Haptics.tap();
-                context.go('/home/meals');
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+          GestureDetector(
+            onTap: () {
+              Haptics.tap();
+              context.go('/home/meals');
+            },
+            behavior: HitTestBehavior.opaque,
+            child: SurfaceCard(
+              margin: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isToday ? "Today's Meals" : (isFuture ? "Upcoming Meals" : "Meals"),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.textDark,
-                          ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isToday ? "Today's Meals" : (isFuture ? "Upcoming Meals" : "Meals"),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: context.colors.textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              planName,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: context.colors.textMedium,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          planName,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: context.colors.textMedium,
-                          ),
-                        ),
-                      ],
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: context.colors.textLight,
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: context.colors.primary.withValues(alpha: 0.12),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isOverTarget ? context.colors.orange : context.colors.green,
+                      ),
+                      minHeight: 6,
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: context.colors.textLight,
-                    size: 16,
+                  const SizedBox(height: 10),
+                  TweenAnimationBuilder<int>(
+                    tween: IntTween(begin: 0, end: completedCal),
+                    duration: const Duration(milliseconds: 1400),
+                    curve: Curves.easeOutQuart,
+                    builder: (context, val, child) {
+                      return Text(
+                        '$completedMeals/$totalMeals meals  ·  $val/$totalCal kcal',
+                        style: AppTheme.numeric(
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: context.colors.textMedium,
+                              ) ??
+                              const TextStyle(),
+                        ),
+                      );
+                    }
                   ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _MacroPill(
+                            label: 'P',
+                            value: dailyLog.totalProtein,
+                            color: context.colors.green,
+                          ),
+                      const SizedBox(width: 6),
+                      _MacroPill(
+                            label: 'C',
+                            value: dailyLog.totalCarbs,
+                            color: context.colors.orange,
+                          ),
+                      const SizedBox(width: 6),
+                      _MacroPill(
+                            label: 'F',
+                            value: dailyLog.totalFat,
+                            color: context.colors.primary,
+                          ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    isFuture || isToday
+                        ? (isOverTarget
+                            ? '${completedCal - totalCal} kcal above target'
+                            : '${totalCal - completedCal} kcal remaining · ${(profile.targetProteinG - dailyLog.totalProtein).clamp(0, 999).toStringAsFixed(0)}g protein to target')
+                        : (isOverTarget
+                            ? '${completedCal - totalCal} kcal above target'
+                            : 'Below target by ${totalCal - completedCal} kcal'),
+                    style: TextStyle(
+                      fontFamily: 'General Sans',
+                      fontSize: 12,
+                      color: context.colors.textMedium,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: context.colors.primary.withValues(alpha: 0.12),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isOverTarget ? context.colors.orange : context.colors.green,
-                ),
-                minHeight: 6,
-              ),
-            ),
-            const SizedBox(height: 10),
-            TweenAnimationBuilder<int>(
-              tween: IntTween(begin: 0, end: completedCal),
-              duration: const Duration(milliseconds: 1400),
-              curve: Curves.easeOutQuart,
-              builder: (context, val, child) {
-                return Text(
-                  '$completedMeals/$totalMeals meals  ·  $val/$totalCal kcal',
-                  style: AppTheme.numeric(
-                    Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textMedium,
-                        ) ??
-                        const TextStyle(),
-                  ),
-                );
-              }
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _MacroPill(
-                      label: 'P',
-                      value: dailyLog.totalProtein,
-                      color: context.colors.green,
-                    ),
-                const SizedBox(width: 6),
-                _MacroPill(
-                      label: 'C',
-                      value: dailyLog.totalCarbs,
-                      color: context.colors.orange,
-                    ),
-                const SizedBox(width: 6),
-                _MacroPill(
-                      label: 'F',
-                      value: dailyLog.totalFat,
-                      color: context.colors.primary,
-                    ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              isFuture || isToday
-                  ? (isOverTarget
-                      ? '${completedCal - totalCal} kcal above target'
-                      : '${totalCal - completedCal} kcal remaining · ${(profile.targetProteinG - dailyLog.totalProtein).clamp(0, 999).toStringAsFixed(0)}g protein to target')
-                  : 'Below target by ${totalCal - completedCal > 0 ? (totalCal - completedCal).toString() : '0'} kcal',
-              style: TextStyle(
-                fontFamily: 'General Sans',
-                fontSize: 12,
-                color: context.colors.textMedium,
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+          ),
         ],
       ),
     );

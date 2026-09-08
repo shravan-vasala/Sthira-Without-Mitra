@@ -412,6 +412,15 @@ class _HabitItem extends ConsumerWidget {
 
     if (habit.type == HabitType.checkbox) {
       ref.read(habitCompletionsProvider.notifier).toggle(habit.id);
+      if (!isCompleted) {
+        _showUndo(context, 'Completed ${habit.name}', () {
+          ref.read(habitCompletionsProvider.notifier).toggle(habit.id);
+        });
+      } else {
+        _showUndo(context, 'Marked ${habit.name} incomplete', () {
+          ref.read(habitCompletionsProvider.notifier).toggle(habit.id);
+        });
+      }
       return;
     }
 
@@ -432,19 +441,28 @@ class _HabitItem extends ConsumerWidget {
     }
 
     String? newOverride;
+    String message;
     if (isCompleted) {
       if (override == 'done') {
         newOverride = null;
       } else {
         newOverride = 'notDone';
       }
+      message = 'Marked ${habit.name} incomplete';
     } else {
       newOverride = 'done';
+      message = 'Completed ${habit.name}';
     }
 
     ref
         .read(habitCompletionsProvider.notifier)
         .setOverride(habit.id, newOverride);
+        
+    _showUndo(context, message, () {
+      ref
+          .read(habitCompletionsProvider.notifier)
+          .setOverride(habit.id, override);
+    });
   }
 
   void _handleLongPress(BuildContext context, WidgetRef ref) {

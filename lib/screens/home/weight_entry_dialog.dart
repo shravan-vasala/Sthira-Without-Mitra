@@ -17,6 +17,7 @@ class WeightEntryDialog extends ConsumerStatefulWidget {
 
 class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
   final _controller = TextEditingController();
+  String? _errorText;
 
   @override
   void initState() {
@@ -55,6 +56,9 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     final selectedDateStr = ref.watch(dateStringProvider);
     final selectedDate = DateTime.parse(selectedDateStr);
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
+    
+    final profile = ref.watch(profileProvider);
+    final unit = profile.useKg ? 'kg' : 'lbs';
 
     return AppSheet(
       title: 'Log Body Weight',
@@ -73,6 +77,11 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             ),
             textAlign: TextAlign.center,
             cursorColor: context.colors.primary,
+            onChanged: (_) {
+              if (_errorText != null) {
+                setState(() => _errorText = null);
+              }
+            },
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.inputFill,
@@ -94,7 +103,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
                 fontWeight: FontWeight.w800,
                 color: context.colors.textLight,
               ),
-              suffixText: 'kg',
+              suffixText: unit,
               suffixStyle: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -106,15 +115,32 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               ),
             ),
           ),
+          if (_errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                _errorText!,
+                style: TextStyle(
+                  color: context.colors.red,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Save Weight',
             onPressed: () {
               final weight = double.tryParse(_controller.text);
-              if (weight != null && weight > 0) {
+              if (weight != null && weight > 0 && weight < 500) {
                 Haptics.toggle();
                 ref.read(dailyLogProvider.notifier).updateWeight(weight);
                 Navigator.of(context).pop();
+              } else {
+                Haptics.error();
+                setState(() {
+                  _errorText = 'Please enter a valid weight.';
+                });
               }
             },
           ),

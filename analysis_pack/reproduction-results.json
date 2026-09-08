@@ -1,0 +1,92 @@
+{
+  "method": "Python reproduction of inspected Dart arithmetic and ASCII parser; not app execution or clinical ground truth",
+  "table_rows": 119,
+  "estimated_rows": 119,
+  "rows_with_explicit_basis_flag": 0,
+  "cases": [
+    {
+      "input": "1 bowl white rice",
+      "matched": "White Rice",
+      "estimated_grams": 150.0,
+      "current_kcal": 130,
+      "table_kcal_at_returned_grams": 195.0,
+      "confidence": "high"
+    },
+    {
+      "input": "1 bowl chicken biryani",
+      "matched": "Chicken Biryani",
+      "estimated_grams": 300.0,
+      "current_kcal": 180,
+      "table_kcal_at_returned_grams": 540.0,
+      "confidence": "high"
+    },
+    {
+      "input": "2 chapatis",
+      "matched": "Chapati",
+      "estimated_grams": 100.0,
+      "current_kcal": 570,
+      "table_kcal_at_returned_grams": 300.0,
+      "confidence": "high"
+    },
+    {
+      "input": "2 idlis",
+      "matched": "Idli",
+      "estimated_grams": 200.0,
+      "current_kcal": 300,
+      "table_kcal_at_returned_grams": 300.0,
+      "confidence": "high"
+    },
+    {
+      "input": "200 g white rice",
+      "matched": "White Rice",
+      "estimated_grams": 30000.0,
+      "current_kcal": 25100,
+      "table_kcal_at_returned_grams": 39000.0,
+      "confidence": "high"
+    },
+    {
+      "input": "1 tsp sambar",
+      "matched": "Sambar",
+      "estimated_grams": 150.0,
+      "current_kcal": 60,
+      "table_kcal_at_returned_grams": 90.0,
+      "confidence": "high"
+    },
+    {
+      "input": "1 cup sambar",
+      "matched": "Sambar",
+      "estimated_grams": 150.0,
+      "current_kcal": 60,
+      "table_kcal_at_returned_grams": 90.0,
+      "confidence": "high"
+    },
+    {
+      "input": "1 white rice with butter",
+      "matched": "White Rice",
+      "estimated_grams": 150.0,
+      "current_kcal": 130,
+      "table_kcal_at_returned_grams": 195.0,
+      "confidence": "high"
+    },
+    {
+      "input": "1 dosa with cheese",
+      "matched": null,
+      "path": "AI required"
+    },
+    {
+      "input": "1 bowl sambar",
+      "matched": "Sambar",
+      "estimated_grams": 150.0,
+      "current_kcal": 60,
+      "table_kcal_at_returned_grams": 90.0,
+      "confidence": "high"
+    }
+  ],
+  "additional_arithmetic_checks": {
+    "two_idlis_using_prompt_40g_each_and_table_150kcal_per100g": 120.0,
+    "saved_300kcal_per_150g_serving_at_150g_photo_current": 450.0,
+    "saved_300kcal_per_150g_serving_at_150g_correct": 300,
+    "fallback_individual_clamps_allow_total_macro_g_per100g": 300,
+    "fallback_energy_for_that_invalid_combination": 1700
+  }
+}

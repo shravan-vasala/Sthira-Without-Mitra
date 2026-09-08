@@ -20,6 +20,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
   TimeOfDay? _bedtime;
   TimeOfDay? _waketime;
   bool _hasExistingEntry = false;
+  String? _errorText;
 
   @override
   void initState() {
@@ -99,6 +100,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
     );
     final isFuture = selectedDate.isAfter(today);
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
+    final nightBeforeFormatted = DateFormat('EEE, d MMM').format(selectedDate.subtract(const Duration(days: 1)));
 
     return AppSheet(
       child: Column(
@@ -144,7 +146,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Enter your sleep for $dateFormatted',
+            'Logging sleep for the night of $nightBeforeFormatted\n(Waking up on $dateFormatted)',
             style: TextStyle(fontSize: 14, color: context.colors.textMedium),
           ),
           const SizedBox(height: 24),
@@ -158,6 +160,11 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
             ),
             textAlign: TextAlign.center,
             enabled: !isFuture,
+            onChanged: (_) {
+              if (_errorText != null) {
+                setState(() => _errorText = null);
+              }
+            },
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.inputFill,
@@ -187,9 +194,24 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               ),
             ),
           ),
+          if (_errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  _errorText!,
+                  style: TextStyle(
+                    color: context.colors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
           const SizedBox(height: 24),
           Text(
-            'Or calculate from times:',
+            'Or calculate automatically from times:',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -225,7 +247,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                     final sleepHours = double.tryParse(_controller.text);
                     if (sleepHours != null &&
                         sleepHours >= 0 &&
-                        sleepHours <= 16) {
+                        sleepHours <= 24) {
                       Haptics.toggle();
                       ref
                           .read(dailyLogProvider.notifier)
@@ -248,14 +270,11 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                       }
 
                       Navigator.of(context).pop();
-                    } else if (sleepHours != null && sleepHours > 16) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Please enter a value between 0 and 16 hours',
-                          ),
-                        ),
-                      );
+                    } else {
+                      Haptics.error();
+                      setState(() {
+                        _errorText = 'Please enter a value between 0 and 24 hours.';
+                      });
                     }
                   },
           ),

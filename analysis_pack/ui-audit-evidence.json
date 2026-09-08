@@ -1,0 +1,267 @@
+{
+  "method": "Static file resolution plus Python mirrors of selected source arithmetic. No Flutter app execution.",
+  "screen_files": 58,
+  "missing_relative_imports_exports_parts": [
+    {
+      "file": "lib/screens/workout/workout_screen.dart",
+      "line": 12,
+      "uri": "../../../widgets/primary_button.dart",
+      "resolved": "D:\\from\\boyd\\meal-ai-audit-20260908\\Sthira-Without-Mitra-main\\widgets\\primary_button.dart"
+    }
+  ],
+  "plate_after_protein_100_from_default": {
+    "percentages": [
+      100.0,
+      0,
+      25.0,
+      0
+    ],
+    "sum_percent": 125.0,
+    "nominal_plate_g": 500,
+    "allocated_g": 625.0
+  },
+  "target_weight_fallback_lb_preference": {
+    "stored_kg": 70,
+    "code_passes_as_kg": 31.75150366049478,
+    "correct_kg": 70
+  },
+  "contrast_solid_tokens": {
+    "dark_textDark_EFE8EA_on_primary_E29B65": 1.91,
+    "white_on_primary_E29B65": 2.31,
+    "onPrimary_2D1A25_on_primary_E29B65": 7.08
+  },
+  "scope_inventory": [
+    {
+      "file": "lib/screens/home/body_stats_screen.dart",
+      "lines": 227
+    },
+    {
+      "file": "lib/screens/home/home_screen.dart",
+      "lines": 664
+    },
+    {
+      "file": "lib/screens/home/meal_detail_screen.dart",
+      "lines": 1146
+    },
+    {
+      "file": "lib/screens/home/photo_compare_screen.dart",
+      "lines": 581
+    },
+    {
+      "file": "lib/screens/home/photo_viewer_screen.dart",
+      "lines": 290
+    },
+    {
+      "file": "lib/screens/home/physique_pictures_screen.dart",
+      "lines": 544
+    },
+    {
+      "file": "lib/screens/home/share_preview_sheet.dart",
+      "lines": 244
+    },
+    {
+      "file": "lib/screens/home/sleep_entry_dialog.dart",
+      "lines": 312
+    },
+    {
+      "file": "lib/screens/home/steps_entry_dialog.dart",
+      "lines": 88
+    },
+    {
+      "file": "lib/screens/home/water_entry_dialog.dart",
+      "lines": 456
+    },
+    {
+      "file": "lib/screens/home/weight_entry_dialog.dart",
+      "lines": 121
+    },
+    {
+      "file": "lib/screens/home/widgets/add_meal_slot_dialog.dart",
+      "lines": 191
+    },
+    {
+      "file": "lib/screens/home/widgets/add_progress_photo_sheet.dart",
+      "lines": 449
+    },
+    {
+      "file": "lib/screens/home/widgets/ai_meal_suggestion_card.dart",
+      "lines": 273
+    },
+    {
+      "file": "lib/screens/home/widgets/coach_notes_card.dart",
+      "lines": 231
+    },
+    {
+      "file": "lib/screens/home/widgets/daily_insight_card.dart",
+      "lines": 98
+    },
+    {
+      "file": "lib/screens/home/widgets/daily_progress_grid.dart",
+      "lines": 567
+    },
+    {
+      "file": "lib/screens/home/widgets/daily_score_sheet.dart",
+      "lines": 456
+    },
+    {
+      "file": "lib/screens/home/widgets/daily_share_card.dart",
+      "lines": 262
+    },
+    {
+      "file": "lib/screens/home/widgets/day_complete_sheet.dart",
+      "lines": 90
+    },
+    {
+      "file": "lib/screens/home/widgets/habits_card.dart",
+      "lines": 599
+    },
+    {
+      "file": "lib/screens/home/widgets/meals_card.dart",
+      "lines": 244
+    },
+    {
+      "file": "lib/screens/home/widgets/past_day_summary_sheet.dart",
+      "lines": 551
+    },
+    {
+      "file": "lib/screens/home/widgets/photo_calorie_scanner_sheet.dart",
+      "lines": 1819
+    },
+    {
+      "file": "lib/screens/home/widgets/sync_status_sheet.dart",
+      "lines": 295
+    },
+    {
+      "file": "lib/screens/home/widgets/timer_entry_dialog.dart",
+      "lines": 239
+    },
+    {
+      "file": "lib/screens/home/widgets/week_calendar_strip.dart",
+      "lines": 562
+    },
+    {
+      "file": "lib/screens/meals/widgets/plate_calculator_sheet.dart",
+      "lines": 257
+    },
+    {
+      "file": "lib/screens/onboarding/onboarding_screen.dart",
+      "lines": 372
+    },
+    {
+      "file": "lib/screens/onboarding/pages/about_you_page.dart",
+      "lines": 282
+    },
+    {
+      "file": "lib/screens/onboarding/pages/connect_page.dart",
+      "lines": 308
+    },
+    {
+      "file": "lib/screens/onboarding/pages/goal_selection_page.dart",
+      "lines": 237
+    },
+    {
+      "file": "lib/screens/onboarding/pages/welcome_page.dart",
+      "lines": 450
+    },
+    {
+      "file": "lib/screens/onboarding/pages/your_plan_page.dart",
+      "lines": 365
+    },
+    {
+      "file": "lib/screens/onboarding/widgets/sthira_aura_background.dart",
+      "lines": 87
+    },
+    {
+      "file": "lib/screens/profile/backup_restore_screen.dart",
+      "lines": 664
+    },
+    {
+      "file": "lib/screens/profile/manage_habits_screen.dart",
+      "lines": 624
+    },
+    {
+      "file": "lib/screens/profile/manage_plans_screen.dart",
+      "lines": 602
+    },
+    {
+      "file": "lib/screens/profile/profile_screen.dart",
+      "lines": 1831
+    },
+    {
+      "file": "lib/screens/profile/reminders_screen.dart",
+      "lines": 394
+    },
+    {
+      "file": "lib/screens/profile/widgets/journey_stats_strip.dart",
+      "lines": 183
+    },
+    {
+      "file": "lib/screens/profile/widgets/trophy_room_card.dart",
+      "lines": 336
+    },
+    {
+      "file": "lib/screens/progress/progress_screen.dart",
+      "lines": 630
+    },
+    {
+      "file": "lib/screens/progress/weekly_summary_screen.dart",
+      "lines": 963
+    },
+    {
+      "file": "lib/screens/progress/widgets/activity_heatmap.dart",
+      "lines": 374
+    },
+    {
+      "file": "lib/screens/progress/widgets/insights_card.dart",
+      "lines": 139
+    },
+    {
+      "file": "lib/screens/progress/widgets/metric_overview_card.dart",
+      "lines": 234
+    },
+    {
+      "file": "lib/screens/progress/widgets/shared_chart_card.dart",
+      "lines": 706
+    },
+    {
+      "file": "lib/screens/progress/yearly_activity_screen.dart",
+      "lines": 71
+    },
+    {
+      "file": "lib/screens/social/connect_screen.dart",
+      "lines": 302
+    },
+    {
+      "file": "lib/screens/social/social_feed_screen.dart",
+      "lines": 713
+    },
+    {
+      "file": "lib/screens/social/widgets/friend_status_card.dart",
+      "lines": 382
+    },
+    {
+      "file": "lib/screens/workout/exercise_progress_screen.dart",
+      "lines": 334
+    },
+    {
+      "file": "lib/screens/workout/log_data_dialog.dart",
+      "lines": 389
+    },
+    {
+      "file": "lib/screens/workout/widgets/exercise_card.dart",
+      "lines": 474
+    },
+    {
+      "file": "lib/screens/workout/widgets/rest_timer_label.dart",
+      "lines": 81
+    },
+    {
+      "file": "lib/screens/workout/workout_screen.dart",
+      "lines": 747
+    },
+    {
+      "file": "lib/screens/workout/youtube_player_screen.dart",
+      "lines": 198
+    }
+  ]
+}

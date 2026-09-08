@@ -50,13 +50,26 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(YourPlanPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.heightCm != oldWidget.heightCm || widget.weightKg != oldWidget.weightKg) {
+      _updateMacroPreview();
+      // Only auto-suggest if user hasn't explicitly changed calories from default 1250, 
+      // or if we want to immediately reflect new suggestions
+      if (widget.initialCalories == _currentCalories) {
+        _suggestMacros();
+      }
+    }
+  }
+
   void _updateMacroPreview() {
     if (widget.weightKg != null) {
       _macroPreview = TargetCalculator.calculate(
         heightCm: widget.heightCm,
         weightKg: widget.weightKg!,
-        age: 30, // Default assumption since not asked
-        gender: 'M',
+        age: 29, // Default assumption per user request (sister)
+        gender: 'F',
         goal: 'Maintain',
         activityLevel: 'Sedentary',
       );
@@ -150,21 +163,14 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
             1,
             Column(
               children: [
-                TweenAnimationBuilder<int>(
-                  tween: IntTween(begin: 0, end: _currentCalories.round()),
-                  duration: const Duration(milliseconds: 1200),
-                  curve: Curves.easeOutExpo,
-                  builder: (context, val, child) {
-                    return Text(
-                      '$val kcal',
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontSize: 40,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.primary,
-                      ),
-                    );
-                  },
+                Text(
+                  '${_currentCalories.round()} kcal',
+                  style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
+                    fontSize: 40,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.primary,
+                  ),
                 ),
                 if (_macroPreview != null)
                   Padding(
@@ -284,21 +290,14 @@ class _MacroChip extends StatelessWidget {
         color: context.colors.primary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: TweenAnimationBuilder<int>(
-        tween: IntTween(begin: 0, end: value),
-        duration: const Duration(milliseconds: 1000),
-        curve: Curves.easeOutExpo,
-        builder: (context, val, child) {
-          return Text(
-            '$label ${val}g',
-            style: TextStyle(
-              fontFamily: 'General Sans',
-              color: context.colors.primary,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
-          );
-        },
+      child: Text(
+        '$label ${value}g',
+        style: TextStyle(
+          fontFamily: 'General Sans',
+          color: context.colors.primary,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+        ),
       ),
     );
   }

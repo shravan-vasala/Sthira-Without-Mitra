@@ -69,8 +69,8 @@ class UserProfile {
     this.activeMealPlan,
     this.primaryGoal,
     this.currentWeight,
-    this.age,
-    this.gender,
+    this.age = 29,
+    this.gender = 'F',
     List<Map<String, dynamic>>? customHabits,
     List<Map<String, dynamic>>? customMealSlots,
     this.geminiApiKey,
@@ -154,8 +154,8 @@ class UserProfile {
       activeMealPlan: json['activeMealPlan'] as String?,
       primaryGoal: json['primaryGoal'] as String?,
       currentWeight: (json['currentWeight'] as num?)?.toDouble(),
-      age: (json['age'] as num?)?.toInt(),
-      gender: json['gender'] as String?,
+      age: (json['age'] as num?)?.toInt() ?? 29,
+      gender: json['gender'] as String? ?? 'F',
       customHabits:
           (json['customHabits'] as List?)
               ?.map((h) => Map<String, dynamic>.from(h as Map))

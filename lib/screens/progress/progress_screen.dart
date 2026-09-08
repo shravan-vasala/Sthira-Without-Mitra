@@ -28,7 +28,7 @@ enum MetricType {
   screenTime,
 }
 
-enum TimeRange { weekly, monthly, sixMonths }
+enum TimeRange { oneMonth, threeMonths, sixMonths, ytd }
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key, this.initialMetric});
@@ -41,14 +41,12 @@ class ProgressScreen extends ConsumerStatefulWidget {
 
 class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   late MetricType _selectedMetric;
-  TimeRange _selectedRange = TimeRange.monthly;
-  late DateTime _currentReferenceDate;
+  TimeRange _selectedRange = TimeRange.oneMonth;
 
   @override
   void initState() {
     super.initState();
     _selectedMetric = widget.initialMetric ?? MetricType.weight;
-    _currentReferenceDate = DateTime.now();
   }
 
   void _nextMetric() {
@@ -72,71 +70,39 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   void _handleSwipe(DragEndDetails details) {
     if (details.primaryVelocity == null) return;
     if (details.primaryVelocity! > 300) {
-      // Swiped right -> older range or wider scale? Let's cycle TimeRange:
       Haptics.tap();
       setState(() {
-        if (_selectedRange == TimeRange.sixMonths) _selectedRange = TimeRange.monthly;
-        else if (_selectedRange == TimeRange.monthly) _selectedRange = TimeRange.weekly;
-        else _selectedRange = TimeRange.sixMonths;
+        if (_selectedRange == TimeRange.ytd) _selectedRange = TimeRange.sixMonths;
+        else if (_selectedRange == TimeRange.sixMonths) _selectedRange = TimeRange.threeMonths;
+        else if (_selectedRange == TimeRange.threeMonths) _selectedRange = TimeRange.oneMonth;
+        else _selectedRange = TimeRange.ytd;
       });
     } else if (details.primaryVelocity! < -300) {
-      // Swiped left
       Haptics.tap();
       setState(() {
-        if (_selectedRange == TimeRange.weekly) _selectedRange = TimeRange.monthly;
-        else if (_selectedRange == TimeRange.monthly) _selectedRange = TimeRange.sixMonths;
-        else _selectedRange = TimeRange.weekly;
+        if (_selectedRange == TimeRange.oneMonth) _selectedRange = TimeRange.threeMonths;
+        else if (_selectedRange == TimeRange.threeMonths) _selectedRange = TimeRange.sixMonths;
+        else if (_selectedRange == TimeRange.sixMonths) _selectedRange = TimeRange.ytd;
+        else _selectedRange = TimeRange.oneMonth;
       });
     }
   }
 
   DateTime get _startDate {
-    final d = _currentReferenceDate;
+    final d = DateTime.now();
     switch (_selectedRange) {
-      case TimeRange.weekly:
-        final daysToSubtract = d.weekday - DateTime.monday;
-        return DateTime(d.year, d.month, d.day - daysToSubtract);
-      case TimeRange.monthly:
-        return DateTime(d.year, d.month, 1);
+      case TimeRange.oneMonth:
+        return DateTime(d.year, d.month - 1, d.day);
+      case TimeRange.threeMonths:
+        return DateTime(d.year, d.month - 3, d.day);
       case TimeRange.sixMonths:
-        return DateTime(d.year, d.month - 5, 1);
+        return DateTime(d.year, d.month - 6, d.day);
+      case TimeRange.ytd:
+        return DateTime(d.year, 1, 1);
     }
   }
 
-  DateTime get _endDate {
-    final d = _currentReferenceDate;
-    switch (_selectedRange) {
-      case TimeRange.weekly:
-        return _startDate.add(const Duration(days: 6));
-      case TimeRange.monthly:
-        return DateTime(d.year, d.month + 1, 0);
-      case TimeRange.sixMonths:
-        return DateTime(d.year, d.month + 1, 0);
-    }
-  }
-
-  void _shiftDate(int direction) {
-    Haptics.tap();
-    setState(() {
-      if (_selectedRange == TimeRange.weekly) {
-        _currentReferenceDate = _currentReferenceDate.add(Duration(days: 7 * direction));
-      } else if (_selectedRange == TimeRange.monthly) {
-        _currentReferenceDate = DateTime(_currentReferenceDate.year, _currentReferenceDate.month + direction, 1);
-      } else {
-        _currentReferenceDate = DateTime(_currentReferenceDate.year, _currentReferenceDate.month + (6 * direction), 1);
-      }
-    });
-  }
-
-  String get _headerText {
-    if (_selectedRange == TimeRange.weekly) {
-      return '${DateFormat('dd MMM').format(_startDate)} - ${DateFormat('dd MMM yyyy').format(_endDate)}';
-    } else if (_selectedRange == TimeRange.monthly) {
-      return DateFormat('MMMM yyyy').format(_startDate);
-    } else {
-      return '${DateFormat('MMM yyyy').format(_startDate)} - ${DateFormat('MMM yyyy').format(_endDate)}';
-    }
-  }
+  DateTime get _endDate => DateTime.now();
 
   void _openManualEntry() {
     if (_selectedMetric == MetricType.weight || _selectedMetric == MetricType.bmi) {
@@ -468,7 +434,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         // Date Pill Navigation
         Center(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             decoration: BoxDecoration(
               color: context.colors.card.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20),
@@ -476,21 +442,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onTap: () => _shiftDate(-1),
-                  child: Icon(Icons.chevron_left_rounded, color: context.colors.textMedium, size: 20),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    _headerText,
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: context.colors.textDark),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _shiftDate(1),
-                  child: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
-                ),
+                _buildRangeTab(context, '1M', TimeRange.oneMonth),
+                _buildRangeTab(context, '3M', TimeRange.threeMonths),
+                _buildRangeTab(context, '6M', TimeRange.sixMonths),
+                _buildRangeTab(context, 'YTD', TimeRange.ytd),
               ],
             ),
           ),
@@ -614,7 +569,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             return FadeTransition(opacity: animation, child: child);
           },
           child: KeyedSubtree(
-            key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}'),
+            key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}'),
             child: _buildChart(logs, mealLogs, profile.useKg, profile),
           ),
         ),
@@ -637,5 +592,32 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   String _metricLabel(MetricType metric) {
     return _metricTitle(metric);
+  }
+
+  Widget _buildRangeTab(BuildContext context, String label, TimeRange range) {
+    final isSelected = _selectedRange == range;
+    return GestureDetector(
+      onTap: () {
+        Haptics.tap();
+        setState(() => _selectedRange = range);
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? context.colors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            color: isSelected ? context.colors.onPrimary : context.colors.textMedium,
+          ),
+        ),
+      ),
+    );
   }
 }

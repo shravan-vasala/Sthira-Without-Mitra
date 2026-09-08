@@ -1,0 +1,54 @@
+{
+  "method": "Source-guarded Python decision models, not execution of Flutter, Firebase, Isar, Android, or their event ordering.",
+  "cases": [
+    {
+      "case": "denied history followed by empty reads marks backfill done",
+      "model_observed": true,
+      "required_behavior": false
+    },
+    {
+      "case": "widget ignores configured step target",
+      "model_observed": 30.0,
+      "required_behavior": 50.0
+    },
+    {
+      "case": "widget includes off-schedule habit",
+      "model_observed": 2,
+      "required_behavior": 1
+    },
+    {
+      "case": "unit toggle final assignment discards in-memory key",
+      "model_observed": null,
+      "required_behavior": "synthetic-key-B"
+    },
+    {
+      "case": "midnight replaces explicit historical selection",
+      "model_observed": "2026-09-09",
+      "required_behavior": "2026-08-20"
+    },
+    {
+      "case": "override-only habit missing from CSV iteration",
+      "model_observed": [],
+      "required_behavior": [
+        "synthetic-auto-habit"
+      ]
+    },
+    {
+      "case": "partial AI text retained on local fallback",
+      "model_observed": {
+        "text": "Partial AI.Local fallback.",
+        "isAi": false
+      },
+      "required_behavior": {
+        "text": "Local fallback.",
+        "isAi": false
+      }
+    },
+    {
+      "case": "scheduled Sunday classified as rest",
+      "model_observed": true,
+      "required_behavior": false
+    }
+  ],
+  "count": 8
+}

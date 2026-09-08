@@ -350,7 +350,7 @@ class _NavButtons extends StatelessWidget {
                     _isLastPage ? 'Start my journey' : 'Next',
                     style: TextStyle(
                       fontFamily: 'General Sans',
-                      color: canGoNext ? context.colors.textDark : Colors.white.withOpacity(0.5),
+                      color: canGoNext ? context.colors.onPrimary : Colors.white.withOpacity(0.5),
                       fontWeight: FontWeight.w800,
                       fontSize: 16,
                     ),

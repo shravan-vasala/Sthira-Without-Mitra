@@ -148,12 +148,30 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                   final estimatedHeight = 20.0 + 16.0 + 12.0 + 8.0 + (6 * (cellSize + 3.0)) + 24.0;
                   final aspectRatio = cardWidth / estimatedHeight;
                   
+                  final int monthsToShow;
+                  if (year == DateTime.now().year) {
+                    monthsToShow = DateTime.now().month;
+                  } else if (year < DateTime.now().year) {
+                    monthsToShow = 12;
+                  } else {
+                    monthsToShow = 0;
+                  }
+                  
+                  if (monthsToShow == 0) {
+                    return Center(
+                      child: Text(
+                        'No activity yet for this year.',
+                        style: TextStyle(color: context.colors.textMedium),
+                      ),
+                    );
+                  }
+
                   return GridView.builder(
                     controller: _scrollController,
                     scrollDirection: Axis.vertical,
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: 12,
+                    itemCount: monthsToShow,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,

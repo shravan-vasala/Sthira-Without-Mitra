@@ -1,0 +1,137 @@
+{
+  "method": "Read-only source guards and Python logical reproductions, not execution of Dart, Isar, Firebase rules, or native UI.",
+  "cases": 14,
+  "results": [
+    {
+      "case": "outbox ignores record owner",
+      "model_observed": [
+        "users/synthetic-B/daily_logs/2026-09-08"
+      ],
+      "required_behavior": [],
+      "explanation": "While B is signed in, A-owned queue entries must not be sent using B destinations.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "commit clears newly appended queue work",
+      "model_observed": [],
+      "required_behavior": [
+        2
+      ],
+      "explanation": "Only acknowledged IDs/revisions may be removed; item 2 arrived after the batch snapshot.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "delete followed by uncancelled upsert",
+      "model_observed": true,
+      "required_behavior": false,
+      "explanation": "A delete operation needs ordering/tombstones and cancellation of obsolete upserts.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "ordinary profile payload replaces sharing ACL",
+      "model_observed": [],
+      "required_behavior": [
+        "synthetic-friend"
+      ],
+      "explanation": "Merge preserves absent fields; an explicitly supplied empty array replaces the field.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "acceptance marker lacks authorization of acceptance transition",
+      "model_observed": true,
+      "required_behavior": false,
+      "explanation": "Boolean model of supplied rules plus client processing only. No Firebase request was made; deployment and full emulator behavior remain unverified.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "omitted nested meal slot survives merge",
+      "model_observed": [
+        "breakfast",
+        "lunch"
+      ],
+      "required_behavior": [
+        "lunch"
+      ],
+      "explanation": "Model of field merge: deleting breakfast locally while lunch remains does not explicitly delete breakfast remotely.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "empty restore payload clears database model",
+      "model_observed": {},
+      "required_behavior": {
+        "dailyLogs": [
+          {
+            "steps": 8000
+          }
+        ]
+      },
+      "explanation": "Reject unsupported/malformed payloads before destructive replacement; genuinely empty supported backups need explicit handling.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "verification accepts manifest-only archive model",
+      "model_observed": true,
+      "required_behavior": false,
+      "explanation": "Verifier does not inspect data.json although restoration requires it.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "observed zero cannot replace previous synced steps",
+      "model_observed": 1000,
+      "required_behavior": 0,
+      "explanation": "Missing observations and successfully observed zero require distinct states; preserve explicit manual precedence.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "selected weekday changes same-week habit denominator",
+      "model_observed": {
+        "1": 7,
+        "2": 0
+      },
+      "required_behavior": {
+        "1": 1,
+        "2": 1
+      },
+      "explanation": "A Monday-only habit contributes one scheduled occurrence to this complete week regardless of selected day.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "nonadjacent stored dates counted as streak",
+      "model_observed": 3,
+      "required_behavior": 1,
+      "explanation": "For an active current day, these dates form a current consecutive-day streak of one, not three.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "missing screen time grants at-most completion",
+      "model_observed": true,
+      "required_behavior": false,
+      "explanation": "No observation must not be treated as a completed daily limit.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "photo removal uses different location from save",
+      "model_observed": "/process/cwd/progress_photos/synthetic.jpg",
+      "required_behavior": "/app/documents/trufit_media/progress_photos/synthetic.jpg",
+      "explanation": "Path-only synthetic example; no actual photo was opened or deleted.",
+      "evidence_type": "source-guarded synthetic model"
+    },
+    {
+      "case": "reminder replacement removes active rest alert",
+      "model_observed": [
+        1
+      ],
+      "required_behavior": [
+        1,
+        1000
+      ],
+      "explanation": "Cancel only the reminder IDs owned by this operation; preserve active timer notification.",
+      "evidence_type": "source-guarded synthetic model"
+    }
+  ],
+  "linux_suites_replaced_by_empty_test": [
+    "test/providers/coach_note_notifier_test.dart",
+    "test/providers/daily_score_provider_test.dart",
+    "test/screens/workout/widgets/exercise_card_test.dart"
+  ]
+}

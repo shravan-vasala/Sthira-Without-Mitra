@@ -7,6 +7,7 @@ import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 
 class StepsEntryDialog extends ConsumerStatefulWidget {
+
   const StepsEntryDialog({super.key});
 
   @override
@@ -15,6 +16,7 @@ class StepsEntryDialog extends ConsumerStatefulWidget {
 
 class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
   final _controller = TextEditingController();
+  String? _errorText;
 
   @override
   void initState() {
@@ -33,9 +35,18 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedDateStr = ref.watch(dateStringProvider);
+    final selectedDate = DateTime.parse(selectedDateStr);
+    final isToday = DateTime.now().year == selectedDate.year &&
+        DateTime.now().month == selectedDate.month &&
+        DateTime.now().day == selectedDate.day;
+
+    final monthStr = const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][selectedDate.month - 1];
+    final dateFormatted = '${selectedDate.day} $monthStr';
+
     return AppSheet(
       title: 'Log Steps',
-      subtitle: 'Enter your step count for today',
+      subtitle: isToday ? 'Enter your step count for today' : 'Enter your step count for $dateFormatted',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -49,6 +60,11 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               color: context.colors.textDark,
             ),
             textAlign: TextAlign.center,
+            onChanged: (_) {
+              if (_errorText != null) {
+                setState(() => _errorText = null);
+              }
+            },
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.inputFill,
@@ -64,19 +80,48 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
                 fontWeight: FontWeight.w600,
                 color: context.colors.textMedium,
               ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
+          if (_errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                _errorText!,
+                style: TextStyle(
+                  color: context.colors.red,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Save Steps',
             onPressed: () {
               final steps = int.tryParse(_controller.text);
-              if (steps != null && steps > 0) {
+              if (steps != null && steps > 0 && steps < 100000) {
                 Haptics.toggle();
                 ref
                     .read(dailyLogProvider.notifier)
                     .updateSteps(steps, source: 'manual');
                 Navigator.of(context).pop();
+              } else {
+                Haptics.error();
+                setState(() {
+                  _errorText = 'Please enter a valid step count.';
+                });
               }
             },
           ),
