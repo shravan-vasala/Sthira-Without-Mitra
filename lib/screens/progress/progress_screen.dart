@@ -385,8 +385,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     ChartTimeFormat format;
     switch (_selectedRange) {
       case TimeRange.weekly: format = ChartTimeFormat.weekly; break;
-      case TimeRange.monthly: format = ChartTimeFormat.monthly; break;
+      case TimeRange.oneMonth:
+      case TimeRange.threeMonths: format = ChartTimeFormat.monthly; break;
       case TimeRange.sixMonths: format = ChartTimeFormat.sixMonths; break;
+      case TimeRange.ytd: format = ChartTimeFormat.allTime; break;
     }
 
     String emptyMessage = 'No ${_metricLabel(_selectedMetric).toLowerCase()} entries yet.';

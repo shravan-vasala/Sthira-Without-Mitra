@@ -33,4 +33,12 @@ class Haptics {
     if (!enabled) return;
     HapticFeedback.vibrate();
   }
+
+  static void error() {
+    if (!enabled) return;
+    HapticFeedback.vibrate();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      HapticFeedback.vibrate();
+    });
+  }
 }
