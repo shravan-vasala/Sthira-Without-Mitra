@@ -44,6 +44,12 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
     _updateMacroPreview();
   }
 
+  @override
+  void dispose() {
+    _staggerController.dispose();
+    super.dispose();
+  }
+
   void _updateMacroPreview() {
     if (widget.weightKg != null) {
       _macroPreview = TargetCalculator.calculate(

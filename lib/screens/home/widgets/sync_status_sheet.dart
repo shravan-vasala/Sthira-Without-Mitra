@@ -115,7 +115,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '\ items pending cloud sync',
+                          '$pendingCount items pending cloud sync',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,

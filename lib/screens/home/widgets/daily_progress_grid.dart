@@ -289,23 +289,22 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
       );
     }
 
-    // Determine subtitle
     String stepsSubtitle;
     String? sourceHint;
 
     if (steps != null) {
       stepsSubtitle = '$steps steps';
       if (stepsSource == 'healthConnect') {
-        sourceHint = 'Synced via Health Connect';
+        sourceHint = 'Synced';
       } else if (stepsSource == 'manual') {
-        sourceHint = 'manual';
+        sourceHint = 'Manual';
       }
     } else {
       stepsSubtitle = widget.isFuture ? 'No data' : 'Tap to log';
       if (_isAuth) {
-        sourceHint = 'Synced';
+        sourceHint = 'Connected';
       } else {
-        sourceHint = widget.isToday ? 'Health Connect or manual' : null;
+        sourceHint = widget.isToday ? 'HC/Manual' : null;
       }
     }
 
@@ -389,17 +388,17 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                           decoration: BoxDecoration(
-                            color: (sourceHint == 'Synced via Health Connect' || sourceHint == 'Synced')
+                            color: (sourceHint == 'Synced' || sourceHint == 'Connected')
                                 ? context.colors.green.withValues(alpha: 0.1)
                                 : context.colors.border,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            sourceHint == 'Health Connect or manual' ? 'HC/Manual' : sourceHint,
+                            sourceHint,
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: (sourceHint == 'Synced via Health Connect' || sourceHint == 'Synced')
+                              color: (sourceHint == 'Synced' || sourceHint == 'Connected')
                                   ? context.colors.green
                                   : context.colors.textMedium,
                             ),

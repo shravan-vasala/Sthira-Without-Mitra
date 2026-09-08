@@ -16,7 +16,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
 
   // Parse planned reps
   int reps = 0;
-  final numMatch = RegExp(r'\d+').firstMatch(exercise.repsDisplay);
+  final numMatch = RegExp(r'\d+').firstMatch(exercise.repsDisplay ?? '');
   if (numMatch != null) reps = int.parse(numMatch.group(0)!);
 
   // Build sets (copying weight from last log if needed)
@@ -42,13 +42,22 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   ref.read(exerciseLogsUpdateProvider.notifier).state++;
   WidgetUpdateService.pushWidgetState(ref);
 
-  // --- Check PR ---
+  return await checkAndSavePr(ref: ref, exerciseName: exercise.name ?? '', sets: sets);
+}
+
+Future<PrUpdateResult> checkAndSavePr({
+  required WidgetRef ref,
+  required String exerciseName,
+  required List<SetLog> sets,
+}) async {
+  final repo = ref.read(exerciseLogRepoProvider);
   final isCompletedSet = sets;
-  if (isCompletedSet.isEmpty)
+  if (isCompletedSet.isEmpty) {
     return PrUpdateResult(
       hasAnyNewPr: false,
-      newPr: ExercisePr(exerciseName: ''),
+      newPr: ExercisePr(exerciseName: exerciseName),
     );
+  }
 
   final maxWeight = isCompletedSet
       .map((s) => s.weight ?? 0.0)
@@ -64,10 +73,10 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
       .map((s) => (s.weight ?? 0.0) * (1 + ((s.reps ?? 0) / 30)))
       .reduce((a, b) => a > b ? a : b);
 
-  final currentPr = repo.getPr(exercise.name ?? '');
+  final currentPr = repo.getPr(exerciseName);
 
   bool newW = false, newR = false, newV = false, new1RM = false;
-  var updatedPr = currentPr ?? ExercisePr(exerciseName: exercise.name ?? '');
+  var updatedPr = currentPr ?? ExercisePr(exerciseName: exerciseName);
 
   if (maxWeight > updatedPr.maxWeight) {
     updatedPr = updatedPr.copyWith(maxWeight: maxWeight);
@@ -90,9 +99,6 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   if (hasAnyNewPr) {
     await repo.savePr(updatedPr);
   }
-
-  // Auto-complete workout if this is the last exercise
-  // Handled elsewhere or wait, we don't have selectedWorkoutProvider anymore in Isar.
 
   return PrUpdateResult(
     hasAnyNewPr: hasAnyNewPr,

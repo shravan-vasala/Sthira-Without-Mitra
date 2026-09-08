@@ -130,7 +130,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           : null;
                       return WorkoutScreen(
                         dayId: dayId,
-                        sectionIndex: jumpToIndex ?? sectionIndex,
+                        sectionIndex: sectionIndex,
+                        jumpToIndex: jumpToIndex,
                       );
                     },
                   ),

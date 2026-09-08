@@ -214,9 +214,15 @@ class _BadgeItem extends StatelessWidget {
                 const SizedBox(height: 32),
                 if (isUnlocked)
                   PrimaryButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(context).pop();
-                      // Share action could go here
+                      await ShareCardExporter.exportAndShareWidget(
+                        context: context,
+                        widget: _BadgeShareCard(badge: badge),
+                        fileName: 'sthira_badge_${badge.id}',
+                        text: 'I just earned the ${badge.title} badge in Sthira! 🏆',
+                        format: ShareFormat.post,
+                      );
                     },
                     icon: Icons.share_rounded,
                     label: 'Share Badge',
@@ -332,5 +338,73 @@ class _BadgeItem extends StatelessWidget {
     }
 
     return tile;
+  }
+}
+
+class _BadgeShareCard extends StatelessWidget {
+  final Badge badge;
+  const _BadgeShareCard({required this.badge});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 360,
+      height: 450,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: context.colors.primary.withValues(alpha: 0.15),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              badge.iconEmoji,
+              style: const TextStyle(fontSize: 64),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            badge.title,
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: context.colors.textDark,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              badge.description,
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.4,
+                color: context.colors.textMedium,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 40),
+          Text(
+            'Unlocked on ${DateFormat('MMMM d, yyyy').format(badge.unlockedAt ?? DateTime.now())}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+              color: context.colors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

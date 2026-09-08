@@ -245,7 +245,7 @@ void _pushProfile(Ref ref, DailyLog todayLog) {
       ? profile.photoPath
       : null;
 
-  final dailyScore = ref.read(dailyScoreProvider);
+  final dailyScore = ref.read(todayScoreProvider);
 
   final profileData = SocialProfile(
     uid: authService.uid!,

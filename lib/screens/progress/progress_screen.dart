@@ -13,6 +13,7 @@ import 'widgets/shared_chart_card.dart';
 import '../home/weight_entry_dialog.dart';
 import '../home/steps_entry_dialog.dart';
 import '../home/sleep_entry_dialog.dart';
+import '../home/body_fat_entry_dialog.dart';
 import '../../models/daily_meal_log.dart';
 import 'widgets/insights_card.dart';
 
@@ -138,8 +139,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   void _openManualEntry() {
-    if (_selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi) {
+    if (_selectedMetric == MetricType.weight || _selectedMetric == MetricType.bmi) {
       showAppBottomSheet(context: context, builder: (_) => const WeightEntryDialog());
+    } else if (_selectedMetric == MetricType.bodyFat) {
+      showAppBottomSheet(context: context, builder: (_) => const BodyFatEntryDialog());
     } else if (_selectedMetric == MetricType.steps) {
       showAppBottomSheet(context: context, builder: (_) => const StepsEntryDialog());
     } else if (_selectedMetric == MetricType.sleep) {
@@ -186,7 +189,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return result;
   }
 
-  List<ChartDataPoint> _dailyMetricSeries(List<DailyLog> logs, MetricType metric, UserProfile profile) {
+  List<ChartDataPoint> _dailyMetricSeries(List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, UserProfile profile) {
     final logsByDate = {for (var l in logs) l.date: l};
     final daysDiff = _endDate.difference(_startDate).inDays;
     final data = <ChartDataPoint>[];
@@ -212,7 +215,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           }
           break;
         case MetricType.calories:
-        case MetricType.protein: val = null; break;
+          final mLog = mealLogs.firstWhere((m) => m.date == dateStr, orElse: () => DailyMealLog(date: dateStr));
+          if (mLog.loggedSlotsCount > 0) val = mLog.totalCalories.toDouble();
+          break;
+        case MetricType.protein: 
+          final mLog = mealLogs.firstWhere((m) => m.date == dateStr, orElse: () => DailyMealLog(date: dateStr));
+          if (mLog.loggedSlotsCount > 0) val = mLog.totalProtein;
+          break;
       }
       if (val != null) {
         if (metric == MetricType.steps && val <= 0) continue;
@@ -373,8 +382,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     );
   }
 
-  Widget _buildChart(List<DailyLog> logs, bool useKg, dynamic profile) {
-    List<ChartDataPoint> data = _dailyMetricSeries(logs, _selectedMetric, profile);
+  Widget _buildChart(List<DailyLog> logs, List<DailyMealLog> mealLogs, bool useKg, dynamic profile) {
+    List<ChartDataPoint> data = _dailyMetricSeries(logs, mealLogs, _selectedMetric, profile);
     
     // We intentionally bypass downsampling (like _downsampleToWeekly) for 6 Months 
     // to preserve massive daily volatility (like a stock/Sensex graph).
@@ -535,6 +544,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final startStr = DateFormat('yyyy-MM-dd').format(_startDate);
     final endStr = DateFormat('yyyy-MM-dd').format(_endDate);
     final logs = ref.watch(dailyLogsRangeProvider((startStr, endStr)));
+    final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
     final profile = ref.watch(profileProvider);
 
     return Scaffold(
@@ -582,7 +592,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           ),
           if (_selectedMetric != MetricType.bmi &&
               _selectedMetric != MetricType.calories &&
-              _selectedMetric != MetricType.protein)
+              _selectedMetric != MetricType.protein &&
+              _selectedMetric != MetricType.screenTime)
             IconButton(
               icon: const Icon(Icons.add_rounded),
               onPressed: () {
@@ -604,7 +615,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           },
           child: KeyedSubtree(
             key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}_${_currentReferenceDate.toIso8601String()}'),
-            child: _buildChart(logs, profile.useKg, profile),
+            child: _buildChart(logs, mealLogs, profile.useKg, profile),
           ),
         ),
       ),

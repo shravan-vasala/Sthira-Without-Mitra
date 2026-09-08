@@ -9,16 +9,22 @@ import '../../models/workout_plan.dart';
 import 'widgets/exercise_card.dart';
 import 'widgets/rest_timer_label.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import '../../../widgets/primary_button.dart';
+import '../../widgets/primary_button.dart';
 import '../../providers/rest_timer_provider.dart';
 
 class WorkoutScreen extends ConsumerStatefulWidget {
-  const WorkoutScreen({super.key, required this.dayId, this.sectionIndex});
+  const WorkoutScreen({
+    super.key,
+    required this.dayId,
+    this.sectionIndex,
+    this.jumpToIndex,
+  });
 
   final String dayId;
 
   /// null = show all sections; 0+ = show that specific section only
   final int? sectionIndex;
+  final int? jumpToIndex;
 
   @override
   ConsumerState<WorkoutScreen> createState() => _WorkoutScreenState();
@@ -311,6 +317,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         section: section,
                         sectionIndex: sectionIndex,
                         dayId: widget.dayId,
+                        jumpToIndex: widget.jumpToIndex,
                       )
                       .animate(delay: (listIndex * 100).ms)
                       .fadeIn(duration: 400.ms, curve: Curves.easeOut)
@@ -318,7 +325,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         begin: 0.1,
                         end: 0,
                         duration: 400.ms,
-                        curve: Curves.easeOut,
+                        curve: Curves.easeOutCubic,
                       );
                 },
               ),

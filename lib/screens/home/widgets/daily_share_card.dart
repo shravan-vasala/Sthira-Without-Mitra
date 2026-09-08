@@ -101,10 +101,10 @@ class DailyShareCard extends ConsumerWidget {
                         fontSize: 12,
                       ),
                     ),
-                    Text(
-                      DateFormat('MMM d').format(DateTime.now()),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
+                      Text(
+                        DateFormat('MMM d').format(DateTime.parse(ref.watch(dateStringProvider))),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),

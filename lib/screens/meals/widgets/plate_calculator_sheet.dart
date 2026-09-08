@@ -166,21 +166,41 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     bool veg = false,
     bool fat = false,
   }) {
-    final double total =
-        proteinPercent + carbsPercent + vegPercent + fatPercent;
-    if (total == 100.0) return;
+    for (int i = 0; i < 5; i++) {
+      final double total = proteinPercent + carbsPercent + vegPercent + fatPercent;
+      final double diff = 100.0 - total;
+      
+      if (diff.abs() < 0.1) break;
 
-    final double diff = 100.0 - total;
+      int absorbCount = 0;
+      if (!protein && (diff > 0 ? proteinPercent < 100 : proteinPercent > 0)) absorbCount++;
+      if (!carbs && (diff > 0 ? carbsPercent < 100 : carbsPercent > 0)) absorbCount++;
+      if (!veg && (diff > 0 ? vegPercent < 100 : vegPercent > 0)) absorbCount++;
+      if (!fat && (diff > 0 ? fatPercent < 100 : fatPercent > 0)) absorbCount++;
 
-    // Distribute diff to others
-    final int othersCount =
-        (protein ? 0 : 1) + (carbs ? 0 : 1) + (veg ? 0 : 1) + (fat ? 0 : 1);
-    final double addPerOther = diff / othersCount;
+      if (absorbCount == 0) {
+        // If no other slider can absorb the diff, force the active slider to give up its value
+        if (protein) proteinPercent = (proteinPercent + diff).clamp(0, 100);
+        if (carbs) carbsPercent = (carbsPercent + diff).clamp(0, 100);
+        if (veg) vegPercent = (vegPercent + diff).clamp(0, 100);
+        if (fat) fatPercent = (fatPercent + diff).clamp(0, 100);
+        break;
+      }
 
-    if (!protein) proteinPercent = (proteinPercent + addPerOther).clamp(0, 100);
-    if (!carbs) carbsPercent = (carbsPercent + addPerOther).clamp(0, 100);
-    if (!veg) vegPercent = (vegPercent + addPerOther).clamp(0, 100);
-    if (!fat) fatPercent = (fatPercent + addPerOther).clamp(0, 100);
+      final double addPerOther = diff / absorbCount;
+      if (!protein && (diff > 0 ? proteinPercent < 100 : proteinPercent > 0)) {
+        proteinPercent = (proteinPercent + addPerOther).clamp(0, 100);
+      }
+      if (!carbs && (diff > 0 ? carbsPercent < 100 : carbsPercent > 0)) {
+        carbsPercent = (carbsPercent + addPerOther).clamp(0, 100);
+      }
+      if (!veg && (diff > 0 ? vegPercent < 100 : vegPercent > 0)) {
+        vegPercent = (vegPercent + addPerOther).clamp(0, 100);
+      }
+      if (!fat && (diff > 0 ? fatPercent < 100 : fatPercent > 0)) {
+        fatPercent = (fatPercent + addPerOther).clamp(0, 100);
+      }
+    }
   }
 
   Widget _buildSlider({

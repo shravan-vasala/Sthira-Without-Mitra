@@ -235,11 +235,16 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                       final sleepHabit = habits
                           .where((h) => h.name.toLowerCase().contains('sleep'))
                           .firstOrNull;
-                      if (sleepHabit != null &&
-                          sleepHours >= sleepHabit.target) {
-                        ref
-                            .read(habitCompletionsProvider.notifier)
-                            .setOverride(sleepHabit.id, 'done');
+                      if (sleepHabit != null) {
+                        if (sleepHours >= sleepHabit.target) {
+                          ref
+                              .read(habitCompletionsProvider.notifier)
+                              .setOverride(sleepHabit.id, 'done');
+                        } else {
+                          ref
+                              .read(habitCompletionsProvider.notifier)
+                              .setOverride(sleepHabit.id, 'none');
+                        }
                       }
 
                       Navigator.of(context).pop();

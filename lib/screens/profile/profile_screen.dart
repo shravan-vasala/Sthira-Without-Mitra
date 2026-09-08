@@ -1419,23 +1419,39 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             PrimaryButton(
               label: 'Save',
               onPressed: () {
+                final parsedHeight = double.tryParse(heightController.text) ?? profile.height;
+                final parsedTarget = targetController.text.isEmpty ? null : double.tryParse(targetController.text);
+                final parsedCal = int.tryParse(caloriesController.text) ?? profile.targetCalories;
+                final parsedPro = int.tryParse(proteinController.text) ?? profile.targetProteinG;
+                final parsedCar = int.tryParse(carbsController.text) ?? profile.targetCarbsG;
+                final parsedFat = int.tryParse(fatController.text) ?? profile.targetFatG;
+
+                if (parsedHeight <= 0 || parsedHeight > 300) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid height (1-300)')));
+                  return;
+                }
+                if (parsedTarget != null && (parsedTarget <= 0 || parsedTarget > 500)) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid target weight (1-500)')));
+                  return;
+                }
+                if (parsedCal <= 0 || parsedCal > 15000) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid daily calorie target (1-15000)')));
+                  return;
+                }
+                if (parsedPro < 0 || parsedPro > 1000 || parsedCar < 0 || parsedCar > 1000 || parsedFat < 0 || parsedFat > 1000) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter valid macro targets (0-1000)')));
+                  return;
+                }
+
                 final updated = profile.copyWith(
                   name: nameController.text,
                   coachName: coachNameController.text.trim(),
-                  height:
-                      double.tryParse(heightController.text) ?? profile.height,
-                  targetWeight: double.tryParse(targetController.text),
-                  targetCalories:
-                      int.tryParse(caloriesController.text) ??
-                      profile.targetCalories,
-                  targetProteinG:
-                      int.tryParse(proteinController.text) ??
-                      profile.targetProteinG,
-                  targetCarbsG:
-                      int.tryParse(carbsController.text) ??
-                      profile.targetCarbsG,
-                  targetFatG:
-                      int.tryParse(fatController.text) ?? profile.targetFatG,
+                  height: parsedHeight,
+                  targetWeight: parsedTarget,
+                  targetCalories: parsedCal,
+                  targetProteinG: parsedPro,
+                  targetCarbsG: parsedCar,
+                  targetFatG: parsedFat,
                   photoPath: _localPhotoPath,
                   clearPhoto: _clearPhoto,
                 );

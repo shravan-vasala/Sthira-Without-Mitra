@@ -3,26 +3,25 @@ import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../services/widget_update_service.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 
-class WeightEntryDialog extends ConsumerStatefulWidget {
-  const WeightEntryDialog({super.key});
+class BodyFatEntryDialog extends ConsumerStatefulWidget {
+  const BodyFatEntryDialog({super.key});
 
   @override
-  ConsumerState<WeightEntryDialog> createState() => _WeightEntryDialogState();
+  ConsumerState<BodyFatEntryDialog> createState() => _BodyFatEntryDialogState();
 }
 
-class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
+class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
   final _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     final log = ref.read(dailyLogProvider);
-    if (log.weight != null) {
-      _controller.text = log.weight!.toStringAsFixed(1);
+    if (log.bodyFat != null) {
+      _controller.text = log.bodyFat!.toStringAsFixed(1);
       return;
     }
 
@@ -35,9 +34,9 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
         .read(dailyLogRepoProvider)
         .getLogsInRange(fmt(start), fmt(end));
     for (int i = logs.length - 1; i >= 0; i--) {
-      final w = logs[i].weight;
-      if (w != null) {
-        _controller.text = w.toStringAsFixed(1);
+      final bf = logs[i].bodyFat;
+      if (bf != null) {
+        _controller.text = bf.toStringAsFixed(1);
         break;
       }
     }
@@ -56,8 +55,8 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
 
     return AppSheet(
-      title: 'Log Body Weight',
-      subtitle: 'Enter your weight for $dateFormatted',
+      title: 'Log Body Fat',
+      subtitle: 'Enter your body fat percentage for $dateFormatted',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -93,7 +92,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
                 fontWeight: FontWeight.w800,
                 color: context.colors.textLight,
               ),
-              suffixText: 'kg',
+              suffixText: '%',
               suffixStyle: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -107,12 +106,13 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
           ),
           const SizedBox(height: 24),
           PrimaryButton(
-            label: 'Save Weight',
+            label: 'Save Body Fat',
             onPressed: () {
-              final weight = double.tryParse(_controller.text);
-              if (weight != null && weight > 0) {
+              final bf = double.tryParse(_controller.text);
+              if (bf != null && bf > 0 && bf <= 100) {
                 Haptics.toggle();
-                ref.read(dailyLogProvider.notifier).updateWeight(weight);
+                final currentLog = ref.read(dailyLogProvider);
+                ref.read(dailyLogProvider.notifier).updateLog(currentLog.copyWith(bodyFat: bf));
                 Navigator.of(context).pop();
               }
             },

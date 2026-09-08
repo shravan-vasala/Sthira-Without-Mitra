@@ -333,7 +333,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         return;
       }
 
-      showDialog(
+      final shouldRestore = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Restore Backup?'),
@@ -346,69 +346,11 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx),
+              onPressed: () => Navigator.pop(ctx, false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                setState(() => _isLoading = true);
-                try {
-                  final result = await backupService.restoreBackup(
-                    path,
-                    password: passwordUsed,
-                  );
-
-                  if (!mounted) return;
-
-                  if (result.success) {
-                    // ignore: unawaited_futures
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (ctx) => AlertDialog(
-                        title: Text(
-                          result.failedPhotosCount > 0
-                              ? 'Restore Complete (with errors)'
-                              : 'Restore Complete 🎉',
-                          style: TextStyle(
-                            color: result.failedPhotosCount > 0
-                                ? context.colors.orange
-                                : context.colors.green,
-                          ),
-                        ),
-                        content: Text(
-                          result.failedPhotosCount > 0
-                              ? 'Restore complete, but ${result.failedPhotosCount} photos failed to decrypt and were skipped. Please restart the app.'
-                              : 'Restore complete — please restart the app.',
-                        ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Failed to restore backup.'),
-                        backgroundColor: context.colors.red,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    final errorMsg = e.toString().replaceFirst(
-                      'FormatException: ',
-                      '',
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Restore error: $errorMsg'),
-                        backgroundColor: context.colors.red,
-                      ),
-                    );
-                  }
-                } finally {
-                  if (mounted) setState(() => _isLoading = false);
-                }
-              },
+              onPressed: () => Navigator.pop(ctx, true),
               child: Text(
                 'Restore',
                 style: TextStyle(color: context.colors.red),
@@ -416,13 +358,73 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
             ),
           ],
         ),
-        // ignore: unawaited_futures
-      ).then((_) {
-        // If dialog was dismissed without restoring, loading should be cleared,
-        // but we only set _isLoading = false if we didn't start the restore.
-        // Let's just handle it securely here.
+      ) ?? false;
+
+      if (!shouldRestore) {
         if (mounted) setState(() => _isLoading = false);
-      });
+        return;
+      }
+
+      if (!mounted) return;
+      setState(() => _isLoading = true);
+
+      try {
+        final result = await backupService.restoreBackup(
+          path,
+          password: passwordUsed,
+        );
+
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+
+        if (result.success) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              title: Text(
+                result.failedPhotosCount > 0
+                    ? 'Restore Complete (with errors)'
+                    : 'Restore Complete 🎉',
+                style: TextStyle(
+                  color: result.failedPhotosCount > 0
+                      ? context.colors.orange
+                      : context.colors.green,
+                ),
+              ),
+              content: Text(
+                result.failedPhotosCount > 0
+                    ? 'Restore complete, but ${result.failedPhotosCount} photos failed to decrypt and were skipped. Please restart the app.'
+                    : 'Restore complete — please restart the app.',
+              ),
+              actions: [
+                 TextButton(
+                   onPressed: () => Navigator.pop(ctx),
+                   child: const Text('OK'),
+                 )
+              ]
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Failed to restore backup.'),
+              backgroundColor: context.colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          final errorMsg = e.toString().replaceFirst('FormatException: ', '');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Restore error: $errorMsg'),
+              backgroundColor: context.colors.red,
+            ),
+          );
+          setState(() => _isLoading = false);
+        }
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

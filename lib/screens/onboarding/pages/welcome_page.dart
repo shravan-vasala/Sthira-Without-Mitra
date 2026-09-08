@@ -389,8 +389,10 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
   
   Future<void> _playSequence() async {
     await Future.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return;
     _fadeController.forward();
     await Future.delayed(const Duration(milliseconds: 1600));
+    if (!mounted) return;
     widget.onComplete();
   }
 

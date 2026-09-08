@@ -326,27 +326,8 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     final top3 = hasTop3 ? activeProfiles.sublist(0, 3) : <SocialProfile>[];
     final remainingActive = hasTop3 ? activeProfiles.sublist(3) : activeProfiles;
 
-    // Check last week banner
-    Widget? banner;
-    if (now.weekday == DateTime.monday && _period == LeaderboardPeriod.week) {
-        if (allProfiles.isNotEmpty) {
-           final winner = allProfiles.first; // Naive check just to show the banner
-           banner = Container(
-             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-             color: context.colors.primary.withValues(alpha: 0.1),
-             child: Center(
-               child: Text(
-                 '👑 ${winner.name} took last week!',
-                 style: TextStyle(color: context.colors.primary, fontWeight: FontWeight.bold),
-               ),
-             ),
-           );
-        }
-    }
-
     return Column(
       children: [
-        if (banner != null) banner,
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -459,7 +440,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       }
     }
     
-    final dailyScore = ref.read(dailyScoreProvider);
+    final dailyScore = ref.read(todayScoreProvider);
 
     return SocialProfile(
       uid: myUid,

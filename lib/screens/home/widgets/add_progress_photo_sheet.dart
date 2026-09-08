@@ -76,13 +76,28 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
     final note = _noteController.text;
     final imageBytes = await _pickedImage!.readAsBytes();
 
-    await ref.read(mediaRepoProvider).saveProgressPhoto(
-      date,
-      imageBytes,
-      poseTag: _selectedPose!,
-      weight: weight,
-      note: note,
-    );
+    try {
+      await ref.read(mediaRepoProvider).saveProgressPhoto(
+        date,
+        imageBytes,
+        poseTag: _selectedPose!,
+        weight: weight,
+        note: note,
+      );
+
+      // Check if there is a habit for progress pictures and mark it
+      final habits = ref.read(habitsProvider);
+      final photoHabit = habits.where((h) => h.name.toLowerCase().contains('photo') || h.name.toLowerCase().contains('picture')).firstOrNull;
+      if (photoHabit != null) {
+        ref.read(habitCompletionsProvider.notifier).setOverride(photoHabit.id, date, 'done');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved locally (Network error: $e)')),
+        );
+      }
+    }
 
     if (mounted) {
       Navigator.pop(context, true); // true indicates successful save

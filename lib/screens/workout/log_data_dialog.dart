@@ -262,7 +262,18 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
       sets: sets,
     );
     await repo.saveLog(newLog);
-    await _persistAndClose(widget.exercise);
+    ref.read(exerciseLogsUpdateProvider.notifier).state++;
+    WidgetUpdateService.pushWidgetState(ref);
+
+    final prResult = await checkAndSavePr(
+      ref: ref,
+      exerciseName: widget.exercise.name ?? '',
+      sets: sets,
+    );
+
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    _showResultSnack(prResult);
   }
 
   Future<void> _persistAndClose(Exercise exercise) async {

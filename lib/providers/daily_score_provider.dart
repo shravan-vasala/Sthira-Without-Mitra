@@ -295,3 +295,82 @@ final dailyScoreProvider = Provider<DailyScore>((ref) {
     sevenDayAverage: sevenDayAverage,
   );
 });
+
+final todayScoreProvider = Provider<DailyScore>((ref) {
+  final date = DateTime.now();
+  final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+  final habits = ref.watch(habitsProvider);
+  final habitCompletions = ref.watch(habitCompletionsProvider);
+  // Need to get today's daily log explicitly, instead of dailyLogProvider which tracks selectedDate
+  final dailyLogRepo = ref.watch(dailyLogRepoProvider);
+  final dailyLog = dailyLogRepo.getOrCreate(dateStr);
+
+  final workoutPlan = ref.watch(workoutPlanProvider);
+  final logRepo = ref.watch(exerciseLogRepoProvider);
+  ref.watch(exerciseLogsUpdateProvider);
+
+  final mealPlan = ref.watch(mealPlanProvider);
+  // Need today's meal log explicitly
+  final mealLogs = ref.watch(dailyMealLogsRangeProvider((dateStr, dateStr)));
+  final mealLog = mealLogs.isNotEmpty ? mealLogs.first : DailyMealLog(date: dateStr);
+
+  final profile = ref.watch(profileProvider);
+  final targetWeight = profile.targetWeight ?? 0.0;
+  final targetCalories = profile.targetCalories;
+
+  final sevenDaysAgoStr = DateFormat('yyyy-MM-dd').format(date.subtract(const Duration(days: 7)));
+  final allDailyLogs = ref.watch(dailyLogsRangeProvider((sevenDaysAgoStr, dateStr)));
+  final allMealLogs = ref.watch(dailyMealLogsRangeProvider((sevenDaysAgoStr, dateStr)));
+
+  int? sevenDayAverage;
+  int sum = 0;
+  int count = 0;
+  for (int i = 1; i <= 7; i++) {
+    final pastDate = date.subtract(Duration(days: i));
+    final dStr = DateFormat('yyyy-MM-dd').format(pastDate);
+    final hasDailyLog = allDailyLogs.any((l) => l.date == dStr);
+    final hasMealLog = allMealLogs.any((l) => l.date == dStr);
+    final completions = ref.read(habitRepoProvider).getCompletions(dStr);
+    if (!hasDailyLog && !hasMealLog && completions.completions.isEmpty) continue;
+
+    final log = allDailyLogs.firstWhere((l) => l.date == dStr, orElse: () => DailyLog(date: dStr));
+    final mLog = allMealLogs.firstWhere((l) => l.date == dStr, orElse: () => DailyMealLog(date: dStr));
+
+    final s = DailyScore.calculate(
+      date: pastDate,
+      dateStr: dStr,
+      habits: habits,
+      habitCompletions: completions,
+      dailyLog: log,
+      workoutPlan: workoutPlan,
+      logRepo: logRepo,
+      mealPlan: mealPlan,
+      mealLog: mLog,
+      targetWeight: targetWeight,
+      targetCalories: targetCalories,
+      dailyLogRepo: dailyLogRepo,
+    ).totalScore;
+    sum += s;
+    count++;
+  }
+  if (count > 0) sevenDayAverage = (sum / count).round();
+
+  final todayScore = DailyScore.calculate(
+    date: date,
+    dateStr: dateStr,
+    habits: habits,
+    habitCompletions: habitCompletions,
+    dailyLog: dailyLog,
+    workoutPlan: workoutPlan,
+    logRepo: logRepo,
+    mealPlan: mealPlan,
+    mealLog: mealLog,
+    targetWeight: targetWeight,
+    targetCalories: targetCalories,
+    dailyLogRepo: dailyLogRepo,
+  );
+
+  return todayScore.copyWithContext(sevenDayAverage: sevenDayAverage);
+});
+
