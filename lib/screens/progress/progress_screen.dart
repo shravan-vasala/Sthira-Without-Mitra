@@ -624,7 +624,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return GestureDetector(
       onTap: () {
         Haptics.tap();
-        setState(() => _selectedRange = range);
+        _setRange(range);
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(

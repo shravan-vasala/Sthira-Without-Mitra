@@ -134,7 +134,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                         const SizedBox(height: 20),
                       ],
                       SharedChartCard(
-                        title: 'Max Weight',
+                        metric: const MetricSpec(title: 'Max Weight', unit: 'kg', isCount: false),
                         data: maxWeightData,
                         statLabels: const ['BEST', 'LAST', 'AVERAGE'],
                         statValues: maxWeightStats,
@@ -145,7 +145,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       SharedChartCard(
-                        title: 'Total Volume',
+                        metric: const MetricSpec(title: 'Total Volume', unit: 'kg', isCount: false),
                         data: totalVolumeData,
                         statLabels: const ['BEST', 'LAST', 'AVERAGE'],
                         statValues: totalVolumeStats,
