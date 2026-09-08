@@ -1,4 +1,5 @@
 import '../models/daily_meal_log.dart';
+import '../models/food_nutrition.dart';
 import '../models/meal_plan.dart';
 import '../models/user_profile.dart';
 
@@ -47,10 +48,12 @@ class MealPlanComplete {
       return MealItemLog(
         name: item.name,
         portion: item.quantity,
-        calories: item.calories,
-        proteinG: protein * itemShare,
-        carbsG: carbs * itemShare,
-        fatG: fat * itemShare,
+        computedNutrition: FoodNutrition(
+          kcal: (item.calories ?? 0).toDouble(),
+          proteinG: protein * itemShare,
+          carbsG: carbs * itemShare,
+          fatG: fat * itemShare,
+        ),
       );
     }).toList();
 

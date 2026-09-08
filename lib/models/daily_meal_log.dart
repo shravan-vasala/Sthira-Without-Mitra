@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'food_nutrition.dart';
 
 part 'daily_meal_log.g.dart';
 
@@ -158,54 +159,86 @@ class MealSlotLog {
 @embedded
 class MealItemLog {
   String? name;
-  String? portion;
-  int? calories;
-  double? proteinG;
-  double? carbsG;
-  double? fatG;
+  String? portion; // "2 chapatis", "100 g", etc.
+
+  // The explicitly computed final totals (optional if unresolved)
+  FoodNutrition? computedNutrition;
+  
+  // The base reference nutrition used for calculation
+  FoodNutrition? baseNutrition;
+
   bool resolved;
   String? provenance; // 'verified', 'estimated', 'yours'
+  
+  // Metadata about the base nutrition basis
   bool isPer100g;
   double? servingGrams;
+
+  // Quantitative values derived from `portion`
+  double? consumedGrams;
 
   MealItemLog({
     this.name,
     this.portion,
-    this.calories,
-    this.proteinG,
-    this.carbsG,
-    this.fatG,
+    this.computedNutrition,
+    this.baseNutrition,
     this.resolved = true,
     this.provenance,
     this.isPer100g = false,
     this.servingGrams,
+    this.consumedGrams,
   });
 
   factory MealItemLog.fromJson(Map<String, dynamic> json) {
+    // Migration: If computedNutrition is missing, reconstruct it from old fields
+    FoodNutrition? compNut;
+    if (json['computedNutrition'] != null) {
+      compNut = FoodNutrition.fromJson(json['computedNutrition'] as Map<String, dynamic>);
+    } else if (json['calories'] != null) {
+      // Legacy fallback
+      compNut = FoodNutrition(
+        kcal: (json['calories'] as num).toDouble(),
+        proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0.0,
+        carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0.0,
+        fatG: (json['fat_g'] as num?)?.toDouble() ?? 0.0,
+      );
+    }
+
+    FoodNutrition? baseNut;
+    if (json['baseNutrition'] != null) {
+      baseNut = FoodNutrition.fromJson(json['baseNutrition'] as Map<String, dynamic>);
+    }
+
     return MealItemLog(
       name: json['name'] as String? ?? 'Unknown',
       portion: json['portion'] as String? ?? '',
-      calories: json['calories'] as int? ?? 0,
-      proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0.0,
-      carbsG: (json['carbs_g'] as num?)?.toDouble() ?? 0.0,
-      fatG: (json['fat_g'] as num?)?.toDouble() ?? 0.0,
+      computedNutrition: compNut,
+      baseNutrition: baseNut,
       resolved: json['resolved'] as bool? ?? true,
       provenance: json['provenance'] as String?,
       isPer100g: json['is_per_100g'] as bool? ?? false,
       servingGrams: (json['serving_grams'] as num?)?.toDouble(),
+      consumedGrams: (json['consumed_grams'] as num?)?.toDouble(),
     );
   }
 
   Map<String, dynamic> toJson() => {
     'name': name,
     'portion': portion,
-    'calories': calories,
-    'protein_g': proteinG,
-    'carbs_g': carbsG,
-    'fat_g': fatG,
+    if (computedNutrition != null) 'computedNutrition': computedNutrition!.toJson(),
+    if (baseNutrition != null) 'baseNutrition': baseNutrition!.toJson(),
     'resolved': resolved,
     if (provenance != null) 'provenance': provenance,
     'is_per_100g': isPer100g,
     if (servingGrams != null) 'serving_grams': servingGrams,
+    if (consumedGrams != null) 'consumed_grams': consumedGrams,
+    
+    // Write legacy fields for backward compatibility during rollback/migration
+    if (computedNutrition != null) ...{
+      'calories': computedNutrition!.kcal.round(),
+      'protein_g': computedNutrition!.proteinG,
+      'carbs_g': computedNutrition!.carbsG,
+      'fat_g': computedNutrition!.fatG,
+    }
   };
 }

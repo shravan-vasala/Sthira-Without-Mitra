@@ -13,11 +13,11 @@ import '../../../models/daily_meal_log.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:isar/isar.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:isar/isar.dart';
 import '../../../models/user_food_log.dart';
+import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
+import '../../../models/food_nutrition.dart';
 import '../../../widgets/offline_banner.dart';
 import '../../../widgets/primary_button.dart';
 
@@ -148,10 +148,12 @@ class _PhotoCalorieScannerSheetState
       return MealItemLog(
         name: m['name']?.toString() ?? 'Unknown',
         portion: m['portion']?.toString() ?? '1 serving',
-        calories: (m['calories'] as num?)?.toInt() ?? 0,
-        proteinG: (m['protein_g'] as num?)?.toDouble() ?? 0.0,
-        carbsG: (m['carbs_g'] as num?)?.toDouble() ?? 0.0,
-        fatG: (m['fat_g'] as num?)?.toDouble() ?? 0.0,
+        computedNutrition: FoodNutrition(
+          kcal: (m['calories'] as num?)?.toDouble() ?? 0,
+          proteinG: (m['protein_g'] as num?)?.toDouble() ?? 0.0,
+          carbsG: (m['carbs_g'] as num?)?.toDouble() ?? 0.0,
+          fatG: (m['fat_g'] as num?)?.toDouble() ?? 0.0,
+        ),
         resolved: m['resolved'] as bool? ?? true,
       );
     }).toList();
@@ -197,11 +199,9 @@ class _PhotoCalorieScannerSheetState
     return MealItemLog(
       name: src.name,
       portion: src.portion,
-      calories: src.calories,
-      proteinG: src.proteinG,
-      carbsG: src.carbsG,
-      fatG: src.fatG,
+      computedNutrition: src.computedNutrition,
       resolved: src.resolved,
+      provenance: src.provenance,
     );
   }
 
@@ -393,12 +393,9 @@ class _PhotoCalorieScannerSheetState
         } else {
           _items = [
             MealItemLog(
-              name: 'Home cooked meal',
+              name: 'Unknown Dish',
               portion: '1 serving',
-              calories: 0,
-              proteinG: 0,
-              carbsG: 0,
-              fatG: 0,
+              computedNutrition: FoodNutrition(kcal: 0, proteinG: 0, carbsG: 0, fatG: 0),
             ),
           ];
         }
@@ -408,7 +405,7 @@ class _PhotoCalorieScannerSheetState
         _itemScales[i] = 1.0;
       }
     });
-    if (_items.length == 1 && _items.first.calories == 0) {
+    if (_items.length == 1 && (_items.first.computedNutrition?.kcal ?? 0) == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _editItem(0));
     }
   }
@@ -463,10 +460,10 @@ class _PhotoCalorieScannerSheetState
     final item = _items[index];
     final nameCtrl = TextEditingController(text: item.name);
     final portionCtrl = TextEditingController(text: item.portion);
-    final calsCtrl = TextEditingController(text: item.calories.toString());
-    final pCtrl = TextEditingController(text: item.proteinG.toString());
-    final cCtrl = TextEditingController(text: item.carbsG.toString());
-    final fCtrl = TextEditingController(text: item.fatG.toString());
+    final calsCtrl = TextEditingController(text: item.computedNutrition?.kcal.round().toString() ?? '0');
+    final pCtrl = TextEditingController(text: item.computedNutrition?.proteinG.toString() ?? '0.0');
+    final cCtrl = TextEditingController(text: item.computedNutrition?.carbsG.toString() ?? '0.0');
+    final fCtrl = TextEditingController(text: item.computedNutrition?.fatG.toString() ?? '0.0');
 
     showDialog(
       context: context,
@@ -598,16 +595,26 @@ class _PhotoCalorieScannerSheetState
           ElevatedButton(
             onPressed: () {
               setState(() {
+                final cVal = int.tryParse(calsCtrl.text) ?? 0;
+                final pVal = double.tryParse(pCtrl.text) ?? 0.0;
+                final carbsVal = double.tryParse(cCtrl.text) ?? 0.0;
+                final fVal = double.tryParse(fCtrl.text) ?? 0.0;
+
                 _items[index] = MealItemLog(
                   name: nameCtrl.text,
                   portion: portionCtrl.text,
-                  calories: int.tryParse(calsCtrl.text) ?? 0,
-                  proteinG: double.tryParse(pCtrl.text) ?? 0.0,
-                  carbsG: double.tryParse(cCtrl.text) ?? 0.0,
-                  fatG: double.tryParse(fCtrl.text) ?? 0.0,
+                  computedNutrition: FoodNutrition(
+                    kcal: cVal.toDouble(),
+                    proteinG: pVal,
+                    carbsG: carbsVal,
+                    fatG: fVal,
+                  ),
+                  resolved: true,
                 );
-                _items[index].resolved = true; // Manual edit resolves it
-                _items[index].provenance = 'yours'; // Flag as manual edit
+                
+                // When explicitly setting macros manually, make it user provenance so it's remembered
+                _items[index].provenance = 'yours';
+                
                 _baseItems[index] = _cloneItem(_items[index]);
                 _itemScales[index] = 1.0;
                 _recalculateTotals();
@@ -633,10 +640,7 @@ class _PhotoCalorieScannerSheetState
       MealItemLog(
         name: 'New Item',
         portion: '1 serving',
-        calories: 0,
-        proteinG: 0,
-        carbsG: 0,
-        fatG: 0,
+        computedNutrition: FoodNutrition(kcal: 0, proteinG: 0, carbsG: 0, fatG: 0),
       ),
     );
     _editItem(_items.length - 1);
@@ -651,10 +655,12 @@ class _PhotoCalorieScannerSheetState
       _items[index] = MealItemLog(
         name: base.name,
         portion: base.portion,
-        calories: ((base.calories ?? 0) * scale).round(),
-        proteinG: double.parse(((base.proteinG ?? 0.0) * scale).toStringAsFixed(1)),
-        carbsG: double.parse(((base.carbsG ?? 0.0) * scale).toStringAsFixed(1)),
-        fatG: double.parse(((base.fatG ?? 0.0) * scale).toStringAsFixed(1)),
+        computedNutrition: FoodNutrition(
+          kcal: ((base.computedNutrition?.kcal ?? 0) * scale).roundToDouble(),
+          proteinG: double.parse(((base.computedNutrition?.proteinG ?? 0.0) * scale).toStringAsFixed(1)),
+          carbsG: double.parse(((base.computedNutrition?.carbsG ?? 0.0) * scale).toStringAsFixed(1)),
+          fatG: double.parse(((base.computedNutrition?.fatG ?? 0.0) * scale).toStringAsFixed(1)),
+        ),
         resolved: base.resolved,
       );
       _recalculateTotals();
@@ -667,10 +673,10 @@ class _PhotoCalorieScannerSheetState
     double carbs = 0;
     double f = 0;
     for (final i in _items) {
-      c += i.calories ?? 0;
-      p += i.proteinG ?? 0.0;
-      carbs += i.carbsG ?? 0.0;
-      f += i.fatG ?? 0.0;
+      c += i.computedNutrition?.kcal.round() ?? 0;
+      p += i.computedNutrition?.proteinG ?? 0.0;
+      carbs += i.computedNutrition?.carbsG ?? 0.0;
+      f += i.computedNutrition?.fatG ?? 0.0;
     }
     _totalCalories = c;
     _totalProtein = p;
@@ -710,7 +716,7 @@ class _PhotoCalorieScannerSheetState
       final isar = Isar.getInstance();
       if (isar != null) {
         for (var i in _items) {
-          if (i.provenance == 'yours' && (i.calories ?? 0) > 0) {
+          if (i.provenance == 'yours' && (i.computedNutrition?.kcal ?? 0) > 0) {
             final normalized = i.name?.toLowerCase().trim();
             if (normalized != null && normalized.isNotEmpty) {
               await isar.writeTxn(() async {
@@ -720,10 +726,9 @@ class _PhotoCalorieScannerSheetState
                   UserFoodLog(
                     normalizedName: normalized,
                     originalName: i.name!,
-                    kcal: (i.calories ?? 0).toDouble(),
-                    proteinG: i.proteinG ?? 0.0,
-                    carbsG: i.carbsG ?? 0.0,
-                    fatG: i.fatG ?? 0.0,
+                    baseNutrition: i.computedNutrition ?? FoodNutrition(),
+                    isPer100g: false,
+                    servingGrams: i.consumedGrams,
                     addedAt: DateTime.now(),
                   )
                 );
@@ -991,10 +996,12 @@ class _PhotoCalorieScannerSheetState
                   final item = MealItemLog(
                     name: food.originalName,
                     portion: '1 serving',
-                    calories: food.kcal.toInt(),
-                    proteinG: food.proteinG,
-                    carbsG: food.carbsG,
-                    fatG: food.fatG,
+                    computedNutrition: FoodNutrition(
+                      kcal: food.baseNutrition.kcal,
+                      proteinG: food.baseNutrition.proteinG,
+                      carbsG: food.baseNutrition.carbsG,
+                      fatG: food.baseNutrition.fatG,
+                    ),
                     resolved: true,
                   );
                   item.provenance = 'verified'; // It's from Personal memory
@@ -1510,9 +1517,9 @@ class _PhotoCalorieScannerSheetState
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                if (isResolved) ...[
+                                  if (isResolved) ...[
                                   Text(
-                                    '${item.portion} • ${item.calories} kcal',
+                                    '${item.portion} • ${item.computedNutrition?.kcal.round() ?? 0} kcal',
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
@@ -1527,19 +1534,19 @@ class _PhotoCalorieScannerSheetState
                                       _buildMacroPill(
                                         context,
                                         'Protein',
-                                        '${item.proteinG?.toStringAsFixed(1) ?? '0'}g',
+                                        '${item.computedNutrition?.proteinG.toStringAsFixed(1) ?? '0'}g',
                                         const Color(0xFFE8A163),
                                       ),
                                       _buildMacroPill(
                                         context,
                                         'Carbs',
-                                        '${item.carbsG?.toStringAsFixed(1) ?? '0'}g',
+                                        '${item.computedNutrition?.carbsG.toStringAsFixed(1) ?? '0'}g',
                                         const Color(0xFF8FB896),
                                       ),
                                       _buildMacroPill(
                                         context,
                                         'Fat',
-                                        '${item.fatG?.toStringAsFixed(1) ?? '0'}g',
+                                        '${item.computedNutrition?.fatG.toStringAsFixed(1) ?? '0'}g',
                                         const Color(0xFFE58B88),
                                       ),
                                     ],
@@ -1724,9 +1731,9 @@ class _PhotoCalorieScannerSheetState
   }
 
   Color _getDominantMacroColor(MealItemLog item, BuildContext context) {
-    final pCal = (item.proteinG ?? 0) * 4;
-    final cCal = (item.carbsG ?? 0) * 4;
-    final fCal = (item.fatG ?? 0) * 9;
+    final pCal = (item.computedNutrition?.proteinG ?? 0) * 4;
+    final cCal = (item.computedNutrition?.carbsG ?? 0) * 4;
+    final fCal = (item.computedNutrition?.fatG ?? 0) * 9;
     
     if (pCal >= cCal && pCal >= fCal) return context.colors.green;
     if (cCal >= pCal && cCal >= fCal) return context.colors.orange;

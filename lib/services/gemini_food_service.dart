@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:googleai_dart/googleai_dart.dart';
-import 'package:isar/isar.dart';
+import 'package:isar/isar.dart' hide Schema;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_search_cache.dart';
 import '../interfaces/i_ai_food_service.dart';
@@ -11,6 +11,8 @@ import '../models/user_food_log.dart';
 import 'package:crypto/crypto.dart';
 
 import 'ai_client.dart';
+import '../models/food_nutrition.dart';
+import '../models/nutrition_lookup_result.dart';
 
 class GeminiFoodService implements IAiFoodService {
   final String? apiKey;
@@ -106,6 +108,30 @@ Portion estimation guidelines:
       '  "confidence": "high"\n'
       '}';
 
+  static final Map<String, dynamic> _foodAnalysisSchema = {
+    'type': 'OBJECT',
+    'properties': {
+      'items': {
+        'type': 'ARRAY',
+        'items': {
+          'type': 'OBJECT',
+          'properties': {
+            'name': {'type': 'STRING', 'description': 'Name of the dish'},
+            'portion': {'type': 'STRING', 'description': 'Estimated portion size (e.g. 1 bowl, 2 pieces)'},
+            'estimated_grams': {'type': 'NUMBER', 'description': 'Estimated weight in grams'},
+          },
+          'required': ['name', 'portion', 'estimated_grams'],
+        },
+      },
+      'confidence': {
+        'type': 'STRING',
+        'enum': ['high', 'medium', 'low'],
+        'description': 'Confidence in the analysis',
+      },
+    },
+    'required': ['items', 'confidence'],
+  };
+
   @override
   Future<Map<String, dynamic>?> analyzeFoodImage(
     List<Uint8List> imageBytesList,
@@ -129,8 +155,9 @@ $_jsonShape
       systemInstruction: _systemInstruction,
       imageBytesList: imageBytesList,
       mimeType: mimeType,
-      apiKey: apiKey,
+      apiKey: apiKey ?? '',
       skipCache: skipCache,
+      responseSchema: _foodAnalysisSchema,
     );
     return _processAiResponse(response);
   }
@@ -194,47 +221,42 @@ $_jsonShape
       
       final localMatch = nutritionLookup.match(queryName);
       if (localMatch != null) {
-         final per100g = localMatch['per100g'] as Map<String, dynamic>;
-         
-         final bool isPer100g = localMatch['is_per_100g'] == true;
-         final double? userServing = localMatch['serving_grams'] as double?;
-         final String? userProv = localMatch['provenance'] as String?;
+         final isPer100g = localMatch.isPer100g;
+         final userServing = localMatch.servingGrams;
+         final userProv = localMatch.provenance;
          
          double defGrams = 100.0;
          if (!isPer100g && userServing != null) {
            defGrams = userServing;
          } else {
-           defGrams = (localMatch['defaultPortionG'] as num?)?.toDouble() ?? 100.0;
+           defGrams = userServing ?? 100.0; // fallback
          }
          
          double totalGrams = defGrams * quantity;
          
-         final multiplier = totalGrams / 100.0;
-         // If it's NOT per 100g, and it's from user memory, the values are already per serving.
-         // So if isPer100g is false, we just multiply by quantity. If true, we multiply by (totalGrams/100).
-         final actualMultiplier = isPer100g ? multiplier : quantity;
-
-         final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * actualMultiplier;
-         final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * actualMultiplier;
-         final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * actualMultiplier;
-         final calculatedKcal = (p * 4.0) + (c * 4.0) + (f * 9.0);
-         double rawKcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * actualMultiplier;
-         
-         // Only correct if it's wildly off.
-         double kcal = rawKcal == 0 || (rawKcal - calculatedKcal).abs() > 25 ? calculatedKcal : rawKcal;
+         // Use the pure typed calculation!
+         final computed = FoodNutrition.compute(
+           consumedGrams: isPer100g ? totalGrams : null,
+           consumedServings: isPer100g ? null : quantity,
+           baseNutrition: localMatch.baseNutrition,
+           isPer100g: isPer100g,
+           servingGrams: localMatch.servingGrams,
+         );
          
          localItems.add({
-           "name": localMatch['name'] ?? queryName,
+           "name": localMatch.name,
            "portion": "$quantity (${defGrams}g)",
            "estimated_grams": totalGrams,
-           "calories": kcal.round(),
-           "protein_g": double.parse(p.toStringAsFixed(1)),
-           "carbs_g": double.parse(c.toStringAsFixed(1)),
-           "fat_g": double.parse(f.toStringAsFixed(1)),
+           "calories": computed.kcal.round(),
+           "protein_g": double.parse(computed.proteinG.toStringAsFixed(1)),
+           "carbs_g": double.parse(computed.carbsG.toStringAsFixed(1)),
+           "fat_g": double.parse(computed.fatG.toStringAsFixed(1)),
            "resolved": true,
            "provenance": userProv ?? "database",
            "is_per_100g": isPer100g,
            "serving_grams": defGrams,
+           "baseNutrition": localMatch.baseNutrition.toJson(),
+           "computedNutrition": computed.toJson(),
          });
       } else {
          isFullyLocal = false;
@@ -275,7 +297,8 @@ $_jsonShape
     final response = await aiClient.generateJson(
       prompt: prompt,
       systemInstruction: _systemInstruction,
-      apiKey: apiKey,
+      apiKey: apiKey ?? '',
+      responseSchema: _foodAnalysisSchema,
     );
 
     // Merge AI response with Local items
@@ -369,11 +392,33 @@ Return ONLY a JSON object containing an array called "items":
   ]
 }
 ''';
+    final Map<String, dynamic> fallbackSchema = {
+      'type': 'OBJECT',
+      'properties': {
+        'items': {
+          'type': 'ARRAY',
+          'items': {
+            'type': 'OBJECT',
+            'properties': {
+              'name': {'type': 'STRING', 'description': 'Exact Name that I queried'},
+              'kcal': {'type': 'NUMBER', 'description': 'Energy in kcal per 100g'},
+              'protein_g': {'type': 'NUMBER', 'description': 'Protein in g per 100g'},
+              'carbs_g': {'type': 'NUMBER', 'description': 'Carbohydrates in g per 100g'},
+              'fat_g': {'type': 'NUMBER', 'description': 'Fat in g per 100g'},
+            },
+            'required': ['name', 'kcal', 'protein_g', 'carbs_g', 'fat_g'],
+          },
+        },
+      },
+      'required': ['items'],
+    };
+
     final response = await aiClient.generateJson(
       prompt: prompt,
       systemInstruction:
           'You are a nutrition database. Provide exact values per 100g.',
-      apiKey: apiKey,
+      apiKey: apiKey ?? '',
+      responseSchema: fallbackSchema,
     );
 
     if (response != null && response['items'] is List) {
@@ -433,10 +478,13 @@ Return ONLY a JSON object containing an array called "items":
                   UserFoodLog(
                     normalizedName: normalized,
                     originalName: queriedName,
-                    kcal: finalKcal,
-                    proteinG: prot,
-                    carbsG: carb,
-                    fatG: fat,
+                    baseNutrition: FoodNutrition(
+                      kcal: finalKcal,
+                      proteinG: prot,
+                      carbsG: carb,
+                      fatG: fat,
+                    ),
+                    isPer100g: true,
                     addedAt: DateTime.now(),
                   )
                );
@@ -497,44 +545,60 @@ Return ONLY a JSON object containing an array called "items":
       grams = grams.clamp(1.0, 1500.0);
       item['estimated_grams'] = grams;
 
-      final Map<String, dynamic>? match = nutritionLookup.match(name);
-      Map<String, dynamic> per100g;
+      final NutritionLookupResult? match = nutritionLookup.match(name);
+      FoodNutrition baseNut;
+      bool isPer100g = true;
+      double? servingGrams;
+      String? provenance;
 
       if (match != null) {
-        per100g = match['per100g'] as Map<String, dynamic>;
+        baseNut = match.baseNutrition;
+        isPer100g = match.isPer100g;
+        servingGrams = match.servingGrams;
+        provenance = 'database';
       } else {
-        per100g =
-            batchResults[name] ??
-            {"kcal": 0.0, "protein_g": 0.0, "carbs_g": 0.0, "fat_g": 0.0};
+        final fallbackMap = batchResults[name];
+        if (fallbackMap != null) {
+          baseNut = FoodNutrition(
+            kcal: (fallbackMap['kcal'] as num?)?.toDouble() ?? 0.0,
+            proteinG: (fallbackMap['protein_g'] as num?)?.toDouble() ?? 0.0,
+            carbsG: (fallbackMap['carbs_g'] as num?)?.toDouble() ?? 0.0,
+            fatG: (fallbackMap['fat_g'] as num?)?.toDouble() ?? 0.0,
+          );
+          isPer100g = true;
+          servingGrams = null;
+          provenance = 'fallback';
+        } else {
+          baseNut = FoodNutrition(); // All zeroes
+          isPer100g = true;
+        }
       }
 
-      final multiplier = grams / 100.0;
-      final p = ((per100g['protein_g'] as num?)?.toDouble() ?? 0) * multiplier;
-      final c = ((per100g['carbs_g'] as num?)?.toDouble() ?? 0) * multiplier;
-      final f = ((per100g['fat_g'] as num?)?.toDouble() ?? 0) * multiplier;
+      final computed = FoodNutrition.compute(
+        consumedGrams: grams, // AI currently only outputs grams or assumes grams
+        baseNutrition: baseNut,
+        isPer100g: isPer100g,
+        servingGrams: servingGrams,
+      );
 
-      // MACRO-ENERGY VALIDATION: Ensure final item calories respect Atwater physics
-      final calculatedKcal = (p * 4.0) + (c * 4.0) + (f * 9.0);
-      double rawKcal = ((per100g['kcal'] as num?)?.toDouble() ?? 0) * multiplier;
-      
-      double kcal = rawKcal;
-      if (rawKcal == 0 || (rawKcal - calculatedKcal).abs() > 25) {
-        kcal = calculatedKcal;
-      }
+      item['calories'] = computed.kcal.round();
+      item['protein_g'] = double.parse(computed.proteinG.toStringAsFixed(1));
+      item['carbs_g'] = double.parse(computed.carbsG.toStringAsFixed(1));
+      item['fat_g'] = double.parse(computed.fatG.toStringAsFixed(1));
+      item['baseNutrition'] = baseNut.toJson();
+      item['computedNutrition'] = computed.toJson();
+      item['is_per_100g'] = isPer100g;
+      item['serving_grams'] = servingGrams;
+      item['provenance'] = provenance;
 
-      item['calories'] = kcal.round();
-      item['protein_g'] = double.parse(p.toStringAsFixed(1));
-      item['carbs_g'] = double.parse(c.toStringAsFixed(1));
-      item['fat_g'] = double.parse(f.toStringAsFixed(1));
-
-      if (kcal == 0 && (per100g['kcal'] as num?) == 0) {
+      if (computed.kcal == 0 && baseNut.kcal == 0) {
         item['resolved'] = false;
       } else {
         item['resolved'] = true;
-        totalCal += kcal;
-        totalP += p;
-        totalC += c;
-        totalF += f;
+        totalCal += computed.kcal;
+        totalP += computed.proteinG;
+        totalC += computed.carbsG;
+        totalF += computed.fatG;
       }
     }
 
@@ -660,7 +724,7 @@ Do NOT use JSON.
         prompt: prompt,
         systemInstruction:
             'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
-        apiKey: apiKey,
+        apiKey: apiKey ?? '',
       );
 
       final buffer = StringBuffer();

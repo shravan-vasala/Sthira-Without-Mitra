@@ -26,7 +26,7 @@ final insightsProvider = Provider<List<Insight>>((ref) {
     if (allItems.isNotEmpty) {
       MealItemLog? topProteinItem;
       for (final item in allItems) {
-        if ((item.proteinG ?? 0) > (topProteinItem?.proteinG ?? 0)) {
+        if ((item.computedNutrition?.proteinG ?? 0) > (topProteinItem?.computedNutrition?.proteinG ?? 0)) {
           topProteinItem = item;
         }
       }

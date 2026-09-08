@@ -99,8 +99,9 @@ class AiClient {
     required String systemInstruction,
     List<Uint8List>? imageBytesList,
     String? mimeType,
-    String? apiKey,
+    required String apiKey,
     bool skipCache = false,
+    Map<String, dynamic>? responseSchema,
   }) async {
     if (apiKey == null || apiKey.isEmpty) {
       throw AiException('API Key is required. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
@@ -167,6 +168,7 @@ class AiClient {
             imageBytesList: processedImages.isNotEmpty ? processedImages : null,
             mimeType: actualMimeType,
             timeout: attemptTimeout,
+            responseSchema: responseSchema,
           );
           sw.stop();
           
@@ -260,6 +262,7 @@ class AiClient {
     List<Uint8List>? imageBytesList,
     String? mimeType,
     Duration timeout = const Duration(seconds: 30),
+    Map<String, dynamic>? responseSchema,
   }) async {
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('API Key is required.');
@@ -277,8 +280,9 @@ class AiClient {
 
       final request = GenerateContentRequest(
         systemInstruction: systemInstruction != null ? Content.text(systemInstruction) : null,
-        generationConfig: const GenerationConfig(
+        generationConfig: GenerationConfig(
           responseMimeType: 'application/json',
+          responseSchema: responseSchema,
           temperature: 0.1,
         ),
         contents: [

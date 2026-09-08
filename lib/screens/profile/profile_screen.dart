@@ -1611,7 +1611,7 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
         await client.generateJson(
           prompt: '{"test":"Respond with exactly {\"status\":\"ok\"}"}',
           systemInstruction: 'Respond only in valid JSON.',
-          apiKey: profile.geminiApiKey,
+          apiKey: profile.geminiApiKey ?? '',
           skipCache: true,
         );
         sw.stop();

@@ -19,23 +19,23 @@ void main() {
     test('match returns item for exact name match', () {
       final match = service.match('White Rice');
       expect(match, isNotNull);
-      expect(match!['id'], 'white_rice');
+      expect(match!.id, 'white_rice');
     });
 
     test('match returns item for alias match (Telugu names)', () {
       final match1 = service.match('annam');
       expect(match1, isNotNull);
-      expect(match1!['id'], 'white_rice');
+      expect(match1!.id, 'white_rice');
 
       final match2 = service.match('kodi kura');
       expect(match2, isNotNull);
-      expect(match2!['id'], 'chicken_curry');
+      expect(match2!.id, 'chicken_curry');
     });
 
     test('match returns item for partial match with weird casing/spaces', () {
       final match = service.match('  Kodi   Vepudu  ');
       expect(match, isNotNull);
-      expect(match!['id'], 'chicken_fry');
+      expect(match!.id, 'chicken_fry');
     });
 
     test('match returns null for unknown dish', () {

@@ -9,6 +9,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/layout_insets.dart';
 import '../../providers/app_providers.dart';
 import '../../models/daily_meal_log.dart';
+import '../../models/food_nutrition.dart';
 import '../../models/meal_plan.dart';
 import '../../utils/meal_plan_complete.dart';
 import '../../widgets/app_bottom_sheet.dart';
@@ -494,14 +495,27 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       return MealItemLog(
         name: i.name,
         portion: i.portion,
-        calories: i.calories,
-        proteinG: i.proteinG,
-        carbsG: i.carbsG,
-        fatG: i.fatG,
+        computedNutrition: i.computedNutrition != null
+            ? FoodNutrition(
+                kcal: i.computedNutrition!.kcal,
+                proteinG: i.computedNutrition!.proteinG,
+                carbsG: i.computedNutrition!.carbsG,
+                fatG: i.computedNutrition!.fatG,
+              )
+            : null,
+        baseNutrition: i.baseNutrition != null
+            ? FoodNutrition(
+                kcal: i.baseNutrition!.kcal,
+                proteinG: i.baseNutrition!.proteinG,
+                carbsG: i.baseNutrition!.carbsG,
+                fatG: i.baseNutrition!.fatG,
+              )
+            : null,
         resolved: i.resolved,
         provenance: i.provenance,
         isPer100g: i.isPer100g,
         servingGrams: i.servingGrams,
+        consumedGrams: i.consumedGrams,
       );
     }).toList();
 

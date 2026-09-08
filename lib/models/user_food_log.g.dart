@@ -22,34 +22,35 @@ const UserFoodLogSchema = CollectionSchema(
       name: r'addedAt',
       type: IsarType.dateTime,
     ),
-    r'carbsG': PropertySchema(
+    r'baseNutrition': PropertySchema(
       id: 1,
-      name: r'carbsG',
-      type: IsarType.double,
+      name: r'baseNutrition',
+      type: IsarType.object,
+      target: r'FoodNutrition',
     ),
-    r'fatG': PropertySchema(
+    r'isPer100g': PropertySchema(
       id: 2,
-      name: r'fatG',
-      type: IsarType.double,
-    ),
-    r'kcal': PropertySchema(
-      id: 3,
-      name: r'kcal',
-      type: IsarType.double,
+      name: r'isPer100g',
+      type: IsarType.bool,
     ),
     r'normalizedName': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'normalizedName',
       type: IsarType.string,
     ),
     r'originalName': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'originalName',
       type: IsarType.string,
     ),
-    r'proteinG': PropertySchema(
+    r'provenance': PropertySchema(
+      id: 5,
+      name: r'provenance',
+      type: IsarType.string,
+    ),
+    r'servingGrams': PropertySchema(
       id: 6,
-      name: r'proteinG',
+      name: r'servingGrams',
       type: IsarType.double,
     )
   },
@@ -74,7 +75,7 @@ const UserFoodLogSchema = CollectionSchema(
     )
   },
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {r'FoodNutrition': FoodNutritionSchema},
   getId: _userFoodLogGetId,
   getLinks: _userFoodLogGetLinks,
   attach: _userFoodLogAttach,
@@ -87,8 +88,17 @@ int _userFoodLogEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 +
+      FoodNutritionSchema.estimateSize(
+          object.baseNutrition, allOffsets[FoodNutrition]!, allOffsets);
   bytesCount += 3 + object.normalizedName.length * 3;
   bytesCount += 3 + object.originalName.length * 3;
+  {
+    final value = object.provenance;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -99,12 +109,17 @@ void _userFoodLogSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDateTime(offsets[0], object.addedAt);
-  writer.writeDouble(offsets[1], object.carbsG);
-  writer.writeDouble(offsets[2], object.fatG);
-  writer.writeDouble(offsets[3], object.kcal);
-  writer.writeString(offsets[4], object.normalizedName);
-  writer.writeString(offsets[5], object.originalName);
-  writer.writeDouble(offsets[6], object.proteinG);
+  writer.writeObject<FoodNutrition>(
+    offsets[1],
+    allOffsets,
+    FoodNutritionSchema.serialize,
+    object.baseNutrition,
+  );
+  writer.writeBool(offsets[2], object.isPer100g);
+  writer.writeString(offsets[3], object.normalizedName);
+  writer.writeString(offsets[4], object.originalName);
+  writer.writeString(offsets[5], object.provenance);
+  writer.writeDouble(offsets[6], object.servingGrams);
 }
 
 UserFoodLog _userFoodLogDeserialize(
@@ -115,12 +130,17 @@ UserFoodLog _userFoodLogDeserialize(
 ) {
   final object = UserFoodLog(
     addedAt: reader.readDateTime(offsets[0]),
-    carbsG: reader.readDouble(offsets[1]),
-    fatG: reader.readDouble(offsets[2]),
-    kcal: reader.readDouble(offsets[3]),
-    normalizedName: reader.readString(offsets[4]),
-    originalName: reader.readString(offsets[5]),
-    proteinG: reader.readDouble(offsets[6]),
+    baseNutrition: reader.readObjectOrNull<FoodNutrition>(
+          offsets[1],
+          FoodNutritionSchema.deserialize,
+          allOffsets,
+        ) ??
+        FoodNutrition(),
+    isPer100g: reader.readBoolOrNull(offsets[2]) ?? false,
+    normalizedName: reader.readString(offsets[3]),
+    originalName: reader.readString(offsets[4]),
+    provenance: reader.readStringOrNull(offsets[5]),
+    servingGrams: reader.readDoubleOrNull(offsets[6]),
   );
   object.id = id;
   return object;
@@ -136,17 +156,22 @@ P _userFoodLogDeserializeProp<P>(
     case 0:
       return (reader.readDateTime(offset)) as P;
     case 1:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readObjectOrNull<FoodNutrition>(
+            offset,
+            FoodNutritionSchema.deserialize,
+            allOffsets,
+          ) ??
+          FoodNutrition()) as P;
     case 2:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -401,131 +426,6 @@ extension UserFoodLogQueryFilter
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> carbsGEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'carbsG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
-      carbsGGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'carbsG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> carbsGLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'carbsG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> carbsGBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'carbsG',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> fatGEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'fatG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> fatGGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'fatG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> fatGLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'fatG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> fatGBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'fatG',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
   QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -579,64 +479,12 @@ extension UserFoodLogQueryFilter
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> kcalEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      isPer100gEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'kcal',
+        property: r'isPer100g',
         value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> kcalGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'kcal',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> kcalLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'kcal',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> kcalBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'kcal',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
       ));
     });
   }
@@ -913,13 +761,186 @@ extension UserFoodLogQueryFilter
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> proteinGEqualTo(
-    double value, {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'provenance',
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'provenance',
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'provenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'provenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'provenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'provenance',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'provenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'provenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'provenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'provenance',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'provenance',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      provenanceIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'provenance',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      servingGramsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'servingGrams',
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      servingGramsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'servingGrams',
+      ));
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      servingGramsEqualTo(
+    double? value, {
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'proteinG',
+        property: r'servingGrams',
         value: value,
         epsilon: epsilon,
       ));
@@ -927,15 +948,15 @@ extension UserFoodLogQueryFilter
   }
 
   QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
-      proteinGGreaterThan(
-    double value, {
+      servingGramsGreaterThan(
+    double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'proteinG',
+        property: r'servingGrams',
         value: value,
         epsilon: epsilon,
       ));
@@ -943,31 +964,32 @@ extension UserFoodLogQueryFilter
   }
 
   QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
-      proteinGLessThan(
-    double value, {
+      servingGramsLessThan(
+    double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'proteinG',
+        property: r'servingGrams',
         value: value,
         epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> proteinGBetween(
-    double lower,
-    double upper, {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition>
+      servingGramsBetween(
+    double? lower,
+    double? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'proteinG',
+        property: r'servingGrams',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -979,7 +1001,14 @@ extension UserFoodLogQueryFilter
 }
 
 extension UserFoodLogQueryObject
-    on QueryBuilder<UserFoodLog, UserFoodLog, QFilterCondition> {}
+    on QueryBuilder<UserFoodLog, UserFoodLog, QFilterCondition> {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterFilterCondition> baseNutrition(
+      FilterQuery<FoodNutrition> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'baseNutrition');
+    });
+  }
+}
 
 extension UserFoodLogQueryLinks
     on QueryBuilder<UserFoodLog, UserFoodLog, QFilterCondition> {}
@@ -998,39 +1027,15 @@ extension UserFoodLogQuerySortBy
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByCarbsG() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByIsPer100g() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'carbsG', Sort.asc);
+      return query.addSortBy(r'isPer100g', Sort.asc);
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByCarbsGDesc() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByIsPer100gDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'carbsG', Sort.desc);
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByFatG() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'fatG', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByFatGDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'fatG', Sort.desc);
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByKcal() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kcal', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByKcalDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kcal', Sort.desc);
+      return query.addSortBy(r'isPer100g', Sort.desc);
     });
   }
 
@@ -1060,15 +1065,28 @@ extension UserFoodLogQuerySortBy
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByProteinG() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByProvenance() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'proteinG', Sort.asc);
+      return query.addSortBy(r'provenance', Sort.asc);
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByProteinGDesc() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByProvenanceDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'proteinG', Sort.desc);
+      return query.addSortBy(r'provenance', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> sortByServingGrams() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'servingGrams', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy>
+      sortByServingGramsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'servingGrams', Sort.desc);
     });
   }
 }
@@ -1087,30 +1105,6 @@ extension UserFoodLogQuerySortThenBy
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByCarbsG() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'carbsG', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByCarbsGDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'carbsG', Sort.desc);
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByFatG() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'fatG', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByFatGDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'fatG', Sort.desc);
-    });
-  }
-
   QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1123,15 +1117,15 @@ extension UserFoodLogQuerySortThenBy
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByKcal() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByIsPer100g() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kcal', Sort.asc);
+      return query.addSortBy(r'isPer100g', Sort.asc);
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByKcalDesc() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByIsPer100gDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'kcal', Sort.desc);
+      return query.addSortBy(r'isPer100g', Sort.desc);
     });
   }
 
@@ -1161,15 +1155,28 @@ extension UserFoodLogQuerySortThenBy
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByProteinG() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByProvenance() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'proteinG', Sort.asc);
+      return query.addSortBy(r'provenance', Sort.asc);
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByProteinGDesc() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByProvenanceDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'proteinG', Sort.desc);
+      return query.addSortBy(r'provenance', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy> thenByServingGrams() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'servingGrams', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QAfterSortBy>
+      thenByServingGramsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'servingGrams', Sort.desc);
     });
   }
 }
@@ -1182,21 +1189,9 @@ extension UserFoodLogQueryWhereDistinct
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QDistinct> distinctByCarbsG() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QDistinct> distinctByIsPer100g() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'carbsG');
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QDistinct> distinctByFatG() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'fatG');
-    });
-  }
-
-  QueryBuilder<UserFoodLog, UserFoodLog, QDistinct> distinctByKcal() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'kcal');
+      return query.addDistinctBy(r'isPer100g');
     });
   }
 
@@ -1215,9 +1210,16 @@ extension UserFoodLogQueryWhereDistinct
     });
   }
 
-  QueryBuilder<UserFoodLog, UserFoodLog, QDistinct> distinctByProteinG() {
+  QueryBuilder<UserFoodLog, UserFoodLog, QDistinct> distinctByProvenance(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'proteinG');
+      return query.addDistinctBy(r'provenance', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<UserFoodLog, UserFoodLog, QDistinct> distinctByServingGrams() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'servingGrams');
     });
   }
 }
@@ -1236,21 +1238,16 @@ extension UserFoodLogQueryProperty
     });
   }
 
-  QueryBuilder<UserFoodLog, double, QQueryOperations> carbsGProperty() {
+  QueryBuilder<UserFoodLog, FoodNutrition, QQueryOperations>
+      baseNutritionProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'carbsG');
+      return query.addPropertyName(r'baseNutrition');
     });
   }
 
-  QueryBuilder<UserFoodLog, double, QQueryOperations> fatGProperty() {
+  QueryBuilder<UserFoodLog, bool, QQueryOperations> isPer100gProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'fatG');
-    });
-  }
-
-  QueryBuilder<UserFoodLog, double, QQueryOperations> kcalProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'kcal');
+      return query.addPropertyName(r'isPer100g');
     });
   }
 
@@ -1266,9 +1263,15 @@ extension UserFoodLogQueryProperty
     });
   }
 
-  QueryBuilder<UserFoodLog, double, QQueryOperations> proteinGProperty() {
+  QueryBuilder<UserFoodLog, String?, QQueryOperations> provenanceProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'proteinG');
+      return query.addPropertyName(r'provenance');
+    });
+  }
+
+  QueryBuilder<UserFoodLog, double?, QQueryOperations> servingGramsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'servingGrams');
     });
   }
 }

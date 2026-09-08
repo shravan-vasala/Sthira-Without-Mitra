@@ -1332,6 +1332,15 @@ void main() {
       "estimated": true,
     },
   ];
+  for (var item in table) {
+    if (item.containsKey('per100g')) {
+      item['is_per_100g'] = true;
+      item['base_quantity_unit'] = 'g';
+    } else {
+      item['is_per_100g'] = false;
+      item['base_quantity_unit'] = 'serving';
+    }
+  }
 
   print('Generating nutrition table with ${table.length} items...');
   File('assets/data/nutrition_table.json').writeAsStringSync(jsonEncode(table));

@@ -78,7 +78,8 @@ const DailyMealLogSchema = CollectionSchema(
   embeddedSchemas: {
     r'CustomSlotEntry': CustomSlotEntrySchema,
     r'MealSlotLog': MealSlotLogSchema,
-    r'MealItemLog': MealItemLogSchema
+    r'MealItemLog': MealItemLogSchema,
+    r'FoodNutrition': FoodNutritionSchema
   },
   getId: _dailyMealLogGetId,
   getLinks: _dailyMealLogGetLinks,
@@ -2675,35 +2676,37 @@ const MealItemLogSchema = Schema(
   name: r'MealItemLog',
   id: -3515644216177808912,
   properties: {
-    r'calories': PropertySchema(
+    r'baseNutrition': PropertySchema(
       id: 0,
-      name: r'calories',
-      type: IsarType.long,
+      name: r'baseNutrition',
+      type: IsarType.object,
+      target: r'FoodNutrition',
     ),
-    r'carbsG': PropertySchema(
+    r'computedNutrition': PropertySchema(
       id: 1,
-      name: r'carbsG',
+      name: r'computedNutrition',
+      type: IsarType.object,
+      target: r'FoodNutrition',
+    ),
+    r'consumedGrams': PropertySchema(
+      id: 2,
+      name: r'consumedGrams',
       type: IsarType.double,
     ),
-    r'fatG': PropertySchema(
-      id: 2,
-      name: r'fatG',
-      type: IsarType.double,
+    r'isPer100g': PropertySchema(
+      id: 3,
+      name: r'isPer100g',
+      type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     ),
     r'portion': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'portion',
       type: IsarType.string,
-    ),
-    r'proteinG': PropertySchema(
-      id: 5,
-      name: r'proteinG',
-      type: IsarType.double,
     ),
     r'provenance': PropertySchema(
       id: 6,
@@ -2714,6 +2717,11 @@ const MealItemLogSchema = Schema(
       id: 7,
       name: r'resolved',
       type: IsarType.bool,
+    ),
+    r'servingGrams': PropertySchema(
+      id: 8,
+      name: r'servingGrams',
+      type: IsarType.double,
     )
   },
   estimateSize: _mealItemLogEstimateSize,
@@ -2728,6 +2736,22 @@ int _mealItemLogEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.baseNutrition;
+    if (value != null) {
+      bytesCount += 3 +
+          FoodNutritionSchema.estimateSize(
+              value, allOffsets[FoodNutrition]!, allOffsets);
+    }
+  }
+  {
+    final value = object.computedNutrition;
+    if (value != null) {
+      bytesCount += 3 +
+          FoodNutritionSchema.estimateSize(
+              value, allOffsets[FoodNutrition]!, allOffsets);
+    }
+  }
   {
     final value = object.name;
     if (value != null) {
@@ -2755,14 +2779,25 @@ void _mealItemLogSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.calories);
-  writer.writeDouble(offsets[1], object.carbsG);
-  writer.writeDouble(offsets[2], object.fatG);
-  writer.writeString(offsets[3], object.name);
-  writer.writeString(offsets[4], object.portion);
-  writer.writeDouble(offsets[5], object.proteinG);
+  writer.writeObject<FoodNutrition>(
+    offsets[0],
+    allOffsets,
+    FoodNutritionSchema.serialize,
+    object.baseNutrition,
+  );
+  writer.writeObject<FoodNutrition>(
+    offsets[1],
+    allOffsets,
+    FoodNutritionSchema.serialize,
+    object.computedNutrition,
+  );
+  writer.writeDouble(offsets[2], object.consumedGrams);
+  writer.writeBool(offsets[3], object.isPer100g);
+  writer.writeString(offsets[4], object.name);
+  writer.writeString(offsets[5], object.portion);
   writer.writeString(offsets[6], object.provenance);
   writer.writeBool(offsets[7], object.resolved);
+  writer.writeDouble(offsets[8], object.servingGrams);
 }
 
 MealItemLog _mealItemLogDeserialize(
@@ -2772,14 +2807,23 @@ MealItemLog _mealItemLogDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = MealItemLog(
-    calories: reader.readLongOrNull(offsets[0]),
-    carbsG: reader.readDoubleOrNull(offsets[1]),
-    fatG: reader.readDoubleOrNull(offsets[2]),
-    name: reader.readStringOrNull(offsets[3]),
-    portion: reader.readStringOrNull(offsets[4]),
-    proteinG: reader.readDoubleOrNull(offsets[5]),
+    baseNutrition: reader.readObjectOrNull<FoodNutrition>(
+      offsets[0],
+      FoodNutritionSchema.deserialize,
+      allOffsets,
+    ),
+    computedNutrition: reader.readObjectOrNull<FoodNutrition>(
+      offsets[1],
+      FoodNutritionSchema.deserialize,
+      allOffsets,
+    ),
+    consumedGrams: reader.readDoubleOrNull(offsets[2]),
+    isPer100g: reader.readBoolOrNull(offsets[3]) ?? false,
+    name: reader.readStringOrNull(offsets[4]),
+    portion: reader.readStringOrNull(offsets[5]),
     provenance: reader.readStringOrNull(offsets[6]),
     resolved: reader.readBoolOrNull(offsets[7]) ?? true,
+    servingGrams: reader.readDoubleOrNull(offsets[8]),
   );
   return object;
 }
@@ -2792,21 +2836,31 @@ P _mealItemLogDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readObjectOrNull<FoodNutrition>(
+        offset,
+        FoodNutritionSchema.deserialize,
+        allOffsets,
+      )) as P;
     case 1:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readObjectOrNull<FoodNutrition>(
+        offset,
+        FoodNutritionSchema.deserialize,
+        allOffsets,
+      )) as P;
     case 2:
       return (reader.readDoubleOrNull(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
       return (reader.readStringOrNull(offset)) as P;
     case 7:
       return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 8:
+      return (reader.readDoubleOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -2815,102 +2869,67 @@ P _mealItemLogDeserializeProp<P>(
 extension MealItemLogQueryFilter
     on QueryBuilder<MealItemLog, MealItemLog, QFilterCondition> {
   QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      caloriesIsNull() {
+      baseNutritionIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'calories',
+        property: r'baseNutrition',
       ));
     });
   }
 
   QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      caloriesIsNotNull() {
+      baseNutritionIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'calories',
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> caloriesEqualTo(
-      int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'calories',
-        value: value,
+        property: r'baseNutrition',
       ));
     });
   }
 
   QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      caloriesGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'calories',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      caloriesLessThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'calories',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> caloriesBetween(
-    int? lower,
-    int? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'calories',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> carbsGIsNull() {
+      computedNutritionIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'carbsG',
+        property: r'computedNutrition',
       ));
     });
   }
 
   QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      carbsGIsNotNull() {
+      computedNutritionIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'carbsG',
+        property: r'computedNutrition',
       ));
     });
   }
 
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> carbsGEqualTo(
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      consumedGramsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'consumedGrams',
+      ));
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      consumedGramsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'consumedGrams',
+      ));
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      consumedGramsEqualTo(
     double? value, {
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'carbsG',
+        property: r'consumedGrams',
         value: value,
         epsilon: epsilon,
       ));
@@ -2918,7 +2937,7 @@ extension MealItemLogQueryFilter
   }
 
   QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      carbsGGreaterThan(
+      consumedGramsGreaterThan(
     double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
@@ -2926,14 +2945,15 @@ extension MealItemLogQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'carbsG',
+        property: r'consumedGrams',
         value: value,
         epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> carbsGLessThan(
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      consumedGramsLessThan(
     double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
@@ -2941,14 +2961,15 @@ extension MealItemLogQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'carbsG',
+        property: r'consumedGrams',
         value: value,
         epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> carbsGBetween(
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      consumedGramsBetween(
     double? lower,
     double? upper, {
     bool includeLower = true,
@@ -2957,91 +2978,22 @@ extension MealItemLogQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'carbsG',
+        property: r'consumedGrams',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> fatGIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'fatG',
       ));
     });
   }
 
   QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      fatGIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'fatG',
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> fatGEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
+      isPer100gEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'fatG',
+        property: r'isPer100g',
         value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> fatGGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'fatG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> fatGLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'fatG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> fatGBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'fatG',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
       ));
     });
   }
@@ -3347,88 +3299,6 @@ extension MealItemLogQueryFilter
   }
 
   QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      proteinGIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'proteinG',
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      proteinGIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'proteinG',
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> proteinGEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'proteinG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      proteinGGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'proteinG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
-      proteinGLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'proteinG',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> proteinGBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'proteinG',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
       provenanceIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -3591,7 +3461,105 @@ extension MealItemLogQueryFilter
       ));
     });
   }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      servingGramsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'servingGrams',
+      ));
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      servingGramsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'servingGrams',
+      ));
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      servingGramsEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'servingGrams',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      servingGramsGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'servingGrams',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      servingGramsLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'servingGrams',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      servingGramsBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'servingGrams',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
 }
 
 extension MealItemLogQueryObject
-    on QueryBuilder<MealItemLog, MealItemLog, QFilterCondition> {}
+    on QueryBuilder<MealItemLog, MealItemLog, QFilterCondition> {
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition> baseNutrition(
+      FilterQuery<FoodNutrition> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'baseNutrition');
+    });
+  }
+
+  QueryBuilder<MealItemLog, MealItemLog, QAfterFilterCondition>
+      computedNutrition(FilterQuery<FoodNutrition> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'computedNutrition');
+    });
+  }
+}

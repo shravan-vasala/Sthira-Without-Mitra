@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
 import '../models/user_food_log.dart';
 
+import '../models/nutrition_lookup_result.dart';
+import '../models/food_nutrition.dart';
+
 class NutritionLookupService {
   List<Map<String, dynamic>> _nutritionTable = [];
   bool _isLoaded = false;
@@ -23,7 +26,7 @@ class NutritionLookupService {
   }
 
   /// Returns the matched item if found, otherwise null.
-  Map<String, dynamic>? match(String dishName) {
+  NutritionLookupResult? match(String dishName) {
     if (!_isLoaded || dishName.trim().isEmpty) return null;
 
     final queryTokens = _tokenize(dishName);
@@ -38,25 +41,20 @@ class NutritionLookupService {
           .normalizedNameEqualTo(queryStr)
           .findFirstSync();
       if (userFood != null) {
-        return {
-          'name': userFood.originalName,
-          'is_per_100g': userFood.isPer100g,
-          'serving_grams': userFood.servingGrams,
-          'provenance': userFood.provenance,
-          'per100g': {
-            'kcal': userFood.kcal,
-            'protein_g': userFood.proteinG,
-            'carbs_g': userFood.carbsG,
-            'fat_g': userFood.fatG,
-          },
-        };
+        return NutritionLookupResult(
+          id: 'user_food_${userFood.id}',
+          name: userFood.originalName,
+          baseNutrition: userFood.baseNutrition,
+          isPer100g: userFood.isPer100g,
+          servingGrams: userFood.servingGrams,
+        );
       }
     }
 
     // 1. Exact match on static table name
     for (var item in _nutritionTable) {
       if (_normalize(item['name'] as String) == queryStr) {
-        return item;
+        return _mapToResult(item);
       }
     }
 
@@ -65,7 +63,7 @@ class NutritionLookupService {
       final aliases = List<String>.from(item['aliases'] ?? []);
       for (var alias in aliases) {
         if (_normalize(alias) == queryStr) {
-          return item;
+          return _mapToResult(item);
         }
       }
     }
@@ -138,7 +136,31 @@ class NutritionLookupService {
       return (b['nameLength'] as int).compareTo(a['nameLength'] as int);
     });
 
-    return candidates.first['item'] as Map<String, dynamic>;
+    return _mapToResult(candidates.first['item'] as Map<String, dynamic>);
+  }
+
+  NutritionLookupResult _mapToResult(Map<String, dynamic> item) {
+    final per100g = item['per100g'] as Map<String, dynamic>?;
+    final perServing = item['perServing'] as Map<String, dynamic>?;
+    
+    // nutrition_table.json generator uses 'per100g' specifically. 
+    final isPer100g = per100g != null;
+    final nutSource = per100g ?? perServing ?? {};
+
+    return NutritionLookupResult(
+      id: item['id'] as String? ?? 'unknown',
+      name: item['name'] as String? ?? 'Unknown',
+      baseNutrition: FoodNutrition(
+        kcal: (nutSource['kcal'] as num?)?.toDouble() ?? 0.0,
+        proteinG: (nutSource['protein_g'] as num?)?.toDouble() ?? 0.0,
+        carbsG: (nutSource['carbs_g'] as num?)?.toDouble() ?? 0.0,
+        fatG: (nutSource['fat_g'] as num?)?.toDouble() ?? 0.0,
+      ),
+      isPer100g: isPer100g,
+      servingGrams: (item['defaultPortionG'] as num?)?.toDouble(), // Default serving grams in JSON
+      baseQuantityUnit: item['base_quantity_unit'] as String?,
+      provenance: 'local_db',
+    );
   }
 
   List<String> _tokenize(String input) {
