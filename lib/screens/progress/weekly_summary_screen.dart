@@ -93,6 +93,8 @@ class WeeklySummaryScreen extends ConsumerWidget {
               if (summary.habitCompletionRate > 0)
                 _HabitChartCard(
                   rates: summary.dailyHabitRates,
+                  totals: summary.dailyHabitsTotal,
+                  startOfWeek: startOfWeek,
                 ).animate().fade(delay: 400.ms).slideY(begin: 0.1),
 
               const SizedBox(height: 32),
@@ -609,7 +611,9 @@ class _DailyScoresChartCard extends ConsumerWidget {
 
 class _HabitChartCard extends StatelessWidget {
   final List<double> rates;
-  const _HabitChartCard({required this.rates});
+  final List<int> totals;
+  final DateTime startOfWeek;
+  const _HabitChartCard({required this.rates, required this.totals, required this.startOfWeek});
 
   @override
   Widget build(BuildContext context) {
@@ -687,12 +691,24 @@ class _HabitChartCard extends StatelessWidget {
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
                 barGroups: List.generate(7, (i) {
+                  final d = startOfWeek.add(Duration(days: i));
+                  final isFuture = d.isAfter(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+                  final isUnscheduled = totals[i] == 0;
+                  
+                  final barColor = (isFuture || isUnscheduled) 
+                      ? context.colors.border 
+                      : context.colors.primary;
+                      
+                  final backColor = (isFuture || isUnscheduled)
+                      ? context.colors.border.withValues(alpha: 0.1)
+                      : context.colors.primary.withValues(alpha: 0.1);
+
                   return BarChartGroupData(
                     x: i,
                     barRods: [
                       BarChartRodData(
                         toY: rates[i],
-                        color: context.colors.primary,
+                        color: barColor,
                         width: 10,
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(3),
@@ -700,7 +716,7 @@ class _HabitChartCard extends StatelessWidget {
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: 1.0,
-                          color: context.colors.primary.withValues(alpha: 0.1),
+                          color: backColor,
                         ),
                       ),
                     ],

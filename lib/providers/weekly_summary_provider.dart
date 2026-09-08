@@ -22,6 +22,7 @@ class WeeklySummary {
   final double weightDelta; // end - start
   final int weekScore; // 0 to 100
   final List<double> dailyHabitRates;
+  final List<int> dailyHabitsTotal;
   final List<int?> dailyScores;
 
   // Previous week stats for trend deltas
@@ -48,6 +49,7 @@ class WeeklySummary {
     required this.daysUnderCalories,
     required this.weightDelta,
     required this.dailyHabitRates,
+    required this.dailyHabitsTotal,
     required this.dailyScores,
     required this.weekScore,
     this.previousWeekScore,
@@ -131,6 +133,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
   int totalHabitInstances = 0;
   int completedHabitInstances = 0;
   final List<double> dailyRates = List.filled(7, 0.0);
+  final List<int> dailyHabitsTotalList = List.filled(7, 0);
   final List<int?> dailyScores = List.filled(7, null);
   final Map<String, int> habitStreaksThisWeek = {};
   final Map<String, int> currentHabitStreak = {};
@@ -179,6 +182,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
     totalHabitInstances += stats.habitsTotal;
     completedHabitInstances += stats.habitsDone;
     dailyRates[i] = stats.habitRate;
+    dailyHabitsTotalList[i] = stats.habitsTotal;
 
     final today = DateTime.now();
     final isFuture = d.isAfter(DateTime(today.year, today.month, today.day));
@@ -396,6 +400,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
     daysUnderCalories: daysUnder,
     weightDelta: weightDelta,
     dailyHabitRates: dailyRates,
+    dailyHabitsTotal: dailyHabitsTotalList,
     dailyScores: dailyScores,
     weekScore: weekScore,
     previousWeekScore: prevWeekScore,

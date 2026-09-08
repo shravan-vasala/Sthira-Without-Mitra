@@ -28,7 +28,7 @@ enum MetricType {
   screenTime,
 }
 
-enum TimeRange { oneMonth, threeMonths, sixMonths, ytd }
+enum TimeRange { weekly, oneMonth, threeMonths, sixMonths, ytd }
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key, this.initialMetric});
@@ -41,7 +41,20 @@ class ProgressScreen extends ConsumerStatefulWidget {
 
 class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   late MetricType _selectedMetric;
-  TimeRange _selectedRange = TimeRange.oneMonth;
+  final Map<MetricType, TimeRange> _selectedRanges = {};
+
+  TimeRange get _selectedRange {
+    if (_selectedRanges.containsKey(_selectedMetric)) return _selectedRanges[_selectedMetric]!;
+    // Default: daily activity/nutrition to 1W, body measurements to 1M
+    final isBody = _selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi;
+    return isBody ? TimeRange.oneMonth : TimeRange.weekly;
+  }
+  
+  void _setRange(TimeRange range) {
+    setState(() {
+      _selectedRanges[_selectedMetric] = range;
+    });
+  }
 
   @override
   void initState() {
@@ -71,26 +84,26 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (details.primaryVelocity == null) return;
     if (details.primaryVelocity! > 300) {
       Haptics.tap();
-      setState(() {
-        if (_selectedRange == TimeRange.ytd) _selectedRange = TimeRange.sixMonths;
-        else if (_selectedRange == TimeRange.sixMonths) _selectedRange = TimeRange.threeMonths;
-        else if (_selectedRange == TimeRange.threeMonths) _selectedRange = TimeRange.oneMonth;
-        else _selectedRange = TimeRange.ytd;
-      });
+      if (_selectedRange == TimeRange.ytd) _setRange(TimeRange.sixMonths);
+      else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.threeMonths);
+      else if (_selectedRange == TimeRange.threeMonths) _setRange(TimeRange.oneMonth);
+      else if (_selectedRange == TimeRange.oneMonth) _setRange(TimeRange.weekly);
+      else _setRange(TimeRange.ytd);
     } else if (details.primaryVelocity! < -300) {
       Haptics.tap();
-      setState(() {
-        if (_selectedRange == TimeRange.oneMonth) _selectedRange = TimeRange.threeMonths;
-        else if (_selectedRange == TimeRange.threeMonths) _selectedRange = TimeRange.sixMonths;
-        else if (_selectedRange == TimeRange.sixMonths) _selectedRange = TimeRange.ytd;
-        else _selectedRange = TimeRange.oneMonth;
-      });
+      if (_selectedRange == TimeRange.weekly) _setRange(TimeRange.oneMonth);
+      else if (_selectedRange == TimeRange.oneMonth) _setRange(TimeRange.threeMonths);
+      else if (_selectedRange == TimeRange.threeMonths) _setRange(TimeRange.sixMonths);
+      else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.ytd);
+      else _setRange(TimeRange.weekly);
     }
   }
 
   DateTime get _startDate {
     final d = DateTime.now();
     switch (_selectedRange) {
+      case TimeRange.weekly:
+        return DateTime(d.year, d.month, d.day - 6); // 7 days inclusive
       case TimeRange.oneMonth:
         return DateTime(d.year, d.month - 1, d.day);
       case TimeRange.threeMonths:
@@ -121,7 +134,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final trend = <ChartDataPoint>[];
     for (int i = 0; i < data.length; i++) {
         final window = data.sublist(i > 6 ? i - 6 : 0, i + 1);
-        final sum = window.fold<double>(0, (p, c) => p + c.value);
+        final sum = window.fold<double>(0, (p, c) => p + c.value!);
         trend.add(ChartDataPoint(data[i].date, sum / window.length));
     }
     return trend;
@@ -142,10 +155,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                result.add(ChartDataPoint(currentWeekDate!, avg));
            }
            currentWeek = weekIdx;
-           currentWeekVals = [d.value];
+           currentWeekVals = [d.value!];
            currentWeekDate = d.date;
        } else {
-           currentWeekVals.add(d.value);
+           currentWeekVals.add(d.value!);
        }
     }
     if (currentWeekVals.isNotEmpty) {
@@ -190,11 +203,23 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           break;
       }
       if (val != null) {
-        if (metric == MetricType.steps && val <= 0) continue;
         data.add(ChartDataPoint(d, val));
       }
     }
     return data;
+  }
+
+  MetricSpec _getMetricSpec(MetricType metric, bool useKg) {
+    switch (metric) {
+      case MetricType.weight: return MetricSpec(title: 'Weight', unit: useKg ? 'kg' : 'lb', isCount: false, plotType: ChartPlotType.line, showKgLbToggle: true);
+      case MetricType.steps: return MetricSpec(title: 'Steps Taken', unit: 'steps', isCount: true, plotType: ChartPlotType.bar);
+      case MetricType.sleep: return MetricSpec(title: 'Sleep Quality', unit: 'h', isCount: false, plotType: ChartPlotType.bar);
+      case MetricType.bmi: return MetricSpec(title: 'BMI Index', unit: '', isCount: false, plotType: ChartPlotType.line);
+      case MetricType.bodyFat: return MetricSpec(title: 'Body Fat', unit: '%', isCount: false, plotType: ChartPlotType.line);
+      case MetricType.calories: return MetricSpec(title: 'Calories', unit: 'kcal', isCount: true, plotType: ChartPlotType.bar);
+      case MetricType.protein: return MetricSpec(title: 'Protein', unit: 'g', isCount: true, plotType: ChartPlotType.bar);
+      case MetricType.screenTime: return MetricSpec(title: 'Screen Time', unit: 'h', isCount: false, plotType: ChartPlotType.bar);
+    }
   }
 
   String _formatOverviewValue(double value, MetricType metric, bool useKg) {
@@ -216,7 +241,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (isTrendMetric && data.length >= 2) {
       final trend = _calculateTrendData(data);
       if (trend.isEmpty) trend.addAll(data);
-      final delta = trend.last.value - trend.first.value;
+      final delta = trend.last.value! - trend.first.value!;
       final abs = delta.abs();
       final sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
       switch (metric) {
@@ -248,7 +273,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (data.isEmpty) return const SizedBox();
 
     if (metric == MetricType.steps) {
-      final valid = data.map((d) => d.value).toList();
+      final valid = data.map((d) => d.value!).toList();
       final total = valid.reduce((a, b) => a + b);
       final avg = total ~/ valid.length;
       final maxVal = valid.reduce((a, b) => a > b ? a : b).toInt();
@@ -270,8 +295,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     
     // Unify all metrics to the beautifully flat Triple-Circle Sesireka Layout
     // Displaying "The Journey": Start, Latest, and Delta (Change)
-    final start = data.first.value;
-    final latest = data.last.value;
+    final start = data.first.value!;
+    final latest = data.last.value!;
     final delta = latest - start;
     final sign = delta > 0 ? '+' : '';
     
@@ -370,7 +395,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final isTrendMetric = _selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi;
     final trendData = (_selectedRange != TimeRange.sixMonths && isTrendMetric && data.length > 2) ? _calculateTrendData(data) : null;
     
-    final double avgValue = data.isNotEmpty ? data.map((d) => d.value).reduce((a,b)=>a+b)/data.length : 0;
+    final double avgValue = data.isNotEmpty ? data.map((d) => d.value!).reduce((a,b)=>a+b)/data.length : 0;
     
     final subtitleText = _overviewSubtitle(data, _selectedMetric, useKg);
     final unitText = _overviewUnit(_selectedMetric, useKg);
@@ -385,11 +410,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                TweenAnimationBuilder<double>(
+                  TweenAnimationBuilder<double>(
                   key: ValueKey('$_selectedMetric-$_selectedRange'),
-                  tween: Tween<double>(begin: avgValue * 0.5, end: avgValue),
-                  duration: const Duration(milliseconds: 1200),
-                  curve: Curves.easeOutQuart,
+                  tween: Tween<double>(begin: avgValue, end: avgValue), // Disable 1200ms count-up
+                  duration: const Duration(milliseconds: 200),
                   builder: (context, value, child) {
                     final displayValue = data.isNotEmpty ? _formatOverviewValue(value, _selectedMetric, useKg) : '—';
                     return Text(
@@ -442,6 +466,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                _buildRangeTab(context, '1W', TimeRange.weekly),
                 _buildRangeTab(context, '1M', TimeRange.oneMonth),
                 _buildRangeTab(context, '3M', TimeRange.threeMonths),
                 _buildRangeTab(context, '6M', TimeRange.sixMonths),
@@ -457,13 +482,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             onHorizontalDragEnd: _handleSwipe,
             behavior: HitTestBehavior.opaque,
             child: SharedChartCard(
-              title: '', // No title needed since it's above
+              metric: _getMetricSpec(_selectedMetric, useKg),
               data: isEmpty ? [] : data,
               trendData: trendData,
               startDate: _startDate,
               endDate: _endDate,
-              isSteps: _selectedMetric == MetricType.steps,
-              showKgLbToggle: false,
               useKg: useKg,
               onToggleUnit: () {},
               statLabels: const [], // Hide Shared Chart Footer

@@ -10,22 +10,36 @@ enum ChartTimeFormat { weekly, monthly, sixMonths, allTime }
 
 class ChartDataPoint {
   final DateTime date;
-  final double value;
+  final double? value;
   ChartDataPoint(this.date, this.value);
+}
+
+enum ChartPlotType { bar, line }
+
+class MetricSpec {
+  final String title;
+  final String unit;
+  final bool isCount;
+  final ChartPlotType plotType;
+  final bool showKgLbToggle;
+
+  const MetricSpec({
+    required this.title,
+    required this.unit,
+    this.isCount = false,
+    this.plotType = ChartPlotType.line,
+    this.showKgLbToggle = false,
+  });
 }
 
 class SharedChartCard extends StatelessWidget {
   const SharedChartCard({
     super.key,
-    required this.title,
+    required this.metric,
     required this.data,
     this.trendData,
     required this.startDate,
     required this.endDate,
-    this.isSteps = false,
-    this.isCalories = false,
-    this.isProtein = false,
-    this.showKgLbToggle = false,
     this.useKg = true,
     this.onToggleUnit,
     required this.statLabels,
@@ -38,15 +52,11 @@ class SharedChartCard extends StatelessWidget {
     this.expandChart = false,
   });
 
-  final String title;
+  final MetricSpec metric;
   final List<ChartDataPoint> data;
   final List<ChartDataPoint>? trendData;
   final DateTime startDate;
   final DateTime endDate;
-  final bool isSteps;
-  final bool isCalories;
-  final bool isProtein;
-  final bool showKgLbToggle;
   final bool useKg;
   final VoidCallback? onToggleUnit;
   final List<String> statLabels;
@@ -58,25 +68,20 @@ class SharedChartCard extends StatelessWidget {
   final void Function(DateTime date, double value)? onPointTap;
   final bool expandChart;
 
-  bool get _isCount => isSteps || isCalories || isProtein;
+  bool get _isCount => metric.isCount;
 
-  bool get _useBars => _isCount && timeFormat != ChartTimeFormat.sixMonths;
+  bool get _useBars => metric.plotType == ChartPlotType.bar && timeFormat != ChartTimeFormat.sixMonths;
 
   String _unitSuffix() {
-    if (isSteps) return ' steps';
-    if (isCalories) return ' kcal';
-    if (isProtein) return 'g';
-    if (showKgLbToggle) return useKg ? ' kg' : ' lb';
-    if (title.toLowerCase().contains('sleep')) return 'h';
-    if (title.toLowerCase().contains('body fat')) return '%';
-    return '';
+    if (metric.showKgLbToggle) return useKg ? ' kg' : ' lb';
+    return metric.unit.isEmpty ? '' : ' ${metric.unit}';
   }
 
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         Text(
-          title,
+          metric.title,
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
@@ -84,7 +89,7 @@ class SharedChartCard extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        if (showKgLbToggle)
+        if (metric.showKgLbToggle)
           GestureDetector(
             onTap: onToggleUnit,
             child: Container(
@@ -424,7 +429,7 @@ class SharedChartCard extends StatelessWidget {
     var current = <FlSpot>[sorted.first];
     for (int i = 1; i < sorted.length; i++) {
       final gap = sorted[i].x - sorted[i - 1].x;
-      if (gap > 1.5 && timeFormat != ChartTimeFormat.sixMonths) {
+      if (gap > 1.5) {
         segments.add(current);
         current = <FlSpot>[sorted[i]];
       } else {
@@ -438,10 +443,11 @@ class SharedChartCard extends StatelessWidget {
   Widget _buildBarChart(BuildContext context) {
     final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
     final byDay = {
-      for (final d in sorted) d.date.difference(startDate).inDays: d.value,
+      for (final d in sorted) if (d.value != null) d.date.difference(startDate).inDays: d.value!,
     };
     final primary = context.colors.primary;
-    final (minY, maxY) = _yRange(sorted.map((d) => d.value));
+    final validVals = sorted.where((d) => d.value != null).map((d) => d.value!);
+    final (minY, maxY) = validVals.isEmpty ? (0.0, 10.0) : _yRange(validVals);
     final daySpan = _maxXValue.toInt();
     final barWidth = daySpan <= 7
         ? 14.0
@@ -536,15 +542,17 @@ class SharedChartCard extends StatelessWidget {
   Widget _buildLineChart(BuildContext context) {
     final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
     final spots = sorted
+        .where((d) => d.value != null)
         .map(
           (d) =>
-              FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value),
+              FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value!),
         )
         .toList();
 
     final segments = _segmentSpots(spots);
-    final (minY, maxY) = _yRange(spots.map((s) => s.y));
-    final dataYValues = spots.map((s) => s.y).toList();
+    final validVals = spots.map((s) => s.y);
+    final (minY, maxY) = validVals.isEmpty ? (0.0, 10.0) : _yRange(validVals);
+    final dataYValues = validVals.toList();
     final dataMinY = dataYValues.isNotEmpty ? dataYValues.reduce(min) : 0.0;
     final dataMaxY = dataYValues.isNotEmpty ? dataYValues.reduce(max) : 0.0;
     final maxXValue = _maxXValue;
@@ -622,7 +630,7 @@ class SharedChartCard extends StatelessWidget {
         ),
       if (hasTrend)
         LineChartBarData(
-          spots: trendData!.map((d) => FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value)).toList(),
+          spots: trendData!.where((d) => d.value != null).map((d) => FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value!)).toList(),
           isCurved: true,
           curveSmoothness: 0.3,
           color: primary,
