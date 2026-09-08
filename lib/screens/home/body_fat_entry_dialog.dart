@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
@@ -112,7 +113,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               if (bf != null && bf > 0 && bf <= 100) {
                 Haptics.toggle();
                 final currentLog = ref.read(dailyLogProvider);
-                ref.read(dailyLogProvider.notifier).updateLog(currentLog.copyWith(bodyFat: bf));
+                ref.read(dailyLogProvider.notifier).updateBodyFat(bf);
                 Navigator.of(context).pop();
               }
             },

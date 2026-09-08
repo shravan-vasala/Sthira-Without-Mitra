@@ -89,7 +89,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
       final habits = ref.read(habitsProvider);
       final photoHabit = habits.where((h) => h.name.toLowerCase().contains('photo') || h.name.toLowerCase().contains('picture')).firstOrNull;
       if (photoHabit != null) {
-        ref.read(habitCompletionsProvider.notifier).setOverride(photoHabit.id, date, 'done');
+        ref.read(habitCompletionsProvider.notifier).setOverride(photoHabit.id, 'done');
       }
     } catch (e) {
       if (mounted) {

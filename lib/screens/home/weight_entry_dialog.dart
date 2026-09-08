@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../services/haptics.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../services/widget_update_service.dart';
