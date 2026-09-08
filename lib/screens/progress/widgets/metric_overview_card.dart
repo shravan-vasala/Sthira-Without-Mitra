@@ -92,7 +92,7 @@ class MetricOverviewCard extends StatelessWidget {
               const SizedBox(width: 4),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 18,
+                size: 16,
                 color: context.colors.textLight,
               ),
             ],

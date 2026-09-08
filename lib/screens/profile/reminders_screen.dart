@@ -315,10 +315,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             ],
           ),
           if (child != null) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1, color: context.colors.border),
-            ),
+            const SizedBox(height: 16),
             child,
           ],
         ],

@@ -952,6 +952,7 @@ class _ExportOptionTile extends StatelessWidget {
       trailing: Icon(
         Icons.chevron_right_rounded,
         color: context.colors.textMedium,
+        size: 16,
       ),
       onTap: onTap,
     );
@@ -977,10 +978,10 @@ class _MenuCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: context.colors.card,
-          borderRadius: BorderRadius.circular(kCardRadius),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
           children: [
@@ -1017,7 +1018,7 @@ class _MenuCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: context.colors.textLight),
+            Icon(Icons.chevron_right_rounded, color: context.colors.textLight, size: 16),
           ],
         ),
       ),

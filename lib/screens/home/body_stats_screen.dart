@@ -123,7 +123,6 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
       decoration: BoxDecoration(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -356,6 +356,7 @@ class _WeeklySummaryLink extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 color: context.colors.textLight,
+                size: 16,
               ),
             ],
           ),
@@ -653,7 +654,7 @@ class _WorkoutsSection extends ConsumerWidget {
                 child: Icon(
                   Icons.chevron_right_rounded,
                   color: context.colors.textMedium,
-                  size: 28,
+                  size: 16,
                 ),
               ),
           ],

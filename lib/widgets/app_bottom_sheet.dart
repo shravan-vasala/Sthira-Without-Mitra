@@ -85,28 +85,31 @@ class AppSheet extends StatelessWidget {
       ],
     );
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(kSheetRadius),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * maxHeightFactor,
-            ),
-            decoration: BoxDecoration(
-              color: context.colors.card.withValues(alpha: 0.85),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(kSheetRadius),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(kSheetRadius),
+          ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * maxHeightFactor,
               ),
+              decoration: BoxDecoration(
+                color: context.colors.card.withValues(alpha: 0.85),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(kSheetRadius),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: content,
             ),
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: content,
           ),
         ),
       ),

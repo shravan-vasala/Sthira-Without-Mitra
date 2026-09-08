@@ -174,7 +174,7 @@ class _FriendsTab extends ConsumerWidget {
                     );
                   },
                 ),
-                const Divider(),
+                const SizedBox(height: 8),
               ],
             );
           },

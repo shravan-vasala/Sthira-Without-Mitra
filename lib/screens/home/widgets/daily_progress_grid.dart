@@ -420,7 +420,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               ),
               const SizedBox(width: 8),
             ],
-            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
+            Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
           ],
         ),
       ),
@@ -539,7 +539,7 @@ class _ProgressCard extends ConsumerWidget {
                       ),
                     ),
                   const SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
+                  Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
                 ],
               )
             else ...[
@@ -553,7 +553,7 @@ class _ProgressCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
+              Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
             ]
           ],
         ),

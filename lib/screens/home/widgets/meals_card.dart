@@ -128,6 +128,7 @@ class MealsCard extends ConsumerWidget {
                   Icon(
                     Icons.chevron_right_rounded,
                     color: context.colors.textLight,
+                    size: 16,
                   ),
                 ],
               ),

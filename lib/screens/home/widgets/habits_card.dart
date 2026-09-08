@@ -48,10 +48,7 @@ class HabitsCard extends ConsumerWidget {
               ),
             ),
             if (i < habits.length - 1)
-              Divider(
-                height: 1,
-                color: context.colors.textLight.withValues(alpha: 0.1),
-              ),
+              const SizedBox(height: 2),
           ],
           if (habits.isEmpty)
             const EmptyStateView(

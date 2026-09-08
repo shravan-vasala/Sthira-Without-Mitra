@@ -489,7 +489,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 ),
                 GestureDetector(
                   onTap: () => _shiftDate(1),
-                  child: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 20),
+                  child: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
                 ),
               ],
             ),
@@ -568,7 +568,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium),
+              icon: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
               onPressed: _nextMetric,
             ),
           ],

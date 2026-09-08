@@ -200,7 +200,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   child: Icon(
                     Icons.chevron_right_rounded,
                     color: context.colors.textDark,
-                    size: 20,
+                    size: 16,
                   ),
                 ),
               ),

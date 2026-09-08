@@ -509,9 +509,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                             ),
                           ),
                         ],
-                        const SizedBox(height: 12),
-                        Divider(color: context.colors.border),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 20),
                         Text(
                           'Last Auto-Backup (Weekly)',
                           style: TextStyle(
@@ -657,7 +655,7 @@ class _ActionCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: context.colors.textLight),
+            Icon(Icons.chevron_right_rounded, color: context.colors.textLight, size: 16),
           ],
         ),
       ),

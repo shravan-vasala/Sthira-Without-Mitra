@@ -489,7 +489,7 @@ class _SummaryRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 color: context.colors.textLight,
-                size: 24,
+                size: 16,
               ),
           ],
         ),
