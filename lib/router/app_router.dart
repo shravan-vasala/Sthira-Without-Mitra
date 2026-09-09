@@ -49,24 +49,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/home',
     refreshListenable: ref.watch(routerNotifierProvider),
     errorBuilder: (context, state) => Scaffold(
+      appBar: AppBar(
+        title: const Text('Page Not Found'),
+        centerTitle: true,
+      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Page Not Found',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: context.colors.textDark,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                'This page doesn\'t exist or was removed.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: context.colors.textDark,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/home'),
-              child: const Text('Go Home'),
-            ),
-          ],
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () => context.go('/home'),
+                icon: const Icon(Icons.home_rounded),
+                label: const Text('Return to Home'),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -265,10 +275,17 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timerState = ref.watch(restTimerProvider);
+    final canPopInner = GoRouter.of(context).canPop();
+    final isHomeTab = navigationShell.currentIndex == 0;
+
     return PopScope(
-      canPop: navigationShell.currentIndex == 0,
+      canPop: isHomeTab && !canPopInner,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && navigationShell.currentIndex != 0) {
+        if (didPop) return;
+        
+        if (canPopInner) {
+          GoRouter.of(context).pop();
+        } else if (!isHomeTab) {
           navigationShell.goBranch(0, initialLocation: false);
         }
       },
@@ -370,39 +387,53 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                           .addSeconds(30),
                                     ),
                                     const SizedBox(width: 4),
-                                    IconButton(
-                                      icon: Icon(
-                                        timerState.isPaused
-                                            ? Icons.play_arrow_rounded
-                                            : Icons.pause_rounded,
-                                        color: context.colors.white,
+                                    Semantics(
+                                      button: true,
+                                      label: timerState.isPaused ? 'Play' : 'Pause',
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          if (timerState.isPaused) {
+                                            ref
+                                                .read(restTimerProvider.notifier)
+                                                .resumeTimer();
+                                          } else {
+                                            ref
+                                                .read(restTimerProvider.notifier)
+                                                .pauseTimer();
+                                          }
+                                        },
+                                        behavior: HitTestBehavior.opaque,
+                                        child: SizedBox(
+                                          width: 48,
+                                          height: 48,
+                                          child: Icon(
+                                            timerState.isPaused
+                                                ? Icons.play_arrow_rounded
+                                                : Icons.pause_rounded,
+                                            color: context.colors.white,
+                                          ),
+                                        ),
                                       ),
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                      onPressed: () {
-                                        if (timerState.isPaused) {
-                                          ref
-                                              .read(restTimerProvider.notifier)
-                                              .resumeTimer();
-                                        } else {
-                                          ref
-                                              .read(restTimerProvider.notifier)
-                                              .pauseTimer();
-                                        }
-                                      },
                                     ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.close,
-                                        color: context.colors.white,
+                                    Semantics(
+                                      button: true,
+                                      label: 'Close',
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          ref
+                                              .read(restTimerProvider.notifier)
+                                              .stopTimer();
+                                        },
+                                        behavior: HitTestBehavior.opaque,
+                                        child: SizedBox(
+                                          width: 48,
+                                          height: 48,
+                                          child: Icon(
+                                            Icons.close,
+                                            color: context.colors.white,
+                                          ),
+                                        ),
                                       ),
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                      onPressed: () {
-                                        ref
-                                            .read(restTimerProvider.notifier)
-                                            .stopTimer();
-                                      },
                                     ),
                                   ],
                                 ),
@@ -496,24 +527,28 @@ class _CustomNavBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _NavBarItem(
+                label: 'Home',
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home_rounded,
                 isSelected: currentIndex == 0,
                 onTap: () => onItemSelected(0),
               ),
               _NavBarItem(
+                label: 'Progress',
                 icon: Icons.show_chart_outlined,
                 activeIcon: Icons.show_chart_rounded,
                 isSelected: currentIndex == 1,
                 onTap: () => onItemSelected(1),
               ),
               _NavBarItem(
+                label: 'Social',
                 icon: Icons.people_outline_rounded,
                 activeIcon: Icons.people_rounded,
                 isSelected: currentIndex == 2,
                 onTap: () => onItemSelected(2),
               ),
               _NavBarItem(
+                label: 'Profile',
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
                 isSelected: currentIndex == 3,
@@ -528,12 +563,14 @@ class _CustomNavBar extends StatelessWidget {
 }
 
 class _NavBarItem extends StatelessWidget {
+  final String label;
   final IconData icon;
   final IconData activeIcon;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _NavBarItem({
+    required this.label,
     required this.icon,
     required this.activeIcon,
     required this.isSelected,
@@ -542,26 +579,33 @@ class _NavBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 24 : 12,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? context.colors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(32),
-        ),
-        child: Icon(
-          isSelected ? activeIcon : icon,
-          color: isSelected
-              ? context.colors.onPrimary
-              : const Color(0xFF8A9A93),
-          size: 24,
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    
+    return Semantics(
+      label: label,
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: disableAnimations ? Duration.zero : const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: isSelected ? 24 : 12,
+            vertical: 12,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? context.colors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: Icon(
+            isSelected ? activeIcon : icon,
+            color: isSelected
+                ? context.colors.onPrimary
+                : const Color(0xFF8A9A93),
+            size: 24,
+          ),
         ),
       ),
     );
