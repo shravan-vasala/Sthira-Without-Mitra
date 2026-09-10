@@ -262,13 +262,14 @@ class UserProfile {
     bool clearPhoto = false,
     bool clearPlanStart = false,
     bool clearGeminiApiKey = false,
+    bool clearTargetWeight = false,
   }) {
     final updated = UserProfile(
       name: name ?? this.name,
       coachName: coachName ?? this.coachName,
       photoPath: clearPhoto ? null : (photoPath ?? this.photoPath),
       height: height ?? this.height,
-      targetWeight: targetWeight ?? this.targetWeight,
+      targetWeight: clearTargetWeight ? null : (targetWeight ?? this.targetWeight),
       useKg: useKg ?? this.useKg,
       targetCalories: targetCalories ?? this.targetCalories,
       activeWorkoutPlan: activeWorkoutPlan ?? this.activeWorkoutPlan,

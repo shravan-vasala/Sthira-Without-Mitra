@@ -18,17 +18,22 @@ class WorkoutRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    if (_isar.workoutPlans.where().countSync() == 0) {
-      final jsonStr = await rootBundle.loadString(
-        'assets/data/seed_workout_plan.json',
-      );
-      final plan = WorkoutPlan.fromJson(
-        jsonDecode(jsonStr) as Map<String, dynamic>,
-      );
-      await _isar.writeTxn(() async {
-        await _isar.workoutPlans.put(plan);
-      });
+    // ALWAYS load the seed plan to ensure latest JSON changes are available.
+    final jsonStr = await rootBundle.loadString(
+      'assets/data/seed_workout_plan.json',
+    );
+    final plan = WorkoutPlan.fromJson(
+      jsonDecode(jsonStr) as Map<String, dynamic>,
+    );
+
+    final existing = getPlan(plan.planName);
+    if (existing != null) {
+      plan.id = existing.id;
     }
+
+    await _isar.writeTxn(() async {
+      await _isar.workoutPlans.put(plan);
+    });
   }
 
   List<WorkoutPlan> getAllPlans() {

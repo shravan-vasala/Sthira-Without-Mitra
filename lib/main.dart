@@ -15,6 +15,7 @@ import 'repositories/exercise_log_repository.dart';
 import 'repositories/badge_repository.dart';
 import 'repositories/coach_note_repository.dart';
 import 'repositories/friend_repository.dart';
+import 'repositories/photo_meal_repository.dart';
 import 'services/health_connect_service.dart';
 import 'services/backup_service.dart';
 import 'services/notification_service.dart';
@@ -55,6 +56,35 @@ Future<void> main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
+
+    // ── Manual font loading ──
+    // Load fonts explicitly via FontLoader to ensure they register
+    // with the engine before the first frame renders.
+    final fontAssets = <String, List<String>>{
+      'Cabinet Grotesk': [
+        'assets/fonts/CabinetGrotesk-Light.ttf',
+        'assets/fonts/CabinetGrotesk-Regular.ttf',
+        'assets/fonts/CabinetGrotesk-Medium.ttf',
+        'assets/fonts/CabinetGrotesk-Bold.ttf',
+        'assets/fonts/CabinetGrotesk-Extrabold.ttf',
+        'assets/fonts/CabinetGrotesk-Black.ttf',
+      ],
+      'General Sans': [
+        'assets/fonts/GeneralSans-Light.ttf',
+        'assets/fonts/GeneralSans-Regular.ttf',
+        'assets/fonts/GeneralSans-Medium.ttf',
+        'assets/fonts/GeneralSans-Semibold.ttf',
+        'assets/fonts/GeneralSans-Bold.ttf',
+      ],
+    };
+    for (final entry in fontAssets.entries) {
+      final loader = FontLoader(entry.key);
+      for (final assetPath in entry.value) {
+        loader.addFont(rootBundle.load(assetPath));
+      }
+      await loader.load();
+    }
+    debugPrint('✅ All custom fonts loaded manually via FontLoader');
 
     // Lock to portrait
     await SystemChrome.setPreferredOrientations([

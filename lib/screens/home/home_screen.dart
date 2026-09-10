@@ -13,6 +13,7 @@ import '../../models/habit.dart';
 import '../../utils/workout_completion.dart';
 import '../../widgets/section_header.dart';
 import '../../theme/layout_insets.dart';
+import '../../theme/app_typography.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/badge_engine_provider.dart';
 import '../../widgets/surface_card.dart';
@@ -262,12 +263,9 @@ class _HomeGreetingTitle extends ConsumerWidget {
         if (name.isEmpty)
           Text(
             _timeGreeting(),
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
+            style: context.text.display.copyWith(
               fontSize: 26,
               fontWeight: FontWeight.w500,
-              height: 1.3,
-              letterSpacing: -0.5,
               color: context.colors.textMedium,
             ),
           )
@@ -277,24 +275,16 @@ class _HomeGreetingTitle extends ConsumerWidget {
               children: [
                 TextSpan(
                   text: '${_timeGreeting()}, ',
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
+                  style: context.text.display.copyWith(
                     fontSize: 26,
                     fontWeight: FontWeight.w500,
-                    height: 1.3,
-                    letterSpacing: -0.5,
                     color: context.colors.textMedium,
                   ),
                 ),
                 TextSpan(
                   text: name,
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
+                  style: context.text.display.copyWith(
                     fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    height: 1.3,
-                    letterSpacing: -0.5,
-                    color: context.colors.textDark,
                   ),
                 ),
               ],
@@ -304,9 +294,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+            style: context.text.body.copyWith(
               color: context.colors.primary,
             ),
           ),

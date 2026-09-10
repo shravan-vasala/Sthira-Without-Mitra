@@ -27,6 +27,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentPage = 0;
   final int _totalPages = 4;
   bool _showCompletion = false;
+  bool _isSaving = false;
 
   final _nameController = TextEditingController();
   final _coachNameController = TextEditingController();
@@ -68,26 +69,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _goNext() async {
-    if (_currentPage == 1) {
-      if (!_saveProfile()) return;
-    }
-    if (_currentPage == 2) {
-      if (_selectedHabitIds.isEmpty) return; // Must have 1
-      _saveGoals();
-    }
-    
-    if (_currentPage < _totalPages - 1) {
-      HapticFeedback.selectionClick();
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      // Connect screen complete!
-      HapticFeedback.lightImpact();
-      setState(() {
-        _showCompletion = true;
-      });
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      if (_currentPage == 1) {
+        if (!await _saveProfile()) return;
+      }
+      if (_currentPage == 2) {
+        if (_selectedHabitIds.isEmpty) return; // Must have 1
+        await _saveGoals();
+      }
+      
+      if (_currentPage < _totalPages - 1) {
+        HapticFeedback.selectionClick();
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        // Connect screen complete!
+        HapticFeedback.lightImpact();
+        setState(() {
+          _showCompletion = true;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -101,7 +108,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  bool _saveProfile() {
+  Future<bool> _saveProfile() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return false;
     
@@ -124,21 +131,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
 
     final current = ref.read(profileProvider);
-    ref.read(profileProvider.notifier).updateProfile(
+    await ref.read(profileProvider.notifier).updateProfile(
       current.copyWith(
         name: name,
         coachName: _coachNameController.text.trim(),
         height: height,
         targetWeight: finalWeight,
+        clearTargetWeight: wText.isEmpty,
         useKg: _useKg,
       ),
     );
     return true;
   }
 
-  void _saveGoals() {
+  Future<void> _saveGoals() async {
     final current = ref.read(profileProvider);
-    ref.read(profileProvider.notifier).updateProfile(
+    await ref.read(profileProvider.notifier).updateProfile(
       current.copyWith(
         targetCalories: _targetCalories.round(),
         targetProteinG: _targetMacros?.proteinG,
@@ -151,7 +159,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final currentHabits = habitRepo.getHabits();
     for (final habit in currentHabits) {
       if (!_selectedHabitIds.contains(habit.id)) {
-        habitRepo.deleteHabit(habit.id);
+        await habitRepo.deleteHabit(habit.id);
       }
     }
 
@@ -159,7 +167,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         .where((h) => _selectedHabitIds.contains(h.id))
         .toList();
     for (final habit in selected) {
-      habitRepo.saveHabit(habit);
+      await habitRepo.saveHabit(habit);
     }
   }
 
@@ -336,31 +344,41 @@ class _NavButtons extends StatelessWidget {
                 
               GestureDetector(
                 onTap: canGoNext ? onNext : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: canGoNext ? context.colors.primary : context.colors.primary.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    _isLastPage ? 'Start my journey' : 'Next',
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      color: canGoNext ? context.colors.onPrimary : Colors.white.withOpacity(0.5),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
-                    ),
-                  ),
-                ).animate(
-                  target: canGoNext ? 1 : 0, 
-                  onPlay: (controller) => controller.repeat(),
-                ).shimmer(
-                  duration: 2000.ms,
-                  color: Colors.white.withValues(alpha: 0.15),
+                child: Builder(
+                  builder: (context) {
+                    Widget btn = AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: canGoNext ? context.colors.primary : context.colors.primary.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        _isLastPage ? 'Start my journey' : 'Next',
+                        style: TextStyle(
+                          fontFamily: 'General Sans',
+                          color: canGoNext ? context.colors.onPrimary : Colors.white.withOpacity(0.5),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                    
+                    if (!MediaQuery.disableAnimationsOf(context)) {
+                      btn = btn.animate(
+                        target: canGoNext ? 1 : 0, 
+                        onPlay: (controller) => controller.repeat(),
+                      ).shimmer(
+                        duration: 2000.ms,
+                        color: Colors.white.withValues(alpha: 0.15),
+                      );
+                    }
+                    
+                    return btn;
+                  }
                 ),
               ),
             ],
