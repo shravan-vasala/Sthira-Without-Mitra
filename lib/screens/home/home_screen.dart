@@ -388,7 +388,6 @@ class _HabitsEditButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      visualDensity: VisualDensity.compact,
       tooltip: 'Edit Habits',
       onPressed: () {
         Navigator.of(

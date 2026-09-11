@@ -23,6 +23,8 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
   late int _remainingSeconds;
   Timer? _timer;
   bool _isRunning = false;
+  DateTime? _lastStartTime;
+  int _secondsPassedThisSession = 0;
 
   late AnimationController _animationController;
 
@@ -53,25 +55,39 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
 
     setState(() {
       _isRunning = true;
+      _lastStartTime = DateTime.now();
+      _secondsPassedThisSession = 0;
     });
 
     _animationController.reverse(from: _remainingSeconds / _totalSeconds);
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (!mounted) return;
-      setState(() {
-        if (_remainingSeconds > 0) {
-          _remainingSeconds--;
-        } else {
-          _completeTimer();
-        }
-      });
+      if (_lastStartTime == null) return;
+      
+      final now = DateTime.now();
+      final elapsed = now.difference(_lastStartTime!).inSeconds;
+      
+      if (elapsed > _secondsPassedThisSession) {
+        setState(() {
+          final diff = elapsed - _secondsPassedThisSession;
+          _secondsPassedThisSession = elapsed;
+          
+          if (_remainingSeconds - diff > 0) {
+            _remainingSeconds -= diff;
+          } else {
+            _completeTimer();
+          }
+        });
+      }
     });
   }
 
   void _pauseTimer() {
     setState(() {
       _isRunning = false;
+      _lastStartTime = null;
+      _secondsPassedThisSession = 0;
     });
     _timer?.cancel();
     _animationController.stop();
@@ -92,8 +108,8 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     // We're skipping playing a sound here to avoid adding a new audio dependency just for this,
     // but the framework is in place (restTimerSound).
 
-    // Mark habit as completed
-    ref.read(habitCompletionsProvider.notifier).toggle(widget.habit.id);
+    // Mark habit as completed explicitly rather than toggling
+    ref.read(habitCompletionsProvider.notifier).setOverride(widget.habit.id, 'done');
 
     // Close the dialog automatically after a brief delay
     Future.delayed(const Duration(seconds: 1), () {
