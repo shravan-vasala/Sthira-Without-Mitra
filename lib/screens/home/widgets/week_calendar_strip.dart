@@ -472,7 +472,10 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
 
     final score = scoreData.totalScore;
     final isFuture = scoreData.isFutureDate;
+    final totalMax = scoreData.totalMax;
     final displayScore = isFuture ? '--' : score.toString();
+
+    final percentage = totalMax > 0 ? (score / totalMax) * 100 : 0;
 
     Color iconColor;
     Color textColor;
@@ -485,7 +488,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
       textColor = context.colors.textLight;
       gradientColors = null;
       borderColor = Colors.transparent;
-    } else if (score == 0) {
+    } else if (percentage == 0) {
       iconColor = context.colors.textLight;
       textColor = context.colors.textDark.withValues(alpha: 0.7);
       gradientColors = [
@@ -493,7 +496,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
         context.colors.border.withValues(alpha: 0.1),
       ];
       borderColor = context.colors.border;
-    } else if (score < 50) {
+    } else if (percentage < 50) {
       // Starting to warm up
       iconColor = context.colors.orange;
       textColor = context.colors.textDark;
@@ -502,7 +505,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
         context.colors.orange.withValues(alpha: 0.05),
       ];
       borderColor = context.colors.orange.withValues(alpha: 0.3);
-    } else if (score < 90) {
+    } else if (percentage < 90) {
       // Getting hot!
       iconColor = context.colors.red;
       textColor = context.colors.textDark;
@@ -577,6 +580,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
               },
             ),
           ],
+        ),
       ),
     ));
   }

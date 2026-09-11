@@ -254,6 +254,7 @@ void main() {
       workoutsMax: 30,
       mealsScore: 10,
       mealsMax: 20,
+      totalMax: 100,
     );
     expect(incomplete.isPrimaryComplete, isFalse);
     expect(incomplete.remainingLabels, ['habits', 'meals']);
@@ -267,6 +268,7 @@ void main() {
       workoutsMax: 30,
       mealsScore: 20,
       mealsMax: 20,
+      totalMax: 100,
     );
     expect(complete.isPrimaryComplete, isTrue);
     expect(complete.remainingLabels, isEmpty);
@@ -280,6 +282,7 @@ void main() {
       workoutsMax: 0,
       mealsScore: 0,
       mealsMax: 0,
+      totalMax: 0,
     );
     expect(future.isPrimaryComplete, isFalse);
     expect(future.remainingLabels, isEmpty);

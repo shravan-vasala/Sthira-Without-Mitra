@@ -8,6 +8,7 @@ import '../../../models/habit.dart';
 import '../../../router/app_router.dart';
 import '../../../utils/workout_completion.dart';
 import '../../../utils/meal_icons.dart';
+import '../../../models/daily_stats_snapshot.dart';
 
 class PastDaySummarySheet extends ConsumerWidget {
   final DateTime date;
@@ -21,6 +22,9 @@ class PastDaySummarySheet extends ConsumerWidget {
     // Watch trigger for reactivity on updates
     ref.watch(dailyLogProvider);
     ref.watch(habitCompletionsProvider);
+    ref.watch(dailyLogsUpdateProvider);
+    ref.watch(dailyMealLogProvider);
+    ref.watch(exerciseLogsUpdateProvider);
 
     // Synchronous reads from repos
     final dailyLog = ref.read(dailyLogRepoProvider).getOrCreate(dateStr);
@@ -41,48 +45,39 @@ class PastDaySummarySheet extends ConsumerWidget {
     }).toList();
 
     final workoutPlan = ref.read(workoutPlanProvider);
+    final mealPlan = ref.read(mealPlanProvider);
     final profile = ref.read(profileProvider);
+    final logRepo = ref.read(exerciseLogRepoProvider);
+    final dailyLogRepo = ref.read(dailyLogRepoProvider);
 
-    // 1) Compute workout status
-    bool isRestDay = true;
-    int totalExercises = 0;
-    int completedExercises = 0;
+    final stats = DailyStatsSnapshot.compute(
+      date: date,
+      dateStr: dateStr,
+      habits: applicableHabits,
+      habitCompletions: habitCompletions,
+      dailyLog: dailyLog,
+      workoutPlan: workoutPlan,
+      hasLog: (d, e) => logRepo.hasLog(d, e),
+      mealPlan: mealPlan,
+      mealLog: mealLog,
+      targetWeight: profile.targetWeight ?? 0,
+      dailyLogRepo: dailyLogRepo,
+    );
+
+    // 1) Compute workout status for UI
     String workoutDayName = "Rest Day";
     String? currentWorkoutDayId;
-    bool workoutDayDone = false;
 
     if (workoutPlan != null && workoutPlan.days.isNotEmpty) {
       final workoutDay = WorkoutCompletion.resolveWorkoutDay(workoutPlan, date);
-      final logRepo = ref.read(exerciseLogRepoProvider);
-      isRestDay = WorkoutCompletion.isRestDay(workoutDay, date);
-      workoutDayDone = WorkoutCompletion.isDayWorkoutDoneWithRepo(
-        date: dateStr,
-        day: workoutDay,
-        dateTime: date,
-        repo: logRepo,
-        dailyLog: dailyLog,
-      );
-
-      if (!isRestDay) {
+      if (!stats.isRestDay) {
         workoutDayName = workoutDay.label ?? 'Workout Day';
         currentWorkoutDayId = dailyLog.workoutDayId ?? workoutDay.dayId;
-        totalExercises = workoutDay.sections.expand((s) => s.exercises).length;
-        completedExercises = workoutDay.sections
-            .expand((s) => s.exercises)
-            .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
-            .length;
       }
     }
 
     // 2) Compute totals
-    final defaultIds = profile.customMealSlots
-        .where((s) => s['isDefault'] == true)
-        .map((s) => s['id'] as String)
-        .toSet();
     final loggedIds = mealLog.customSlots.keys.toSet();
-    final customLoggedCount = loggedIds.difference(defaultIds).length;
-    final totalMealsTarget = defaultIds.length + customLoggedCount;
-
     final List<IconData> loggedIcons = [];
     for (final slotId in loggedIds) {
       final log = mealLog.customSlots[slotId];
@@ -103,18 +98,15 @@ class PastDaySummarySheet extends ConsumerWidget {
       }
     }
 
-    final completedMeals = mealLog.loggedSlotsCount;
-    final totalHabitsTarget = applicableHabits.length;
-    final completedHabits = applicableHabits
-        .where((h) => isHabitCompleted(h, habitCompletions, dailyLog))
-        .length;
+    final completedMeals = stats.mealsLogged;
+    final totalMealsTarget = stats.mealsTotal;
+    final completedHabits = stats.habitsDone;
+    final totalHabitsTarget = stats.habitsTotal;
+    final isRestDay = stats.isRestDay;
+    final workoutDayDone = stats.workoutsDone >= stats.workoutsTotal;
 
-    final totalThings =
-        totalMealsTarget + totalHabitsTarget + (isRestDay ? 0 : 1);
-    final totalDone =
-        completedMeals +
-        completedHabits +
-        (isRestDay ? 0 : (workoutDayDone ? 1 : 0));
+    final totalThings = totalMealsTarget + totalHabitsTarget + (isRestDay ? 0 : 1);
+    final totalDone = completedMeals + completedHabits + (isRestDay ? 0 : (workoutDayDone ? 1 : 0));
 
     // 3) Status pill logic
     String statusText = "Nothing logged";
@@ -234,7 +226,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                     ),
                     subtitle: isRestDay
                         ? 'Recovery day'
-                        : '$completedExercises/$totalExercises exercises done',
+                        : '${stats.workoutsDone}/${stats.workoutsTotal} exercises done',
                     isDone: workoutDayDone,
                     onTap: () {
                       if (isRestDay || currentWorkoutDayId == null) return;

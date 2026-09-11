@@ -9,6 +9,7 @@ class YourPlanPage extends StatefulWidget {
   final double initialCalories;
   final double heightCm;
   final double? weightKg;
+  final List<String> selectedHabitIds;
   final bool isManuallyEdited;
   final void Function(double, bool) onCaloriesChanged;
   final ValueChanged<TargetMacros?>? onMacrosChanged;

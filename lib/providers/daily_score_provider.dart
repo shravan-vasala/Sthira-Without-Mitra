@@ -19,6 +19,7 @@ class DailyScore {
   final double workoutsMax;
   final double mealsScore;
   final double mealsMax;
+  final double totalMax;
 
   DailyScore({
     required this.totalScore,
@@ -29,6 +30,7 @@ class DailyScore {
     required this.workoutsMax,
     required this.mealsScore,
     required this.mealsMax,
+    required this.totalMax,
     this.yesterdayScore,
     this.sevenDayAverage,
   });
@@ -90,6 +92,7 @@ class DailyScore {
         workoutsMax: 0,
         mealsScore: 0,
         mealsMax: 0,
+        totalMax: 0,
       );
     }
 
@@ -151,10 +154,7 @@ class DailyScore {
     final totalEarned = habitsScore + workoutsScore + mealsScore;
     final totalPossible = habitsMax + workoutsMax + mealsMax;
 
-    int finalScore = 0;
-    if (totalPossible > 0) {
-      finalScore = ((totalEarned / totalPossible) * 100).round();
-    }
+    int finalScore = totalEarned.round();
 
     return DailyScore(
       totalScore: finalScore,
@@ -165,6 +165,7 @@ class DailyScore {
       workoutsMax: workoutsMax,
       mealsScore: mealsScore,
       mealsMax: mealsMax,
+      totalMax: totalPossible,
     );
   }
 
@@ -178,8 +179,9 @@ class DailyScore {
       workoutsMax: workoutsMax,
       mealsScore: mealsScore,
       mealsMax: mealsMax,
-      yesterdayScore: yesterdayScore,
-      sevenDayAverage: sevenDayAverage,
+      totalMax: totalMax,
+      yesterdayScore: yesterdayScore ?? this.yesterdayScore,
+      sevenDayAverage: sevenDayAverage ?? this.sevenDayAverage,
     );
   }
 }

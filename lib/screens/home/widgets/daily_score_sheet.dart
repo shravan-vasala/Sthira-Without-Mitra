@@ -35,10 +35,14 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
       );
     }
 
+    int percentage = scoreData.totalMax > 0
+        ? ((scoreData.totalScore / scoreData.totalMax) * 100).round()
+        : 0;
+
     Color scoreColor = context.colors.green;
-    if (scoreData.totalScore < 50) {
+    if (percentage < 50) {
       scoreColor = context.colors.red;
-    } else if (scoreData.totalScore < 80) {
+    } else if (percentage < 80) {
       scoreColor = context.colors.orange;
     }
 
@@ -47,6 +51,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
       scrollable: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // 2.2 Animated Score Card
           Center(
@@ -55,16 +60,22 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                 begin: 0,
                 end: scoreData.totalScore.toDouble(),
               ),
-              duration: const Duration(milliseconds: 1200),
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 1200),
               curve: Curves.easeOutCubic,
               builder: (context, value, child) {
                 final intScore = value.round();
 
+                int currentPercentage = scoreData.totalMax > 0
+                    ? ((intScore / scoreData.totalMax) * 100).round()
+                    : 0;
+
                 // Color dynamically shifts during animation
                 Color animColor = context.colors.green;
-                if (intScore < 50)
+                if (currentPercentage < 50)
                   animColor = context.colors.red;
-                else if (intScore < 80)
+                else if (currentPercentage < 80)
                   animColor = context.colors.orange;
 
                 return Column(
@@ -75,7 +86,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                         TextStyle(
                           fontSize: 64,
                           fontWeight: FontWeight.w800,
-                          color: intScore == 100
+                          color: intScore == scoreData.totalMax.toInt()
                               ? context.colors.green
                               : animColor,
                           height: 1.0,
@@ -85,7 +96,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'of 100',
+                      'of ${scoreData.totalMax.toInt()}',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -97,9 +108,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(1),
                       child: LinearProgressIndicator(
-                        value: value / 100,
+                        value: scoreData.totalMax > 0 ? value / scoreData.totalMax : 0.0,
                         backgroundColor: context.colors.border.withValues(alpha: 0.3),
-                        color: intScore == 100 ? context.colors.green : animColor,
+                        color: intScore == scoreData.totalMax.toInt() ? context.colors.green : animColor,
                         minHeight: 2,
                       ),
                     ),
@@ -253,7 +264,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                 );
               }).toList(),
             ).animate().fade(delay: 340.ms),
-          ] else if (scoreData.totalScore == 100) ...[
+          ] else if (scoreData.totalScore == scoreData.totalMax && scoreData.totalMax > 0) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -285,7 +296,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
 
           // 2.5 Footer
           Text(
-            'Habits 50 · Workout 30 · Meals 20 — meals include an accuracy bonus.',
+            'Maximum weights: Habits 50 · Workout 30 · Meals 20 (meals include an accuracy bonus).',
             style: TextStyle(
               fontSize: 12,
               color: context.colors.textLight,
@@ -369,9 +380,11 @@ class _AnimatedProgressBarRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final fraction = max > 0 ? (score / max).clamp(0.0, 1.0) : 0.0;
 
-    return Row(
-      children: [
-        Container(
+    return Opacity(
+      opacity: max <= 0 && !isRestDay ? 0.5 : 1.0,
+      child: Row(
+        children: [
+          Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
@@ -414,6 +427,15 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                         ),
                       ],
                     )
+                  else if (max <= 0)
+                    Text(
+                      'Not configured',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.textLight,
+                      ),
+                    )
                   else
                     Text(
                       '${score == score.toInt() ? score.toInt().toString() : score.toStringAsFixed(1)} / ${max.toStringAsFixed(0)}',
@@ -430,7 +452,9 @@ class _AnimatedProgressBarRow extends StatelessWidget {
               const SizedBox(height: 8),
               TweenAnimationBuilder<double>(
                 tween: Tween<double>(begin: 0, end: isRestDay ? 1.0 : fraction),
-                duration: const Duration(milliseconds: 1000),
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 1000),
                 curve: Curves.easeOutCubic,
                 builder: (context, val, _) {
                   return ClipRRect(
@@ -452,6 +476,6 @@ class _AnimatedProgressBarRow extends StatelessWidget {
           ),
         ),
       ],
-    );
+    ));
   }
 }
