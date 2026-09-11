@@ -9,8 +9,8 @@ class YourPlanPage extends StatefulWidget {
   final double initialCalories;
   final double heightCm;
   final double? weightKg;
-  final List<String> selectedHabitIds;
-  final ValueChanged<double> onCaloriesChanged;
+  final bool isManuallyEdited;
+  final void Function(double, bool) onCaloriesChanged;
   final ValueChanged<TargetMacros?>? onMacrosChanged;
   final void Function(String id, bool selected) onHabitToggled;
 
@@ -20,6 +20,7 @@ class YourPlanPage extends StatefulWidget {
     required this.heightCm,
     this.weightKg,
     required this.selectedHabitIds,
+    required this.isManuallyEdited,
     required this.onCaloriesChanged,
     this.onMacrosChanged,
     required this.onHabitToggled,
@@ -42,6 +43,16 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
         vsync: this, duration: const Duration(milliseconds: 600));
     _staggerController.forward();
     _updateMacroPreview();
+    if (!widget.isManuallyEdited) {
+      _suggestMacros();
+    } else {
+      final dynamicMacros = _getDynamicMacrosForCalories(_currentCalories);
+      if (dynamicMacros != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) widget.onMacrosChanged?.call(dynamicMacros);
+        });
+      }
+    }
   }
 
   @override
@@ -55,10 +66,15 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
     super.didUpdateWidget(oldWidget);
     if (widget.heightCm != oldWidget.heightCm || widget.weightKg != oldWidget.weightKg) {
       _updateMacroPreview();
-      // Only auto-suggest if user hasn't explicitly changed calories from default 1250, 
-      // or if we want to immediately reflect new suggestions
-      if (widget.initialCalories == _currentCalories) {
+      if (!widget.isManuallyEdited) {
         _suggestMacros();
+      } else {
+        final dynamicMacros = _getDynamicMacrosForCalories(_currentCalories);
+        if (dynamicMacros != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) widget.onMacrosChanged?.call(dynamicMacros);
+          });
+        }
       }
     }
   }
@@ -80,35 +96,42 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
     if (_macroPreview != null) {
       setState(() {
         _currentCalories = _macroPreview!.calories.toDouble();
-        widget.onCaloriesChanged(_currentCalories);
+        widget.onCaloriesChanged(_currentCalories, false);
         widget.onMacrosChanged?.call(_macroPreview);
       });
     }
   }
 
   Widget _buildAnimEntrance(int index, Widget child) {
-    final start = index * 0.1;
-    final end = (start + 0.5).clamp(0.0, 1.0);
-    return AnimatedBuilder(
-      animation: _staggerController,
-      builder: (context, animChild) {
-        final slide = CurvedAnimation(
-          parent: _staggerController,
-          curve: Interval(start, end, curve: Curves.easeOutCubic),
-        ).value;
-        final fade = CurvedAnimation(
-          parent: _staggerController,
-          curve: Interval(start, end - 0.2, curve: Curves.easeIn),
-        ).value;
-        return Opacity(
-          opacity: fade,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - slide)),
-            child: animChild,
-          ),
+    return Builder(
+      builder: (context) {
+        if (MediaQuery.disableAnimationsOf(context)) {
+          return child;
+        }
+        final start = index * 0.1;
+        final end = (start + 0.5).clamp(0.0, 1.0);
+        return AnimatedBuilder(
+          animation: _staggerController,
+          builder: (context, animChild) {
+            final slide = CurvedAnimation(
+              parent: _staggerController,
+              curve: Interval(start, end, curve: Curves.easeOutCubic),
+            ).value;
+            final fade = CurvedAnimation(
+              parent: _staggerController,
+              curve: Interval(start, end - 0.2, curve: Curves.easeIn),
+            ).value;
+            return Opacity(
+              opacity: fade,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - slide)),
+                child: animChild,
+              ),
+            );
+          },
+          child: child,
         );
-      },
-      child: child,
+      }
     );
   }
 
@@ -202,7 +225,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     divisions: (4000 - 1200) ~/ 50,
                     onChanged: (v) {
                       setState(() => _currentCalories = v);
-                      widget.onCaloriesChanged(v);
+                      widget.onCaloriesChanged(v, true);
                       final dynamicMacros = _getDynamicMacrosForCalories(v);
                       if (dynamicMacros != null) {
                         widget.onMacrosChanged?.call(dynamicMacros);
@@ -213,14 +236,27 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                 if (dynamicMacros != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
                       children: [
-                        _MacroChip(value: dynamicMacros.proteinG, label: 'P'),
-                        const SizedBox(width: 8),
-                        _MacroChip(value: dynamicMacros.carbsG, label: 'C'),
-                        const SizedBox(width: 8),
-                        _MacroChip(value: dynamicMacros.fatG, label: 'F'),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _MacroChip(value: dynamicMacros.proteinG, label: 'P'),
+                            const SizedBox(width: 8),
+                            _MacroChip(value: dynamicMacros.carbsG, label: 'C'),
+                            const SizedBox(width: 8),
+                            _MacroChip(value: dynamicMacros.fatG, label: 'F'),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Based on default assumptions (29F, Maintain, Sedentary)',
+                          style: TextStyle(
+                            fontFamily: 'General Sans',
+                            fontSize: 12,
+                            color: Colors.white.withOpacity(0.5),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -316,41 +352,43 @@ class _HabitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onToggle(!selected),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        decoration: BoxDecoration(
-          color: selected ? context.colors.primary.withOpacity(0.15) : context.colors.inputFill,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              HabitIcons.resolve(habit.icon),
-              size: 24,
-              color: selected ? context.colors.primary : context.colors.textMedium,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                habit.name,
-                style: TextStyle(
-                  fontFamily: 'General Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: selected ? Colors.white : context.colors.textDark,
-                ),
+    final disableAnim = MediaQuery.disableAnimationsOf(context);
+    
+    Widget tile = AnimatedContainer(
+      duration: disableAnim ? Duration.zero : const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      decoration: BoxDecoration(
+        color: selected ? context.colors.primary.withOpacity(0.15) : context.colors.inputFill,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            HabitIcons.resolve(habit.icon),
+            size: 24,
+            color: selected ? context.colors.primary : context.colors.textMedium,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              habit.name,
+              style: TextStyle(
+                fontFamily: 'General Sans',
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: selected ? Colors.white : context.colors.textDark,
               ),
             ),
-            if (selected)
-              Icon(Icons.check_circle_rounded, color: context.colors.primary, size: 24),
-          ],
-        ),
-      ).animate(target: selected ? 1 : 0)
+          ),
+          if (selected)
+            Icon(Icons.check_circle_rounded, color: context.colors.primary, size: 24),
+        ],
+      ),
+    );
+
+    if (!disableAnim) {
+      tile = tile.animate(target: selected ? 1 : 0)
        .scale(
          begin: const Offset(1, 1), 
          end: const Offset(0.97, 0.97), 
@@ -364,7 +402,13 @@ class _HabitTile extends StatelessWidget {
          duration: 200.ms, 
          curve: Curves.easeOutBack,
        )
-       .shimmer(duration: 500.ms, color: Colors.white.withValues(alpha: 0.2)),
+       .shimmer(duration: 500.ms, color: Colors.white.withOpacity(0.2));
+    }
+
+    return GestureDetector(
+      onTap: () => onToggle(!selected),
+      behavior: HitTestBehavior.opaque,
+      child: tile,
     );
   }
 }

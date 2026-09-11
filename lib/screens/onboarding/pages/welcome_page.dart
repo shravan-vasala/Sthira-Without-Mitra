@@ -32,6 +32,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
     showAppBottomSheet(
       context: context,
       builder: (ctx) => AppSheet(
+        scrollable: true,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
@@ -87,22 +88,26 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 parent: _staggerController,
                 curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
               ).value;
+              Widget logo = ClipRRect(
+                borderRadius: BorderRadius.circular(40),
+                child: Image.asset(
+                  'assets/icon/sunflower_logo.jpg',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
+              );
+              if (!MediaQuery.disableAnimationsOf(context)) {
+                logo = logo.animate(onPlay: (controller) => controller.repeat()).shimmer(
+                  duration: 4.seconds,
+                  color: Colors.white.withValues(alpha: 0.1),
+                );
+              }
               return Opacity(
                 opacity: fade,
                 child: Transform.scale(
                   scale: scale,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(40),
-                    child: Image.asset(
-                      'assets/icon/sunflower_logo.jpg',
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                    ).animate(onPlay: (controller) => controller.repeat()).shimmer(
-                      duration: 4.seconds,
-                      color: Colors.white.withValues(alpha: 0.1),
-                    ),
-                  ),
+                  child: logo,
                 ),
               );
             },
@@ -271,54 +276,62 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
             offset: Offset(0, 20 * (1 - slide)),
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: SurfaceCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: context.colors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(icon, color: context.colors.primary, size: 20),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontFamily: 'General Sans',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.textDark,
-                            ),
+              child: Builder(
+                builder: (context) {
+                  Widget card = SurfaceCard(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: context.colors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              fontFamily: 'General Sans',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: context.colors.textMedium,
-                            ),
+                          child: Icon(icon, color: context.colors.primary, size: 20),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  fontFamily: 'General Sans',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.colors.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                subtitle,
+                                style: TextStyle(
+                                  fontFamily: 'General Sans',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: context.colors.textMedium,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ).animate(
-                  delay: (start * 1000 + 1000).ms, 
-                  onPlay: (controller) => controller.repeat(reverse: false),
-                ).shimmer(
-                  duration: 3.seconds,
-                  color: Colors.white.withValues(alpha: 0.05),
-                ),
+                  );
+                  if (!MediaQuery.disableAnimationsOf(context)) {
+                    card = card.animate(
+                      delay: (start * 1000 + 1000).ms, 
+                      onPlay: (controller) => controller.repeat(reverse: false),
+                    ).shimmer(
+                      duration: 3.seconds,
+                      color: Colors.white.withValues(alpha: 0.05),
+                    );
+                  }
+                  return card;
+                },
+              ),
             ),
           ),
         );

@@ -28,6 +28,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final int _totalPages = 4;
   bool _showCompletion = false;
   bool _isSaving = false;
+  bool _showErrors = false;
 
   final _nameController = TextEditingController();
   final _coachNameController = TextEditingController();
@@ -36,6 +37,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _useKg = true;
 
   double _targetCalories = 1250;
+  bool _isCaloriesManuallyEdited = false;
   TargetMacros? _targetMacros;
   final List<String> _selectedHabitIds = ['sleep', 'walk', 'water'];
 
@@ -73,6 +75,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() => _isSaving = true);
     try {
       if (_currentPage == 1) {
+        setState(() => _showErrors = true);
         if (!await _saveProfile()) return;
       }
       if (_currentPage == 2) {
@@ -136,8 +139,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         name: name,
         coachName: _coachNameController.text.trim(),
         height: height,
-        targetWeight: finalWeight,
-        clearTargetWeight: wText.isEmpty,
+        currentWeight: finalWeight,
+        clearCurrentWeight: wText.isEmpty,
         useKg: _useKg,
       ),
     );
@@ -201,20 +204,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         heightController: _heightController,
                         weightController: _weightController,
                         useKg: _useKg,
+                        showErrors: _showErrors,
                         onToggleUnit: () {
                           HapticFeedback.selectionClick();
                           setState(() {
-                            // Convert weights properly
-                            final w = double.tryParse(_weightController.text);
-                            if (w != null) {
-                              if (_useKg) {
-                                // Kg -> Lbs
-                                _weightController.text = (w * 2.20462).toStringAsFixed(1);
-                              } else {
-                                // Lbs -> Kg
-                                _weightController.text = (w / 2.20462).toStringAsFixed(1);
-                              }
-                            }
                             _useKg = !_useKg;
                           });
                         },
@@ -228,7 +221,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 : double.parse(_weightController.text) / 2.20462)
                             : null,
                         selectedHabitIds: _selectedHabitIds,
-                        onCaloriesChanged: (v) => _targetCalories = v,
+                        isManuallyEdited: _isCaloriesManuallyEdited,
+                        onCaloriesChanged: (v, manual) {
+                          _targetCalories = v;
+                          _isCaloriesManuallyEdited = manual;
+                        },
                         onMacrosChanged: (m) => _targetMacros = m,
                         onHabitToggled: (id, selected) {
                           HapticFeedback.selectionClick();
@@ -264,16 +261,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   bool _canGoNext() {
     if (_currentPage == 1) {
-      if (_nameController.text.trim().isEmpty) return false;
-      final h = double.tryParse(_heightController.text);
-      if (h == null || h < 100 || h > 230) return false;
-      final wText = _weightController.text;
-      if (wText.isNotEmpty) {
-        final w = double.tryParse(wText);
-        if (w == null) return false;
-        final double wKg = _useKg ? w : w / 2.20462;
-        if (wKg < 30 || wKg > 200) return false;
-      }
+      return true; // Allow attempting Next to surface validation errors
     }
     if (_currentPage == 2) {
       if (_selectedHabitIds.isEmpty) return false;

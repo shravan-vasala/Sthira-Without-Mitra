@@ -81,7 +81,12 @@ class AppSheet extends StatelessWidget {
           const SizedBox(height: 20),
         ] else
           const SizedBox(height: 16),
-        if (scrollable) Flexible(child: child) else child,
+        if (scrollable)
+          Flexible(
+            child: SingleChildScrollView(child: child),
+          )
+        else
+          child,
       ],
     );
 

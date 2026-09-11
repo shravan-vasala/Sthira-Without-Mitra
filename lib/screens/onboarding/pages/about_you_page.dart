@@ -8,6 +8,7 @@ class AboutYouPage extends StatefulWidget {
   final TextEditingController heightController;
   final TextEditingController weightController;
   final bool useKg;
+  final bool showErrors;
   final VoidCallback onToggleUnit;
 
   const AboutYouPage({
@@ -17,6 +18,7 @@ class AboutYouPage extends StatefulWidget {
     required this.heightController,
     required this.weightController,
     required this.useKg,
+    this.showErrors = false,
     required this.onToggleUnit,
   });
 
@@ -26,6 +28,7 @@ class AboutYouPage extends StatefulWidget {
 
 class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
+  String _nameError = '';
   String _heightError = '';
   String _weightError = '';
 
@@ -36,6 +39,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
         vsync: this, duration: const Duration(milliseconds: 600));
     _staggerController.forward();
 
+    widget.nameController.addListener(_validateInputs);
     widget.heightController.addListener(_validateInputs);
     widget.weightController.addListener(_validateInputs);
   }
@@ -43,6 +47,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
   @override
   void dispose() {
     _staggerController.dispose();
+    widget.nameController.removeListener(_validateInputs);
     widget.heightController.removeListener(_validateInputs);
     widget.weightController.removeListener(_validateInputs);
     super.dispose();
@@ -51,14 +56,19 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
   @override
   void didUpdateWidget(AboutYouPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.useKg != widget.useKg) {
+    if (oldWidget.useKg != widget.useKg || oldWidget.showErrors != widget.showErrors) {
       _validateInputs();
     }
   }
 
   void _validateInputs() {
+    String nError = '';
     String hError = '';
     String wError = '';
+
+    if (widget.showErrors && widget.nameController.text.trim().isEmpty) {
+      nError = 'Required';
+    }
 
     final hText = widget.heightController.text;
     if (hText.isNotEmpty) {
@@ -68,6 +78,8 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
       } else if (h < 100 || h > 230) {
         hError = 'Must be 100-230 cm';
       }
+    } else if (widget.showErrors) {
+      hError = 'Required';
     }
 
     final wText = widget.weightController.text;
@@ -83,8 +95,9 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
       }
     }
 
-    if (hError != _heightError || wError != _weightError) {
+    if (nError != _nameError || hError != _heightError || wError != _weightError) {
       setState(() {
+        _nameError = nError;
         _heightError = hError;
         _weightError = wError;
       });
@@ -153,12 +166,25 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
           const SizedBox(height: 48),
           _buildAnimEntrance(
             1,
-            AppTextField(
-              controller: widget.nameController,
-              labelText: 'Your Name',
-              hintText: 'Eg. Bodamma',
-              capitalization: TextCapitalization.words,
-              prefixIcon: Icons.badge_rounded,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppTextField(
+                  controller: widget.nameController,
+                  labelText: 'Your Name',
+                  hintText: 'Eg. Bodamma',
+                  capitalization: TextCapitalization.words,
+                  prefixIcon: Icons.badge_rounded,
+                ),
+                if (_nameError.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, left: 4),
+                    child: Text(
+                      _nameError,
+                      style: TextStyle(color: context.colors.red, fontSize: 13),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 24),
@@ -223,7 +249,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                     children: [
                       AppTextField(
                         controller: widget.weightController,
-                        labelText: 'Goal Weight',
+                        labelText: 'Weight',
                         hintText: widget.useKg ? '63 kg' : '138 lb',
                         keyboardType: TextInputType.number,
                       ),

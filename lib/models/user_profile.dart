@@ -263,6 +263,7 @@ class UserProfile {
     bool clearPlanStart = false,
     bool clearGeminiApiKey = false,
     bool clearTargetWeight = false,
+    bool clearCurrentWeight = false,
   }) {
     final updated = UserProfile(
       name: name ?? this.name,
@@ -275,7 +276,7 @@ class UserProfile {
       activeWorkoutPlan: activeWorkoutPlan ?? this.activeWorkoutPlan,
       activeMealPlan: activeMealPlan ?? this.activeMealPlan,
       primaryGoal: primaryGoal ?? this.primaryGoal,
-      currentWeight: currentWeight ?? this.currentWeight,
+      currentWeight: clearCurrentWeight ? null : (currentWeight ?? this.currentWeight),
       age: age ?? this.age,
       gender: gender ?? this.gender,
       customHabits: customHabits ?? this.customHabits,
