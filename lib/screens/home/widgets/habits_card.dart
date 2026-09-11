@@ -293,8 +293,6 @@ class _HabitItem extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    // ignore: unawaited_futures
-    Haptics.toggle();
 
     if (direction == DismissDirection.startToEnd) {
       // Swipe Right -> Complete
@@ -382,10 +380,7 @@ class _HabitItem extends ConsumerWidget {
   }
 
   void _handleTap(BuildContext context, WidgetRef ref) {
-    final nameLower = habit.name.toLowerCase();
-
-    // Check if it's the Sleep habit
-    if (nameLower.contains('sleep')) {
+    if (habit.type == HabitType.autoSleep) {
       showAppBottomSheet(
         context: context,
         builder: (_) => const SleepEntryDialog(),
@@ -393,8 +388,7 @@ class _HabitItem extends ConsumerWidget {
       return;
     }
 
-    // Check if it's the Water habit
-    if (nameLower.contains('water')) {
+    if (habit.id == 'water') {
       showAppBottomSheet(
         context: context,
         builder: (_) => const WaterEntryDialog(),
@@ -466,10 +460,19 @@ class _HabitItem extends ConsumerWidget {
   }
 
   void _handleLongPress(BuildContext context, WidgetRef ref) {
+    final override = ref.read(habitCompletionsProvider).overrides[habit.id];
+
+    if (override != null) {
+      ref.read(habitCompletionsProvider.notifier).setOverride(habit.id, null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Removed manual override for ${habit.name}')),
+      );
+      return;
+    }
+
     if (habit.type != HabitType.autoSteps && habit.type != HabitType.autoSleep)
       return;
 
-    final override = ref.read(habitCompletionsProvider).overrides[habit.id];
     final isSyncCompleted = isCompleted && override == null;
 
     if (isSyncCompleted) {
