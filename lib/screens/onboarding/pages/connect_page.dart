@@ -16,7 +16,6 @@ class ConnectPage extends ConsumerStatefulWidget {
 class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
   bool _healthConnected = false;
-  bool _cloudConnected = false;
 
   @override
   void initState() {
@@ -24,6 +23,17 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
     _staggerController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 600));
     _staggerController.forward();
+    _checkHealthStatus();
+  }
+
+  Future<void> _checkHealthStatus() async {
+    final hcService = ref.read(healthConnectServiceProvider);
+    final isAuthorized = await hcService.isAuthorized();
+    if (mounted) {
+      setState(() {
+        _healthConnected = isAuthorized;
+      });
+    }
   }
 
   @override
@@ -33,28 +43,35 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
   }
 
   Widget _buildAnimEntrance(int index, Widget child) {
-    final start = index * 0.1;
-    final end = (start + 0.5).clamp(0.0, 1.0);
-    return AnimatedBuilder(
-      animation: _staggerController,
-      builder: (context, animChild) {
-        final slide = CurvedAnimation(
-          parent: _staggerController,
-          curve: Interval(start, end, curve: Curves.easeOutCubic),
-        ).value;
-        final fade = CurvedAnimation(
-          parent: _staggerController,
-          curve: Interval(start, end - 0.2, curve: Curves.easeIn),
-        ).value;
-        return Opacity(
-          opacity: fade,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - slide)),
-            child: animChild,
-          ),
+    return Builder(
+      builder: (context) {
+        if (MediaQuery.disableAnimationsOf(context)) {
+          return child;
+        }
+        final start = index * 0.1;
+        final end = (start + 0.5).clamp(0.0, 1.0);
+        return AnimatedBuilder(
+          animation: _staggerController,
+          builder: (context, animChild) {
+            final slide = CurvedAnimation(
+              parent: _staggerController,
+              curve: Interval(start, end, curve: Curves.easeOutCubic),
+            ).value;
+            final fade = CurvedAnimation(
+              parent: _staggerController,
+              curve: Interval(start, end - 0.2, curve: Curves.easeIn),
+            ).value;
+            return Opacity(
+              opacity: fade,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - slide)),
+                child: animChild,
+              ),
+            );
+          },
+          child: child,
         );
-      },
-      child: child,
+      }
     );
   }
 
@@ -63,8 +80,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
     // Current statuses
     final profile = ref.watch(profileProvider);
     final hasGemini = (profile.geminiApiKey ?? '').isNotEmpty;
-    // Health Connect status could ideally be streamed, but we assume false unless connected during this session
-    // For simplicity, we just use local state in sheets and return true if successfully saved.
+    final cloudConnected = ref.watch(isSignedInProvider);
     
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -115,7 +131,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
             _IntegrationRow(
               icon: Icons.favorite_rounded,
               title: 'Health Connect',
-              subtitle: 'Sync workouts & weight natively.',
+              subtitle: 'Sync steps & sleep natively.',
               statusText: _healthConnected ? 'Connected' : 'Optional',
               statusActive: _healthConnected,
               onTap: () async {
@@ -153,16 +169,13 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
               icon: Icons.cloud_sync_rounded,
               title: 'Cloud Backup',
               subtitle: 'Securely sync your progress.',
-              statusText: _cloudConnected ? 'Syncing...' : 'Local-only',
-              statusActive: _cloudConnected,
+              statusText: cloudConnected ? 'Syncing...' : 'Local-only',
+              statusActive: cloudConnected,
               onTap: () async {
-                final result = await showAppBottomSheet<String>(
+                await showAppBottomSheet<bool>(
                   context: context,
                   builder: (_) => const CloudSyncSheet(),
                 );
-                if (result == 'trigger_sync') {
-                  setState(() => _cloudConnected = true);
-                }
               },
             ),
           ),
@@ -192,6 +205,7 @@ class _IntegrationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final disableAnim = MediaQuery.disableAnimationsOf(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SurfaceCard(
@@ -235,10 +249,11 @@ class _IntegrationRow extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
+              duration: disableAnim ? Duration.zero : const Duration(milliseconds: 400),
               switchInCurve: Curves.easeOutBack,
               switchOutCurve: Curves.easeIn,
               transitionBuilder: (child, animation) {
+                if (disableAnim) return child;
                 return FadeTransition(
                   opacity: animation,
                   child: SlideTransition(

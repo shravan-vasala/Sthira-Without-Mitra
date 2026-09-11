@@ -210,7 +210,7 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
   Widget build(BuildContext context) {
     return AppSheet(
       title: 'Health Connect',
-      subtitle: 'Automatically sync workouts, steps, and weight context from other apps.',
+      subtitle: 'Automatically sync steps and sleep data from other apps.',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -252,9 +252,40 @@ class CloudSyncSheet extends ConsumerStatefulWidget {
 }
 
 class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
-  // Simple stub for now - to be extracted properly if needed
-  // Profile handles its own syncing complex screens, this is a simplified onboarding trigger
-  
+  bool _connecting = false;
+  String _status = '';
+
+  Future<void> _connect() async {
+    setState(() {
+      _connecting = true;
+      _status = '';
+    });
+    try {
+      final authService = ref.read(authServiceProvider);
+      final user = await authService.signInWithGoogle();
+      if (user != null) {
+        setState(() {
+          _status = 'Connected! Your data will be backed up.';
+        });
+        if (mounted) {
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) Navigator.pop(context, true);
+          });
+        }
+      } else {
+        setState(() {
+          _status = 'Sign in cancelled.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _status = 'Could not sign in.';
+      });
+    } finally {
+      if (mounted) setState(() => _connecting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppSheet(
@@ -271,10 +302,22 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
           ),
           const SizedBox(height: 32),
           PrimaryButton(
-            onPressed: () => Navigator.pop(context, 'trigger_sync'),
-            label: 'Enable Cloud Sync',
+            onPressed: _connecting ? null : _connect,
+            label: _connecting ? 'Connecting...' : 'Enable Cloud Sync',
+            isLoading: _connecting,
             icon: Icons.cloud_upload_rounded,
           ),
+          if (_status.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              _status,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _status.contains('Connected') ? context.colors.primary : context.colors.red,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ],
       ),
     );
