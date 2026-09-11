@@ -19,7 +19,16 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
     super.initState();
     _staggerController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1200));
-    _staggerController.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _staggerController.value = 1.0;
+    } else if (!_staggerController.isAnimating && _staggerController.value == 0) {
+      _staggerController.forward();
+    }
   }
 
   @override
@@ -391,16 +400,33 @@ class CompletionScreen extends StatefulWidget {
 class _CompletionScreenState extends State<CompletionScreen> with SingleTickerProviderStateMixin {
   late AnimationController _fadeController;
 
+  bool _sequenceStarted = false;
+
   @override
   void initState() {
     super.initState();
     _fadeController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1000));
-    
-    _playSequence();
   }
   
-  Future<void> _playSequence() async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_sequenceStarted) {
+      _sequenceStarted = true;
+      _playSequence(MediaQuery.disableAnimationsOf(context));
+    }
+  }
+
+  Future<void> _playSequence(bool disableAnim) async {
+    if (disableAnim) {
+      _fadeController.value = 1.0;
+      await Future.delayed(const Duration(milliseconds: 1200));
+      if (!mounted) return;
+      widget.onComplete();
+      return;
+    }
+
     await Future.delayed(const Duration(milliseconds: 100));
     if (!mounted) return;
     _fadeController.forward();

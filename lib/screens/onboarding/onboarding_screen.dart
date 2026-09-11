@@ -66,8 +66,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  void _completeRoute() async {
-    await ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
+  void _completeRoute() {
+    ref.read(onboardingCompletedProvider.notifier).completeRoute();
   }
 
   Future<void> _goNext() async {
@@ -91,6 +91,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         );
       } else {
         // Connect screen complete!
+        await ref.read(onboardingCompletedProvider.notifier).commitLocalSetup();
+        
         HapticFeedback.lightImpact();
         setState(() {
           _showCompletion = true;

@@ -71,8 +71,11 @@ class OnboardingCompletedNotifier extends Notifier<bool> {
     return _prefs.getBool(_onboardingKey) ?? false;
   }
 
-  Future<void> completeOnboarding() async {
+  Future<void> commitLocalSetup() async {
     await _prefs.setBool(_onboardingKey, true);
+  }
+
+  void completeRoute() {
     state = true;
   }
 }
