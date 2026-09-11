@@ -126,6 +126,7 @@ final dailyLogProvider = NotifierProvider<DailyLogNotifier, DailyLog>(() {
 
 final dailyLogsRangeProvider =
     Provider.family<List<DailyLog>, (String, String)>((ref, range) {
+      ref.watch(dailyLogsUpdateProvider);
       final (start, end) = range;
       return ref.watch(dailyLogRepoProvider).getLogsInRange(start, end);
     });

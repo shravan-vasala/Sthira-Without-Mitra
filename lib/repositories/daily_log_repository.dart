@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:isar/isar.dart';
 import '../models/daily_log.dart';
@@ -6,6 +7,9 @@ import '../interfaces/i_cloud_sync_service.dart';
 class DailyLogRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
+  
+  final _updates = StreamController<void>.broadcast();
+  Stream<void> get watchUpdates => _updates.stream;
 
   /// Attach a Firestore sync service (called after sign-in).
   void attachSync(ICloudSyncService sync) {
@@ -21,6 +25,7 @@ class DailyLogRepository {
             await _isar.writeTxn(() async {
               await _isar.dailyLogs.put(log);
             });
+            _updates.add(null);
           }
         }
       });
@@ -59,6 +64,7 @@ class DailyLogRepository {
       await _isar.dailyLogs.put(updatedLog);
     });
     _sync?.syncToCloud('daily_logs', updatedLog.date, updatedLog.toJson());
+    _updates.add(null);
   }
 
   Future<void> updateWeight(String date, double weight) async {
@@ -166,6 +172,7 @@ class DailyLogRepository {
         }
       }
     }
+    _updates.add(null);
   }
 
   /// Export all local data as a map for bulk cloud upload.

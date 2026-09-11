@@ -116,12 +116,14 @@ class DailyStatsSnapshot {
     int mealsLogged = 0;
     int mealsTotal = 0;
     final mealPlanMeals = mealPlan?.meals.map((m) => m.type).toList();
-    final mealLogSlots = mealLog.customSlots.keys.toList();
 
     if (mealPlanMeals != null && mealPlanMeals.isNotEmpty) {
       mealsTotal = mealPlanMeals.length;
       for (final slotType in mealPlanMeals) {
-        if (mealLogSlots.contains(slotType)) mealsLogged++;
+        final slotLog = mealLog.customSlots[slotType];
+        if (slotLog != null && (slotLog.items.isNotEmpty || slotLog.photoPath != null || slotLog.totalCalories > 0)) {
+          mealsLogged++;
+        }
       }
     }
 

@@ -209,7 +209,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
   }
 
   void _save() {
-    final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final date = ref.read(dateStringProvider);
     final stats = BodyStats(
       date: date,
       waist: double.tryParse(_controllers['Waist']!.text),

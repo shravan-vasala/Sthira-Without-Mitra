@@ -7,6 +7,7 @@ final selectedYearProvider = StateProvider<int>((ref) => DateTime.now().year);
 
 final yearlyActivityHeatmapProvider =
     FutureProvider.family<Map<DateTime, int>, int>((ref, year) async {
+      ref.watch(dailyLogsUpdateProvider);
       final result = <DateTime, int>{};
 
       // Get repositories and global plans

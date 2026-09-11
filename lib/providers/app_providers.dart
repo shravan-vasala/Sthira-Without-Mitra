@@ -103,6 +103,9 @@ final mealRepoProvider = Provider<MealRepository>((ref) {
 final dailyLogRepoProvider = Provider<DailyLogRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
+final dailyLogsUpdateProvider = StreamProvider<void>((ref) {
+  return ref.watch(dailyLogRepoProvider).watchUpdates;
+});
 final habitRepoProvider = Provider<HabitRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });

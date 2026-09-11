@@ -163,14 +163,16 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
               const Spacer(),
               const _DailyScoreBadge(),
               const SizedBox(width: 12),
-              GestureDetector(
-                onTap: () {
+              IconButton(
+                tooltip: 'Previous week',
+                visualDensity: VisualDensity.compact,
+                onPressed: () {
                   _pageController.previousPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                   );
                 },
-                child: Container(
+                icon: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: context.colors.border.withValues(alpha: 0.3),
@@ -184,14 +186,16 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                 ),
               ),
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
+              IconButton(
+                tooltip: 'Next week',
+                visualDensity: VisualDensity.compact,
+                onPressed: () {
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                   );
                 },
-                child: Container(
+                icon: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: context.colors.border.withValues(alpha: 0.3),
@@ -200,7 +204,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   child: Icon(
                     Icons.chevron_right_rounded,
                     color: context.colors.textDark,
-                    size: 16,
+                    size: 20,
                   ),
                 ),
               ),
@@ -355,20 +359,30 @@ class _DayCircleState extends ConsumerState<_DayCircle>
       dotColor = widget.isComplete ? context.colors.green : muted;
     }
 
-    return GestureDetector(
-      onTap: () {
-        if (widget.isFuture || widget.isToday) {
-          ref.read(selectedDateProvider.notifier).state = widget.date;
-        } else {
-          showAppBottomSheet(
-            context: context,
-            builder: (_) => PastDaySummarySheet(date: widget.date),
-          );
-        }
-      },
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    final fullDate = DateFormat('EEEE, MMMM d').format(widget.date);
+    final relative = widget.isToday ? "Today" : (widget.isFuture ? "Future" : "");
+    final completion = widget.isComplete ? "Activity completed" : "No activity";
+    final label = [if (relative.isNotEmpty) relative, fullDate, completion].join(", ");
+
+    return Semantics(
+      label: label,
+      button: true,
+      selected: widget.isSelected,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () {
+          if (!widget.isSelected) {
+            ref.read(selectedDateProvider.notifier).state = widget.date;
+          } else if (!widget.isFuture && !widget.isToday) {
+            showAppBottomSheet(
+              context: context,
+              builder: (_) => PastDaySummarySheet(date: widget.date),
+            );
+          }
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             dayName.toUpperCase(),
@@ -440,7 +454,7 @@ class _DayCircleState extends ConsumerState<_DayCircle>
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -508,7 +522,13 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
       borderColor = context.colors.primary.withValues(alpha: 0.3);
     }
 
-    return GestureDetector(
+    final semanticsLabel = isFuture ? 'Future date score' : 'Daily score: $score';
+
+    return Semantics(
+      label: semanticsLabel,
+      button: !isFuture,
+      excludeSemantics: true,
+      child: GestureDetector(
       onTap: isFuture
           ? null
           : () {
@@ -540,7 +560,9 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
             const SizedBox(width: 4),
             TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: isFuture ? 0 : score),
-              duration: const Duration(milliseconds: 1500),
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 1500),
               curve: Curves.easeOutExpo,
               builder: (context, value, child) {
                 return Text(
@@ -555,8 +577,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
               },
             ),
           ],
-        ),
       ),
-    );
+    ));
   }
 }

@@ -69,7 +69,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Widget _staggerWrap(int index, Widget child) {
+  Widget _staggerWrap(BuildContext context, int index, Widget child) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
     return child
         .animate(delay: (index * 80).ms)
         .fadeIn(duration: 400.ms, curve: Curves.easeOut)
@@ -144,21 +145,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 2. Week calendar + score
-                      _staggerWrap(1, const WeekCalendarStrip()),
+                      _staggerWrap(context, 1, const WeekCalendarStrip()),
                       const SizedBox(height: 24),
 
                       // 2.5 Daily Insight
-                      _staggerWrap(2, const DailyInsightCard()),
+                      _staggerWrap(context, 2, const DailyInsightCard()),
                       const SizedBox(height: 24),
 
                       // 3. Workout (primary daily action)
                       if (plan != null && plan.days.isNotEmpty) ...[
-                        _staggerWrap(3, _WorkoutsSection(plan: plan)),
+                        _staggerWrap(context, 3, _WorkoutsSection(plan: plan)),
                         const SizedBox(height: 24),
                       ],
 
                       // 4. Habits
                       _staggerWrap(
+                        context,
                         4,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,6 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 5. Meals
                       _staggerWrap(
+                        context,
                         5,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,6 +200,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 6. Daily progress metrics
                       _staggerWrap(
+                        context,
                         6,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 7. Coach notes last (below fold)
-                      _staggerWrap(7, const CoachNotesCard()),
+                      _staggerWrap(context, 7, const CoachNotesCard()),
                       const SizedBox(height: 24),
                     ],
                   ),
@@ -383,14 +387,16 @@ class _HabitsEditButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
+    return IconButton(
+      visualDensity: VisualDensity.compact,
+      tooltip: 'Edit Habits',
+      onPressed: () {
         Navigator.of(
           context,
           rootNavigator: true,
         ).push(MaterialPageRoute(builder: (_) => const ManageHabitsScreen()));
       },
-      child: Icon(Icons.edit_rounded, color: context.colors.primary, size: 18),
+      icon: Icon(Icons.edit_rounded, color: context.colors.primary, size: 18),
     );
   }
 }

@@ -147,7 +147,7 @@ class MealsCard extends ConsumerWidget {
                   const SizedBox(height: 10),
                   TweenAnimationBuilder<int>(
                     tween: IntTween(begin: 0, end: completedCal),
-                    duration: const Duration(milliseconds: 1400),
+                    duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1400),
                     curve: Curves.easeOutQuart,
                     builder: (context, val, child) {
                       return Text(
@@ -231,7 +231,7 @@ class _MacroPill extends StatelessWidget {
       ),
       child: TweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0, end: value),
-        duration: const Duration(milliseconds: 1400),
+        duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1400),
         curve: Curves.easeOutQuart,
         builder: (context, val, child) {
           return Text(

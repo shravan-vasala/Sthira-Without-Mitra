@@ -156,7 +156,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0, top: 4.0),
               child: Text(
-                'If enabled, this slot will appear every day. Otherwise, just today.',
+                'If enabled, this slot will appear every day. Otherwise, just this day.',
                 style: TextStyle(
                   fontSize: 12,
                   color: context.colors.textMedium,

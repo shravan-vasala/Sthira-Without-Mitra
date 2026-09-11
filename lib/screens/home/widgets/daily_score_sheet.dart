@@ -202,10 +202,11 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
           if (scoreData.remainingLabels.isNotEmpty) ...[
             Text(
               'STILL TO DO',
+              maxLines: 1,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w800,
-                letterSpacing: 1.5,
+                letterSpacing: 1.2,
                 color: context.colors.primary,
               ),
             ),
