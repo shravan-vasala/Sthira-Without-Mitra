@@ -5,6 +5,9 @@ import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+
+bool _isShowingDayComplete = false;
 
 /// Calm one-shot celebration when habits + meals + workout buckets are full.
 Future<void> maybeShowDayCompleteSheet(
@@ -22,13 +25,28 @@ Future<void> maybeShowDayCompleteSheet(
   final key = 'day_complete_shown_$dateStr';
   if (prefs.getBool(key) == true) return;
 
-  await prefs.setBool(key, true);
-  if (!context.mounted) return;
+  if (_isShowingDayComplete) return;
+  _isShowingDayComplete = true;
 
-  await showAppBottomSheet<void>(
-    context: context,
-    builder: (ctx) => const DayCompleteSheet(),
-  );
+  try {
+    if (!context.mounted || ModalRoute.of(context)?.isCurrent != true) {
+      return;
+    }
+
+    await prefs.setBool(key, true);
+
+    if (!context.mounted) {
+      await prefs.setBool(key, false);
+      return;
+    }
+
+    await showAppBottomSheet<void>(
+      context: context,
+      builder: (ctx) => const DayCompleteSheet(),
+    );
+  } finally {
+    _isShowingDayComplete = false;
+  }
 }
 
 class DayCompleteSheet extends ConsumerWidget {
@@ -51,11 +69,23 @@ class DayCompleteSheet extends ConsumerWidget {
               color: context.colors.green.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.check_rounded,
-              color: context.colors.green,
+              color: Colors.green,
               size: 36,
-            ),
+            )
+                .animate(
+                  onPlay: (controller) =>
+                      MediaQuery.disableAnimationsOf(context)
+                          ? controller.stop()
+                          : null,
+                )
+                .scale(
+                  duration: 400.ms,
+                  curve: Curves.easeOutBack,
+                  begin: const Offset(0.5, 0.5),
+                  end: const Offset(1.0, 1.0),
+                ),
           ),
           const SizedBox(height: 16),
           Text(
