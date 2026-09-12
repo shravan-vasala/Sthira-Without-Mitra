@@ -19,6 +19,12 @@ class ReminderConfig {
   final bool photosEnabled;
   final TimeOfDay photoTime;
 
+  final bool quietHoursEnabled;
+  final TimeOfDay quietHoursStart;
+  final TimeOfDay quietHoursEnd;
+
+  final bool bodyFatEnabled;
+
   ReminderConfig({
     this.habitsEnabled = false,
     this.habitTime = const TimeOfDay(hour: 21, minute: 0),
@@ -32,6 +38,10 @@ class ReminderConfig {
     this.backupTime = const TimeOfDay(hour: 10, minute: 0),
     this.photosEnabled = true,
     this.photoTime = const TimeOfDay(hour: 10, minute: 0),
+    this.quietHoursEnabled = false,
+    this.quietHoursStart = const TimeOfDay(hour: 22, minute: 0),
+    this.quietHoursEnd = const TimeOfDay(hour: 7, minute: 0),
+    this.bodyFatEnabled = false,
   });
 
   ReminderConfig copyWith({
@@ -47,6 +57,10 @@ class ReminderConfig {
     TimeOfDay? backupTime,
     bool? photosEnabled,
     TimeOfDay? photoTime,
+    bool? quietHoursEnabled,
+    TimeOfDay? quietHoursStart,
+    TimeOfDay? quietHoursEnd,
+    bool? bodyFatEnabled,
   }) {
     return ReminderConfig(
       habitsEnabled: habitsEnabled ?? this.habitsEnabled,
@@ -61,6 +75,10 @@ class ReminderConfig {
       backupTime: backupTime ?? this.backupTime,
       photosEnabled: photosEnabled ?? this.photosEnabled,
       photoTime: photoTime ?? this.photoTime,
+      quietHoursEnabled: quietHoursEnabled ?? this.quietHoursEnabled,
+      quietHoursStart: quietHoursStart ?? this.quietHoursStart,
+      quietHoursEnd: quietHoursEnd ?? this.quietHoursEnd,
+      bodyFatEnabled: bodyFatEnabled ?? this.bodyFatEnabled,
     );
   }
 
@@ -78,6 +96,10 @@ class ReminderConfig {
       'backupTime': '${backupTime.hour}:${backupTime.minute}',
       'photosEnabled': photosEnabled,
       'photoTime': '${photoTime.hour}:${photoTime.minute}',
+      'quietHoursEnabled': quietHoursEnabled,
+      'quietHoursStart': '${quietHoursStart.hour}:${quietHoursStart.minute}',
+      'quietHoursEnd': '${quietHoursEnd.hour}:${quietHoursEnd.minute}',
+      'bodyFatEnabled': bodyFatEnabled,
     };
   }
 
@@ -125,6 +147,16 @@ class ReminderConfig {
         map['photoTime'],
         const TimeOfDay(hour: 10, minute: 0),
       ),
+      quietHoursEnabled: map['quietHoursEnabled'] ?? false,
+      quietHoursStart: parseTime(
+        map['quietHoursStart'],
+        const TimeOfDay(hour: 22, minute: 0),
+      ),
+      quietHoursEnd: parseTime(
+        map['quietHoursEnd'],
+        const TimeOfDay(hour: 7, minute: 0),
+      ),
+      bodyFatEnabled: map['bodyFatEnabled'] ?? false,
     );
   }
 

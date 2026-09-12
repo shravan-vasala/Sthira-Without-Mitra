@@ -25,8 +25,8 @@ class NotificationService {
       final tzInfo = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
     } catch (e) {
-      // Fallback if platform timezone cannot be determined
-      tz.setLocalLocation(tz.getLocation('UTC'));
+      // Explicitly handle failure instead of defaulting to UTC silently
+      throw Exception('Failed to resolve local timezone: $e');
     }
 
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -35,22 +35,32 @@ class NotificationService {
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    await _notificationsPlugin.initialize(initializationSettings);
+    await _notificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: _onNotificationResponse,
+    );
     _initialized = true;
+  }
+
+  void _onNotificationResponse(NotificationResponse response) {
+    // Handle Snooze, Skip, and Mark Done actions
+    final action = response.actionId;
+    final payload = response.payload;
+    if (action != null) {
+      debugPrint('Notification Action received: $action with payload: $payload');
+      // In a real app, this would route to a stream or provider
+      // For now, it logs the action safely.
+    }
   }
 
   Future<bool> requestPermissions() async {
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >();
+        _notificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidImplementation != null) {
-      final bool? granted = await androidImplementation
-          .requestNotificationsPermission();
-      final bool? exactGranted = await androidImplementation
-          .requestExactAlarmsPermission();
+      final bool? granted = await androidImplementation.requestNotificationsPermission();
+      final bool? exactGranted = await androidImplementation.requestExactAlarmsPermission();
       return (granted ?? false) && (exactGranted ?? false);
     }
     return false;
@@ -60,135 +70,72 @@ class NotificationService {
     await _notificationsPlugin.cancelAll();
   }
 
-  Future<void> cancelAllReminders() async {
-    // Habits (10), Meals (20, 21), Backup (30), Workouts (41-47), Photos (50)
-    for (int i = 10; i <= 50; i++) {
-      await _notificationsPlugin.cancel(i);
+  /// Cancels a specific range of IDs safely.
+  Future<void> cancelRange(int startId, int endId) async {
+    for (int i = startId; i <= endId; i++) {
+      try {
+        await _notificationsPlugin.cancel(i);
+      } catch (_) {}
     }
   }
 
-  Future<void> scheduleHabitReminder(TimeOfDay time) async {
-    await _scheduleDaily(
-      id: 10,
-      title: 'Habit Reminder',
-      body: 'Log your habits for today!',
-      time: time,
-    );
+  /// Cancels habits (1000-1031)
+  Future<void> cancelHabits() => cancelRange(1000, 1031);
+  /// Cancels meals (2000-2031 lunch, 2100-2131 dinner)
+  Future<void> cancelMeals() async {
+    await cancelRange(2000, 2031);
+    await cancelRange(2100, 2131);
   }
+  /// Cancels workouts (3000-3031)
+  Future<void> cancelWorkouts() => cancelRange(3000, 3031);
+  /// Cancels backups (4000)
+  Future<void> cancelBackup() => cancelRange(4000, 4000);
+  /// Cancels photos (5000)
+  Future<void> cancelPhotos() => cancelRange(5000, 5000);
+  /// Cancels body fat (6000)
+  Future<void> cancelBodyFat() => cancelRange(6000, 6000);
 
-  Future<void> scheduleMealReminders(
-    TimeOfDay lunchTime,
-    TimeOfDay dinnerTime,
-  ) async {
-    await _scheduleDaily(
-      id: 20,
-      title: 'Lunch Logging',
-      body: 'Time to track your lunch!',
-      time: lunchTime,
-    );
-    await _scheduleDaily(
-      id: 21,
-      title: 'Dinner Logging',
-      body: 'Time to track your dinner!',
-      time: dinnerTime,
-    );
-  }
+  Future<void> scheduleAbsolute({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    String? payload,
+    bool addSnooze = true,
+    bool addSkip = true,
+  }) async {
+    if (!_initialized) await init();
 
-  Future<void> scheduleBackupReminder(int dayOfWeek, TimeOfDay time) async {
-    await _scheduleWeekly(
-      id: 30,
-      title: 'Weekly Backup',
-      body: 'Time for your weekly Sthira backup!',
-      dayOfWeek: dayOfWeek,
-      time: time,
-    );
-  }
+    final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    if (tzDate.isBefore(tz.TZDateTime.now(tz.local))) return;
 
-  Future<void> scheduleWorkoutReminders(
-    List<int> workoutDaysOfWeek,
-    TimeOfDay time,
-  ) async {
-    // Cancel old workout reminders (ids 41-47)
-    for (int i = 1; i <= 7; i++) {
-      await _notificationsPlugin.cancel(40 + i);
+    final actions = <AndroidNotificationAction>[];
+    if (addSnooze) {
+      actions.add(const AndroidNotificationAction('snooze', 'Snooze'));
+    }
+    if (addSkip) {
+      actions.add(const AndroidNotificationAction('skip', 'Skip Today'));
     }
 
-    for (final day in workoutDaysOfWeek) {
-      await _scheduleWeekly(
-        id: 40 + day,
-        title: 'Workout Today',
-        body: 'Time to crush your workout!',
-        dayOfWeek: day,
-        time: time,
-      );
-    }
-  }
-
-  Future<void> schedulePhotoReminder(
-    TimeOfDay time,
-    DateTime? lastPhotoDate,
-  ) async {
-    // ID 50 for photo reminder
-    await _notificationsPlugin.cancel(50);
-
-    // If last photo is null, or it's been more than 14 days, remind them today/tomorrow
-    final now = DateTime.now();
-    bool needsNudge = false;
-
-    if (lastPhotoDate == null) {
-      needsNudge = true;
-    } else {
-      if (now.difference(lastPhotoDate).inDays >= 14) {
-        needsNudge = true;
-      }
-    }
-
-    if (needsNudge) {
-      // Schedule a daily nudge until they take a photo
-      await _scheduleDaily(
-        id: 50,
-        title: 'Time for a Progress Photo',
-        body: 'It\'s been a while! Update your physique pictures.',
-        time: time,
-      );
-    } else {
-      // Schedule exactly 14 days from the last photo date at the preferred time
-      final scheduledDay = lastPhotoDate!.add(const Duration(days: 14));
-      var scheduledDate = tz.TZDateTime(
-        tz.local,
-        scheduledDay.year,
-        scheduledDay.month,
-        scheduledDay.day,
-        time.hour,
-        time.minute,
-      );
-
-      if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-        // Fallback if we somehow got here
-        scheduledDate = tz.TZDateTime.now(
-          tz.local,
-        ).add(const Duration(days: 1));
-      }
-
-      await _notificationsPlugin.zonedSchedule(
-        50,
-        'Progress Photo Due',
-        'It\'s been 2 weeks! Time for a new progress picture.',
-        scheduledDate,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'weekly_channel',
-            'Weekly Reminders',
-            channelDescription: 'Weekly reminders for workouts and backups',
-            importance: Importance.high,
-            priority: Priority.high,
-          ),
+    await _notificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tzDate,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'routine_reminders',
+          'Routine Reminders',
+          channelDescription: 'Daily habits, meals, and workouts',
+          importance: Importance.high,
+          priority: Priority.high,
+          actions: actions.isNotEmpty ? actions : null,
         ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-    }
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      payload: payload,
+    );
   }
 
   Future<void> scheduleRestTimer(
@@ -206,8 +153,8 @@ class NotificationService {
 
     try {
       await _notificationsPlugin.zonedSchedule(
-        // Use ID 1000 for rest timer to clearly separate from habit IDs
-        1000,
+        // Use ID 100 for rest timer to clearly separate from routine IDs
+        100,
         title,
         body,
         tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds)),
@@ -233,90 +180,13 @@ class NotificationService {
 
   Future<void> cancelRestTimer() async {
     try {
-      await _notificationsPlugin.cancel(1000);
+      await _notificationsPlugin.cancel(100);
     } catch (e) {
       // Ignore
     }
   }
 
-  Future<void> _scheduleDaily({
-    required int id,
-    required String title,
-    required String body,
-    required TimeOfDay time,
-  }) async {
-    await _notificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      _nextInstanceOfTime(time),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'daily_channel',
-          'Daily Reminders',
-          channelDescription: 'Daily reminders for habits and meals',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-  }
 
-  Future<void> _scheduleWeekly({
-    required int id,
-    required String title,
-    required String body,
-    required int dayOfWeek,
-    required TimeOfDay time,
-  }) async {
-    await _notificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      _nextInstanceOfWeeklyTime(dayOfWeek, time),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'weekly_channel',
-          'Weekly Reminders',
-          channelDescription: 'Weekly reminders for workouts and backups',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-    );
-  }
-
-  tz.TZDateTime _nextInstanceOfTime(TimeOfDay time) {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      time.hour,
-      time.minute,
-    );
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    return scheduledDate;
-  }
-
-  tz.TZDateTime _nextInstanceOfWeeklyTime(int dayOfWeek, TimeOfDay time) {
-    tz.TZDateTime scheduledDate = _nextInstanceOfTime(time);
-    while (scheduledDate.weekday != dayOfWeek) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    return scheduledDate;
-  }
 }
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {

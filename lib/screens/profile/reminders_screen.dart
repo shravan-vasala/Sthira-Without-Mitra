@@ -67,6 +67,43 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          _buildSectionHeader('GLOBAL SETTINGS'),
+          _buildToggleCard(
+            title: 'Quiet Hours',
+            subtitle: 'Pause routine reminders during these hours',
+            value: config.quietHoursEnabled,
+            onChanged: (val) {
+              ref
+                  .read(remindersProvider.notifier)
+                  .updateConfig(config.copyWith(quietHoursEnabled: val));
+            },
+            child: config.quietHoursEnabled
+                ? Column(
+                    children: [
+                      _buildTimeSelector(
+                        label: 'Start Time',
+                        time: config.quietHoursStart,
+                        onTap: () => _pickTime(context, config.quietHoursStart, (t) {
+                          ref
+                              .read(remindersProvider.notifier)
+                              .updateConfig(config.copyWith(quietHoursStart: t));
+                        }),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTimeSelector(
+                        label: 'End Time',
+                        time: config.quietHoursEnd,
+                        onTap: () => _pickTime(context, config.quietHoursEnd, (t) {
+                          ref
+                              .read(remindersProvider.notifier)
+                              .updateConfig(config.copyWith(quietHoursEnd: t));
+                        }),
+                      ),
+                    ],
+                  )
+                : null,
+          ),
+          const SizedBox(height: 24),
           _buildSectionHeader('DAILY HABITS'),
           _buildToggleCard(
             title: 'Habit Reminder',
@@ -240,6 +277,18 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                     ],
                   )
                 : null,
+          ),
+          const SizedBox(height: 24),
+          _buildSectionHeader('BODY COMPOSITION'),
+          _buildToggleCard(
+            title: 'Body Fat Reminder',
+            subtitle: 'Remind me to update my body fat percentage',
+            value: config.bodyFatEnabled,
+            onChanged: (val) {
+              ref
+                  .read(remindersProvider.notifier)
+                  .updateConfig(config.copyWith(bodyFatEnabled: val));
+            },
           ),
         ],
       ),
