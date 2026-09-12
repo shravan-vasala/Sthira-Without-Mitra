@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'app_bottom_sheet.dart';
 
 class AvatarPickerSheet extends StatelessWidget {
-  const AvatarPickerSheet({super.key});
+  final String? currentAvatar;
+  const AvatarPickerSheet({super.key, this.currentAvatar});
 
   static const List<Map<String, String>> avatars = [
     {'name': 'Lion', 'path': 'assets/avatars/lion.png'},
@@ -13,46 +15,23 @@ class AvatarPickerSheet extends StatelessWidget {
     {'name': 'Panda', 'path': 'assets/avatars/panda.png'},
     {'name': 'Tiger', 'path': 'assets/avatars/tiger.png'},
     {'name': 'Koala', 'path': 'assets/avatars/koala.png'},
+    {'name': 'Giraffe', 'path': 'assets/avatars/giraffe.png'},
+    {'name': 'Monkey', 'path': 'assets/avatars/monkey.png'},
+    {'name': 'Elephant', 'path': 'assets/avatars/elephant.png'},
+    {'name': 'Penguin', 'path': 'assets/avatars/penguin.png'},
+    {'name': 'Deer', 'path': 'assets/avatars/deer.png'},
+    {'name': 'Red Panda', 'path': 'assets/avatars/red_panda.png'},
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
+    return AppSheet(
+      title: 'Sesireka Spirit',
+      subtitle: 'Select your companion',
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag handle
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: context.colors.textLight.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          Text(
-            'Sesireka Spirit',
-            style: TextStyle(
-              fontSize: 24,
-              fontFamily: 'Cabinet Grotesk',
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Select your companion',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: context.colors.textMedium,
-            ),
-          ),
-          const SizedBox(height: 32),
-          
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -64,18 +43,47 @@ class AvatarPickerSheet extends StatelessWidget {
             itemCount: avatars.length,
             itemBuilder: (context, index) {
               final avatar = avatars[index];
+              final isSelected = avatar['path'] == currentAvatar;
               return Semantics(
                 button: true,
+                selected: isSelected,
                 label: 'Select ${avatar['name']}',
                 child: InkWell(
                   onTap: () => Navigator.of(context).pop(avatar['path']),
                   borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Image.asset(
-                      avatar['path']!,
-                      fit: BoxFit.contain,
-                    ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: isSelected ? Border.all(color: context.colors.primary, width: 2) : null,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Image.asset(
+                            avatar['path']!,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      if (isSelected)
+                        Positioned(
+                          right: -8,
+                          bottom: -8,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check_circle,
+                              color: context.colors.primary,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               );

@@ -93,7 +93,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onTap: () async {
                         final result = await showAppBottomSheet<String>(
                           context: context,
-                          builder: (_) => const AvatarPickerSheet(),
+                          builder: (_) => AvatarPickerSheet(currentAvatar: profile.photoPath),
                         );
                         if (result != null) {
                           if (result == 'DELETE') {
@@ -1205,7 +1205,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 Navigator.pop(ctx);
                 final selectedAvatar = await showAppBottomSheet<String>(
                   context: context,
-                  builder: (_) => const AvatarPickerSheet(),
+                  builder: (_) => AvatarPickerSheet(currentAvatar: profile.photoPath),
                 );
                 if (selectedAvatar == 'DELETE') {
                   setState(() {
