@@ -26,7 +26,7 @@ class AvatarPickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppSheet(
-      title: 'Sesireka Spirit',
+      title: 'Sthira Spirit',
       subtitle: 'Select your companion',
       scrollable: true,
       child: Column(
