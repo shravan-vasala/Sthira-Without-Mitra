@@ -1267,11 +1267,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     return AppSheet(
       title: 'Edit Profile',
       scrollable: true,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             Center(
               child: GestureDetector(
                 onTap: _showPickerOptions,
@@ -1470,7 +1469,6 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
           ],
         ),
-      ),
     );
   }
 }

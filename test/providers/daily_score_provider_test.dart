@@ -216,7 +216,13 @@ void main() {
     final profileRepo = container.read(profileRepoProvider);
     final profile = profileRepo.getProfile();
     await profileRepo.saveProfile(
-      profile.copyWith(activeMealPlan: 'test_meal_plan'),
+      profile.copyWith(
+        activeMealPlan: 'test_meal_plan',
+        customMealSlots: [
+          {'id': 'breakfast', 'name': 'Morning Fuel', 'emoji': '🍳', 'isDefault': true},
+          {'id': 'lunch', 'name': 'Midday Power', 'emoji': '🥗', 'isDefault': true},
+        ],
+      ),
     );
 
     container.invalidate(mealPlanProvider);

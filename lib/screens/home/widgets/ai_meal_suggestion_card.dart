@@ -35,6 +35,25 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
   String? _suggestionText;
   String? _error;
 
+  @override
+  void didUpdateWidget(AIMealSuggestionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.remainingCalories != widget.remainingCalories ||
+        oldWidget.remainingProtein != widget.remainingProtein ||
+        oldWidget.remainingCarbs != widget.remainingCarbs ||
+        oldWidget.remainingFat != widget.remainingFat ||
+        oldWidget.mealName != widget.mealName) {
+      if (_suggestionText != null || _error != null || _isLoading || _isStreaming) {
+        setState(() {
+          _suggestionText = null;
+          _error = null;
+          _isLoading = false;
+          _isStreaming = false;
+        });
+      }
+    }
+  }
+
   Future<void> _fetchSuggestion() async {
     setState(() {
       _isLoading = true;
@@ -64,6 +83,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         mealName: widget.mealName,
         mealsLeft: widget.mealsLeft,
         previousMeals: previousMeals,
+        targetDate: dateStr,
       );
 
       bool isFirstChunk = true;
@@ -108,6 +128,17 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(dateStringProvider, (previous, next) {
+      if (previous != next && mounted) {
+        setState(() {
+          _suggestionText = null;
+          _error = null;
+          _isLoading = false;
+          _isStreaming = false;
+        });
+      }
+    });
+
     if (widget.remainingCalories <= 0) {
       return SurfaceCard(
         elevation: SurfaceCardElevation.nested,

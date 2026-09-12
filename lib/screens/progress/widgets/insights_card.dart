@@ -31,6 +31,7 @@ class InsightsCard extends ConsumerWidget {
               Text(
                 'Insights',
                 style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: context.colors.textDark,

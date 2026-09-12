@@ -26,6 +26,8 @@ class ExerciseCard extends ConsumerWidget {
     ref.watch(exerciseLogsUpdateProvider);
     final pr = ref.watch(exercisePrProvider(exercise.name ?? ''));
     final logRepo = ref.watch(exerciseLogRepoProvider);
+    final profile = ref.watch(profileProvider);
+    final useKg = profile.useKg;
     final dateStr = ref.watch(dateStringProvider);
     final log = logRepo.getLog(dateStr, exercise.name ?? '');
     final isCompleted = log != null;
@@ -34,8 +36,10 @@ class ExerciseCard extends ConsumerWidget {
     if (log != null && log.sets.isNotEmpty) {
       final repsList = log.sets
           .map((s) {
-            if ((s.weight ?? 0) > 0)
-              return '${s.reps}x${(s.weight ?? 0).toInt()}kg';
+            if ((s.weight ?? 0) > 0) {
+              final w = convertFromKg(profile, s.weight!);
+              return '${s.reps}x${w.toInt()}${useKg ? 'kg' : 'lb'}';
+            }
             return '${s.reps}';
           })
           .join(', ');
@@ -207,7 +211,7 @@ class ExerciseCard extends ConsumerWidget {
                           if (exercise.weightKg != null) ...[
                             Text('•', style: TextStyle(color: context.colors.border, fontSize: 10)),
                             Text(
-                              '${exercise.weightKg} kg',
+                              '${convertFromKg(profile, exercise.weightKg!).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${useKg ? 'kg' : 'lb'}',
                               style: AppTheme.numeric(
                                 TextStyle(
                                   fontSize: 13,
@@ -241,7 +245,7 @@ class ExerciseCard extends ConsumerWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   pr.maxWeight > 0
-                                      ? '${pr.maxWeight}kg'
+                                      ? '${convertFromKg(profile, pr.maxWeight).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}${useKg ? 'kg' : 'lb'}'
                                       : '${pr.maxReps} reps',
                                   style: AppTheme.numeric(
                                     const TextStyle(
@@ -405,14 +409,18 @@ class ExerciseCard extends ConsumerWidget {
     final prResult = await saveExerciseAsPlanned(ref: ref, exercise: exercise);
     if (!context.mounted) return;
 
+    final profile = ref.read(profileProvider);
+    final useKg = profile.useKg;
+
     String msg = 'Logged ${exercise.name}';
     if (prResult.hasAnyNewPr) {
       if (prResult.isNewMaxWeight) {
-        msg = 'New PR! ${prResult.newPr.maxWeight}kg';
+        final w = convertFromKg(profile, prResult.newPr.maxWeight).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+        msg = 'New PR! $w${useKg ? 'kg' : 'lb'}';
       } else if (prResult.isNewMaxReps) {
         msg = 'New PR! ${prResult.newPr.maxReps} reps';
       } else if (prResult.isNewMaxVolume) {
-        msg = 'New Volume PR!';
+        msg = 'New PR! ${prResult.newPr.maxVolume} vol';
       } else if (prResult.isNew1RM) {
         msg = 'New 1RM PR!';
       }

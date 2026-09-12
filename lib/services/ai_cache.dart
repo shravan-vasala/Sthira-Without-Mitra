@@ -11,7 +11,7 @@ class AiCache {
     _isar = Isar.getInstance()!;
   }
 
-  String _hash(String prompt, String? systemInstruction, String? imageContext) {
+  String _hash(String prompt, String? systemInstruction, String? imageContext, String? schemaStr) {
     var raw = prompt;
     if (systemInstruction != null) {
       raw += systemInstruction;
@@ -19,11 +19,14 @@ class AiCache {
     if (imageContext != null) {
       raw += imageContext;
     }
+    if (schemaStr != null) {
+      raw += schemaStr;
+    }
     return 'ai_cache_${sha256.convert(utf8.encode(raw)).toString()}';
   }
 
-  Map<String, dynamic>? get(String prompt, String? systemInstruction, [String? imageContext]) {
-    final key = _hash(prompt, systemInstruction, imageContext);
+  Map<String, dynamic>? get(String prompt, String? systemInstruction, [String? imageContext, String? schemaStr]) {
+    final key = _hash(prompt, systemInstruction, imageContext, schemaStr);
     final entry = _isar.aiCacheEntrys
         .where()
         .cacheKeyEqualTo(key)
@@ -53,8 +56,9 @@ class AiCache {
     String? systemInstruction,
     Map<String, dynamic> result, [
     String? imageContext,
+    String? schemaStr,
   ]) async {
-    final key = _hash(prompt, systemInstruction, imageContext);
+    final key = _hash(prompt, systemInstruction, imageContext, schemaStr);
     final data = jsonEncode(result);
 
     final existing = _isar.aiCacheEntrys

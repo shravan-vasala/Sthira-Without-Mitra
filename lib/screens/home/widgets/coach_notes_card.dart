@@ -119,6 +119,7 @@ class CoachNotesCard extends ConsumerWidget {
                 child: Text(
                   profile.coachDisplayName,
                   style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: context.colors.primary,

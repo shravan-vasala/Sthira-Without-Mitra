@@ -37,10 +37,15 @@ class MealDetailScreen extends ConsumerWidget {
     final planName = mealPlan?.planName ?? 'Daily Meal Plan';
 
     final targetCalories = profile.targetCalories;
-    final isOverTarget = dailyLog.totalCalories > targetCalories;
-    final progressRatio =
-        (dailyLog.totalCalories / (targetCalories > 0 ? targetCalories : 1))
-            .clamp(0.0, 1.0);
+    final isOverTarget = targetCalories > 0 && dailyLog.totalCalories > targetCalories;
+    final progressRatio = targetCalories > 0
+        ? (dailyLog.totalCalories / targetCalories).clamp(0.0, 1.0)
+        : (dailyLog.totalCalories > 0 ? 1.0 : 0.0);
+
+    final pinnedDateStr = ref.watch(dateStringProvider);
+    final pinnedDate = DateTime.parse(pinnedDateStr);
+    final isToday = pinnedDateStr == DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final titleText = isToday ? "Today's meals" : "${DateFormat('MMM d, yyyy').format(pinnedDate)} meals";
 
     final List<({String id, String name, String emoji})> slotsToDisplay = [];
     final recurringIds = <String>{};
@@ -73,7 +78,7 @@ class MealDetailScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Today's meals"),
+            Text(titleText),
             Text(
               planName,
               style: TextStyle(
@@ -119,7 +124,9 @@ class MealDetailScreen extends ConsumerWidget {
             );
           } else if (index <= slotsToDisplay.length) {
             final s = slotsToDisplay[index - 1];
+            final shouldAnimate = !MediaQuery.disableAnimationsOf(context);
             return _MealSlotCard(
+              key: ValueKey(s.id),
               slotId: s.id,
               slotName: s.name,
               slotEmoji: s.emoji,
@@ -127,8 +134,8 @@ class MealDetailScreen extends ConsumerWidget {
               plannedMeal: MealPlanComplete.plannedForSlot(mealPlan, s.id),
             )
             .animate()
-            .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-            .slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOut);
+            .fadeIn(duration: shouldAnimate ? 400.ms : 0.ms, curve: Curves.easeOut)
+            .slideY(begin: 0.05, end: 0, duration: shouldAnimate ? 400.ms : 0.ms, curve: Curves.easeOut);
           } else if (index == slotsToDisplay.length + 1) {
             final unloggedSlots = slotsToDisplay.where((s) {
               final slotLog = dailyLog.customSlots[s.id];
@@ -245,6 +252,7 @@ class _CalorieHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = isOverTarget ? context.colors.orange : context.colors.primary;
+    final shouldAnimate = !MediaQuery.disableAnimationsOf(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -256,8 +264,8 @@ class _CalorieHeader extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               TweenAnimationBuilder<int>(
-                tween: IntTween(begin: 0, end: eaten.toInt()),
-                duration: const Duration(milliseconds: 1400),
+                tween: IntTween(begin: shouldAnimate ? 0 : eaten.toInt(), end: eaten.toInt()),
+                duration: shouldAnimate ? const Duration(milliseconds: 400) : Duration.zero,
                 curve: Curves.easeOutQuart,
                 builder: (context, val, child) {
                   return Text(
@@ -274,7 +282,16 @@ class _CalorieHeader extends StatelessWidget {
                 },
               ),
               const SizedBox(width: 8),
-              if (isOverTarget)
+              if (target == 0)
+                Text(
+                  ' kcal',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textMedium,
+                  ),
+                )
+              else if (isOverTarget)
                 Text(
                   '+${(eaten - target).toInt()} over target',
                   style: TextStyle(
@@ -363,16 +380,28 @@ class _MinimalMacroStat extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          '${current.toInt()} / ${target.toInt()}g',
-          style: AppTheme.numeric(
-            TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
+        if (target == 0)
+          Text(
+            '${current.toInt()}g',
+            style: AppTheme.numeric(
+              TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: context.colors.textDark,
+              ),
+            ),
+          )
+        else
+          Text(
+            '${current.toInt()} / ${target.toInt()}g',
+            style: AppTheme.numeric(
+              TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: context.colors.textDark,
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -409,14 +438,28 @@ class _MacroBar extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              '${current.toStringAsFixed(0)}/${target.toStringAsFixed(0)}g',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textDark,
+            if (target == 0)
+              Text(
+                '${current.toStringAsFixed(0)}g',
+                style: AppTheme.numeric(
+                  TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textDark,
+                  ),
+                ),
+              )
+            else
+              Text(
+                '${current.toStringAsFixed(0)}/${target.toStringAsFixed(0)}g',
+                style: AppTheme.numeric(
+                  TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textDark,
+                  ),
+                ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 4),
@@ -436,12 +479,13 @@ class _MacroBar extends StatelessWidget {
 
 class _MealSlotCard extends ConsumerStatefulWidget {
   const _MealSlotCard({
+    Key? key,
     required this.slotId,
     required this.slotName,
     required this.slotEmoji,
     this.slotLog,
     this.plannedMeal,
-  });
+  }) : super(key: key);
 
   final String slotId;
   final String slotName;
@@ -456,6 +500,8 @@ class _MealSlotCard extends ConsumerStatefulWidget {
 class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
   bool _showSuggestions = false;
 
+  bool _isSaving = false;
+
   bool get _hasLog => MealPlanComplete.isSlotLogged(widget.slotLog);
 
   bool get _isPlannedComplete =>
@@ -466,18 +512,18 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     if (oldLog == null || oldLog.items.isEmpty) return;
 
     final repo = ref.read(mealRepoProvider);
-    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final targetDateStr = ref.read(dateStringProvider);
     
-    // Check if today's same slot is empty
-    final todayLog = repo.getDailyLog(todayStr);
+    // Check if current day's same slot is empty
+    final targetLog = repo.getDailyLog(targetDateStr);
     String targetSlotId = widget.slotId;
     
-    if (todayLog.customSlots[targetSlotId] != null && todayLog.customSlots[targetSlotId]!.items.isNotEmpty) {
+    if (targetLog.customSlots[targetSlotId] != null && targetLog.customSlots[targetSlotId]!.items.isNotEmpty) {
       final profile = ref.read(profileProvider);
       final recurringIds = profile.customMealSlots.map((s) => s['id'] as String).toList();
       String? nextEmpty;
       for (final id in recurringIds) {
-        final slot = todayLog.customSlots[id];
+        final slot = targetLog.customSlots[id];
         if (slot == null || slot.items.isEmpty) {
           nextEmpty = id;
           break;
@@ -530,32 +576,29 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       photoPath: oldLog.photoPath,
     );
     
-    await repo.saveMealSlot(todayStr, targetSlotId, newSlotLog);
+    await repo.saveMealSlot(targetDateStr, targetSlotId, newSlotLog);
     ref.read(dailyMealLogProvider.notifier).state = repo.getDailyLog(ref.read(dateStringProvider));
     
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Meal copied to today!'),
+        content: Text('Meal duplicated!'),
         behavior: SnackBarBehavior.floating,
       ),
     );
-    
-    // Switch global date back to today
-    ref.read(selectedDateProvider.notifier).state = DateTime.now();
-    Navigator.of(context).pop(); // Close detail screen and go back to home? Or we can let it be, but the global date has changed. Let's not pop, since it's the meal detail screen, they might want to see the new date. Actually, meal_detail_screen listens to `dailyMealLogProvider` which reacts to `dateStringProvider`. So it will just update.
   }
 
   @override
   Widget build(BuildContext context) {
     final planned = widget.plannedMeal;
     final slotLog = widget.slotLog;
+    final shouldAnimate = !MediaQuery.disableAnimationsOf(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: SurfaceCard(
         child: AnimatedSize(
-          duration: 300.ms,
+          duration: shouldAnimate ? 300.ms : 0.ms,
           curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
           child: Padding(
@@ -588,8 +631,8 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           if (_hasLog)
                             TweenAnimationBuilder<double>(
                               key: ValueKey(slotLog!.totalCalories),
-                              tween: Tween(begin: 0.0, end: 1.0),
-                              duration: const Duration(milliseconds: 800),
+                              tween: Tween(begin: shouldAnimate ? 0.0 : 1.0, end: 1.0),
+                              duration: shouldAnimate ? const Duration(milliseconds: 400) : Duration.zero,
                               curve: Curves.easeOutCubic,
                               builder: (context, val, _) {
                                 final cal = (slotLog.totalCalories * val).toInt();
@@ -648,8 +691,8 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                     if (_hasLog)
                       TweenAnimationBuilder<double>(
                         key: const ValueKey('check'),
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 600),
+                        tween: Tween(begin: shouldAnimate ? 0.0 : 1.0, end: 1.0),
+                        duration: shouldAnimate ? const Duration(milliseconds: 400) : Duration.zero,
                         curve: Curves.elasticOut,
                         builder: (context, val, child) {
                           return Transform.scale(
@@ -746,7 +789,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                             alignment: PlaceholderAlignment.middle,
                                             child: Padding(
                                               padding: EdgeInsets.only(right: isLast ? 0 : 12),
-                                              child: _ProvenanceBadge(provenance: item.provenance!),
+                                              child: _ProvenanceBadge(provenance: item.provenance),
                                             ),
                                           )
                                         else if (!isLast)
@@ -802,8 +845,9 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 constraints: const BoxConstraints(),
                                 padding: EdgeInsets.zero,
                                 onPressed: () {
+                                  final targetDateStr = ref.read(dateStringProvider);
                                   final oldLog = widget.slotLog;
-                                  ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId);
+                                  ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId, targetDate: targetDateStr);
                                   
                                   ScaffoldMessenger.of(context).clearSnackBars();
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -815,7 +859,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                         textColor: context.colors.primary,
                                         onPressed: () {
                                           if (oldLog != null) {
-                                            ref.read(dailyMealLogProvider.notifier).saveMealSlot(widget.slotId, oldLog);
+                                            ref.read(dailyMealLogProvider.notifier).saveMealSlot(widget.slotId, oldLog, targetDate: targetDateStr);
                                           }
                                         },
                                       ),
@@ -970,11 +1014,19 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
   }
 
   Future<void> _toggleCompletedAsPlanned(Meal planned) async {
+    if (_isSaving) return;
+    
+    final targetDateStr = ref.read(dateStringProvider);
     final notifier = ref.read(dailyMealLogProvider.notifier);
+    
     if (_isPlannedComplete) {
-      // ignore: unawaited_futures
-      Haptics.tap();
-      await notifier.clearMealSlot(widget.slotId);
+      setState(() => _isSaving = true);
+      try {
+        Haptics.tap();
+        await notifier.clearMealSlot(widget.slotId, targetDate: targetDateStr);
+      } finally {
+        if (mounted) setState(() => _isSaving = false);
+      }
       return;
     }
 
@@ -1003,19 +1055,27 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       );
       if (confirm != true) return;
     }
+    
+    if (!mounted) return;
 
-    final profile = ref.read(profileProvider);
-    final log = MealPlanComplete.buildSlotLog(
-      planned: planned,
-      slotName: widget.slotName,
-      slotEmoji: widget.slotEmoji,
-      profile: profile,
-    );
+    setState(() => _isSaving = true);
+    try {
+      final profile = ref.read(profileProvider);
+      final log = MealPlanComplete.buildSlotLog(
+        planned: planned,
+        slotName: widget.slotName,
+        slotEmoji: widget.slotEmoji,
+        profile: profile,
+      );
 
-    // ignore: unawaited_futures
-    Haptics.toggle();
-    await notifier.saveMealSlot(widget.slotId, log);
+      Haptics.toggle();
+      await notifier.saveMealSlot(widget.slotId, log, targetDate: targetDateStr);
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
+
+
 
   void _openScanner(
     BuildContext context,
@@ -1035,16 +1095,17 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 }
 
 class _ProvenanceBadge extends StatelessWidget {
-  const _ProvenanceBadge({required this.provenance});
-  final String provenance;
+  const _ProvenanceBadge({this.provenance});
+  final String? provenance;
 
   @override
   Widget build(BuildContext context) {
     IconData iconData;
     Color color;
-    String label = provenance;
+    final validProvenance = (provenance != null && provenance!.isNotEmpty) ? provenance! : 'unknown';
+    String label = validProvenance;
     
-    switch (provenance) {
+    switch (validProvenance) {
       case 'verified':
         iconData = Icons.verified_outlined;
         color = context.colors.textMedium;
@@ -1060,6 +1121,7 @@ class _ProvenanceBadge extends StatelessWidget {
       default:
         iconData = Icons.info_outline_rounded;
         color = context.colors.textLight;
+        label = 'unknown';
     }
 
     return GestureDetector(
@@ -1070,28 +1132,32 @@ class _ProvenanceBadge extends StatelessWidget {
           builder: (ctx) => _ProvenanceExplanationSheet(provenance: provenance),
         );
       },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(iconData, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label.substring(0, 1).toUpperCase() + label.substring(1),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: color,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(iconData, size: 12, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label.substring(0, 1).toUpperCase() + label.substring(1),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class _ProvenanceExplanationSheet extends StatelessWidget {
-  const _ProvenanceExplanationSheet({required this.provenance});
-  final String provenance;
+  const _ProvenanceExplanationSheet({this.provenance});
+  final String? provenance;
 
   @override
   Widget build(BuildContext context) {
@@ -1099,62 +1165,66 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
     IconData headerIcon;
     Color headerColor;
     
-    if (provenance == 'verified') {
+    final validProvenance = (provenance != null && provenance!.isNotEmpty) ? provenance! : 'unknown';
+
+    if (validProvenance == 'verified') {
       title = 'Verified Local Food';
       headerIcon = Icons.verified_outlined;
       headerColor = context.colors.textMedium;
-      desc = 'This item was matched instantly against your personal food database. No AI estimation was used, ensuring 100% precision.';
-    } else if (provenance == 'estimated') {
+      desc = 'This item was matched against your personal food database. The base macros are exact, but the consumed portion may vary.';
+    } else if (validProvenance == 'estimated') {
       title = 'AI Estimated';
       headerIcon = Icons.auto_awesome_rounded;
       headerColor = context.colors.primary.withValues(alpha: 0.8);
-      desc = 'Gemini estimated the macros for this food using Atwater culinary physics (4-4-9 rule). It has now been saved to your local database.';
-    } else {
+      desc = 'Gemini estimated the macros for this food based on its nutritional profile. The values are an AI approximation and not exact.';
+    } else if (validProvenance == 'yours') {
       title = 'Yours';
       headerIcon = Icons.edit_outlined;
       headerColor = context.colors.textLight;
       desc = 'You manually adjusted the macros or portion size for this item.';
+    } else {
+      title = 'Unknown Origin';
+      headerIcon = Icons.info_outline_rounded;
+      headerColor = context.colors.textLight;
+      desc = 'This is a legacy item with no recorded provenance or origin.';
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 48),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.textLight.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
+    return AppSheet(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(headerIcon, size: 24, color: headerColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Cabinet Grotesk',
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              desc,
+              style: TextStyle(
+                fontSize: 15,
+                color: context.colors.textMedium,
+                height: 1.4,
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Icon(headerIcon, size: 24, color: headerColor),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            desc,
-            style: TextStyle(fontSize: 15, color: context.colors.textMedium, height: 1.5),
-          ),
-          const SizedBox(height: 12),
-        ],
+            const SizedBox(height: 48),
+          ],
+        ),
       ),
     );
   }
 }
-

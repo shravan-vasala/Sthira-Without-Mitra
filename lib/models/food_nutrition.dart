@@ -51,25 +51,23 @@ class FoodNutrition {
       if (consumedGrams != null) {
         multiplier = consumedGrams / 100.0;
       } else if (consumedServings != null) {
-        // We have servings but basis is per100g. We must know the serving size in grams to convert.
         if (servingGrams != null && servingGrams > 0) {
           multiplier = (consumedServings * servingGrams) / 100.0;
         } else {
-          // Cannot convert safely. Assume 1 serving = 100g as fallback or just 1:1.
-          multiplier = consumedServings;
+          // Cannot convert safely from servings to 100g basis without a defined serving mass.
+          throw const FormatException('Missing serving_grams for per-100g conversion.');
         }
       }
     } else {
       // Basis is per-serving
-      if (consumedServings != null) {
+      if (consumedServings != null && consumedGrams == null) {
         multiplier = consumedServings;
       } else if (consumedGrams != null) {
-        // We have grams, but basis is per-serving. We must know serving size.
         if (servingGrams != null && servingGrams > 0) {
           multiplier = consumedGrams / servingGrams;
         } else {
-          // Cannot convert safely. DO NOT GUESS 100g! Assume 1 multiplier to avoid silent errors.
-          multiplier = 1.0;
+          // Cannot convert safely from grams to per-serving basis without a defined serving mass.
+          throw const FormatException('Missing serving_grams for per-serving conversion.');
         }
       }
     }

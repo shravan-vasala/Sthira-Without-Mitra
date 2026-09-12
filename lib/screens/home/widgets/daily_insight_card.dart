@@ -71,10 +71,10 @@ class DailyInsightCard extends ConsumerWidget {
             Text(
               insight.title,
               style: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: context.colors.textDark,
-                height: 1.2,
               ),
             ),
             const SizedBox(height: 6),

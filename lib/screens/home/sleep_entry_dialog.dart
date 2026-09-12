@@ -21,10 +21,12 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
   TimeOfDay? _waketime;
   bool _hasExistingEntry = false;
   String? _errorText;
+  late String _pinnedDateStr;
 
   @override
   void initState() {
     super.initState();
+    _pinnedDateStr = ref.read(dateStringProvider);
     final log = ref.read(dailyLogProvider);
     if (log.sleepHours != null) {
       _controller.text = log.sleepHours!.toStringAsFixed(1);
@@ -77,6 +79,8 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
       },
     );
 
+    if (!mounted) return;
+
     if (time != null) {
       setState(() {
         if (isBedtime) {
@@ -103,6 +107,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
     final nightBeforeFormatted = DateFormat('EEE, d MMM').format(selectedDate.subtract(const Duration(days: 1)));
 
     return AppSheet(
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,27 +118,17 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               Text(
                 'Log Sleep',
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Cabinet Grotesk',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
                   color: context.colors.textDark,
                 ),
               ),
               if (_hasExistingEntry)
                 TextButton(
-                  onPressed: () {
-                    ref.read(dailyLogProvider.notifier).clearSleep();
-
-                    final habits = ref.read(habitsProvider);
-                    final sleepHabit = habits
-                        .where((h) => h.name.toLowerCase().contains('sleep'))
-                        .firstOrNull;
-                    if (sleepHabit != null) {
-                      ref
-                          .read(habitCompletionsProvider.notifier)
-                          .setOverride(sleepHabit.id, 'none');
-                    }
-
-                    Navigator.of(context).pop();
+                  onPressed: () async {
+                    await ref.read(dailyLogProvider.notifier).clearSleepForDate(_pinnedDateStr);
+                    if (mounted) Navigator.of(context).pop();
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: context.colors.pinkIcon,
@@ -154,6 +149,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
             controller: _controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: context.colors.textDark,
@@ -164,6 +160,11 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               if (_errorText != null) {
                 setState(() => _errorText = null);
               }
+              // Clear time pickers to show manual entry takes precedence
+              setState(() {
+                _bedtime = null;
+                _waketime = null;
+              });
             },
             decoration: InputDecoration(
               filled: true,
@@ -182,6 +183,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               ),
               hintText: '0.0',
               hintStyle: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
                 color: context.colors.textLight,
@@ -243,33 +245,14 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
             label: isFuture ? 'Cannot log for future date' : 'Save Sleep',
             onPressed: isFuture
                 ? null
-                : () {
+                : () async {
                     final sleepHours = double.tryParse(_controller.text);
                     if (sleepHours != null &&
                         sleepHours >= 0 &&
                         sleepHours <= 24) {
                       Haptics.toggle();
-                      ref
-                          .read(dailyLogProvider.notifier)
-                          .updateSleep(sleepHours);
-
-                      final habits = ref.read(habitsProvider);
-                      final sleepHabit = habits
-                          .where((h) => h.name.toLowerCase().contains('sleep'))
-                          .firstOrNull;
-                      if (sleepHabit != null) {
-                        if (sleepHours >= sleepHabit.target) {
-                          ref
-                              .read(habitCompletionsProvider.notifier)
-                              .setOverride(sleepHabit.id, 'done');
-                        } else {
-                          ref
-                              .read(habitCompletionsProvider.notifier)
-                              .setOverride(sleepHabit.id, 'none');
-                        }
-                      }
-
-                      Navigator.of(context).pop();
+                      await ref.read(dailyLogProvider.notifier).updateSleepForDate(_pinnedDateStr, sleepHours);
+                      if (mounted) Navigator.of(context).pop();
                     } else {
                       Haptics.error();
                       setState(() {
@@ -321,7 +304,8 @@ class _TimePickerCard extends StatelessWidget {
             Text(
               time != null ? time!.format(context) : '--:--',
               style: TextStyle(
-                fontSize: 16,
+                fontFamily: 'Cabinet Grotesk',
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: time != null
                     ? context.colors.textDark

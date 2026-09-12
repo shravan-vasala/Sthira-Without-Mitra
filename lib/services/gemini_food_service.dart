@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:isar/isar.dart' hide Schema;
@@ -165,7 +166,6 @@ $_jsonShape
   /// Estimate macros from a free-text description of what was eaten at home.
   @override
   Future<Map<String, dynamic>?> analyzeFoodText(String description) async {
-    _ensureApiKey();
     final trimmed = description.trim();
     if (trimmed.isEmpty) {
       throw Exception('Please describe what you ate.');
@@ -201,12 +201,14 @@ $_jsonShape
     await nutritionLookup.load();
     
     for (var part in splitParts) {
-      final match = RegExp(r'^(\d+(?:\.\d+)?)\s*(bowl|cup|plate|piece|idlis?|dosas?|chapatis?|rotis?|tbsp|tsp)?\s*(.*)$', caseSensitive: false).firstMatch(part);
+      final match = RegExp(r'^(\d+(?:\.\d+)?)\s*(g|grams?|ml|bowl|cup|plate|piece|idlis?|dosas?|chapatis?|rotis?|tbsp|tsp)?\s*(.*)$', caseSensitive: false).firstMatch(part);
       String queryName = part;
       double quantity = 1.0;
+      String? parsedUnit;
       
       if (match != null) {
         quantity = double.tryParse(match.group(1) ?? '1') ?? 1.0;
+        parsedUnit = match.group(2)?.toLowerCase();
         final possibleName = match.group(3)?.trim() ?? '';
         if (possibleName.isNotEmpty) {
            queryName = possibleName;
@@ -221,43 +223,57 @@ $_jsonShape
       
       final localMatch = nutritionLookup.match(queryName);
       if (localMatch != null) {
-         final isPer100g = localMatch.isPer100g;
-         final userServing = localMatch.servingGrams;
-         final userProv = localMatch.provenance;
-         
-         double defGrams = 100.0;
-         if (!isPer100g && userServing != null) {
-           defGrams = userServing;
-         } else {
-           defGrams = userServing ?? 100.0; // fallback
+         try {
+           final isPer100g = localMatch.isPer100g;
+           final userServing = localMatch.servingGrams;
+           final userProv = localMatch.provenance;
+           
+           double? explicitGrams;
+           double? explicitServings;
+           double defGrams = userServing ?? 100.0;
+           
+           if (parsedUnit == 'g' || parsedUnit == 'gram' || parsedUnit == 'grams' || parsedUnit == 'ml') {
+             explicitGrams = quantity;
+             defGrams = quantity;
+             quantity = 1.0;
+           } else {
+             explicitServings = quantity;
+             if (parsedUnit == 'cup') defGrams = 240.0;
+             else if (parsedUnit == 'bowl') defGrams = 250.0;
+             else if (parsedUnit == 'tbsp') defGrams = 15.0;
+             else if (parsedUnit == 'tsp') defGrams = 5.0;
+             else if (!isPer100g && userServing != null) defGrams = userServing;
+           }
+           
+           double totalGrams = explicitGrams ?? (defGrams * (explicitServings ?? 1.0));
+           
+           final computed = FoodNutrition.compute(
+             consumedGrams: explicitGrams,
+             consumedServings: explicitServings,
+             baseNutrition: localMatch.baseNutrition,
+             isPer100g: isPer100g,
+             servingGrams: (parsedUnit != null && ['cup','bowl','tbsp','tsp'].contains(parsedUnit)) ? defGrams : localMatch.servingGrams,
+           );
+           
+           localItems.add({
+             "name": localMatch.name,
+             "portion": explicitGrams != null ? "${explicitGrams}g" : "$quantity (${defGrams}g)",
+             "estimated_grams": totalGrams,
+             "calories": computed.kcal.round(),
+             "protein_g": double.parse(computed.proteinG.toStringAsFixed(1)),
+             "carbs_g": double.parse(computed.carbsG.toStringAsFixed(1)),
+             "fat_g": double.parse(computed.fatG.toStringAsFixed(1)),
+             "resolved": true,
+             "provenance": userProv ?? "database",
+             "is_per_100g": isPer100g,
+             "serving_grams": defGrams,
+             "baseNutrition": localMatch.baseNutrition.toJson(),
+             "computedNutrition": computed.toJson(),
+           });
+         } catch (e) {
+           isFullyLocal = false;
+           unresolvedParts.add(part);
          }
-         
-         double totalGrams = defGrams * quantity;
-         
-         // Use the pure typed calculation!
-         final computed = FoodNutrition.compute(
-           consumedGrams: isPer100g ? totalGrams : null,
-           consumedServings: isPer100g ? null : quantity,
-           baseNutrition: localMatch.baseNutrition,
-           isPer100g: isPer100g,
-           servingGrams: localMatch.servingGrams,
-         );
-         
-         localItems.add({
-           "name": localMatch.name,
-           "portion": "$quantity (${defGrams}g)",
-           "estimated_grams": totalGrams,
-           "calories": computed.kcal.round(),
-           "protein_g": double.parse(computed.proteinG.toStringAsFixed(1)),
-           "carbs_g": double.parse(computed.carbsG.toStringAsFixed(1)),
-           "fat_g": double.parse(computed.fatG.toStringAsFixed(1)),
-           "resolved": true,
-           "provenance": userProv ?? "database",
-           "is_per_100g": isPer100g,
-           "serving_grams": defGrams,
-           "baseNutrition": localMatch.baseNutrition.toJson(),
-           "computedNutrition": computed.toJson(),
-         });
       } else {
          isFullyLocal = false;
          unresolvedParts.add(part);
@@ -282,6 +298,7 @@ $_jsonShape
     }
 
     // AI is only given what the local parser failed to understand
+    _ensureApiKey();
     final aiTargetText = unresolvedParts.join(" and ");
 
     final prompt =
@@ -636,6 +653,7 @@ Return ONLY a JSON object containing an array called "items":
     String? mealName,
     int? mealsLeft,
     List<String>? previousMeals,
+    String? targetDate,
   }) async* {
     _ensureApiKey();
 
@@ -646,7 +664,7 @@ Return ONLY a JSON object containing an array called "items":
     final historyHash = previousMeals != null ? sha256.convert(utf8.encode(previousMeals.join())).toString().substring(0, 8) : 'none';
     final ml = mealsLeft ?? 1;
 
-    final dateStr = todayKey();
+    final dateStr = targetDate ?? todayKey();
     final mName = mealName?.replaceAll(' ', '_') ?? 'final';
     final cacheKey =
         'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_${bucketedProtein}_${bucketedCarbs}_${bucketedFat}_${ml}_$historyHash';
@@ -728,7 +746,7 @@ Do NOT use JSON.
       );
 
       final buffer = StringBuffer();
-      await for (final chunk in stream) {
+      await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
         buffer.write(chunk);
         yield chunk;
       }
@@ -737,12 +755,14 @@ Do NOT use JSON.
         // ignore: unawaited_futures
         prefs.setString(cacheKey, buffer.toString());
       }
+    } on TimeoutException {
+      yield "Our AI is taking too long to respond. Here's a generic quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! Please verify the macros manually to ensure it fits your budget.";
     } catch (e) {
       if (e is AiException &&
           (e.message.contains('traffic') ||
               e.message.contains('rate limited') ||
               e.message.contains('later'))) {
-        yield "Our AI is currently taking a breather to handle traffic, but here's a quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! This should easily fit your remaining $remainingCalories calories.";
+        yield "Our AI is currently taking a breather. Here's a generic quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! Please verify the macros manually to ensure it fits your budget.";
       } else {
         rethrow;
       }

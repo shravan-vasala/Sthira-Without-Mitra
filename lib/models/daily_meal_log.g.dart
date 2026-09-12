@@ -1559,23 +1559,28 @@ const MealSlotLogSchema = Schema(
       name: r'photoPath',
       type: IsarType.string,
     ),
-    r'totalCalories': PropertySchema(
+    r'photoPaths': PropertySchema(
       id: 5,
+      name: r'photoPaths',
+      type: IsarType.stringList,
+    ),
+    r'totalCalories': PropertySchema(
+      id: 6,
       name: r'totalCalories',
       type: IsarType.long,
     ),
     r'totalCarbs': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'totalCarbs',
       type: IsarType.double,
     ),
     r'totalFat': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'totalFat',
       type: IsarType.double,
     ),
     r'totalProtein': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'totalProtein',
       type: IsarType.double,
     )
@@ -1624,6 +1629,13 @@ int _mealSlotLogEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.photoPaths.length * 3;
+  {
+    for (var i = 0; i < object.photoPaths.length; i++) {
+      final value = object.photoPaths[i];
+      bytesCount += value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -1643,10 +1655,11 @@ void _mealSlotLogSerialize(
   );
   writer.writeString(offsets[3], object.name);
   writer.writeString(offsets[4], object.photoPath);
-  writer.writeLong(offsets[5], object.totalCalories);
-  writer.writeDouble(offsets[6], object.totalCarbs);
-  writer.writeDouble(offsets[7], object.totalFat);
-  writer.writeDouble(offsets[8], object.totalProtein);
+  writer.writeStringList(offsets[5], object.photoPaths);
+  writer.writeLong(offsets[6], object.totalCalories);
+  writer.writeDouble(offsets[7], object.totalCarbs);
+  writer.writeDouble(offsets[8], object.totalFat);
+  writer.writeDouble(offsets[9], object.totalProtein);
 }
 
 MealSlotLog _mealSlotLogDeserialize(
@@ -1667,10 +1680,11 @@ MealSlotLog _mealSlotLogDeserialize(
         const [],
     name: reader.readStringOrNull(offsets[3]),
     photoPath: reader.readStringOrNull(offsets[4]),
-    totalCalories: reader.readLongOrNull(offsets[5]) ?? 0,
-    totalCarbs: reader.readDoubleOrNull(offsets[6]) ?? 0.0,
-    totalFat: reader.readDoubleOrNull(offsets[7]) ?? 0.0,
-    totalProtein: reader.readDoubleOrNull(offsets[8]) ?? 0.0,
+    photoPaths: reader.readStringList(offsets[5]) ?? const [],
+    totalCalories: reader.readLongOrNull(offsets[6]) ?? 0,
+    totalCarbs: reader.readDoubleOrNull(offsets[7]) ?? 0.0,
+    totalFat: reader.readDoubleOrNull(offsets[8]) ?? 0.0,
+    totalProtein: reader.readDoubleOrNull(offsets[9]) ?? 0.0,
   );
   return object;
 }
@@ -1699,12 +1713,14 @@ P _mealSlotLogDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readStringList(offset) ?? const []) as P;
     case 6:
-      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 7:
       return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     case 8:
+      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
+    case 9:
       return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2403,6 +2419,231 @@ extension MealSlotLogQueryFilter
         property: r'photoPath',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'photoPaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'photoPaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'photoPaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'photoPaths',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'photoPaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'photoPaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'photoPaths',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'photoPaths',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'photoPaths',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'photoPaths',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'photoPaths',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'photoPaths',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'photoPaths',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'photoPaths',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'photoPaths',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MealSlotLog, MealSlotLog, QAfterFilterCondition>
+      photoPathsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'photoPaths',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 

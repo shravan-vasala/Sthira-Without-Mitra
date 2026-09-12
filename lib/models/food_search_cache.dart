@@ -9,9 +9,13 @@ class FoodSearchCache {
   @Index(unique: true, replace: true)
   final String normalizedQuery;
   final String cachedResponseJson;
+  final DateTime timestamp;
+  final String schemaVersion;
 
   FoodSearchCache({
     required this.normalizedQuery,
     required this.cachedResponseJson,
+    required this.timestamp,
+    required this.schemaVersion,
   });
 }

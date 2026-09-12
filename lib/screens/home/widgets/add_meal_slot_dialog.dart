@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
 import '../../../models/daily_meal_log.dart';
@@ -16,6 +17,8 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
   final _nameCtrl = TextEditingController();
   String _selectedEmoji = 'restaurant';
   bool _addToEveryDay = false;
+  bool _isSaving = false;
+  String? _errorText;
 
   @override
   void dispose() {
@@ -23,49 +26,64 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_isSaving) return;
+    
     final name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      setState(() => _errorText = 'Name cannot be blank');
+      return;
+    }
+    
+    setState(() {
+      _errorText = null;
+      _isSaving = true;
+    });
 
     final id =
-        '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
+        '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch}';
 
-    if (_addToEveryDay) {
-      final profile = ref.read(profileProvider);
-      final updatedSlots =
-          List<Map<String, dynamic>>.from(profile.customMealSlots)..add({
-            'id': id,
-            'name': name,
-            'emoji': _selectedEmoji,
-            'isDefault': false,
-          });
-      ref
-          .read(profileProvider.notifier)
-          .updateProfile(profile.copyWith(customMealSlots: updatedSlots));
+    try {
+      final targetDateStr = ref.read(dateStringProvider);
+      
+      if (_addToEveryDay) {
+        final profile = ref.read(profileProvider);
+        final updatedSlots =
+            List<Map<String, dynamic>>.from(profile.customMealSlots)..add({
+              'id': id,
+              'name': name,
+              'emoji': _selectedEmoji,
+              'isDefault': false,
+            });
+        await ref
+            .read(profileProvider.notifier)
+            .updateProfile(profile.copyWith(customMealSlots: updatedSlots));
+      }
+
+      // Create an empty log entry for today so it immediately appears (and persists name/emoji)
+      final slotLog = MealSlotLog(
+        name: name,
+        emoji: _selectedEmoji,
+        items: [],
+        totalCalories: 0,
+        totalProtein: 0,
+        totalCarbs: 0,
+        totalFat: 0,
+      );
+
+      await ref.read(dailyMealLogProvider.notifier).saveMealSlot(id, slotLog, targetDate: targetDateStr);
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+          _errorText = 'Failed to save meal slot.';
+        });
+      }
     }
-
-    // Create an empty log entry for today so it immediately appears (and persists name/emoji)
-    final slotLog = MealSlotLog(
-      name: name,
-      emoji: _selectedEmoji,
-      items: [],
-      totalCalories: 0,
-      totalProtein: 0,
-      totalCarbs: 0,
-      totalFat: 0,
-    );
-
-    ref.read(dailyMealLogProvider.notifier).saveMealSlot(id, slotLog);
-
-    Navigator.pop(context);
-
-    // Optionally open the scanner immediately for the new slot
-    // showModalBottomSheet(
-    //   context: context,
-    //   isScrollControlled: true,
-    //   backgroundColor: Colors.transparent,
-    //   builder: (_) => PhotoCalorieScannerSheet(slotId: id, slotName: name, isManualEntry: false),
-    // );
   }
 
   @override
@@ -87,6 +105,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
               decoration: InputDecoration(
                 labelText: 'Meal Name',
                 hintText: 'e.g. Post-workout shake',
+                errorText: _errorText,
                 filled: true,
                 fillColor: context.colors.inputFill,
                 border: OutlineInputBorder(
@@ -94,6 +113,11 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                   borderSide: BorderSide.none,
                 ),
               ),
+              onChanged: (_) {
+                if (_errorText != null) {
+                  setState(() => _errorText = null);
+                }
+              },
             ),
             const SizedBox(height: 20),
             Text(
@@ -156,7 +180,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0, top: 4.0),
               child: Text(
-                'If enabled, this slot will appear every day. Otherwise, just this day.',
+                'If enabled, this slot will appear every day. Otherwise, just for ${DateFormat('MMM d').format(DateTime.parse(ref.watch(dateStringProvider)))}.',
                 style: TextStyle(
                   fontSize: 12,
                   color: context.colors.textMedium,
@@ -175,7 +199,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed: _submit,
+          onPressed: _isSaving ? null : _submit,
           style: ElevatedButton.styleFrom(
             backgroundColor: context.colors.primary,
             foregroundColor: context.colors.white,
@@ -183,7 +207,16 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: const Text('Add Slot'),
+          child: _isSaving
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.colors.onPrimary,
+                  ),
+                )
+              : const Text('Add Slot'),
         ),
       ],
     );

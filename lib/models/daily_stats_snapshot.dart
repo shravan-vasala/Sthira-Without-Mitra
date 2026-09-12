@@ -3,6 +3,7 @@ import '../models/daily_log.dart';
 import '../models/daily_meal_log.dart';
 import '../models/habit.dart';
 import '../models/meal_plan.dart';
+import '../models/user_profile.dart';
 import '../models/workout_plan.dart';
 import '../repositories/daily_log_repository.dart';
 import '../utils/workout_completion.dart';
@@ -56,6 +57,7 @@ class DailyStatsSnapshot {
     required DailyMealLog mealLog,
     required double targetWeight,
     required DailyLogRepository dailyLogRepo,
+    required UserProfile profile,
   }) {
     // 1. Habits
     int habitsDone = 0;
@@ -113,18 +115,33 @@ class DailyStatsSnapshot {
     }
 
     // 3. Meals
-    int mealsLogged = 0;
+    int mealsLogged = mealLog.loggedSlotsCount;
     int mealsTotal = 0;
-    final mealPlanMeals = mealPlan?.meals.map((m) => m.type).toList();
 
-    if (mealPlanMeals != null && mealPlanMeals.isNotEmpty) {
-      mealsTotal = mealPlanMeals.length;
-      for (final slotType in mealPlanMeals) {
-        final slotLog = mealLog.customSlots[slotType];
-        if (slotLog != null && (slotLog.items.isNotEmpty || slotLog.photoPath != null || slotLog.totalCalories > 0)) {
-          mealsLogged++;
-        }
-      }
+    final defaultIds = profile.customMealSlots
+        .where((s) => s['isDefault'] == true)
+        .map((s) => s['id'] as String)
+        .toSet();
+    final loggedIds = mealLog.customSlots.entries
+        .where((e) => e.value.items.isNotEmpty || e.value.photoPath != null || e.value.totalCalories > 0)
+        .map((e) => e.key)
+        .toSet();
+
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    final isFutureOrToday = !date.isBefore(today);
+
+    if (isFutureOrToday) {
+      final recurringIds = profile.customMealSlots
+          .map((s) => s['id'] as String)
+          .toSet();
+      mealsTotal = recurringIds.union(loggedIds).length;
+    } else {
+      final customLoggedCount = loggedIds.difference(defaultIds).length;
+      mealsTotal = defaultIds.length + customLoggedCount;
     }
 
     // 4. Weight Trend

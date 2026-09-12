@@ -19,10 +19,12 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
   bool _hasExistingEntry = false;
   int _currentAmount = 0;
   bool _isSaving = false;
+  late String _pinnedDateStr;
 
   @override
   void initState() {
     super.initState();
+    _pinnedDateStr = ref.read(dateStringProvider);
     final log = ref.read(dailyLogProvider);
     if (log.waterMl != null && log.waterMl! > 0) {
       _currentAmount = log.waterMl!;
@@ -40,7 +42,8 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
   void _addAmount(int amount) {
     if (_isSaving) return;
     setState(() {
-      final currentTextAmount = int.tryParse(_controller.text) ?? 0;
+      int currentTextAmount = int.tryParse(_controller.text) ?? 0;
+      if (currentTextAmount < 0) currentTextAmount = 0;
       _currentAmount = currentTextAmount + amount;
       _controller.text = _currentAmount.toString();
     });
@@ -49,7 +52,9 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
   void _onTextChanged(String val) {
     if (_isSaving) return;
     setState(() {
-      _currentAmount = int.tryParse(val) ?? 0;
+      int parsed = int.tryParse(val) ?? 0;
+      if (parsed < 0) parsed = 0;
+      _currentAmount = parsed;
     });
   }
 
@@ -87,6 +92,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
     final isGoalReached = hasTarget && _currentAmount >= targetInMl;
 
     return AppSheet(
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,8 +104,9 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
               Text(
                 'Water Intake',
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Cabinet Grotesk',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
                   color: context.colors.textDark,
                 ),
               ),
@@ -137,6 +144,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     Text(
                       '$_currentAmount ml',
                       style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         color: isGoalReached ? context.colors.green : context.colors.primary,
@@ -254,6 +262,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     keyboardType: TextInputType.number,
                     enabled: !_isSaving,
                     style: TextStyle(
+                      fontFamily: 'Cabinet Grotesk',
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: context.colors.textDark,
@@ -366,14 +375,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                           : () async {
                               setState(() => _isSaving = true);
                               try {
-                                await ref.read(dailyLogProvider.notifier).clearWater();
-
-                                if (waterHabit != null) {
-                                  // ignore: unawaited_futures
-                                  ref
-                                      .read(habitCompletionsProvider.notifier)
-                                      .setOverride(waterHabit.id, 'none');
-                                }
+                                await ref.read(dailyLogProvider.notifier).clearWaterForDate(_pinnedDateStr);
                                 if (context.mounted) Navigator.of(context).pop();
                               } catch (e) {
                                 setState(() => _isSaving = false);
@@ -410,30 +412,10 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         if (_currentAmount > 0) {
                           await ref
                               .read(dailyLogProvider.notifier)
-                              .updateWater(_currentAmount);
-
-                          if (waterHabit != null) {
-                            if (isGoalReached) {
-                              // ignore: unawaited_futures
-                              ref
-                                  .read(habitCompletionsProvider.notifier)
-                                  .setOverride(waterHabit.id, 'done');
-                            } else {
-                              // ignore: unawaited_futures
-                              ref
-                                  .read(habitCompletionsProvider.notifier)
-                                  .setOverride(waterHabit.id, 'none');
-                            }
-                          }
+                              .updateWaterForDate(_pinnedDateStr, _currentAmount);
                         } else {
                           // Clear water if saved with 0
-                          await ref.read(dailyLogProvider.notifier).clearWater();
-                          if (waterHabit != null) {
-                            // ignore: unawaited_futures
-                            ref
-                                .read(habitCompletionsProvider.notifier)
-                                .setOverride(waterHabit.id, 'none');
-                          }
+                          await ref.read(dailyLogProvider.notifier).clearWaterForDate(_pinnedDateStr);
                         }
 
                         if (context.mounted) Navigator.of(context).pop();

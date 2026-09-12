@@ -155,7 +155,7 @@ class MediaRepository {
 
     // 3. Delete physical file (if not web)
     if (!kIsWeb) {
-      final file = File(photoPath);
+      final file = File(getAbsolutePath(photoPath));
       if (await file.exists()) {
         await file.delete();
       }

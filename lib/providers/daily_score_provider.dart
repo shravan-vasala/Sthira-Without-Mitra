@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'app_providers.dart';
 import '../models/habit.dart';
 import '../models/daily_log.dart';
+import '../models/user_profile.dart';
 import '../models/workout_plan.dart';
 import '../models/meal_plan.dart';
 import '../models/daily_meal_log.dart';
@@ -78,6 +79,7 @@ class DailyScore {
     required double targetWeight,
     required int targetCalories,
     required DailyLogRepository dailyLogRepo,
+    required UserProfile profile,
   }) {
     final today = DateTime.now();
     final isFuture = date.isAfter(DateTime(today.year, today.month, today.day));
@@ -108,6 +110,7 @@ class DailyScore {
       mealLog: mealLog,
       targetWeight: targetWeight,
       dailyLogRepo: dailyLogRepo,
+      profile: profile,
     );
 
     // 1. Habits (Max 50)
@@ -154,7 +157,10 @@ class DailyScore {
     final totalEarned = habitsScore + workoutsScore + mealsScore;
     final totalPossible = habitsMax + workoutsMax + mealsMax;
 
-    int finalScore = totalEarned.round();
+    int finalScore = 0;
+    if (totalPossible > 0) {
+      finalScore = ((totalEarned / totalPossible) * 100).round();
+    }
 
     return DailyScore(
       totalScore: finalScore,
@@ -257,6 +263,7 @@ final dailyScoreProvider = Provider<DailyScore>((ref) {
         targetWeight: targetWeight,
         targetCalories: targetCalories,
         dailyLogRepo: dailyLogRepo,
+        profile: profile,
       ).totalScore;
     }
 
@@ -290,6 +297,7 @@ final dailyScoreProvider = Provider<DailyScore>((ref) {
     targetWeight: targetWeight,
     targetCalories: targetCalories,
     dailyLogRepo: dailyLogRepo,
+    profile: profile,
   );
 
   return todayScore.copyWithContext(
@@ -352,6 +360,7 @@ final todayScoreProvider = Provider<DailyScore>((ref) {
       targetWeight: targetWeight,
       targetCalories: targetCalories,
       dailyLogRepo: dailyLogRepo,
+      profile: profile,
     ).totalScore;
     sum += s;
     count++;
@@ -371,6 +380,7 @@ final todayScoreProvider = Provider<DailyScore>((ref) {
     targetWeight: targetWeight,
     targetCalories: targetCalories,
     dailyLogRepo: dailyLogRepo,
+    profile: profile,
   );
 
   return todayScore.copyWithContext(sevenDayAverage: sevenDayAverage);

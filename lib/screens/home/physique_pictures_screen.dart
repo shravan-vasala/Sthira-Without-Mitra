@@ -12,6 +12,7 @@ import '../../services/haptics.dart';
 import 'widgets/add_progress_photo_sheet.dart';
 import '../../providers/app_providers.dart';
 import '../../repositories/media_repository.dart';
+import '../../theme/app_theme.dart';
 import 'photo_compare_screen.dart';
 import 'photo_viewer_screen.dart';
 import '../../theme/layout_insets.dart';
@@ -69,11 +70,21 @@ class _PhysiquePicturesScreenState
                     }
                   }
                 }
-                await ref.read(mediaRepoProvider).deletePhotos(toDelete);
-                setState(() {
-                  _selectedPhotos.clear();
-                  _isSelectionMode = false;
-                });
+                try {
+                  await ref.read(mediaRepoProvider).deletePhotos(toDelete);
+                  if (mounted) {
+                    setState(() {
+                      _selectedPhotos.clear();
+                      _isSelectionMode = false;
+                    });
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to delete photos: $e')),
+                    );
+                  }
+                }
               },
               label: 'Delete',
             ),
@@ -266,14 +277,14 @@ class _PhysiquePicturesScreenState
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
-                            child: Text(
-                              formattedDate,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: context.colors.textDark,
+                              child: Text(
+                                formattedDate,
+                                style: AppTheme.numeric(TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.colors.textDark,
+                                )),
                               ),
-                            ),
                           ),
                           GridView.builder(
                             shrinkWrap: true,
@@ -402,14 +413,14 @@ class _PhysiquePicturesScreenState
                                               6,
                                             ),
                                           ),
-                                          child: Text(
-                                            '${weight}kg',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                              color: context.colors.onPrimary,
+                                            child: Text(
+                                              '${weight}kg',
+                                              style: AppTheme.numeric(TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                                color: context.colors.onPrimary,
+                                              )),
                                             ),
-                                          ),
                                         ),
                                       ),
                                     if (isSelected)
@@ -470,7 +481,7 @@ class _PhysiquePicturesScreenState
     _addPhoto();
   }
 
-  void _openViewer(List<MapEntry<String, List<String>>> allPhotos, int dateIndex, int photoIndex) {
+  Future<void> _openViewer(List<MapEntry<String, List<String>>> allPhotos, int dateIndex, int photoIndex) async {
     final flatPhotos = <PhotoItem>[];
     int targetIndex = 0;
     for (int i = 0; i < allPhotos.length; i++) {
@@ -485,7 +496,7 @@ class _PhysiquePicturesScreenState
       }
     }
     
-    Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PhotoViewerScreen(
@@ -494,6 +505,10 @@ class _PhysiquePicturesScreenState
         ),
       ),
     );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _openCompareMode(List<MapEntry<String, List<String>>> allPhotos) {

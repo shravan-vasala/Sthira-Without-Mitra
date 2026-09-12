@@ -45,11 +45,19 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
   }
 
   Future<void> setOverride(String habitId, String? overrideValue) async {
-    final repo = ref.read(habitRepoProvider);
     final date = ref.read(dateStringProvider);
+    await setOverrideForDate(date, habitId, overrideValue);
+  }
+
+  Future<void> setOverrideForDate(String date, String habitId, String? overrideValue) async {
+    final repo = ref.read(habitRepoProvider);
     await repo.setOverride(date, habitId, overrideValue);
-    state = repo.getCompletions(date);
-    WidgetUpdateService.pushWidgetState(ref);
+    
+    final currentDate = ref.read(dateStringProvider);
+    if (date == currentDate) {
+      state = repo.getCompletions(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
   }
 }
 

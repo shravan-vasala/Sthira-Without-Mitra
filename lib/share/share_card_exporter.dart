@@ -12,7 +12,7 @@ class ShareCardExporter {
   /// and exports it to a high-quality PNG.
   /// Post: 1080x1350 (logical 360x450 at 3x)
   /// Story: 1080x1920 (logical 360x640 at 3x)
-  static Future<void> exportAndShareWidget({
+  static Future<bool> exportAndShareWidget({
     required BuildContext context,
     required Widget widget,
     required String fileName,
@@ -91,9 +91,11 @@ class ShareCardExporter {
       final xFile = XFile(file.path, mimeType: 'image/png');
       
       // ignore: deprecated_member_use
-      await Share.shareXFiles([xFile], text: text);
+      final result = await Share.shareXFiles([xFile], text: text);
+      return result.status == ShareResultStatus.success;
     } catch (e) {
       debugPrint('Error via ShareCardExporter: $e');
+      return false;
     } finally {
       overlayEntry.remove();
     }

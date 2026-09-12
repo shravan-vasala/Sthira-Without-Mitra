@@ -83,6 +83,7 @@ class SharedChartCard extends StatelessWidget {
         Text(
           metric.title,
           style: TextStyle(
+            fontFamily: 'Cabinet Grotesk',
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: context.colors.textDark,
@@ -187,6 +188,7 @@ class SharedChartCard extends StatelessWidget {
                             Text(
                               statValues[index],
                               style: TextStyle(
+                                fontFamily: 'Cabinet Grotesk',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 color: context.colors.textDark,
@@ -520,7 +522,7 @@ class SharedChartCard extends StatelessWidget {
           touchTooltipData: BarTouchTooltipData(
             getTooltipColor: (_) => context.colors.textDark,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              if (!byDay.containsKey(group.x) || rod.toY <= 0) {
+              if (!byDay.containsKey(group.x)) {
                 return null;
               }
               final date = startDate.add(Duration(days: group.x));
@@ -578,9 +580,9 @@ class SharedChartCard extends StatelessWidget {
           dotData: FlDotData(
             show: true,
             checkToShowDot: (spot, barData) {
+              final isIsolated = segment.length == 1;
               if (timeFormat == ChartTimeFormat.sixMonths) {
-                if (dataYValues.length > 1 && dataMinY == dataMaxY) return false;
-                return spot.y == dataMinY || spot.y == dataMaxY;
+                return isIsolated || spot.y == dataMinY || spot.y == dataMaxY;
               }
               if (hasTrend) return true;
               return showDots || segment.length == 1;
@@ -695,8 +697,10 @@ class SharedChartCard extends StatelessWidget {
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
                 final date = startDate.add(Duration(days: spot.x.toInt()));
+                final isTrend = spot.barIndex == segments.length;
+                final prefix = isTrend ? '7-Day Trend\n' : 'Measured\n';
                 return LineTooltipItem(
-                  _tooltipText(date, spot.y),
+                  '$prefix${_tooltipText(date, spot.y)}',
                   TextStyle(
                     color: context.colors.card,
                     fontWeight: FontWeight.bold,

@@ -55,6 +55,7 @@ class _PhotoCalorieScannerSheetState
   String? _techErrorMsg;
   AiErrorCause? _errorCause;
   bool _isOffline = false;
+  bool _isSavingMeal = false;
 
   int _analysisSessionToken = 0;
   Timer? _statusTimer;
@@ -125,6 +126,8 @@ class _PhotoCalorieScannerSheetState
 
   @override
   void dispose() {
+    _statusTimer?.cancel();
+    _countdownTimer?.cancel();
     _descriptionCtrl.dispose();
     super.dispose();
   }
@@ -154,6 +157,11 @@ class _PhotoCalorieScannerSheetState
           carbsG: (m['carbs_g'] as num?)?.toDouble() ?? 0.0,
           fatG: (m['fat_g'] as num?)?.toDouble() ?? 0.0,
         ),
+        baseNutrition: m['baseNutrition'] != null ? FoodNutrition.fromJson(m['baseNutrition']) : null,
+        isPer100g: m['is_per_100g'] as bool? ?? false,
+        servingGrams: (m['serving_grams'] as num?)?.toDouble(),
+        consumedGrams: (m['estimated_grams'] as num?)?.toDouble(),
+        provenance: m['provenance'] as String?,
         resolved: m['resolved'] as bool? ?? true,
       );
     }).toList();
@@ -214,6 +222,7 @@ class _PhotoCalorieScannerSheetState
     );
     if (picked == null) return;
 
+    _analysisSessionToken++;
     setState(() {
       _selectedImages.add(File(picked.path));
       _describeMode = false;
@@ -266,11 +275,11 @@ class _PhotoCalorieScannerSheetState
       if (result != null) {
         _applyResult(result);
       } else {
-        _showError('AI could not analyze the image.');
+        _showError('AI could not analyze the image.', currentToken);
       }
     } catch (e) {
       if (!mounted) return;
-      _handleAnalyzeError(e);
+      _handleAnalyzeError(e, currentToken);
     }
   }
 
@@ -309,15 +318,16 @@ class _PhotoCalorieScannerSheetState
       if (result != null) {
         _applyResult(result);
       } else {
-        _showError('AI could not estimate from that description.');
+        _showError('AI could not estimate from that description.', currentToken);
       }
     } catch (e) {
       if (!mounted) return;
-      _handleAnalyzeError(e);
+      _handleAnalyzeError(e, currentToken);
     }
   }
 
-  void _handleAnalyzeError(Object e) {
+  void _handleAnalyzeError(Object e, int token) {
+    if (token != _analysisSessionToken) return;
     _statusTimer?.cancel();
     final msg = e
         .toString()
@@ -349,7 +359,8 @@ class _PhotoCalorieScannerSheetState
     });
   }
 
-  void _showError(String message) {
+  void _showError(String message, int token) {
+    if (token != _analysisSessionToken) return;
     _statusTimer?.cancel();
     setState(() {
       _isAnalyzing = false;
@@ -358,6 +369,7 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _switchToDescribe() {
+    _analysisSessionToken++;
     setState(() {
       _describeMode = true;
       _selectedImages = [];
@@ -369,6 +381,7 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _switchToPhoto() {
+    _analysisSessionToken++;
     setState(() {
       _describeMode = false;
       _analysisComplete = false;
@@ -379,6 +392,7 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _enterManualItems() {
+    _analysisSessionToken++;
     setState(() {
       _errorMessage = null;
       _isAnalyzing = false;
@@ -456,8 +470,12 @@ class _PhotoCalorieScannerSheetState
     );
   }
 
-  void _editItem(int index) {
-    final item = _items[index];
+  void _editItem(int? index) {
+    final item = index != null ? _items[index] : MealItemLog(
+      name: 'New Item',
+      portion: '1 serving',
+      computedNutrition: FoodNutrition(kcal: 0, proteinG: 0, carbsG: 0, fatG: 0),
+    );
     final nameCtrl = TextEditingController(text: item.name);
     final portionCtrl = TextEditingController(text: item.portion);
     final calsCtrl = TextEditingController(text: item.computedNutrition?.kcal.round().toString() ?? '0');
@@ -505,9 +523,10 @@ class _PhotoCalorieScannerSheetState
               const SizedBox(height: 12),
               TextField(
                 controller: calsCtrl,
+                style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
                 decoration: InputDecoration(
                   labelText: 'Calories',
-                  labelStyle: TextStyle(color: context.colors.textMedium),
+                  labelStyle: TextStyle(color: context.colors.textMedium, fontFamily: 'General Sans'),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.colors.primary),
                   ),
@@ -520,11 +539,13 @@ class _PhotoCalorieScannerSheetState
                   Expanded(
                     child: TextField(
                       controller: pCtrl,
+                      style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
                       decoration: InputDecoration(
                         labelText: 'Pro(g)',
                         labelStyle: TextStyle(
                           color: context.colors.textMedium,
                           fontSize: 13,
+                          fontFamily: 'General Sans',
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
@@ -541,11 +562,13 @@ class _PhotoCalorieScannerSheetState
                   Expanded(
                     child: TextField(
                       controller: cCtrl,
+                      style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
                       decoration: InputDecoration(
                         labelText: 'Carb(g)',
                         labelStyle: TextStyle(
                           color: context.colors.textMedium,
                           fontSize: 13,
+                          fontFamily: 'General Sans',
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
@@ -562,11 +585,13 @@ class _PhotoCalorieScannerSheetState
                   Expanded(
                     child: TextField(
                       controller: fCtrl,
+                      style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
                       decoration: InputDecoration(
                         labelText: 'Fat(g)',
                         labelStyle: TextStyle(
                           color: context.colors.textMedium,
                           fontSize: 13,
+                          fontFamily: 'General Sans',
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
@@ -595,12 +620,12 @@ class _PhotoCalorieScannerSheetState
           ElevatedButton(
             onPressed: () {
               setState(() {
-                final cVal = int.tryParse(calsCtrl.text) ?? 0;
-                final pVal = double.tryParse(pCtrl.text) ?? 0.0;
-                final carbsVal = double.tryParse(cCtrl.text) ?? 0.0;
-                final fVal = double.tryParse(fCtrl.text) ?? 0.0;
+                final cVal = (int.tryParse(calsCtrl.text) ?? 0).clamp(0, 9999);
+                final pVal = (double.tryParse(pCtrl.text) ?? 0.0).clamp(0.0, 999.9);
+                final carbsVal = (double.tryParse(cCtrl.text) ?? 0.0).clamp(0.0, 999.9);
+                final fVal = (double.tryParse(fCtrl.text) ?? 0.0).clamp(0.0, 999.9);
 
-                _items[index] = MealItemLog(
+                final newItem = MealItemLog(
                   name: nameCtrl.text,
                   portion: portionCtrl.text,
                   computedNutrition: FoodNutrition(
@@ -609,14 +634,24 @@ class _PhotoCalorieScannerSheetState
                     carbsG: carbsVal,
                     fatG: fVal,
                   ),
+                  baseNutrition: item.baseNutrition,
+                  isPer100g: item.isPer100g,
+                  servingGrams: item.servingGrams,
+                  consumedGrams: item.consumedGrams,
                   resolved: true,
                 );
+                newItem.provenance = 'yours';
                 
-                // When explicitly setting macros manually, make it user provenance so it's remembered
-                _items[index].provenance = 'yours';
+                if (index != null) {
+                  _items[index] = newItem;
+                  _baseItems[index] = _cloneItem(newItem);
+                  _itemScales[index] = 1.0;
+                } else {
+                  _items.add(newItem);
+                  _baseItems[_items.length - 1] = _cloneItem(newItem);
+                  _itemScales[_items.length - 1] = 1.0;
+                }
                 
-                _baseItems[index] = _cloneItem(_items[index]);
-                _itemScales[index] = 1.0;
                 _recalculateTotals();
               });
               Navigator.pop(ctx);
@@ -636,14 +671,7 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _addItem() {
-    _items.add(
-      MealItemLog(
-        name: 'New Item',
-        portion: '1 serving',
-        computedNutrition: FoodNutrition(kcal: 0, proteinG: 0, carbsG: 0, fatG: 0),
-      ),
-    );
-    _editItem(_items.length - 1);
+    _editItem(null);
   }
 
   void _setPortionScale(int index, double scale) {
@@ -661,6 +689,11 @@ class _PhotoCalorieScannerSheetState
           carbsG: double.parse(((base.computedNutrition?.carbsG ?? 0.0) * scale).toStringAsFixed(1)),
           fatG: double.parse(((base.computedNutrition?.fatG ?? 0.0) * scale).toStringAsFixed(1)),
         ),
+        baseNutrition: base.baseNutrition,
+        isPer100g: base.isPer100g,
+        servingGrams: base.servingGrams,
+        consumedGrams: base.consumedGrams != null ? base.consumedGrams! * scale : null,
+        provenance: base.provenance,
         resolved: base.resolved,
       );
       _recalculateTotals();
@@ -672,38 +705,52 @@ class _PhotoCalorieScannerSheetState
     double p = 0;
     double carbs = 0;
     double f = 0;
+    int unresolved = 0;
     for (final i in _items) {
       c += i.computedNutrition?.kcal.round() ?? 0;
       p += i.computedNutrition?.proteinG ?? 0.0;
       carbs += i.computedNutrition?.carbsG ?? 0.0;
       f += i.computedNutrition?.fatG ?? 0.0;
+      if (i.resolved == false) unresolved++;
     }
     _totalCalories = c;
     _totalProtein = p;
     _totalCarbs = carbs;
     _totalFat = f;
+    _unresolvedCount = unresolved;
   }
 
   Future<void> _saveMeal() async {
-    String? finalPhotoPath;
-    if (_selectedImages.isNotEmpty) {
-      if (!kIsWeb) {
-        final appDir = await getApplicationDocumentsDirectory();
-        final timestamp = DateTime.now().millisecondsSinceEpoch;
-        final fileName = 'meal_photo_$timestamp.jpg';
-        final savedImage = await _selectedImages.first.copy(
-          '${appDir.path}/$fileName',
-        );
-        finalPhotoPath = savedImage.path;
-      } else {
-        finalPhotoPath = _selectedImages.first.path;
-      }
-    }
+    if (_isSavingMeal) return;
+    setState(() => _isSavingMeal = true);
 
-    final slotLog = MealSlotLog(
-      name: widget.slotDisplayName,
-      photoPath: finalPhotoPath ?? widget.appendToLog?.photoPath,
-      items: _items,
+    try {
+      List<String> finalPhotoPaths = [];
+      String? fallbackPhotoPath;
+
+      if (_selectedImages.isNotEmpty) {
+        if (!kIsWeb) {
+          final appDir = await getApplicationDocumentsDirectory();
+          for (int i = 0; i < _selectedImages.length; i++) {
+            final timestamp = DateTime.now().millisecondsSinceEpoch;
+            final fileName = 'meal_photo_${timestamp}_$i.jpg';
+            final savedImage = await _selectedImages[i].copy(
+              '${appDir.path}/$fileName',
+            );
+            finalPhotoPaths.add(savedImage.path);
+          }
+          fallbackPhotoPath = finalPhotoPaths.first;
+        } else {
+          finalPhotoPaths = _selectedImages.map((f) => f.path).toList();
+          fallbackPhotoPath = finalPhotoPaths.first;
+        }
+      }
+
+      final slotLog = MealSlotLog(
+        name: widget.slotDisplayName,
+        photoPath: fallbackPhotoPath ?? widget.appendToLog?.photoPath,
+        photoPaths: [...(widget.appendToLog?.photoPaths ?? []), ...finalPhotoPaths],
+        items: _items,
       totalCalories: _totalCalories,
       totalProtein: _totalProtein,
       totalCarbs: _totalCarbs,
@@ -741,23 +788,38 @@ class _PhotoCalorieScannerSheetState
        // silently fail portion memory if db throws
     }
 
-    await ref
-        .read(dailyMealLogProvider.notifier)
-        .saveMealSlot(widget.slotId, slotLog);
+      await ref
+          .read(dailyMealLogProvider.notifier)
+          .saveMealSlot(widget.slotId, slotLog);
 
-    if (mounted) {
-      // ignore: unawaited_futures
-      Haptics.toggle();
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Logged $_totalCalories kcal for ${widget.slotDisplayName}!',
+      if (mounted) {
+        // ignore: unawaited_futures
+        Haptics.toggle();
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Logged $_totalCalories kcal for ${widget.slotDisplayName}!',
+            ),
+            backgroundColor: context.colors.green,
+            behavior: SnackBarBehavior.floating,
           ),
-          backgroundColor: context.colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Failed to save meal. Please try again.'),
+            backgroundColor: context.colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingMeal = false);
+      }
     }
   }
 
@@ -774,7 +836,7 @@ class _PhotoCalorieScannerSheetState
         : 'Log ${widget.slotDisplayName}';
 
     return AppSheet(
-      scrollable: _analysisComplete,
+      scrollable: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -811,7 +873,7 @@ class _PhotoCalorieScannerSheetState
                     Text(
                       title,
                       style: TextStyle(
-                        fontFamily: 'CabinetGrotesk',
+                        fontFamily: 'Cabinet Grotesk',
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
@@ -1521,6 +1583,7 @@ class _PhotoCalorieScannerSheetState
                                   Text(
                                     '${item.portion} • ${item.computedNutrition?.kcal.round() ?? 0} kcal',
                                     style: TextStyle(
+                                      fontFamily: 'Cabinet Grotesk',
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       color: context.colors.primary,
@@ -1651,6 +1714,7 @@ class _PhotoCalorieScannerSheetState
                         Text(
                           '$_totalCalories kcal',
                           style: TextStyle(
+                            fontFamily: 'Cabinet Grotesk',
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: context.colors.textDark,
@@ -1696,6 +1760,7 @@ class _PhotoCalorieScannerSheetState
       child: Text(
         '$label: $value',
         style: TextStyle(
+          fontFamily: 'Cabinet Grotesk',
           fontSize: 11,
           fontWeight: FontWeight.w600,
           color: color,
@@ -1752,11 +1817,28 @@ class _MyFoodsScroller extends StatefulWidget {
 
 class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
   List<UserFoodLog> _myFoods = [];
+  StreamSubscription<void>? _subscription;
 
   @override
   void initState() {
     super.initState();
     _loadMyFoods();
+    _setupSubscription();
+  }
+
+  void _setupSubscription() {
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      _subscription = isar.userFoodLogs.watchLazy().listen((_) {
+        _loadMyFoods();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadMyFoods() async {
@@ -1780,26 +1862,29 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 36,
+          height: 48,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: _myFoods.length,
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final food = _myFoods[index];
-              return InkWell(
+              return GestureDetector(
                 onTap: () {
                   Haptics.tap();
                   widget.onFoodTap(food);
                 },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: context.colors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: context.colors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.history_rounded, size: 14, color: context.colors.primary),

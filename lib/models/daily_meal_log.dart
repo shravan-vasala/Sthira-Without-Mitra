@@ -106,6 +106,7 @@ class MealSlotLog {
   String? name;
   String? emoji;
   String? photoPath;
+  List<String> photoPaths;
   List<MealItemLog> items;
   int totalCalories;
   double totalProtein;
@@ -117,6 +118,7 @@ class MealSlotLog {
     this.name,
     this.emoji,
     this.photoPath,
+    this.photoPaths = const [],
     this.items = const [],
     this.totalCalories = 0,
     this.totalProtein = 0.0,
@@ -130,6 +132,7 @@ class MealSlotLog {
       name: json['name'] as String?,
       emoji: json['emoji'] as String?,
       photoPath: json['photoPath'] as String?,
+      photoPaths: (json['photoPaths'] as List?)?.cast<String>() ?? [],
       items:
           (json['items'] as List?)
               ?.map((i) => MealItemLog.fromJson(i as Map<String, dynamic>))
@@ -147,6 +150,7 @@ class MealSlotLog {
     if (name != null) 'name': name,
     if (emoji != null) 'emoji': emoji,
     if (photoPath != null) 'photoPath': photoPath,
+    'photoPaths': photoPaths,
     'items': items.map((i) => i.toJson()).toList(),
     'totalCalories': totalCalories,
     'totalProtein': totalProtein,

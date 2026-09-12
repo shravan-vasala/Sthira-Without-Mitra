@@ -103,13 +103,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final d = DateTime.now();
     switch (_selectedRange) {
       case TimeRange.weekly:
-        return DateTime(d.year, d.month, d.day - 6); // 7 days inclusive
+        return d.subtract(const Duration(days: 6)); // 7 days inclusive
       case TimeRange.oneMonth:
-        return DateTime(d.year, d.month - 1, d.day);
+        return d.subtract(const Duration(days: 30));
       case TimeRange.threeMonths:
-        return DateTime(d.year, d.month - 3, d.day);
+        return d.subtract(const Duration(days: 90));
       case TimeRange.sixMonths:
-        return DateTime(d.year, d.month - 6, d.day);
+        return d.subtract(const Duration(days: 180));
       case TimeRange.ytd:
         return DateTime(d.year, 1, 1);
     }
@@ -133,9 +133,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (data.isEmpty) return [];
     final trend = <ChartDataPoint>[];
     for (int i = 0; i < data.length; i++) {
-        final window = data.sublist(i > 6 ? i - 6 : 0, i + 1);
-        final sum = window.fold<double>(0, (p, c) => p + c.value!);
-        trend.add(ChartDataPoint(data[i].date, sum / window.length));
+        final windowStart = data[i].date.subtract(const Duration(days: 6));
+        final window = data.where((d) => !d.date.isBefore(windowStart) && !d.date.isAfter(data[i].date)).toList();
+        if (window.isNotEmpty) {
+          final sum = window.fold<double>(0, (p, c) => p + c.value!);
+          trend.add(ChartDataPoint(data[i].date, sum / window.length));
+        }
     }
     return trend;
   }
@@ -178,19 +181,18 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       final d = _startDate.add(Duration(days: i));
       final dateStr = DateFormat('yyyy-MM-dd').format(d);
       final log = logsByDate[dateStr];
-      if (log == null) continue;
 
       double? val;
       switch (metric) {
-        case MetricType.weight: val = log.weight != null ? (useKg ? log.weight! : log.weight! * 2.20462) : null; break;
-        case MetricType.steps: val = log.steps?.toDouble(); break;
-        case MetricType.sleep: val = log.sleepHours; break;
-        case MetricType.screenTime: if (log.screenTimeMinutes != null) val = log.screenTimeMinutes! / 60.0; break;
-        case MetricType.bodyFat: val = log.bodyFat; break;
+        case MetricType.weight: val = log?.weight != null ? (useKg ? log!.weight! : log!.weight! * 2.20462) : null; break;
+        case MetricType.steps: val = log?.steps?.toDouble(); break;
+        case MetricType.sleep: val = log?.sleepHours; break;
+        case MetricType.screenTime: if (log?.screenTimeMinutes != null) val = log!.screenTimeMinutes! / 60.0; break;
+        case MetricType.bodyFat: val = log?.bodyFat; break;
         case MetricType.bmi: 
-          if (log.weight != null) {
+          if (log?.weight != null) {
             final h = profile.heightInMeters;
-            val = log.weight! / (h * h);
+            val = log!.weight! / (h * h);
           }
           break;
         case MetricType.calories:
@@ -331,7 +333,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           child: Icon(icon, color: context.colors.primary, size: 20),
         ),
         const SizedBox(height: 12),
-        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+        Text(value, style: TextStyle(fontFamily: 'Cabinet Grotesk', fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark)),
         const SizedBox(height: 2),
         Text(label, style: TextStyle(fontSize: 12, color: context.colors.textLight)),
       ],
@@ -361,7 +363,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+              Text(value, style: TextStyle(fontFamily: 'Cabinet Grotesk', fontSize: 24, fontWeight: FontWeight.bold, color: context.colors.textDark)),
               const SizedBox(width: 4),
               Text(unit, style: TextStyle(fontSize: 14, color: context.colors.textLight)),
             ],
@@ -421,6 +423,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                     return Text(
                       displayValue,
                       style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
                         fontSize: 48,
                         fontWeight: FontWeight.w800,
                         color: context.colors.textDark,
@@ -433,6 +436,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 Text(
                   unitText,
                   style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                     color: context.colors.textMedium,

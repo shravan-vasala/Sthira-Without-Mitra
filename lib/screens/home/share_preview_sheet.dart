@@ -22,13 +22,16 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     if (_isSharing) return;
     setState(() => _isSharing = true);
     try {
-      await ShareCardExporter.exportAndShareWidget(
+      final success = await ShareCardExporter.exportAndShareWidget(
         context: context,
         widget: layout,
         fileName: 'sthira_daily_status',
         text: subtitle,
         format: _format,
       );
+      if (success && mounted) {
+        Navigator.of(context).pop();
+      }
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }
@@ -47,20 +50,12 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     final name = ref.watch(profileProvider.select((p) => p.name));
     final scoreData = ref.watch(dailyScoreProvider);
     final score = scoreData.totalScore;
-    final log = ref.watch(dailyLogProvider);
-    final steps = log.steps ?? 0;
-    final meals = ref.watch(dailyMealLogProvider);
-    final habitsList = ref.watch(habitsProvider);
-    final completions = ref.watch(habitCompletionsProvider);
+    final selectedDate = ref.watch(selectedDateProvider);
     
-    int habitsDone = 0;
-    int totalHabits = 0;
-    for (final h in habitsList) {
-      totalHabits++;
-      if (isHabitCompleted(h, completions, log)) {
-        habitsDone++;
-      }
-    }
+    final steps = scoreData.steps;
+    final mealsKcal = scoreData.totalCalories;
+    final workoutDone = scoreData.workoutsDone > 0;
+    final habitsDone = scoreData.habitsTotal > 0 ? '${scoreData.habitsDone}/${scoreData.habitsTotal}' : '0/0';
 
     final subtitle = _getSubtitle(score);
     // Base color tied to score
@@ -77,10 +72,11 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
       score: score,
       subtitle: subtitle,
       steps: steps,
-      mealsKcal: meals.totalCalories.toInt(),
-      workoutDone: log.workoutCompleted,
-      habitsDone: totalHabits > 0 ? '$habitsDone/$totalHabits' : '0/0',
+      mealsKcal: mealsKcal,
+      workoutDone: workoutDone,
+      habitsDone: habitsDone,
       baseColor: baseColor,
+      date: selectedDate,
     );
 
     final previewWidth = 360.0;
@@ -110,6 +106,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
             Text(
               'Share Your Progress',
               style: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: context.colors.textDark,

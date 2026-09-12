@@ -266,8 +266,11 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
     if (name.isEmpty) return;
 
     var target = double.tryParse(_targetCtrl.text) ?? 1.0;
-    final step = double.tryParse(_stepCtrl.text) ?? 1.0;
+    var step = double.tryParse(_stepCtrl.text) ?? 1.0;
     var unit = _unitCtrl.text.trim();
+
+    if (target <= 0) target = 1.0;
+    if (step <= 0) step = 1.0;
 
     // Water: always checkbox with customizable daily goal
     var type = _type;

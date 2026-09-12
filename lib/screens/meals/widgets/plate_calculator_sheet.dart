@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_theme.dart';
+import '../../../widgets/app_bottom_sheet.dart';
 
 class PlateCalculatorSheet extends StatefulWidget {
   const PlateCalculatorSheet({super.key});
@@ -49,44 +51,13 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
   @override
   Widget build(BuildContext context) {
     final macros = _calculatedMacros;
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.paddingOf(context).bottom + 20,
-        top: 8,
-        left: 20,
-        right: 20,
-      ),
+    return AppSheet(
+      title: 'Visual Plate Calculator',
+      subtitle: 'Adjusting one proportion automatically redistributes the others to maintain 100%. Values are rough educational estimates for a standard 500g plate.',
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: context.colors.border,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Visual Plate Calculator',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.colors.textDark,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Adjust the sliders to roughly estimate a standard 500g meal based on plate proportions.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
-          ),
-          const SizedBox(height: 24),
 
           _buildSlider(
             title: 'Protein (Meat, Eggs, Dal)',
@@ -122,7 +93,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             },
           ),
           _buildSlider(
-            title: 'Added Fats & Oils',
+            title: 'Added Fats & Oils (Highly Caloric)',
             color: context.colors.red,
             value: fatPercent,
             onChanged: (v) {
@@ -145,13 +116,13 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _macroItem('Calories', "${macros['calories']!.toInt()}"),
+                _macroItem('Calories', "${macros['calories']!.toInt()}", isGiant: true),
                 _macroItem(
                   'Protein',
-                  "${macros['protein']!.toStringAsFixed(1)}g",
+                  "${macros['protein']!.toInt()}g",
                 ),
-                _macroItem('Carbs', "${macros['carbs']!.toStringAsFixed(1)}g"),
-                _macroItem('Fat', "${macros['fat']!.toStringAsFixed(1)}g"),
+                _macroItem('Carbs', "${macros['carbs']!.toInt()}g"),
+                _macroItem('Fat', "${macros['fat']!.toInt()}g"),
               ],
             ),
           ),
@@ -255,7 +226,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     );
   }
 
-  Widget _macroItem(String title, String value) {
+  Widget _macroItem(String title, String value, {bool isGiant = false}) {
     return Column(
       children: [
         Text(
@@ -265,11 +236,12 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: context.colors.textDark,
-          ),
+          style: AppTheme.numeric(TextStyle(
+            fontSize: isGiant ? 32 : 16,
+            fontWeight: isGiant ? FontWeight.w800 : FontWeight.w700,
+            fontFamily: 'Cabinet Grotesk',
+            color: isGiant ? context.colors.primary : context.colors.textDark,
+          )),
         ),
       ],
     );

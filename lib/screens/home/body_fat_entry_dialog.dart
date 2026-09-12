@@ -16,13 +16,20 @@ class BodyFatEntryDialog extends ConsumerStatefulWidget {
 
 class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
   final _controller = TextEditingController();
+  String? _errorText;
+  late String _pinnedDateStr;
+  bool _isExistingEntry = false;
+  bool _isPrefill = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
+    _pinnedDateStr = ref.read(dateStringProvider);
     final log = ref.read(dailyLogProvider);
     if (log.bodyFat != null) {
       _controller.text = log.bodyFat!.toStringAsFixed(1);
+      _isExistingEntry = true;
       return;
     }
 
@@ -38,6 +45,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
       final bf = logs[i].bodyFat;
       if (bf != null) {
         _controller.text = bf.toStringAsFixed(1);
+        _isPrefill = true;
         break;
       }
     }
@@ -56,16 +64,60 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
 
     return AppSheet(
-      title: 'Log Body Fat',
-      subtitle: 'Enter your body fat percentage for $dateFormatted',
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Log Body Fat',
+                style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: context.colors.textDark,
+                ),
+              ),
+              if (_isExistingEntry)
+                TextButton(
+                  onPressed: _isSaving
+                      ? null
+                      : () async {
+                          setState(() => _isSaving = true);
+                          try {
+                            await ref.read(dailyLogProvider.notifier).clearBodyFatForDate(_pinnedDateStr);
+                            if (context.mounted) Navigator.of(context).pop();
+                          } catch (_) {
+                            setState(() {
+                              _isSaving = false;
+                              _errorText = 'Failed to clear. Try again.';
+                            });
+                          }
+                       },
+                  style: TextButton.styleFrom(foregroundColor: context.colors.red),
+                  child: _isSaving ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Clear'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Enter your body fat percentage for $dateFormatted',
+            style: TextStyle(
+              fontSize: 14,
+              color: context.colors.textMedium,
+            ),
+          ),
+          const SizedBox(height: 24),
           TextField(
             controller: _controller,
+            enabled: !_isSaving,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
             style: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: context.colors.textDark,
@@ -75,6 +127,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.inputFill,
+              errorText: _errorText,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
@@ -89,6 +142,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               ),
               hintText: '0.0',
               hintStyle: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
                 color: context.colors.textLight,
@@ -108,16 +162,42 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Save Body Fat',
-            onPressed: () {
+            isLoading: _isSaving,
+            onPressed: () async {
+              if (_isSaving) return;
               final bf = double.tryParse(_controller.text);
               if (bf != null && bf > 0 && bf <= 100) {
+                setState(() => _isSaving = true);
                 Haptics.toggle();
-                final currentLog = ref.read(dailyLogProvider);
-                ref.read(dailyLogProvider.notifier).updateBodyFat(bf);
-                Navigator.of(context).pop();
+                try {
+                  await ref.read(dailyLogProvider.notifier).updateBodyFatForDate(_pinnedDateStr, bf);
+                  if (mounted) Navigator.of(context).pop();
+                } catch (e) {
+                  setState(() {
+                    _isSaving = false;
+                    _errorText = 'Failed to save. Try again.';
+                  });
+                }
+              } else {
+                Haptics.error();
+                setState(() => _errorText = 'Please enter a valid percentage (0.1-100)');
               }
             },
           ),
+          if (_isPrefill)
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Center(
+                child: Text(
+                  'Prefilled from a previous measurement',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.colors.textMedium,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ),
           SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),

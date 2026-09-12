@@ -27,75 +27,168 @@ class DailyLogNotifier extends Notifier<DailyLog> {
   }
 
   Future<void> updateWeight(double weight) async {
+    await updateWeightForDate(state.date, weight);
+  }
+
+  Future<void> updateWeightForDate(String date, double weight) async {
     final repo = ref.read(dailyLogRepoProvider);
-    await repo.updateWeight(state.date, weight);
-    state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
+    await repo.updateWeight(date, weight);
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
   }
 
   Future<void> updateSteps(int steps, {String? source}) async {
+    await updateStepsForDate(state.date, steps, source: source);
+  }
+
+  Future<void> updateStepsForDate(String date, int steps, {String? source}) async {
     final repo = ref.read(dailyLogRepoProvider);
-    await repo.updateSteps(state.date, steps, source: source ?? 'manual');
-    state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
+    await repo.updateSteps(date, steps, source: source ?? 'manual');
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
     ref.read(stepsSourceProvider.notifier).state = (source == 'healthConnect')
         ? StepsSource.healthConnect
         : StepsSource.manual;
   }
 
-  Future<void> updateSleep(double hours, {String? source}) async {
+  Future<void> clearStepsForDate(String date) async {
     final repo = ref.read(dailyLogRepoProvider);
-    await repo.updateSleep(state.date, hours, source: source ?? 'manual');
-    state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
+    await repo.clearSteps(date);
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
+    ref.read(stepsSourceProvider.notifier).state = StepsSource.manual;
+  }
+
+  Future<void> updateSleep(double hours, {String? source}) async {
+    await updateSleepForDate(state.date, hours, source: source);
+  }
+
+  Future<void> updateSleepForDate(String date, double hours, {String? source}) async {
+    final repo = ref.read(dailyLogRepoProvider);
+    await repo.updateSleep(date, hours, source: source ?? 'manual');
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
 
     final habitRepo = ref.read(habitRepoProvider);
     final allHabits = habitRepo.getHabits();
     for (final habit in allHabits.where((h) => h.type == HabitType.autoSleep)) {
       if (hours >= habit.target) {
-        await habitRepo.setCompletion(state.date, habit.id, true);
+        await habitRepo.setCompletion(date, habit.id, true);
       } else {
-        await habitRepo.setCompletion(state.date, habit.id, false);
+        await habitRepo.setCompletion(date, habit.id, false);
       }
     }
-    ref.invalidate(habitCompletionsProvider);
+    if (state.date == date) {
+      ref.invalidate(habitCompletionsProvider);
+    }
   }
 
   Future<void> clearSleep() async {
+    await clearSleepForDate(state.date);
+  }
+
+  Future<void> clearSleepForDate(String date) async {
     final repo = ref.read(dailyLogRepoProvider);
-    await repo.clearSleep(state.date);
-    state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
+    await repo.clearSleep(date);
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
 
     final habitRepo = ref.read(habitRepoProvider);
     final allHabits = habitRepo.getHabits();
     for (final habit in allHabits.where((h) => h.type == HabitType.autoSleep)) {
-      await habitRepo.setCompletion(state.date, habit.id, false);
+      await habitRepo.setCompletion(date, habit.id, false);
     }
-    ref.invalidate(habitCompletionsProvider);
+    if (state.date == date) {
+      ref.invalidate(habitCompletionsProvider);
+    }
   }
 
   Future<void> updateBodyFat(double bodyFat) async {
+    await updateBodyFatForDate(state.date, bodyFat);
+  }
+
+  Future<void> updateBodyFatForDate(String date, double bodyFat) async {
     final repo = ref.read(dailyLogRepoProvider);
-    await repo.updateBodyFat(state.date, bodyFat);
-    state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
+    await repo.updateBodyFat(date, bodyFat);
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
+  }
+
+  Future<void> clearBodyFatForDate(String date) async {
+    final repo = ref.read(dailyLogRepoProvider);
+    final current = repo.getOrCreate(date);
+    await repo.saveLog(current.clearBodyFat());
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
   }
 
   Future<void> updateWater(int waterMl) async {
+    await updateWaterForDate(state.date, waterMl);
+  }
+
+  Future<void> updateWaterForDate(String date, int waterMl) async {
     final repo = ref.read(dailyLogRepoProvider);
-    final current = state;
+    final current = repo.getOrCreate(date);
     await repo.saveLog(current.copyWith(waterMl: waterMl));
-    state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
+
+    final habitRepo = ref.read(habitRepoProvider);
+    final allHabits = habitRepo.getHabits();
+    final waterHabit = allHabits.where((h) => h.id == 'water').firstOrNull;
+    if (waterHabit != null) {
+      double targetInMl = waterHabit.target.toDouble();
+      if (waterHabit.unit.toLowerCase() == 'l' || waterHabit.unit.toLowerCase() == 'liters') {
+        targetInMl *= 1000;
+      }
+      if (waterMl >= targetInMl) {
+        await habitRepo.setCompletion(date, waterHabit.id, true);
+      } else {
+        await habitRepo.setCompletion(date, waterHabit.id, false);
+      }
+    }
+    if (state.date == date) {
+      ref.invalidate(habitCompletionsProvider);
+    }
   }
 
   Future<void> clearWater() async {
+    await clearWaterForDate(state.date);
+  }
+
+  Future<void> clearWaterForDate(String date) async {
     final repo = ref.read(dailyLogRepoProvider);
-    final current = state;
+    final current = repo.getOrCreate(date);
     await repo.saveLog(current.clearWater());
-    state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
+    if (state.date == date) {
+      state = repo.getOrCreate(date);
+      WidgetUpdateService.pushWidgetState(ref);
+    }
+
+    final habitRepo = ref.read(habitRepoProvider);
+    final waterHabit = habitRepo.getHabits().where((h) => h.id == 'water').firstOrNull;
+    if (waterHabit != null) {
+      await habitRepo.setCompletion(date, waterHabit.id, false);
+    }
+    if (state.date == date) {
+      ref.invalidate(habitCompletionsProvider);
+    }
   }
 
   Future<void> markWorkoutCompleted(String dayId) async {

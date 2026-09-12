@@ -201,15 +201,15 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
   }
 }
 
-class _ZoomablePhoto extends StatefulWidget {
+class _ZoomablePhoto extends ConsumerStatefulWidget {
   final String photoPath;
   const _ZoomablePhoto({required this.photoPath});
 
   @override
-  State<_ZoomablePhoto> createState() => _ZoomablePhotoState();
+  ConsumerState<_ZoomablePhoto> createState() => _ZoomablePhotoState();
 }
 
-class _ZoomablePhotoState extends State<_ZoomablePhoto>
+class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
     with SingleTickerProviderStateMixin {
   final TransformationController _transformationController =
       TransformationController();
@@ -281,7 +281,10 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto>
             tag: widget.photoPath, // Optional: if we want to do hero animations
             child: kIsWeb
                 ? Image.network(widget.photoPath, fit: BoxFit.contain)
-                : Image.file(File(widget.photoPath), fit: BoxFit.contain),
+                : Image.file(
+                    File(ref.read(mediaRepoProvider).getAbsolutePath(widget.photoPath)),
+                    fit: BoxFit.contain,
+                  ),
           ),
         ),
       ),

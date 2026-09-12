@@ -125,6 +125,8 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
   final dailyLogRepo = ref.watch(dailyLogRepoProvider);
 
   ref.watch(exerciseLogsUpdateProvider);
+  ref.watch(habitCompletionsProvider);
+  ref.watch(dailyMealLogsUpdateProvider);
 
   int wCompleted = 0;
   int wTotal = 0;
@@ -174,6 +176,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
       mealLog: mealLog,
       targetWeight: profile.targetWeight ?? 0.0,
       dailyLogRepo: dailyLogRepo,
+      profile: profile,
     );
 
     wCompleted += stats.workoutsDone;
@@ -201,6 +204,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
         targetWeight: profile.targetWeight ?? 0.0,
         targetCalories: profile.targetCalories,
         dailyLogRepo: dailyLogRepo,
+        profile: profile,
       ).totalScore;
       dailyScores[i] = score;
     }
@@ -341,6 +345,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
         mealLog: pMealLog,
         targetWeight: profile.targetWeight ?? 0.0,
         dailyLogRepo: dailyLogRepo,
+        profile: profile,
       );
 
       prevWCompleted += pStats.workoutsDone;
@@ -376,6 +381,7 @@ final weeklySummaryProvider = Provider<WeeklySummary>((ref) {
         targetWeight: profile.targetWeight ?? 0.0,
         targetCalories: profile.targetCalories,
         dailyLogRepo: dailyLogRepo,
+        profile: profile,
       ).totalScore;
       prevSumScores += score;
       prevElapsedDays++;

@@ -179,6 +179,10 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
     // Trigger sync
     final dailyLogRepo = ref.read(dailyLogRepoProvider);
     final habitRepo = ref.read(habitRepoProvider);
+    await prefs.setString(
+      'last_hc_sync_attempt',
+      DateTime.now().toIso8601String(),
+    );
     final todayData = await hcService.syncToday();
     final steps = todayData?.steps;
     if (todayData != null) await dailyLogRepo.updateFromHealthConnect([todayData]);

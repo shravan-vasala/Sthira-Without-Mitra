@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../providers/app_providers.dart';
+import '../../../utils/format_units.dart';
 import '../photo_viewer_screen.dart';
 
 class AddProgressPhotoSheet extends ConsumerStatefulWidget {
@@ -33,10 +35,13 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
     _noteController = TextEditingController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final selectedDate = ref.read(selectedDateProvider);
+      final date = DateFormat('yyyy-MM-dd').format(selectedDate);
       final currentWeight = ref.read(dailyLogRepoProvider).getLog(date)?.weight;
       if (currentWeight != null && currentWeight > 0) {
-        _weightController.text = currentWeight.toString();
+        final profile = ref.read(profileProvider);
+        final displayWeight = convertFromKg(profile, currentWeight);
+        _weightController.text = displayWeight.toStringAsFixed(1);
       }
     });
   }
@@ -71,12 +76,18 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
     if (_pickedImage == null || _selectedPose == null) return;
     setState(() => _isSaving = true);
     
-    final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final weight = double.tryParse(_weightController.text);
+    final selectedDate = ref.read(selectedDateProvider);
+    final date = DateFormat('yyyy-MM-dd').format(selectedDate);
+    
+    double? weight = double.tryParse(_weightController.text);
+    if (weight != null) {
+      final profile = ref.read(profileProvider);
+      weight = convertToKg(profile, weight);
+    }
+    
     final note = _noteController.text;
-    final imageBytes = await _pickedImage!.readAsBytes();
-
     try {
+      final imageBytes = await _pickedImage!.readAsBytes();
       await ref.read(mediaRepoProvider).saveProgressPhoto(
         date,
         imageBytes,
@@ -89,18 +100,19 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
       final habits = ref.read(habitsProvider);
       final photoHabit = habits.where((h) => h.name.toLowerCase().contains('photo') || h.name.toLowerCase().contains('picture')).firstOrNull;
       if (photoHabit != null) {
-        ref.read(habitCompletionsProvider.notifier).setOverride(photoHabit.id, 'done');
+        ref.read(habitCompletionsProvider.notifier).setOverrideForDate(date, photoHabit.id, 'done');
+      }
+
+      if (mounted) {
+        Navigator.pop(context, true); // true indicates successful save
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved locally (Network error: $e)')),
+          SnackBar(content: Text('Failed to save photo: $e')),
         );
       }
-    }
-
-    if (mounted) {
-      Navigator.pop(context, true); // true indicates successful save
     }
   }
 
@@ -128,15 +140,17 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
       }
     }
 
+    final selectedDate = ref.watch(selectedDateProvider);
+
     return AppSheet(
       title: 'Add Progress Photo',
+      subtitle: 'For ${DateFormat('MMM d, yyyy').format(selectedDate)}',
       scrollable: true,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'POSE (REQUIRED)',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'POSE (REQUIRED)',
               style: TextStyle(
                 fontWeight: FontWeight.w800, 
                 fontSize: 13,
@@ -302,7 +316,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
             TextField(
               controller: _weightController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: TextStyle(color: context.colors.textDark),
+              style: AppTheme.numeric(TextStyle(color: context.colors.textDark)),
               decoration: InputDecoration(
                 labelText: 'Weight (Optional)',
                 prefixIcon: Icon(Icons.monitor_weight_outlined, color: context.colors.textLight),

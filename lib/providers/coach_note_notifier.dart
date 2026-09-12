@@ -9,6 +9,7 @@ import 'app_providers.dart';
 
 class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
   late String dateStr;
+  String? _fetchingDate;
 
   @override
   FutureOr<CoachNote> build() async {
@@ -45,6 +46,10 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
   }
 
   Future<void> fetchNote({bool force = false, bool background = false}) async {
+    if (_fetchingDate == dateStr && !force) return;
+    _fetchingDate = dateStr;
+    final targetDateStr = dateStr;
+
     final repo = ref.read(coachNoteRepoProvider);
     final prefs = ref.read(sharedPreferencesProvider);
     final lastGenStr = prefs.getString('coach_note_last_gen_$dateStr');
@@ -95,6 +100,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         mealLog: mealLog,
         targetWeight: profile.targetWeight ?? 0.0,
         dailyLogRepo: dailyLogRepo,
+        profile: profile,
       );
 
       final yesterday = DateTime.parse(
@@ -117,6 +123,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         mealLog: DailyMealLog(date: yesterdayStr),
         targetWeight: profile.targetWeight ?? 0.0,
         dailyLogRepo: dailyLogRepo,
+        profile: profile,
       );
 
       // We pass down to coach service. We don't assume isAi here.
@@ -140,9 +147,10 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       bool resolvedIsAi = false;
 
       // Ensure we only save for the date we requested
-      final targetDateStr = dateStr;
 
-      await for (final chunk in stream) {
+      bool hasYielded = false;
+      await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
+        if (dateStr != targetDateStr) break;
         if (chunk.startsWith('__AI__')) {
            resolvedIsAi = true;
            continue;
@@ -152,12 +160,15 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
            continue;
         }
         accumulatedNote += chunk;
-        if (dateStr == targetDateStr) {
+        if (!background) {
+          hasYielded = true;
           state = AsyncValue.data(
             CoachNote(date: targetDateStr, note: accumulatedNote, isAi: resolvedIsAi),
           );
         }
       }
+
+      if (dateStr != targetDateStr) return; // User navigated away
 
       if (accumulatedNote.isEmpty)
         throw Exception('Failed to generate note stream');
@@ -169,14 +180,23 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       );
       await repo.saveNote(finalNote);
 
+      if (background || !hasYielded) {
+        state = AsyncValue.data(finalNote);
+      }
+
       final currentPrefs = ref.read(sharedPreferencesProvider);
       await currentPrefs.setString(
         'coach_note_last_gen_$targetDateStr',
         DateTime.now().toIso8601String(),
       );
     } catch (e, st) {
-      if (state.isLoading) {
+      if (dateStr != targetDateStr) return;
+      if (!background || !state.hasValue || state.value?.note == 'Generating...') {
         state = AsyncValue.error(e, st);
+      }
+    } finally {
+      if (_fetchingDate == targetDateStr) {
+        _fetchingDate = null;
       }
     }
   }

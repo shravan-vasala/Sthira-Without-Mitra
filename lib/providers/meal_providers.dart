@@ -27,19 +27,23 @@ class DailyMealLogNotifier extends Notifier<DailyMealLog> {
     return repo.getDailyLog(date);
   }
 
-  Future<void> saveMealSlot(String slotName, MealSlotLog slotLog) async {
+  Future<void> saveMealSlot(String slotName, MealSlotLog slotLog, {String? targetDate}) async {
     final repo = ref.read(mealRepoProvider);
-    final date = ref.read(dateStringProvider);
+    final String date = targetDate ?? ref.read(dateStringProvider);
     await repo.saveMealSlot(date, slotName, slotLog);
-    state = repo.getDailyLog(date);
+    if (state.date == date) {
+      state = repo.getDailyLog(date);
+    }
     WidgetUpdateService.pushWidgetState(ref);
   }
 
-  Future<void> clearMealSlot(String slotName) async {
+  Future<void> clearMealSlot(String slotName, {String? targetDate}) async {
     final repo = ref.read(mealRepoProvider);
-    final date = ref.read(dateStringProvider);
+    final String date = targetDate ?? ref.read(dateStringProvider);
     await repo.clearMealSlot(date, slotName);
-    state = repo.getDailyLog(date);
+    if (state.date == date) {
+      state = repo.getDailyLog(date);
+    }
     WidgetUpdateService.pushWidgetState(ref);
   }
 }

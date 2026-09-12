@@ -13,6 +13,7 @@ class DailyShareLayout extends StatelessWidget {
   final bool workoutDone;
   final String habitsDone;
   final Color baseColor;
+  final DateTime date;
 
   const DailyShareLayout({
     super.key,
@@ -25,6 +26,7 @@ class DailyShareLayout extends StatelessWidget {
     required this.workoutDone,
     required this.habitsDone,
     required this.baseColor,
+    required this.date,
   });
 
   @override
@@ -101,7 +103,7 @@ class DailyShareLayout extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      DateFormat('MMM d').format(DateTime.now()),
+                      DateFormat('MMM d').format(date),
                       style: TextStyle(
                         color: AppColors.dark.textMedium,
                         fontFamily: 'General Sans',

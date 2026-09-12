@@ -62,6 +62,7 @@ class PastDaySummarySheet extends ConsumerWidget {
       mealLog: mealLog,
       targetWeight: profile.targetWeight ?? 0,
       dailyLogRepo: dailyLogRepo,
+      profile: profile,
     );
 
     // 1) Compute workout status for UI

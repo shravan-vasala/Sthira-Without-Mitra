@@ -296,7 +296,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
 
           // 2.5 Footer
           Text(
-            'Maximum weights: Habits 50 · Workout 30 · Meals 20 (meals include an accuracy bonus).',
+            'Score is weighted proportionally based on scheduled categories (Habits up to 50, Workouts up to 30, Meals up to 20).',
             style: TextStyle(
               fontSize: 12,
               color: context.colors.textLight,

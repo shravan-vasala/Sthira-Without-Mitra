@@ -8,6 +8,9 @@ final selectedYearProvider = StateProvider<int>((ref) => DateTime.now().year);
 final yearlyActivityHeatmapProvider =
     FutureProvider.family<Map<DateTime, int>, int>((ref, year) async {
       ref.watch(dailyLogsUpdateProvider);
+      ref.watch(habitCompletionsProvider);
+      ref.watch(exerciseLogsUpdateProvider);
+      ref.watch(dailyMealLogsUpdateProvider);
       final result = <DateTime, int>{};
 
       // Get repositories and global plans
@@ -23,7 +26,7 @@ final yearlyActivityHeatmapProvider =
         preferredKey: profile.activeWorkoutPlan ?? 'beginner_plan',
       );
       final mealPlan = mealRepo.getMealPlan(
-        profile.activeMealPlan ?? 'Daily Nutrition Plan',
+        profile.activeMealPlan ?? "Bodamma's Glow & Lean Master Routine",
       );
 
       final startDate = DateTime(year, 1, 1);
@@ -39,12 +42,28 @@ final yearlyActivityHeatmapProvider =
         }
 
         final date = startDate.add(Duration(days: i));
-        final dateStr = DateFormat('yyyy-MM-dd').format(date);
+        
+        final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+        if (date.isAfter(today)) {
+          result[date] = -1;
+          continue;
+        }
 
+        final dateStr = DateFormat('yyyy-MM-dd').format(date);
         final completions = habitRepo.getCompletions(dateStr);
-        final dailyLog =
-            dailyLogRepo.getLog(dateStr) ?? DailyLog(date: dateStr);
+        final rawDailyLog = dailyLogRepo.getLog(dateStr);
         final mealLog = mealRepo.getDailyLog(dateStr);
+
+        final bool isUnrecorded = rawDailyLog == null &&
+                                  completions.completedIds.isEmpty &&
+                                  mealLog.loggedSlotsCount == 0;
+
+        if (isUnrecorded) {
+          result[date] = -2;
+          continue;
+        }
+
+        final dailyLog = rawDailyLog ?? DailyLog(date: dateStr);
 
         final score = DailyScore.calculate(
           date: date,
@@ -59,9 +78,10 @@ final yearlyActivityHeatmapProvider =
           targetWeight: profile.targetWeight ?? 0.0,
           targetCalories: profile.targetCalories,
           dailyLogRepo: dailyLogRepo,
+          profile: profile,
         );
 
-        result[date] = score.totalScore;
+        result[date] = score.totalScore.round();
       }
 
       return result;

@@ -25,12 +25,14 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
   bool _isRunning = false;
   DateTime? _lastStartTime;
   int _secondsPassedThisSession = 0;
+  late String _initialDateStr;
 
   late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
+    _initialDateStr = ref.read(dateStringProvider);
     // target is in minutes
     _totalSeconds = (widget.habit.target * 60).toInt();
     _remainingSeconds = _totalSeconds;
@@ -108,8 +110,8 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     // We're skipping playing a sound here to avoid adding a new audio dependency just for this,
     // but the framework is in place (restTimerSound).
 
-    // Mark habit as completed explicitly rather than toggling
-    ref.read(habitCompletionsProvider.notifier).setOverride(widget.habit.id, 'done');
+    // Mark habit as completed explicitly rather than toggling, on the exact original date
+    ref.read(habitCompletionsProvider.notifier).setOverrideForDate(_initialDateStr, widget.habit.id, 'done');
 
     // Close the dialog automatically after a brief delay
     Future.delayed(const Duration(seconds: 1), () {
@@ -131,6 +133,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     final progress = _remainingSeconds / _totalSeconds;
 
     return AppSheet(
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,15 +141,16 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
           Text(
             widget.habit.name,
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
               color: context.colors.textDark,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'Stay focused',
+            'Closing this sheet will cancel the timer',
             style: TextStyle(fontSize: 14, color: context.colors.textMedium),
             textAlign: TextAlign.center,
           ),

@@ -5,6 +5,7 @@ import '../../services/haptics.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../services/widget_update_service.dart';
+import '../../utils/format_units.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 
@@ -18,13 +19,19 @@ class WeightEntryDialog extends ConsumerStatefulWidget {
 class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
   final _controller = TextEditingController();
   String? _errorText;
+  late String _pinnedDateStr;
+  bool _isPastValue = false;
+  String? _pastValueDateStr;
 
   @override
   void initState() {
     super.initState();
+    _pinnedDateStr = ref.read(dateStringProvider);
     final log = ref.read(dailyLogProvider);
+    final profile = ref.read(profileProvider);
     if (log.weight != null) {
-      _controller.text = log.weight!.toStringAsFixed(1);
+      final w = convertFromKg(profile, log.weight!);
+      _controller.text = w.toStringAsFixed(1);
       return;
     }
 
@@ -39,7 +46,10 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     for (int i = logs.length - 1; i >= 0; i--) {
       final w = logs[i].weight;
       if (w != null) {
-        _controller.text = w.toStringAsFixed(1);
+        final wConverted = convertFromKg(profile, w);
+        _controller.text = wConverted.toStringAsFixed(1);
+        _isPastValue = true;
+        _pastValueDateStr = logs[i].date;
         break;
       }
     }
@@ -61,6 +71,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     final unit = profile.useKg ? 'kg' : 'lbs';
 
     return AppSheet(
+      scrollable: true,
       title: 'Log Body Weight',
       subtitle: 'Enter your weight for $dateFormatted',
       child: Column(
@@ -71,6 +82,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
             style: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: context.colors.textDark,
@@ -99,6 +111,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               ),
               hintText: '0.0',
               hintStyle: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
                 color: context.colors.textLight,
@@ -115,6 +128,18 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               ),
             ),
           ),
+          if (_isPastValue && _pastValueDateStr != null && _errorText == null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
+                style: TextStyle(
+                  color: context.colors.textMedium,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           if (_errorText != null)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
@@ -130,17 +155,21 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Save Weight',
-            onPressed: () {
-              final weight = double.tryParse(_controller.text);
-              if (weight != null && weight > 0 && weight < 500) {
-                Haptics.toggle();
-                ref.read(dailyLogProvider.notifier).updateWeight(weight);
-                Navigator.of(context).pop();
+            onPressed: () async {
+              final weightDisplay = double.tryParse(_controller.text);
+              if (weightDisplay != null && weightDisplay > 0 && weightDisplay.isFinite) {
+                final weightKg = convertToKg(profile, weightDisplay);
+                if (weightKg < 500) {
+                  Haptics.toggle();
+                  await ref.read(dailyLogProvider.notifier).updateWeightForDate(_pinnedDateStr, weightKg);
+                  if (mounted) Navigator.of(context).pop();
+                } else {
+                  Haptics.error();
+                  setState(() => _errorText = 'Value too high');
+                }
               } else {
                 Haptics.error();
-                setState(() {
-                  _errorText = 'Please enter a valid weight.';
-                });
+                setState(() => _errorText = 'Please enter a valid weight');
               }
             },
           ),

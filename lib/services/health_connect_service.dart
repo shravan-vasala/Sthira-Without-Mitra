@@ -137,10 +137,32 @@ class HealthConnectService {
 
       if (healthData.isEmpty) return null;
 
-      // Calculate total minutes of sleep
+      // Deduplicate overlapping sleep sessions
+      healthData.sort((a, b) => a.dateFrom.compareTo(b.dateFrom));
       double totalMinutes = 0;
+      DateTime? currentStart;
+      DateTime? currentEnd;
+
       for (final data in healthData) {
-        totalMinutes += data.dateTo.difference(data.dateFrom).inMinutes;
+        if (currentStart == null) {
+          currentStart = data.dateFrom;
+          currentEnd = data.dateTo;
+        } else {
+          if (data.dateFrom.isBefore(currentEnd!)) {
+            // Overlapping, extend currentEnd if this session ends later
+            if (data.dateTo.isAfter(currentEnd)) {
+              currentEnd = data.dateTo;
+            }
+          } else {
+            // No overlap, add previous interval and start new
+            totalMinutes += currentEnd.difference(currentStart).inMinutes;
+            currentStart = data.dateFrom;
+            currentEnd = data.dateTo;
+          }
+        }
+      }
+      if (currentStart != null && currentEnd != null) {
+        totalMinutes += currentEnd.difference(currentStart).inMinutes;
       }
 
       return double.parse((totalMinutes / 60).toStringAsFixed(1));
@@ -167,7 +189,10 @@ class HealthConnectService {
       if (!granted) return [];
     }
 
-    await requestHistoryAccess();
+    final historyGranted = await requestHistoryAccess();
+    if (!historyGranted) {
+      return [];
+    }
 
     final List<HealthDailyData> results = [];
     final now = DateTime.now();

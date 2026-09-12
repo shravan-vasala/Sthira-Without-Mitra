@@ -50,7 +50,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
   }
 
   Color _getColorForScore(BuildContext context, int score) {
-    if (score == 0) return context.colors.inputFill;
+    if (score == -1) return Colors.transparent;
+    if (score == -2) return context.colors.inputFill;
+    if (score == 0) return context.colors.border;
     if (score < 25) return context.colors.primary.withValues(alpha: 0.25);
     if (score < 50) return context.colors.primary.withValues(alpha: 0.50);
     if (score < 75) return context.colors.primary.withValues(alpha: 0.75);
@@ -110,10 +112,12 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                       const SizedBox(width: 8),
                       Text(
                         year.toString(),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: context.colors.textDark,
+                        style: AppTheme.numeric(
+                          TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: context.colors.textDark,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -167,6 +171,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                   }
 
                   return GridView.builder(
+                    key: const PageStorageKey('heatmap_grid'),
                     controller: _scrollController,
                     scrollDirection: Axis.vertical,
                     physics: const BouncingScrollPhysics(),
@@ -312,32 +317,46 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
 
                     if (dayOffset < 0 || dayOffset >= daysInMonth) {
                       return SizedBox(width: cellSize, height: cellSize);
-                    }
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(7, (colIndex) {
+                  final cellIndex = rowIndex * 7 + colIndex;
+                  final dayOffset = cellIndex - startWeekday;
 
-                    final currentDate = DateTime(year, month, dayOffset + 1);
-                    final score = heatmapData[currentDate] ?? 0;
-                    
-                    String tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score';
+                  if (dayOffset < 0 || dayOffset >= daysInMonth) {
+                    return SizedBox(width: cellSize, height: cellSize);
+                  }
 
-                    return GestureDetector(
+                  final currentDate = DateTime(year, month, dayOffset + 1);
+                  final score = heatmapData[currentDate] ?? 0;
+                  
+                  String tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score';
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: GestureDetector(
                       onTap: () {
                         ref.read(selectedDateProvider.notifier).state = currentDate;
                         context.go('/home');
                       },
-                      child: Tooltip(
-                        message: tooltipMsg,
-                        child: Container(
-                          width: cellSize,
-                          height: cellSize,
-                          decoration: BoxDecoration(
-                            color: _getColorForScore(context, score),
-                            borderRadius: BorderRadius.circular(4),
+                      child: Semantics(
+                        label: tooltipMsg,
+                        button: true,
+                        child: Tooltip(
+                          message: tooltipMsg,
+                          child: Container(
+                            width: cellSize,
+                            height: cellSize,
+                            decoration: BoxDecoration(
+                              color: _getColorForScore(context, score),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         ),
                       ),
-                    );
-                  }),
-                ),
+                    ),
+                  );
+                }),
               );
             }),
           ),

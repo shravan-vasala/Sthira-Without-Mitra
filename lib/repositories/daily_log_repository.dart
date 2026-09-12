@@ -115,6 +115,11 @@ class DailyLogRepository {
     }
   }
 
+  Future<void> clearSteps(String date) async {
+    final log = getOrCreate(date);
+    await saveLog(log.clearSteps());
+  }
+
   Future<void> clearSleep(String date) async {
     final log = getOrCreate(date);
     await saveLog(log.clearSleep());

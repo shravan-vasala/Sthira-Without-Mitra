@@ -397,9 +397,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _executeFinish(context, ref, dayId, completed, total);
+              _persistWorkoutFinished(ref, dayId, isFullFinish: false);
+              context.go('/home');
             },
-            child: const Text('Finish'),
+            child: const Text('Finish early'),
           ),
         ],
       ),
@@ -436,15 +437,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
 
-  void _persistWorkoutFinished(WidgetRef ref, String dayId) {
+  void _persistWorkoutFinished(WidgetRef ref, String dayId, {bool isFullFinish = false}) {
     final dateStr = ref.read(dateStringProvider);
     ref.read(workoutRepoProvider).finishWorkout(dateStr, dayId);
-    ref.read(dailyLogProvider.notifier).markWorkoutCompleted(dayId);
+    if (isFullFinish) {
+      ref.read(dailyLogProvider.notifier).markWorkoutCompleted(dayId);
+    }
   }
 
   void _executeFinish(
       BuildContext context, WidgetRef ref, String dayId, int completed, int total) {
-    _persistWorkoutFinished(ref, dayId);
+    _persistWorkoutFinished(ref, dayId, isFullFinish: true);
     Haptics.toggle();
 
     final name = ref.read(profileProvider).name.trim();

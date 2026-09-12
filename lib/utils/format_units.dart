@@ -8,3 +8,13 @@ String formatWeight(UserProfile profile, double weightKg) {
     return '${weightLb.toStringAsFixed(1)} lb';
   }
 }
+
+double convertFromKg(UserProfile profile, double weightKg) {
+  if (profile.useKg) return weightKg;
+  return weightKg * 2.20462;
+}
+
+double convertToKg(UserProfile profile, double displayWeight) {
+  if (profile.useKg) return displayWeight;
+  return displayWeight / 2.20462;
+}

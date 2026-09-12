@@ -17,13 +17,21 @@ class StepsEntryDialog extends ConsumerStatefulWidget {
 class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
   final _controller = TextEditingController();
   String? _errorText;
+  late String _pinnedDateStr;
+  bool _hasExistingEntry = false;
+  bool _isHealthConnect = false;
 
   @override
   void initState() {
     super.initState();
+    _pinnedDateStr = ref.read(dateStringProvider);
     final log = ref.read(dailyLogProvider);
-    if (log.steps != null) {
+    if (log.steps != null && log.steps! >= 0) {
       _controller.text = log.steps.toString();
+      _hasExistingEntry = true;
+    }
+    if (log.stepsSource == 'healthConnect') {
+      _isHealthConnect = true;
     }
   }
 
@@ -45,16 +53,53 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
     final dateFormatted = '${selectedDate.day} $monthStr';
 
     return AppSheet(
-      title: 'Log Steps',
-      subtitle: isToday ? 'Enter your step count for today' : 'Enter your step count for $dateFormatted',
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Log Steps',
+                style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: context.colors.textDark,
+                ),
+              ),
+              if (_hasExistingEntry)
+                TextButton(
+                  onPressed: () async {
+                    await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
+                    if (mounted) Navigator.of(context).pop();
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.colors.pinkIcon,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 0),
+                  ),
+                  child: const Text('Clear entry'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isToday ? 'Enter your step count for today' : 'Enter your step count for $dateFormatted',
+            style: TextStyle(
+              fontSize: 16,
+              color: context.colors.textMedium,
+            ),
+          ),
+          const SizedBox(height: 24),
           TextField(
             controller: _controller,
             keyboardType: TextInputType.number,
             autofocus: true,
             style: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: context.colors.textDark,
@@ -70,6 +115,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               fillColor: context.colors.inputFill,
               hintText: '0',
               hintStyle: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
                 color: context.colors.textLight,
@@ -106,22 +152,46 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
                 ),
               ),
             ),
+          if (_isHealthConnect)
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.health_and_safety, size: 16, color: context.colors.primary),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Synced from Health Connect. Manual saves will override sync for this day.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.colors.textMedium,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Save Steps',
-            onPressed: () {
-              final steps = int.tryParse(_controller.text);
-              if (steps != null && steps > 0 && steps < 100000) {
+            onPressed: () async {
+              if (_controller.text.trim().isEmpty) {
                 Haptics.toggle();
-                ref
-                    .read(dailyLogProvider.notifier)
-                    .updateSteps(steps, source: 'manual');
-                Navigator.of(context).pop();
+                await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
+                if (mounted) Navigator.of(context).pop();
+                return;
+              }
+
+              final steps = int.tryParse(_controller.text);
+              if (steps != null && steps >= 0) {
+                Haptics.toggle();
+                await ref.read(dailyLogProvider.notifier).updateStepsForDate(_pinnedDateStr, steps);
+                if (mounted) Navigator.of(context).pop();
               } else {
                 Haptics.error();
-                setState(() {
-                  _errorText = 'Please enter a valid step count.';
-                });
+                setState(() => _errorText = 'Please enter a valid number (≥ 0)');
               }
             },
           ),

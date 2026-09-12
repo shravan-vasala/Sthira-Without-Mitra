@@ -128,7 +128,7 @@ class AiClient {
     }
 
     if (cache != null && !skipCache) {
-      final cachedResult = cache!.get(prompt, systemInstruction, imageContext);
+      final cachedResult = cache!.get(prompt, systemInstruction, imageContext, responseSchema?.toString());
       if (cachedResult != null) return cachedResult;
     }
 
@@ -186,7 +186,7 @@ class AiClient {
           );
           
           breaker.recordSuccess();
-          if (cache != null) await cache!.set(prompt, systemInstruction, json, imageContext);
+          if (cache != null) await cache!.set(prompt, systemInstruction, json, imageContext, responseSchema?.toString());
           return json;
           
         } catch (e) {

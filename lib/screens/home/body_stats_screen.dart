@@ -15,6 +15,7 @@ class BodyStatsScreen extends ConsumerStatefulWidget {
 class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
   final _controllers = <String, TextEditingController>{};
   bool _isEditing = false;
+  bool _isSaving = false;
 
   final _fields = [
     'Waist',
@@ -27,9 +28,14 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
     'Neck',
   ];
 
+  bool _isPrefilled = false;
+  String? _prefillDate;
+  late final String _pinnedDateStr;
+
   @override
   void initState() {
     super.initState();
+    _pinnedDateStr = ref.read(dateStringProvider);
     for (final f in _fields) {
       _controllers[f] = TextEditingController();
     }
@@ -37,13 +43,35 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
   }
 
   void _loadData() {
-    final stats = ref.read(bodyStatsRepoProvider).getLatestStats();
+    final stats = ref.read(bodyStatsRepoProvider).getStats(_pinnedDateStr);
     if (stats != null) {
-      final m = stats.allMeasurements;
+      _isPrefilled = false;
+      _prefillDate = null;
+      _fillControllers(stats);
+      return;
+    }
+    
+    final latest = ref.read(bodyStatsRepoProvider).getLatestStats();
+    if (latest != null) {
+      _isPrefilled = true;
+      _prefillDate = latest.date;
+      _fillControllers(latest);
+    } else {
+      _isPrefilled = false;
+      _prefillDate = null;
       for (final f in _fields) {
-        if (m[f] != null) {
-          _controllers[f]!.text = m[f]!.toStringAsFixed(1);
-        }
+        _controllers[f]!.clear();
+      }
+    }
+  }
+
+  void _fillControllers(BodyStats stats) {
+    final m = stats.allMeasurements;
+    for (final f in _fields) {
+      if (m[f] != null) {
+        _controllers[f]!.text = m[f]!.toStringAsFixed(1);
+      } else {
+        _controllers[f]!.clear();
       }
     }
   }
@@ -62,25 +90,47 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
         title: const Text('Body Stats'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        leading: _isEditing
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  setState(() {
+                    _isEditing = false;
+                    _loadData();
+                  });
+                },
+              )
+            : IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
         actions: [
           TextButton(
-            onPressed: () {
-              if (_isEditing) {
-                _save();
-              }
-              setState(() => _isEditing = !_isEditing);
-            },
-            child: Text(
-              _isEditing ? 'Save' : 'Edit',
-              style: TextStyle(
-                color: context.colors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            onPressed: _isSaving
+                ? null
+                : () async {
+                    if (_isEditing) {
+                      await _save();
+                    } else {
+                      setState(() => _isEditing = true);
+                    }
+                  },
+            child: _isSaving
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: context.colors.primary,
+                    ),
+                  )
+                : Text(
+                    _isEditing ? 'Save' : 'Edit',
+                    style: TextStyle(
+                      color: context.colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -90,27 +140,46 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 16),
-            child: Text(
-              'ALL MEASUREMENTS',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: context.colors.primary,
-                letterSpacing: 1.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ALL MEASUREMENTS FOR ${DateFormat('MMM d, yyyy').format(DateTime.parse(_pinnedDateStr)).toUpperCase()}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: context.colors.primary,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                if (_isPrefilled && _prefillDate != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      'Prefilled from ${DateFormat('MMM d').format(DateTime.parse(_prefillDate!))} measurement',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.colors.textMedium,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              mainAxisExtent: 96,
-            ),
-            itemCount: _fields.length,
-            itemBuilder: (ctx, i) => _buildField(_fields[i]),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final itemWidth = (width - 12) / 2;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: _fields.map((f) => SizedBox(
+                  width: itemWidth,
+                  child: _buildField(f),
+                )).toList(),
+              );
+            },
           ),
         ],
       ),
@@ -144,23 +213,22 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: SizedBox(
-                        height: 32,
-                        child: TextField(
-                          controller: _controllers[field],
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            color: context.colors.primary,
-                            height: 1.0,
-                          ),
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.zero,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                          ),
+                      child: TextField(
+                        controller: _controllers[field],
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: TextStyle(
+                          fontFamily: 'Cabinet Grotesk',
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: context.colors.primary,
+                          height: 1.0,
+                        ),
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.zero,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          isDense: true,
                         ),
                       ),
                     ),
@@ -183,6 +251,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                     Text(
                       _controllers[field]!.text.isEmpty ? '--' : _controllers[field]!.text,
                       style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: _controllers[field]!.text.isEmpty ? context.colors.textLight : context.colors.textDark,
@@ -208,19 +277,35 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
     );
   }
 
-  void _save() {
-    final date = ref.read(dateStringProvider);
-    final stats = BodyStats(
-      date: date,
-      waist: double.tryParse(_controllers['Waist']!.text),
-      hips: double.tryParse(_controllers['Hips']!.text),
-      chest: double.tryParse(_controllers['Chest']!.text),
-      leftArm: double.tryParse(_controllers['Left Arm']!.text),
-      rightArm: double.tryParse(_controllers['Right Arm']!.text),
-      leftThigh: double.tryParse(_controllers['Left Thigh']!.text),
-      rightThigh: double.tryParse(_controllers['Right Thigh']!.text),
-      neck: double.tryParse(_controllers['Neck']!.text),
-    );
-    ref.read(bodyStatsRepoProvider).saveStats(stats);
+  Future<void> _save() async {
+    setState(() => _isSaving = true);
+    try {
+      final date = ref.read(dateStringProvider);
+      final stats = BodyStats(
+        date: date,
+        waist: double.tryParse(_controllers['Waist']!.text),
+        hips: double.tryParse(_controllers['Hips']!.text),
+        chest: double.tryParse(_controllers['Chest']!.text),
+        leftArm: double.tryParse(_controllers['Left Arm']!.text),
+        rightArm: double.tryParse(_controllers['Right Arm']!.text),
+        leftThigh: double.tryParse(_controllers['Left Thigh']!.text),
+        rightThigh: double.tryParse(_controllers['Right Thigh']!.text),
+        neck: double.tryParse(_controllers['Neck']!.text),
+      );
+      await ref.read(bodyStatsRepoProvider).saveStats(stats);
+      if (mounted) {
+        setState(() {
+          _isEditing = false;
+          _isSaving = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save body stats.')),
+        );
+      }
+    }
   }
 }

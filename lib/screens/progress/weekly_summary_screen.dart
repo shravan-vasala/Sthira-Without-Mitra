@@ -102,10 +102,11 @@ class WeeklySummaryScreen extends ConsumerWidget {
               Text(
                 'STATS OVERVIEW',
                 style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
-                  color: context.colors.primary,
+                  color: context.colors.textMedium,
                 ),
               ).animate().fade(delay: 500.ms),
               const SizedBox(height: 16),
@@ -309,12 +310,9 @@ class _ScoreHeroCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0, end: score.toDouble()),
-            duration: const Duration(milliseconds: 1500),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              final intScore = value.round();
+          Builder(
+            builder: (context) {
+              final intScore = score;
               Color scoreColor = context.colors.green;
               if (intScore < 50)
                 scoreColor = context.colors.red;
@@ -501,10 +499,11 @@ class _DailyScoresChartCard extends ConsumerWidget {
               Text(
                 'DAILY SCORES',
                 style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
-                  color: context.colors.primary,
+                  color: context.colors.textMedium,
                 ),
               ),
             ],
@@ -639,10 +638,11 @@ class _HabitChartCard extends StatelessWidget {
               Text(
                 'HABIT COMPLETION',
                 style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
-                  color: context.colors.primary,
+                  color: context.colors.textMedium,
                 ),
               ),
             ],
@@ -810,12 +810,9 @@ class _StatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (numericValue != null) 
-                TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 0, end: numericValue!),
-                  duration: const Duration(milliseconds: 1400),
-                  curve: Curves.easeOutQuart,
-                  builder: (context, val, child) {
-                    final display = '${val.toStringAsFixed(decimals)}${unit ?? ''}';
+                Builder(
+                  builder: (context) {
+                    final display = '${numericValue!.toStringAsFixed(decimals)}${unit ?? ''}';
                     return Text(
                       display,
                       style: AppTheme.numeric(
@@ -829,7 +826,7 @@ class _StatCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     );
-                  }
+                  },
                 )
               else
                 Text(
@@ -892,13 +889,11 @@ class _WeeklyShareSection extends ConsumerStatefulWidget {
 class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
   bool _isSharing = false;
 
-  void _shareImage(BuildContext context, WeeklySummary summary, String title) async {
+  void _shareImage(BuildContext context, WeeklySummary summary, String title, String name) async {
     if (_isSharing) return;
     setState(() => _isSharing = true);
     
     try {
-      final name = ref.read(profileProvider).name;
-      
       Color baseColor = context.colors.green;
       if (summary.weekScore < 50) baseColor = context.colors.red;
       else if (summary.weekScore < 80) baseColor = context.colors.orange;
@@ -917,13 +912,18 @@ class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
         baseColor: baseColor,
       );
 
-      await ShareCardExporter.exportAndShareWidget(
+      final success = await ShareCardExporter.exportAndShareWidget(
         context: context,
         widget: layout,
         fileName: 'sthira_weekly_summary',
         text: summary.generateShareText(),
         format: ShareFormat.post,
       );
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Weekly summary shared successfully!')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }
@@ -931,11 +931,13 @@ class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
 
   @override
   Widget build(BuildContext context) {
+    final name = ref.watch(profileProvider).name;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton.icon(
-          onPressed: _isSharing ? null : () => _shareImage(context, widget.summary, widget.titleText),
+          onPressed: _isSharing ? null : () => _shareImage(context, widget.summary, widget.titleText, name),
           icon: _isSharing
               ? const SizedBox(
                   width: 20,
