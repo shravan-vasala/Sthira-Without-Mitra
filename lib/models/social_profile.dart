@@ -9,7 +9,7 @@ class SocialProfile {
   final int weeklyWorkouts;
   final String? latestBadge;
   final DateTime lastUpdatedAt;
-  final List<String> allowedReaders;
+  final List<String>? allowedReaders;
   final int? todayScore;
   final int? weekScore;
 
@@ -24,7 +24,7 @@ class SocialProfile {
     required this.weeklyWorkouts,
     this.latestBadge,
     required this.lastUpdatedAt,
-    this.allowedReaders = const [],
+    this.allowedReaders,
     this.todayScore,
     this.weekScore,
   });
@@ -46,8 +46,7 @@ class SocialProfile {
       allowedReaders:
           (json['allowedReaders'] as List<dynamic>?)
               ?.map((e) => e as String)
-              .toList() ??
-          [],
+              .toList(),
       todayScore: json['todayScore'] as int?,
       weekScore: json['weekScore'] as int?,
     );
@@ -65,7 +64,7 @@ class SocialProfile {
       'weeklyWorkouts': weeklyWorkouts,
       'latestBadge': latestBadge,
       'lastUpdatedAt': lastUpdatedAt.millisecondsSinceEpoch,
-      'allowedReaders': allowedReaders,
+      if (allowedReaders != null) 'allowedReaders': allowedReaders,
       if (todayScore != null) 'todayScore': todayScore,
       if (weekScore != null) 'weekScore': weekScore,
     };

@@ -74,6 +74,10 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
 
   Future<void> _loadPersistedTimer() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    // Guard against overriding a newly started timer
+    if (state.isActive) return;
+
     final isPaused = prefs.getBool(kTimerIsPausedKey) ?? false;
     final exerciseName = prefs.getString(kTimerExerciseKey);
 

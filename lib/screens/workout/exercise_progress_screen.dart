@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/exercise_log.dart';
 import '../../models/exercise_pr.dart';
+import '../../utils/unit_conversion.dart';
 
 class ExerciseProgressScreen extends ConsumerWidget {
   const ExerciseProgressScreen({super.key, required this.exerciseName});
@@ -15,6 +16,11 @@ class ExerciseProgressScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logs = ref.watch(exerciseHistoryProvider(exerciseName));
+    
+    final profile = ref.watch(profileProvider);
+    final useKg = profile.useKg;
+    final unitLabel = useKg ? 'kg' : 'lb';
+    final weightMultiplier = useKg ? 1.0 : kgToLbs;
 
     final plan = ref.watch(workoutPlanProvider);
     String displayTitle = exerciseName;
@@ -37,37 +43,37 @@ class ExerciseProgressScreen extends ConsumerWidget {
 
     // Prepare Max Weight Data and Stats
     final List<ChartDataPoint> maxWeightData = sortedLogs
-        .map((l) => ChartDataPoint(DateTime.parse(l.date), l.maxWeight))
+        .map((l) => ChartDataPoint(DateTime.parse(l.date), l.maxWeight * weightMultiplier))
         .toList();
 
     List<String> maxWeightStats = [];
     if (sortedLogs.isNotEmpty) {
-      final weights = sortedLogs.map((l) => l.maxWeight).toList();
+      final weights = sortedLogs.map((l) => l.maxWeight * weightMultiplier).toList();
       final max = weights.reduce((a, b) => a > b ? a : b);
       final last = weights.last;
       final avg = weights.reduce((a, b) => a + b) / weights.length;
       maxWeightStats = [
-        '${max.toStringAsFixed(1)} kg',
-        '${last.toStringAsFixed(1)} kg',
-        '${avg.toStringAsFixed(1)} kg',
+        '${max.toStringAsFixed(1)} $unitLabel',
+        '${last.toStringAsFixed(1)} $unitLabel',
+        '${avg.toStringAsFixed(1)} $unitLabel',
       ];
     }
 
     // Prepare Total Volume Data and Stats
     final List<ChartDataPoint> totalVolumeData = sortedLogs
-        .map((l) => ChartDataPoint(DateTime.parse(l.date), l.totalVolume))
+        .map((l) => ChartDataPoint(DateTime.parse(l.date), l.totalVolume * weightMultiplier))
         .toList();
 
     List<String> totalVolumeStats = [];
     if (sortedLogs.isNotEmpty) {
-      final vols = sortedLogs.map((l) => l.totalVolume).toList();
+      final vols = sortedLogs.map((l) => l.totalVolume * weightMultiplier).toList();
       final max = vols.reduce((a, b) => a > b ? a : b);
       final last = vols.last;
       final avg = vols.reduce((a, b) => a + b) / vols.length;
       totalVolumeStats = [
-        '${max.toStringAsFixed(1)} kg',
-        '${last.toStringAsFixed(1)} kg',
-        '${avg.toStringAsFixed(1)} kg',
+        '${max.toStringAsFixed(1)} $unitLabel',
+        '${last.toStringAsFixed(1)} $unitLabel',
+        '${avg.toStringAsFixed(1)} $unitLabel',
       ];
     }
 
@@ -130,11 +136,13 @@ class ExerciseProgressScreen extends ConsumerWidget {
                           pr: ref
                               .watch(exerciseLogRepoProvider)
                               .getPr(exerciseName)!,
+                          unitLabel: unitLabel,
+                          weightMultiplier: weightMultiplier,
                         ),
                         const SizedBox(height: 20),
                       ],
                       SharedChartCard(
-                        metric: const MetricSpec(title: 'Max Weight', unit: 'kg', isCount: false),
+                        metric: MetricSpec(title: 'Max Weight', unit: unitLabel, isCount: false),
                         data: maxWeightData,
                         statLabels: const ['BEST', 'LAST', 'AVERAGE'],
                         statValues: maxWeightStats,
@@ -145,7 +153,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       SharedChartCard(
-                        metric: const MetricSpec(title: 'Total Volume', unit: 'kg', isCount: false),
+                        metric: MetricSpec(title: 'Total Volume', unit: unitLabel, isCount: false),
                         data: totalVolumeData,
                         statLabels: const ['BEST', 'LAST', 'AVERAGE'],
                         statValues: totalVolumeStats,
@@ -174,6 +182,8 @@ class ExerciseProgressScreen extends ConsumerWidget {
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return _HistoryCard(
                         log: sortedLogs[sortedLogs.length - 1 - index],
+                        unitLabel: unitLabel,
+                        weightMultiplier: weightMultiplier,
                       );
                     }, childCount: sortedLogs.length),
                   ),
@@ -187,7 +197,9 @@ class ExerciseProgressScreen extends ConsumerWidget {
 
 class _PrSummary extends StatelessWidget {
   final ExercisePr pr;
-  const _PrSummary({required this.pr});
+  final String unitLabel;
+  final double weightMultiplier;
+  const _PrSummary({required this.pr, required this.unitLabel, required this.weightMultiplier});
 
   @override
   Widget build(BuildContext context) {
@@ -226,19 +238,24 @@ class _PrSummary extends StatelessWidget {
           if (pr.maxWeight > 0)
             _buildPrRow(
               'Max Weight',
-              '${pr.maxWeight}kg × ${pr.maxWeightReps}',
+              '${(pr.maxWeight * weightMultiplier).toStringAsFixed(1)}$unitLabel × ${pr.maxWeightReps}',
+              context,
+            )
+          else if (pr.maxReps > 0)
+            _buildPrRow(
+              'Max Weight',
+              'Bodyweight × ${pr.maxWeightReps}',
               context,
             ),
-          if (pr.maxReps > 0 &&
-              (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
+          if (pr.maxReps > 0 && (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
             _buildPrRow(
               'Max Reps',
-              '${pr.maxReps} reps @ ${pr.maxRepsWeight}kg',
+              '${pr.maxReps} reps @ ${pr.maxRepsWeight > 0 ? (pr.maxRepsWeight * weightMultiplier).toStringAsFixed(1) + unitLabel : "BW"}',
               context,
             ),
           if (pr.estimated1RM > 0)
-            _buildPrRow('Est. 1RM', '${pr.estimated1RM.toStringAsFixed(1)}kg', context),
-          if (pr.maxVolume > 0) _buildPrRow('Max Volume', '${pr.maxVolume}kg', context),
+            _buildPrRow('Est. 1RM', '${(pr.estimated1RM * weightMultiplier).toStringAsFixed(1)}$unitLabel', context),
+          if (pr.maxVolume > 0) _buildPrRow('Max Volume', '${(pr.maxVolume * weightMultiplier).toStringAsFixed(1)}$unitLabel', context),
         ],
       ),
     );
@@ -269,9 +286,11 @@ class _PrSummary extends StatelessWidget {
 }
 
 class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.log});
+  const _HistoryCard({required this.log, required this.unitLabel, required this.weightMultiplier});
 
   final ExerciseLog log;
+  final String unitLabel;
+  final double weightMultiplier;
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +320,16 @@ class _HistoryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  log.sets.map((s) => '${s.reps}×${s.weight}kg').join(' | '),
+                  log.sets.map((s) {
+                    final w = s.weight ?? 0.0;
+                    if (w > 0) {
+                      final strWeight = (w * weightMultiplier) == (w * weightMultiplier).toInt() 
+                          ? (w * weightMultiplier).toInt().toString() 
+                          : (w * weightMultiplier).toStringAsFixed(1);
+                      return '${s.reps}×$strWeight$unitLabel';
+                    }
+                    return '${s.reps}×BW';
+                  }).join(' | '),
                   style: TextStyle(
                     fontSize: 12,
                     color: context.colors.textMedium,
@@ -314,7 +342,7 @@ class _HistoryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${log.totalVolume.toStringAsFixed(0)} kg',
+                '${(log.totalVolume * weightMultiplier).toStringAsFixed(0)} $unitLabel',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -322,7 +350,7 @@ class _HistoryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'volume',
+                'load × reps',
                 style: TextStyle(fontSize: 11, color: context.colors.textLight),
               ),
             ],

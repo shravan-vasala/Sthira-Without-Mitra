@@ -389,6 +389,8 @@ class _HabitsEditButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       tooltip: 'Edit Habits',
+      padding: const EdgeInsets.all(12),
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       onPressed: () {
         Navigator.of(
           context,

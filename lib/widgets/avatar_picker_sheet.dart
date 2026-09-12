@@ -64,17 +64,19 @@ class AvatarPickerSheet extends StatelessWidget {
             itemCount: avatars.length,
             itemBuilder: (context, index) {
               final avatar = avatars[index];
-              return GestureDetector(
-                onTap: () => Navigator.of(context).pop(avatar['path']),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Image.asset(
-                        avatar['path']!,
-                        fit: BoxFit.contain,
-                      ),
+              return Semantics(
+                button: true,
+                label: 'Select ${avatar['name']}',
+                child: InkWell(
+                  onTap: () => Navigator.of(context).pop(avatar['path']),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Image.asset(
+                      avatar['path']!,
+                      fit: BoxFit.contain,
                     ),
-                  ],
+                  ),
                 ),
               );
             },
@@ -82,17 +84,21 @@ class AvatarPickerSheet extends StatelessWidget {
           const SizedBox(height: 32),
           
           // Remove Avatar Action
-          InkWell(
-            onTap: () => Navigator.of(context).pop('DELETE'),
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-              child: Text(
-                'Remove Avatar',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textMedium,
+          Semantics(
+            button: true,
+            label: 'Remove Avatar',
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop('DELETE'),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                child: Text(
+                  'Remove Avatar',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ),
             ),

@@ -42,7 +42,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
       }
     }
 
-    await _notificationService.cancelAll();
+    await _notificationService.cancelAllReminders();
 
     if (state.habitsEnabled) {
       await _notificationService.scheduleHabitReminder(state.habitTime);

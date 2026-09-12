@@ -81,7 +81,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // Profile header
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: context.colors.card,
                   borderRadius: BorderRadius.circular(24),
@@ -158,7 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     if (profile.targetWeight != null) ...[
                       const SizedBox(height: 2),
                       Text(
-                        'Target: ${profile.targetWeight!.toStringAsFixed(1)} ${profile.weightUnit}',
+                        'Target: ${(profile.useKg ? profile.targetWeight! : profile.targetWeight! * 2.20462).toStringAsFixed(1)} ${profile.weightUnit}',
                         style: TextStyle(
                           fontSize: 14,
                           color: context.colors.textMedium,
@@ -501,6 +501,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     title: Text(
                       label(mode),
                       style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
                         fontWeight: FontWeight.w600,
                         color: colors.textDark,
                       ),
@@ -974,15 +975,18 @@ class _MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: context.colors.card,
-          borderRadius: BorderRadius.circular(24),
-        ),
+    return Semantics(
+      button: true,
+      label: title,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: context.colors.card,
+            borderRadius: BorderRadius.circular(24),
+          ),
         child: Row(
           children: [
             Container(
@@ -1002,6 +1006,7 @@ class _MenuCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
+                      fontFamily: 'Cabinet Grotesk',
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: context.colors.textDark,
@@ -1064,6 +1069,7 @@ class _SettingsSwitch extends StatelessWidget {
         title: Text(
           title,
           style: TextStyle(
+            fontFamily: 'Cabinet Grotesk',
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: context.colors.textDark,
@@ -1111,8 +1117,12 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     heightController = TextEditingController(
       text: profile.height.toStringAsFixed(0),
     );
+    double? displayTarget = profile.targetWeight;
+    if (displayTarget != null && !profile.useKg) {
+      displayTarget = displayTarget * 2.20462;
+    }
     targetController = TextEditingController(
-      text: profile.targetWeight?.toStringAsFixed(1) ?? '',
+      text: displayTarget?.toStringAsFixed(1) ?? '',
     );
     caloriesController = TextEditingController(
       text: profile.targetCalories.toString(),
@@ -1170,18 +1180,19 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       );
 
       if (croppedFile != null) {
-        final appDir = await getApplicationDocumentsDirectory();
-        final fileName =
-            'profile_pic_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final savedImage = await File(
-          croppedFile.path,
-        ).copy('${appDir.path}/$fileName');
+        final mediaRepo = ref.read(mediaRepoProvider);
+        final relativePath = await mediaRepo.saveMediaFile(croppedFile.path, 'profile_photos');
 
         setState(() {
-          _localPhotoPath = savedImage.path;
+          _localPhotoPath = relativePath;
           _clearPhoto = false;
         });
+
+        // Clean up abandoned temp crops
+        File(croppedFile.path).delete().ignore();
       }
+      
+      File(pickedFile.path).delete().ignore();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1230,7 +1241,12 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   context: context,
                   builder: (_) => const AvatarPickerSheet(),
                 );
-                if (selectedAvatar != null) {
+                if (selectedAvatar == 'DELETE') {
+                  setState(() {
+                    _localPhotoPath = null;
+                    _clearPhoto = true;
+                  });
+                } else if (selectedAvatar != null) {
                   setState(() {
                     _localPhotoPath = selectedAvatar;
                     _clearPhoto = false;
@@ -1293,7 +1309,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                       fit: BoxFit.cover,
                                     )
                                   : Image.file(
-                                      File(_localPhotoPath!),
+                                      File(ref.read(mediaRepoProvider).getAbsolutePath(_localPhotoPath!)),
                                       width: 80,
                                       height: 80,
                                       fit: BoxFit.cover,
@@ -1303,6 +1319,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                     ? Text(
                                         nameController.text[0].toUpperCase(),
                                         style: TextStyle(
+                                          fontFamily: 'Cabinet Grotesk',
                                           fontSize: 32,
                                           fontWeight: FontWeight.w800,
                                           color: context.colors.primary,
@@ -1358,7 +1375,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             ),
             const SizedBox(height: 16),
             _ProfileTextField(
-              label: 'Target Weight (kg)',
+              label: profile.useKg ? 'Target Weight (kg)' : 'Target Weight (lb)',
               controller: targetController,
               prefixIcon: Icons.flag_rounded,
               keyboardType: const TextInputType.numberWithOptions(
@@ -1418,36 +1435,49 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             const SizedBox(height: 28),
             PrimaryButton(
               label: 'Save',
-              onPressed: () {
-                final parsedHeight = double.tryParse(heightController.text) ?? profile.height;
-                final parsedTarget = targetController.text.isEmpty ? null : double.tryParse(targetController.text);
-                final parsedCal = int.tryParse(caloriesController.text) ?? profile.targetCalories;
-                final parsedPro = int.tryParse(proteinController.text) ?? profile.targetProteinG;
-                final parsedCar = int.tryParse(carbsController.text) ?? profile.targetCarbsG;
-                final parsedFat = int.tryParse(fatController.text) ?? profile.targetFatG;
+              onPressed: () async {
+                final heightText = heightController.text.trim();
+                final targetText = targetController.text.trim();
+                final calText = caloriesController.text.trim();
+                final proText = proteinController.text.trim();
+                final carText = carbsController.text.trim();
+                final fatText = fatController.text.trim();
 
-                if (parsedHeight <= 0 || parsedHeight > 300) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid height (1-300)')));
+                final parsedHeight = heightText.isEmpty ? null : double.tryParse(heightText);
+                final parsedTarget = targetText.isEmpty ? null : double.tryParse(targetText);
+                final parsedCal = calText.isEmpty ? null : int.tryParse(calText);
+                final parsedPro = proText.isEmpty ? null : int.tryParse(proText);
+                final parsedCar = carText.isEmpty ? null : int.tryParse(carText);
+                final parsedFat = fatText.isEmpty ? null : int.tryParse(fatText);
+
+                if (parsedHeight == null || parsedHeight <= 0 || parsedHeight > 300) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid height (1-300)')));
                   return;
                 }
-                if (parsedTarget != null && (parsedTarget <= 0 || parsedTarget > 500)) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid target weight (1-500)')));
+                if (targetText.isNotEmpty && (parsedTarget == null || parsedTarget <= 0 || parsedTarget > 500)) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid target weight (1-500)')));
                   return;
                 }
-                if (parsedCal <= 0 || parsedCal > 15000) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid daily calorie target (1-15000)')));
+                if (parsedCal == null || parsedCal <= 0 || parsedCal > 15000) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid daily calorie target (1-15000)')));
                   return;
                 }
-                if (parsedPro < 0 || parsedPro > 1000 || parsedCar < 0 || parsedCar > 1000 || parsedFat < 0 || parsedFat > 1000) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter valid macro targets (0-1000)')));
+                if (parsedPro == null || parsedPro < 0 || parsedPro > 1000 || parsedCar == null || parsedCar < 0 || parsedCar > 1000 || parsedFat == null || parsedFat < 0 || parsedFat > 1000) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter valid macro targets (0-1000)')));
                   return;
+                }
+
+                double? finalTargetKg = parsedTarget;
+                if (finalTargetKg != null && !profile.useKg) {
+                  finalTargetKg = finalTargetKg / 2.20462;
                 }
 
                 final updated = profile.copyWith(
                   name: nameController.text,
                   coachName: coachNameController.text.trim(),
                   height: parsedHeight,
-                  targetWeight: parsedTarget,
+                  targetWeight: finalTargetKg,
+                  clearTargetWeight: targetText.isEmpty,
                   targetCalories: parsedCal,
                   targetProteinG: parsedPro,
                   targetCarbsG: parsedCar,
@@ -1455,15 +1485,19 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   photoPath: _localPhotoPath,
                   clearPhoto: _clearPhoto,
                 );
-                if (_clearPhoto &&
-                    profile.photoPath != null &&
-                    !profile.photoPath!.startsWith('assets/')) {
-                  final f = File(profile.photoPath!);
-                  if (f.existsSync()) f.deleteSync();
+
+                await ref.read(profileProvider.notifier).updateProfile(updated);
+
+                if (_clearPhoto || (_localPhotoPath != profile.photoPath)) {
+                  if (profile.photoPath != null && !profile.photoPath!.startsWith('assets/')) {
+                    final oldFile = File(ref.read(mediaRepoProvider).getAbsolutePath(profile.photoPath!));
+                    if (oldFile.existsSync()) oldFile.deleteSync();
+                  }
                 }
 
-                ref.read(profileProvider.notifier).updateProfile(updated);
-                Navigator.of(context).pop();
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               },
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom + 8),

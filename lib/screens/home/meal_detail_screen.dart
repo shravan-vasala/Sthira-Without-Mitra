@@ -732,7 +732,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                         InteractiveViewer(
                                           child: kIsWeb
                                             ? Image.network(slotLog.photoPath!)
-                                            : Image.file(File(ref.read(photoMealRepoProvider).getAbsolutePath(slotLog.photoPath!))),
+                                            : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(slotLog.photoPath!))),
                                         ),
                                         Positioned(
                                           top: MediaQuery.paddingOf(context).top + 16,
@@ -757,7 +757,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                         fit: BoxFit.cover,
                                       )
                                     : Image.file(
-                                        File(ref.read(photoMealRepoProvider).getAbsolutePath(slotLog.photoPath!)),
+                                        File(ref.read(mediaRepoProvider).getAbsolutePath(slotLog.photoPath!)),
                                         width: double.infinity,
                                         height: 120,
                                         fit: BoxFit.cover,

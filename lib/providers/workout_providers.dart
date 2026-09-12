@@ -30,6 +30,7 @@ final exerciseHistoryProvider = Provider.family<List<ExerciseLog>, String>((
   ref,
   exerciseName,
 ) {
+  ref.watch(exerciseLogsUpdateProvider);
   return ref.watch(exerciseLogRepoProvider).getLogsForExercise(exerciseName);
 });
 
@@ -37,6 +38,7 @@ final exercisePrProvider = Provider.family<ExercisePr?, String>((
   ref,
   exerciseName,
 ) {
+  ref.watch(exerciseLogsUpdateProvider);
   // Watch logRepo to rebuild when PR updates
   final repo = ref.watch(exerciseLogRepoProvider);
   return repo.getPr(exerciseName);

@@ -15,39 +15,47 @@ class JourneyStatsStrip extends ConsumerWidget {
     final badgeRepo = ref.watch(badgeRepoProvider);
     
     final allLogs = logRepo.getAllLogs();
+    final mealRepo = ref.watch(mealRepoProvider);
+    final allMealLogs = mealRepo.getAllLogs();
     final earnedBadges = badgeRepo.getAllBadges().where((b) => b.isUnlocked).length;
 
     int totalWorkouts = 0;
-    int daysTracked = 0;
+    
+    final activeDates = <String>{};
+    for (final log in allLogs) {
+      if (log.workoutCompleted == true) {
+        totalWorkouts++;
+      }
+      if (log.hasAnyActivity) {
+        activeDates.add(log.date);
+      }
+    }
+    for (final mLog in allMealLogs) {
+      if (mLog.meals.isNotEmpty) {
+        activeDates.add(mLog.date);
+      }
+    }
+
+    int daysTracked = activeDates.length;
     DateTime? firstTrackedDate;
+    if (activeDates.isNotEmpty) {
+      final sortedDates = activeDates.toList()..sort();
+      firstTrackedDate = DateTime.tryParse(sortedDates.first);
+    }
     
     // Calculate streak
     int currentStreak = 0;
     final today = DateTime.now();
     final todayStr = DateFormat('yyyy-MM-dd').format(today);
-    final yesterdayStr = DateFormat('yyyy-MM-dd').format(today.subtract(const Duration(days: 1)));
     
     bool streakActive = true;
     DateTime ptr = today;
 
-    if (allLogs.isNotEmpty) {
-      for (final log in allLogs) {
-        if (log.hasAnyActivity) {
-          daysTracked++;
-          if (firstTrackedDate == null) {
-            firstTrackedDate = DateTime.tryParse(log.date);
-          }
-        }
-        if (log.workoutCompleted == true) {
-          totalWorkouts++;
-        }
-      }
-      
+    if (activeDates.isNotEmpty) {
       // Calculate active streak by walking backward from today
       while (streakActive) {
         final dateStr = DateFormat('yyyy-MM-dd').format(ptr);
-        final log = logRepo.getLog(dateStr);
-        if (log != null && log.hasAnyActivity) {
+        if (activeDates.contains(dateStr)) {
           currentStreak++;
           ptr = ptr.subtract(const Duration(days: 1));
         } else {
@@ -119,6 +127,9 @@ class _StatCard extends StatelessWidget {
     final bool isTopTier = title == 'Streak' || title == 'Workouts';
     final Color effectiveColor = (!isTopTier && isZero) ? color.withValues(alpha: 0.3) : color;
 
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    final duration = disableAnimations ? Duration.zero : const Duration(milliseconds: 1200);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -148,12 +159,13 @@ class _StatCard extends StatelessWidget {
             children: [
               TweenAnimationBuilder<int>(
                 tween: IntTween(begin: 0, end: value),
-                duration: const Duration(milliseconds: 1200),
+                duration: duration,
                 curve: Curves.easeOutExpo,
                 builder: (context, val, _) {
                   return Text(
                     val.toString(),
                     style: TextStyle(
+                      fontFamily: 'Cabinet Grotesk',
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
                       color: context.colors.textDark,

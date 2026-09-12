@@ -173,9 +173,7 @@ final socialPushControllerProvider = Provider<void>((ref) {
       final fromUid = p['fromUid'] as String?;
       if (fromUid != null) {
         // We know they accepted our request, add them to our allowedReaders
-        await syncService.acceptFriendRequest(
-          fromUid,
-        ); // Not quite, we just need to add to allowed readers
+          // We know they accepted our request, add them to our allowedReaders
         // Actually, the sender side of acceptance:
         // When I send request, they accept -> they add me to their allowed readers, and create an acceptance marker for me.
         // I see the marker -> I add them to my allowed readers, local friend DB, and delete the marker.
@@ -189,20 +187,8 @@ final socialPushControllerProvider = Provider<void>((ref) {
               );
             }
           });
-          // To add to my allowed readers, I can just call acceptFriendRequest which does it.
-          // Wait, acceptFriendRequest deletes from my requests, adds to my allowed readers, creates a marker for them.
-          // That's for the TARGET receiving a request.
-          // For the SENDER receiving an acceptance marker:
-          // The marker is in my requests but has accepted=true.
-          // Let's just update my allowedReaders, and clear the marker.
-          final db = FirebaseFirestore.instance;
-          final currentUid = syncService.currentUid;
-          if (currentUid != null) {
-            await db.collection('social_profiles').doc(currentUid).update({
-              'allowedReaders': FieldValue.arrayUnion([fromUid]),
-            });
-            await syncService.clearAcceptanceMarker(fromUid);
-          }
+          
+          await syncService.processPendingAcceptance(fromUid);
         } catch (e) {
           debugPrint('Error processing pending acceptance: $e');
         }

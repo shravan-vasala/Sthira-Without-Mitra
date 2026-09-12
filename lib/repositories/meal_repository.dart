@@ -104,6 +104,10 @@ class MealRepository {
         });
   }
 
+  List<DailyMealLog> getAllLogs() {
+    return _isar.dailyMealLogs.where().findAllSync();
+  }
+
   List<DailyMealLog> getLogsInRange(String start, String end) {
     return _isar.dailyMealLogs
         .filter()

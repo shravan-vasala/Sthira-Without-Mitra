@@ -26,7 +26,7 @@ class NotificationService {
       tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
     } catch (e) {
       // Fallback if platform timezone cannot be determined
-      tz.setLocalLocation(tz.getLocation('America/Detroit'));
+      tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
     }
 
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -58,6 +58,13 @@ class NotificationService {
 
   Future<void> cancelAll() async {
     await _notificationsPlugin.cancelAll();
+  }
+
+  Future<void> cancelAllReminders() async {
+    // Habits (10), Meals (20, 21), Backup (30), Workouts (41-47), Photos (50)
+    for (int i = 10; i <= 50; i++) {
+      await _notificationsPlugin.cancel(i);
+    }
   }
 
   Future<void> scheduleHabitReminder(TimeOfDay time) async {
@@ -101,8 +108,8 @@ class NotificationService {
     List<int> workoutDaysOfWeek,
     TimeOfDay time,
   ) async {
-    // Cancel old workout reminders (ids 40-46)
-    for (int i = 0; i < 7; i++) {
+    // Cancel old workout reminders (ids 41-47)
+    for (int i = 1; i <= 7; i++) {
       await _notificationsPlugin.cancel(40 + i);
     }
 

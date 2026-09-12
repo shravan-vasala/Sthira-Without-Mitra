@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../models/friend.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_theme.dart';
 import '../../../models/social_profile.dart';
 
 
@@ -248,12 +249,27 @@ class FriendStatusCard extends ConsumerWidget {
             ),
           ),
           TextButton(
-            onPressed: () {
-              ref.read(friendRepoProvider).removeFriend(friend.uid);
-              ref
-                  .read(socialSyncServiceProvider)
-                  .removeFriendAccess(friend.uid);
-              Navigator.of(ctx).pop();
+            onPressed: () async {
+              try {
+                // Wait for the backend response instead of pretending it worked immediately
+                await ref
+                    .read(socialSyncServiceProvider)
+                    .removeFriendAccess(friend.uid);
+                ref.read(friendRepoProvider).removeFriend(friend.uid);
+                if (ctx.mounted) {
+                  Navigator.of(ctx).pop();
+                }
+              } catch (e) {
+                if (ctx.mounted) {
+                  Navigator.of(ctx).pop();
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to remove friend. Please try again.'),
+                      backgroundColor: context.colors.red,
+                    ),
+                  );
+                }
+              }
             },
             child: Text('Remove', style: TextStyle(color: context.colors.red)),
           ),
@@ -312,10 +328,12 @@ class _StatBlock extends StatelessWidget {
             final displayString = useDecimalFormat ? NumberFormat.decimalPattern().format(val) : val.toString();
             return Text(
               displayString,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-                color: textColor,
+              style: AppTheme.numeric(
+                TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  color: textColor,
+                ),
               ),
             );
           },
@@ -370,10 +388,12 @@ class _ScoreBadge extends StatelessWidget {
       child: Center(
         child: Text(
           score.toString(),
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: color,
+          style: AppTheme.numeric(
+            TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
         ),
       ),

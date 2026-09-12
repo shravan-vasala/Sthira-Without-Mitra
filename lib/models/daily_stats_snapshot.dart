@@ -125,22 +125,8 @@ class DailyStatsSnapshot {
         .map((e) => e.key)
         .toSet();
 
-    final today = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-    );
-    final isFutureOrToday = !date.isBefore(today);
-
-    if (isFutureOrToday) {
-      final recurringIds = profile.customMealSlots
-          .map((s) => s['id'] as String)
-          .toSet();
-      mealsTotal = recurringIds.union(loggedIds).length;
-    } else {
-      final customLoggedCount = loggedIds.difference(defaultIds).length;
-      mealsTotal = defaultIds.length + customLoggedCount;
-    }
+    final customLoggedCount = loggedIds.difference(defaultIds).length;
+    mealsTotal = defaultIds.length + customLoggedCount;
 
     // 4. Weight Trend
     String weightTrend = 'stable';

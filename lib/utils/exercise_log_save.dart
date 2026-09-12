@@ -55,7 +55,9 @@ Future<PrUpdateResult> checkAndSavePr({
   final allLogs = repo.getLogsForExercise(exerciseName);
 
   var calcMaxWeight = 0.0;
+  var calcMaxWeightReps = 0;
   var calcMaxReps = 0;
+  var calcMaxRepsWeight = 0.0;
   var calcMaxVolume = 0.0;
   var calcEstimated1RM = 0.0;
 
@@ -64,8 +66,17 @@ Future<PrUpdateResult> checkAndSavePr({
     for (final s in log.sets) {
       final w = s.weight ?? 0.0;
       final r = s.reps ?? 0;
-      if (w > calcMaxWeight) calcMaxWeight = w;
-      if (r > calcMaxReps) calcMaxReps = r;
+      
+      if (w > calcMaxWeight || (w == calcMaxWeight && r > calcMaxWeightReps)) {
+        calcMaxWeight = w;
+        calcMaxWeightReps = r;
+      }
+      
+      if (r > calcMaxReps || (r == calcMaxReps && w > calcMaxRepsWeight)) {
+        calcMaxReps = r;
+        calcMaxRepsWeight = w;
+      }
+      
       logVolume += (w * r);
       final oneRM = w * (1 + (r / 30));
       if (oneRM > calcEstimated1RM) calcEstimated1RM = oneRM;
@@ -82,7 +93,9 @@ Future<PrUpdateResult> checkAndSavePr({
   final updatedPr = ExercisePr(
     exerciseName: exerciseName,
     maxWeight: calcMaxWeight,
+    maxWeightReps: calcMaxWeightReps,
     maxReps: calcMaxReps,
+    maxRepsWeight: calcMaxRepsWeight,
     maxVolume: calcMaxVolume,
     estimated1RM: calcEstimated1RM,
   );

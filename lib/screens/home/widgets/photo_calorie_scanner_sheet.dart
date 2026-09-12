@@ -730,14 +730,10 @@ class _PhotoCalorieScannerSheetState
 
       if (_selectedImages.isNotEmpty) {
         if (!kIsWeb) {
-          final appDir = await getApplicationDocumentsDirectory();
+          final mediaRepo = ref.read(mediaRepoProvider);
           for (int i = 0; i < _selectedImages.length; i++) {
-            final timestamp = DateTime.now().millisecondsSinceEpoch;
-            final fileName = 'meal_photo_${timestamp}_$i.jpg';
-            final savedImage = await _selectedImages[i].copy(
-              '${appDir.path}/$fileName',
-            );
-            finalPhotoPaths.add(savedImage.path);
+            final relPath = await mediaRepo.saveMediaFile(_selectedImages[i].path, 'meal_photos');
+            finalPhotoPaths.add(relPath);
           }
           fallbackPhotoPath = finalPhotoPaths.first;
         } else {

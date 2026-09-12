@@ -84,7 +84,11 @@ class SocialSyncService {
         .collection('requests')
         .where('accepted', isEqualTo: false)
         .snapshots()
-        .map((snap) => snap.docs.map((doc) => doc.data()).toList());
+        .map((snap) => snap.docs.map((doc) {
+              final data = doc.data();
+              data['fromUid'] = doc.id; // Force doc id to prevent payload forgery
+              return data;
+            }).toList());
   }
 
   Future<List<Map<String, dynamic>>> getPendingAcceptances() async {
@@ -96,7 +100,11 @@ class SocialSyncService {
           .collection('requests')
           .where('accepted', isEqualTo: true)
           .get();
-      return snap.docs.map((doc) => doc.data()).toList();
+      return snap.docs.map((doc) {
+        final data = doc.data();
+        data['fromUid'] = doc.id; // Force doc id to prevent payload forgery
+        return data;
+      }).toList();
     } catch (e) {
       debugPrint('SocialSyncService: Error getting pending acceptances: $e');
       return [];
@@ -106,26 +114,35 @@ class SocialSyncService {
   Future<void> acceptFriendRequest(String requesterUid) async {
     if (!canSync) return;
     try {
+      final batch = _db.batch();
+
       // Add requester to my allowedReaders
-      await _db.collection('social_profiles').doc(currentUid).update({
+      final myProfileRef = _db.collection('social_profiles').doc(currentUid);
+      batch.update(myProfileRef, {
         'allowedReaders': FieldValue.arrayUnion([requesterUid]),
       });
 
       // Delete the request from my requests
-      await _db
+      final myRequestRef = _db
           .collection('friend_requests')
           .doc(currentUid)
           .collection('requests')
-          .doc(requesterUid)
-          .delete();
+          .doc(requesterUid);
+      batch.delete(myRequestRef);
 
       // Write an acceptance marker for the requester
-      await _db
+      final theirRequestRef = _db
           .collection('friend_requests')
           .doc(requesterUid)
           .collection('requests')
-          .doc(currentUid)
-          .set({'fromUid': currentUid, 'accepted': true});
+          .doc(currentUid);
+      batch.set(theirRequestRef, {
+        'fromUid': currentUid, 
+        'accepted': true,
+        'acceptedAt': FieldValue.serverTimestamp(),
+      });
+
+      await batch.commit();
     } catch (e) {
       debugPrint('SocialSyncService: Error accepting friend request: $e');
       rethrow;
@@ -154,6 +171,7 @@ class SocialSyncService {
       });
     } catch (e) {
       debugPrint('SocialSyncService: Error removing friend access: $e');
+      rethrow;
     }
   }
 
@@ -168,6 +186,30 @@ class SocialSyncService {
           .delete();
     } catch (e) {
       debugPrint('SocialSyncService: Error clearing acceptance marker: $e');
+    }
+  }
+
+  Future<void> processPendingAcceptance(String friendUid) async {
+    if (!canSync) return;
+    try {
+      final batch = _db.batch();
+
+      final myProfileRef = _db.collection('social_profiles').doc(currentUid);
+      batch.update(myProfileRef, {
+        'allowedReaders': FieldValue.arrayUnion([friendUid]),
+      });
+
+      final markerRef = _db
+          .collection('friend_requests')
+          .doc(currentUid)
+          .collection('requests')
+          .doc(friendUid);
+      batch.delete(markerRef);
+
+      await batch.commit();
+    } catch (e) {
+      debugPrint('SocialSyncService: Error processing pending acceptance: $e');
+      rethrow;
     }
   }
 }

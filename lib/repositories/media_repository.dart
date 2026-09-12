@@ -20,6 +20,25 @@ class MediaRepository {
     }
   }
 
+  // Save any media file to a given category subdirectory
+  Future<String> saveMediaFile(String sourcePath, String category) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final extension = sourcePath.split('.').last.toLowerCase();
+    final ext = ['jpg', 'jpeg', 'png', 'webp'].contains(extension) ? extension : 'jpg';
+    final relPath = '$category/${category}_$timestamp.$ext';
+    final destPath = kIsWeb ? sourcePath : '$_baseDir/$relPath';
+
+    if (!kIsWeb) {
+      final dir = Directory('$_baseDir/$category');
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      await File(sourcePath).copy(destPath);
+    }
+
+    return kIsWeb ? destPath : relPath;
+  }
+
   // Save a progress photo from raw bytes (works on both web and mobile)
   Future<String> saveProgressPhoto(
     String date,

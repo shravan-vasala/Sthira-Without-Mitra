@@ -251,7 +251,7 @@ class AiClient {
     if (lastCause == AiErrorCause.timeout) reason = 'timed out';
     if (lastCause == AiErrorCause.parse) reason = 'parsing failed';
     
-    throw AiException('Couldn\'t analyze right now ($reason). Try again in a minute.', cause: lastCause);
+    throw AiException('Couldn\'t analyze right now. Try again in a minute.', cause: lastCause);
   }
 
   Future<String?> _callModel({
@@ -404,7 +404,7 @@ class AiClient {
     if (lastCause == AiErrorCause.overloaded) reason = 'model overloaded';
     if (lastCause == AiErrorCause.timeout) reason = 'timed out';
     
-    throw AiException('Failed to generate response ($reason). Please try again later.', cause: lastCause);
+    throw AiException('Failed to generate response. Please try again later.', cause: lastCause);
   }
 
   Stream<String?> _callModelStream({

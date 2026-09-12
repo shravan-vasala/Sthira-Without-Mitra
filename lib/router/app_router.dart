@@ -338,7 +338,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                   size: 28,
                                 ),
                                 const SizedBox(width: 12),
-                                Expanded(
+                                Flexible(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -373,67 +373,68 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    _TimerControlButton(
-                                      label: '+15s',
-                                      onTap: () => ref
+                                    TextButton(
+                                      onPressed: () => ref
                                           .read(restTimerProvider.notifier)
                                           .addSeconds(15),
+                                      style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        minimumSize: const Size(48, 48),
+                                        foregroundColor: context.colors.card,
+                                      ),
+                                      child: Text(
+                                        '+15s',
+                                        style: AppTheme.numeric(
+                                          const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    _TimerControlButton(
-                                      label: '+30s',
-                                      onTap: () => ref
+                                    TextButton(
+                                      onPressed: () => ref
                                           .read(restTimerProvider.notifier)
                                           .addSeconds(30),
+                                      style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        minimumSize: const Size(48, 48),
+                                        foregroundColor: context.colors.card,
+                                      ),
+                                      child: Text(
+                                        '+30s',
+                                        style: AppTheme.numeric(
+                                          const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(width: 4),
-                                    Semantics(
-                                      button: true,
-                                      label: timerState.isPaused ? 'Play' : 'Pause',
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          if (timerState.isPaused) {
-                                            ref
-                                                .read(restTimerProvider.notifier)
-                                                .resumeTimer();
-                                          } else {
-                                            ref
-                                                .read(restTimerProvider.notifier)
-                                                .pauseTimer();
-                                          }
-                                        },
-                                        behavior: HitTestBehavior.opaque,
-                                        child: SizedBox(
-                                          width: 48,
-                                          height: 48,
-                                          child: Icon(
-                                            timerState.isPaused
-                                                ? Icons.play_arrow_rounded
-                                                : Icons.pause_rounded,
-                                            color: context.colors.white,
-                                          ),
-                                        ),
+                                    IconButton(
+                                      onPressed: () {
+                                        if (timerState.isPaused) {
+                                          ref.read(restTimerProvider.notifier).resumeTimer();
+                                        } else {
+                                          ref.read(restTimerProvider.notifier).pauseTimer();
+                                        }
+                                      },
+                                      icon: Icon(
+                                        timerState.isPaused
+                                            ? Icons.play_arrow_rounded
+                                            : Icons.pause_rounded,
                                       ),
+                                      color: context.colors.white,
+                                      tooltip: timerState.isPaused ? 'Play' : 'Pause',
                                     ),
-                                    Semantics(
-                                      button: true,
-                                      label: 'Close',
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          ref
-                                              .read(restTimerProvider.notifier)
-                                              .stopTimer();
-                                        },
-                                        behavior: HitTestBehavior.opaque,
-                                        child: SizedBox(
-                                          width: 48,
-                                          height: 48,
-                                          child: Icon(
-                                            Icons.close,
-                                            color: context.colors.white,
-                                          ),
-                                        ),
-                                      ),
+                                    IconButton(
+                                      onPressed: () {
+                                        ref.read(restTimerProvider.notifier).stopTimer();
+                                      },
+                                      icon: const Icon(Icons.close),
+                                      color: context.colors.white,
+                                      tooltip: 'Close timer',
                                     ),
                                   ],
                                 ),
@@ -462,45 +463,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   }
 }
 
-class _TimerControlButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _TimerControlButton({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: label,
-      button: true,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: context.colors.card,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// Removed _TimerControlButton in favor of native TextButton.
 
 class _CustomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -581,30 +544,33 @@ class _NavBarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     
-    return Semantics(
-      label: label,
-      button: true,
-      selected: isSelected,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: disableAnimations ? Duration.zero : const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-          padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 24 : 12,
-            vertical: 12,
-          ),
-          decoration: BoxDecoration(
-            color: isSelected ? context.colors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(32),
-          ),
-          child: Icon(
-            isSelected ? activeIcon : icon,
-            color: isSelected
-                ? context.colors.onPrimary
-                : const Color(0xFF8A9A93),
-            size: 24,
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        label: label,
+        button: true,
+        selected: isSelected,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: disableAnimations ? Duration.zero : const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            padding: EdgeInsets.symmetric(
+              horizontal: isSelected ? 24 : 12,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: isSelected ? context.colors.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: Icon(
+              isSelected ? activeIcon : icon,
+              color: isSelected
+                  ? context.colors.onPrimary
+                  : const Color(0xFF8A9A93),
+              size: 24,
+            ),
           ),
         ),
       ),

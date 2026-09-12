@@ -55,6 +55,7 @@ final dailyMealLogProvider =
 
 final dailyMealLogsRangeProvider =
     Provider.family<List<DailyMealLog>, (String, String)>((ref, range) {
+      ref.watch(dailyMealLogsUpdateProvider);
       final (start, end) = range;
       final mealRepo = ref.watch(mealRepoProvider);
       return mealRepo.getLogsInRange(start, end);

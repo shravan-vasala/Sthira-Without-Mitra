@@ -19,6 +19,7 @@ class TrophyRoomCard extends ConsumerWidget {
     final badges = ref.watch(badgesProvider);
     if (badges.isEmpty) return const SizedBox.shrink();
 
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final unlocked = badges.where((b) => b.isUnlocked).length;
 
     // Sorting
@@ -43,12 +44,13 @@ class TrophyRoomCard extends ConsumerWidget {
             padding: const EdgeInsets.only(left: 4, bottom: 12),
             child: TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: unlocked),
-              duration: const Duration(milliseconds: 1500),
+              duration: disableAnimations ? Duration.zero : const Duration(milliseconds: 1500),
               curve: Curves.easeOutExpo,
               builder: (context, val, child) {
                 return Text(
                   'TROPHY ROOM ($val/${badges.length})',
                   style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
                     color: context.colors.primary,
@@ -98,6 +100,7 @@ class _BadgeItem extends StatelessWidget {
       ),
       builder: (context) {
         final isUnlocked = badge.isUnlocked;
+        final disableAnimations = MediaQuery.disableAnimationsOf(context);
         return SafeArea(
           child: Padding(
             padding: EdgeInsets.only(
@@ -125,7 +128,7 @@ class _BadgeItem extends StatelessWidget {
                     ),
                   ),
                 )
-                  .animate(target: isUnlocked ? 1 : 0)
+                  .animate(target: (isUnlocked && !disableAnimations) ? 1 : 0)
                   .shimmer(duration: 1.seconds, color: Colors.white24),
   
                 const SizedBox(height: 32),
@@ -329,7 +332,8 @@ class _BadgeItem extends StatelessWidget {
       ),
     );
 
-    if (isUnlocked) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    if (isUnlocked && !disableAnimations) {
       tile = tile.animate().shimmer(
         delay: 400.ms,
         duration: 2000.ms,

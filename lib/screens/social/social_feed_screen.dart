@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../providers/app_providers.dart';
 import '../../models/social_profile.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/surface_card.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
@@ -82,128 +83,177 @@ class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen>
   }
 }
 
-class _FriendsTab extends ConsumerWidget {
+class _FriendsTab extends ConsumerStatefulWidget {
   const _FriendsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_FriendsTab> createState() => _FriendsTabState();
+}
+
+class _FriendsTabState extends ConsumerState<_FriendsTab> {
+  final Set<String> _processingRequests = {};
+
+  @override
+  Widget build(BuildContext context) {
     final friendsAsync = ref.watch(friendsListStreamProvider);
     final syncService = ref.watch(socialSyncServiceProvider);
 
-    return Column(
-      children: [
+    return CustomScrollView(
+      slivers: [
         StreamBuilder<List<Map<String, dynamic>>>(
           stream: syncService.streamFriendRequests(),
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('Error loading requests: ${snapshot.error}', style: TextStyle(color: context.colors.red)),
+                ),
+              );
+            }
             final requests = snapshot.data ?? [];
-            if (requests.isEmpty) return const SizedBox.shrink();
+            if (requests.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                  child: Text(
-                    'Friend Requests',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: context.colors.textMedium,
+            return SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
+                    child: Text(
+                      'Friend Requests',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: context.colors.textMedium,
+                      ),
                     ),
                   ),
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: requests.length,
-                  itemBuilder: (context, index) {
-                    final req = requests[index];
-                    final String fromUid = req['fromUid'];
-                    final String name = req['fromName'] ?? 'Unknown';
-                    final String? avatarUrl = req['fromAvatar'];
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: requests.length,
+                    itemBuilder: (context, index) {
+                      final req = requests[index];
+                      final String fromUid = req['fromUid'];
+                      final String name = req['fromName'] ?? 'Unknown';
+                      final String? avatarUrl = req['fromAvatar'];
+                      
+                      final isProcessing = _processingRequests.contains(fromUid);
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: _buildAvatar(avatarUrl, name, fromUid, context),
-                        title: Text(
-                          name,
-                          style: TextStyle(
-                            color: context.colors.textDark,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: _buildAvatar(avatarUrl, name, fromUid, context),
+                          title: Text(
+                            name,
+                            style: TextStyle(
+                              color: context.colors.textDark,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        subtitle: Text(
-                          'Wants to be friends',
-                          style: TextStyle(color: context.colors.textMedium),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                Icons.check_circle,
-                                color: context.colors.primary,
-                              ),
-                              onPressed: () async {
-                                await syncService.acceptFriendRequest(fromUid);
-                                ref.read(friendRepoProvider).addFriend(
-                                  fromUid,
-                                  name,
-                                  avatarUrl: avatarUrl,
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.cancel,
-                                color: context.colors.textMedium.withValues(
-                                  alpha: 0.5,
+                          subtitle: Text(
+                            'Wants to be friends',
+                            style: TextStyle(color: context.colors.textMedium),
+                          ),
+                          trailing: isProcessing 
+                            ? const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+                              )
+                            : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.check_circle,
+                                    color: context.colors.primary,
+                                  ),
+                                  onPressed: () async {
+                                    setState(() => _processingRequests.add(fromUid));
+                                    try {
+                                      await syncService.acceptFriendRequest(fromUid);
+                                      ref.read(friendRepoProvider).addFriend(
+                                        fromUid,
+                                        name,
+                                        avatarUrl: avatarUrl,
+                                      );
+                                    } finally {
+                                      if (mounted) setState(() => _processingRequests.remove(fromUid));
+                                    }
+                                  },
                                 ),
-                              ),
-                              onPressed: () =>
-                                  syncService.declineFriendRequest(fromUid),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.cancel,
+                                    color: context.colors.textMedium.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    setState(() => _processingRequests.add(fromUid));
+                                    try {
+                                      await syncService.declineFriendRequest(fromUid);
+                                    } finally {
+                                      if (mounted) setState(() => _processingRequests.remove(fromUid));
+                                    }
+                                  },
+                                ),
+                              ],
                             ),
-                          ],
                         ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
-              ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             );
           },
         ),
-        Expanded(
-          child: friendsAsync.when(
-            data: (friends) {
-              if (friends.isEmpty) {
-                return Column(
+        friendsAsync.when(
+          data: (friends) {
+            if (friends.isEmpty) {
+              return const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const EmptyStateView(
+                    EmptyStateView(
                       icon: Icons.people_outline,
                       title: 'No friends connected yet.',
                       subtitle: 'Tap the top right icon to connect and share your progress.',
                     ),
                   ],
-                );
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: friends.length,
-                itemBuilder: (context, index) {
-                  return FriendStatusCard(friend: friends[index]);
-                },
+                ),
               );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, st) => Center(child: Text('Error: $err')),
+            }
+            return SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return FriendStatusCard(friend: friends[index]);
+                  },
+                  childCount: friends.length,
+                ),
+              ),
+            );
+          },
+          loading: () => const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (err, st) => SliverFillRemaining(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text('Error: $err', textAlign: TextAlign.center, style: TextStyle(color: context.colors.red)),
+              ),
+            ),
           ),
         ),
       ],
@@ -287,18 +337,53 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       }
     }
 
+    bool isSameDay(DateTime a, DateTime b) =>
+        a.year == b.year && a.month == b.month && a.day == b.day;
+
+    bool isSameWeek(DateTime a, DateTime b) {
+      final aMon = a.subtract(Duration(days: a.weekday - 1));
+      final bMon = b.subtract(Duration(days: b.weekday - 1));
+      return isSameDay(aMon, bMon);
+    }
+
+    int? getScore(SocialProfile p, bool forWeek) {
+      if (forWeek) return isSameWeek(now, p.lastUpdatedAt) ? p.weekScore : 0;
+      return isSameDay(now, p.lastUpdatedAt) ? p.todayScore : 0;
+    }
+
+    int getSteps(SocialProfile p, bool forWeek) {
+      if (forWeek) return isSameWeek(now, p.lastUpdatedAt) ? p.weeklySteps : 0;
+      return isSameDay(now, p.lastUpdatedAt) ? p.todaySteps : 0;
+    }
+
     activeProfiles.sort((a, b) {
+      final isWeek = _period == LeaderboardPeriod.week;
       if (_metric == LeaderboardMetric.score) {
-        final aScore = _period == LeaderboardPeriod.week ? a.weekScore : a.todayScore;
-        final bScore = _period == LeaderboardPeriod.week ? b.weekScore : b.todayScore;
+        final aScore = getScore(a, isWeek);
+        final bScore = getScore(b, isWeek);
         if (aScore == null && bScore == null) return 0;
         if (aScore == null) return 1;
         if (bScore == null) return -1;
-        return bScore.compareTo(aScore);
+        
+        int cmp = bScore.compareTo(aScore);
+        if (cmp != 0) return cmp;
+        
+        // Tie breaker 1: secondary metric (steps)
+        final aSteps = getSteps(a, isWeek);
+        final bSteps = getSteps(b, isWeek);
+        cmp = bSteps.compareTo(aSteps);
+        if (cmp != 0) return cmp;
+        
+        // Tie breaker 2: name (alphabetical)
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       } else {
-        final aSteps = _period == LeaderboardPeriod.week ? a.weeklySteps : a.todaySteps;
-        final bSteps = _period == LeaderboardPeriod.week ? b.weeklySteps : b.todaySteps;
-        return bSteps.compareTo(aSteps);
+        final aSteps = getSteps(a, isWeek);
+        final bSteps = getSteps(b, isWeek);
+        int cmp = bSteps.compareTo(aSteps);
+        if (cmp != 0) return cmp;
+        
+        // Tie breaker: name (alphabetical)
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       }
     });
 
@@ -465,12 +550,32 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
   ) {
     final isMe = profile.uid == myUid;
     
+    final now = DateTime.now();
+    final isWeek = _period == LeaderboardPeriod.week;
+    
+    bool isSameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+    bool isSameWeek(DateTime a, DateTime b) {
+      final aMon = a.subtract(Duration(days: a.weekday - 1));
+      final bMon = b.subtract(Duration(days: b.weekday - 1));
+      return isSameDay(aMon, bMon);
+    }
+
     String primaryText;
     if (_metric == LeaderboardMetric.score) {
-       final s = _period == LeaderboardPeriod.week ? profile.weekScore : profile.todayScore;
+       int? s;
+       if (isWeek) {
+         s = isSameWeek(now, profile.lastUpdatedAt) ? profile.weekScore : 0;
+       } else {
+         s = isSameDay(now, profile.lastUpdatedAt) ? profile.todayScore : 0;
+       }
        primaryText = s == null ? '—' : s.toString();
     } else {
-       final s = _period == LeaderboardPeriod.week ? profile.weeklySteps : profile.todaySteps;
+       int s;
+       if (isWeek) {
+         s = isSameWeek(now, profile.lastUpdatedAt) ? profile.weeklySteps : 0;
+       } else {
+         s = isSameDay(now, profile.lastUpdatedAt) ? profile.todaySteps : 0;
+       }
        primaryText = NumberFormat.decimalPattern().format(s);
     }
     
@@ -529,20 +634,24 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           children: [
             Text(
               primaryText,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-                color: isInactive
-                    ? context.colors.textMedium.withValues(alpha: 0.5)
-                    : context.colors.textDark,
+              style: AppTheme.numeric(
+                TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  color: isInactive
+                      ? context.colors.textMedium.withValues(alpha: 0.5)
+                      : context.colors.textDark,
+                ),
               ),
             ),
             Text(
               secondaryMetric,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textMedium,
+              style: AppTheme.numeric(
+                TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: context.colors.textMedium,
+                ),
               ),
             ),
           ],
@@ -595,11 +704,24 @@ class _PodiumView extends ConsumerWidget {
   final LeaderboardMetric metric;
 
   const _PodiumView({required this.top3, required this.myUid, required this.period, required this.metric});
+  bool isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  bool isSameWeek(DateTime a, DateTime b) {
+    final aMon = a.subtract(Duration(days: a.weekday - 1));
+    final bMon = b.subtract(Duration(days: b.weekday - 1));
+    return isSameDay(aMon, bMon);
+  }
+
   int? _getRawVal(SocialProfile p) {
+    final now = DateTime.now();
+    final isWeek = period == LeaderboardPeriod.week;
     if (metric == LeaderboardMetric.score) {
-       return period == LeaderboardPeriod.week ? p.weekScore : p.todayScore;
+       if (isWeek) return isSameWeek(now, p.lastUpdatedAt) ? p.weekScore : 0;
+       return isSameDay(now, p.lastUpdatedAt) ? p.todayScore : 0;
     } else {
-       return period == LeaderboardPeriod.week ? p.weeklySteps : p.todaySteps;
+       if (isWeek) return isSameWeek(now, p.lastUpdatedAt) ? p.weeklySteps : 0;
+       return isSameDay(now, p.lastUpdatedAt) ? p.todaySteps : 0;
     }
   }
 
@@ -653,7 +775,7 @@ class _PodiumView extends ConsumerWidget {
               final displayStr = metric == LeaderboardMetric.score 
                   ? val.toString() 
                   : NumberFormat.compact().format(val);
-              return Text(displayStr, style: TextStyle(fontWeight: FontWeight.w800, color: ringColor));
+              return Text(displayStr, style: AppTheme.numeric(TextStyle(fontWeight: FontWeight.w800, color: ringColor)));
             },
           );
         })(),

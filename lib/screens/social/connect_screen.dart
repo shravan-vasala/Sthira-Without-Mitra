@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/app_providers.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/empty_state_view.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -64,10 +67,27 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
   @override
   Widget build(BuildContext context) {
     final authService = ref.watch(authServiceProvider);
+    final isAnonymous = authService.currentUser?.isAnonymous ?? true;
     final uid = authService.uid;
 
-    if (uid == null) {
-      return const Center(child: Text('Please sign in to view your code.'));
+    if (isAnonymous || uid == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const EmptyStateView(
+              icon: Icons.person_off_rounded,
+              title: 'Sign in Required',
+              subtitle: 'You need an account to have a unique ID.',
+            ),
+            const SizedBox(height: 24),
+            PrimaryButton(
+              label: 'Sign In',
+              onPressed: () => context.push('/auth'),
+            ),
+          ],
+        ),
+      );
     }
 
     return Center(
@@ -84,62 +104,86 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
             ),
           ),
           const SizedBox(height: 24),
-          GestureDetector(
-            onTap: () async {
-               HapticFeedback.lightImpact();
-               await Clipboard.setData(ClipboardData(text: uid));
-               setState(() => _copied = true);
-               Future.delayed(const Duration(seconds: 2), () {
-                 if (mounted) setState(() => _copied = false);
-               });
-            },
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 32),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                 color: _copied ? context.colors.primary.withValues(alpha: 0.1) : context.colors.card,
-                 borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                   Text(
-                      uid,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'monospace',
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.w700,
-                        color: _copied ? context.colors.primary : context.colors.textDark,
-                      ),
-                   ),
-                   const SizedBox(height: 24),
-                   Row(
-                     mainAxisSize: MainAxisSize.min,
-                     children: [
-                       Icon(
-                          _copied ? Icons.check_circle_rounded : Icons.copy_rounded, 
-                          color: _copied ? context.colors.primary : context.colors.textMedium, 
-                          size: 18,
+          Semantics(
+            button: true,
+            label: 'Copy ID to clipboard',
+            child: GestureDetector(
+              onTap: () async {
+                 HapticFeedback.lightImpact();
+                 try {
+                   await Clipboard.setData(ClipboardData(text: uid));
+                   if (!mounted) return;
+                   setState(() => _copied = true);
+                   Future.delayed(const Duration(seconds: 2), () {
+                     if (mounted) setState(() => _copied = false);
+                   });
+                 } catch (e) {
+                   if (mounted) {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       SnackBar(
+                         content: const Text('Failed to copy ID to clipboard.'),
+                         backgroundColor: context.colors.red,
                        ),
-                       const SizedBox(width: 8),
-                       Text(
-                         _copied ? 'Copied to Clipboard!' : 'Tap to Copy',
-                         style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: _copied ? context.colors.primary : context.colors.textMedium,
+                     );
+                   }
+                 }
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                decoration: BoxDecoration(
+                   color: _copied ? context.colors.primary.withValues(alpha: 0.1) : context.colors.card,
+                   borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                     Text(
+                        uid,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: 'monospace',
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.w700,
+                          color: _copied ? context.colors.primary : context.colors.textDark,
+                        ),
+                     ),
+                     const SizedBox(height: 24),
+                     Row(
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         Icon(
+                            _copied ? Icons.check_circle_rounded : Icons.copy_rounded, 
+                            color: _copied ? context.colors.primary : context.colors.textMedium, 
+                            size: 18,
                          ),
-                       ),
-                     ],
-                   ),
-                ],
-              ),
-            ).animate(target: _copied ? 1 : 0)
-             .scaleXY(end: 0.95, duration: 150.ms, curve: Curves.easeOut)
-             .then().scaleXY(end: 1.0, duration: 250.ms, curve: Curves.easeOutBack)
-             .tint(color: context.colors.primary.withValues(alpha: 0.1), duration: 200.ms),
+                         const SizedBox(width: 8),
+                         Text(
+                           _copied ? 'Copied to Clipboard!' : 'Tap to Copy',
+                           style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: _copied ? context.colors.primary : context.colors.textMedium,
+                           ),
+                         ),
+                       ],
+                     ),
+                  ],
+                ),
+              ).animate(target: _copied ? 1 : 0)
+               .scaleXY(end: 0.95, duration: 150.ms, curve: Curves.easeOut)
+               .then().scaleXY(end: 1.0, duration: 250.ms, curve: Curves.easeOutBack)
+               .tint(color: context.colors.primary.withValues(alpha: 0.1), duration: 200.ms),
+            ),
+          ),
+          const SizedBox(height: 32),
+          PrimaryButton(
+            label: 'Share Invitation',
+            icon: Icons.share_rounded,
+            onPressed: () {
+              Share.share('Connect with me on Sthira! My friend ID is: $uid');
+            },
           ),
         ],
       ),
@@ -182,7 +226,7 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
       final friendRepo = ref.read(friendRepoProvider);
       final profile = ref.read(profileProvider);
 
-      if (!RegExp(r'^[A-Za-z0-9]{20,40}$').hasMatch(code)) {
+      if (!RegExp(r'^[A-Za-z0-9_-]{20,128}$').hasMatch(code)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -215,19 +259,6 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
         return;
       }
 
-      final targetProfile = await syncService.fetchProfileOnce(code);
-      if (targetProfile == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('We couldn\'t find anyone with that ID. Is it correct?'),
-              backgroundColor: context.colors.orange,
-            ),
-          );
-        }
-        return;
-      }
-
       final String? safeAvatar =
           (profile.photoPath?.startsWith('assets/') ?? false)
           ? profile.photoPath
@@ -237,9 +268,9 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(
-              'Friend request sent to ${targetProfile.name} successfully!',
+              'Friend request sent successfully!',
             ),
           ),
         );
