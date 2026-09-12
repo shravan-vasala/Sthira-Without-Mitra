@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../utils/format_units.dart';
 import '../../providers/app_providers.dart';
 import '../../models/workout_plan.dart';
@@ -14,7 +15,7 @@ import '../../services/widget_update_service.dart';
 String parseRepTarget(String rep) {
   if (rep.contains('-')) {
     final parts = rep.split('-');
-    if (parts.length == 2) return parts[1].trim();
+    if (parts.length == 2) return parts[0].trim();
   }
   return rep;
 }
@@ -43,9 +44,13 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
         text: parseRepTarget(widget.exercise.repsDisplay ?? ''),
       );
     });
+    final profile = ref.read(profileProvider);
     _weightControllers = List.generate(setCount, (i) {
+      final planned = widget.exercise.weightKg;
       return TextEditingController(
-        text: widget.exercise.weightKg?.toString() ?? '',
+        text: planned != null && planned > 0 
+          ? convertFromKg(profile, planned).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '') 
+          : '',
       );
     });
 
@@ -55,7 +60,8 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   void _loadExistingData() {
     final dateStr = ref.read(dateStringProvider);
     final repo = ref.read(exerciseLogRepoProvider);
-    final existing = repo.getLog(dateStr, widget.exercise.name ?? '');
+    final profile = ref.read(profileProvider);
+    final existing = repo.getLog(dateStr, widget.exercise.instanceId ?? widget.exercise.name ?? '');
 
     if (existing != null) {
       for (
@@ -64,8 +70,9 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
         i++
       ) {
         _repsControllers[i].text = (existing.sets[i].reps ?? 0).toString();
-        _weightControllers[i].text = (existing.sets[i].weight ?? 0.0) > 0
-            ? (existing.sets[i].weight ?? 0.0).toString()
+        final w = existing.sets[i].weight ?? 0.0;
+        _weightControllers[i].text = w > 0
+            ? convertFromKg(profile, w).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')
             : '';
       }
     } else {
@@ -78,7 +85,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
         ) {
           final w = _lastLog!.sets[i].weight ?? 0.0;
           if (w > 0) {
-            _weightControllers[i].text = w.toString();
+            _weightControllers[i].text = convertFromKg(profile, w).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
           }
           final r = _lastLog!.sets[i].reps ?? 0;
           if (r > 0) {
@@ -186,10 +193,12 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                     width: 40,
                     child: Text(
                       'Set ${i + 1}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.textDark,
+                      style: AppTheme.numeric(
+                        TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: context.colors.textDark,
+                        ),
                       ),
                     ),
                   ),
@@ -249,16 +258,24 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
 
   Future<void> _save() async {
     final sets = <SetLog>[];
+    final profile = ref.read(profileProvider);
+    
     for (int i = 0; i < widget.exercise.setCount; i++) {
-      final reps = int.tryParse(_repsControllers[i].text) ?? 0;
-      final weight = double.tryParse(_weightControllers[i].text) ?? 0;
-      sets.add(SetLog(setNumber: i + 1, reps: reps, weight: weight));
+      final reps = int.tryParse(_repsControllers[i].text);
+      final weightRaw = double.tryParse(_weightControllers[i].text);
+      
+      if (reps == null || reps <= 0) continue;
+      if (weightRaw == null || weightRaw < 0) continue;
+      
+      final weightKg = convertToKg(profile, weightRaw);
+      sets.add(SetLog(setNumber: sets.length + 1, reps: reps, weight: weightKg));
     }
 
     final repo = ref.read(exerciseLogRepoProvider);
     final dateStr = ref.read(dateStringProvider);
     final newLog = ExerciseLog(
       date: dateStr,
+      instanceId: widget.exercise.instanceId ?? widget.exercise.name ?? '',
       exerciseName: widget.exercise.name ?? '',
       sets: sets,
     );
@@ -366,10 +383,12 @@ class _StepperField extends StatelessWidget {
               controller: controller,
               keyboardType: TextInputType.numberWithOptions(decimal: isWeight),
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textDark,
+              style: AppTheme.numeric(
+                TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textDark,
+                ),
               ),
               decoration: InputDecoration(
                 isDense: true,

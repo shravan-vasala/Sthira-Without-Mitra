@@ -7,16 +7,18 @@ class ExerciseLog {
   Id id = Isar.autoIncrement;
 
   @Index(
-    composite: [CompositeIndex('exerciseName')],
+    composite: [CompositeIndex('instanceId')],
     unique: true,
     replace: true,
   )
   final String date;
+  final String instanceId;
   final String exerciseName;
   final List<SetLog> sets;
 
   ExerciseLog({
     required this.date,
+    required this.instanceId,
     required this.exerciseName,
     required this.sets,
   });
@@ -24,6 +26,7 @@ class ExerciseLog {
   factory ExerciseLog.fromJson(Map<String, dynamic> json) {
     return ExerciseLog(
       date: json['date'] as String,
+      instanceId: json['instanceId'] as String? ?? json['exerciseName'] as String,
       exerciseName: json['exerciseName'] as String,
       sets:
           (json['sets'] as List?)
@@ -35,6 +38,7 @@ class ExerciseLog {
 
   Map<String, dynamic> toJson() => {
     'date': date,
+    'instanceId': instanceId,
     'exerciseName': exerciseName,
     'sets': sets.map((s) => s.toJson()).toList(),
   };
@@ -48,7 +52,7 @@ class ExerciseLog {
   double get totalVolume =>
       sets.fold(0.0, (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)));
 
-  String get key => '${date}_$exerciseName';
+  String get key => '${date}_$instanceId';
 }
 
 @embedded

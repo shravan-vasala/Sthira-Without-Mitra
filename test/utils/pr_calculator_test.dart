@@ -14,6 +14,7 @@ void main() {
   test('calculateNewPr detects new max weight', () {
     final log = ExerciseLog(
       date: '2023-10-01',
+      instanceId: 'Squat',
       exerciseName: 'Squat',
       sets: [
         SetLog(setNumber: 1, weight: 100, reps: 5),
@@ -37,6 +38,7 @@ void main() {
 
     final log = ExerciseLog(
       date: '2023-10-01',
+      instanceId: 'Squat',
       exerciseName: 'Squat',
       sets: [
         SetLog(setNumber: 1, weight: 100, reps: 8), // new max weight reps
@@ -58,6 +60,7 @@ void main() {
 
     final log = ExerciseLog(
       date: '2023-10-01',
+      instanceId: 'Squat',
       exerciseName: 'Squat',
       sets: [
         SetLog(setNumber: 1, weight: 100, reps: 6), // vol = 600

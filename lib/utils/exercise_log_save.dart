@@ -34,6 +34,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
 
   final newLog = ExerciseLog(
     date: dateStr,
+    instanceId: exercise.instanceId ?? exercise.name ?? '',
     exerciseName: exercise.name ?? '',
     sets: sets,
   );
@@ -51,54 +52,48 @@ Future<PrUpdateResult> checkAndSavePr({
   required List<SetLog> sets,
 }) async {
   final repo = ref.read(exerciseLogRepoProvider);
-  final isCompletedSet = sets;
-  if (isCompletedSet.isEmpty) {
-    return PrUpdateResult(
-      hasAnyNewPr: false,
-      newPr: ExercisePr(exerciseName: exerciseName),
-    );
-  }
+  final allLogs = repo.getLogsForExercise(exerciseName);
 
-  final maxWeight = isCompletedSet
-      .map((s) => s.weight ?? 0.0)
-      .reduce((a, b) => a > b ? a : b);
-  final maxReps = isCompletedSet
-      .map((s) => s.reps ?? 0)
-      .reduce((a, b) => a > b ? a : b);
-  final totalVolume = isCompletedSet.fold(
-    0.0,
-    (sum, s) => sum + ((s.weight ?? 0.0) * (s.reps ?? 0)),
-  );
-  final oneRM = isCompletedSet
-      .map((s) => (s.weight ?? 0.0) * (1 + ((s.reps ?? 0) / 30)))
-      .reduce((a, b) => a > b ? a : b);
+  var calcMaxWeight = 0.0;
+  var calcMaxReps = 0;
+  var calcMaxVolume = 0.0;
+  var calcEstimated1RM = 0.0;
+
+  for (final log in allLogs) {
+    var logVolume = 0.0;
+    for (final s in log.sets) {
+      final w = s.weight ?? 0.0;
+      final r = s.reps ?? 0;
+      if (w > calcMaxWeight) calcMaxWeight = w;
+      if (r > calcMaxReps) calcMaxReps = r;
+      logVolume += (w * r);
+      final oneRM = w * (1 + (r / 30));
+      if (oneRM > calcEstimated1RM) calcEstimated1RM = oneRM;
+    }
+    if (logVolume > calcMaxVolume) calcMaxVolume = logVolume;
+  }
 
   final currentPr = repo.getPr(exerciseName);
+  final oldW = currentPr?.maxWeight ?? 0.0;
+  final oldR = currentPr?.maxReps ?? 0;
+  final oldV = currentPr?.maxVolume ?? 0.0;
+  final old1RM = currentPr?.estimated1RM ?? 0.0;
 
-  bool newW = false, newR = false, newV = false, new1RM = false;
-  var updatedPr = currentPr ?? ExercisePr(exerciseName: exerciseName);
+  final updatedPr = ExercisePr(
+    exerciseName: exerciseName,
+    maxWeight: calcMaxWeight,
+    maxReps: calcMaxReps,
+    maxVolume: calcMaxVolume,
+    estimated1RM: calcEstimated1RM,
+  );
 
-  if (maxWeight > updatedPr.maxWeight) {
-    updatedPr = updatedPr.copyWith(maxWeight: maxWeight);
-    newW = true;
-  }
-  if (maxReps > updatedPr.maxReps) {
-    updatedPr = updatedPr.copyWith(maxReps: maxReps);
-    newR = true;
-  }
-  if (totalVolume > updatedPr.maxVolume) {
-    updatedPr = updatedPr.copyWith(maxVolume: totalVolume);
-    newV = true;
-  }
-  if (oneRM > updatedPr.estimated1RM) {
-    updatedPr = updatedPr.copyWith(estimated1RM: oneRM);
-    new1RM = true;
-  }
+  await repo.savePr(updatedPr);
 
+  final newW = calcMaxWeight > oldW && calcMaxWeight > 0;
+  final newR = calcMaxReps > oldR && calcMaxReps > 0;
+  final newV = calcMaxVolume > oldV && calcMaxVolume > 0;
+  final new1RM = calcEstimated1RM > old1RM && calcEstimated1RM > 0;
   final hasAnyNewPr = newW || newR || newV || new1RM;
-  if (hasAnyNewPr) {
-    await repo.savePr(updatedPr);
-  }
 
   return PrUpdateResult(
     hasAnyNewPr: hasAnyNewPr,

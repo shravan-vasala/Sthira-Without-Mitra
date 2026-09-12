@@ -31,12 +31,15 @@ class PhotoViewerScreen extends ConsumerStatefulWidget {
 class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
   late PageController _pageController;
   late int _currentIndex;
+  late List<PhotoItem> _photos;
   bool _showOverlay = true;
+  bool _isZoomed = false;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
+    _photos = List.from(widget.photos);
+    _currentIndex = _photos.isEmpty ? 0 : widget.initialIndex.clamp(0, _photos.length - 1);
     _pageController = PageController(initialPage: _currentIndex);
   }
 
@@ -60,23 +63,32 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final item = widget.photos[_currentIndex];
+              final item = _photos[_currentIndex];
 
-              await ref
-                  .read(mediaRepoProvider)
-                  .deletePhoto(item.date, item.path);
+              try {
+                await ref
+                    .read(mediaRepoProvider)
+                    .deletePhoto(item.date, item.path);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to delete photo: $e')),
+                  );
+                }
+                return;
+              }
 
               if (!mounted) return;
 
               setState(() {
-                widget.photos.removeAt(_currentIndex);
-                if (widget.photos.isEmpty) {
+                _photos.removeAt(_currentIndex);
+                if (_photos.isEmpty) {
                   Navigator.pop(context);
                 } else {
-                  if (_currentIndex >= widget.photos.length) {
-                    _currentIndex = widget.photos.length - 1;
+                  if (_currentIndex >= _photos.length) {
+                    _currentIndex = _photos.length - 1;
+                    _pageController.jumpToPage(_currentIndex);
                   }
-                  // We just let the pageview rebuild with the current index
                 }
               });
             },
@@ -112,10 +124,10 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.photos.isEmpty)
+    if (_photos.isEmpty)
       return const Scaffold(backgroundColor: Colors.black);
 
-    final currentPhoto = widget.photos[_currentIndex];
+    final currentPhoto = _photos[_currentIndex];
     final poseLabel = _poseLabel(currentPhoto.poseTag);
     final dateLabel = _formatDate(currentPhoto.date);
 
@@ -135,10 +147,18 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
               onDismissed: (_) => Navigator.pop(context),
               child: PageView.builder(
                 controller: _pageController,
+                physics: _isZoomed ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
                 onPageChanged: (idx) => setState(() => _currentIndex = idx),
-                itemCount: widget.photos.length,
+                itemCount: _photos.length,
                 itemBuilder: (context, index) {
-                  return _ZoomablePhoto(photoPath: widget.photos[index].path);
+                  return _ZoomablePhoto(
+                    photoPath: _photos[index].path,
+                    onZoomStateChanged: (zoomed) {
+                      if (_isZoomed != zoomed) {
+                        setState(() => _isZoomed = zoomed);
+                      }
+                    },
+                  );
                 },
               ),
             ),
@@ -166,6 +186,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                   child: Row(
                     children: [
                       IconButton(
+                        tooltip: 'Back',
                         icon: const Icon(
                           Icons.arrow_back_ios_rounded,
                           color: Colors.white,
@@ -176,6 +197,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                         child: Text(
                           titleText,
                           style: const TextStyle(
+                            fontFamily: 'Cabinet Grotesk',
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -184,6 +206,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                         ),
                       ),
                       IconButton(
+                        tooltip: 'Delete',
                         icon: const Icon(
                           Icons.delete_outline_rounded,
                           color: Colors.white,
@@ -203,7 +226,12 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
 
 class _ZoomablePhoto extends ConsumerStatefulWidget {
   final String photoPath;
-  const _ZoomablePhoto({required this.photoPath});
+  final ValueChanged<bool> onZoomStateChanged;
+
+  const _ZoomablePhoto({
+    required this.photoPath,
+    required this.onZoomStateChanged,
+  });
 
   @override
   ConsumerState<_ZoomablePhoto> createState() => _ZoomablePhotoState();
@@ -217,6 +245,8 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
   late AnimationController _animationController;
   Animation<Matrix4>? _animation;
 
+  bool _wasZoomed = false;
+
   @override
   void initState() {
     super.initState();
@@ -229,6 +259,16 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
             _transformationController.value = _animation!.value;
           }
         });
+    _transformationController.addListener(_onScaleChanged);
+  }
+
+  void _onScaleChanged() {
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    final isZoomed = scale > 1.05;
+    if (_wasZoomed != isZoomed) {
+      _wasZoomed = isZoomed;
+      widget.onZoomStateChanged(isZoomed);
+    }
   }
 
   @override
@@ -280,10 +320,17 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
           child: Hero(
             tag: widget.photoPath, // Optional: if we want to do hero animations
             child: kIsWeb
-                ? Image.network(widget.photoPath, fit: BoxFit.contain)
+                ? Image.network(
+                    widget.photoPath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48),
+                  )
                 : Image.file(
                     File(ref.read(mediaRepoProvider).getAbsolutePath(widget.photoPath)),
                     fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48),
                   ),
           ),
         ),

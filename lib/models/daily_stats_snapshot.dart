@@ -103,9 +103,7 @@ class DailyStatsSnapshot {
             day,
             hasLog,
           );
-          if (dailyLog.workoutCompleted && workoutsDone < workoutsTotal) {
-            workoutsDone = workoutsTotal;
-          }
+
         }
       }
     } else {

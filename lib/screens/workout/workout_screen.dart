@@ -3,7 +3,10 @@ import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../models/daily_stats_snapshot.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
+import '../../utils/target_calculator.dart';
 import '../../providers/app_providers.dart';
 import '../../models/workout_plan.dart';
 import 'widgets/exercise_card.dart';
@@ -89,13 +92,19 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       (sum, s) =>
           sum +
           s.exercises
-              .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
+              .where((e) => logRepo.hasLog(dateStr, e.instanceId ?? e.name ?? ''))
               .length,
     );
 
     final isFinished = ref
         .watch(workoutRepoProvider)
         .isWorkoutFinished(dateStr, widget.dayId);
+        
+    final selectedDate = ref.watch(selectedDateProvider);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selectedDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    final isFuture = selectedDay.isAfter(today);
 
     // Determine which sections to display
     final bool isFiltered =
@@ -117,7 +126,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         : totalExercises;
     final viewCompleted = isFiltered
         ? workoutDay.sections[_activeSectionIndex!].exercises
-              .where((e) => logRepo.hasLog(dateStr, e.name ?? ''))
+              .where((e) => logRepo.hasLog(dateStr, e.instanceId ?? e.name ?? ''))
               .length
         : completedExercises;
 
@@ -171,10 +180,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                             builder: (context, value, child) {
                               return Text(
                                 '$value/$viewExercises exercises done',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: context.colors.textMedium,
+                                style: AppTheme.numeric(
+                                  TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: context.colors.textMedium,
+                                  ),
                                 ),
                               );
                             }
@@ -245,9 +256,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   children: [
                     Text(
                       'Day total: $completedExercises/$totalExercises',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.colors.textLight,
+                      style: AppTheme.numeric(
+                        TextStyle(
+                          fontSize: 11,
+                          color: context.colors.textLight,
+                        ),
                       ),
                     ),
                   ],
@@ -317,7 +330,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         section: section,
                         sectionIndex: sectionIndex,
                         dayId: widget.dayId,
-                        jumpToIndex: widget.jumpToIndex,
+                        jumpToIndex: (widget.sectionIndex == sectionIndex) ? widget.jumpToIndex : null,
                       )
                       .animate(delay: (listIndex * 100).ms)
                       .fadeIn(duration: 400.ms, curve: Curves.easeOut)
@@ -342,7 +355,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 child: PrimaryButton(
                   label: 'Finish Workout',
                   icon: Icons.emoji_events_rounded,
-                  onPressed: () => _finishWorkout(
+                  onPressed: isFuture ? null : () => _finishWorkout(
                     context,
                     ref,
                     widget.dayId,
@@ -740,6 +753,7 @@ class _SectionWidgetState extends State<_SectionWidget> {
               }
               final exerciseIndex = index ~/ 2;
               final exercise = widget.section.exercises[exerciseIndex];
+              exercise.instanceId = '${widget.section.title ?? 'section_${widget.sectionIndex}'}_${exerciseIndex}_${exercise.name}';
               return Container(
                 key: (widget.jumpToIndex == exerciseIndex) ? _jumpKey : null,
                 child: ExerciseCard(

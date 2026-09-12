@@ -8,6 +8,8 @@ import '../../providers/app_providers.dart';
 import 'photo_viewer_screen.dart'; // To reuse PhotoItem
 import '../../share/share_card_exporter.dart';
 import '../../services/haptics.dart';
+import '../../utils/format_units.dart';
+import '../../theme/app_theme.dart';
 
 enum CompareMode { sideBySide, slider }
 
@@ -45,7 +47,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     super.dispose();
   }
 
-  void _initPhotos() {
+  void _loadPhotos() {
     final mediaRepo = ref.read(mediaRepoProvider);
     final allEntries = mediaRepo.getAllProgressPhotos();
 
@@ -57,6 +59,10 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
         _allPhotos.add(PhotoItem(path: path, date: date, poseTag: poseTag));
       }
     }
+  }
+
+  void _initPhotos() {
+    _loadPhotos();
 
     if (_allPhotos.isEmpty) return;
 
@@ -133,30 +139,50 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
   
   Map<String, dynamic> _getWeightDelta() {
     if (_leftPhoto == null || _rightPhoto == null) return {'text': ''};
-    final logL = ref.read(dailyLogRepoProvider).getLog(_leftPhoto!.date);
-    final logR = ref.read(dailyLogRepoProvider).getLog(_rightPhoto!.date);
     
-    if (logL?.weight == null || logR?.weight == null || logL!.weight! == 0.0 || logR!.weight! == 0.0) {
+    final metaL = ref.read(mediaRepoProvider).getProgressPhotoMeta(_leftPhoto!.date, _leftPhoto!.path);
+    final logL = ref.read(dailyLogRepoProvider).getLog(_leftPhoto!.date);
+    double? wL = metaL.weight;
+    bool isLMeta = true;
+    if (wL == null || wL == 0.0) {
+      wL = logL?.weight;
+      isLMeta = false;
+    }
+
+    final metaR = ref.read(mediaRepoProvider).getProgressPhotoMeta(_rightPhoto!.date, _rightPhoto!.path);
+    final logR = ref.read(dailyLogRepoProvider).getLog(_rightPhoto!.date);
+    double? wR = metaR.weight;
+    bool isRMeta = true;
+    if (wR == null || wR == 0.0) {
+      wR = logR?.weight;
+      isRMeta = false;
+    }
+    
+    if (wL == null || wR == null || wL == 0.0 || wR == 0.0) {
       return {'text': ''};
     }
     
-    final wL = logL.weight!;
-    final wR = logR.weight!;
-    final diff = wR - wL;
+    final profile = ref.read(profileProvider);
+    final dispL = convertFromKg(profile, wL);
+    final dispR = convertFromKg(profile, wR);
+    final diff = dispR - dispL;
     
     final sign = diff > 0 ? '+' : '';
-    final text = ' · $sign${diff.toStringAsFixed(1)} kg';
+    final unit = profile.useKg ? 'kg' : 'lbs';
     
+    String text = ' · $sign${diff.toStringAsFixed(1)} $unit';
+    if (!isLMeta || !isRMeta) {
+      text += ' (Est)';
+    }
+
     // logic: green towards target / orange otherwise
-    final target = ref.read(profileRepoProvider).getProfile().targetWeight;
-    Color color = context.colors.primary; // fallback
+    final target = profile.targetWeight;
+    Color color = context.colors.textDark; // fallback if no target
     if (target != null && target > 0) {
-      final oldDist = (wL - target).abs();
-      final newDist = (wR - target).abs();
+      final targetDisp = convertFromKg(profile, target);
+      final oldDist = (dispL - targetDisp).abs();
+      final newDist = (dispR - targetDisp).abs();
       color = newDist < oldDist ? context.colors.green : context.colors.orange;
-    } else {
-      // Just assume weight loss is green
-      color = diff <= 0 ? context.colors.green : context.colors.orange;
     }
     
     return {'text': text, 'color': color};
@@ -164,6 +190,16 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
 
   void _pickPhoto(bool isLeft) {
     setState(() => _pickerFilter = 'all');
+    _loadPhotos();
+    
+    // Check if current selections are still valid
+    if (_leftPhoto != null && !_allPhotos.any((p) => p.path == _leftPhoto!.path)) {
+      setState(() => _leftPhoto = null);
+    }
+    if (_rightPhoto != null && !_allPhotos.any((p) => p.path == _rightPhoto!.path)) {
+      setState(() => _rightPhoto = null);
+    }
+    
     Haptics.tap();
     showModalBottomSheet(
       context: context,
@@ -181,85 +217,128 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             maxChildSize: 0.9,
             minChildSize: 0.5,
             expand: false,
-            builder: (ctx, scrollController) => Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                  child: Text(
-                    'Select Photo',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark),
-                  ),
-                ),
-                Padding( // Filter chips
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      children: [
-                        _buildPickerChip('all', 'All', setStateSheet),
-                        const SizedBox(width: 8),
-                        _buildPickerChip('front', 'Front', setStateSheet),
-                        const SizedBox(width: 8),
-                        _buildPickerChip('side', 'Side', setStateSheet),
-                        const SizedBox(width: 8),
-                        _buildPickerChip('back', 'Back', setStateSheet),
-                      ],
+            builder: (ctx, scrollController) => CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                    child: Text(
+                      'Select Photo',
+                      style: TextStyle(fontFamily: 'Cabinet Grotesk', fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark),
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: GridView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildPickerChip('all', 'All', setStateSheet),
+                          const SizedBox(width: 8),
+                          _buildPickerChip('front', 'Front', setStateSheet),
+                          const SizedBox(width: 8),
+                          _buildPickerChip('side', 'Side', setStateSheet),
+                          const SizedBox(width: 8),
+                          _buildPickerChip('back', 'Back', setStateSheet),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
                     ),
-                    itemCount: filtered.length,
-                    itemBuilder: (ctx, i) {
-                      final item = filtered[i];
-                      return GestureDetector(
-                        onTap: () {
-                          Haptics.tap();
-                          setState(() {
-                            if (isLeft) _leftPhoto = item;
-                            else _rightPhoto = item;
-                          });
-                          Navigator.pop(ctx);
-                        },
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: kIsWeb
-                                    ? Image.network(item.path, fit: BoxFit.cover, cacheWidth: 400)
-                                    : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.cover, cacheWidth: 400),
-                              ),
-                            ),
-                            if (item.poseTag != 'none')
-                              Positioned(
-                                bottom: 4, left: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.6),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    item.poseTag,
-                                    style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) {
+                        final item = filtered[i];
+                        final isOtherSelected = (!isLeft ? _leftPhoto?.path : _rightPhoto?.path) == item.path;
+                        final isCurrentSelected = (isLeft ? _leftPhoto?.path : _rightPhoto?.path) == item.path;
+                        
+                        return Semantics(
+                          button: true,
+                          label: 'Select photo from ${_formatDateShort(item.date)}',
+                          child: GestureDetector(
+                            onTap: () {
+                              if (isOtherSelected) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Photo already selected for the other side.')),
+                                );
+                                return;
+                              }
+                              Haptics.tap();
+                              setState(() {
+                                if (isLeft) _leftPhoto = item;
+                                else _rightPhoto = item;
+                              });
+                              Navigator.pop(ctx);
+                            },
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: kIsWeb
+                                        ? Image.network(item.path, fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54)))
+                                        : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54))),
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
+                                if (isCurrentSelected)
+                                  Positioned.fill(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: context.colors.primary, width: 3),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                Positioned(
+                                  bottom: 4, left: 4,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (item.poseTag != 'none')
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                          margin: const EdgeInsets.only(bottom: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(alpha: 0.6),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            item.poseTag,
+                                            style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(alpha: 0.6),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          _formatDateShort(item.date),
+                                          style: AppTheme.numeric(const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      childCount: filtered.length,
+                    ),
                   ),
                 ),
               ],
@@ -272,24 +351,29 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
   
   Widget _buildPickerChip(String tag, String label, StateSetter setStateSheet) {
     final isSelected = _pickerFilter == tag;
-    return GestureDetector(
-      onTap: () {
-        Haptics.tap();
-        setStateSheet(() => _pickerFilter = tag);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? context.colors.primary : context.colors.inputFill,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? context.colors.onPrimary : context.colors.textDark,
+    return Semantics(
+      button: true,
+      label: 'Filter by $label',
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: () {
+          Haptics.tap();
+          setStateSheet(() => _pickerFilter = tag);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? context.colors.primary : context.colors.inputFill,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? context.colors.onPrimary : context.colors.textDark,
+            ),
           ),
         ),
       ),
@@ -305,13 +389,21 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     );
   }
 
-  Widget _buildPhotoSource(PhotoItem? item) {
+  Widget _buildPhotoSource(PhotoItem? item, {BoxFit fit = BoxFit.contain}) {
     if (item == null) {
       return Container(color: Colors.black);
     }
     return kIsWeb
-        ? Image.network(item.path, fit: BoxFit.contain)
-        : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.contain);
+        ? Image.network(
+            item.path,
+            fit: fit,
+            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
+          )
+        : Image.file(
+            File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)),
+            fit: fit,
+            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
+          );
   }
   
   Widget _buildCompareContent() {
@@ -368,11 +460,11 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
           fit: StackFit.expand,
           children: [
             // Bottom photo (Right)
-            _buildPhotoSource(_rightPhoto),
+            _buildPhotoSource(_rightPhoto, fit: BoxFit.cover),
             // Top photo (Left) clipped
             ClipRect(
               clipper: _SliderClipper(splitFraction: _sliderPosition),
-              child: _buildPhotoSource(_leftPhoto),
+              child: _buildPhotoSource(_leftPhoto, fit: BoxFit.cover),
             ),
             // Slider Handle
             Align(
@@ -425,11 +517,23 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     );
   }
 
-  String _getCaption(String dateStr) {
-    String datePart = _formatDateShort(dateStr);
-    final log = ref.read(dailyLogRepoProvider).getLog(dateStr);
-    if (log != null && log.weight != null && log.weight! > 0) {
-      return '$datePart, ${log.weight!.toStringAsFixed(1)}kg';
+  String _getCaption(PhotoItem? item) {
+    if (item == null) return '';
+    String datePart = _formatDateShort(item.date);
+    
+    final meta = ref.read(mediaRepoProvider).getProgressPhotoMeta(item.date, item.path);
+    final log = ref.read(dailyLogRepoProvider).getLog(item.date);
+    
+    double? w = meta.weight;
+    if (w == null || w == 0.0) {
+      w = log?.weight;
+    }
+    
+    if (w != null && w > 0) {
+      final profile = ref.read(profileProvider);
+      final disp = convertFromKg(profile, w);
+      final unit = profile.useKg ? 'kg' : 'lbs';
+      return '$datePart, ${disp.toStringAsFixed(1)}$unit';
     }
     return datePart;
   }
@@ -511,16 +615,16 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              _getCaption(_leftPhoto!.date),
+                              _getCaption(_leftPhoto),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                              style: AppTheme.numeric(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                             ),
                           ),
                           Expanded(
                             child: Text(
-                              _getCaption(_rightPhoto!.date),
+                              _getCaption(_rightPhoto),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                              style: AppTheme.numeric(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                             ),
                           ),
                         ],
@@ -549,11 +653,11 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                   ),
                   child: Text(
                     '${_getTimeDeltaText()}$weightDeltaText',
-                    style: TextStyle(
+                    style: AppTheme.numeric(TextStyle(
                       color: context.colors.onPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
-                    ),
+                    )),
                   ),
                 ),
               ),

@@ -317,15 +317,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
 
                     if (dayOffset < 0 || dayOffset >= daysInMonth) {
                       return SizedBox(width: cellSize, height: cellSize);
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(7, (colIndex) {
-                  final cellIndex = rowIndex * 7 + colIndex;
-                  final dayOffset = cellIndex - startWeekday;
-
-                  if (dayOffset < 0 || dayOffset >= daysInMonth) {
-                    return SizedBox(width: cellSize, height: cellSize);
-                  }
+                    }
 
                   final currentDate = DateTime(year, month, dayOffset + 1);
                   final score = heatmapData[currentDate] ?? 0;
@@ -357,6 +349,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     ),
                   );
                 }),
+                ),
               );
             }),
           ),

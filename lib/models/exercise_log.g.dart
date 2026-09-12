@@ -27,29 +27,34 @@ const ExerciseLogSchema = CollectionSchema(
       name: r'exerciseName',
       type: IsarType.string,
     ),
-    r'key': PropertySchema(
+    r'instanceId': PropertySchema(
       id: 2,
+      name: r'instanceId',
+      type: IsarType.string,
+    ),
+    r'key': PropertySchema(
+      id: 3,
       name: r'key',
       type: IsarType.string,
     ),
     r'maxWeight': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'maxWeight',
       type: IsarType.double,
     ),
     r'sets': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'sets',
       type: IsarType.objectList,
       target: r'SetLog',
     ),
     r'totalReps': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'totalReps',
       type: IsarType.long,
     ),
     r'totalVolume': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'totalVolume',
       type: IsarType.double,
     )
@@ -60,9 +65,9 @@ const ExerciseLogSchema = CollectionSchema(
   deserializeProp: _exerciseLogDeserializeProp,
   idName: r'id',
   indexes: {
-    r'date_exerciseName': IndexSchema(
-      id: 4066726893760949379,
-      name: r'date_exerciseName',
+    r'date_instanceId': IndexSchema(
+      id: -3163923839009351063,
+      name: r'date_instanceId',
       unique: true,
       replace: true,
       properties: [
@@ -72,7 +77,7 @@ const ExerciseLogSchema = CollectionSchema(
           caseSensitive: true,
         ),
         IndexPropertySchema(
-          name: r'exerciseName',
+          name: r'instanceId',
           type: IndexType.hash,
           caseSensitive: true,
         )
@@ -95,6 +100,7 @@ int _exerciseLogEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.date.length * 3;
   bytesCount += 3 + object.exerciseName.length * 3;
+  bytesCount += 3 + object.instanceId.length * 3;
   bytesCount += 3 + object.key.length * 3;
   bytesCount += 3 + object.sets.length * 3;
   {
@@ -115,16 +121,17 @@ void _exerciseLogSerialize(
 ) {
   writer.writeString(offsets[0], object.date);
   writer.writeString(offsets[1], object.exerciseName);
-  writer.writeString(offsets[2], object.key);
-  writer.writeDouble(offsets[3], object.maxWeight);
+  writer.writeString(offsets[2], object.instanceId);
+  writer.writeString(offsets[3], object.key);
+  writer.writeDouble(offsets[4], object.maxWeight);
   writer.writeObjectList<SetLog>(
-    offsets[4],
+    offsets[5],
     allOffsets,
     SetLogSchema.serialize,
     object.sets,
   );
-  writer.writeLong(offsets[5], object.totalReps);
-  writer.writeDouble(offsets[6], object.totalVolume);
+  writer.writeLong(offsets[6], object.totalReps);
+  writer.writeDouble(offsets[7], object.totalVolume);
 }
 
 ExerciseLog _exerciseLogDeserialize(
@@ -136,8 +143,9 @@ ExerciseLog _exerciseLogDeserialize(
   final object = ExerciseLog(
     date: reader.readString(offsets[0]),
     exerciseName: reader.readString(offsets[1]),
+    instanceId: reader.readString(offsets[2]),
     sets: reader.readObjectList<SetLog>(
-          offsets[4],
+          offsets[5],
           SetLogSchema.deserialize,
           allOffsets,
           SetLog(),
@@ -162,8 +170,10 @@ P _exerciseLogDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
+      return (reader.readDouble(offset)) as P;
+    case 5:
       return (reader.readObjectList<SetLog>(
             offset,
             SetLogSchema.deserialize,
@@ -171,9 +181,9 @@ P _exerciseLogDeserializeProp<P>(
             SetLog(),
           ) ??
           []) as P;
-    case 5:
-      return (reader.readLong(offset)) as P;
     case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -194,90 +204,89 @@ void _exerciseLogAttach(
 }
 
 extension ExerciseLogByIndex on IsarCollection<ExerciseLog> {
-  Future<ExerciseLog?> getByDateExerciseName(String date, String exerciseName) {
-    return getByIndex(r'date_exerciseName', [date, exerciseName]);
+  Future<ExerciseLog?> getByDateInstanceId(String date, String instanceId) {
+    return getByIndex(r'date_instanceId', [date, instanceId]);
   }
 
-  ExerciseLog? getByDateExerciseNameSync(String date, String exerciseName) {
-    return getByIndexSync(r'date_exerciseName', [date, exerciseName]);
+  ExerciseLog? getByDateInstanceIdSync(String date, String instanceId) {
+    return getByIndexSync(r'date_instanceId', [date, instanceId]);
   }
 
-  Future<bool> deleteByDateExerciseName(String date, String exerciseName) {
-    return deleteByIndex(r'date_exerciseName', [date, exerciseName]);
+  Future<bool> deleteByDateInstanceId(String date, String instanceId) {
+    return deleteByIndex(r'date_instanceId', [date, instanceId]);
   }
 
-  bool deleteByDateExerciseNameSync(String date, String exerciseName) {
-    return deleteByIndexSync(r'date_exerciseName', [date, exerciseName]);
+  bool deleteByDateInstanceIdSync(String date, String instanceId) {
+    return deleteByIndexSync(r'date_instanceId', [date, instanceId]);
   }
 
-  Future<List<ExerciseLog?>> getAllByDateExerciseName(
-      List<String> dateValues, List<String> exerciseNameValues) {
+  Future<List<ExerciseLog?>> getAllByDateInstanceId(
+      List<String> dateValues, List<String> instanceIdValues) {
     final len = dateValues.length;
-    assert(exerciseNameValues.length == len,
+    assert(instanceIdValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], exerciseNameValues[i]]);
+      values.add([dateValues[i], instanceIdValues[i]]);
     }
 
-    return getAllByIndex(r'date_exerciseName', values);
+    return getAllByIndex(r'date_instanceId', values);
   }
 
-  List<ExerciseLog?> getAllByDateExerciseNameSync(
-      List<String> dateValues, List<String> exerciseNameValues) {
+  List<ExerciseLog?> getAllByDateInstanceIdSync(
+      List<String> dateValues, List<String> instanceIdValues) {
     final len = dateValues.length;
-    assert(exerciseNameValues.length == len,
+    assert(instanceIdValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], exerciseNameValues[i]]);
+      values.add([dateValues[i], instanceIdValues[i]]);
     }
 
-    return getAllByIndexSync(r'date_exerciseName', values);
+    return getAllByIndexSync(r'date_instanceId', values);
   }
 
-  Future<int> deleteAllByDateExerciseName(
-      List<String> dateValues, List<String> exerciseNameValues) {
+  Future<int> deleteAllByDateInstanceId(
+      List<String> dateValues, List<String> instanceIdValues) {
     final len = dateValues.length;
-    assert(exerciseNameValues.length == len,
+    assert(instanceIdValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], exerciseNameValues[i]]);
+      values.add([dateValues[i], instanceIdValues[i]]);
     }
 
-    return deleteAllByIndex(r'date_exerciseName', values);
+    return deleteAllByIndex(r'date_instanceId', values);
   }
 
-  int deleteAllByDateExerciseNameSync(
-      List<String> dateValues, List<String> exerciseNameValues) {
+  int deleteAllByDateInstanceIdSync(
+      List<String> dateValues, List<String> instanceIdValues) {
     final len = dateValues.length;
-    assert(exerciseNameValues.length == len,
+    assert(instanceIdValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], exerciseNameValues[i]]);
+      values.add([dateValues[i], instanceIdValues[i]]);
     }
 
-    return deleteAllByIndexSync(r'date_exerciseName', values);
+    return deleteAllByIndexSync(r'date_instanceId', values);
   }
 
-  Future<Id> putByDateExerciseName(ExerciseLog object) {
-    return putByIndex(r'date_exerciseName', object);
+  Future<Id> putByDateInstanceId(ExerciseLog object) {
+    return putByIndex(r'date_instanceId', object);
   }
 
-  Id putByDateExerciseNameSync(ExerciseLog object, {bool saveLinks = true}) {
-    return putByIndexSync(r'date_exerciseName', object, saveLinks: saveLinks);
+  Id putByDateInstanceIdSync(ExerciseLog object, {bool saveLinks = true}) {
+    return putByIndexSync(r'date_instanceId', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByDateExerciseName(List<ExerciseLog> objects) {
-    return putAllByIndex(r'date_exerciseName', objects);
+  Future<List<Id>> putAllByDateInstanceId(List<ExerciseLog> objects) {
+    return putAllByIndex(r'date_instanceId', objects);
   }
 
-  List<Id> putAllByDateExerciseNameSync(List<ExerciseLog> objects,
+  List<Id> putAllByDateInstanceIdSync(List<ExerciseLog> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'date_exerciseName', objects,
-        saveLinks: saveLinks);
+    return putAllByIndexSync(r'date_instanceId', objects, saveLinks: saveLinks);
   }
 }
 
@@ -359,28 +368,28 @@ extension ExerciseLogQueryWhere
   }
 
   QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
-      dateEqualToAnyExerciseName(String date) {
+      dateEqualToAnyInstanceId(String date) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_exerciseName',
+        indexName: r'date_instanceId',
         value: [date],
       ));
     });
   }
 
   QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
-      dateNotEqualToAnyExerciseName(String date) {
+      dateNotEqualToAnyInstanceId(String date) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
+              indexName: r'date_instanceId',
               lower: [],
               upper: [date],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
+              indexName: r'date_instanceId',
               lower: [date],
               includeLower: false,
               upper: [],
@@ -388,13 +397,13 @@ extension ExerciseLogQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
+              indexName: r'date_instanceId',
               lower: [date],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
+              indexName: r'date_instanceId',
               lower: [],
               upper: [date],
               includeUpper: false,
@@ -404,44 +413,44 @@ extension ExerciseLogQueryWhere
   }
 
   QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
-      dateExerciseNameEqualTo(String date, String exerciseName) {
+      dateInstanceIdEqualTo(String date, String instanceId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_exerciseName',
-        value: [date, exerciseName],
+        indexName: r'date_instanceId',
+        value: [date, instanceId],
       ));
     });
   }
 
   QueryBuilder<ExerciseLog, ExerciseLog, QAfterWhereClause>
-      dateEqualToExerciseNameNotEqualTo(String date, String exerciseName) {
+      dateEqualToInstanceIdNotEqualTo(String date, String instanceId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
+              indexName: r'date_instanceId',
               lower: [date],
-              upper: [date, exerciseName],
+              upper: [date, instanceId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
-              lower: [date, exerciseName],
+              indexName: r'date_instanceId',
+              lower: [date, instanceId],
               includeLower: false,
               upper: [date],
             ));
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
-              lower: [date, exerciseName],
+              indexName: r'date_instanceId',
+              lower: [date, instanceId],
               includeLower: false,
               upper: [date],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_exerciseName',
+              indexName: r'date_instanceId',
               lower: [date],
-              upper: [date, exerciseName],
+              upper: [date, instanceId],
               includeUpper: false,
             ));
       }
@@ -767,6 +776,142 @@ extension ExerciseLogQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'instanceId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'instanceId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'instanceId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterFilterCondition>
+      instanceIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'instanceId',
+        value: '',
       ));
     });
   }
@@ -1219,6 +1364,18 @@ extension ExerciseLogQuerySortBy
     });
   }
 
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterSortBy> sortByInstanceId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'instanceId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterSortBy> sortByInstanceIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'instanceId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ExerciseLog, ExerciseLog, QAfterSortBy> sortByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'key', Sort.asc);
@@ -1307,6 +1464,18 @@ extension ExerciseLogQuerySortThenBy
     });
   }
 
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterSortBy> thenByInstanceId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'instanceId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ExerciseLog, ExerciseLog, QAfterSortBy> thenByInstanceIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'instanceId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ExerciseLog, ExerciseLog, QAfterSortBy> thenByKey() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'key', Sort.asc);
@@ -1372,6 +1541,13 @@ extension ExerciseLogQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ExerciseLog, ExerciseLog, QDistinct> distinctByInstanceId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'instanceId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ExerciseLog, ExerciseLog, QDistinct> distinctByKey(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1415,6 +1591,12 @@ extension ExerciseLogQueryProperty
   QueryBuilder<ExerciseLog, String, QQueryOperations> exerciseNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'exerciseName');
+    });
+  }
+
+  QueryBuilder<ExerciseLog, String, QQueryOperations> instanceIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'instanceId');
     });
   }
 

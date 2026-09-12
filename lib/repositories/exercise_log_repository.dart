@@ -29,17 +29,17 @@ class ExerciseLogRepository {
     _sync?.syncToCloud('exercise_prs', pr.exerciseName, pr.toJson());
   }
 
-  ExerciseLog? getLog(String date, String exerciseName) {
+  ExerciseLog? getLog(String date, String instanceId) {
     return _isar.exerciseLogs
         .filter()
         .dateEqualTo(date)
         .and()
-        .exerciseNameEqualTo(exerciseName)
+        .instanceIdEqualTo(instanceId)
         .findFirstSync();
   }
 
   Future<void> saveLog(ExerciseLog log) async {
-    final existing = getLog(log.date, log.exerciseName);
+    final existing = getLog(log.date, log.instanceId);
     if (existing != null) log.id = existing.id;
     await _isar.writeTxn(() async {
       await _isar.exerciseLogs.put(log);
@@ -47,8 +47,8 @@ class ExerciseLogRepository {
     _sync?.syncToCloud('exercise_logs', log.key, log.toJson());
   }
 
-  bool hasLog(String date, String exerciseName) {
-    return getLog(date, exerciseName) != null;
+  bool hasLog(String date, String instanceId) {
+    return getLog(date, instanceId) != null;
   }
 
   List<ExerciseLog> getLogsForExercise(String exerciseName) {
@@ -78,7 +78,7 @@ class ExerciseLogRepository {
   ) async {
     for (final entry in cloudData.entries) {
       final log = ExerciseLog.fromJson(entry.value);
-      if (getLog(log.date, log.exerciseName) == null) {
+      if (getLog(log.date, log.instanceId) == null) {
         await _isar.writeTxn(() async {
           await _isar.exerciseLogs.put(log);
         });

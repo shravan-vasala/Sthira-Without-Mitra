@@ -29,8 +29,13 @@ class ExerciseCard extends ConsumerWidget {
     final profile = ref.watch(profileProvider);
     final useKg = profile.useKg;
     final dateStr = ref.watch(dateStringProvider);
-    final log = logRepo.getLog(dateStr, exercise.name ?? '');
+    final log = logRepo.getLog(dateStr, exercise.instanceId ?? exercise.name ?? '');
     final isCompleted = log != null;
+    
+    final selectedDate = ref.watch(selectedDateProvider);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isFuture = DateTime(selectedDate.year, selectedDate.month, selectedDate.day).isAfter(today);
 
     String? loggedText;
     if (log != null && log.sets.isNotEmpty) {
@@ -281,7 +286,7 @@ class ExerciseCard extends ConsumerWidget {
                       'Mark ${exercise.displayName ?? exercise.name ?? ''} as ${isCompleted ? 'incomplete' : 'complete'}',
                   button: true,
                   child: GestureDetector(
-                    onTap: () {
+                    onTap: isFuture ? null : () {
                       showAppBottomSheet(
                         context: context,
                         builder: (_) => LogDataDialog(exercise: exercise),

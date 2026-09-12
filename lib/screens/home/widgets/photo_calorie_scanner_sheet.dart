@@ -1900,6 +1900,7 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
                     ],
                   ),
                 ),
+                ),
               );
             },
           ),

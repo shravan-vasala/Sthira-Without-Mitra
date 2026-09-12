@@ -368,7 +368,6 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
             ),
           ],
         ),
-      ),
     );
   }
 

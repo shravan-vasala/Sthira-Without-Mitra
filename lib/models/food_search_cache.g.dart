@@ -26,6 +26,16 @@ const FoodSearchCacheSchema = CollectionSchema(
       id: 1,
       name: r'normalizedQuery',
       type: IsarType.string,
+    ),
+    r'schemaVersion': PropertySchema(
+      id: 2,
+      name: r'schemaVersion',
+      type: IsarType.string,
+    ),
+    r'timestamp': PropertySchema(
+      id: 3,
+      name: r'timestamp',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _foodSearchCacheEstimateSize,
@@ -64,6 +74,7 @@ int _foodSearchCacheEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.cachedResponseJson.length * 3;
   bytesCount += 3 + object.normalizedQuery.length * 3;
+  bytesCount += 3 + object.schemaVersion.length * 3;
   return bytesCount;
 }
 
@@ -75,6 +86,8 @@ void _foodSearchCacheSerialize(
 ) {
   writer.writeString(offsets[0], object.cachedResponseJson);
   writer.writeString(offsets[1], object.normalizedQuery);
+  writer.writeString(offsets[2], object.schemaVersion);
+  writer.writeDateTime(offsets[3], object.timestamp);
 }
 
 FoodSearchCache _foodSearchCacheDeserialize(
@@ -86,6 +99,8 @@ FoodSearchCache _foodSearchCacheDeserialize(
   final object = FoodSearchCache(
     cachedResponseJson: reader.readString(offsets[0]),
     normalizedQuery: reader.readString(offsets[1]),
+    schemaVersion: reader.readString(offsets[2]),
+    timestamp: reader.readDateTime(offsets[3]),
   );
   object.id = id;
   return object;
@@ -102,6 +117,10 @@ P _foodSearchCacheDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -631,6 +650,198 @@ extension FoodSearchCacheQueryFilter
       ));
     });
   }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'schemaVersion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'schemaVersion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'schemaVersion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'schemaVersion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'schemaVersion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'schemaVersion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'schemaVersion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'schemaVersion',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'schemaVersion',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      schemaVersionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'schemaVersion',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      timestampEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'timestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      timestampGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'timestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      timestampLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'timestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterFilterCondition>
+      timestampBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'timestamp',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension FoodSearchCacheQueryObject
@@ -666,6 +877,34 @@ extension FoodSearchCacheQuerySortBy
       sortByNormalizedQueryDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'normalizedQuery', Sort.desc);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      sortBySchemaVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'schemaVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      sortBySchemaVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'schemaVersion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      sortByTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      sortByTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestamp', Sort.desc);
     });
   }
 }
@@ -711,6 +950,34 @@ extension FoodSearchCacheQuerySortThenBy
       return query.addSortBy(r'normalizedQuery', Sort.desc);
     });
   }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      thenBySchemaVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'schemaVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      thenBySchemaVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'schemaVersion', Sort.desc);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      thenByTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QAfterSortBy>
+      thenByTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestamp', Sort.desc);
+    });
+  }
 }
 
 extension FoodSearchCacheQueryWhereDistinct
@@ -728,6 +995,21 @@ extension FoodSearchCacheQueryWhereDistinct
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'normalizedQuery',
           caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QDistinct>
+      distinctBySchemaVersion({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'schemaVersion',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, FoodSearchCache, QDistinct>
+      distinctByTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'timestamp');
     });
   }
 }
@@ -751,6 +1033,20 @@ extension FoodSearchCacheQueryProperty
       normalizedQueryProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'normalizedQuery');
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, String, QQueryOperations>
+      schemaVersionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'schemaVersion');
+    });
+  }
+
+  QueryBuilder<FoodSearchCache, DateTime, QQueryOperations>
+      timestampProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'timestamp');
     });
   }
 }

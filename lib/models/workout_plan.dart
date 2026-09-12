@@ -98,6 +98,9 @@ class WorkoutSection {
 
 @embedded
 class Exercise {
+  @ignore
+  String? instanceId;
+
   String? name;
   String? displayName;
   String? youtubeUrl;

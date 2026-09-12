@@ -125,6 +125,7 @@ void main() {
       // Save one log
       final log1 = ExerciseLog(
         date: '2023-10-02',
+        instanceId: 'Bench Press',
         exerciseName: 'Bench Press',
         sets: [SetLog(setNumber: 1, reps: 10, weight: 100)],
       );
@@ -141,6 +142,7 @@ void main() {
       // Save second log
       final log2 = ExerciseLog(
         date: '2023-10-02',
+        instanceId: 'Squat',
         exerciseName: 'Squat',
         sets: [SetLog(setNumber: 1, reps: 10, weight: 100)],
       );
