@@ -8,6 +8,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/profile_providers.dart';
+import '../../providers/daily_log_notifier.dart';
 
 class BackupRestoreScreen extends ConsumerStatefulWidget {
   const BackupRestoreScreen({super.key});
@@ -345,6 +348,8 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         return;
       }
 
+      final warningText = (verify.errorMessage != null) ? '\n\n${verify.errorMessage}' : '';
+
       final shouldRestore = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -354,7 +359,8 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
             'Created At: ${verify.createdAt != 'Unknown' ? DateFormat('MMM dd, yyyy · HH:mm').format(DateTime.parse(verify.createdAt)) : 'Unknown'}\n'
             'Entries: ${verify.totalEntries}\n'
             'Photos: ${verify.photoCount}\n\n'
-            'WARNING: Restoring will completely overwrite all your current data. A pre-restore safety backup will be created in your app documents directory.',
+            'WARNING: Restoring will completely overwrite all your current data. A pre-restore safety backup will be created in your app documents directory.'
+            '$warningText',
           ),
           actions: [
             TextButton(
@@ -380,7 +386,12 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       if (!mounted) return;
       setState(() => _isLoading = true);
 
+      final syncService = ref.read(firestoreSyncServiceProvider);
+      syncService.pauseSync();
+
       try {
+        await backupService.createBackup(includeMedia: true); // Pre-restore safety backup
+
         final result = await backupService.restoreBackup(
           path,
           password: passwordUsed,
@@ -390,6 +401,9 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         setState(() => _isLoading = false);
 
         if (result.success) {
+          ref.invalidate(profileProvider);
+          ref.invalidate(dailyLogProvider);
+
           await showDialog(
             context: context,
             barrierDismissible: false,
@@ -407,8 +421,8 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
               ),
               content: Text(
                 result.failedPhotosCount > 0
-                    ? 'Restore complete, but ${result.failedPhotosCount} photos failed to decrypt and were skipped. Please restart the app.'
-                    : 'Restore complete — please restart the app.',
+                    ? 'Restore complete, but ${result.failedPhotosCount} photos failed to decrypt and were skipped.'
+                    : 'Restore complete. Your data has been loaded.',
               ),
               actions: [
                  TextButton(
@@ -437,6 +451,8 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           );
           setState(() => _isLoading = false);
         }
+      } finally {
+        syncService.resumeSync();
       }
     } catch (e) {
       if (mounted) {

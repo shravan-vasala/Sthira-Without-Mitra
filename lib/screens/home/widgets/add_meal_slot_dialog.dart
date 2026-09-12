@@ -34,6 +34,22 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       setState(() => _errorText = 'Name cannot be blank');
       return;
     }
+    if (name.length > 50) {
+      setState(() => _errorText = 'Name is too long');
+      return;
+    }
+    
+    final nameLower = name.toLowerCase();
+    final profile = ref.read(profileProvider);
+    final isProfileDuplicate = profile.customMealSlots.any((slot) => (slot['name'] as String?)?.toLowerCase() == nameLower);
+    
+    final dailyLog = ref.read(dailyMealLogProvider);
+    final isDailyDuplicate = dailyLog?.customSlots.values.any((slot) => slot.name?.toLowerCase() == nameLower) ?? false;
+    
+    if (isProfileDuplicate || isDailyDuplicate) {
+      setState(() => _errorText = 'A meal slot with this name already exists');
+      return;
+    }
     
     setState(() {
       _errorText = null;
@@ -47,13 +63,12 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       final targetDateStr = ref.read(dateStringProvider);
       
       if (_addToEveryDay) {
-        final profile = ref.read(profileProvider);
         final updatedSlots =
             List<Map<String, dynamic>>.from(profile.customMealSlots)..add({
               'id': id,
               'name': name,
               'emoji': _selectedEmoji,
-              'isDefault': false,
+              'isDefault': true,
             });
         await ref
             .read(profileProvider.notifier)

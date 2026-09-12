@@ -31,8 +31,8 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
-      reverseDuration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 400),
+      reverseDuration: const Duration(milliseconds: 250),
     );
     _slideAnimation = CurvedAnimation(
       parent: _controller,
@@ -250,7 +250,7 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                           key: ValueKey('${_currentBadge!.id}_shimmer'),
                           onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : null,
                         ).shimmer(
-                          duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 900.ms,
+                          duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 600.ms,
                           color: Colors.white.withValues(alpha: 0.3),
                         ),
                 ),

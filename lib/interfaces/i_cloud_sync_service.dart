@@ -4,6 +4,9 @@ abstract class ICloudSyncService {
   Stream<int> get pendingCountStream;
   Future<void> flushNow();
 
+  void pauseSync();
+  void resumeSync();
+
   void syncToCloud(String collection, String docId, Map<String, dynamic> data);
 
   void deleteFromCloud(String collection, String docId);

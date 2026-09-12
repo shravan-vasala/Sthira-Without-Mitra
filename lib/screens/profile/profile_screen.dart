@@ -614,7 +614,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _ExportOptionTile(
-              title: 'Last 30 Days',
+              title: 'Last 30 Days (Inclusive)',
               onTap: () {
                 // Sheet is on the root navigator; pop with sheet context.
                 Navigator.of(sheetContext).pop();
@@ -626,7 +626,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               },
             ),
             _ExportOptionTile(
-              title: 'Last 90 Days',
+              title: 'Last 90 Days (Inclusive)',
               onTap: () {
                 Navigator.of(sheetContext).pop();
                 _handleExport(
@@ -666,18 +666,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     try {
       final exportService = ref.read(csvExportServiceProvider);
-      final zipPath = await exportService.exportData(startDate);
+      final result = await exportService.exportData(startDate);
 
       if (!context.mounted) return;
       Navigator.of(context, rootNavigator: true).pop(); // hide loading
 
-      if (zipPath != null) {
+      if (result.isSuccess && result.filePath != null) {
         // ignore: deprecated_member_use
-        await Share.shareXFiles([XFile(zipPath)], text: 'Sthira Data Export');
+        await Share.shareXFiles([XFile(result.filePath!)], text: 'Sthira Data Export');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Failed to export data or no data found'),
+            content: Text(result.errorMessage ?? 'Failed to export data.'),
             backgroundColor: context.colors.red,
           ),
         );
@@ -1552,9 +1552,24 @@ class _AiActivitySheet extends StatelessWidget {
       return AppSheet(
         title: 'Recent AI Activity',
         scrollable: true,
-        child: const Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: Text('No AI requests made yet.')),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('No AI requests made yet.'),
+              const SizedBox(height: 16),
+              Text(
+                'Logs are kept locally on your device for diagnostic purposes (up to 20 recent requests).',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -1562,9 +1577,28 @@ class _AiActivitySheet extends StatelessWidget {
       title: 'Recent AI Activity',
       scrollable: true,
       child: Column(
-        children: AiLogger.logs
-            .map(
-              (log) => ListTile(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Text(
+              'Logs are kept locally on your device for diagnostic purposes (up to 20 recent requests).',
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: AiLogger.logs.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final log = AiLogger.logs[index];
+              return ListTile(
                 title: Text(
                   '${log.purpose} • ${log.model}',
                   style: TextStyle(
@@ -1584,10 +1618,11 @@ class _AiActivitySheet extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                contentPadding: EdgeInsets.zero,
-              ),
-            )
-            .toList(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 4),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -1607,7 +1642,6 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
   @override
   void initState() {
     super.initState();
-    _runTests();
   }
 
   Future<void> _runTests() async {
@@ -1660,8 +1694,18 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
       title: 'AI Connection Test',
       scrollable: true,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_results.isEmpty && !_isTesting)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ElevatedButton.icon(
+                onPressed: _runTests,
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: const Text('Run Diagnostic Test'),
+              ),
+            ),
           if (_isTesting) const LinearProgressIndicator(),
           const SizedBox(height: 16),
           ..._results.entries
@@ -1728,6 +1772,8 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
       title: 'System Diagnostics',
       scrollable: true,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1738,17 +1784,73 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                   '${logs.length} logs in ring buffer',
                   style: TextStyle(color: context.colors.textMedium),
                 ),
-                TextButton.icon(
-                  onPressed: () {
-                    logger.clear();
-                    // ignore: use_build_context_synchronously
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.delete_sweep_rounded),
-                  label: const Text('Clear'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.red,
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        final sb = StringBuffer();
+                        sb.writeln('=== Sthira Diagnostic Logs ===');
+                        sb.writeln('Generated: ${DateTime.now().toIso8601String()}');
+                        sb.writeln('==============================\n');
+                        for (final log in logs) {
+                          String msg = log.message;
+                          msg = msg.replaceAll(RegExp(r'AIza[0-9A-Za-z-_]{35}'), '[REDACTED_API_KEY]');
+                          sb.writeln('[${log.level}] ${log.timestamp.toIso8601String()}');
+                          sb.writeln(msg);
+                          if (log.error != null) {
+                            String err = log.error!;
+                            err = err.replaceAll(RegExp(r'AIza[0-9A-Za-z-_]{35}'), '[REDACTED_API_KEY]');
+                            sb.writeln('Error: $err');
+                          }
+                          if (log.stackTrace != null) {
+                            sb.writeln('Stack: ${log.stackTrace}');
+                          }
+                          sb.writeln('---');
+                        }
+                        await Share.share(sb.toString(), subject: 'Sthira Diagnostics');
+                      },
+                      icon: const Icon(Icons.ios_share_rounded),
+                      tooltip: 'Export Logs',
+                      color: context.colors.primary,
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text(
+                              'Clear Diagnostics',
+                              style: TextStyle(
+                                fontFamily: 'Cabinet Grotesk',
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            content: const Text('Are you sure? This will only clear your local diagnostic logs. It will not erase your actual app data or tracked habits.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                onPressed: () {
+                                  logger.clear();
+                                  Navigator.pop(context); // close dialog
+                                  Navigator.pop(context); // close sheet
+                                },
+                                child: const Text('Clear'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.delete_sweep_rounded),
+                      label: const Text('Clear'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.colors.red,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

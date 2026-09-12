@@ -22,6 +22,7 @@ import '../models/habit.dart';
 import '../models/user_food_log.dart';
 import 'schema_migration_service.dart';
 import 'backup_encryption_service.dart';
+import '../interfaces/i_auth_service.dart';
 
 class BackupRestoreResult {
   final bool success;
@@ -52,7 +53,10 @@ class BackupVerificationResult {
 }
 
 class BackupService {
+  final IAuthService _auth;
   static const int _maxAutoBackups = 3;
+
+  BackupService(this._auth);
 
   /// Creates a zipped backup in the application documents directory containing
   /// Isar JSON and the media directory. Returns the local path.
@@ -111,6 +115,7 @@ class BackupService {
         'appVersion': 'Sthira V1', // Stub for now, can be read from package_info
         'createdAt': DateTime.now().toIso8601String(),
         'totalEntries': recordCount,
+        'uid': _auth.uid,
       };
       await manifestFile.writeAsString(jsonEncode(manifest));
 
@@ -134,6 +139,14 @@ class BackupService {
           final targetMedia = Directory('${appDir.path}/$dirName');
           if (await targetMedia.exists()) {
             encoder.addDirectory(targetMedia, includeDirName: true);
+          }
+        }
+        
+        final rootFiles = appDir.listSync().whereType<File>();
+        for (final file in rootFiles) {
+          final name = file.path.split(Platform.pathSeparator).last.toLowerCase();
+          if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.gif')) {
+            encoder.addFile(file);
           }
         }
       }
@@ -214,16 +227,37 @@ class BackupService {
       }
 
       final content = utf8.decode(manifestFile.content as List<int>);
-      final map = jsonDecode(content) as Map<String, dynamic>;
+      final map = jsonDecode(content);
+      if (map is! Map<String, dynamic>) {
+        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid manifest format (not a JSON object)');
+      }
+
+      // Check data.json parses to Map<String, dynamic>
+      try {
+        final dataContent = utf8.decode(dataFile.content as List<int>);
+        final dataMap = jsonDecode(dataContent);
+        if (dataMap is! Map<String, dynamic>) {
+          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid data format (not a JSON object)');
+        }
+      } catch (_) {
+        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Corrupted data.json file');
+      }
+
+      final uid = map['uid'] as String?;
+      String? warningMsg;
+      if (uid != null && _auth.uid != null && uid != _auth.uid) {
+        warningMsg = 'Account mismatch: This backup belongs to another user.';
+      }
 
       return BackupVerificationResult(
         isValid: true,
-        totalEntries: map['totalEntries'] ?? 0,
+        totalEntries: map['totalEntries'] as int? ?? 0,
         photoCount: photoCount,
         isEncrypted: isEncrypted,
-        schemaVersion: map['schemaVersion'] ?? 1,
-        appVersion: map['appVersion'] ?? 'Unknown',
-        createdAt: map['createdAt'] ?? 'Unknown',
+        schemaVersion: map['schemaVersion'] as int? ?? 1,
+        appVersion: map['appVersion'] as String? ?? 'Unknown',
+        createdAt: map['createdAt'] as String? ?? 'Unknown',
+        errorMessage: warningMsg,
       );
     } catch (e) {
       return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, errorMessage: e.toString());
@@ -233,7 +267,11 @@ class BackupService {
   Future<BackupRestoreResult> restoreBackup(String zipPath, {String? password}) async {
     if (kIsWeb) return BackupRestoreResult(success: false);
     
+    final appDir = await getApplicationDocumentsDirectory();
+    final stagingDir = Directory('${appDir.path}/restore_staging_${DateTime.now().millisecondsSinceEpoch}');
+    
     try {
+      await stagingDir.create();
       final isar = Isar.getInstance();
       if (isar == null) throw Exception('Isar instance not found.');
 
@@ -274,6 +312,29 @@ class BackupService {
 
       final migratedData = SchemaMigrationService.runMigrationsForRestore(rawData, manifestSchema);
 
+      // 1. Extract photos to staging
+      final stagedPhotos = <String, String>{};
+      for (final file in archive) {
+        final name = file.name.toLowerCase();
+        if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.gif')) {
+           final safePath = file.name.replaceAll('..', ''); 
+           String targetPath = '${appDir.path}/$safePath';
+           
+           // Legacy fallback
+           if (!safePath.startsWith('trufit_') && !safePath.startsWith('sthira_') && !safePath.startsWith('profile_') && !safePath.contains('/')) {
+             targetPath = '${appDir.path}/trufit_media/$safePath';
+           }
+
+           final stagingFileName = '${DateTime.now().microsecondsSinceEpoch}_$safePath'.replaceAll('/', '_').replaceAll('\\', '_');
+           final stagingPath = '${stagingDir.path}/$stagingFileName';
+           
+           final extractedFile = File(stagingPath);
+           extractedFile.writeAsBytesSync(file.content as List<int>);
+           stagedPhotos[targetPath] = stagingPath;
+        }
+      }
+
+      // 2. Database transaction
       await isar.writeTxn(() async {
         await isar.clear();
         
@@ -295,28 +356,15 @@ class BackupService {
         if (migratedData['userFoodLogs'] != null) isar.userFoodLogs.importJsonSync(migratedData['userFoodLogs']);
       });
 
-      // Restore photos
-      final appDir = await getApplicationDocumentsDirectory();
+      // 3. Move photos from staging to target
       int failedPhotos = 0;
-      for (final file in archive) {
-        final name = file.name.toLowerCase();
-        if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.gif')) {
-          try {
-             // Extract directly into the app documents structure to preserve paths
-             final safePath = file.name.replaceAll('..', ''); 
-             String targetPath = '${appDir.path}/$safePath';
-             
-             // Legacy fallback if the backup was created with includeDirName: false
-             if (!safePath.startsWith('trufit_') && !safePath.startsWith('sthira_') && !safePath.startsWith('profile_')) {
-               targetPath = '${appDir.path}/trufit_media/$safePath';
-             }
-
-             final extractedFile = File(targetPath);
-             extractedFile.createSync(recursive: true);
-             extractedFile.writeAsBytesSync(file.content as List<int>);
-          } catch (_) {
-             failedPhotos++;
-          }
+      for (final entry in stagedPhotos.entries) {
+        try {
+           final targetFile = File(entry.key);
+           targetFile.parent.createSync(recursive: true);
+           File(entry.value).copySync(targetFile.path);
+        } catch (_) {
+           failedPhotos++;
         }
       }
 
@@ -324,6 +372,10 @@ class BackupService {
     } catch (e) {
       debugPrint('Restore failed: $e');
       return BackupRestoreResult(success: false);
+    } finally {
+      if (await stagingDir.exists()) {
+        await stagingDir.delete(recursive: true);
+      }
     }
   }
 

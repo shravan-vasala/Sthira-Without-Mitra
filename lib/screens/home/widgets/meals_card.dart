@@ -52,18 +52,6 @@ class MealsCard extends ConsumerWidget {
     final isToday = selectedDate.isAtSameMomentAs(today);
 
     int totalMeals = MealCompletion.calculateTotalMeals(profile, dailyLog);
-    
-    // For today/future, also include recurring ids so empty planned meals show up
-    if (isFuture || isToday) {
-      final recurringIds = profile.customMealSlots
-          .map((s) => s['id'] as String)
-          .toSet();
-      final loggedIds = dailyLog.customSlots.entries
-          .where((e) => e.value.items.isNotEmpty || e.value.photoPath != null || e.value.totalCalories > 0)
-          .map((e) => e.key)
-          .toSet();
-      totalMeals = recurringIds.union(loggedIds).length;
-    }
 
     final slots = <({String id, String name, String emoji})>[];
     for (final s in profile.customMealSlots) {

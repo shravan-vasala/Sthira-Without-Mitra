@@ -28,15 +28,17 @@ class TrophyRoomCard extends ConsumerWidget {
       if (a.isUnlocked && !b.isUnlocked) return -1;
       if (!a.isUnlocked && b.isUnlocked) return 1;
       if (a.isUnlocked && b.isUnlocked) {
-        return b.unlockedAt!.compareTo(a.unlockedAt!);
+        final dateA = a.unlockedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = b.unlockedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return dateB.compareTo(dateA);
       }
-      final progA = a.currentProgress / a.requiredProgress;
-      final progB = b.currentProgress / b.requiredProgress;
+      final progA = a.requiredProgress > 0 ? a.currentProgress / a.requiredProgress : 0.0;
+      final progB = b.requiredProgress > 0 ? b.currentProgress / b.requiredProgress : 0.0;
       return progB.compareTo(progA);
     });
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -44,7 +46,7 @@ class TrophyRoomCard extends ConsumerWidget {
             padding: const EdgeInsets.only(left: 4, bottom: 12),
             child: TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: unlocked),
-              duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1500),
+              duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 600),
               curve: Curves.easeOutExpo,
               builder: (context, val, child) {
                 return Text(
@@ -61,15 +63,15 @@ class TrophyRoomCard extends ConsumerWidget {
             ),
           ),
           SurfaceCard(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             color: context.colors.card,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return Wrap(
-                  spacing: 12,
+                  spacing: 8,
                   runSpacing: 24,
                   children: sortedBadges.map((badge) {
-                    final itemWidth = (constraints.maxWidth - 24) / 3;
+                    final itemWidth = (constraints.maxWidth - 16) / 3;
                     return _BadgeItem(badge: badge, width: itemWidth);
                   }).toList(),
                 );
@@ -129,12 +131,13 @@ class _BadgeItem extends StatelessWidget {
                   ),
                 )
                   .animate(target: (isUnlocked && !disableAnimations) ? 1 : 0)
-                  .shimmer(duration: 1.seconds, color: Colors.white24),
+                  .shimmer(duration: 600.ms, color: Colors.white24),
   
                 const SizedBox(height: 32),
                 Text(
                   badge.title,
                   style: TextStyle(
+                    fontFamily: 'Cabinet Grotesk',
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                     color: context.colors.textDark,
@@ -155,7 +158,7 @@ class _BadgeItem extends StatelessWidget {
   
                 if (isUnlocked) ...[
                   Text(
-                    'Unlocked ${DateFormat('MMMM d, yyyy').format(badge.unlockedAt!)}',
+                    'Unlocked ${DateFormat('MMMM d, yyyy').format(badge.unlockedAt ?? DateTime.now())}',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -213,12 +216,10 @@ class _BadgeItem extends StatelessWidget {
                     ],
                   ),
                 ],
-                
                 const SizedBox(height: 32),
                 if (isUnlocked)
                   PrimaryButton(
                     onPressed: () async {
-                      Navigator.of(context).pop();
                       await ShareCardExporter.exportAndShareWidget(
                         context: context,
                         widget: _BadgeShareCard(badge: badge),
@@ -226,6 +227,9 @@ class _BadgeItem extends StatelessWidget {
                         text: 'I just earned the ${badge.title} badge in Sthira! 🏆',
                         format: ShareFormat.post,
                       );
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                      }
                     },
                     icon: Icons.share_rounded,
                     label: 'Share Badge',
@@ -319,7 +323,7 @@ class _BadgeItem extends StatelessWidget {
               )
             else
               Text(
-                DateFormat('MMM d').format(badge.unlockedAt!),
+                DateFormat('MMM d').format(badge.unlockedAt ?? DateTime.now()),
                 style: TextStyle(
                   fontSize: 10,
                   color: context.colors.textMedium,
@@ -335,8 +339,8 @@ class _BadgeItem extends StatelessWidget {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     if (isUnlocked && !disableAnimations) {
       tile = tile.animate().shimmer(
-        delay: 400.ms,
-        duration: 2000.ms,
+        delay: 200.ms,
+        duration: 800.ms,
         color: Colors.white.withValues(alpha: 0.2),
       );
     }
@@ -378,6 +382,7 @@ class _BadgeShareCard extends StatelessWidget {
           Text(
             badge.title,
             style: TextStyle(
+              fontFamily: 'Cabinet Grotesk',
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: context.colors.textDark,

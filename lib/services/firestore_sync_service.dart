@@ -22,6 +22,7 @@ class FirestoreSyncService implements ICloudSyncService {
   final IAuthService _auth;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final Map<String, Timer> _debouncers = {};
+  bool _isSyncPaused = false;
 
   FirestoreSyncService(this._auth) {
     flushQueue();
@@ -47,6 +48,15 @@ class FirestoreSyncService implements ICloudSyncService {
   @override
   Future<void> flushNow() => flushQueue();
 
+  @override
+  void pauseSync() => _isSyncPaused = true;
+
+  @override
+  void resumeSync() {
+    _isSyncPaused = false;
+    flushQueue();
+  }
+
   /// Reference to the current user's document.
   DocumentReference? get _userDoc {
     final uid = _auth.uid;
@@ -70,37 +80,29 @@ class FirestoreSyncService implements ICloudSyncService {
   @override
   void syncToCloud(String collection, String docId, Map<String, dynamic> data) {
     if (!canSync) return;
+    final uid = _auth.uid;
+    if (uid == null) return;
 
-    final ref = _subcollection(collection);
-    if (ref == null) return;
-
-    final debounceKey = '$collection/$docId';
-    if (_debouncers.containsKey(debounceKey)) {
-      _debouncers[debounceKey]?.cancel();
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      isar.writeTxnSync(() {
+        final item = SyncQueueItem(
+          collection: collection,
+          docId: docId,
+          payload: jsonEncode(data),
+          timestamp: DateTime.now(),
+          uid: uid,
+        );
+        isar.syncQueueItems.putSync(item);
+      });
     }
 
-    _debouncers[debounceKey] = Timer(const Duration(seconds: 3), () {
-      // Fire-and-forget — don't await, don't block UI
-      ref.doc(docId).set(data, SetOptions(merge: true)).catchError((e) async {
-        debugPrint(
-          'FirestoreSync: Error syncing $collection/$docId: $e, queuing...',
-        );
-        final isar = Isar.getInstance();
-        final uid = _auth.uid;
-        if (isar != null && uid != null) {
-          await isar.writeTxn(() async {
-            final item = SyncQueueItem(
-              collection: collection,
-              docId: docId,
-              payload: jsonEncode(data),
-              timestamp: DateTime.now(),
-              uid: uid,
-            );
-            await isar.syncQueueItems.put(item);
-          });
-        }
-      });
-      _debouncers.remove(debounceKey);
+    if (_debouncers.containsKey('flush')) {
+      _debouncers['flush']?.cancel();
+    }
+    _debouncers['flush'] = Timer(const Duration(seconds: 3), () {
+      flushQueue();
+      _debouncers.remove('flush');
     });
   }
 
@@ -108,66 +110,53 @@ class FirestoreSyncService implements ICloudSyncService {
   @override
   void deleteFromCloud(String collection, String docId) {
     if (!canSync) return;
+    final uid = _auth.uid;
+    if (uid == null) return;
 
-    final ref = _subcollection(collection);
-    if (ref == null) return;
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      isar.writeTxnSync(() {
+        final item = SyncQueueItem(
+          collection: '_delete_/$collection',
+          docId: docId,
+          payload: '{}',
+          timestamp: DateTime.now(),
+          uid: uid,
+        );
+        isar.syncQueueItems.putSync(item);
+      });
+    }
 
-    ref.doc(docId).delete().catchError((e) async {
-      debugPrint('FirestoreSync: Error deleting $collection/$docId: $e');
-      final isar = Isar.getInstance();
-      final uid = _auth.uid;
-      if (isar != null && uid != null) {
-        await isar.writeTxn(() async {
-          final item = SyncQueueItem(
-            collection: '_delete_/$collection',
-            docId: docId,
-            payload: '{}',
-            timestamp: DateTime.now(),
-            uid: uid,
-          );
-          await isar.syncQueueItems.put(item);
-        });
-      }
-    });
+    flushNow();
   }
 
   /// Sync the user profile (stored as a single doc, not a sub-collection).
   @override
   void syncProfile(Map<String, dynamic> data) {
     if (!canSync) return;
+    final uid = _auth.uid;
+    if (uid == null) return;
 
-    final doc = _userDoc;
-    if (doc == null) return;
-
-    final debounceKey = 'profile';
-    if (_debouncers.containsKey(debounceKey)) {
-      _debouncers[debounceKey]?.cancel();
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      isar.writeTxnSync(() {
+        final item = SyncQueueItem(
+          collection: '_profile_',
+          docId: uid,
+          payload: jsonEncode(data),
+          timestamp: DateTime.now(),
+          uid: uid,
+        );
+        isar.syncQueueItems.putSync(item);
+      });
     }
 
-    _debouncers[debounceKey] = Timer(const Duration(seconds: 3), () {
-      doc
-          .set({
-            'profile': data,
-            'lastSyncedAt': FieldValue.serverTimestamp(),
-          }, SetOptions(merge: true))
-          .catchError((e) async {
-            debugPrint('FirestoreSync: Error syncing profile: $e');
-            final isar = Isar.getInstance();
-            final uid = _auth.uid;
-            if (isar != null && uid != null) {
-              await isar.writeTxn(() async {
-                final item = SyncQueueItem(
-                  collection: '_profile_',
-                  docId: uid,
-                  payload: jsonEncode(data),
-                  timestamp: DateTime.now(),
-                  uid: uid,
-                );
-                await isar.syncQueueItems.put(item);
-              });
-            }
-          });
-      _debouncers.remove(debounceKey);
+    if (_debouncers.containsKey('flush')) {
+      _debouncers['flush']?.cancel();
+    }
+    _debouncers['flush'] = Timer(const Duration(seconds: 3), () {
+      flushQueue();
+      _debouncers.remove('flush');
     });
   }
 
@@ -184,34 +173,27 @@ class FirestoreSyncService implements ICloudSyncService {
   }
 
   Future<void> flushQueue() async {
-    if (!canSync) return;
+    if (!canSync || _isSyncPaused) return;
     final isar = Isar.getInstance();
     if (isar == null) return;
-
-    final items = isar.syncQueueItems.where().sortByTimestamp().findAllSync();
-    if (items.isEmpty) return;
 
     final currentUserUid = _auth.uid;
     if (currentUserUid == null) return;
 
+    // B01: Only process items for the CURRENT user!
+    final items = isar.syncQueueItems.where().sortByTimestamp().findAllSync()
+        .where((item) => item.uid == currentUserUid).toList();
+    
+    if (items.isEmpty) return;
+
     final Map<String, SyncQueueItem> deduped = {};
-    final List<int> itemsToDelete = [];
 
     for (final item in items) {
-      if (item.uid != currentUserUid) {
-        itemsToDelete.add(item.id);
-        continue;
-      }
       final key = '${item.collection}/${item.docId}';
       deduped[key] = item;
     }
 
     if (deduped.isEmpty) {
-      if (itemsToDelete.isNotEmpty) {
-        await isar.writeTxn(() async {
-          await isar.syncQueueItems.deleteAll(itemsToDelete);
-        });
-      }
       return;
     }
 
@@ -246,11 +228,7 @@ class FirestoreSyncService implements ICloudSyncService {
       await batch.commit();
       
       // Collect IDs of all successfully processed items for this user
-      for (final item in items) {
-        if (item.uid == currentUserUid) {
-          itemsToDelete.add(item.id);
-        }
-      }
+      final itemsToDelete = items.map((e) => e.id).toList();
 
       await isar.writeTxn(() async {
         await isar.syncQueueItems.deleteAll(itemsToDelete);

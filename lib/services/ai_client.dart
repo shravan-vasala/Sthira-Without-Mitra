@@ -19,11 +19,11 @@ class AiException implements Exception {
 }
 
 AiErrorCause _classifyError(String errorString) {
-  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project') || errorString.contains('deactivated') || errorString.contains('SERVICE_DISABLED') || errorString.contains('PERMISSION_DENIED')) {
+  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project') || errorString.contains('deactivated') || errorString.contains('SERVICE_DISABLED') || errorString.contains('PERMISSION_DENIED') || errorString.contains('403') || errorString.contains('forbidden')) {
     return AiErrorCause.invalidKey;
   } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
     return AiErrorCause.offline;
-  } else if (errorString.contains('403') || errorString.contains('forbidden') || errorString.contains('404') || errorString.contains('not found')) {
+  } else if (errorString.contains('404') || errorString.contains('not found')) {
     return AiErrorCause.notFound;
   } else if (errorString.contains('429') || errorString.contains('quota') || errorString.contains('RESOURCE_EXHAUSTED')) {
     return AiErrorCause.rateLimited;
@@ -205,9 +205,11 @@ class AiClient {
           );
           
           if (cause == AiErrorCause.invalidKey) {
-            throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.', cause: cause);
+            throw AiException('This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.', cause: cause);
           } else if (cause == AiErrorCause.offline) {
             throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
+          } else if (cause == AiErrorCause.parse) {
+            throw AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause);
           } else if (cause == AiErrorCause.notFound) {
             break; // Next model
           } else if (cause == AiErrorCause.rateLimited) {
@@ -227,8 +229,6 @@ class AiClient {
             } else {
               break; // Next model
             }
-          } else if (cause == AiErrorCause.parse) {
-            break; // Next model
           } else if (cause == AiErrorCause.timeout) {
             break; // Next model immediately
           }
@@ -331,7 +331,7 @@ class AiClient {
           apiKey: apiKey,
         );
         
-        await for (final chunk in stream) {
+        await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
            if (chunk != null && chunk.isNotEmpty) {
              if (firstTokenMs == null) {
                firstTokenMs = sw.elapsedMilliseconds;
@@ -374,10 +374,12 @@ class AiClient {
           // to another model because it will just append the new start to the old partial text.
           // We must throw here.
           throw AiException('Stream failed midway. Please try again.', cause: cause);
+        } else if (cause == AiErrorCause.parse) {
+          throw AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause);
         }
         
         if (cause == AiErrorCause.invalidKey) {
-          throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.', cause: cause);
+          throw AiException('This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.', cause: cause);
         } else if (cause == AiErrorCause.offline) {
           throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
         } else if (cause == AiErrorCause.notFound) {

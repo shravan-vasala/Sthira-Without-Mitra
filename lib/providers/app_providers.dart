@@ -146,7 +146,7 @@ final healthConnectServiceProvider = Provider<HealthConnectService>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
 final backupServiceProvider = Provider<BackupService>((ref) {
-  return BackupService();
+  return BackupService(ref.watch(authServiceProvider));
 });
 final authServiceProvider = Provider<AuthService>((ref) {
   throw UnimplementedError('Must be overridden in main');

@@ -10,8 +10,25 @@ import '../models/habit.dart';
 import '../models/body_stats.dart';
 import '../models/daily_meal_log.dart';
 
+class CsvExportResult {
+  final bool isSuccess;
+  final String? filePath;
+  final String? errorMessage;
+  
+  CsvExportResult({required this.isSuccess, this.filePath, this.errorMessage});
+}
+
 class CsvExportService {
-  Future<String?> exportData(DateTime? startDate) async {
+  dynamic _sanitizeForCsv(dynamic value) {
+    if (value is String) {
+      if (value.startsWith('=') || value.startsWith('+') || value.startsWith('-') || value.startsWith('@') || value.startsWith('\t') || value.startsWith('\r')) {
+        return "'$value";
+      }
+    }
+    return value;
+  }
+
+  Future<CsvExportResult> exportData(DateTime? startDate) async {
     try {
       final archive = Archive();
 
@@ -22,7 +39,7 @@ class CsvExportService {
       }
 
       final isar = Isar.getInstance();
-      if (isar == null) return null;
+      if (isar == null) return CsvExportResult(isSuccess: false, errorMessage: 'Database not initialized.');
 
       await addCsv('daily_logs.csv', await _exportDailyLogs(isar, startDate));
       await addCsv(
@@ -36,21 +53,32 @@ class CsvExportService {
       await addCsv('body_stats.csv', await _exportBodyStats(isar, startDate));
       await addCsv('meals.csv', await _exportMeals(isar, startDate));
 
-      if (archive.isEmpty) return null;
+      if (archive.isEmpty) return CsvExportResult(isSuccess: false, errorMessage: 'No records found for the selected time range.');
 
       final zipData = ZipEncoder().encode(archive);
 
       final tempDir = await getTemporaryDirectory();
+
+      // Cleanup old export files
+      try {
+        final files = tempDir.listSync();
+        for (final file in files) {
+          if (file is File && file.path.contains('trufit_export_') && file.path.endsWith('.zip')) {
+            file.deleteSync();
+          }
+        }
+      } catch (_) {}
+
       final fileName =
           'trufit_export_${DateTime.now().millisecondsSinceEpoch}.zip';
       final zipFile = File('${tempDir.path}/$fileName');
       await zipFile.writeAsBytes(zipData);
 
-      return zipFile.path;
+      return CsvExportResult(isSuccess: true, filePath: zipFile.path);
     } catch (e) {
       // ignore: avoid_print
       print('Export error: $e');
-      return null;
+      return CsvExportResult(isSuccess: false, errorMessage: 'Export failed: $e');
     }
   }
 
@@ -71,7 +99,7 @@ class CsvExportService {
     // Headers
     rows.add([
       'Date',
-      'Weight',
+      'Weight (kg)',
       'Steps',
       'Steps Source',
       'Sleep Hours',
@@ -82,7 +110,7 @@ class CsvExportService {
       'Water (ml)',
       'Screen Time (mins)',
       'Updated At',
-    ]);
+    ].map(_sanitizeForCsv).toList());
 
     for (final log in logs) {
       try {
@@ -101,7 +129,7 @@ class CsvExportService {
           log.waterMl ?? '',
           log.screenTimeMinutes ?? '',
           log.updatedAt?.toIso8601String() ?? '',
-        ]);
+        ].map(_sanitizeForCsv).toList());
       } catch (_) {}
     }
 
@@ -113,7 +141,7 @@ class CsvExportService {
     final logs = isar.exerciseLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
 
-    rows.add(['Date', 'Exercise', 'Set', 'Reps', 'Weight']);
+    rows.add(['Date', 'Exercise', 'Set', 'Reps', 'Weight (kg)'].map(_sanitizeForCsv).toList());
 
     for (final log in logs) {
       try {
@@ -126,7 +154,7 @@ class CsvExportService {
             set.setNumber,
             set.reps,
             set.weight,
-          ]);
+          ].map(_sanitizeForCsv).toList());
         }
       } catch (_) {}
     }
@@ -148,7 +176,7 @@ class CsvExportService {
     }
 
     final rows = <List<dynamic>>[];
-    rows.add(['Date', 'Habit ID', 'Habit Name', 'Value', 'Override']);
+    rows.add(['Date', 'Habit ID', 'Habit Name', 'Value', 'Override'].map(_sanitizeForCsv).toList());
 
     for (final completion in completions) {
       try {
@@ -160,7 +188,7 @@ class CsvExportService {
           final val = entry.value;
           final override = completion.overrides[habitId] ?? '';
 
-          rows.add([completion.date, habitId, habitName, val, override]);
+          rows.add([completion.date, habitId, habitName, val, override].map(_sanitizeForCsv).toList());
         }
       } catch (_) {}
     }
@@ -184,7 +212,7 @@ class CsvExportService {
       'Left Thigh',
       'Right Thigh',
       'Neck',
-    ]);
+    ].map(_sanitizeForCsv).toList());
 
     for (final stats in statsList) {
       try {
@@ -201,7 +229,7 @@ class CsvExportService {
           stats.leftThigh ?? '',
           stats.rightThigh ?? '',
           stats.neck ?? '',
-        ]);
+        ].map(_sanitizeForCsv).toList());
       } catch (_) {}
     }
 
@@ -220,7 +248,7 @@ class CsvExportService {
       'Total Protein (g)',
       'Total Carbs (g)',
       'Total Fat (g)',
-    ]);
+    ].map(_sanitizeForCsv).toList());
 
     for (final log in logs) {
       try {
@@ -238,7 +266,7 @@ class CsvExportService {
               slot.totalProtein,
               slot.totalCarbs,
               slot.totalFat,
-            ]);
+            ].map(_sanitizeForCsv).toList());
           }
         }
       } catch (_) {}
