@@ -408,10 +408,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             child: const Text('Keep going'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
-              _persistWorkoutFinished(ref, dayId, isFullFinish: false);
-              context.go('/home');
+              await _persistWorkoutFinished(ref, dayId, status: 'partial');
+              if (context.mounted) {
+                _executeFinish(context, ref, dayId, completed, total, isPartial: true);
+              }
             },
             child: const Text('Finish early'),
           ),
@@ -438,10 +440,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             child: const Text('Keep going'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
-              _persistWorkoutFinished(ref, dayId);
-              context.go('/home');
+              await _persistWorkoutFinished(ref, dayId, status: 'skipped');
+              if (context.mounted) {
+                context.go('/home');
+              }
             },
             child: const Text('Skip Workout'),
           ),
@@ -450,21 +454,25 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
 
-  void _persistWorkoutFinished(WidgetRef ref, String dayId, {bool isFullFinish = false}) {
+  Future<void> _persistWorkoutFinished(WidgetRef ref, String dayId, {String status = 'completed'}) async {
     final dateStr = ref.read(dateStringProvider);
-    ref.read(workoutRepoProvider).finishWorkout(dateStr, dayId);
-    if (isFullFinish) {
-      ref.read(dailyLogProvider.notifier).markWorkoutCompleted(dayId);
+    await ref.read(workoutRepoProvider).finishWorkout(dateStr, dayId, status: status);
+    if (status == 'completed') {
+      await ref.read(dailyLogProvider.notifier).markWorkoutCompleted(dayId);
     }
   }
 
   void _executeFinish(
-      BuildContext context, WidgetRef ref, String dayId, int completed, int total) {
-    _persistWorkoutFinished(ref, dayId, isFullFinish: true);
+      BuildContext context, WidgetRef ref, String dayId, int completed, int total, {bool isPartial = false}) async {
+    if (!isPartial) {
+      await _persistWorkoutFinished(ref, dayId, status: 'completed');
+    }
     Haptics.toggle();
 
     final name = ref.read(profileProvider).name.trim();
-    final title = name.isEmpty ? 'Workout complete!' : 'Nice work, $name!';
+    final title = isPartial 
+        ? '$completed of $total exercises done!' 
+        : (name.isEmpty ? 'Workout complete!' : 'Nice work, $name!');
 
     showDialog(
       context: context,
@@ -495,20 +503,24 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   const SizedBox(height: 16),
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: context.colors.textDark,
+                    style: AppTheme.numeric(
+                      TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: context.colors.textDark,
+                      ),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '$completed / $total exercises completed.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.primary,
+                    style: AppTheme.numeric(
+                      TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.primary,
+                      ),
                     ),
                     textAlign: TextAlign.center,
                   ),

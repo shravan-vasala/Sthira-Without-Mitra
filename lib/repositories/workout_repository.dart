@@ -136,7 +136,7 @@ class WorkoutRepository {
     await savePlan(key, plan);
   }
 
-  Future<void> finishWorkout(String date, String dayId) async {
+  Future<void> finishWorkout(String date, String dayId, {String status = 'completed'}) async {
     final key = '${date}_$dayId';
     final existingSession = _isar.workoutSessions
         .where()
@@ -147,6 +147,7 @@ class WorkoutRepository {
       data = jsonDecode(existingSession.jsonStr) as Map<String, dynamic>;
     }
     data['finished'] = true;
+    data['status'] = status;
     data['finishedAt'] = DateTime.now().toIso8601String();
     data['dayId'] = dayId;
     data['date'] = date;
