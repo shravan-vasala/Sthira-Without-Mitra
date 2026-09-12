@@ -770,6 +770,201 @@ Do NOT use JSON.
   }
 
   void _ensureApiKey() {
+        if (fallbackMap != null) {
+          baseNut = FoodNutrition(
+            kcal: (fallbackMap['kcal'] as num?)?.toDouble() ?? 0.0,
+            proteinG: (fallbackMap['protein_g'] as num?)?.toDouble() ?? 0.0,
+            carbsG: (fallbackMap['carbs_g'] as num?)?.toDouble() ?? 0.0,
+            fatG: (fallbackMap['fat_g'] as num?)?.toDouble() ?? 0.0,
+          );
+          isPer100g = true;
+          servingGrams = null;
+          provenance = 'fallback';
+        } else {
+          baseNut = FoodNutrition(); // All zeroes
+          isPer100g = true;
+        }
+      }
+
+      final computed = FoodNutrition.compute(
+        consumedGrams: grams, // AI currently only outputs grams or assumes grams
+        baseNutrition: baseNut,
+        isPer100g: isPer100g,
+        servingGrams: servingGrams,
+      );
+
+      item['calories'] = computed.kcal.round();
+      item['protein_g'] = double.parse(computed.proteinG.toStringAsFixed(1));
+      item['carbs_g'] = double.parse(computed.carbsG.toStringAsFixed(1));
+      item['fat_g'] = double.parse(computed.fatG.toStringAsFixed(1));
+      item['baseNutrition'] = baseNut.toJson();
+      item['computedNutrition'] = computed.toJson();
+      item['is_per_100g'] = isPer100g;
+      item['serving_grams'] = servingGrams;
+      item['provenance'] = provenance;
+
+      if (computed.kcal == 0 && baseNut.kcal == 0) {
+        item['resolved'] = false;
+      } else {
+        item['resolved'] = true;
+        totalCal += computed.kcal;
+        totalP += computed.proteinG;
+        totalC += computed.carbsG;
+        totalF += computed.fatG;
+      }
+    }
+
+    final unresolvedCount = items.where((i) => i is Map && i['resolved'] == false).length;
+
+    aiResponse['total'] = {
+      'calories': totalCal.round(),
+      'protein_g': double.parse(totalP.toStringAsFixed(1)),
+      'carbs_g': double.parse(totalC.toStringAsFixed(1)),
+      'fat_g': double.parse(totalF.toStringAsFixed(1)),
+      if (unresolvedCount > 0) 'unresolved_count': unresolvedCount,
+    };
+
+    if (hadUnknown || unresolvedCount > 0) {
+      final currentConfidence =
+          aiResponse['confidence']?.toString().toLowerCase() ?? 'low';
+      if (currentConfidence == 'high') {
+        aiResponse['confidence'] = 'medium';
+      } else if (currentConfidence == 'medium') {
+        aiResponse['confidence'] = 'low';
+      }
+      aiResponse['lookup'] = 'partial';
+    }
+
+    return aiResponse;
+  }
+
+  /// Suggest a meal that fits within the remaining daily macros.
+  @override
+  Stream<String> suggestMealStream({
+    required int remainingCalories,
+    required double remainingProtein,
+    required double remainingCarbs,
+    required double remainingFat,
+    String? mealName,
+    int? mealsLeft,
+    List<String>? previousMeals,
+    String? targetDate,
+  }) async* {
+    _ensureApiKey();
+
+    final bucketedCalories = (remainingCalories ~/ 100) * 100;
+    final bucketedProtein = (remainingProtein ~/ 10) * 10;
+    final bucketedCarbs = (remainingCarbs ~/ 10) * 10;
+    final bucketedFat = (remainingFat ~/ 5) * 5;
+    final historyHash = previousMeals != null ? sha256.convert(utf8.encode(previousMeals.join())).toString().substring(0, 8) : 'none';
+    final ml = mealsLeft ?? 1;
+
+    final dateStr = targetDate ?? todayKey();
+    final mName = mealName?.replaceAll(' ', '_') ?? 'final';
+    final cacheKey =
+        'meal_suggestion_${dateStr}_${mName}_${bucketedCalories}_${bucketedProtein}_${bucketedCarbs}_${bucketedFat}_${ml}_$historyHash';
+
+    final prefs = await SharedPreferences.getInstance();
+
+    // Prune old keys
+    final keys = prefs
+        .getKeys()
+        .where((k) => k.startsWith('meal_suggestion_'))
+        .toList();
+    final twoDaysAgo = DateTime.now()
+        .subtract(const Duration(days: 2))
+        .toIso8601String()
+        .substring(0, 10);
+    for (final key in keys) {
+      if (key.length >= 26) {
+        final keyDate = key.substring(16, 26); // extracts YYYY-MM-DD
+        if (keyDate.compareTo(twoDaysAgo) < 0) {
+          prefs.remove(key);
+        }
+      }
+    }
+
+    final cached = prefs.getString(cacheKey);
+    if (cached != null && cached.isNotEmpty) {
+      yield cached;
+      return;
+    }
+
+    String mealContext = '';
+    if (mealName != null && mealsLeft != null && mealsLeft > 1) {
+      mealContext =
+          'The user is asking for a "$mealName" suggestion. There are $mealsLeft meals left to eat today (including this one), so DO NOT use up all the remaining macros for this single meal. Instead, roughly divide the remaining macros by $mealsLeft to get a sensible target for this specific meal. Be realistic and do not suggest massive meals (e.g. keep single meal suggestions under 800-1000 calories).';
+    } else {
+      mealContext =
+          'This is the final meal/snack of the day, so try to use up as much of the remaining macros as possible without going over calories. If the remaining calories are very high, suggest a realistic meal and do not force an unrealistic 1200+ calorie dish.';
+    }
+
+    String historyContext = '';
+    if (previousMeals != null && previousMeals.isNotEmpty) {
+      final recentMeals = previousMeals.take(2).join(", ");
+      historyContext =
+          'The user has already eaten the following today: $recentMeals. Please balance the diet based on what they already ate, and avoid suggesting the exact same things.';
+    } else {
+      historyContext =
+          'This is the first meal of the day. Focus purely on hitting a healthy balance for this meal.';
+    }
+
+    final prompt =
+        '''
+You are an expert dietitian. The user needs a meal suggestion to hit their remaining macros for the day.
+Make the suggestion simple and mostly home-cooked meals.
+
+Remaining Macros for the ENTIRE rest of the day:
+- Calories: $remainingCalories kcal
+- Protein: ${remainingProtein.toStringAsFixed(1)} g
+- Carbs: ${remainingCarbs.toStringAsFixed(1)} g
+- Fat: ${remainingFat.toStringAsFixed(1)} g
+
+$mealContext
+
+$historyContext
+
+$_cuisineHint
+
+Suggest ONE specific simple, home-cooked meal, prioritizing protein. If the target calories for this meal are very low (e.g. < 150), suggest a small healthy snack.
+Keep it brief and friendly. Provide the meal name, portion, and approximate macros.
+Do NOT use markdown formatting (no asterisks).
+Do NOT use JSON.
+''';
+
+    try {
+      final stream = aiClient.generateTextStream(
+        prompt: prompt,
+        systemInstruction:
+            'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
+        apiKey: apiKey ?? '',
+      );
+
+      final buffer = StringBuffer();
+      await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
+        buffer.write(chunk);
+        yield chunk;
+      }
+
+      if (buffer.isNotEmpty) {
+        // ignore: unawaited_futures
+        prefs.setString(cacheKey, buffer.toString());
+      }
+    } on TimeoutException {
+      yield "Our AI is taking too long to respond. Here's a generic quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! Please verify the macros manually to ensure it fits your budget.";
+    } catch (e) {
+      if (e is AiException &&
+          (e.message.contains('traffic') ||
+              e.message.contains('rate limited') ||
+              e.message.contains('later'))) {
+        yield "Our AI is currently taking a breather. Here's a generic quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! Please verify the macros manually to ensure it fits your budget.";
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  void _ensureApiKey() {
     if (apiKey == null || apiKey!.isEmpty) {
       throw Exception(
         'Gemini API key is not configured. Please add it in Profile -> AI Settings.',
@@ -785,7 +980,8 @@ Do NOT use JSON.
 
     try {
       // Bounded capability check
-      await client.models.get(name: 'models/gemini-1.5-flash')
+      final modelName = AiClient.textModelsToTry.first;
+      await client.models.get(name: 'models/$modelName')
           .timeout(const Duration(seconds: 10));
       return;
     } catch (e) {

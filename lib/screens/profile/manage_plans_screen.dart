@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
@@ -329,25 +330,31 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancel'),
             ),
-            ElevatedButton(
-              onPressed: () {
-                final profile = ref.read(profileProvider);
-                final updatedSlots = List<Map<String, dynamic>>.from(
-                  profile.customMealSlots,
-                );
-                updatedSlots[index] = {
-                  ...slot,
-                  'name': nameCtrl.text.trim(),
-                  'emoji': selectedEmoji,
-                };
-                ref
-                    .read(profileProvider.notifier)
-                    .updateProfile(
-                      profile.copyWith(customMealSlots: updatedSlots),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: nameCtrl,
+              builder: (context, value, child) {
+                final isValid = value.text.trim().isNotEmpty;
+                return ElevatedButton(
+                  onPressed: isValid ? () {
+                    final profile = ref.read(profileProvider);
+                    final updatedSlots = List<Map<String, dynamic>>.from(
+                      profile.customMealSlots,
                     );
-                Navigator.pop(ctx);
+                    updatedSlots[index] = {
+                      ...slot,
+                      'name': nameCtrl.text.trim(),
+                      'emoji': selectedEmoji,
+                    };
+                    ref
+                        .read(profileProvider.notifier)
+                        .updateProfile(
+                          profile.copyWith(customMealSlots: updatedSlots),
+                        );
+                    Navigator.pop(ctx);
+                  } : null,
+                  child: const Text('Save'),
+                );
               },
-              child: const Text('Save'),
             ),
           ],
         ),
@@ -508,11 +515,34 @@ class _PlanEditorState extends State<_PlanEditor> {
                         child: Text(k, style: const TextStyle(fontSize: 14)),
                       );
                     }).toList(),
-                    onChanged: (v) {
-                      setState(() {
-                        _selectedKey = v;
-                        _loadJson();
-                      });
+                    onChanged: (v) async {
+                      if (v != null && v != _selectedKey) {
+                        final rawJson = widget.getRawJson(_selectedKey!) ?? '';
+                        if (_controller.text != rawJson) {
+                          final discard = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Unsaved Changes'),
+                              content: const Text('You have unsaved changes. Are you sure you want to discard them?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: Text('Discard', style: TextStyle(color: context.colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (discard != true) return;
+                        }
+                        setState(() {
+                          _selectedKey = v;
+                          _loadJson();
+                        });
+                      }
                     },
                   ),
                 ),
@@ -567,7 +597,64 @@ class _PlanEditorState extends State<_PlanEditor> {
   Future<void> _save() async {
     if (_selectedKey == null) return;
     try {
-      await widget.saveJson(_selectedKey!, _controller.text);
+      if (widget.type == 'workout') {
+        final decoded = jsonDecode(_controller.text);
+        final newPlanName = decoded['planName']?.toString();
+        
+        if (newPlanName != null && newPlanName != _selectedKey) {
+          final confirmRename = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Rename Plan?'),
+              content: Text('You changed the plan name from "$_selectedKey" to "$newPlanName". Do you want to save it as a new plan or rename it?\n\n(Renaming will delete "$_selectedKey")'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, null),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Save as New'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Rename'),
+                ),
+              ],
+            ),
+          );
+          
+          if (confirmRename == null) return;
+          
+          if (confirmRename == true) {
+            // Rename logic
+            final repo = ProviderScope.containerOf(context).read(workoutRepoProvider);
+            await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
+            
+            // Update active plan if it was the selected one
+            final profileNotifier = ProviderScope.containerOf(context).read(profileProvider.notifier);
+            final profile = ProviderScope.containerOf(context).read(profileProvider);
+            if (profile.activeWorkoutPlan == _selectedKey) {
+              profileNotifier.updateProfile(profile.copyWith(activeWorkoutPlan: newPlanName));
+            }
+            
+            setState(() {
+              _selectedKey = newPlanName;
+            });
+          } else {
+            // Save as new
+            await widget.saveJson(newPlanName, _controller.text);
+            setState(() {
+              _selectedKey = newPlanName;
+            });
+          }
+        } else {
+          await widget.saveJson(_selectedKey!, _controller.text);
+        }
+      } else {
+        await widget.saveJson(_selectedKey!, _controller.text);
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

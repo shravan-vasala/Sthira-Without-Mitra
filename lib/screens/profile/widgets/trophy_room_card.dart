@@ -44,7 +44,7 @@ class TrophyRoomCard extends ConsumerWidget {
             padding: const EdgeInsets.only(left: 4, bottom: 12),
             child: TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: unlocked),
-              duration: disableAnimations ? Duration.zero : const Duration(milliseconds: 1500),
+              duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1500),
               curve: Curves.easeOutExpo,
               builder: (context, val, child) {
                 return Text(

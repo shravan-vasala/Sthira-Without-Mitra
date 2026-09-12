@@ -9,6 +9,7 @@ abstract class ICloudSyncService {
   void deleteFromCloud(String collection, String docId);
 
   void syncProfile(Map<String, dynamic> data);
+  Future<void> pushProfileNow(Map<String, dynamic> data);
 
   Future<Map<String, Map<String, dynamic>>> pullCollection(String collection);
 

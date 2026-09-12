@@ -201,21 +201,45 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
     });
     try {
       final hcService = ref.read(healthConnectServiceProvider);
-      final granted = await hcService.requestPermission();
-      setState(() {
-        _status = granted ? 'Connected! Data will sync automatically.' : 'Permission denied.';
-      });
-      if (granted && mounted) {
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) Navigator.pop(context, true);
-        });
+      
+      final available = await hcService.isAvailable();
+      if (!available) {
+        if (mounted) {
+          setState(() {
+            _status = 'Health Connect is not installed on this device.';
+          });
+        }
+        return;
+      }
+
+      await hcService.requestPermission();
+      
+      // Re-read effective status (Android process death workaround)
+      final authorized = await hcService.isAuthorized();
+      final hasData = await hcService.canReadSteps();
+
+      if (mounted) {
+        if (authorized || hasData) {
+          setState(() {
+            _status = 'Connected! Data will sync automatically.';
+          });
+          Future.delayed(const Duration(milliseconds: 600), () {
+            if (mounted) Navigator.pop(context, true);
+          });
+        } else {
+          setState(() {
+            _status = 'Permission denied or no data available.';
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        _status = 'Health Connect not available.';
-      });
+      if (mounted) {
+        setState(() {
+          _status = 'Failed to connect. Please try again.';
+        });
+      }
     } finally {
-      setState(() => _connecting = false);
+      if (mounted) setState(() => _connecting = false);
     }
   }
 
@@ -250,6 +274,18 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
                 fontWeight: FontWeight.w500,
               ),
             ),
+            if (!_status.contains('Connected')) ...[
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  if (mounted) Navigator.pop(context, false);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.textMedium,
+                ),
+                child: const Text('Enter Data Manually Instead'),
+              ),
+            ],
           ],
         ],
       ),
@@ -265,42 +301,20 @@ class CloudSyncSheet extends ConsumerStatefulWidget {
 }
 
 class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
-  bool _connecting = false;
-  String _status = '';
-
-  Future<void> _connect() async {
-    setState(() {
-      _connecting = true;
-      _status = '';
-    });
-    try {
-      final authService = ref.read(authServiceProvider);
-      final user = await authService.signInWithGoogle();
-      if (user != null) {
-        setState(() {
-          _status = 'Connected! Your data will be backed up.';
-        });
-        if (mounted) {
-          Future.delayed(const Duration(seconds: 1), () {
-            if (mounted) Navigator.pop(context, true);
-          });
-        }
-      } else {
-        setState(() {
-          _status = 'Sign in cancelled.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _status = 'Could not sign in.';
-      });
-    } finally {
-      if (mounted) setState(() => _connecting = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final syncState = ref.watch(cloudSyncControllerProvider);
+    final isSyncing = syncState == CloudSyncState.syncing;
+    final isSuccess = syncState == CloudSyncState.success;
+    final errorMessage = ref.read(cloudSyncControllerProvider.notifier).errorMessage;
+
+    ref.listen(cloudSyncControllerProvider, (prev, next) {
+      if (next == CloudSyncState.success) {
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) Navigator.pop(context, true);
+        });
+      }
+    });
     return AppSheet(
       title: 'Cloud Backup',
       subtitle: 'Securely sync your progress across devices and never lose a day.',
@@ -315,18 +329,29 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
           ),
           const SizedBox(height: 32),
           PrimaryButton(
-            onPressed: _connecting ? null : _connect,
-            label: _connecting ? 'Connecting...' : 'Enable Cloud Sync',
-            isLoading: _connecting,
-            icon: Icons.cloud_upload_rounded,
+            onPressed: isSyncing || isSuccess ? null : () => ref.read(cloudSyncControllerProvider.notifier).signInAndSync(),
+            label: isSyncing ? 'Syncing...' : isSuccess ? 'Synced!' : 'Enable Cloud Sync',
+            isLoading: isSyncing,
+            icon: isSuccess ? Icons.check_circle : Icons.cloud_upload_rounded,
           ),
-          if (_status.isNotEmpty) ...[
+          if (errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(
-              _status,
+              errorMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: _status.contains('Connected') ? context.colors.primary : context.colors.red,
+                color: context.colors.red,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+          if (isSuccess) ...[
+            const SizedBox(height: 16),
+            Text(
+              'Connected! Your data is securely backed up.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.colors.primary,
                 fontWeight: FontWeight.w500,
               ),
             ),

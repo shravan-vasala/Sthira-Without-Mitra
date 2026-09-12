@@ -245,10 +245,12 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                               ),
                             ],
                           ),
-                        )
-                        .animate(key: ValueKey('${_currentBadge!.id}_shimmer'))
-                        .shimmer(
-                          duration: 900.ms,
+                          ),
+                        ).animate(
+                          key: ValueKey('${_currentBadge!.id}_shimmer'),
+                          onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : null,
+                        ).shimmer(
+                          duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 900.ms,
                           color: Colors.white.withValues(alpha: 0.3),
                         ),
                 ),

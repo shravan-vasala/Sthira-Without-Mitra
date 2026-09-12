@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
@@ -77,6 +78,22 @@ class WorkoutRepository {
     _sync?.syncToCloud('workout_plans', key, plan.toJson());
   }
 
+  Future<void> renamePlan(String oldKey, String newKey, String jsonStr) async {
+    final existing = getPlan(oldKey);
+    final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final newPlan = WorkoutPlan.fromJson(map);
+    
+    await _isar.writeTxn(() async {
+      if (existing != null) {
+        await _isar.workoutPlans.delete(existing.id);
+      }
+      await _isar.workoutPlans.put(newPlan);
+    });
+    
+    _sync?.deleteFromCloud('workout_plans', oldKey);
+    _sync?.syncToCloud('workout_plans', newKey, newPlan.toJson());
+  }
+
   Future<void> savePlanJson(String key, String jsonStr) async {
     // Validate JSON first
     final dynamic decoded = jsonDecode(jsonStr);
@@ -98,6 +115,10 @@ class WorkoutRepository {
       final day = days[i];
       if (day is! Map<String, dynamic>) {
         throw FormatException('Day at index $i is not an object');
+      }
+
+      if (day['dayId'] == null || day['dayId'].toString().trim().isEmpty) {
+        day['dayId'] = const Uuid().v4();
       }
 
       final exercises = day['exercises'];
@@ -128,6 +149,10 @@ class WorkoutRepository {
                 'Invalid YouTube URL format for exercise "$name". Use youtube.com/watch or youtu.be',
               );
             }
+          }
+          
+          if (ex['instanceId'] == null || ex['instanceId'].toString().trim().isEmpty) {
+            ex['instanceId'] = const Uuid().v4();
           }
         }
       }

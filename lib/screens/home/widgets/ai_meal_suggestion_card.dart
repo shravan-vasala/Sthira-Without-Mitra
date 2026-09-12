@@ -212,8 +212,8 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                       color: context.colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                  ).animate(onPlay: (c) => c.repeat()).shimmer(
-                    duration: 1200.ms,
+                  ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
+                    duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1200.ms,
                     color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 8),
@@ -224,8 +224,8 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                       color: context.colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                  ).animate(onPlay: (c) => c.repeat()).shimmer(
-                    duration: 1200.ms,
+                  ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
+                    duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1200.ms,
                     color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 8),
@@ -236,8 +236,8 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                       color: context.colors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                  ).animate(onPlay: (c) => c.repeat()).shimmer(
-                    duration: 1200.ms,
+                  ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
+                    duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1200.ms,
                     color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                 ],

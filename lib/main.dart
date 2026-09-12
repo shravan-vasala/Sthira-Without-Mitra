@@ -209,6 +209,7 @@ Future<void> main() async {
           friendRepoProvider.overrideWithValue(friendRepo),
           healthConnectServiceProvider.overrideWithValue(healthConnectService),
           authServiceProvider.overrideWithValue(authService),
+          firestoreSyncServiceProvider.overrideWithValue(firestoreSyncService),
           initialGeminiKeyProvider.overrideWithValue(initialGeminiKey ?? ''),
           sharedPreferencesProvider.overrideWithValue(prefs),
         ],
@@ -271,6 +272,7 @@ class _TruFitAppState extends ConsumerState<TruFitApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(remindersProvider.notifier).initializeNotifications();
       ref.read(socialPushControllerProvider);
+      ref.read(widgetCoordinatorProvider);
     });
   }
 

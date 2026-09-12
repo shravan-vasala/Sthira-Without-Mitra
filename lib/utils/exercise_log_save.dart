@@ -4,6 +4,7 @@ import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';
 import '../providers/app_providers.dart';
 import '../services/widget_update_service.dart';
+import 'target_parser.dart';
 
 Future<PrUpdateResult> saveExerciseAsPlanned({
   required WidgetRef ref,
@@ -15,12 +16,10 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   final profile = ref.read(profileProvider);
 
   // Parse planned reps
-  int reps = 0;
-  final numMatch = RegExp(r'\d+').firstMatch(exercise.repsDisplay ?? '');
-  if (numMatch != null) reps = int.parse(numMatch.group(0)!);
+  int reps = TargetParser.parseRepTarget(exercise.repsDisplay ?? '');
 
   // Build sets (copying weight from last log if needed)
-  final lastLog = repo.getLastLog(exercise.name ?? '');
+  final lastLog = repo.getLastLog(exercise.name ?? '', beforeDate: dateStr);
   final List<SetLog> sets = [];
   for (int i = 0; i < exercise.setCount; i++) {
     double weight = exercise.weightKg ?? 0.0;
@@ -41,7 +40,6 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
 
   await repo.saveLog(newLog);
   ref.read(exerciseLogsUpdateProvider.notifier).state++;
-  WidgetUpdateService.pushWidgetState(ref);
 
   return await checkAndSavePr(ref: ref, exerciseName: exercise.name ?? '', sets: sets);
 }

@@ -40,9 +40,10 @@ class ScreenTimeService {
   }
 
   /// Fetches screen time (totalTimeInForeground) in minutes for the current day
-  /// Returns 0 if permission is not granted or platform is not Android
-  Future<int> getScreenTimeForToday() async {
-    if (!Platform.isAndroid) return 0;
+  /// Fetches screen time (totalTimeInForeground) in minutes for the current day
+  /// Returns null if permission is not granted, platform is not Android, or an error occurs.
+  Future<int?> getScreenTimeForToday() async {
+    if (!Platform.isAndroid) return null;
     try {
       final int minutes = await _channel.invokeMethod('getScreenTime');
       return minutes;
@@ -52,10 +53,10 @@ class ScreenTimeService {
       } else {
         debugPrint('Failed to get screen time: ${e.message}');
       }
-      return 0;
+      return null;
     } catch (e) {
       debugPrint('Error getting screen time: $e');
-      return 0;
+      return null;
     }
   }
 }

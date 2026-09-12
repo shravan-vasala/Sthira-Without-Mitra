@@ -210,8 +210,8 @@ class CoachNotesCard extends ConsumerWidget {
                   color: context.colors.textMedium,
                   fontStyle: FontStyle.italic,
                 ),
-              ).animate(onPlay: (c) => c.repeat()).shimmer(
-                duration: 1500.ms,
+              ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
+                duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1500.ms,
                 color: context.colors.primary,
               ),
             ),

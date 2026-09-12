@@ -12,13 +12,7 @@ import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../services/widget_update_service.dart';
 
-String parseRepTarget(String rep) {
-  if (rep.contains('-')) {
-    final parts = rep.split('-');
-    if (parts.length == 2) return parts[0].trim();
-  }
-  return rep;
-}
+import '../../utils/target_parser.dart';
 
 class LogDataDialog extends ConsumerStatefulWidget {
   const LogDataDialog({super.key, required this.exercise});
@@ -41,7 +35,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     _repsControllers = List.generate(setCount, (i) {
       return TextEditingController(
         // ignore: dead_code, dead_null_aware_expression
-        text: parseRepTarget(widget.exercise.repsDisplay ?? ''),
+        text: TargetParser.parseRepTarget(widget.exercise.repsDisplay ?? '').toString(),
       );
     });
     final profile = ref.read(profileProvider);
@@ -76,7 +70,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
             : '';
       }
     } else {
-      _lastLog = repo.getLastLog(widget.exercise.name ?? '');
+      _lastLog = repo.getLastLog(widget.exercise.name ?? '', beforeDate: dateStr);
       if (_lastLog != null) {
         for (
           int i = 0;
@@ -273,15 +267,20 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
 
     final repo = ref.read(exerciseLogRepoProvider);
     final dateStr = ref.read(dateStringProvider);
-    final newLog = ExerciseLog(
-      date: dateStr,
-      instanceId: widget.exercise.instanceId ?? widget.exercise.name ?? '',
-      exerciseName: widget.exercise.name ?? '',
-      sets: sets,
-    );
-    await repo.saveLog(newLog);
+
+    if (sets.isEmpty) {
+      await repo.deleteLog(dateStr, widget.exercise.instanceId ?? widget.exercise.name ?? '');
+    } else {
+      final newLog = ExerciseLog(
+        date: dateStr,
+        instanceId: widget.exercise.instanceId ?? widget.exercise.name ?? '',
+        exerciseName: widget.exercise.name ?? '',
+        sets: sets,
+      );
+      await repo.saveLog(newLog);
+    }
+    
     ref.read(exerciseLogsUpdateProvider.notifier).state++;
-    WidgetUpdateService.pushWidgetState(ref);
 
     final prResult = await checkAndSavePr(
       ref: ref,

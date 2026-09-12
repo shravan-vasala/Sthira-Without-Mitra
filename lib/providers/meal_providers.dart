@@ -34,7 +34,6 @@ class DailyMealLogNotifier extends Notifier<DailyMealLog> {
     if (state.date == date) {
       state = repo.getDailyLog(date);
     }
-    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> clearMealSlot(String slotName, {String? targetDate}) async {
@@ -44,7 +43,6 @@ class DailyMealLogNotifier extends Notifier<DailyMealLog> {
     if (state.date == date) {
       state = repo.getDailyLog(date);
     }
-    WidgetUpdateService.pushWidgetState(ref);
   }
 }
 

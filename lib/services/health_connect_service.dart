@@ -191,6 +191,11 @@ class HealthConnectService {
 
     final historyGranted = await requestHistoryAccess();
     if (!historyGranted) {
+      await _isar.writeTxn(() async {
+        await _isar.appConfigs.put(
+          AppConfig(key: _backfillDoneKey, value: 'true'),
+        );
+      });
       return [];
     }
 

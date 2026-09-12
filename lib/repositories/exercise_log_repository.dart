@@ -47,8 +47,19 @@ class ExerciseLogRepository {
     _sync?.syncToCloud('exercise_logs', log.key, log.toJson());
   }
 
+  Future<void> deleteLog(String date, String instanceId) async {
+    final existing = getLog(date, instanceId);
+    if (existing != null) {
+      await _isar.writeTxn(() async {
+        await _isar.exerciseLogs.delete(existing.id);
+      });
+      _sync?.deleteFromCloud('exercise_logs', existing.key);
+    }
+  }
+
   bool hasLog(String date, String instanceId) {
-    return getLog(date, instanceId) != null;
+    final log = getLog(date, instanceId);
+    return log != null && log.sets.isNotEmpty;
   }
 
   List<ExerciseLog> getLogsForExercise(String exerciseName) {
@@ -64,8 +75,11 @@ class ExerciseLogRepository {
     return _isar.exerciseLogs.filter().dateEqualTo(date).findAllSync();
   }
 
-  ExerciseLog? getLastLog(String exerciseName) {
-    final logs = getLogsForExercise(exerciseName);
+  ExerciseLog? getLastLog(String exerciseName, {String? beforeDate}) {
+    var logs = getLogsForExercise(exerciseName);
+    if (beforeDate != null) {
+      logs = logs.where((l) => l.date.compareTo(beforeDate) <= 0).toList();
+    }
     if (logs.isEmpty) return null;
     logs.sort((a, b) => b.date.compareTo(a.date));
     return logs.first;

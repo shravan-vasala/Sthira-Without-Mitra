@@ -30,7 +30,6 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
       sync(isManualRefresh: false);
     } else if (state == AppLifecycleState.paused) {
       // Flush any pending Widget state when going to background
-      WidgetUpdateService.pushWidgetState(ref);
 
       // Also flush firestore queue if available (Task 4)
       ref.read(firestoreSyncServiceProvider).flushNow();
@@ -61,7 +60,7 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
         final screenTimeMins = await ref
             .read(screenTimeServiceProvider)
             .getScreenTimeForToday();
-        if (screenTimeMins > 0) {
+        if (screenTimeMins != null) {
           await dailyLogRepo.updateScreenTime(todayStr, screenTimeMins);
         }
       }
@@ -113,7 +112,6 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
       ref.invalidate(habitCompletionsProvider);
 
       // Update widget with new sync data
-      WidgetUpdateService.pushWidgetState(ref);
     } finally {
       _isSyncing = false;
       state = false;

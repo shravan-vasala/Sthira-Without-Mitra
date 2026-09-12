@@ -91,9 +91,9 @@ class _PrimaryButtonState extends State<PrimaryButton> {
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(
         scale: _isPressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 150),
+        duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
-        child: widget.isLoading
+        child: widget.isLoading && !MediaQuery.disableAnimationsOf(context)
             ? btn.animate(onPlay: (c) => c.repeat()).shimmer(duration: 1500.ms, color: Colors.white.withValues(alpha: 0.2))
             : btn,
       ),

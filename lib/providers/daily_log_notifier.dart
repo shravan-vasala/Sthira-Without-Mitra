@@ -35,7 +35,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.updateWeight(date, weight);
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
   }
 
@@ -48,7 +47,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.updateSteps(date, steps, source: source ?? 'manual');
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
     ref.read(stepsSourceProvider.notifier).state = (source == 'healthConnect')
         ? StepsSource.healthConnect
@@ -60,7 +58,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.clearSteps(date);
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
     ref.read(stepsSourceProvider.notifier).state = StepsSource.manual;
   }
@@ -74,7 +71,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.updateSleep(date, hours, source: source ?? 'manual');
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
 
     final habitRepo = ref.read(habitRepoProvider);
@@ -100,7 +96,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.clearSleep(date);
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
 
     final habitRepo = ref.read(habitRepoProvider);
@@ -122,7 +117,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.updateBodyFat(date, bodyFat);
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
   }
 
@@ -132,7 +126,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.saveLog(current.clearBodyFat());
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
   }
 
@@ -146,7 +139,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.saveLog(current.copyWith(waterMl: waterMl));
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
 
     final habitRepo = ref.read(habitRepoProvider);
@@ -178,7 +170,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await repo.saveLog(current.clearWater());
     if (state.date == date) {
       state = repo.getOrCreate(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
 
     final habitRepo = ref.read(habitRepoProvider);
@@ -195,7 +186,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.markWorkoutCompleted(state.date, dayId);
     state = repo.getOrCreate(state.date);
-    WidgetUpdateService.pushWidgetState(ref);
 
     final profile = ref.read(profileProvider);
     if (profile.planStartDate == null) {

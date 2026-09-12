@@ -98,7 +98,6 @@ class WorkoutSection {
 
 @embedded
 class Exercise {
-  @ignore
   String? instanceId;
 
   String? name;
@@ -181,7 +180,7 @@ class Exercise {
           ? (json['weightKg'] as num).toDouble()
           : null,
       durationSeconds: json['durationSeconds'] as int?,
-    );
+    )..instanceId = json['instanceId'] as String?;
   }
 
   Map<String, dynamic> toJson() => {
@@ -194,5 +193,6 @@ class Exercise {
     'restSecondsAfterSet': restSecondsAfterSet,
     if (weightKg != null) 'weightKg': weightKg,
     if (durationSeconds != null) 'durationSeconds': durationSeconds,
+    if (instanceId != null) 'instanceId': instanceId,
   };
 }

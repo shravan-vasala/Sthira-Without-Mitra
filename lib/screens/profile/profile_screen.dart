@@ -224,9 +224,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: 'Unit Preference',
                 subtitle:
                     'Currently: ${profile.useKg ? 'Kilograms (kg)' : 'Pounds (lb)'}',
-                onTap: () {
-                  ref.read(profileProvider.notifier).toggleUnit();
-                },
+                onTap: () => _showUnitDialog(context, ref),
               ),
               _MenuCard(
                 icon: Icons.dark_mode_rounded,
@@ -410,7 +408,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         backgroundColor: context.colors.card,
         title: Text(
           'Enable Screen Time',
-          style: TextStyle(color: context.colors.textDark),
+          style: TextStyle(
+            fontFamily: 'Cabinet Grotesk',
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            color: context.colors.textDark,
+          ),
         ),
         content: Text(
           'Sthira can read your daily screen time to help you build better habits. '
@@ -429,6 +432,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
+              _ScreenTimeObserver(ref, profile);
               ref.read(screenTimeServiceProvider).openSettings();
             },
             child: Text(
@@ -441,6 +445,67 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showUnitDialog(BuildContext context, WidgetRef ref) {
+    showAppBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final profile = ref.watch(profileProvider);
+            final colors = context.colors;
+
+            return AppSheet(
+              title: 'Select Unit Preference',
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [true, false].map((isKg) {
+                  final selected = profile.useKg == isKg;
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    selected: selected,
+                    leading: Icon(
+                      isKg ? Icons.monitor_weight_rounded : Icons.scale_rounded,
+                      color: selected ? colors.primary : colors.textMedium,
+                    ),
+                    title: Text(
+                      isKg ? 'Kilograms (kg)' : 'Pounds (lb)',
+                      style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
+                        fontWeight: FontWeight.w600,
+                        color: colors.textDark,
+                      ),
+                    ),
+                    subtitle: Text(
+                      isKg ? 'Metric system' : 'Imperial system',
+                      style: TextStyle(color: colors.textMedium, fontSize: 13),
+                    ),
+                    trailing: Icon(
+                      selected
+                          ? Icons.check_circle_rounded
+                          : Icons.circle_outlined,
+                      color: selected ? colors.primary : colors.border,
+                    ),
+                    onTap: () async {
+                      if (profile.useKg != isKg) {
+                        await ref.read(profileProvider.notifier).toggleUnit();
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
+                            const SnackBar(content: Text('Unit preference updated')),
+                          );
+                        }
+                      }
+                      if (ctx.mounted) Navigator.pop(ctx);
+                    },
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -494,6 +559,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   final selected = current == mode;
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
+                    selected: selected,
                     leading: Icon(
                       icon(mode),
                       color: selected ? colors.primary : colors.textMedium,
@@ -517,9 +583,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       color: selected ? colors.primary : colors.border,
                     ),
                     onTap: () async {
-                      await ref
-                          .read(themeModeProvider.notifier)
-                          .setThemeMode(mode);
+                      if (current != mode) {
+                        await ref
+                            .read(themeModeProvider.notifier)
+                            .setThemeMode(mode);
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
+                            const SnackBar(content: Text('Theme preference updated')),
+                          );
+                        }
+                      }
                       if (ctx.mounted) Navigator.pop(ctx);
                     },
                   );
@@ -645,121 +718,13 @@ class _CloudSyncCard extends ConsumerStatefulWidget {
 }
 
 class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
-  bool _isSyncing = false;
-  String _syncStatus = '';
-
-  Future<void> _handleSignIn() async {
-    setState(() {
-      _isSyncing = true;
-      _syncStatus = 'Signing in...';
-    });
-    try {
-      final user = await ref.read(authServiceProvider).signInWithGoogle();
-      if (user != null && mounted) {
-        // Run initial sync/migration
-        setState(() {
-          _syncStatus = 'Syncing data...';
-        });
-        await _runFullSync();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Successfully signed in & synced!'),
-              backgroundColor: context.colors.primary,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sign in failed: $e'),
-            backgroundColor: context.colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted)
-        setState(() {
-          _isSyncing = false;
-          _syncStatus = '';
-        });
-    }
-  }
-
-  Future<void> _runFullSync() async {
-    final syncService = ref.read(firestoreSyncServiceProvider);
-
-    // 1. Check if cloud has data
-    final hasCloudData = await syncService.hasCloudData();
-
-    if (hasCloudData) {
-      // Pull down to device
-      final profile = await syncService.pullProfile();
-      await ref.read(profileRepoProvider).importProfileFromCloud(profile);
-
-      final dailyLogs = await syncService.pullCollection('daily_logs');
-      await ref.read(dailyLogRepoProvider).importFromCloud(dailyLogs);
-
-      final mealLogs = await syncService.pullCollection('meal_logs');
-      await ref.read(mealRepoProvider).importLogsFromCloud(mealLogs);
-
-      final stats = await syncService.pullCollection('body_stats');
-      await ref.read(bodyStatsRepoProvider).importStatsFromCloud(stats);
-
-      final workoutPlans = await syncService.pullCollection('workout_plans');
-      await ref.read(workoutRepoProvider).importPlansFromCloud(workoutPlans);
-
-      final mealPlans = await syncService.pullCollection('meal_plans');
-      await ref.read(mealRepoProvider).importPlansFromCloud(mealPlans);
-
-      // refresh UI
-      ref.invalidate(profileProvider);
-      ref.invalidate(dailyLogProvider);
-      ref.invalidate(dailyMealLogProvider);
-      ref.invalidate(latestBodyStatsProvider);
-    } else {
-      // First time cloud user: upload local data
-      syncService.syncProfile(
-        ref.read(profileRepoProvider).exportProfileForCloud(),
-      );
-
-      await syncService.bulkSync(
-        'daily_logs',
-        ref.read(dailyLogRepoProvider).exportForCloud(),
-      );
-      await syncService.bulkSync(
-        'meal_logs',
-        ref.read(mealRepoProvider).exportLogsForCloud(),
-      );
-      await syncService.bulkSync(
-        'body_stats',
-        ref.read(bodyStatsRepoProvider).exportStatsForCloud(),
-      );
-      await syncService.bulkSync(
-        'habit_config',
-        ref.read(habitRepoProvider).exportConfigForCloud(),
-      );
-      await syncService.bulkSync(
-        'habit_completions',
-        ref.read(habitRepoProvider).exportCompletionsForCloud(),
-      );
-      await syncService.bulkSync(
-        'workout_plans',
-        ref.read(workoutRepoProvider).exportPlansForCloud(),
-      );
-      await syncService.bulkSync(
-        'meal_plans',
-        ref.read(mealRepoProvider).exportPlansForCloud(),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final isSignedIn = ref.watch(isSignedInProvider);
     final userEmail = ref.watch(userEmailProvider);
+    final syncState = ref.watch(cloudSyncControllerProvider);
+    final isSyncing = syncState == CloudSyncState.syncing;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -777,6 +742,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
               Text(
                 'Cloud Sync',
                 style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: context.colors.textDark,
@@ -812,7 +778,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
             style: TextStyle(color: context.colors.textMedium, fontSize: 13),
           ),
           const SizedBox(height: 16),
-          if (_isSyncing)
+          if (isSyncing)
             Center(
               child: Column(
                 children: [
@@ -823,7 +789,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _syncStatus,
+                    'Syncing data...',
                     style: TextStyle(
                       color: context.colors.primary,
                       fontSize: 12,
@@ -836,7 +802,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _handleSignIn,
+                onPressed: () => ref.read(cloudSyncControllerProvider.notifier).signInAndSync(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
@@ -848,7 +814,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                 icon: const Icon(Icons.login),
                 label: const Text('Sign in with Google'),
               ),
-            )
+            ),
           else
             Row(
               children: [

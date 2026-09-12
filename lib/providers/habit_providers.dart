@@ -33,7 +33,6 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
     final date = ref.read(dateStringProvider);
     await repo.toggleCheckboxCompletion(date, habitId);
     state = repo.getCompletions(date);
-    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> updateProgress(String habitId, double progress) async {
@@ -41,7 +40,6 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
     final date = ref.read(dateStringProvider);
     await repo.updateProgress(date, habitId, progress);
     state = repo.getCompletions(date);
-    WidgetUpdateService.pushWidgetState(ref);
   }
 
   Future<void> setOverride(String habitId, String? overrideValue) async {
@@ -56,7 +54,6 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
     final currentDate = ref.read(dateStringProvider);
     if (date == currentDate) {
       state = repo.getCompletions(date);
-      WidgetUpdateService.pushWidgetState(ref);
     }
   }
 }

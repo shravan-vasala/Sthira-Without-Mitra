@@ -273,6 +273,105 @@ final nutritionLookupServiceProvider = Provider<NutritionLookupService>((ref) {
   return NutritionLookupService();
 });
 
+final firestoreSyncServiceProvider = Provider<FirestoreSyncService>((ref) {
+  throw UnimplementedError('Must be overridden in main');
+});
+
+enum CloudSyncState { idle, syncing, success, error }
+
+final cloudSyncControllerProvider =
+    NotifierProvider<CloudSyncController, CloudSyncState>(
+  CloudSyncController.new,
+);
+
+class CloudSyncController extends Notifier<CloudSyncState> {
+  String? errorMessage;
+
+  @override
+  CloudSyncState build() {
+    return CloudSyncState.idle;
+  }
+
+  Future<void> signInAndSync() async {
+    state = CloudSyncState.syncing;
+    errorMessage = null;
+    try {
+      final authService = ref.read(authServiceProvider);
+      final user = await authService.signInWithGoogle();
+      if (user == null) {
+        state = CloudSyncState.idle;
+        return;
+      }
+
+      final syncService = ref.read(firestoreSyncServiceProvider);
+      final hasCloudData = await syncService.hasCloudData();
+
+      if (hasCloudData) {
+        final profile = await syncService.pullProfile();
+        if (profile != null) {
+          await ref.read(profileRepoProvider).importProfileFromCloud(profile);
+        }
+
+        final dailyLogs = await syncService.pullCollection('daily_logs');
+        await ref.read(dailyLogRepoProvider).importFromCloud(dailyLogs);
+
+        final mealLogs = await syncService.pullCollection('meal_logs');
+        await ref.read(mealRepoProvider).importLogsFromCloud(mealLogs);
+
+        final stats = await syncService.pullCollection('body_stats');
+        await ref.read(bodyStatsRepoProvider).importStatsFromCloud(stats);
+
+        final workoutPlans = await syncService.pullCollection('workout_plans');
+        await ref.read(workoutRepoProvider).importPlansFromCloud(workoutPlans);
+
+        final mealPlans = await syncService.pullCollection('meal_plans');
+        await ref.read(mealRepoProvider).importPlansFromCloud(mealPlans);
+
+        ref.invalidate(profileProvider);
+        ref.invalidate(dailyLogProvider);
+        ref.invalidate(dailyMealLogProvider);
+        ref.invalidate(latestBodyStatsProvider);
+      } else {
+        await syncService.syncProfile(
+          ref.read(profileRepoProvider).exportProfileForCloud(),
+        );
+        await syncService.bulkSync(
+          'daily_logs',
+          ref.read(dailyLogRepoProvider).exportForCloud(),
+        );
+        await syncService.bulkSync(
+          'meal_logs',
+          ref.read(mealRepoProvider).exportLogsForCloud(),
+        );
+        await syncService.bulkSync(
+          'body_stats',
+          ref.read(bodyStatsRepoProvider).exportStatsForCloud(),
+        );
+        await syncService.bulkSync(
+          'habit_config',
+          ref.read(habitRepoProvider).exportConfigForCloud(),
+        );
+        await syncService.bulkSync(
+          'habit_completions',
+          ref.read(habitRepoProvider).exportCompletionsForCloud(),
+        );
+        await syncService.bulkSync(
+          'workout_plans',
+          ref.read(workoutRepoProvider).exportPlansForCloud(),
+        );
+        await syncService.bulkSync(
+          'meal_plans',
+          ref.read(mealRepoProvider).exportPlansForCloud(),
+        );
+      }
+      state = CloudSyncState.success;
+    } catch (e) {
+      errorMessage = e.toString().replaceAll('Exception: ', '');
+      state = CloudSyncState.error;
+    }
+  }
+}
+
 final geminiFoodServiceProvider = Provider<IAiFoodService>((ref) {
   final profile = ref.watch(profileProvider);
   return GeminiFoodService(
@@ -305,3 +404,4 @@ final syncPendingCountProvider = StreamProvider<int>((ref) {
   final sync = ref.watch(firestoreSyncServiceProvider);
   return sync.pendingCountStream;
 });
+export '../services/widget_coordinator.dart';

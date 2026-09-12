@@ -769,7 +769,7 @@ class _PodiumView extends ConsumerWidget {
           }
           return TweenAnimationBuilder<int>(
             tween: IntTween(begin: 0, end: rawVal),
-            duration: const Duration(milliseconds: 1400),
+            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1400),
             curve: Curves.easeOutQuart,
             builder: (context, val, child) {
               final displayStr = metric == LeaderboardMetric.score 
