@@ -8,6 +8,8 @@ class MediaRepository {
   late Isar _isar;
   late String _baseDir;
 
+  Isar get isar => _isar;
+
   Future<void> init(Isar isar) async {
     _isar = isar;
     if (!kIsWeb) {

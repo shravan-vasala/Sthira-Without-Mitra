@@ -7,6 +7,7 @@ import 'package:isar/isar.dart';
 import '../models/social_profile.dart';
 import '../models/friend.dart';
 import 'daily_log_notifier.dart';
+import 'meal_providers.dart';
 import '../models/daily_log.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/coach_note_repository.dart';
@@ -23,6 +24,7 @@ import '../repositories/badge_repository.dart';
 import '../repositories/friend_repository.dart';
 import '../services/health_connect_service.dart';
 import '../services/backup_service.dart';
+import '../services/firestore_sync_service.dart';
 import '../services/coach_service.dart';
 import '../services/gemini_food_service.dart';
 import '../services/csv_export_service.dart';
@@ -105,7 +107,13 @@ final dailyLogRepoProvider = Provider<DailyLogRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
 final dailyLogsUpdateProvider = StreamProvider<void>((ref) {
-  return ref.watch(dailyLogRepoProvider).watchUpdates;
+  final repo = ref.watch(dailyLogRepoProvider);
+  return repo.watchUpdates;
+});
+
+final dailyMealLogsUpdateProvider = StreamProvider<void>((ref) {
+  final repo = ref.watch(mealRepoProvider);
+  return repo.watchUpdates;
 });
 final habitRepoProvider = Provider<HabitRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
@@ -279,9 +287,6 @@ final nutritionLookupServiceProvider = Provider<NutritionLookupService>((ref) {
   return NutritionLookupService();
 });
 
-final firestoreSyncServiceProvider = Provider<FirestoreSyncService>((ref) {
-  throw UnimplementedError('Must be overridden in main');
-});
 
 enum CloudSyncState { idle, syncing, success, error }
 

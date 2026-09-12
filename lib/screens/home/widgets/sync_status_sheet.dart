@@ -126,11 +126,13 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
               children: [
                 Text(
                   '$steps',
-                  style: AppTheme.numeric.copyWith(
-                    fontSize: 56,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.primary,
-                    height: 1.0,
+                  style: AppTheme.numeric(
+                    TextStyle(
+                      fontSize: 56,
+                      fontWeight: FontWeight.w800,
+                      color: context.colors.primary,
+                      height: 1.0,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),

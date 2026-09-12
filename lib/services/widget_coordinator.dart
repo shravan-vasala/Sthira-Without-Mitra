@@ -66,10 +66,10 @@ class WidgetCoordinator {
       // Real step goal derived from habit configuration
       final habits = habitRepo.getHabits();
       final stepHabit = habits.cast<Habit?>().firstWhere(
-            (h) => h?.type == HabitType.step,
+            (h) => h?.type == HabitType.autoSteps,
             orElse: () => null,
           );
-      final stepGoal = stepHabit?.targetValue.toInt() ?? 0;
+      final stepGoal = stepHabit?.target.toInt() ?? 0;
 
       // --- 2. Meals ---
       final mealPlan = mealRepo.getMealPlan(
@@ -85,7 +85,7 @@ class WidgetCoordinator {
       int totalMeals = mealPlan?.meals.length ?? 4;
       // Add extra custom slots to the total if the user added more today
       int extraSlots = mealLog.customSlots.keys.where((id) {
-        return mealPlan?.meals.every((m) => m.id != id) ?? true;
+        return mealPlan?.meals.every((m) => m.type != id) ?? true;
       }).length;
       totalMeals += extraSlots;
 
@@ -93,8 +93,8 @@ class WidgetCoordinator {
       double totalCal = 0;
       double totalProtein = 0;
       for (final slot in mealLog.customSlots.values) {
-        if (slot.calories != null) totalCal += slot.calories!;
-        if (slot.protein != null) totalProtein += slot.protein!;
+        totalCal += slot.totalCalories;
+        totalProtein += slot.totalProtein;
       }
 
       // --- 3. Habits ---
@@ -104,7 +104,7 @@ class WidgetCoordinator {
         if (h.createdAt.isAfter(now) && DateFormat('yyyy-MM-dd').format(h.createdAt) != todayStr) {
           return false;
         }
-        return h.scheduledDays.contains(dayOfWeek);
+        return h.activeDays?.contains(dayOfWeek) ?? true;
       }).toList();
 
       final completions = habitRepo.getCompletions(todayStr);

@@ -55,7 +55,7 @@ final yearlyActivityHeatmapProvider =
         final mealLog = mealRepo.getDailyLog(dateStr);
 
         final bool isUnrecorded = rawDailyLog == null &&
-                                  completions.completedIds.isEmpty &&
+                                  completions.completions.isEmpty &&
                                   mealLog.loggedSlotsCount == 0;
 
         if (isUnrecorded) {

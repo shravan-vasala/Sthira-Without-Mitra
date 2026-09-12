@@ -55,7 +55,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     final dailyLog = ref.watch(dailyLogProvider);
     final mealsLog = ref.watch(dailyMealLogProvider);
     final habitsCount = ref.watch(habitsProvider).length;
-    final habitsCompleted = ref.watch(habitCompletionsProvider).completions.values.where((c) => c.status == HabitStatus.completed).length;
+    final habitsCompleted = ref.watch(habitCompletionsProvider).completions.values.where((c) => c == true || (c is num && c > 0)).length;
 
     final steps = dailyLog.steps ?? 0;
     final mealsKcal = mealsLog.totalCalories;

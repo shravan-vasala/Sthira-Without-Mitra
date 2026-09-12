@@ -27,7 +27,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
     });
     
     // Listen to daily logs to cancel/skip completed tasks
-    ref.listen(dailyLogsStreamProvider, (prev, next) {
+    ref.listen(dailyLogsUpdateProvider, (prev, next) {
       if (state.habitsEnabled || state.mealsEnabled) _queueSync();
     });
 

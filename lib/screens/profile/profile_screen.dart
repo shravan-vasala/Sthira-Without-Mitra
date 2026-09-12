@@ -432,7 +432,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              _ScreenTimeObserver(ref, profile);
               ref.read(screenTimeServiceProvider).openSettings();
             },
             child: Text(
@@ -814,7 +813,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                 icon: const Icon(Icons.login),
                 label: const Text('Sign in with Google'),
               ),
-            ),
+            )
           else
             Row(
               children: [
@@ -1206,7 +1205,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 Navigator.pop(ctx);
                 final selectedAvatar = await showAppBottomSheet<String>(
                   context: context,
-                  builder: (_) => AvatarPickerSheet(currentAvatar: profile.photoPath),
+                  builder: (_) => AvatarPickerSheet(currentAvatar: _localPhotoPath ?? widget.profile.photoPath),
                 );
                 if (selectedAvatar == 'DELETE') {
                   setState(() {

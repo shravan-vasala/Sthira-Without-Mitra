@@ -344,7 +344,7 @@ $_jsonShape
          await isar.foodSearchCaches.put(
            FoodSearchCache(
              normalizedQuery: normalizedQuery,
-             cachedResponseJson: jsonEncode(aiParsed),
+             cachedResponseJson: jsonEncode(aiParsed), timestamp: DateTime.now(),
            ),
          );
        });
@@ -356,7 +356,7 @@ $_jsonShape
          await isar.foodSearchCaches.put(
            FoodSearchCache(
              normalizedQuery: normalizedQuery,
-             cachedResponseJson: jsonEncode(aiParsed),
+             cachedResponseJson: jsonEncode(aiParsed), timestamp: DateTime.now(),
            ),
          );
        });
@@ -484,7 +484,8 @@ Return ONLY a JSON object containing an array called "items":
             await isar.foodSearchCaches.put(
               FoodSearchCache(
                 normalizedQuery: 'fallback_$normalized',
-                cachedResponseJson: jsonEncode(safeResponse),
+                cachedResponseJson: jsonEncode(safeResponse), timestamp: DateTime.now(),
+                timestamp: DateTime.now(),
               ),
             );
 
@@ -785,7 +786,7 @@ Do NOT use JSON.
 
     try {
       // Bounded capability check
-      await client.models.get(modelId: 'gemini-1.5-flash')
+      await client.models.get(name: 'gemini-1.5-flash')
           .timeout(const Duration(seconds: 10));
       return;
     } catch (e) {

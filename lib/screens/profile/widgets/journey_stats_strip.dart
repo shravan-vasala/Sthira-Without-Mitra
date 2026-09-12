@@ -31,7 +31,7 @@ class JourneyStatsStrip extends ConsumerWidget {
       }
     }
     for (final mLog in allMealLogs) {
-      if (mLog.meals.isNotEmpty) {
+      if (mLog.loggedSlotsCount > 0) {
         activeDates.add(mLog.date);
       }
     }

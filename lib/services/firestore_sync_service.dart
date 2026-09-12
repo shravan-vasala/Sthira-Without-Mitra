@@ -379,3 +379,4 @@ class FirestoreSyncService implements ICloudSyncService {
       rethrow;
   }
 }
+}

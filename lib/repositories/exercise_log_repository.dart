@@ -7,6 +7,8 @@ class ExerciseLogRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
 
+  Stream<void> get watchUpdates => _isar.exerciseLogs.watchLazy(fireImmediately: true);
+
   void attachSync(ICloudSyncService sync) => _sync = sync;
 
   Future<void> init(Isar isar) async {
