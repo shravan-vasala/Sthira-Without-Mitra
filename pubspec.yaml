@@ -26,7 +26,7 @@ dependencies:
   intl: ^0.19.0
   google_fonts: ^6.2.1
   cached_network_image: ^3.4.1
-  googleai_dart: any
+  googleai_dart: ^11.0.0
   flutter_secure_storage: ^10.3.1
   shared_preferences: ^2.2.3
   health: ^13.3.1
@@ -46,7 +46,7 @@ dependencies:
   flutter_timezone: ^5.1.0
   wakelock_plus: ^1.2.8
   flutter_animate: ^4.5.2
-  pointycastle: any
+  pointycastle: ^3.9.1
   image: ^4.9.2
   home_widget: ^0.9.3
 dev_dependencies:

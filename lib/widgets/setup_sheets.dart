@@ -51,6 +51,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
       });
       try {
         await ref.read(geminiFoodServiceProvider).verifyApiKey(key);
+        await ref.read(profileProvider.notifier).updateGeminiKey(key);
       } catch (e) {
         if (mounted) {
           setState(() {
@@ -60,13 +61,22 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
         }
         return;
       }
-      await ref.read(profileProvider.notifier).updateGeminiKey(key);
       if (mounted) {
         setState(() => _isVerifying = false);
       }
     } else {
       // Allow clearing the key if it was removed by the user
-      await ref.read(profileProvider.notifier).updateGeminiKey('');
+      try {
+        await ref.read(profileProvider.notifier).updateGeminiKey('');
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isVerifying = false;
+            _errorMessage = e.toString().replaceAll('Exception: ', '');
+          });
+        }
+        return;
+      }
     }
     
     final current = ref.read(profileProvider);
@@ -76,7 +86,10 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
 
     if (mounted) {
       setState(() => _isSuccess = true);
-      await Future.delayed(const Duration(milliseconds: 1200));
+      final disableAnimations = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+      if (!disableAnimations) {
+        await Future.delayed(const Duration(milliseconds: 600)); // Shorter delay
+      }
       if (mounted) Navigator.pop(context, true);
     }
   }

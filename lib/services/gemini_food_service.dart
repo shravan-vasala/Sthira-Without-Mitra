@@ -783,60 +783,34 @@ Do NOT use JSON.
       config: GoogleAIConfig.googleAI(authProvider: ApiKeyProvider(key.trim())),
     );
 
-    final modelsToTry = AiClient.textModelsToTry;
-
-    String lastError = '';
-
     try {
-      for (final model in modelsToTry) {
-        try {
-          final response = await client.models
-              .generateContent(
-                model: model,
-                request: GenerateContentRequest(
-                  contents: [Content.text("Respond exactly with 'OK'")],
-                ),
-              )
-              .timeout(const Duration(seconds: 15));
-          if (response.text != null && response.text!.isNotEmpty) {
-            return; // Success!
-          }
-        } catch (e) {
-          final errorString = e.toString();
-          if (errorString.contains('API_KEY_INVALID') ||
-              errorString.contains('API key not valid') ||
-              errorString.contains('disabled') ||
-              errorString.contains('has not been used in project') ||
-              errorString.contains('deactivated') ||
-              errorString.contains('SERVICE_DISABLED') ||
-              errorString.contains('PERMISSION_DENIED')) {
-            throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.');
-          } else if (errorString.contains('403') ||
-              errorString.contains('forbidden')) {
-            lastError =
-                'Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.';
-            continue; // Try next model
-          } else if (errorString.contains('404') ||
-              errorString.contains('not found')) {
-            lastError = 'Model $model unavailable (404)';
-            continue; // Try next model
-          } else if (errorString.contains('429') ||
-              errorString.contains('quota')) {
-            throw AiException(
-              'We\'re experiencing heavy traffic! Please wait a minute.',
-            );
-          } else if (errorString.contains('TimeoutException') ||
-              errorString.contains('Timeout') ||
-              errorString.contains('SocketException') ||
-              errorString.contains('Failed host lookup')) {
-            lastError = 'Connection timed out or offline';
-            continue;
-          }
-          lastError = errorString;
-          continue; // Try next model on 404 etc.
-        }
+      // Bounded capability check
+      await client.models.get(name: 'models/gemini-1.5-flash')
+          .timeout(const Duration(seconds: 10));
+      return;
+    } catch (e) {
+      final errorString = e.toString();
+      if (errorString.contains('API_KEY_INVALID') ||
+          errorString.contains('API key not valid') ||
+          errorString.contains('disabled') ||
+          errorString.contains('has not been used in project') ||
+          errorString.contains('deactivated') ||
+          errorString.contains('SERVICE_DISABLED') ||
+          errorString.contains('PERMISSION_DENIED')) {
+        throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.');
+      } else if (errorString.contains('403') || errorString.contains('forbidden')) {
+        throw AiException('Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.');
+      } else if (errorString.contains('404') || errorString.contains('not found')) {
+        throw AiException('Model not found (404). Your key is valid but the requested model is unavailable.');
+      } else if (errorString.contains('429') || errorString.contains('quota')) {
+        throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');
+      } else if (errorString.contains('TimeoutException') ||
+          errorString.contains('Timeout') ||
+          errorString.contains('SocketException') ||
+          errorString.contains('Failed host lookup')) {
+        throw AiException('Network error. Please check your internet connection.');
       }
-      throw AiException("Failed to verify API key: $lastError");
+      throw AiException('Could not verify key: $errorString');
     } finally {
       client.close();
     }

@@ -41,13 +41,12 @@ class ProfileNotifier extends Notifier<UserProfile> {
   }
 
   Future<void> updateGeminiKey(String key) async {
-    state = state.copyWith(geminiApiKey: key);
     try {
       final repo = ref.read(profileRepoProvider);
       await repo.saveSecureGeminiKey(key);
+      state = state.copyWith(geminiApiKey: key, clearGeminiApiKey: key.isEmpty);
     } catch (e) {
-      // ignore: avoid_print
-      print('Error saving secure key: $e');
+      throw Exception('Failed to securely save API key.');
     }
   }
 
