@@ -118,7 +118,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     setState(() {
       for (int i = 0; i < widget.exercise.setCount; i++) {
         // ignore: dead_code, dead_null_aware_expression
-        _repsControllers[i].text = parseRepTarget(
+        _repsControllers[i].text = TargetParser.parseRepTarget(
           widget.exercise.repsDisplay ?? '',
         );
         final planned = widget.exercise.weightKg;

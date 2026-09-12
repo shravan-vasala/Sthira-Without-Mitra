@@ -258,7 +258,6 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

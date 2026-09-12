@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+export '../services/widget_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -409,4 +410,3 @@ final syncPendingCountProvider = StreamProvider<int>((ref) {
   final sync = ref.watch(firestoreSyncServiceProvider);
   return sync.pendingCountStream;
 });
-export '../services/widget_coordinator.dart';

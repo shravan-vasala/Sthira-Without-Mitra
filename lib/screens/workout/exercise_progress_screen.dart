@@ -6,12 +6,14 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/exercise_log.dart';
 import '../../models/exercise_pr.dart';
-import '../../utils/unit_conversion.dart';
+
 
 class ExerciseProgressScreen extends ConsumerWidget {
   const ExerciseProgressScreen({super.key, required this.exerciseName});
 
   final String exerciseName;
+
+  static const double kgToLbs = 2.20462;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

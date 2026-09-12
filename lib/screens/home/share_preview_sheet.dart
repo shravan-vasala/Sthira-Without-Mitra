@@ -52,10 +52,15 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     final score = scoreData.totalScore;
     final selectedDate = ref.watch(selectedDateProvider);
     
-    final steps = scoreData.steps;
-    final mealsKcal = scoreData.totalCalories;
-    final workoutDone = scoreData.workoutsDone > 0;
-    final habitsDone = scoreData.habitsTotal > 0 ? '${scoreData.habitsDone}/${scoreData.habitsTotal}' : '0/0';
+    final dailyLog = ref.watch(dailyLogProvider);
+    final mealsLog = ref.watch(dailyMealLogProvider);
+    final habitsCount = ref.watch(habitsProvider).length;
+    final habitsCompleted = ref.watch(habitCompletionsProvider).completions.values.where((c) => c.status == HabitStatus.completed).length;
+
+    final steps = dailyLog.steps ?? 0;
+    final mealsKcal = mealsLog.totalCalories;
+    final workoutDone = dailyLog.workoutCompleted;
+    final habitsDone = habitsCount > 0 ? '$habitsCompleted/$habitsCount' : '0/0';
 
     final subtitle = _getSubtitle(score);
     // Base color tied to score

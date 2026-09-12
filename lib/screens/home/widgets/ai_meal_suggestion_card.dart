@@ -83,7 +83,6 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         mealName: widget.mealName,
         mealsLeft: widget.mealsLeft,
         previousMeals: previousMeals,
-        targetDate: dateStr,
       );
 
       bool isFirstChunk = true;
