@@ -105,8 +105,8 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
     final userName = profile.name.isNotEmpty ? profile.name : 'there';
     
     final now = DateTime.now();
-    final logsAsync = ref.read(dailyLogsStreamProvider);
-    final logs = logsAsync.value ?? [];
+    
+    
     
     // Check habits
     await _notificationService.cancelHabits();
@@ -114,7 +114,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
       for (int i = 0; i < 7; i++) {
         final date = now.add(Duration(days: i));
         final dateStr = DateFormat('yyyy-MM-dd').format(date);
-        final log = logs.firstWhere((l) => l.date == dateStr, orElse: () => throw Error());
+        
         
         // In this simple check, if the log exists and some habits are done, maybe they finished.
         // Actually, we'll schedule it unless we have robust completion checking.

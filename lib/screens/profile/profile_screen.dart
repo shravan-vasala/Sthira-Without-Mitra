@@ -819,16 +819,8 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () async {
-                      setState(() {
-                        _isSyncing = true;
-                        _syncStatus = 'Syncing...';
-                      });
-                      await _runFullSync();
-                      setState(() {
-                        _isSyncing = false;
-                        _syncStatus = '';
-                      });
+                    onPressed: isSyncing ? null : () {
+                      ref.read(syncControllerProvider.notifier).sync(isManualRefresh: true);
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
@@ -1205,7 +1197,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 Navigator.pop(ctx);
                 final selectedAvatar = await showAppBottomSheet<String>(
                   context: context,
-                  builder: (_) => AvatarPickerSheet(currentAvatar: _localPhotoPath ?? widget.profile.photoPath),
+                  builder: (_) => AvatarPickerSheet(currentAvatar: _localPhotoPath ?? ref.read(profileProvider).photoPath),
                 );
                 if (selectedAvatar == 'DELETE') {
                   setState(() {

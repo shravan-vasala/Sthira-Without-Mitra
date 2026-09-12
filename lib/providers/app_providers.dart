@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import '../models/social_profile.dart';
 import '../models/friend.dart';
+import '../models/progress_photo.dart';
 import 'daily_log_notifier.dart';
 import 'meal_providers.dart';
 import '../models/daily_log.dart';
@@ -343,7 +344,7 @@ class CloudSyncController extends Notifier<CloudSyncState> {
         ref.invalidate(dailyMealLogProvider);
         ref.invalidate(latestBodyStatsProvider);
       } else {
-        await syncService.syncProfile(
+        syncService.syncProfile(
           ref.read(profileRepoProvider).exportProfileForCloud(),
         );
         await syncService.bulkSync(
