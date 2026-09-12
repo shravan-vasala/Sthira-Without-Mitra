@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/meal_completion.dart';
 import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,21 +51,18 @@ class MealsCard extends ConsumerWidget {
     final isFuture = selectedDate.isAfter(today);
     final isToday = selectedDate.isAtSameMomentAs(today);
 
-    final defaultIds = profile.customMealSlots
-        .where((s) => s['isDefault'] == true)
-        .map((s) => s['id'] as String)
-        .toSet();
-    final loggedIds = dailyLog.customSlots.keys.toSet();
-
-    int totalMeals = defaultIds.length;
+    int totalMeals = MealCompletion.calculateTotalMeals(profile, dailyLog);
+    
+    // For today/future, also include recurring ids so empty planned meals show up
     if (isFuture || isToday) {
       final recurringIds = profile.customMealSlots
           .map((s) => s['id'] as String)
           .toSet();
+      final loggedIds = dailyLog.customSlots.entries
+          .where((e) => e.value.items.isNotEmpty || e.value.photoPath != null || e.value.totalCalories > 0)
+          .map((e) => e.key)
+          .toSet();
       totalMeals = recurringIds.union(loggedIds).length;
-    } else {
-      final customLoggedCount = loggedIds.difference(defaultIds).length;
-      totalMeals = defaultIds.length + customLoggedCount;
     }
 
     final slots = <({String id, String name, String emoji})>[];

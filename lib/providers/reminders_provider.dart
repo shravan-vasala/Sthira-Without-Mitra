@@ -15,6 +15,19 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
     _prefs = ref.watch(sharedPreferencesProvider);
     _notificationService = ref.watch(notificationServiceProvider);
 
+    // Listen to workout and photo changes to automatically reschedule
+    ref.listen(workoutPlanProvider, (prev, next) {
+      if (state.workoutsEnabled) {
+        _queueSync();
+      }
+    });
+
+    ref.listen(progressPhotosStreamProvider, (prev, next) {
+      if (state.photosEnabled) {
+        _queueSync();
+      }
+    });
+
     final jsonStr = _prefs.getString(_key);
     if (jsonStr != null) {
       return ReminderConfig.fromJson(jsonStr);
@@ -22,10 +35,29 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
     return ReminderConfig();
   }
 
+  bool _isSyncing = false;
+  bool _needsSync = false;
+
+  Future<void> _queueSync() async {
+    if (_isSyncing) {
+      _needsSync = true;
+      return;
+    }
+    _isSyncing = true;
+    try {
+      do {
+        _needsSync = false;
+        await _syncNotifications();
+      } while (_needsSync);
+    } finally {
+      _isSyncing = false;
+    }
+  }
+
   Future<void> updateConfig(ReminderConfig newConfig) async {
     state = newConfig;
     await _prefs.setString(_key, newConfig.toJson());
-    await _syncNotifications();
+    await _queueSync();
   }
 
   Future<void> _syncNotifications() async {
@@ -37,8 +69,18 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
         state.photosEnabled) {
       final granted = await _notificationService.requestPermissions();
       if (!granted) {
-        // Fallback: If not granted, we probably shouldn't keep them enabled in UI
-        // But we'll let it be for now and let the user see them toggled but not firing.
+        // Fallback: If not granted, immediately revert the toggles in state
+        final reverted = state.copyWith(
+          habitsEnabled: false,
+          workoutsEnabled: false,
+          mealsEnabled: false,
+          backupEnabled: false,
+          photosEnabled: false,
+        );
+        state = reverted;
+        await _prefs.setString(_key, reverted.toJson());
+        await _notificationService.cancelAllReminders();
+        return;
       }
     }
 
@@ -104,7 +146,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
 
   // Called on app boot from main.dart
   Future<void> initializeNotifications() async {
-    await _syncNotifications();
+    await _queueSync();
   }
 }
 

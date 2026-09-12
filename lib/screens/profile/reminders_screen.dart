@@ -40,12 +40,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
   }
 
   String _formatTime(TimeOfDay time) {
-    final hour = time.hour == 0
-        ? 12
-        : (time.hour > 12 ? time.hour - 12 : time.hour);
-    final period = time.hour >= 12 ? 'PM' : 'AM';
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $period';
+    return time.format(context);
   }
 
   @override
@@ -257,6 +252,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       child: Text(
         title,
         style: TextStyle(
+          fontFamily: 'Cabinet Grotesk',
           fontSize: 13,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.5,

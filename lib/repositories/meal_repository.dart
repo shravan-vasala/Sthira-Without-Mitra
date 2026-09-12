@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:uuid/uuid.dart';
 import 'package:isar/isar.dart';
 import '../models/daily_meal_log.dart';
 import '../models/meal_plan.dart';
@@ -171,6 +172,35 @@ class MealRepository {
     if (meals is! List) {
       throw const FormatException('"meals" must be an array');
     }
+    for (int i = 0; i < meals.length; i++) {
+      final meal = meals[i];
+      if (meal is! Map<String, dynamic>) {
+        throw FormatException('Meal at index $i is not an object');
+      }
+      
+      if (meal['id'] == null || meal['id'].toString().trim().isEmpty) {
+        meal['id'] = const Uuid().v4();
+      }
+      
+      final nutrition = meal['nutritionTarget'];
+      if (nutrition is Map) {
+        if (nutrition['calories'] == null || num.tryParse(nutrition['calories'].toString()) == null) {
+          throw FormatException('Invalid or missing calories in meal "${meal['name'] ?? 'unknown'}"');
+        }
+        if (nutrition['protein'] == null || num.tryParse(nutrition['protein'].toString()) == null) {
+          throw FormatException('Invalid or missing protein in meal "${meal['name'] ?? 'unknown'}"');
+        }
+        if (nutrition['carbs'] == null || num.tryParse(nutrition['carbs'].toString()) == null) {
+          throw FormatException('Invalid or missing carbs in meal "${meal['name'] ?? 'unknown'}"');
+        }
+        if (nutrition['fat'] == null || num.tryParse(nutrition['fat'].toString()) == null) {
+          throw FormatException('Invalid or missing fat in meal "${meal['name'] ?? 'unknown'}"');
+        }
+      } else if (nutrition != null) {
+        throw const FormatException('"nutritionTarget" must be an object');
+      }
+    }
+
     final plan = MealPlan.fromJson(map);
 
     final existing = getMealPlan(key);
@@ -181,6 +211,22 @@ class MealRepository {
       await _isar.mealPlans.put(plan);
     });
     _sync?.syncToCloud('meal_plans', key, plan.toJson());
+  }
+
+  Future<void> renamePlan(String oldKey, String newKey, String jsonStr) async {
+    final existing = getMealPlan(oldKey);
+    final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final newPlan = MealPlan.fromJson(map);
+    
+    await _isar.writeTxn(() async {
+      if (existing != null) {
+        await _isar.mealPlans.delete(existing.id);
+      }
+      await _isar.mealPlans.put(newPlan);
+    });
+    
+    _sync?.deleteFromCloud('meal_plans', oldKey);
+    _sync?.syncToCloud('meal_plans', newKey, newPlan.toJson());
   }
 
   String? getRawPlanJson(String key) {

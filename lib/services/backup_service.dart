@@ -67,11 +67,14 @@ class BackupService {
       if (isar == null) throw Exception('Isar instance not found.');
 
       final appDir = await getApplicationDocumentsDirectory();
-      final backupStagingDir = Directory('${appDir.path}/backup_staging');
+      final stagingName = 'backup_staging_${DateTime.now().millisecondsSinceEpoch}';
+      final backupStagingDir = Directory('${appDir.path}/$stagingName');
       if (await backupStagingDir.exists()) {
         await backupStagingDir.delete(recursive: true);
       }
       await backupStagingDir.create(recursive: true);
+
+      try {
 
       final dataFile = File('${backupStagingDir.path}/data.json');
       final manifestFile = File('${backupStagingDir.path}/manifest.json');
@@ -112,39 +115,48 @@ class BackupService {
       await manifestFile.writeAsString(jsonEncode(manifest));
 
       final encoder = ZipFileEncoder();
-      final zipPath = '${appDir.path}/sthira_backup_${DateTime.now().millisecondsSinceEpoch}.zip';
+      final zipPath = '${backupStagingDir.path}/temp_backup.zip';
       encoder.create(zipPath);
 
       encoder.addFile(manifestFile);
       encoder.addFile(dataFile);
 
       if (includeMedia) {
-        final mediaDir = Directory('${appDir.path}/sthira_media'); // Adjusted logic dynamically
-        final trufitMediaDir = Directory('${appDir.path}/trufit_media');
-        
-        Directory targetMedia = trufitMediaDir;
-        if (await mediaDir.exists()) {
-          targetMedia = mediaDir;
-        }
+        final mediaDirs = [
+          'sthira_media',
+          'trufit_media',
+          'trufit_meal_photos',
+          'trufit_profile_photos',
+          'profile_photos',
+        ];
 
-        if (await targetMedia.exists()) {
-          encoder.addDirectory(targetMedia, includeDirName: false); 
+        for (final dirName in mediaDirs) {
+          final targetMedia = Directory('${appDir.path}/$dirName');
+          if (await targetMedia.exists()) {
+            encoder.addDirectory(targetMedia, includeDirName: true);
+          }
         }
       }
 
       encoder.close();
 
+      final finalZipPath = '${appDir.path}/sthira_backup_${DateTime.now().millisecondsSinceEpoch}.zip';
+
       if (password != null && password.isNotEmpty) {
         final zipFile = File(zipPath);
         final zipBytes = await zipFile.readAsBytes();
         final encryptedZip = BackupEncryptionService.encryptBytes(zipBytes, password);
-        await zipFile.writeAsBytes(encryptedZip);
+        await File(finalZipPath).writeAsBytes(encryptedZip);
+      } else {
+        await File(zipPath).copy(finalZipPath);
       }
 
-      // Clean up staging
-      await backupStagingDir.delete(recursive: true);
-
-      return zipPath;
+      return finalZipPath;
+      } finally {
+        if (await backupStagingDir.exists()) {
+          await backupStagingDir.delete(recursive: true);
+        }
+      }
     } catch (e) {
       debugPrint('Backup creation failed: $e');
       return null;
@@ -177,18 +189,28 @@ class BackupService {
       final archive = ZipDecoder().decodeBytes(bytes);
 
       ArchiveFile? manifestFile;
+      ArchiveFile? dataFile;
       int photoCount = 0;
 
       for (final archiveFile in archive) {
         if (archiveFile.name == 'manifest.json') {
           manifestFile = archiveFile;
-        } else if (archiveFile.name.endsWith('.jpg') || archiveFile.name.endsWith('.png')) {
+        } else if (archiveFile.name == 'data.json') {
+          dataFile = archiveFile;
+        } else if (archiveFile.name.toLowerCase().endsWith('.jpg') || 
+                   archiveFile.name.toLowerCase().endsWith('.jpeg') || 
+                   archiveFile.name.toLowerCase().endsWith('.png') ||
+                   archiveFile.name.toLowerCase().endsWith('.webp') ||
+                   archiveFile.name.toLowerCase().endsWith('.gif')) {
           photoCount++;
         }
       }
 
       if (manifestFile == null) {
         return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid backup format (no manifest.json)');
+      }
+      if (dataFile == null) {
+        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid backup format (no data.json)');
       }
 
       final content = utf8.decode(manifestFile.content as List<int>);
@@ -277,12 +299,19 @@ class BackupService {
       final appDir = await getApplicationDocumentsDirectory();
       int failedPhotos = 0;
       for (final file in archive) {
-        if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
+        final name = file.name.toLowerCase();
+        if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.gif')) {
           try {
-             // Extract directly into the media directory structure
-             // Using relative path mapping is safer
+             // Extract directly into the app documents structure to preserve paths
              final safePath = file.name.replaceAll('..', ''); 
-             final extractedFile = File('${appDir.path}/trufit_media/$safePath');
+             String targetPath = '${appDir.path}/$safePath';
+             
+             // Legacy fallback if the backup was created with includeDirName: false
+             if (!safePath.startsWith('trufit_') && !safePath.startsWith('sthira_') && !safePath.startsWith('profile_')) {
+               targetPath = '${appDir.path}/trufit_media/$safePath';
+             }
+
+             final extractedFile = File(targetPath);
              extractedFile.createSync(recursive: true);
              extractedFile.writeAsBytesSync(file.content as List<int>);
           } catch (_) {

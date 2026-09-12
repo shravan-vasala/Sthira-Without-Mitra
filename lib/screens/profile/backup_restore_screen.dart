@@ -129,7 +129,10 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(
           'Encrypted Backup',
-          style: TextStyle(color: context.colors.primary),
+          style: TextStyle(
+            color: context.colors.primary,
+            fontFamily: 'Cabinet Grotesk',
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -232,7 +235,10 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(
               'Backup Verified ✨',
-              style: TextStyle(color: context.colors.green),
+              style: TextStyle(
+                color: context.colors.green,
+                fontFamily: 'Cabinet Grotesk',
+              ),
             ),
             content: Text(
               'App Version: ${verify.appVersion}\n'
@@ -256,7 +262,10 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(
               'Verification Failed',
-              style: TextStyle(color: context.colors.red),
+              style: TextStyle(
+                color: context.colors.red,
+                fontFamily: 'Cabinet Grotesk',
+              ),
             ),
             content: Text(verify.errorMessage ?? 'Invalid backup file.'),
             actions: [
@@ -276,7 +285,10 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(
               'Verification Error',
-              style: TextStyle(color: context.colors.red),
+              style: TextStyle(
+                color: context.colors.red,
+                fontFamily: 'Cabinet Grotesk',
+              ),
             ),
             content: Text('An error occurred while verifying the backup: $e'),
             actions: [
@@ -390,6 +402,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                   color: result.failedPhotosCount > 0
                       ? context.colors.orange
                       : context.colors.green,
+                  fontFamily: 'Cabinet Grotesk',
                 ),
               ),
               content: Text(
@@ -454,9 +467,11 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         ),
         backgroundColor: context.colors.scaffoldBg,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
+      body: Stack(
+        children: [
+          IgnorePointer(
+            ignoring: _isLoading,
+            child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,6 +550,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                       Text(
                         'ENCRYPT BACKUP',
                         style: TextStyle(
+                          fontFamily: 'Cabinet Grotesk',
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.5,
@@ -590,6 +606,19 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                 ],
               ),
             ),
+          ),
+          if (_isLoading)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LinearProgressIndicator(
+                backgroundColor: context.colors.scaffoldBg,
+                color: context.colors.primary,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

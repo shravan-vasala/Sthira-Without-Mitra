@@ -26,7 +26,7 @@ class NotificationService {
       tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
     } catch (e) {
       // Fallback if platform timezone cannot be determined
-      tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
+      tz.setLocalLocation(tz.getLocation('UTC'));
     }
 
     const AndroidInitializationSettings initializationSettingsAndroid =

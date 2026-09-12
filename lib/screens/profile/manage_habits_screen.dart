@@ -23,7 +23,11 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
       appBar: AppBar(
         title: Text(
           'Manage Habits',
-          style: TextStyle(color: context.colors.textDark),
+          style: TextStyle(
+            color: context.colors.textDark,
+            fontFamily: 'Cabinet Grotesk',
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: context.colors.scaffoldBg,
         foregroundColor: context.colors.textDark,
@@ -142,7 +146,14 @@ class _HabitListTile extends ConsumerWidget {
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('Delete Habit?'),
+                    title: const Text(
+                      'Delete Habit?',
+                      style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
                     content: const Text(
                       'Are you sure you want to delete this habit? History will be kept for past days, but it won\'t appear anymore.',
                     ),
@@ -218,6 +229,9 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
   final _stepCtrl = TextEditingController();
   final _unitCtrl = TextEditingController();
 
+  String? _targetError;
+  String? _stepError;
+
   String _selectedIcon = 'check';
   HabitType _type = HabitType.checkbox;
   bool _isWaterHabit = false;
@@ -253,6 +267,12 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
 
   void _syncWaterNameFromGoal() {
     if (!_isWaterHabit) return;
+    final currentName = _nameCtrl.text.trim();
+    if (currentName.isNotEmpty && !currentName.startsWith('Drink ') && !currentName.endsWith(' of water')) {
+      // User has customized the name, don't overwrite it
+      return;
+    }
+    
     final target = double.tryParse(_targetCtrl.text) ?? 3.0;
     final unit = _unitCtrl.text.trim().isEmpty ? 'L' : _unitCtrl.text.trim();
     final targetLabel = target == target.roundToDouble()
@@ -265,12 +285,31 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
     var name = _nameCtrl.text.trim();
     if (name.isEmpty) return;
 
-    var target = double.tryParse(_targetCtrl.text) ?? 1.0;
-    var step = double.tryParse(_stepCtrl.text) ?? 1.0;
+    var target = double.tryParse(_targetCtrl.text) ?? 0.0;
+    var step = double.tryParse(_stepCtrl.text) ?? 0.0;
     var unit = _unitCtrl.text.trim();
 
-    if (target <= 0) target = 1.0;
-    if (step <= 0) step = 1.0;
+    bool hasError = false;
+    if (target <= 0) {
+      setState(() => _targetError = 'Must be > 0');
+      hasError = true;
+    } else {
+      setState(() => _targetError = null);
+    }
+    
+    if (_type == HabitType.counter && !_isWaterHabit) {
+      if (step <= 0) {
+        setState(() => _stepError = 'Must be > 0');
+        hasError = true;
+      } else {
+        setState(() => _stepError = null);
+      }
+    } else {
+      step = 1.0;
+      setState(() => _stepError = null);
+    }
+
+    if (hasError) return;
 
     // Water: always checkbox with customizable daily goal
     var type = _type;
@@ -295,7 +334,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
       icon: HabitIcons.normalize(_selectedIcon),
       type: type,
       target: target,
-      activeDays: (_activeDays != null && _activeDays!.isEmpty) ? null : _activeDays,
+      activeDays: (_activeDays != null && _activeDays!.isEmpty) ? [] : _activeDays,
       step: step,
       unit: unit,
       order: isNew ? ref.read(habitsProvider).length : widget.habit!.order,
@@ -318,6 +357,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
       title: Text(
         widget.habit == null ? 'Add Habit' : 'Edit Habit',
         style: TextStyle(
+          fontFamily: 'Cabinet Grotesk',
           fontWeight: FontWeight.bold,
           fontSize: 20,
           color: context.colors.textDark,
@@ -328,24 +368,24 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!_isWaterHabit)
-              TextField(
-                controller: _nameCtrl,
-                style: TextStyle(color: context.colors.textDark),
-                decoration: InputDecoration(
-                  labelText: 'Habit Name',
-                  hintText: 'e.g. Meditate 10 min',
-                  filled: true,
-                  fillColor: context.colors.inputFill,
-                  labelStyle: TextStyle(color: context.colors.textMedium),
-                  hintStyle: TextStyle(color: context.colors.textLight),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+            TextField(
+              controller: _nameCtrl,
+              style: TextStyle(color: context.colors.textDark),
+              decoration: InputDecoration(
+                labelText: _isWaterHabit ? 'Water Habit Name' : 'Habit Name',
+                hintText: 'e.g. Meditate 10 min',
+                filled: true,
+                fillColor: context.colors.inputFill,
+                labelStyle: TextStyle(color: context.colors.textMedium),
+                hintStyle: TextStyle(color: context.colors.textLight),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
-              )
-            else ...[
+              ),
+            ),
+            if (_isWaterHabit) ...[
+              const SizedBox(height: 8),
               Text(
                 'Daily water goal',
                 style: TextStyle(
@@ -525,6 +565,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                       style: TextStyle(color: context.colors.textDark),
                       decoration: InputDecoration(
                         labelText: _isWaterHabit ? 'Amount' : 'Target',
+                        errorText: _targetError,
                         filled: true,
                         fillColor: context.colors.inputFill,
                         border: OutlineInputBorder(
@@ -584,6 +625,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 style: TextStyle(color: context.colors.textDark),
                 decoration: InputDecoration(
                   labelText: 'Increment Step (e.g. 0.25)',
+                  errorText: _stepError,
                   filled: true,
                   fillColor: context.colors.inputFill,
                   border: OutlineInputBorder(

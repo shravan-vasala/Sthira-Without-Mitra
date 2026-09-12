@@ -115,14 +115,14 @@ class DailyScore {
 
     // 1. Habits (Max 50)
     double habitsScore = 0;
-    final double habitsMax = 50.0;
+    final double habitsMax = stats.habitsTotal > 0 ? 50.0 : 0.0;
     if (stats.habitsTotal > 0) {
       habitsScore = stats.habitRate * habitsMax;
     }
 
     // 2. Workouts (Max 30)
     double workoutsScore = 0;
-    final double workoutsMax = 30.0;
+    final double workoutsMax = (stats.workoutsTotal > 0 || stats.isRestDay) ? 30.0 : 0.0;
     if (stats.isRestDay) {
       workoutsScore = workoutsMax;
     } else if (stats.workoutsTotal > 0) {
@@ -131,7 +131,7 @@ class DailyScore {
 
     // 3. Meals (Max 20 = 14 completion + 6 accuracy)
     double mealsScore = 0;
-    final double mealsMax = 20.0;
+    final double mealsMax = stats.mealsTotal > 0 ? 20.0 : 0.0;
     if (stats.mealsTotal > 0) {
       double completionScore = (stats.mealsLogged / stats.mealsTotal) * 14.0;
       double accuracyScore = 0;

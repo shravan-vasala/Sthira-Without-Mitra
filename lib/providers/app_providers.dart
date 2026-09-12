@@ -115,6 +115,11 @@ final bodyStatsRepoProvider = Provider<BodyStatsRepository>((ref) {
 final mediaRepoProvider = Provider<MediaRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });
+final progressPhotosStreamProvider = StreamProvider<void>((ref) {
+  final repo = ref.watch(mediaRepoProvider);
+  // We only care about changes to progress photos to trigger reminder updates
+  return repo.isar.progressPhotos.watchLazy(fireImmediately: true);
+});
 final photoMealRepoProvider = Provider<PhotoMealRepository>((ref) {
   throw UnimplementedError('Must be overridden in main');
 });

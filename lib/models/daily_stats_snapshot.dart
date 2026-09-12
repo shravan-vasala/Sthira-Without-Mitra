@@ -7,6 +7,7 @@ import '../models/user_profile.dart';
 import '../models/workout_plan.dart';
 import '../repositories/daily_log_repository.dart';
 import '../utils/workout_completion.dart';
+import '../utils/meal_completion.dart';
 
 class DailyStatsSnapshot {
   final int habitsDone;
@@ -114,19 +115,7 @@ class DailyStatsSnapshot {
 
     // 3. Meals
     int mealsLogged = mealLog.loggedSlotsCount;
-    int mealsTotal = 0;
-
-    final defaultIds = profile.customMealSlots
-        .where((s) => s['isDefault'] == true)
-        .map((s) => s['id'] as String)
-        .toSet();
-    final loggedIds = mealLog.customSlots.entries
-        .where((e) => e.value.items.isNotEmpty || e.value.photoPath != null || e.value.totalCalories > 0)
-        .map((e) => e.key)
-        .toSet();
-
-    final customLoggedCount = loggedIds.difference(defaultIds).length;
-    mealsTotal = defaultIds.length + customLoggedCount;
+    int mealsTotal = MealCompletion.calculateTotalMeals(profile, mealLog);
 
     // 4. Weight Trend
     String weightTrend = 'stable';
