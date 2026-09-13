@@ -36,7 +36,8 @@ Future<Isar> setUpTestIsar() async {
         );
         final response = await request.close();
         if (response.statusCode == 200) {
-          final file = File('libisar.so');
+          final tempName = 'libisar_${DateTime.now().microsecondsSinceEpoch}.so';
+          final file = File('${Directory.systemTemp.path}/$tempName');
           await response.pipe(file.openWrite());
           await Isar.initializeIsarCore(
             libraries: {Abi.linuxX64: file.absolute.path},
