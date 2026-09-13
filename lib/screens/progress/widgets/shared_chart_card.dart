@@ -66,8 +66,8 @@ class SharedChartCard extends StatelessWidget {
   final ChartTimeFormat timeFormat;
   final String emptyMessage;
   final double? targetValue;
-  final void Function(DateTime date, double value)? onPointLongPress;
-  final void Function(DateTime date, double value)? onPointTap;
+  final void Function(ChartDataPoint point)? onPointLongPress;
+  final void Function(ChartDataPoint point)? onPointTap;
   final bool expandChart;
 
   bool get _isCount => metric.isCount;
@@ -454,24 +454,7 @@ class SharedChartCard extends StatelessWidget {
     return null;
   }
 
-  /// Split into contiguous day segments so missing days show as gaps, not zeros.
-  /// For 6-month views, we connect all points to preserve the macro trend line, regardless of gaps.
-  List<List<FlSpot>> _segmentSpots(List<FlSpot> sorted) {
-    if (sorted.isEmpty) return const [];
-    final segments = <List<FlSpot>>[];
-    var current = <FlSpot>[sorted.first];
-    for (int i = 1; i < sorted.length; i++) {
-      final gap = sorted[i].x - sorted[i - 1].x;
-      if (gap > 1.5) {
-        segments.add(current);
-        current = <FlSpot>[sorted[i]];
-      } else {
-        current.add(sorted[i]);
-      }
-    }
-    segments.add(current);
-    return segments;
-  }
+  // Removed redundant _segmentSpots. We will do this inline in _buildLineChart.
 
   Widget _buildBarChart(BuildContext context) {
     final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
@@ -541,12 +524,12 @@ class SharedChartCard extends StatelessWidget {
                 Haptics.tap();
               }
               if (event is FlTapUpEvent && onPointTap != null) {
-                final date = startDate.add(Duration(days: response.spot!.touchedBarGroup.x));
-                onPointTap!(date, response.spot!.touchedRodData.toY);
+                final pt = _getPointForOffset(response.spot!.touchedBarGroup.x.toDouble());
+                if (pt != null) onPointTap!(pt);
               }
               if (event is FlLongPressEnd && onPointLongPress != null) {
-                final date = startDate.add(Duration(days: response.spot!.touchedBarGroup.x));
-                onPointLongPress!(date, response.spot!.touchedRodData.toY);
+                final pt = _getPointForOffset(response.spot!.touchedBarGroup.x.toDouble());
+                if (pt != null) onPointLongPress!(pt);
               }
             }
           },
@@ -575,15 +558,22 @@ class SharedChartCard extends StatelessWidget {
 
   Widget _buildLineChart(BuildContext context) {
     final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
-    final spots = sorted
-        .where((d) => d.value != null)
-        .map(
-          (d) =>
-              FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value!),
-        )
-        .toList();
-
-    final segments = _segmentSpots(spots);
+    
+    final segments = <List<FlSpot>>[];
+    var currentSegment = <FlSpot>[];
+    for (final d in sorted) {
+      if (d.value != null && d.value!.isFinite) {
+        currentSegment.add(FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value!));
+      } else if (currentSegment.isNotEmpty) {
+        segments.add(currentSegment);
+        currentSegment = <FlSpot>[];
+      }
+    }
+    if (currentSegment.isNotEmpty) {
+      segments.add(currentSegment);
+    }
+    
+    final spots = segments.expand((s) => s).toList();
     final validVals = spots.map((s) => s.y);
     final (minY, maxY) = validVals.isEmpty ? (0.0, 10.0) : _yRange(validVals);
     final dataYValues = validVals.toList();
@@ -603,12 +593,12 @@ class SharedChartCard extends StatelessWidget {
               ? false 
               : (useCurve && segment.length > 2),
           curveSmoothness: spots.length > 31 ? 0.40 : 0.25,
-          preventCurveOverShooting: spots.length <= 31, 
+          preventCurveOverShooting: true, 
           color: hasTrend ? primary.withValues(alpha: 0.2) : primary,
           barWidth: hasTrend 
               ? 0.0 
-              : (timeFormat == ChartTimeFormat.sixMonths ? 1.5 : (spots.length > 31 ? 1.5 : 2.5)), 
-          isStrokeCapRound: timeFormat != ChartTimeFormat.sixMonths,
+              : 2.0, 
+          isStrokeCapRound: true,
           dotData: FlDotData(
             show: true,
             checkToShowDot: (spot, barData) {
@@ -714,13 +704,13 @@ class SharedChartCard extends StatelessWidget {
               }
               if (event is FlTapUpEvent && onPointTap != null) {
                 final spot = response.lineBarSpots!.first;
-                final date = startDate.add(Duration(days: spot.x.toInt()));
-                onPointTap!(date, spot.y);
+                final pt = _getPointForOffset(spot.x);
+                if (pt != null) onPointTap!(pt);
               }
               if (event is FlLongPressEnd && onPointLongPress != null) {
                 final spot = response.lineBarSpots!.first;
-                final date = startDate.add(Duration(days: spot.x.toInt()));
-                onPointLongPress!(date, spot.y);
+                final pt = _getPointForOffset(spot.x);
+                if (pt != null) onPointLongPress!(pt);
               }
             }
           },

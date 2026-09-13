@@ -106,23 +106,37 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     }
   }
 
-  DateTime get _startDate {
-    final d = DateTime.now();
+  DateTime _calcStartDate(DateTime now) {
+    final d = DateTime(now.year, now.month, now.day);
     switch (_selectedRange) {
       case TimeRange.weekly:
         return d.subtract(const Duration(days: 6)); // 7 days inclusive
       case TimeRange.oneMonth:
-        return d.subtract(const Duration(days: 30));
+        return _clampMonth(d, 1).add(const Duration(days: 1));
       case TimeRange.threeMonths:
-        return d.subtract(const Duration(days: 90));
+        return _clampMonth(d, 3).add(const Duration(days: 1));
       case TimeRange.sixMonths:
-        return d.subtract(const Duration(days: 180));
+        return _clampMonth(d, 6).add(const Duration(days: 1));
       case TimeRange.twelveMonths:
         return DateTime(d.year, d.month - 11, 1);
     }
   }
 
-  DateTime get _endDate => DateTime.now();
+  DateTime _clampMonth(DateTime date, int monthsBack) {
+    int targetYear = date.year;
+    int targetMonth = date.month - monthsBack;
+    while (targetMonth <= 0) {
+      targetMonth += 12;
+      targetYear--;
+    }
+    int lastDay = DateTime(targetYear, targetMonth + 1, 0).day;
+    int targetDay = date.day > lastDay ? lastDay : date.day;
+    return DateTime(targetYear, targetMonth, targetDay);
+  }
+
+  DateTime _calcEndDate(DateTime now) {
+    return DateTime(now.year, now.month, now.day);
+  }
 
   void _openManualEntry() {
     if (_selectedMetric == MetricType.weight || _selectedMetric == MetricType.bmi) {
@@ -188,14 +202,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return result;
   }
 
-  List<ChartDataPoint> _dailyMetricSeries(List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, UserProfile profile) {
+  List<ChartDataPoint> _dailyMetricSeries(List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, UserProfile profile, DateTime startDate, DateTime endDate) {
     final logsByDate = {for (var l in logs) l.date: l};
-    final daysDiff = _endDate.difference(_startDate).inDays;
+    final daysDiff = endDate.difference(startDate).inDays;
     final data = <ChartDataPoint>[];
     final useKg = profile.useKg;
 
     for (int i = 0; i <= daysDiff; i++) {
-      final d = _startDate.add(Duration(days: i));
+      final d = startDate.add(Duration(days: i));
       final dateStr = DateFormat('yyyy-MM-dd').format(d);
       final log = logsByDate[dateStr];
 
@@ -257,7 +271,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   String _overviewSubtitle(List<ChartDataPoint> data, MetricType metric, bool useKg) {
     final validData = data.where((d) => d.value != null && d.value!.isFinite).toList();
     if (validData.isEmpty) return 'No recorded data for this period.';
-    final isTrendMetric = metric == MetricType.weight || metric == MetricType.bodyFat || metric == MetricType.bmi || metric == MetricType.sleep;
+    
+    int loggedDays = 0;
+    for (final d in validData) {
+      loggedDays += d.bucket?.validDaysCount ?? 1;
+    }
+    
+    final isTrendMetric = metric == MetricType.weight || metric == MetricType.bodyFat || metric == MetricType.bmi;
     if (isTrendMetric && validData.length >= 2) {
       final trend = _calculateTrendData(validData);
       if (trend.isEmpty) trend.addAll(validData);
@@ -265,15 +285,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       final abs = delta.abs();
       final sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
       switch (metric) {
-        case MetricType.weight: return 'You have a stable track record. $sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start!';
-        case MetricType.sleep:
-        case MetricType.screenTime: return 'Trend shows $sign${abs.toStringAsFixed(1)}h vs start of period.';
-        case MetricType.bodyFat: return 'Progress: $sign${abs.toStringAsFixed(1)}% vs start.';
-        case MetricType.bmi: return 'Your BMI shifted $sign${abs.toStringAsFixed(1)}.';
+        case MetricType.weight: return 'Logged $loggedDays days. $sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start.';
+        case MetricType.bodyFat: return 'Logged $loggedDays days. Progress: $sign${abs.toStringAsFixed(1)}% vs start.';
+        case MetricType.bmi: return 'Logged $loggedDays days. BMI shifted $sign${abs.toStringAsFixed(1)}.';
         default: break;
       }
     }
-    return 'Consistent tracking is the key to steady action.';
+    return 'Consistently logged for $loggedDays days this period.';
   }
 
   String _overviewUnit(MetricType metric, bool useKg) {
@@ -321,21 +339,20 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         }
       }
 
-      final kcal = (avg * 0.04).toStringAsFixed(0);
-      final distance = (avg * 0.762).toStringAsFixed(0);
+      final totalFormatted = NumberFormat('#,###').format(totalSteps.toInt());
 
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildCircularStat('kcal', '${kcal}+', Icons.bolt),
-            _buildCircularStat('meters', distance, Icons.location_on),
-            _buildCircularStat('max steps', NumberFormat('#,###').format(maxVal.toInt()), Icons.directions_run),
+            _buildCircularStat('total steps', totalFormatted, Icons.directions_walk_rounded),
+            _buildCircularStat('days logged', '$totalDays', Icons.fact_check_rounded),
+            _buildCircularStat('best day', NumberFormat('#,###').format(maxVal.toInt()), Icons.emoji_events_rounded),
           ],
         ),
       );
-    } 
+    }
     
     // Unify all metrics to the beautifully flat Triple-Circle Sesireka Layout
     // Displaying "The Journey": Start, Latest, and Delta (Change)
@@ -421,7 +438,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     );
   }
 
-  Widget _buildChart(List<ChartDataPoint> data, bool useKg, dynamic profile) {
+  Widget _buildChart(List<ChartDataPoint> data, bool useKg, dynamic profile, DateTime startDate, DateTime endDate) {
     final daysWithData = data.where((d) => d.value != null).length;
     final isEmpty = daysWithData == 0;
     
@@ -544,8 +561,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               metric: _getMetricSpec(_selectedMetric, useKg),
               data: isEmpty ? [] : data,
               trendData: trendData,
-              startDate: _startDate,
-              endDate: _endDate,
+              startDate: startDate,
+              endDate: endDate,
               useKg: useKg,
               onToggleUnit: () {},
               statLabels: const [], // Hide Shared Chart Footer
@@ -561,20 +578,16 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                       : (profile.targetWeight as double) * 2.20462)
                   : null,
               onPointLongPress: null,
-              onPointTap: (date, value) {
-                // If it's weekly or monthly, date is just the day.
-                // If it's a longer range, date is the bucket's start date.
-                // We'll update the selected bucket state if it's 3M/6M/12M.
+              onPointTap: (point) {
                 if (_selectedRange == TimeRange.threeMonths || _selectedRange == TimeRange.sixMonths || _selectedRange == TimeRange.twelveMonths) {
-                  final pt = data.where((d) => d.date == date).firstOrNull;
-                  if (pt != null && pt.bucket != null) {
+                  if (point.bucket != null) {
                     setState(() {
-                      _selectedBucket = pt.bucket;
+                      _selectedBucket = point.bucket;
                     });
                   }
                 } else {
                   // Direct daily navigation for 1W/1M
-                  ref.read(selectedDateProvider.notifier).state = date;
+                  ref.read(selectedDateProvider.notifier).state = point.date;
                   context.go('/home');
                 }
               },
@@ -612,14 +625,18 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final now = ref.watch(clockProvider);
+    final startDate = _calcStartDate(now);
+    final endDate = _calcEndDate(now);
+    
     final profile = ref.watch(profileProvider);
     final useKg = profile.useKg;
     
     final buckets = ref.watch(aggregatedChartProvider((
       metric: _selectedMetric,
       range: _selectedRange,
-      start: _startDate,
-      end: _endDate,
+      start: startDate,
+      end: endDate,
     )));
     
     final data = buckets.map((b) => ChartDataPoint(b.startDate, b.average, bucket: b)).toList();
@@ -692,7 +709,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           },
           child: KeyedSubtree(
             key: ValueKey('$_selectedMetric-$_selectedRange'),
-            child: _buildChart(data, useKg, profile),
+            child: _buildChart(data, useKg, profile, startDate, endDate),
           ),
         ),
       ),

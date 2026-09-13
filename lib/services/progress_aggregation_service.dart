@@ -49,31 +49,37 @@ class ProgressAggregationService {
   }
 
   static double? _extractValue(DailyLog? log, DailyMealLog? mLog, MetricType metric, double heightInMeters, bool useKg) {
+    double? val;
     switch (metric) {
       case MetricType.weight:
-        if (log?.weight == null) return null;
-        return useKg ? log!.weight! : log!.weight! * 2.20462;
+        if (log?.weight != null) val = useKg ? log!.weight! : log!.weight! * 2.20462;
+        break;
       case MetricType.steps:
-        return log?.steps?.toDouble();
+        val = log?.steps?.toDouble();
+        break;
       case MetricType.sleep:
-        return log?.sleepHours;
+        val = log?.sleepHours;
+        break;
       case MetricType.screenTime:
-        if (log?.screenTimeMinutes != null) return log!.screenTimeMinutes! / 60.0;
-        return null;
+        if (log?.screenTimeMinutes != null) val = log!.screenTimeMinutes! / 60.0;
+        break;
       case MetricType.bodyFat:
-        return log?.bodyFat;
+        val = log?.bodyFat;
+        break;
       case MetricType.bmi:
         if (log?.weight != null && heightInMeters > 0) {
-          return log!.weight! / (heightInMeters * heightInMeters);
+          val = log!.weight! / (heightInMeters * heightInMeters);
         }
-        return null;
+        break;
       case MetricType.calories:
-        if (mLog != null && mLog.loggedSlotsCount > 0) return mLog.totalCalories.toDouble();
-        return null;
+        if (mLog != null && mLog.loggedSlotsCount > 0) val = mLog.totalCalories.toDouble();
+        break;
       case MetricType.protein:
-        if (mLog != null && mLog.loggedSlotsCount > 0) return mLog.totalProtein;
-        return null;
+        if (mLog != null && mLog.loggedSlotsCount > 0) val = mLog.totalProtein;
+        break;
     }
+    if (val != null && (!val.isFinite || val < 0)) return null;
+    return val;
   }
 
   static List<ChartBucket> _buildDailyBuckets(
@@ -106,7 +112,7 @@ class ProgressAggregationService {
         isPartial: false,
       ));
       
-      current = current.add(const Duration(days: 1));
+      current = DateTime(current.year, current.month, current.day + 1);
     }
     
     return buckets;
@@ -141,7 +147,7 @@ class ProgressAggregationService {
       int eligibleDays = 0;
       
       for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
-        final d = effectiveStart.add(Duration(days: i));
+        final d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day + i);
         if (d.isAfter(today)) continue; // Exclude future days
         
         eligibleDays++;
@@ -174,7 +180,7 @@ class ProgressAggregationService {
         isPartial: isPartial,
       ));
       
-      current = current.add(const Duration(days: 7));
+      current = DateTime(current.year, current.month, current.day + 7);
     }
     
     return buckets;
@@ -209,7 +215,7 @@ class ProgressAggregationService {
       int eligibleDays = 0;
       
       for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
-        final d = effectiveStart.add(Duration(days: i));
+        final d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day + i);
         if (d.isAfter(today)) continue;
         
         eligibleDays++;

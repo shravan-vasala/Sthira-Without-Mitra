@@ -67,54 +67,46 @@ class ChartDrilldownSheet extends ConsumerWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: context.colors.scaffoldBg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.border,
-                borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 12),
+            Text(
+              'Daily Details: ${DateFormat('MMM d').format(bucket.startDate)} - ${DateFormat('MMM d').format(bucket.endDate)}',
+              style: TextStyle(
+                fontFamily: 'Cabinet Grotesk',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: context.colors.textDark,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 250,
+              child: SharedChartCard(
+                metric: metricSpec,
+                data: data,
+                startDate: bucket.startDate,
+                endDate: bucket.endDate,
+                useKg: useKg,
+                statLabels: const [],
+                statValues: const [],
+                timeFormat: bucket.endDate.difference(bucket.startDate).inDays <= 7 ? ChartTimeFormat.weekly : ChartTimeFormat.monthly,
+                emptyMessage: 'No daily entries in this period.',
+                expandChart: true,
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Daily Details: ${DateFormat('MMM d').format(bucket.startDate)} - ${DateFormat('MMM d').format(bucket.endDate)}',
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: context.colors.textDark,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 250,
-            child: SharedChartCard(
-              metric: metricSpec,
-              data: data,
-              startDate: bucket.startDate,
-              endDate: bucket.endDate,
-              useKg: useKg,
-              statLabels: const [],
-              statValues: const [],
-              timeFormat: bucket.endDate.difference(bucket.startDate).inDays <= 7 ? ChartTimeFormat.weekly : ChartTimeFormat.monthly,
-              emptyMessage: 'No daily entries in this period.',
-              expandChart: true,
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

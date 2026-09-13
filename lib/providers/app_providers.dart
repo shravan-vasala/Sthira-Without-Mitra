@@ -56,6 +56,8 @@ export 'sync_controller.dart';
 import 'gamification_provider.dart';
 export 'gamification_provider.dart';
 
+final clockProvider = Provider<DateTime>((ref) => DateTime.now());
+
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('prefs must be overridden in ProviderScope');
 });
