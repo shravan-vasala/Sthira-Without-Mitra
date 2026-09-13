@@ -1,0 +1,148 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:trufit_bodamma/services/progress_aggregation_service.dart';
+import 'package:trufit_bodamma/models/daily_log.dart';
+import 'package:trufit_bodamma/models/daily_meal_log.dart';
+import 'package:trufit_bodamma/screens/progress/progress_screen.dart';
+
+void main() {
+  group('ProgressAggregationService Tests', () {
+    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    
+    test('Scenario 1 & 2: Calendar-week boundaries and partial weeks', () {
+      // 3M range (approx 90 days). Let's use a fixed start/end
+      // 2024-01-01 was a Monday.
+      final start = DateTime(2024, 1, 10); // Wednesday
+      final end = DateTime(2024, 1, 31); // Wednesday
+      
+      final buckets = ProgressAggregationService.aggregate(
+        logs: [],
+        mealLogs: [],
+        metric: MetricType.weight,
+        range: TimeRange.threeMonths,
+        rangeStart: start,
+        rangeEnd: end,
+        heightInMeters: 1.8,
+        useKg: true,
+      );
+      
+      // Buckets should start from the Monday of Jan 10th (which is Jan 8),
+      // but clipped to effective start: Jan 10.
+      expect(buckets.first.startDate, DateTime(2024, 1, 10));
+      expect(buckets.first.endDate, DateTime(2024, 1, 14)); // Sunday
+      expect(buckets.first.isPartial, true);
+      
+      // Last bucket should end on Jan 31
+      expect(buckets.last.endDate, DateTime(2024, 1, 31));
+      expect(buckets.last.isPartial, true);
+    });
+
+    test('Scenario 4: December/January boundaries and Leap Year', () {
+      final start = DateTime(2023, 12, 15);
+      final end = DateTime(2024, 3, 5); // 2024 is a leap year
+      
+      final buckets = ProgressAggregationService.aggregate(
+        logs: [],
+        mealLogs: [],
+        metric: MetricType.weight,
+        range: TimeRange.twelveMonths,
+        rangeStart: start,
+        rangeEnd: end,
+        heightInMeters: 1.8,
+        useKg: true,
+      );
+      
+      // 12M produces monthly buckets
+      // Dec 2023 bucket
+      expect(buckets[0].startDate, DateTime(2023, 12, 15));
+      expect(buckets[0].endDate, DateTime(2023, 12, 31));
+      
+      // Jan 2024 bucket
+      expect(buckets[1].startDate, DateTime(2024, 1, 1));
+      expect(buckets[1].endDate, DateTime(2024, 1, 31));
+      
+      // Feb 2024 bucket (Leap year)
+      expect(buckets[2].startDate, DateTime(2024, 2, 1));
+      expect(buckets[2].endDate, DateTime(2024, 2, 29));
+      
+      // Mar 2024 bucket
+      expect(buckets[3].startDate, DateTime(2024, 3, 1));
+      expect(buckets[3].endDate, DateTime(2024, 3, 5));
+    });
+
+    test('Scenario 5 & 6 & 11: Missing vs recorded-zero, Meal-only days, Empty gaps', () {
+      final start = DateTime(2024, 5, 1);
+      final end = DateTime(2024, 5, 3);
+      
+      final logs = [
+        DailyLog(date: '2024-05-01', steps: 0, weight: 80.0), // Recorded zero steps
+        // May 02 is totally missing DailyLog, but has a meal log
+      ];
+      final mealLogs = [
+        DailyMealLog(date: '2024-05-02', customSlots: {'lunch': MealSlotLog(totalCalories: 1500)}),
+      ];
+      
+      // Check Steps (May 1 should have 0, May 2 should be null, May 3 null)
+      final stepBuckets = ProgressAggregationService.aggregate(
+        logs: logs, mealLogs: mealLogs, metric: MetricType.steps, range: TimeRange.weekly,
+        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true,
+      );
+      expect(stepBuckets[0].average, 0.0);
+      expect(stepBuckets[1].average, null); // gap
+      
+      // Check Calories (May 1 null, May 2 1500)
+      final calBuckets = ProgressAggregationService.aggregate(
+        logs: logs, mealLogs: mealLogs, metric: MetricType.calories, range: TimeRange.weekly,
+        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true,
+      );
+      expect(calBuckets[0].average, null); // gap
+      expect(calBuckets[1].average, 1500.0);
+    });
+
+    test('Scenario 9: Canonical kg values and consistent lb display', () {
+      final start = DateTime(2024, 5, 1);
+      final logs = [DailyLog(date: '2024-05-01', weight: 100.0)]; // 100kg
+      
+      final bucketsKg = ProgressAggregationService.aggregate(
+        logs: logs, mealLogs: [], metric: MetricType.weight, range: TimeRange.weekly,
+        rangeStart: start, rangeEnd: start, heightInMeters: 1.8, useKg: true,
+      );
+      expect(bucketsKg.first.average, 100.0);
+      
+      final bucketsLb = ProgressAggregationService.aggregate(
+        logs: logs, mealLogs: [], metric: MetricType.weight, range: TimeRange.weekly,
+        rangeStart: start, rangeEnd: start, heightInMeters: 1.8, useKg: false,
+      );
+      expect(bucketsLb.first.average, closeTo(220.462, 0.001));
+    });
+
+    test('Scenario 12: Future days excluded from coverage', () {
+      final start = today.subtract(const Duration(days: 2));
+      final end = today.add(const Duration(days: 2)); // Range extends into future
+      
+      final buckets = ProgressAggregationService.aggregate(
+        logs: [], mealLogs: [], metric: MetricType.weight, range: TimeRange.threeMonths, // weekly buckets
+        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true,
+      );
+      
+      // The eligibleDaysCount should NOT include the future days.
+      // If start is today-2, and end is today+2, there are 3 days up to today.
+      // So eligibleDaysCount should be 3, not 5.
+      final totalEligible = buckets.fold(0, (sum, b) => sum + b.eligibleDaysCount);
+      expect(totalEligible, 3);
+    });
+    
+    test('Scenario 13: Nonfinite/invalid inputs for BMI', () {
+      final start = DateTime(2024, 5, 1);
+      final logs = [DailyLog(date: '2024-05-01', weight: 80.0)];
+      
+      // Height is 0 (invalid)
+      final buckets = ProgressAggregationService.aggregate(
+        logs: logs, mealLogs: [], metric: MetricType.bmi, range: TimeRange.weekly,
+        rangeStart: start, rangeEnd: start, heightInMeters: 0.0, useKg: true,
+      );
+      
+      // BMI should be null gracefully rather than Infinity or NaN
+      expect(buckets.first.average, null);
+    });
+  });
+}

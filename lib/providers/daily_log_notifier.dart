@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/daily_log.dart';
-import '../services/widget_update_service.dart';
+
 import '../models/habit.dart';
 import '../services/health_connect_service.dart';
 import 'app_providers.dart';

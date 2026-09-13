@@ -70,12 +70,14 @@ class DailyMealLog {
       );
 
     // New format
-    if (json['customSlots'] != null) {
-      final map = json['customSlots'] as Map<String, dynamic>;
+    if (json['customSlots'] != null && json['customSlots'] is Map) {
+      final map = Map<String, dynamic>.from(json['customSlots'] as Map);
       for (final entry in map.entries) {
-        slots[entry.key] = MealSlotLog.fromJson(
-          entry.value as Map<String, dynamic>,
-        );
+        if (entry.value is Map) {
+          slots[entry.key] = MealSlotLog.fromJson(
+            Map<String, dynamic>.from(entry.value as Map),
+          );
+        }
       }
     }
 

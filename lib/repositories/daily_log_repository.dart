@@ -8,28 +8,77 @@ class DailyLogRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
   
+  int _syncGeneration = 0;
+  String? _attachedUid;
+  final List<StreamSubscription> _syncSubscriptions = [];
+  final Map<String, DateTime> _localEdits = {};
+
   final _updates = StreamController<void>.broadcast();
   Stream<void> get watchUpdates => _updates.stream;
 
-  /// Attach a Firestore sync service (called after sign-in).
-  void attachSync(ICloudSyncService sync) {
-    _sync = sync;
-    if (_sync?.canSync == true) {
-      _sync!.streamCollection('daily_logs').listen((data) async {
-        for (final entry in data.entries) {
-          final log = DailyLog.fromJson(entry.value);
-          final existing = getLog(entry.key);
-          if (existing == null ||
-              jsonEncode(existing.toJson()) != jsonEncode(log.toJson())) {
-            if (existing != null) log.id = existing.id;
-            await _isar.writeTxn(() async {
-              await _isar.dailyLogs.put(log);
-            });
-            _updates.add(null);
-          }
-        }
-      });
+  Future<void> detachSync() async {
+    _syncGeneration++;
+    _attachedUid = null;
+    final toCancel = List<StreamSubscription>.from(_syncSubscriptions);
+    _syncSubscriptions.clear();
+    for (final sub in toCancel) {
+      try {
+        await sub.cancel();
+      } catch (e) {
+        // ignore errors during teardown
+      }
     }
+    _sync = null;
+  }
+
+  /// Attach a Firestore sync service (called after sign-in).
+  Future<void> attachSync(ICloudSyncService sync) async {
+    await detachSync();
+    _sync = sync;
+    final currentGen = _syncGeneration;
+    final targetUid = sync.currentUid;
+    _attachedUid = targetUid;
+
+    if (sync.canSync) {
+      _syncSubscriptions.add(
+        sync.streamCollection('daily_logs').listen((data) async {
+          if (currentGen != _syncGeneration) return;
+          for (final entry in data.entries) {
+            if (currentGen != _syncGeneration) return;
+            final log = DailyLog.fromJson(entry.value);
+            final existing = getLog(entry.key);
+
+            // If incoming is older than existing, skip
+            if (existing?.updatedAt != null && log.updatedAt != null && log.updatedAt!.isBefore(existing!.updatedAt!)) {
+              continue;
+            }
+            final localEdit = _localEdits[entry.key];
+            if (log.updatedAt != null && localEdit != null && log.updatedAt!.isBefore(localEdit)) {
+              continue;
+            }
+
+            if (existing == null ||
+                jsonEncode(existing.toJson()) != jsonEncode(log.toJson())) {
+              if (existing != null) log.id = existing.id;
+              await _isar.writeTxn(() async {
+                if (currentGen != _syncGeneration ||
+                    sync.currentUid != targetUid ||
+                    _attachedUid != targetUid) {
+                  return;
+                }
+                await _isar.dailyLogs.put(log);
+              });
+              _updates.add(null);
+            }
+          }
+        }),
+      );
+    }
+  }
+
+  void dispose() {
+    detachSync();
+    _updates.close();
   }
 
   Future<void> init(Isar isar) async {
@@ -55,6 +104,7 @@ class DailyLogRepository {
   }
 
   Future<void> saveLog(DailyLog log) async {
+    _localEdits[log.date] = DateTime.now();
     final updatedLog = log.copyWith(updatedAt: DateTime.now());
     final existing = getLog(log.date);
     if (existing != null) {

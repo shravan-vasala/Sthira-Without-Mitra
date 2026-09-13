@@ -39,13 +39,6 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
         ? ((scoreData.totalScore / scoreData.totalMax) * 100).round()
         : 0;
 
-    Color scoreColor = context.colors.green;
-    if (percentage < 50) {
-      scoreColor = context.colors.red;
-    } else if (percentage < 80) {
-      scoreColor = context.colors.orange;
-    }
-
     return AppSheet(
       title: 'Daily Score',
       scrollable: true,
@@ -158,7 +151,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               ],
             ).animate().fade(delay: 400.ms),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           Text(
             'SCORE BREAKDOWN',
             style: TextStyle(
@@ -168,11 +161,11 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               color: context.colors.primary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // 2.3 Breakdown as progress bars (Staggered)
           SurfaceCard(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(12),
             border: null,
             child: Column(
               children: [
@@ -182,8 +175,11 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   max: scoreData.habitsMax,
                   icon: Icons.check_circle_outline_rounded,
                   color: context.colors.primary,
+                  onTap: scoreData.remainingLabels.contains('habits')
+                      ? () => Navigator.pop(context)
+                      : null,
                 ).animate().fade(delay: 100.ms).slideX(begin: 0.05),
-                const SizedBox(height: 24),
+                const SizedBox(height: 4),
                 _AnimatedProgressBarRow(
                   label: 'Workouts',
                   score: scoreData.workoutsScore,
@@ -194,14 +190,23 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                       scoreData.workoutsScore == scoreData.workoutsMax &&
                       scoreData.totalScore > 0 &&
                       ref.watch(workoutPlanProvider) != null,
+                  onTap: scoreData.remainingLabels.contains('workout')
+                      ? () {
+                          Navigator.pop(context);
+                          context.go('/workout');
+                        }
+                      : null,
                 ).animate().fade(delay: 180.ms).slideX(begin: 0.05),
-                const SizedBox(height: 24),
+                const SizedBox(height: 4),
                 _AnimatedProgressBarRow(
                   label: 'Meals',
                   score: scoreData.mealsScore,
                   max: scoreData.mealsMax,
                   icon: Icons.restaurant_rounded,
                   color: context.colors.green,
+                  onTap: scoreData.remainingLabels.contains('meals')
+                      ? () => Navigator.pop(context)
+                      : null,
                 ).animate().fade(delay: 260.ms).slideX(begin: 0.05),
               ],
             ),
@@ -209,62 +214,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
 
           const SizedBox(height: 32),
 
-          // 2.4 "What's left" actionable row
-          if (scoreData.remainingLabels.isNotEmpty) ...[
-            Text(
-              'STILL TO DO',
-              maxLines: 1,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-                color: context.colors.primary,
-              ),
-            ),
+          // 2.4 Perfect day state (retained)
+          if (scoreData.remainingLabels.isEmpty && scoreData.totalScore == scoreData.totalMax && scoreData.totalMax > 0) ...[
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 12,
-              children: scoreData.remainingLabels.map((label) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (label == 'workout') {
-                      context.go('/workout');
-                    }
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: context.colors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          label.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.2,
-                            color: context.colors.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          size: 16,
-                          color: context.colors.primary,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ).animate().fade(delay: 340.ms),
-          ] else if (scoreData.totalScore == scoreData.totalMax && scoreData.totalMax > 0) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -279,12 +231,14 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     size: 20,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'Perfect day — everything done ✨',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.green,
+                  Expanded(
+                    child: Text(
+                      'Perfect day — everything done ✨',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.green,
+                      ),
                     ),
                   ),
                 ],
@@ -292,19 +246,38 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
             ).animate().fade(delay: 340.ms),
           ],
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
-          // 2.5 Footer
-          Text(
-            'Score is weighted proportionally based on scheduled categories (Habits up to 50, Workouts up to 30, Meals up to 20).',
-            style: TextStyle(
-              fontSize: 12,
-              color: context.colors.textLight,
-              fontStyle: FontStyle.italic,
+          // 2.5 Footer Disclosure
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              title: Text(
+                'How scoring works',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textMedium,
+                ),
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    'Score is weighted proportionally based on scheduled categories (Habits up to 50, Workouts up to 30, Meals up to 20).',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: context.colors.textMedium,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -367,6 +340,7 @@ class _AnimatedProgressBarRow extends StatelessWidget {
     required this.icon,
     required this.color,
     this.isRestDay = false,
+    this.onTap,
   });
 
   final String label;
@@ -375,107 +349,126 @@ class _AnimatedProgressBarRow extends StatelessWidget {
   final IconData icon;
   final Color color;
   final bool isRestDay;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final fraction = max > 0 ? (score / max).clamp(0.0, 1.0) : 0.0;
+    final isConfigured = max > 0 || isRestDay;
+    final isComplete = max > 0 && score >= max || isRestDay;
 
-    return Opacity(
-      opacity: max <= 0 && !isRestDay ? 0.5 : 1.0,
-      child: Row(
-        children: [
-          Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    String statusText;
+    if (isRestDay) {
+      statusText = 'Rest day';
+    } else if (max <= 0) {
+      statusText = 'Not configured';
+    } else {
+      statusText = '${score == score.toInt() ? score.toInt().toString() : score.toStringAsFixed(1)} / ${max.toStringAsFixed(0)}';
+    }
+
+    return Semantics(
+      label: '$label category. $statusText. ${onTap != null ? 'Double tap to open' : ''}',
+      button: onTap != null,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Opacity(
+            opacity: !isConfigured ? 0.5 : 1.0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              child: Row(
                 children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
                     ),
+                    child: Icon(icon, color: color, size: 20),
                   ),
-                  if (isRestDay)
-                    Row(
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Rest day',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.green,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: context.colors.textDark,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                if (isRestDay) ...[
+                                  Icon(
+                                    Icons.spa_rounded,
+                                    color: context.colors.green,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                ],
+                                Text(
+                                  statusText,
+                                  style: AppTheme.numeric(
+                                    TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: context.colors.textMedium,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.spa_rounded,
-                          color: context.colors.green,
-                          size: 12,
+                        const SizedBox(height: 6),
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0, end: isRestDay ? 1.0 : fraction),
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? Duration.zero
+                              : const Duration(milliseconds: 1000),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, val, _) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: val,
+                                backgroundColor: context.colors.primary.withValues(
+                                  alpha: 0.12,
+                                ),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  isRestDay ? context.colors.green : color,
+                                ),
+                                minHeight: 2,
+                              ),
+                            );
+                          },
                         ),
                       ],
-                    )
-                  else if (max <= 0)
-                    Text(
-                      'Not configured',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.textLight,
-                      ),
-                    )
-                  else
-                    Text(
-                      '${score == score.toInt() ? score.toInt().toString() : score.toStringAsFixed(1)} / ${max.toStringAsFixed(0)}',
-                      style: AppTheme.numeric(
-                        TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textMedium,
-                        ),
-                      ),
                     ),
+                  ),
+                  if (onTap != null) ...[
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20,
+                      color: context.colors.textMedium.withValues(alpha: 0.5),
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 8),
-              TweenAnimationBuilder<double>(
-                tween: Tween<double>(begin: 0, end: isRestDay ? 1.0 : fraction),
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 1000),
-                curve: Curves.easeOutCubic,
-                builder: (context, val, _) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: val,
-                      backgroundColor: context.colors.primary.withValues(
-                        alpha: 0.12,
-                      ),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        isRestDay ? context.colors.green : color,
-                      ),
-                      minHeight: 4,
-                    ),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
         ),
-      ],
-    ));
+      ),
+    );
   }
 }

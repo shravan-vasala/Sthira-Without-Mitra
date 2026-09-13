@@ -22,6 +22,7 @@ class WidgetCoordinator {
   final Ref _ref;
   Timer? _debounceTimer;
   final List<StreamSubscription> _subs = [];
+  int _updateGeneration = 0;
 
   WidgetCoordinator(this._ref) {
     _initListeners();
@@ -34,20 +35,46 @@ class WidgetCoordinator {
     final mealRepo = _ref.read(mealRepoProvider);
     final habitRepo = _ref.read(habitRepoProvider);
     final exerciseLogRepo = _ref.read(exerciseLogRepoProvider);
+    final authService = _ref.read(authServiceProvider);
 
     _subs.add(dailyLogRepo.watchUpdates.listen((_) => _scheduleUpdate()));
     _subs.add(mealRepo.watchUpdates.listen((_) => _scheduleUpdate()));
     _subs.add(habitRepo.watchUpdates.listen((_) => _scheduleUpdate()));
     _subs.add(exerciseLogRepo.watchUpdates.listen((_) => _scheduleUpdate()));
+    _subs.add(authService.authStateChanges.listen((user) {
+      if (user == null) {
+        _clearWidgetData();
+      } else {
+        _scheduleUpdate();
+      }
+    }));
+  }
+
+  Future<void> _clearWidgetData() async {
+    _updateGeneration++;
+    final gen = _updateGeneration;
+    try {
+      if (gen != _updateGeneration) return;
+      await HomeWidget.saveWidgetData<String>('widget_data', '{}');
+      if (gen != _updateGeneration) return;
+      await HomeWidget.updateWidget(androidName: 'TrufitWidgetProvider');
+    } catch (e) {
+      debugPrint('WidgetCoordinator clear error: $e');
+    }
   }
 
   void _scheduleUpdate() {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), _pushSnapshot);
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _updateGeneration++;
+      _pushSnapshot(_updateGeneration);
+    });
   }
 
-  Future<void> _pushSnapshot() async {
+  Future<void> _pushSnapshot(int generation) async {
     try {
+      if (generation != _updateGeneration) return;
+      
       final now = DateTime.now();
       final todayStr = DateFormat('yyyy-MM-dd').format(now);
       
@@ -170,7 +197,9 @@ class WidgetCoordinator {
         'workoutStatus': workoutStatus,
       };
 
+      if (generation != _updateGeneration) return;
       await HomeWidget.saveWidgetData<String>('widget_data', jsonEncode(snapshot));
+      if (generation != _updateGeneration) return;
       await HomeWidget.updateWidget(
         androidName: 'TrufitWidgetProvider',
       );

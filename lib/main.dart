@@ -160,14 +160,14 @@ Future<void> main() async {
     final firestoreSyncService = FirestoreSyncService(authService);
 
     workoutRepo.attachSync(firestoreSyncService);
-    mealRepo.attachSync(firestoreSyncService);
-    dailyLogRepo.attachSync(firestoreSyncService);
+    await mealRepo.attachSync(firestoreSyncService);
+    await dailyLogRepo.attachSync(firestoreSyncService);
     habitRepo.attachSync(firestoreSyncService);
     bodyStatsRepo.attachSync(firestoreSyncService);
     profileRepo.attachSync(firestoreSyncService);
     exerciseLogRepo.attachSync(firestoreSyncService);
     coachNoteRepo.attachSync(firestoreSyncService);
-    badgeRepo.attachSync(firestoreSyncService);
+    await badgeRepo.attachSync(firestoreSyncService);
 
     // Fetch global plans from Firebase (non-blocking) to merge with local seed data
     // ignore: unawaited_futures

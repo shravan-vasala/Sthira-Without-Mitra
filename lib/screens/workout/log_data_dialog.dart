@@ -10,7 +10,7 @@ import '../../models/exercise_log.dart';
 import '../../utils/exercise_log_save.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
-import '../../services/widget_update_service.dart';
+
 
 import '../../utils/target_parser.dart';
 

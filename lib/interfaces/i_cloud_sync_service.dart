@@ -1,5 +1,6 @@
 abstract class ICloudSyncService {
   bool get canSync;
+  String? get currentUid;
 
   Stream<int> get pendingCountStream;
   Future<void> flushNow();

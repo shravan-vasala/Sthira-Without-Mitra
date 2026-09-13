@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../services/haptics.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../services/widget_update_service.dart';
+
 import '../../utils/format_units.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';

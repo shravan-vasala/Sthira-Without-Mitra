@@ -14,8 +14,11 @@ import '../home/weight_entry_dialog.dart';
 import '../home/steps_entry_dialog.dart';
 import '../home/sleep_entry_dialog.dart';
 import '../home/body_fat_entry_dialog.dart';
+import 'widgets/chart_drilldown_sheet.dart';
 import '../../models/daily_meal_log.dart';
 import 'widgets/insights_card.dart';
+import '../../providers/progress_chart_provider.dart';
+import '../../services/progress_aggregation_service.dart';
 
 enum MetricType {
   weight,
@@ -28,7 +31,7 @@ enum MetricType {
   screenTime,
 }
 
-enum TimeRange { weekly, oneMonth, threeMonths, sixMonths, ytd }
+enum TimeRange { weekly, oneMonth, threeMonths, sixMonths, twelveMonths }
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key, this.initialMetric});
@@ -42,6 +45,7 @@ class ProgressScreen extends ConsumerStatefulWidget {
 class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   late MetricType _selectedMetric;
   final Map<MetricType, TimeRange> _selectedRanges = {};
+  ChartBucket? _selectedBucket;
 
   TimeRange get _selectedRange {
     if (_selectedRanges.containsKey(_selectedMetric)) return _selectedRanges[_selectedMetric]!;
@@ -53,6 +57,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   void _setRange(TimeRange range) {
     setState(() {
       _selectedRanges[_selectedMetric] = range;
+      _selectedBucket = null;
     });
   }
 
@@ -68,6 +73,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       int idx = MetricType.values.indexOf(_selectedMetric);
       idx = (idx + 1) % MetricType.values.length;
       _selectedMetric = MetricType.values[idx];
+      _selectedBucket = null;
     });
   }
 
@@ -77,6 +83,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       int idx = MetricType.values.indexOf(_selectedMetric);
       idx = (idx - 1 + MetricType.values.length) % MetricType.values.length;
       _selectedMetric = MetricType.values[idx];
+      _selectedBucket = null;
     });
   }
 
@@ -84,17 +91,17 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (details.primaryVelocity == null) return;
     if (details.primaryVelocity! > 300) {
       Haptics.tap();
-      if (_selectedRange == TimeRange.ytd) _setRange(TimeRange.sixMonths);
+      if (_selectedRange == TimeRange.twelveMonths) _setRange(TimeRange.sixMonths);
       else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.threeMonths);
       else if (_selectedRange == TimeRange.threeMonths) _setRange(TimeRange.oneMonth);
       else if (_selectedRange == TimeRange.oneMonth) _setRange(TimeRange.weekly);
-      else _setRange(TimeRange.ytd);
+      else _setRange(TimeRange.twelveMonths);
     } else if (details.primaryVelocity! < -300) {
       Haptics.tap();
       if (_selectedRange == TimeRange.weekly) _setRange(TimeRange.oneMonth);
       else if (_selectedRange == TimeRange.oneMonth) _setRange(TimeRange.threeMonths);
       else if (_selectedRange == TimeRange.threeMonths) _setRange(TimeRange.sixMonths);
-      else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.ytd);
+      else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.twelveMonths);
       else _setRange(TimeRange.weekly);
     }
   }
@@ -110,8 +117,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         return d.subtract(const Duration(days: 90));
       case TimeRange.sixMonths:
         return d.subtract(const Duration(days: 180));
-      case TimeRange.ytd:
-        return DateTime(d.year, 1, 1);
+      case TimeRange.twelveMonths:
+        return DateTime(d.year, d.month - 11, 1);
     }
   }
 
@@ -129,12 +136,22 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     }
   }
 
+  void _openDrilldownSheet(ChartBucket bucket) {
+    showAppBottomSheet(
+      context: context,
+      builder: (_) => ChartDrilldownSheet(
+        bucket: bucket,
+        metric: _selectedMetric,
+      ),
+    );
+  }
+
   List<ChartDataPoint> _calculateTrendData(List<ChartDataPoint> data) {
     if (data.isEmpty) return [];
     final trend = <ChartDataPoint>[];
     for (int i = 0; i < data.length; i++) {
         final windowStart = data[i].date.subtract(const Duration(days: 6));
-        final window = data.where((d) => !d.date.isBefore(windowStart) && !d.date.isAfter(data[i].date)).toList();
+        final window = data.where((d) => d.value != null && !d.date.isBefore(windowStart) && !d.date.isAfter(data[i].date)).toList();
         if (window.isNotEmpty) {
           final sum = window.fold<double>(0, (p, c) => p + c.value!);
           trend.add(ChartDataPoint(data[i].date, sum / window.length));
@@ -238,11 +255,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   String _overviewSubtitle(List<ChartDataPoint> data, MetricType metric, bool useKg) {
-    if (data.isEmpty) return 'No data yet';
+    final validData = data.where((d) => d.value != null && d.value!.isFinite).toList();
+    if (validData.isEmpty) return 'No recorded data for this period.';
     final isTrendMetric = metric == MetricType.weight || metric == MetricType.bodyFat || metric == MetricType.bmi || metric == MetricType.sleep;
-    if (isTrendMetric && data.length >= 2) {
-      final trend = _calculateTrendData(data);
-      if (trend.isEmpty) trend.addAll(data);
+    if (isTrendMetric && validData.length >= 2) {
+      final trend = _calculateTrendData(validData);
+      if (trend.isEmpty) trend.addAll(validData);
       final delta = trend.last.value! - trend.first.value!;
       final abs = delta.abs();
       final sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
@@ -272,15 +290,39 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   }
 
   Widget _buildStatCards(List<ChartDataPoint> data, MetricType metric, bool useKg, UserProfile profile) {
-    if (data.isEmpty) return const SizedBox();
+    final validData = data.where((d) => d.value != null && d.value!.isFinite).toList();
+    if (validData.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Text(
+          'No recorded data for this period.',
+          style: TextStyle(fontSize: 14, color: context.colors.textMedium),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
 
     if (metric == MetricType.steps) {
-      final valid = data.map((d) => d.value!).toList();
-      final total = valid.reduce((a, b) => a + b);
-      final avg = total ~/ valid.length;
-      final maxVal = valid.reduce((a, b) => a > b ? a : b).toInt();
+      double totalSteps = 0;
+      int totalDays = 0;
+      for (final d in validData) {
+        final days = d.bucket?.validDaysCount ?? 1;
+        totalSteps += d.value! * days;
+        totalDays += days;
+      }
+      final avg = totalDays > 0 ? (totalSteps / totalDays).toInt() : 0;
+      
+      double maxVal = 0;
+      for (final d in validData) {
+        if (d.bucket != null && d.bucket!.max != null) {
+          if (d.bucket!.max! > maxVal) maxVal = d.bucket!.max!;
+        } else {
+          if (d.value! > maxVal) maxVal = d.value!;
+        }
+      }
+
       final kcal = (avg * 0.04).toStringAsFixed(0);
-      final distance = (avg * 0.762).toStringAsFixed(0); // roughly 0.762m per step
+      final distance = (avg * 0.762).toStringAsFixed(0);
 
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -289,7 +331,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           children: [
             _buildCircularStat('kcal', '${kcal}+', Icons.bolt),
             _buildCircularStat('meters', distance, Icons.location_on),
-            _buildCircularStat('max steps', NumberFormat('#,###').format(maxVal), Icons.directions_run),
+            _buildCircularStat('max steps', NumberFormat('#,###').format(maxVal.toInt()), Icons.directions_run),
           ],
         ),
       );
@@ -297,21 +339,25 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     
     // Unify all metrics to the beautifully flat Triple-Circle Sesireka Layout
     // Displaying "The Journey": Start, Latest, and Delta (Change)
-    final start = data.first.value!;
-    final latest = data.last.value!;
+    final start = validData.first.value!;
+    final latest = validData.last.value!;
     final delta = latest - start;
     final sign = delta > 0 ? '+' : '';
     
     final unit = _overviewUnit(metric, useKg);
+
+    final isMacroBucket = _selectedRange == TimeRange.threeMonths || _selectedRange == TimeRange.sixMonths || _selectedRange == TimeRange.twelveMonths;
+    final startLabel = isMacroBucket ? 'start avg' : 'start $unit';
+    final latestLabel = isMacroBucket ? 'latest avg' : 'latest';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildCircularStat('start $unit', start.toStringAsFixed(1), Icons.flag_rounded),
-          _buildCircularStat('latest', latest.toStringAsFixed(1), Icons.today_rounded),
-          if (data.length > 1)
+          _buildCircularStat(startLabel, start.toStringAsFixed(1), Icons.flag_rounded),
+          _buildCircularStat(latestLabel, latest.toStringAsFixed(1), Icons.today_rounded),
+          if (validData.length > 1)
             _buildCircularStat('change', '$sign${delta.toStringAsFixed(1)}', delta > 0 ? Icons.trending_up_rounded : (delta < 0 ? Icons.trending_down_rounded : Icons.trending_flat_rounded))
           else
             _buildCircularStat('change', '0.0', Icons.trending_flat_rounded),
@@ -375,13 +421,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     );
   }
 
-  Widget _buildChart(List<DailyLog> logs, List<DailyMealLog> mealLogs, bool useKg, dynamic profile) {
-    List<ChartDataPoint> data = _dailyMetricSeries(logs, mealLogs, _selectedMetric, profile);
-    
-    // We intentionally bypass downsampling (like _downsampleToWeekly) for 6 Months 
-    // to preserve massive daily volatility (like a stock/Sensex graph).
-    
-    final daysWithData = data.length;
+  Widget _buildChart(List<ChartDataPoint> data, bool useKg, dynamic profile) {
+    final daysWithData = data.where((d) => d.value != null).length;
     final isEmpty = daysWithData == 0;
     
     ChartTimeFormat format;
@@ -390,7 +431,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       case TimeRange.oneMonth:
       case TimeRange.threeMonths: format = ChartTimeFormat.monthly; break;
       case TimeRange.sixMonths: format = ChartTimeFormat.sixMonths; break;
-      case TimeRange.ytd: format = ChartTimeFormat.allTime; break;
+      case TimeRange.twelveMonths: format = ChartTimeFormat.allTime; break;
     }
 
     String emptyMessage = 'No ${_metricLabel(_selectedMetric).toLowerCase()} entries yet.';
@@ -399,7 +440,19 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final isTrendMetric = _selectedMetric == MetricType.weight || _selectedMetric == MetricType.bodyFat || _selectedMetric == MetricType.bmi;
     final trendData = (_selectedRange != TimeRange.sixMonths && isTrendMetric && data.length > 2) ? _calculateTrendData(data) : null;
     
-    final double avgValue = data.isNotEmpty ? data.map((d) => d.value!).reduce((a,b)=>a+b)/data.length : 0;
+    final validData = data.where((d) => d.value != null && d.value!.isFinite).toList();
+    
+    double avgValue = 0;
+    if (validData.isNotEmpty) {
+      double sum = 0;
+      int days = 0;
+      for (final d in validData) {
+        final c = d.bucket?.validDaysCount ?? 1;
+        sum += d.value! * c;
+        days += c;
+      }
+      avgValue = days > 0 ? sum / days : 0;
+    }
     
     final subtitleText = _overviewSubtitle(data, _selectedMetric, useKg);
     final unitText = _overviewUnit(_selectedMetric, useKg);
@@ -476,7 +529,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 _buildRangeTab(context, '1M', TimeRange.oneMonth),
                 _buildRangeTab(context, '3M', TimeRange.threeMonths),
                 _buildRangeTab(context, '6M', TimeRange.sixMonths),
-                _buildRangeTab(context, 'YTD', TimeRange.ytd),
+                _buildRangeTab(context, '12M', TimeRange.twelveMonths),
               ],
             ),
           ),
@@ -509,15 +562,49 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   : null,
               onPointLongPress: null,
               onPointTap: (date, value) {
-                ref.read(selectedDateProvider.notifier).state = date;
-                context.go('/home');
+                // If it's weekly or monthly, date is just the day.
+                // If it's a longer range, date is the bucket's start date.
+                // We'll update the selected bucket state if it's 3M/6M/12M.
+                if (_selectedRange == TimeRange.threeMonths || _selectedRange == TimeRange.sixMonths || _selectedRange == TimeRange.twelveMonths) {
+                  final pt = data.where((d) => d.date == date).firstOrNull;
+                  if (pt != null && pt.bucket != null) {
+                    setState(() {
+                      _selectedBucket = pt.bucket;
+                    });
+                  }
+                } else {
+                  // Direct daily navigation for 1W/1M
+                  ref.read(selectedDateProvider.notifier).state = date;
+                  context.go('/home');
+                }
               },
               expandChart: true,
             ),
           ),
         ),
         
+        // Show Drilldown Button if a bucket is selected
+        if (_selectedBucket != null && (_selectedRange == TimeRange.threeMonths || _selectedRange == TimeRange.sixMonths || _selectedRange == TimeRange.twelveMonths))
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Haptics.tap();
+                _openDrilldownSheet(_selectedBucket!);
+              },
+              icon: const Icon(Icons.calendar_view_day_rounded, size: 20),
+              label: const Text('View Daily Details', style: TextStyle(fontFamily: 'Cabinet Grotesk', fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.colors.primary,
+                foregroundColor: context.colors.onPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        
         // Bottom Sesireka styled cards
+        // Pass data if needed, or update _buildStatCards logic
         _buildStatCards(data, _selectedMetric, useKg, profile as UserProfile),
       ],
     );
@@ -525,11 +612,17 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final startStr = DateFormat('yyyy-MM-dd').format(_startDate);
-    final endStr = DateFormat('yyyy-MM-dd').format(_endDate);
-    final logs = ref.watch(dailyLogsRangeProvider((startStr, endStr)));
-    final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
     final profile = ref.watch(profileProvider);
+    final useKg = profile.useKg;
+    
+    final buckets = ref.watch(aggregatedChartProvider((
+      metric: _selectedMetric,
+      range: _selectedRange,
+      start: _startDate,
+      end: _endDate,
+    )));
+    
+    final data = buckets.map((b) => ChartDataPoint(b.startDate, b.average, bucket: b)).toList();
 
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
@@ -598,8 +691,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             return FadeTransition(opacity: animation, child: child);
           },
           child: KeyedSubtree(
-            key: ValueKey('${_selectedMetric.name}_${_selectedRange.name}'),
-            child: _buildChart(logs, mealLogs, profile.useKg, profile),
+            key: ValueKey('$_selectedMetric-$_selectedRange'),
+            child: _buildChart(data, useKg, profile),
           ),
         ),
       ),

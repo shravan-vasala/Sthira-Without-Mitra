@@ -32,10 +32,11 @@ class SectionHeader extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
+              fontFamily: 'Cabinet Grotesk',
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
               color: context.colors.primary,
-              letterSpacing: 1.2,
+              letterSpacing: 0,
             ),
           ),
           if (countLabel != null) ...[const SizedBox(width: 8), countLabel!],

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import 'package:isar/isar.dart';
@@ -11,44 +12,104 @@ class MealRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
 
+  int _syncGeneration = 0;
+  String? _attachedUid;
+  final List<StreamSubscription> _syncSubscriptions = [];
+  final Map<String, DateTime> _localEdits = {};
+
   Stream<void> get watchUpdates => _isar.dailyMealLogs.watchLazy(fireImmediately: true);
 
-  void attachSync(ICloudSyncService sync) {
-    _sync = sync;
-    if (_sync?.canSync == true) {
-      _sync!.streamCollection('meal_logs').listen((data) async {
-        for (final entry in data.entries) {
-          final log = DailyMealLog.fromJson(entry.value);
-          final existing = _isar.dailyMealLogs
-              .where()
-              .dateEqualTo(entry.key)
-              .findFirstSync();
-          if (existing == null ||
-              jsonEncode(existing.toJson()) != jsonEncode(log.toJson())) {
-            if (existing != null) log.id = existing.id;
-            await _isar.writeTxn(() async {
-              await _isar.dailyMealLogs.put(log);
-            });
-          }
-        }
-      });
-      _sync!.streamCollection('meal_plans').listen((data) async {
-        for (final entry in data.entries) {
-          final plan = MealPlan.fromJson(entry.value);
-          final existing = _isar.mealPlans
-              .where()
-              .planNameEqualTo(entry.key)
-              .findFirstSync();
-          if (existing == null ||
-              jsonEncode(existing.toJson()) != jsonEncode(plan.toJson())) {
-            if (existing != null) plan.id = existing.id;
-            await _isar.writeTxn(() async {
-              await _isar.mealPlans.put(plan);
-            });
-          }
-        }
-      });
+  Future<void> detachSync() async {
+    _syncGeneration++;
+    _attachedUid = null;
+    final toCancel = List<StreamSubscription>.from(_syncSubscriptions);
+    _syncSubscriptions.clear();
+    for (final sub in toCancel) {
+      try {
+        await sub.cancel();
+      } catch (e) {
+        debugPrint('MealRepository: Error cancelling sync subscription: $e');
+      }
     }
+    _sync = null;
+  }
+
+  Future<void> attachSync(ICloudSyncService sync) async {
+    await detachSync();
+    _sync = sync;
+    final currentGen = _syncGeneration;
+    final targetUid = sync.currentUid;
+    _attachedUid = targetUid;
+
+    if (sync.canSync) {
+      _syncSubscriptions.add(
+        sync.streamCollection('meal_logs').listen((data) async {
+          if (currentGen != _syncGeneration) return;
+          for (final entry in data.entries) {
+            if (currentGen != _syncGeneration) return;
+
+            final incomingMap = entry.value;
+            DateTime? incomingUpdatedAt;
+            if (incomingMap is Map && incomingMap['updatedAt'] != null) {
+              incomingUpdatedAt = DateTime.tryParse(incomingMap['updatedAt'].toString());
+            }
+
+            final localEditTime = _localEdits[entry.key];
+            if (incomingUpdatedAt != null && localEditTime != null && incomingUpdatedAt.isBefore(localEditTime)) {
+              continue;
+            }
+
+            final log = DailyMealLog.fromJson(entry.value);
+            final existing = _isar.dailyMealLogs
+                .where()
+                .dateEqualTo(entry.key)
+                .findFirstSync();
+            if (existing == null ||
+                jsonEncode(existing.toJson()) != jsonEncode(log.toJson())) {
+              if (existing != null) log.id = existing.id;
+              await _isar.writeTxn(() async {
+                if (currentGen != _syncGeneration ||
+                    sync.currentUid != targetUid ||
+                    _attachedUid != targetUid) {
+                  return;
+                }
+                await _isar.dailyMealLogs.put(log);
+              });
+            }
+          }
+        }),
+      );
+
+      _syncSubscriptions.add(
+        sync.streamCollection('meal_plans').listen((data) async {
+          if (currentGen != _syncGeneration) return;
+          for (final entry in data.entries) {
+            if (currentGen != _syncGeneration) return;
+            final plan = MealPlan.fromJson(entry.value);
+            final existing = _isar.mealPlans
+                .where()
+                .planNameEqualTo(entry.key)
+                .findFirstSync();
+            if (existing == null ||
+                jsonEncode(existing.toJson()) != jsonEncode(plan.toJson())) {
+              if (existing != null) plan.id = existing.id;
+              await _isar.writeTxn(() async {
+                if (currentGen != _syncGeneration ||
+                    sync.currentUid != targetUid ||
+                    _attachedUid != targetUid) {
+                  return;
+                }
+                await _isar.mealPlans.put(plan);
+              });
+            }
+          }
+        }),
+      );
+    }
+  }
+
+  void dispose() {
+    detachSync();
   }
 
   Future<void> init(Isar isar) async {
@@ -122,6 +183,7 @@ class MealRepository {
   }
 
   Future<void> saveDailyLog(DailyMealLog log) async {
+    _localEdits[log.date] = DateTime.now();
     final existing = _isar.dailyMealLogs
         .where()
         .dateEqualTo(log.date)
@@ -132,7 +194,9 @@ class MealRepository {
     await _isar.writeTxn(() async {
       await _isar.dailyMealLogs.put(log);
     });
-    _sync?.syncToCloud('meal_logs', log.date, log.toJson());
+    final payload = log.toJson();
+    payload['updatedAt'] = DateTime.now().toIso8601String();
+    _sync?.syncToCloud('meal_logs', log.date, payload);
   }
 
   Future<void> saveMealSlot(

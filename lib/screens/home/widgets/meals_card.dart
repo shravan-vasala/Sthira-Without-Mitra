@@ -94,8 +94,9 @@ class MealsCard extends ConsumerWidget {
                             Text(
                               isToday ? "Today's Meals" : (isFuture ? "Upcoming Meals" : "Meals"),
                               style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Cabinet Grotesk',
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
                                 color: context.colors.textDark,
                               ),
                             ),

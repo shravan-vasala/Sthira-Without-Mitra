@@ -5,13 +5,15 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
+import '../../../services/progress_aggregation_service.dart';
 
 enum ChartTimeFormat { weekly, monthly, sixMonths, allTime }
 
 class ChartDataPoint {
   final DateTime date;
   final double? value;
-  ChartDataPoint(this.date, this.value);
+  final ChartBucket? bucket;
+  ChartDataPoint(this.date, this.value, {this.bucket});
 }
 
 enum ChartPlotType { bar, line }
@@ -340,22 +342,19 @@ class SharedChartCard extends StatelessWidget {
     if (timeFormat == ChartTimeFormat.weekly) {
       label = DateFormat('E').format(date);
     } else if (timeFormat == ChartTimeFormat.monthly) {
-      // ~weekly anchors — quieter than every 5 days.
       final lastDay = DateTime(date.year, date.month + 1, 0).day;
-      final show =
-          date.day == 1 ||
-          date.day == 8 ||
-          date.day == 15 ||
-          date.day == 22 ||
-          date.day == lastDay;
+      final show = date.day == 1 || date.day == 8 || date.day == 15 || date.day == 22 || date.day == lastDay;
       if (!show) return const SizedBox.shrink();
       label = date.day.toString();
+      if (date.day == 1) label = '${DateFormat('MMM').format(date)}\n$label';
     } else if (timeFormat == ChartTimeFormat.sixMonths) {
       if (date.day != 1) return const SizedBox.shrink();
-      label = DateFormat('MMM\nyy').format(date);
+      label = DateFormat('MMM').format(date);
+      if (date.month == 1) label = DateFormat('MMM\nyy').format(date);
     } else {
       if (date.day != 1) return const SizedBox.shrink();
       label = DateFormat('MMM').format(date);
+      if (date.month == 1) label = DateFormat('MMM\nyy').format(date);
     }
 
     return Padding(
@@ -363,6 +362,7 @@ class SharedChartCard extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(fontSize: 10, color: context.colors.textLight),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -410,17 +410,48 @@ class SharedChartCard extends StatelessWidget {
     );
   }
 
-  String _tooltipText(DateTime date, double value) {
-    final dateStr = DateFormat('EEE, d MMM yyyy').format(date);
+  String _tooltipText(ChartDataPoint point) {
+    final date = point.date;
+    final value = point.value ?? 0.0;
+    
+    String dateStr;
+    String extra = '';
+    
+    if (point.bucket != null && timeFormat != ChartTimeFormat.weekly && timeFormat != ChartTimeFormat.monthly) {
+      final b = point.bucket!;
+      if (timeFormat == ChartTimeFormat.allTime) { 
+        dateStr = DateFormat('MMM yyyy').format(b.startDate);
+      } else { 
+        final endFmt = b.startDate.month == b.endDate.month ? 'd' : 'MMM d';
+        dateStr = '${DateFormat('MMM d').format(b.startDate)} - ${DateFormat(endFmt).format(b.endDate)}';
+      }
+      
+      if (b.isPartial) dateStr += ' (Partial)';
+      
+      extra += '\nCoverage: ${b.validDaysCount}/${b.eligibleDaysCount} days';
+      if (b.min != null && b.max != null) {
+         extra += '\nMin: ${b.min!.toStringAsFixed(1)} | Max: ${b.max!.toStringAsFixed(1)}';
+      }
+    } else {
+      dateStr = DateFormat('EEE, d MMM yyyy').format(date);
+    }
+    
     final valStr = value.toStringAsFixed(_isCount ? 0 : 1);
     final unit = _unitSuffix();
-    String extra = '';
     if (targetValue != null) {
       final diff = value - targetValue!;
       final sign = diff >= 0 ? '+' : '';
-      extra = '\n$sign${diff.toStringAsFixed(_isCount ? 0 : 1)}$unit vs goal';
+      extra += '\n$sign${diff.toStringAsFixed(_isCount ? 0 : 1)}$unit vs goal';
     }
     return '$dateStr\n$valStr$unit$extra';
+  }
+
+  ChartDataPoint? _getPointForOffset(double xOffset) {
+    final offsetInt = xOffset.toInt();
+    for (final d in data) {
+      if (d.date.difference(startDate).inDays == offsetInt) return d;
+    }
+    return null;
   }
 
   /// Split into contiguous day segments so missing days show as gaps, not zeros.
@@ -525,9 +556,10 @@ class SharedChartCard extends StatelessWidget {
               if (!byDay.containsKey(group.x)) {
                 return null;
               }
-              final date = startDate.add(Duration(days: group.x));
+              final pt = _getPointForOffset(group.x.toDouble());
+              if (pt == null) return null;
               return BarTooltipItem(
-                _tooltipText(date, rod.toY),
+                _tooltipText(pt),
                 TextStyle(
                   color: context.colors.card,
                   fontWeight: FontWeight.bold,
@@ -699,8 +731,9 @@ class SharedChartCard extends StatelessWidget {
                 final date = startDate.add(Duration(days: spot.x.toInt()));
                 final isTrend = spot.barIndex == segments.length;
                 final prefix = isTrend ? '7-Day Trend\n' : 'Measured\n';
+                final pt = isTrend ? ChartDataPoint(date, spot.y) : (_getPointForOffset(spot.x) ?? ChartDataPoint(date, spot.y));
                 return LineTooltipItem(
-                  '$prefix${_tooltipText(date, spot.y)}',
+                  '$prefix${_tooltipText(pt)}',
                   TextStyle(
                     color: context.colors.card,
                     fontWeight: FontWeight.bold,

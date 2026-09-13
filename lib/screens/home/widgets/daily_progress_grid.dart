@@ -235,68 +235,12 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
         !_checkingPermission &&
         !(steps != null && stepsSource == 'healthConnect');
 
-    // Show the sync CTA card if permission not granted (today only)
-    if (showSyncCta) {
-      return GestureDetector(
-        onTap: _handleSyncTap,
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            gradient: context.colors.primaryGradient,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: context.colors.primary.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: context.colors.onPrimary.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.sync_rounded,
-                  color: context.colors.onPrimary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                'Sync Steps',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.onPrimary,
-                  height: 1.3,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'from Health Connect',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.onPrimary.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     String stepsSubtitle;
     String? sourceHint;
 
-    if (steps != null) {
+    if (_checkingPermission) {
+      stepsSubtitle = 'Checking sync...';
+    } else if (steps != null) {
       stepsSubtitle = '$steps steps';
       if (stepsSource == 'healthConnect') {
         sourceHint = 'Synced';
@@ -307,8 +251,8 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
       stepsSubtitle = widget.isFuture ? 'No data' : 'Tap to log';
       if (_isAuth) {
         sourceHint = 'Connected';
-      } else {
-        sourceHint = widget.isToday ? 'HC/Manual' : null;
+      } else if (showSyncCta) {
+        sourceHint = 'HC/Manual';
       }
     }
 
@@ -353,8 +297,9 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                   Text(
                     'Steps',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Cabinet Grotesk',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
                       color: context.colors.textDark,
                     ),
                   ),
@@ -379,12 +324,15 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           }
                         )
                       else
-                        Text(
-                          stepsSubtitle,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: context.colors.textMedium,
+                        Flexible(
+                          child: Text(
+                            stepsSubtitle,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: context.colors.textMedium,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       if (sourceHint != null) ...[
@@ -414,18 +362,51 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 ],
               ),
             ),
-            if (steps != null) ...[
-              GestureDetector(
-                onTap: () => context.push('/progress?metric=steps'),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Icon(Icons.show_chart_rounded, size: 22, color: context.colors.textMedium),
+            if (_checkingPermission)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.colors.primary,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
+              )
+            else if (showSyncCta)
+              GestureDetector(
+                onTap: _handleSyncTap,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: context.colors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Connect',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.primary,
+                    ),
+                  ),
+                ),
+              )
+            else ...[
+              if (steps != null) ...[
+                GestureDetector(
+                  onTap: () => context.push('/progress?metric=steps'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Icon(Icons.show_chart_rounded, size: 22, color: context.colors.textMedium),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              if (!widget.isFuture)
+                Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
             ],
-            if (!widget.isFuture)
-              Icon(Icons.chevron_right_rounded, size: 16, color: context.colors.textMedium.withValues(alpha: 0.5)),
           ],
         ),
       ),
@@ -487,8 +468,9 @@ class _ProgressCard extends ConsumerWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Cabinet Grotesk',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
                       color: context.colors.textDark,
                     ),
                   ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:isar/isar.dart';
 import '../models/badge.dart';
@@ -7,26 +8,63 @@ class BadgeRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
 
-  void attachSync(ICloudSyncService sync) {
-    _sync = sync;
-    if (_sync?.canSync == true) {
-      _sync!.streamCollection('badges').listen((data) async {
-        for (final entry in data.entries) {
-          final b = Badge.fromJson(entry.value);
-          final existing = _isar.badges
-              .where()
-              .idEqualTo(entry.key)
-              .findFirstSync();
-          if (existing == null ||
-              jsonEncode(existing.toJson()) != jsonEncode(b.toJson())) {
-            if (existing != null) b.idInternal = existing.idInternal;
-            await _isar.writeTxn(() async {
-              await _isar.badges.put(b);
-            });
-          }
-        }
-      });
+  int _syncGeneration = 0;
+  String? _attachedUid;
+  final List<StreamSubscription> _syncSubscriptions = [];
+
+  Future<void> detachSync() async {
+    _syncGeneration++;
+    _attachedUid = null;
+    final toCancel = List<StreamSubscription>.from(_syncSubscriptions);
+    _syncSubscriptions.clear();
+    for (final sub in toCancel) {
+      try {
+        await sub.cancel();
+      } catch (e) {
+        // ignore errors during teardown
+      }
     }
+    _sync = null;
+  }
+
+  Future<void> attachSync(ICloudSyncService sync) async {
+    await detachSync();
+    _sync = sync;
+    final currentGen = _syncGeneration;
+    final targetUid = sync.currentUid;
+    _attachedUid = targetUid;
+
+    if (sync.canSync) {
+      _syncSubscriptions.add(
+        sync.streamCollection('badges').listen((data) async {
+          if (currentGen != _syncGeneration) return;
+          for (final entry in data.entries) {
+            if (currentGen != _syncGeneration) return;
+            final b = Badge.fromJson(entry.value);
+            final existing = _isar.badges
+                .where()
+                .idEqualTo(entry.key)
+                .findFirstSync();
+            if (existing == null ||
+                jsonEncode(existing.toJson()) != jsonEncode(b.toJson())) {
+              if (existing != null) b.idInternal = existing.idInternal;
+              await _isar.writeTxn(() async {
+                if (currentGen != _syncGeneration ||
+                    sync.currentUid != targetUid ||
+                    _attachedUid != targetUid) {
+                  return;
+                }
+                await _isar.badges.put(b);
+              });
+            }
+          }
+        }),
+      );
+    }
+  }
+
+  void dispose() {
+    detachSync();
   }
 
   Future<void> init(Isar isar) async {

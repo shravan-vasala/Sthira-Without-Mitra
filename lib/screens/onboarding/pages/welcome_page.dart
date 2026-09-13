@@ -70,6 +70,20 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                   fontWeight: FontWeight.w400,
                 ),
               ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Caveat',
+                    fontSize: 22,
+                    color: context.colors.textDark.withValues(alpha: 0.85),
+                    height: 1.3,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -181,32 +195,6 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                       ],
                     ),
                   ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 24),
-          AnimatedBuilder(
-            animation: _staggerController,
-            builder: (context, child) {
-              final fade = CurvedAnimation(
-                parent: _staggerController,
-                curve: const Interval(0.3, 0.6, curve: Curves.easeIn),
-              ).value;
-              return Opacity(
-                opacity: fade,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Text(
-                    "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Caveat',
-                      fontSize: 22,
-                      color: Colors.white.withOpacity(0.85),
-                      height: 1.3,
-                    ),
-                  ),
                 ),
               );
             },
@@ -478,7 +466,6 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Spacer(),
                 Opacity(
                   opacity: CurvedAnimation(
                     parent: _fadeController,
@@ -496,16 +483,13 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
                     ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(height: 48),
                 Opacity(
                   opacity: CurvedAnimation(
                     parent: _fadeController,
                     curve: const Interval(0.6, 1.0, curve: Curves.easeIn),
                   ).value,
-                  child: const Padding(
-                    padding: EdgeInsets.only(bottom: 24.0),
-                    child: _DedicationLine(),
-                  ),
+                  child: const _DedicationLine(),
                 ),
               ],
             ),

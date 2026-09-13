@@ -6,7 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/sync_controller.dart';
 import '../../providers/midnight_tick_provider.dart';
-import '../../services/widget_update_service.dart';
+
 import '../../services/health_connect_service.dart';
 import '../../services/screen_time_service.dart';
 import '../../models/habit.dart';
@@ -168,7 +168,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             KeyedSubtree(
                               key: _habitsKey,
                               child: const SectionHeader(
-                                'HABITS',
+                                'Habits',
                                 trailing: _HabitsEditButton(),
                                 countLabel: _HabitsCountLabel(),
                               ),
@@ -189,7 +189,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             KeyedSubtree(
                               key: _mealsKey,
-                              child: const SectionHeader('MEALS'),
+                              child: const SectionHeader('Meals'),
                             ),
                             const SizedBox(height: 12),
                             const MealsCard(),
@@ -208,7 +208,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             KeyedSubtree(
                               key: _progressKey,
                               child: const SectionHeader(
-                                'DAILY PROGRESS',
+                                'Daily progress',
                                 icon: Icons.show_chart_rounded,
                               ),
                             ),
@@ -267,10 +267,12 @@ class _HomeGreetingTitle extends ConsumerWidget {
         if (name.isEmpty)
           Text(
             _timeGreeting(),
-            style: context.text.display.copyWith(
-              fontSize: 26,
+            style: TextStyle(
+              fontFamily: 'General Sans',
+              fontSize: 24,
               fontWeight: FontWeight.w500,
               color: context.colors.textMedium,
+              letterSpacing: -0.3,
             ),
           )
         else
@@ -279,16 +281,22 @@ class _HomeGreetingTitle extends ConsumerWidget {
               children: [
                 TextSpan(
                   text: '${_timeGreeting()}, ',
-                  style: context.text.display.copyWith(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w500,
+                  style: TextStyle(
+                    fontFamily: 'General Sans',
+                    fontSize: 24,
+                    fontWeight: FontWeight.w400,
                     color: context.colors.textMedium,
+                    letterSpacing: -0.3,
                   ),
                 ),
                 TextSpan(
                   text: name,
-                  style: context.text.display.copyWith(
-                    fontSize: 26,
+                  style: TextStyle(
+                    fontFamily: 'General Sans',
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.textDark,
+                    letterSpacing: -0.3,
                   ),
                 ),
               ],
@@ -523,7 +531,16 @@ class _WorkoutsSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          'WORKOUTS ($completedCount/$total)',
+          'Workouts',
+          countLabel: Text(
+            '($completedCount/$total)',
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'General Sans',
+              fontWeight: FontWeight.w500,
+              color: context.colors.primary.withValues(alpha: 0.8),
+            ),
+          ),
           trailing: phaseProgress.isPhaseActive
               ? Row(
                   children: [
@@ -594,9 +611,10 @@ class _WorkoutsSection extends ConsumerWidget {
                         child: Text(
                           title,
                           style: TextStyle(
+                            fontFamily: 'Cabinet Grotesk',
                             color: context.colors.textDark,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -605,9 +623,10 @@ class _WorkoutsSection extends ConsumerWidget {
                     Text(
                       title,
                       style: TextStyle(
+                        fontFamily: 'Cabinet Grotesk',
                         color: context.colors.textDark,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   const SizedBox(height: 4),

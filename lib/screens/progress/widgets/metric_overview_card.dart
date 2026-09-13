@@ -158,10 +158,10 @@ class _MiniSparkline extends StatelessWidget {
   Widget build(BuildContext context) {
     final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
     final spots = sorted
-        .where((d) => !isCount || d.value > 0)
+        .where((d) => d.value != null && (!isCount || d.value! > 0))
         .map(
           (d) =>
-              FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value),
+              FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value!),
         )
         .toList();
 

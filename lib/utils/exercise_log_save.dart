@@ -3,7 +3,7 @@ import '../models/workout_plan.dart';
 import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';
 import '../providers/app_providers.dart';
-import '../services/widget_update_service.dart';
+
 import 'target_parser.dart';
 
 Future<PrUpdateResult> saveExerciseAsPlanned({

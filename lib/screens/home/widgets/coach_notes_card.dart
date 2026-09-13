@@ -161,9 +161,10 @@ class CoachNotesCard extends ConsumerWidget {
                 Text(
                       note.note,
                       style: TextStyle(
+                        fontFamily: 'General Sans',
                         fontSize: 14,
                         color: context.colors.textDark,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                         height: 1.4,
                       ),
                     )

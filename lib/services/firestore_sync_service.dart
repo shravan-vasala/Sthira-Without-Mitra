@@ -37,6 +37,9 @@ class FirestoreSyncService implements ICloudSyncService {
   bool get canSync => _auth.isSignedIn;
 
   @override
+  String? get currentUid => _auth.uid;
+
+  @override
   Stream<int> get pendingCountStream {
     final isar = Isar.getInstance();
     if (isar == null) return Stream.value(0);

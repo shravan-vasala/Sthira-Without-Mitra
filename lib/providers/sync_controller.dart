@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
-import '../services/widget_update_service.dart';
+
 import '../models/daily_log.dart';
 import '../services/screen_time_service.dart';
 import 'auth_provider.dart';

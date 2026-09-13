@@ -86,7 +86,27 @@ class AiClient {
   GoogleAIClient? _cachedClient;
   String? _cachedApiKey;
 
-  AiClient({this.cache});
+  @visibleForTesting
+  Future<String?> Function({
+    required String modelName,
+    required String prompt,
+    String? systemInstruction,
+    String? apiKey,
+    List<Uint8List>? imageBytesList,
+    String? mimeType,
+    Duration timeout,
+    Map<String, dynamic>? responseSchema,
+  })? mockCallModel;
+
+  @visibleForTesting
+  Stream<String?> Function({
+    required String modelName,
+    required String prompt,
+    required String systemInstruction,
+    String? apiKey,
+  })? mockCallModelStream;
+
+  AiClient({this.cache, this.mockCallModel, this.mockCallModelStream});
 
   void dispose() {
     _cachedClient?.close();
@@ -215,6 +235,7 @@ class AiClient {
           } else if (cause == AiErrorCause.rateLimited) {
             if (attempt < maxRetries) {
               final delay = attempt == 0 ? 1 : 2;
+              if (DateTime.now().add(Duration(seconds: delay)).isAfter(overallDeadline)) break;
               await Future.delayed(Duration(seconds: delay));
               attempt++;
               continue;
@@ -223,6 +244,7 @@ class AiClient {
             }
           } else if (cause == AiErrorCause.overloaded) {
             if (attempt == 0) {
+              if (DateTime.now().add(const Duration(seconds: 2)).isAfter(overallDeadline)) break;
               await Future.delayed(const Duration(seconds: 2));
               attempt++;
               continue;
@@ -264,6 +286,18 @@ class AiClient {
     Duration timeout = const Duration(seconds: 30),
     Map<String, dynamic>? responseSchema,
   }) async {
+      if (mockCallModel != null) {
+        return mockCallModel!(
+          modelName: modelName,
+          prompt: prompt,
+          systemInstruction: systemInstruction,
+          apiKey: apiKey,
+          imageBytesList: imageBytesList,
+          mimeType: mimeType,
+          timeout: timeout,
+          responseSchema: responseSchema,
+        );
+      }
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('API Key is required.');
       }
@@ -309,19 +343,64 @@ class AiClient {
     required String systemInstruction,
     String? apiKey,
     Duration overallTimeout = const Duration(seconds: 40),
-  }) async* {
+    Duration inactivityTimeout = const Duration(seconds: 15),
+  }) {
     if (_textCircuitBreaker.isOpen) {
       throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
     }
 
-    AiErrorCause? lastCause;
-    final overallDeadline = DateTime.now().add(overallTimeout);
+    late StreamController<String> controller;
+    StreamSubscription<String?>? currentSub;
+    Timer? inactivityTimer;
+    Timer? overallTimer;
+    bool isCancelled = false;
+    bool yieldedAny = false;
+    int modelIndex = 0;
+    AiErrorCause lastCause = AiErrorCause.unknown;
+    final sw = Stopwatch();
+    int? firstTokenMs;
 
-    for (final modelName in textModelsToTry) {
-      if (DateTime.now().isAfter(overallDeadline)) break;
-      final sw = Stopwatch()..start();
-      int? firstTokenMs;
-      bool yieldedAny = false;
+    void cleanup() {
+      inactivityTimer?.cancel();
+      overallTimer?.cancel();
+      currentSub?.cancel();
+    }
+
+    void tryNextModel() {
+      if (isCancelled || controller.isClosed) return;
+
+      if (modelIndex >= textModelsToTry.length) {
+        if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
+          _textCircuitBreaker.recordFailure();
+        }
+        controller.addError(AiException('Failed to generate response. Please try again later.', cause: lastCause));
+        controller.close();
+        return;
+      }
+
+      final modelName = textModelsToTry[modelIndex++];
+      sw.reset();
+      sw.start();
+      firstTokenMs = null;
+
+      void resetInactivityTimer() {
+        inactivityTimer?.cancel();
+        if (isCancelled || controller.isClosed) return;
+        inactivityTimer = Timer(inactivityTimeout, () {
+          if (isCancelled || controller.isClosed) return;
+          currentSub?.cancel();
+          if (yieldedAny) {
+            cleanup();
+            controller.addError(AiException('Stream failed midway. Please try again.', cause: AiErrorCause.timeout));
+            controller.close();
+          } else {
+            lastCause = AiErrorCause.timeout;
+            tryNextModel();
+          }
+        });
+      }
+
+      resetInactivityTimer();
 
       try {
         final stream = _callModelStream(
@@ -330,83 +409,102 @@ class AiClient {
           systemInstruction: systemInstruction,
           apiKey: apiKey,
         );
-        
-        await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
-           if (chunk != null && chunk.isNotEmpty) {
-             if (firstTokenMs == null) {
-               firstTokenMs = sw.elapsedMilliseconds;
-             }
-             yieldedAny = true;
-             yield chunk;
-           }
-         }
-         
-         if (!yieldedAny) {
-           throw AiException("Empty response from stream", cause: AiErrorCause.unknown);
-         }
 
-         sw.stop();
-         AiLogger.log(
-           purpose: 'text stream',
-           model: modelName,
-           durationMs: sw.elapsedMilliseconds,
-           firstTokenMs: firstTokenMs,
-           outcome: 'success'
-         );
-         _textCircuitBreaker.recordSuccess();
-         return;
-       } catch (e) {
-        sw.stop();
-        final errStr = e.toString();
-        final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
-        lastCause = cause;
+        currentSub = stream.listen(
+          (chunk) {
+            if (isCancelled || controller.isClosed) return;
+            if (chunk != null && chunk.isNotEmpty) {
+              if (firstTokenMs == null) {
+                firstTokenMs = sw.elapsedMilliseconds;
+              }
+              yieldedAny = true;
+              resetInactivityTimer();
+              controller.add(chunk);
+            }
+          },
+          onError: (e) {
+            if (isCancelled || controller.isClosed) return;
+            sw.stop();
+            final errStr = e.toString();
+            final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
+            lastCause = cause;
 
-        AiLogger.log(
-          purpose: 'text stream fallback',
-          model: modelName,
-          durationMs: sw.elapsedMilliseconds,
-          firstTokenMs: firstTokenMs,
-          outcome: cause.toString()
+            AiLogger.log(
+              purpose: 'text stream fallback',
+              model: modelName,
+              durationMs: sw.elapsedMilliseconds,
+              firstTokenMs: firstTokenMs,
+              outcome: cause.toString(),
+            );
+
+            if (yieldedAny) {
+              cleanup();
+              controller.addError(AiException('Stream failed midway. Please try again.', cause: cause));
+              controller.close();
+            } else if (cause == AiErrorCause.parse) {
+              cleanup();
+              controller.addError(AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause));
+              controller.close();
+            } else if (cause == AiErrorCause.invalidKey) {
+              cleanup();
+              controller.addError(AiException('This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.', cause: cause));
+              controller.close();
+            } else if (cause == AiErrorCause.offline) {
+              cleanup();
+              controller.addError(AiException('You seem to be offline. Please check your internet connection.', cause: cause));
+              controller.close();
+            } else if (cause == AiErrorCause.timeout) {
+              cleanup();
+              controller.addError(AiException('AI stream timed out.', cause: AiErrorCause.timeout));
+              controller.close();
+            } else {
+              tryNextModel();
+            }
+          },
+          onDone: () {
+            if (isCancelled || controller.isClosed) return;
+            if (!yieldedAny) {
+              tryNextModel();
+              return;
+            }
+            cleanup();
+            sw.stop();
+            AiLogger.log(
+              purpose: 'text stream',
+              model: modelName,
+              durationMs: sw.elapsedMilliseconds,
+              firstTokenMs: firstTokenMs,
+              outcome: 'success',
+            );
+            _textCircuitBreaker.recordSuccess();
+            controller.close();
+          },
         );
-
-        if (yieldedAny) {
-          // If we already started streaming text to the user, we cannot seamlessly fallback
-          // to another model because it will just append the new start to the old partial text.
-          // We must throw here.
-          throw AiException('Stream failed midway. Please try again.', cause: cause);
-        } else if (cause == AiErrorCause.parse) {
-          throw AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause);
-        }
-        
-        if (cause == AiErrorCause.invalidKey) {
-          throw AiException('This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.', cause: cause);
-        } else if (cause == AiErrorCause.offline) {
-          throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
-        } else if (cause == AiErrorCause.notFound) {
-          continue;
-        } else if (cause == AiErrorCause.rateLimited) {
-          continue;
-        } else if (cause == AiErrorCause.overloaded || cause == AiErrorCause.timeout) {
-          continue;
-        }
-        continue;
+      } catch (e) {
+        if (isCancelled || controller.isClosed) return;
+        final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(e.toString());
+        lastCause = cause;
+        tryNextModel();
       }
     }
-    
-    if (DateTime.now().isAfter(overallDeadline)) {
-      lastCause = AiErrorCause.timeout;
-    }
 
-    if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
-      _textCircuitBreaker.recordFailure();
-    }
-    
-    String reason = 'unknown error';
-    if (lastCause == AiErrorCause.rateLimited) reason = 'rate limited';
-    if (lastCause == AiErrorCause.overloaded) reason = 'model overloaded';
-    if (lastCause == AiErrorCause.timeout) reason = 'timed out';
-    
-    throw AiException('Failed to generate response. Please try again later.', cause: lastCause);
+    controller = StreamController<String>(
+      onListen: () {
+        overallTimer = Timer(overallTimeout, () {
+          if (isCancelled || controller.isClosed) return;
+          cleanup();
+          controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
+          controller.close();
+        });
+        tryNextModel();
+      },
+      onCancel: () {
+        isCancelled = true;
+        cleanup();
+      },
+    );
+
+    return controller.stream;
   }
 
   Stream<String?> _callModelStream({
@@ -414,7 +512,15 @@ class AiClient {
     required String prompt,
     required String systemInstruction,
     String? apiKey,
-  }) async* {
+  }) {
+      if (mockCallModelStream != null) {
+        return mockCallModelStream!(
+          modelName: modelName,
+          prompt: prompt,
+          systemInstruction: systemInstruction,
+          apiKey: apiKey,
+        );
+      }
       if (apiKey == null || apiKey.isEmpty) {
         throw Exception('API Key is required.');
       }
@@ -442,11 +548,9 @@ class AiClient {
         request: request,
       );
       
-      await for (final response in responseStream) {
-        if (response.text != null && response.text!.isNotEmpty) {
-          yield response.text;
-        }
-      }
+      return responseStream
+          .map((response) => response.text)
+          .where((text) => text != null && text.isNotEmpty);
   }
 
   Map<String, dynamic> _parseJson(String text) {
@@ -454,7 +558,7 @@ class AiClient {
       final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
       return jsonDecode(cleaned) as Map<String, dynamic>;
     } catch (e) {
-      throw AiException('Something went wrong parsing the response. Please try again.');
+      throw AiException('Something went wrong parsing the response. Please try again.', cause: AiErrorCause.parse);
     }
   }
 }

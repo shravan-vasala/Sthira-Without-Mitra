@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
-import '../services/widget_update_service.dart';
+
 import '../models/habit.dart';
 import '../models/daily_log.dart';
 
