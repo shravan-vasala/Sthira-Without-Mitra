@@ -11,8 +11,8 @@ void main() {
       WorkoutSection(
         title: 'Main',
         exercises: [
-          Exercise(name: 'Bench Press', reps: ['10']),
-          Exercise(name: 'Squat', reps: ['10']),
+          Exercise(name: 'Bench Press', reps: ['10'])..instanceId = 'bench_1',
+          Exercise(name: 'Squat', reps: ['10'])..instanceId = 'squat_1',
         ],
       ),
     ],
@@ -53,7 +53,7 @@ void main() {
       isFalse,
     );
 
-    logged.add('2023-10-02|Bench Press');
+    logged.add('2023-10-02|bench_1');
     expect(
       WorkoutCompletion.isTrainingDayComplete(
         '2023-10-02',
@@ -63,7 +63,7 @@ void main() {
       isFalse,
     );
 
-    logged.add('2023-10-02|Squat');
+    logged.add('2023-10-02|squat_1');
     expect(
       WorkoutCompletion.isTrainingDayComplete(
         '2023-10-02',
