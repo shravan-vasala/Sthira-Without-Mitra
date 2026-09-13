@@ -4,6 +4,7 @@ import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/setup_sheets.dart';
 import '../../../providers/app_providers.dart';
+import '../../../providers/credential_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ConnectPage extends ConsumerStatefulWidget {
@@ -78,8 +79,8 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     // Current statuses
-    final profile = ref.watch(profileProvider);
-    final hasGemini = (profile.geminiApiKey ?? '').isNotEmpty;
+    final cred = ref.watch(credentialProvider);
+    final hasGemini = cred.status == CredentialStatus.present && (cred.key ?? '').isNotEmpty;
     final cloudConnected = ref.watch(isSignedInProvider);
     
     return SingleChildScrollView(

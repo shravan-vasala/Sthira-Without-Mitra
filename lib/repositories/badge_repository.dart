@@ -41,22 +41,7 @@ class BadgeRepository {
           for (final entry in data.entries) {
             if (currentGen != _syncGeneration) return;
             final b = Badge.fromJson(entry.value);
-            final existing = _isar.badges
-                .where()
-                .idEqualTo(entry.key)
-                .findFirstSync();
-            if (existing == null ||
-                jsonEncode(existing.toJson()) != jsonEncode(b.toJson())) {
-              if (existing != null) b.idInternal = existing.idInternal;
-              await _isar.writeTxn(() async {
-                if (currentGen != _syncGeneration ||
-                    sync.currentUid != targetUid ||
-                    _attachedUid != targetUid) {
-                  return;
-                }
-                await _isar.badges.put(b);
-              });
-            }
+            await _mergeCloudBadgeSafe(b, () => currentGen == _syncGeneration && sync.currentUid == targetUid && _attachedUid == targetUid);
           }
         }),
       );
@@ -134,17 +119,54 @@ class BadgeRepository {
   }
 
   Future<void> saveBadge(Badge badge) async {
-    final existing = getBadge(badge.id);
-    if (existing != null) {
-      badge.idInternal = existing.idInternal;
-    }
-
     await _isar.writeTxn(() async {
+      final existing = await _isar.badges.where().idEqualTo(badge.id).findFirst();
+      if (existing != null) {
+        badge.idInternal = existing.idInternal;
+      }
       await _isar.badges.put(badge);
       _sync?.queueSyncInTxn(_isar, 'badges', badge.id, badge.toJson());
     });
 
     _sync?.triggerFlush();
+  }
+
+  Future<void> _mergeCloudBadgeSafe(Badge cloudBadge, [bool Function()? isValidContext]) async {
+    await _isar.writeTxn(() async {
+      if (isValidContext != null && !isValidContext()) return;
+      
+      final existing = await _isar.badges.where().idEqualTo(cloudBadge.id).findFirst();
+      
+      if (existing == null) {
+        await _isar.badges.put(cloudBadge);
+        return;
+      }
+      
+      int newProgress = existing.currentProgress;
+      if (cloudBadge.currentProgress > existing.currentProgress) {
+        newProgress = cloudBadge.currentProgress;
+      }
+      
+      DateTime? newUnlockedAt = existing.unlockedAt;
+      if (cloudBadge.unlockedAt != null) {
+        if (newUnlockedAt == null || cloudBadge.unlockedAt!.isBefore(newUnlockedAt)) {
+          newUnlockedAt = cloudBadge.unlockedAt;
+        }
+      }
+      
+      final updated = existing.copyWith(
+        currentProgress: newProgress,
+        unlockedAt: newUnlockedAt,
+      );
+      
+      if (updated.currentProgress == existing.currentProgress && 
+          updated.unlockedAt == existing.unlockedAt) {
+        return;
+      }
+      
+      updated.idInternal = existing.idInternal;
+      await _isar.badges.put(updated);
+    });
   }
 
   /// Bulk import from Firestore (used on new-device sign-in).
@@ -153,24 +175,7 @@ class BadgeRepository {
   ) async {
     for (final entry in cloudData.entries) {
       final cloudBadge = Badge.fromJson(entry.value);
-      final localBadge = getBadge(entry.key);
-
-      if (localBadge == null) {
-        await _isar.writeTxn(() async {
-          await _isar.badges.put(cloudBadge);
-        });
-      } else {
-        final localDate = localBadge.unlockedAt ?? DateTime.parse('2000-01-01');
-        final cloudDate = cloudBadge.unlockedAt ?? DateTime.parse('2000-01-01');
-        if (cloudDate.isAfter(localDate) ||
-            (cloudBadge.currentProgress > localBadge.currentProgress &&
-                localBadge.unlockedAt == null)) {
-          cloudBadge.idInternal = localBadge.idInternal;
-        }
-        await _isar.writeTxn(() async {
-          await _isar.badges.put(cloudBadge);
-        });
-      }
+      await _mergeCloudBadgeSafe(cloudBadge);
     }
   }
 

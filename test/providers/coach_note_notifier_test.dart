@@ -64,7 +64,6 @@ void main() {
         mealRepoProvider.overrideWithValue(mealRepo),
         workoutRepoProvider.overrideWithValue(workoutRepo),
         exerciseLogRepoProvider.overrideWithValue(exerciseLogRepo),
-        initialGeminiKeyProvider.overrideWithValue(''),
         selectedDateProvider.overrideWith((ref) => DateTime(2023, 10, 2)),
         sharedPreferencesProvider.overrideWithValue(
           await SharedPreferences.getInstance(),

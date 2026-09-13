@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
+import '../../../providers/credential_provider.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/async_error_card.dart';
 import '../../../widgets/app_bottom_sheet.dart';
@@ -89,6 +90,8 @@ class CoachNotesCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final noteAsync = ref.watch(coachNoteProvider);
     final profile = ref.watch(profileProvider);
+    final cred = ref.watch(credentialProvider);
+    final hasKey = cred.status == CredentialStatus.present && (cred.key ?? '').isNotEmpty;
 
     return SurfaceCard(
       margin: const EdgeInsets.symmetric(
@@ -126,7 +129,7 @@ class CoachNotesCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (profile.geminiApiKey == null || profile.geminiApiKey!.isEmpty)
+              if (!hasKey)
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: Tooltip(

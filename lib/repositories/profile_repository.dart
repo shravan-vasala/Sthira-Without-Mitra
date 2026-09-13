@@ -34,6 +34,10 @@ class ProfileRepository {
     await _secureStorage.write(key: 'gemini_api_key', value: key);
   }
 
+  Future<void> deleteSecureGeminiKey() async {
+    await _secureStorage.delete(key: 'gemini_api_key');
+  }
+
   UserProfile getProfile() {
     return _isar.userProfiles.where().findFirstSync() ?? UserProfile();
   }

@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_colors.dart';
 import '../providers/app_providers.dart';
+import '../providers/credential_provider.dart';
 import 'app_bottom_sheet.dart';
 import 'app_text_field.dart';
 import 'primary_button.dart';
@@ -29,7 +30,8 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
   void initState() {
     super.initState();
     final profile = ref.read(profileProvider);
-    _geminiController = TextEditingController(text: profile.geminiApiKey ?? '');
+    final cred = ref.read(credentialProvider);
+    _geminiController = TextEditingController(text: cred.key ?? '');
     _coachController = TextEditingController(text: profile.coachName ?? '');
   }
 
@@ -51,7 +53,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
       });
       try {
         await ref.read(geminiFoodServiceProvider).verifyApiKey(key);
-        await ref.read(profileProvider.notifier).updateGeminiKey(key);
+        await ref.read(credentialProvider.notifier).saveKey(key);
       } catch (e) {
         if (mounted) {
           setState(() {
@@ -67,7 +69,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
     } else {
       // Allow clearing the key if it was removed by the user
       try {
-        await ref.read(profileProvider.notifier).updateGeminiKey('');
+        await ref.read(credentialProvider.notifier).removeKey();
       } catch (e) {
         if (mounted) {
           setState(() {

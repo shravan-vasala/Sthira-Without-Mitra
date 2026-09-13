@@ -94,7 +94,6 @@ void main() {
         mealRepoProvider.overrideWithValue(mealRepo),
         dailyLogRepoProvider.overrideWithValue(dailyRepo),
         profileRepoProvider.overrideWithValue(profileRepo),
-        initialGeminiKeyProvider.overrideWithValue(''),
         selectedDateProvider.overrideWith(
           (ref) => DateTime(2023, 10, 2),
         ), // Monday
@@ -187,7 +186,6 @@ void main() {
         profileRepoProvider.overrideWithValue(
           container.read(profileRepoProvider),
         ),
-        initialGeminiKeyProvider.overrideWithValue(''),
         selectedDateProvider.overrideWith((ref) => DateTime(2023, 10, 1)),
       ],
     );

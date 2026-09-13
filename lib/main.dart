@@ -133,9 +133,7 @@ Future<void> main() async {
     // ignore: unawaited_futures
     BackupService(authService).autoBackup();
 
-    final initialGeminiKey = await profileRepo.getSecureGeminiKey();
     final prefs = await SharedPreferences.getInstance();
-
     final logger = DiagnosticLogger(prefs);
     logger.info('Sthira started cleanly');
 
@@ -158,7 +156,6 @@ Future<void> main() async {
           healthConnectServiceProvider.overrideWithValue(healthConnectService),
           authServiceProvider.overrideWithValue(authService),
           firestoreSyncServiceProvider.overrideWithValue(firestoreSyncService),
-          initialGeminiKeyProvider.overrideWithValue(initialGeminiKey ?? ''),
           sharedPreferencesProvider.overrideWithValue(prefs),
         ],
         child: const TruFitApp(),

@@ -118,72 +118,65 @@ class DailyLogRepository {
     _updates.add(null);
   }
 
+  Future<void> _updateLogSafe(String date, DailyLog Function(DailyLog) modifier) async {
+    _localEdits[date] = DateTime.now();
+    await _isar.writeTxn(() async {
+      final current = await _isar.dailyLogs.where().dateEqualTo(date).findFirst() ?? DailyLog(date: date);
+      final updated = modifier(current).copyWith(updatedAt: DateTime.now());
+      updated.id = current.id;
+      
+      await _isar.dailyLogs.put(updated);
+      _sync?.queueSyncInTxn(_isar, 'daily_logs', updated.date, updated.toJson());
+    });
+    _sync?.triggerFlush();
+    _updates.add(null);
+  }
+
   Future<void> updateWeight(String date, double weight) async {
-    final log = getOrCreate(date);
-    await saveLog(log.copyWith(weight: weight));
+    await _updateLogSafe(date, (log) => log.copyWith(weight: weight));
   }
 
   Future<void> updateSteps(String date, int steps, {String? source}) async {
-    final log = getOrCreate(date);
-    await saveLog(log.copyWith(steps: steps, stepsSource: source));
+    await _updateLogSafe(date, (log) => log.copyWith(steps: steps, stepsSource: source));
   }
 
   Future<void> updateScreenTime(String date, int minutes) async {
-    final log = getOrCreate(date);
-    await saveLog(log.copyWith(screenTimeMinutes: minutes));
+    await _updateLogSafe(date, (log) => log.copyWith(screenTimeMinutes: minutes));
   }
 
   Future<void> updateSleep(String date, double? hours, {String? source}) async {
-    final log = getOrCreate(date);
-    await saveLog(log.copyWith(sleepHours: hours, sleepSource: source));
+    await _updateLogSafe(date, (log) => log.copyWith(sleepHours: hours, sleepSource: source));
   }
 
   Future<void> updateFromHealthConnect(List<dynamic> healthDataList) async {
     for (final data in healthDataList) {
-      final log = getOrCreate(data.dateStr);
-      var updatedLog = log;
-      bool changed = false;
-
-      // Don't overwrite manual steps
-      if (data.steps != null) {
-        if (log.stepsSource != 'manual') {
-          updatedLog = updatedLog.copyWith(steps: data.steps, stepsSource: 'healthConnect');
-          changed = true;
+      await _updateLogSafe(data.dateStr, (log) {
+        var updated = log;
+        if (data.steps != null && log.stepsSource != 'manual') {
+          updated = updated.copyWith(steps: data.steps, stepsSource: 'healthConnect');
         }
-      }
-
-      // Don't overwrite manual sleep
-      if (data.sleepHours != null) {
-        if (log.sleepSource != 'manual') {
-          updatedLog = updatedLog.copyWith(sleepHours: data.sleepHours, sleepSource: 'healthConnect');
-          changed = true;
+        if (data.sleepHours != null && log.sleepSource != 'manual') {
+          updated = updated.copyWith(sleepHours: data.sleepHours, sleepSource: 'healthConnect');
         }
-      }
-
-      if (changed) {
-        await saveLog(updatedLog);
-      }
+        return updated;
+      });
     }
   }
 
   Future<void> clearSteps(String date) async {
-    final log = getOrCreate(date);
-    await saveLog(log.clearSteps());
+    await _updateLogSafe(date, (log) => log.clearSteps());
   }
 
   Future<void> clearSleep(String date) async {
-    final log = getOrCreate(date);
-    await saveLog(log.clearSleep());
+    await _updateLogSafe(date, (log) => log.clearSleep());
   }
 
   Future<void> updateBodyFat(String date, double bodyFat) async {
-    final log = getOrCreate(date);
-    await saveLog(log.copyWith(bodyFat: bodyFat));
+    await _updateLogSafe(date, (log) => log.copyWith(bodyFat: bodyFat));
   }
 
   Future<void> updateWorkoutStatus(String date, String dayId, String status) async {
-    final log = getOrCreate(date);
-    await saveLog(log.copyWith(workoutStatus: status, workoutDayId: dayId));
+    await _updateLogSafe(date, (log) => log.copyWith(workoutStatus: status, workoutDayId: dayId));
   }
 
   List<DailyLog> getLogsInRange(String startDate, String endDate) {

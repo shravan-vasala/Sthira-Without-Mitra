@@ -210,21 +210,39 @@ class MealRepository {
     String slotId,
     MealSlotLog slotLog,
   ) async {
-    final currentLog = getDailyLog(date);
-    final updatedSlots = Map<String, MealSlotLog>.from(currentLog.customSlots);
-    updatedSlots[slotId] = slotLog;
+    _localEdits[date] = DateTime.now();
+    await _isar.writeTxn(() async {
+      final currentLog = await _isar.dailyMealLogs.where().dateEqualTo(date).findFirst() ?? DailyMealLog(date: date);
+      final updatedSlots = Map<String, MealSlotLog>.from(currentLog.customSlots);
+      updatedSlots[slotId] = slotLog;
 
-    final updated = currentLog.copyWith(customSlots: updatedSlots);
-    await saveDailyLog(updated);
+      final updated = currentLog.copyWith(customSlots: updatedSlots);
+      updated.id = currentLog.id;
+      
+      await _isar.dailyMealLogs.put(updated);
+      final payload = updated.toJson();
+      payload['updatedAt'] = DateTime.now().toIso8601String();
+      _sync?.queueSyncInTxn(_isar, 'meal_logs', updated.date, payload);
+    });
+    _sync?.triggerFlush();
   }
 
   Future<void> clearMealSlot(String date, String slotId) async {
-    final currentLog = getDailyLog(date);
-    final updatedSlots = Map<String, MealSlotLog>.from(currentLog.customSlots);
-    updatedSlots.remove(slotId);
+    _localEdits[date] = DateTime.now();
+    await _isar.writeTxn(() async {
+      final currentLog = await _isar.dailyMealLogs.where().dateEqualTo(date).findFirst() ?? DailyMealLog(date: date);
+      final updatedSlots = Map<String, MealSlotLog>.from(currentLog.customSlots);
+      updatedSlots.remove(slotId);
 
-    final updated = currentLog.copyWith(customSlots: updatedSlots);
-    await saveDailyLog(updated);
+      final updated = currentLog.copyWith(customSlots: updatedSlots);
+      updated.id = currentLog.id;
+
+      await _isar.dailyMealLogs.put(updated);
+      final payload = updated.toJson();
+      payload['updatedAt'] = DateTime.now().toIso8601String();
+      _sync?.queueSyncInTxn(_isar, 'meal_logs', updated.date, payload);
+    });
+    _sync?.triggerFlush();
   }
 
   MealPlan? getMealPlan(String key) {

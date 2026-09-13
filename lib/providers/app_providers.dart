@@ -39,6 +39,7 @@ import '../interfaces/i_ai_food_service.dart';
 import '../utils/time_utils.dart';
 import 'auth_provider.dart';
 import 'profile_providers.dart';
+import 'credential_provider.dart';
 import 'daily_score_provider.dart';
 
 export 'rest_timer_provider.dart';
@@ -433,18 +434,18 @@ class CloudSyncController extends Notifier<CloudSyncState> {
 }
 
 final geminiFoodServiceProvider = Provider<IAiFoodService>((ref) {
-  final profile = ref.watch(profileProvider);
+  final credentialState = ref.watch(credentialProvider);
   return GeminiFoodService(
-    apiKey: profile.geminiApiKey,
+    apiKey: credentialState.key,
     aiClient: ref.watch(aiClientProvider),
     nutritionLookup: ref.watch(nutritionLookupServiceProvider),
   );
 });
 
 final coachServiceProvider = Provider<CoachService>((ref) {
-  final apiKey = ref.watch(profileProvider.select((p) => p.geminiApiKey));
+  final key = ref.watch(credentialProvider.select((s) => s.key));
   return CoachService(
-    apiKey: apiKey,
+    apiKey: key,
     aiClient: ref.watch(aiClientProvider),
   );
 });

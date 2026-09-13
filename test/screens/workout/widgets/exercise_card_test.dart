@@ -65,7 +65,6 @@ void main() {
             exerciseLogRepoProvider.overrideWithValue(logRepo),
             profileRepoProvider.overrideWithValue(_profRepo),
             sharedPreferencesProvider.overrideWithValue(await SharedPreferences.getInstance()),
-            initialGeminiKeyProvider.overrideWithValue(''),
           ],
           child: MaterialApp(
             home: Scaffold(

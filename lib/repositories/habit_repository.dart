@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import '../models/habit.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import '../models/app_config.dart';
 
 class HabitRepository {
   late Isar _isar;
@@ -17,12 +18,14 @@ class HabitRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    if (_isar.habits.where().countSync() == 0) {
+    final config = _isar.appConfigs.where().keyEqualTo('habits_seeded').findFirstSync();
+    if (config == null) {
       final defaultHabits = Habit.defaults;
       await _isar.writeTxn(() async {
         for (final habit in defaultHabits) {
           await _isar.habits.put(habit);
         }
+        await _isar.appConfigs.put(AppConfig(key: 'habits_seeded', value: 'true'));
       });
     }
   }
@@ -60,10 +63,18 @@ class HabitRepository {
   }
 
   Future<void> reorderHabits(List<Habit> reordered) async {
-    for (int i = 0; i < reordered.length; i++) {
-      final h = reordered[i].copyWith(order: i);
-      await saveHabit(h);
-    }
+    await _isar.writeTxn(() async {
+      for (int i = 0; i < reordered.length; i++) {
+        final existing = await _isar.habits.get(reordered[i].idInternal);
+        final h = reordered[i].copyWith(order: i, updatedAt: DateTime.now());
+        if (existing != null) {
+          h.idInternal = existing.idInternal;
+        }
+        await _isar.habits.put(h);
+        _sync?.queueSyncInTxn(_isar, 'habit_config', h.id, h.toJson());
+      }
+    });
+    _sync?.triggerFlush();
   }
 
   HabitCompletion getCompletions(String date) {
@@ -108,11 +119,24 @@ class HabitRepository {
     _sync?.triggerFlush();
   }
 
+  Future<void> _updateCompletionSafe(String date, HabitCompletion Function(HabitCompletion) modifier) async {
+    await _isar.writeTxn(() async {
+      final current = await _isar.habitCompletions.where().dateEqualTo(date).findFirst() ?? HabitCompletion(date: date);
+      final updated = modifier(current);
+      
+      // Inherit the private DB id manually because immutable models discard them during mapping
+      // Although our modifier functions actually pass the whole object, so we're good mostly.
+      updated.id = current.id;
+      
+      await _isar.habitCompletions.put(updated);
+      _sync?.queueSyncInTxn(_isar, 'habit_completions', updated.date, updated.toJson());
+    });
+    _sync?.triggerFlush();
+  }
+
   // Checkbox toggle
   Future<void> toggleCheckboxCompletion(String date, String habitId) async {
-    final completion = getCompletions(date);
-    final updated = completion.toggleCheckbox(habitId);
-    await saveCompletion(updated);
+    await _updateCompletionSafe(date, (completion) => completion.toggleCheckbox(habitId));
   }
 
   // Counter / numeric update
@@ -121,9 +145,7 @@ class HabitRepository {
     String habitId,
     double progress,
   ) async {
-    final completion = getCompletions(date);
-    final updated = completion.updateProgress(habitId, progress);
-    await saveCompletion(updated);
+    await _updateCompletionSafe(date, (completion) => completion.updateProgress(habitId, progress));
   }
 
   // Backwards compatibility for old HealthConnectService code
@@ -132,18 +154,20 @@ class HabitRepository {
     String habitId,
     dynamic completed,
   ) async {
-    final completion = getCompletions(date);
-    final current = completion.completions[habitId];
-    if (current == completed) return;
+    await _updateCompletionSafe(date, (completion) {
+      final current = completion.completions[habitId];
+      if (current == completed) return completion;
 
-    final newCompletions = Map<String, dynamic>.from(completion.completions);
-    newCompletions[habitId] = completed;
-    final updated = HabitCompletion(
-      date: date,
-      completions: newCompletions,
-      overrides: completion.overrides,
-    );
-    await saveCompletion(updated);
+      final newCompletions = Map<String, dynamic>.from(completion.completions);
+      newCompletions[habitId] = completed;
+      return HabitCompletion(
+        date: date,
+        completions: newCompletions,
+        overrides: completion.overrides,
+        streaks: completion.streaks,
+        updatedAt: DateTime.now(),
+      );
+    });
   }
 
   Future<void> setOverride(
@@ -151,9 +175,7 @@ class HabitRepository {
     String habitId,
     String? overrideValue,
   ) async {
-    final completion = getCompletions(date);
-    final updated = completion.setOverride(habitId, overrideValue);
-    await saveCompletion(updated);
+    await _updateCompletionSafe(date, (completion) => completion.setOverride(habitId, overrideValue));
   }
 
   // ── Cloud sync helpers ──

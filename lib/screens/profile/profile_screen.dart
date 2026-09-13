@@ -18,7 +18,9 @@ import '../../widgets/primary_button.dart';
 import 'widgets/trophy_room_card.dart';
 import 'widgets/journey_stats_strip.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/credential_provider.dart';
 import '../../providers/reminders_provider.dart';
+import '../../providers/rest_timer_provider.dart';
 import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../services/diagnostic_logger.dart';
@@ -1655,7 +1657,7 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
       ...AiClient.visionModelsToTry,
     }.toList();
     final client = AiClient();
-    final profile = widget.ref.read(profileProvider);
+    final cred = widget.ref.read(credentialProvider);
 
     for (final model in allModels) {
       if (!mounted) break;
@@ -1664,7 +1666,7 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
         await client.generateJson(
           prompt: '{"test":"Respond with exactly {\"status\":\"ok\"}"}',
           systemInstruction: 'Respond only in valid JSON.',
-          apiKey: profile.geminiApiKey ?? '',
+          apiKey: cred.key ?? '',
           skipCache: true,
         );
         sw.stop();
