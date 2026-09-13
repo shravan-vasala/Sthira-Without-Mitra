@@ -84,6 +84,9 @@ class MockCloudSyncService implements ICloudSyncService {
 
   @override
   void resumeSync() {}
+
+  @override
+  Future<void> pauseAndDrainSync() async {}
 }
 
 void main() {
