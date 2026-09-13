@@ -9,6 +9,7 @@ class HabitRepository {
   Stream<void> get watchUpdates => _isar.habits.watchLazy(fireImmediately: true);
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
+  Future<void> detachSync() async { _sync = null; }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -42,8 +43,9 @@ class HabitRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.habits.put(updatedHabit);
+      _sync?.queueSyncInTxn(_isar, 'habit_config', updatedHabit.id, updatedHabit.toJson());
     });
-    _sync?.syncToCloud('habit_config', updatedHabit.id, updatedHabit.toJson());
+    _sync?.triggerFlush();
   }
 
   Future<void> deleteHabit(String id) async {
@@ -51,9 +53,9 @@ class HabitRepository {
     if (existing != null) {
       await _isar.writeTxn(() async {
         await _isar.habits.delete(existing.idInternal);
+        _sync?.queueDeleteInTxn(_isar, 'habit_config', id);
       });
-    }
-    _sync?.deleteFromCloud('habit_config', id);
+      _sync?.triggerFlush();
   }
 
   Future<void> reorderHabits(List<Habit> reordered) async {
@@ -95,12 +97,14 @@ class HabitRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.habitCompletions.put(updatedCompletion);
+      _sync?.queueSyncInTxn(
+        _isar,
+        'habit_completions',
+        updatedCompletion.date,
+        updatedCompletion.toJson(),
+      );
     });
-    _sync?.syncToCloud(
-      'habit_completions',
-      updatedCompletion.date,
-      updatedCompletion.toJson(),
-    );
+    _sync?.triggerFlush();
   }
 
   // Checkbox toggle

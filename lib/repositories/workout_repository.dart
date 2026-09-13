@@ -12,6 +12,7 @@ class WorkoutRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
+  Future<void> detachSync() async { _sync = null; }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -74,8 +75,9 @@ class WorkoutRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.workoutPlans.put(plan);
+      _sync?.queueSyncInTxn(_isar, 'workout_plans', key, plan.toJson());
     });
-    _sync?.syncToCloud('workout_plans', key, plan.toJson());
+    _sync?.triggerFlush();
   }
 
   Future<void> renamePlan(String oldKey, String newKey, String jsonStr) async {
@@ -88,10 +90,10 @@ class WorkoutRepository {
         await _isar.workoutPlans.delete(existing.id);
       }
       await _isar.workoutPlans.put(newPlan);
+      _sync?.queueDeleteInTxn(_isar, 'workout_plans', oldKey);
+      _sync?.queueSyncInTxn(_isar, 'workout_plans', newKey, newPlan.toJson());
     });
-    
-    _sync?.deleteFromCloud('workout_plans', oldKey);
-    _sync?.syncToCloud('workout_plans', newKey, newPlan.toJson());
+    _sync?.triggerFlush();
   }
 
   Future<void> savePlanJson(String key, String jsonStr) async {
@@ -184,9 +186,9 @@ class WorkoutRepository {
 
     await _isar.writeTxn(() async {
       await _isar.workoutSessions.put(newSession);
+      _sync?.queueSyncInTxn(_isar, 'workout_sessions', key, data);
     });
-
-    _sync?.syncToCloud('workout_sessions', key, data);
+    _sync?.triggerFlush();
   }
 
   bool isWorkoutFinished(String date, String dayId) {

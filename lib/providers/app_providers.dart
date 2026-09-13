@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/app_database_manager.dart';
 export '../services/widget_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -318,6 +319,47 @@ class CloudSyncController extends Notifier<CloudSyncState> {
       }
 
       final syncService = ref.read(firestoreSyncServiceProvider);
+      
+      // Detach all before transition
+      await ref.read(workoutRepoProvider).detachSync();
+      await ref.read(mealRepoProvider).detachSync();
+      await ref.read(dailyLogRepoProvider).detachSync();
+      await ref.read(habitRepoProvider).detachSync();
+      await ref.read(bodyStatsRepoProvider).detachSync();
+      await ref.read(profileRepoProvider).detachSync();
+      await ref.read(exerciseLogRepoProvider).detachSync();
+      await ref.read(coachNoteRepoProvider).detachSync();
+      await ref.read(badgeRepoProvider).detachSync();
+
+      // Switch scope
+      final newIsar = await AppDatabaseManager.openDatabaseForUser(user.uid);
+      
+      // Re-initialize
+      await Future.wait([
+        ref.read(workoutRepoProvider).init(newIsar),
+        ref.read(mealRepoProvider).init(newIsar),
+        ref.read(photoMealRepoProvider).init(newIsar),
+        ref.read(dailyLogRepoProvider).init(newIsar),
+        ref.read(habitRepoProvider).init(newIsar),
+        ref.read(bodyStatsRepoProvider).init(newIsar),
+        ref.read(mediaRepoProvider).init(newIsar),
+        ref.read(profileRepoProvider).init(newIsar),
+        ref.read(exerciseLogRepoProvider).init(newIsar),
+        ref.read(coachNoteRepoProvider).init(newIsar),
+        ref.read(badgeRepoProvider).init(newIsar),
+      ]);
+
+      // Re-attach sync subscriptions NOW that we are logged in, so they get their cloud listeners.
+      ref.read(workoutRepoProvider).attachSync(syncService);
+      await ref.read(mealRepoProvider).attachSync(syncService);
+      await ref.read(dailyLogRepoProvider).attachSync(syncService);
+      ref.read(habitRepoProvider).attachSync(syncService);
+      ref.read(bodyStatsRepoProvider).attachSync(syncService);
+      ref.read(profileRepoProvider).attachSync(syncService);
+      ref.read(exerciseLogRepoProvider).attachSync(syncService);
+      ref.read(coachNoteRepoProvider).attachSync(syncService);
+      await ref.read(badgeRepoProvider).attachSync(syncService);
+
       final hasCloudData = await syncService.hasCloudData();
 
       if (hasCloudData) {

@@ -193,10 +193,11 @@ class MealRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.dailyMealLogs.put(log);
+      final payload = log.toJson();
+      payload['updatedAt'] = DateTime.now().toIso8601String();
+      _sync?.queueSyncInTxn(_isar, 'meal_logs', log.date, payload);
     });
-    final payload = log.toJson();
-    payload['updatedAt'] = DateTime.now().toIso8601String();
-    _sync?.syncToCloud('meal_logs', log.date, payload);
+    _sync?.triggerFlush();
   }
 
   Future<void> saveMealSlot(
@@ -275,8 +276,9 @@ class MealRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.mealPlans.put(plan);
+      _sync?.queueSyncInTxn(_isar, 'meal_plans', key, plan.toJson());
     });
-    _sync?.syncToCloud('meal_plans', key, plan.toJson());
+    _sync?.triggerFlush();
   }
 
   Future<void> renamePlan(String oldKey, String newKey, String jsonStr) async {
@@ -289,10 +291,10 @@ class MealRepository {
         await _isar.mealPlans.delete(existing.id);
       }
       await _isar.mealPlans.put(newPlan);
+      _sync?.queueDeleteInTxn(_isar, 'meal_plans', oldKey);
+      _sync?.queueSyncInTxn(_isar, 'meal_plans', newKey, newPlan.toJson());
     });
-    
-    _sync?.deleteFromCloud('meal_plans', oldKey);
-    _sync?.syncToCloud('meal_plans', newKey, newPlan.toJson());
+    _sync?.triggerFlush();
   }
 
   String? getRawPlanJson(String key) {

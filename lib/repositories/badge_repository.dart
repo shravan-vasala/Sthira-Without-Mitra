@@ -141,9 +141,10 @@ class BadgeRepository {
 
     await _isar.writeTxn(() async {
       await _isar.badges.put(badge);
+      _sync?.queueSyncInTxn(_isar, 'badges', badge.id, badge.toJson());
     });
 
-    _sync?.syncToCloud('badges', badge.id, badge.toJson());
+    _sync?.triggerFlush();
   }
 
   /// Bulk import from Firestore (used on new-device sign-in).

@@ -7,6 +7,7 @@ class BodyStatsRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
+  Future<void> detachSync() async { _sync = null; }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -23,8 +24,9 @@ class BodyStatsRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.bodyStats.put(stats);
+      _sync?.queueSyncInTxn(_isar, 'body_stats', stats.date, stats.toJson());
     });
-    _sync?.syncToCloud('body_stats', stats.date, stats.toJson());
+    _sync?.triggerFlush();
   }
 
   BodyStats? getLatestStats() {

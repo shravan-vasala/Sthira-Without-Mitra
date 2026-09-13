@@ -10,6 +10,7 @@ class ProfileRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
+  Future<void> detachSync() async { _sync = null; }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -48,8 +49,9 @@ class ProfileRepository {
   Future<void> saveProfile(UserProfile profile) async {
     await _isar.writeTxn(() async {
       await _isar.userProfiles.put(profile);
+      _sync?.queueProfileInTxn(_isar, profile.toJson());
     });
-    _sync?.syncProfile(profile.toJson());
+    _sync?.triggerFlush();
   }
 
   Future<void> updateName(String name) async {

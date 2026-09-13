@@ -76,91 +76,96 @@ class FirestoreSyncService implements ICloudSyncService {
   //  WRITE — fire-and-forget sync after Hive write
   // ──────────────────────────────────────────────
 
-  /// Sync a single document to Firestore. Non-blocking.
-  /// [collection] is the sub-collection name (e.g. 'daily_logs').
-  /// [docId] is the document key (e.g. '2026-08-04').
-  /// [data] is the JSON map to store.
+  @override
+  void queueSyncInTxn(Isar isar, String collection, String docId, Map<String, dynamic> data) {
+    if (!canSync) return;
+    final uid = _auth.uid;
+    if (uid == null) return;
+    
+    final item = SyncQueueItem(
+      collection: collection,
+      docId: docId,
+      payload: jsonEncode(data),
+      timestamp: DateTime.now(),
+      uid: uid,
+    );
+    isar.syncQueueItems.put(item); // inside an active transaction
+  }
+
+  @override
+  void queueDeleteInTxn(Isar isar, String collection, String docId) {
+    if (!canSync) return;
+    final uid = _auth.uid;
+    if (uid == null) return;
+    
+    final item = SyncQueueItem(
+      collection: '_delete_/$collection',
+      docId: docId,
+      payload: '{}',
+      timestamp: DateTime.now(),
+      uid: uid,
+    );
+    isar.syncQueueItems.put(item);
+  }
+
+  @override
+  void queueProfileInTxn(Isar isar, Map<String, dynamic> data) {
+    if (!canSync) return;
+    final uid = _auth.uid;
+    if (uid == null) return;
+
+    final item = SyncQueueItem(
+      collection: '_profile_',
+      docId: uid,
+      payload: jsonEncode(data),
+      timestamp: DateTime.now(),
+      uid: uid,
+    );
+    isar.syncQueueItems.put(item);
+  }
+
+  @override
+  void triggerFlush() {
+    if (_debouncers.containsKey('flush')) {
+      _debouncers['flush']?.cancel();
+    }
+    _debouncers['flush'] = Timer(const Duration(seconds: 3), () {
+      flushQueue();
+      _debouncers.remove('flush');
+    });
+  }
+
   @override
   void syncToCloud(String collection, String docId, Map<String, dynamic> data) {
-    if (!canSync) return;
-    final uid = _auth.uid;
-    if (uid == null) return;
-
     final isar = Isar.getInstance();
-    if (isar != null) {
+    if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
-        final item = SyncQueueItem(
-          collection: collection,
-          docId: docId,
-          payload: jsonEncode(data),
-          timestamp: DateTime.now(),
-          uid: uid,
-        );
-        isar.syncQueueItems.putSync(item);
+        queueSyncInTxn(isar, collection, docId, data);
       });
+      triggerFlush();
     }
-
-    if (_debouncers.containsKey('flush')) {
-      _debouncers['flush']?.cancel();
-    }
-    _debouncers['flush'] = Timer(const Duration(seconds: 3), () {
-      flushQueue();
-      _debouncers.remove('flush');
-    });
   }
 
-  /// Delete a document from Firestore. Non-blocking.
   @override
   void deleteFromCloud(String collection, String docId) {
-    if (!canSync) return;
-    final uid = _auth.uid;
-    if (uid == null) return;
-
     final isar = Isar.getInstance();
-    if (isar != null) {
+    if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
-        final item = SyncQueueItem(
-          collection: '_delete_/$collection',
-          docId: docId,
-          payload: '{}',
-          timestamp: DateTime.now(),
-          uid: uid,
-        );
-        isar.syncQueueItems.putSync(item);
+        queueDeleteInTxn(isar, collection, docId);
       });
+      flushNow();
     }
-
-    flushNow();
   }
 
-  /// Sync the user profile (stored as a single doc, not a sub-collection).
   @override
   void syncProfile(Map<String, dynamic> data) {
-    if (!canSync) return;
-    final uid = _auth.uid;
-    if (uid == null) return;
-
     final isar = Isar.getInstance();
-    if (isar != null) {
+    if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
-        final item = SyncQueueItem(
-          collection: '_profile_',
-          docId: uid,
-          payload: jsonEncode(data),
-          timestamp: DateTime.now(),
-          uid: uid,
-        );
-        isar.syncQueueItems.putSync(item);
+        queueProfileInTxn(isar, data);
       });
+      triggerFlush();
     }
-
-    if (_debouncers.containsKey('flush')) {
-      _debouncers['flush']?.cancel();
-    }
-    _debouncers['flush'] = Timer(const Duration(seconds: 3), () {
-      flushQueue();
-      _debouncers.remove('flush');
-    });
   }
 
   @override
@@ -175,70 +180,93 @@ class FirestoreSyncService implements ICloudSyncService {
     }, SetOptions(merge: true));
   }
 
+  bool _isFlushing = false;
+
   Future<void> flushQueue() async {
-    if (!canSync || _isSyncPaused) return;
+    if (!canSync || _isSyncPaused || _isFlushing) return;
     final isar = Isar.getInstance();
     if (isar == null) return;
 
     final currentUserUid = _auth.uid;
     if (currentUserUid == null) return;
 
-    // B01: Only process items for the CURRENT user!
-    final items = isar.syncQueueItems.where().sortByTimestamp().findAllSync()
-        .where((item) => item.uid == currentUserUid).toList();
-    
-    if (items.isEmpty) return;
-
-    final Map<String, SyncQueueItem> deduped = {};
-
-    for (final item in items) {
-      final key = '${item.collection}/${item.docId}';
-      deduped[key] = item;
-    }
-
-    if (deduped.isEmpty) {
-      return;
-    }
-
-    final batch = _db.batch();
-    for (final item in deduped.values) {
-      if (item.collection.startsWith('_delete_/')) {
-        final actualCollection = item.collection.split('/')[1];
-        final ref = _subcollection(actualCollection);
-        if (ref != null) {
-          batch.delete(ref.doc(item.docId));
-        }
-      } else if (item.collection == '_profile_') {
-        final doc = _userDoc;
-        if (doc != null) {
-          try {
-            final data = jsonDecode(item.payload) as Map<String, dynamic>;
-            batch.set(doc, {'profile': data, 'lastSyncedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
-          } catch (_) {}
-        }
-      } else {
-        final ref = _subcollection(item.collection);
-        if (ref != null) {
-          try {
-            final data = jsonDecode(item.payload) as Map<String, dynamic>;
-            batch.set(ref.doc(item.docId), data, SetOptions(merge: true));
-          } catch (_) {}
-        }
-      }
-    }
-
+    _isFlushing = true;
     try {
-      await batch.commit();
+      final items = isar.syncQueueItems.where().sortByTimestamp().findAllSync()
+          .where((item) => item.uid == currentUserUid).toList(); // Strict UID boundary
       
-      // Collect IDs of all successfully processed items for this user
-      final itemsToDelete = items.map((e) => e.id).toList();
+      if (items.isEmpty) return;
 
-      await isar.writeTxn(() async {
-        await isar.syncQueueItems.deleteAll(itemsToDelete);
-      });
-      debugPrint('FirestoreSync: Flushed ${deduped.length} items from queue.');
+      // Fold identity by canonical target
+      final Map<String, SyncQueueItem> deduped = {};
+      for (final item in items) {
+        final collectionSegment = item.collection.startsWith('_delete_/') 
+            ? item.collection.substring(9) 
+            : item.collection;
+        final key = '${item.uid}/$collectionSegment/${item.docId}';
+        deduped[key] = item;
+      }
+
+      final successfulIds = <Id>[];
+      final ops = deduped.values.toList();
+      
+      // Bounded batch limits (Firestore allows 500)
+      for (int i = 0; i < ops.length; i += 450) {
+        final batch = _db.batch();
+        final chunk = ops.skip(i).take(450);
+        final chunkIds = <Id>[];
+
+        for (final item in chunk) {
+          final isDelete = item.collection.startsWith('_delete_/');
+          final actualCollection = isDelete ? item.collection.substring(9) : item.collection;
+          
+          if (isDelete) {
+            final ref = _subcollection(actualCollection);
+            if (ref != null) {
+              batch.delete(ref.doc(item.docId));
+              chunkIds.add(item.id);
+            }
+          } else if (actualCollection == '_profile_') {
+            final doc = _userDoc;
+            if (doc != null) {
+              try {
+                final data = jsonDecode(item.payload) as Map<String, dynamic>;
+                batch.set(doc, {'profile': data, 'lastSyncedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+                chunkIds.add(item.id);
+              } catch (_) {
+                debugPrint('FirestoreSync: Quarantined malformed profile payload ID ${item.id}');
+              }
+            }
+          } else {
+            final ref = _subcollection(actualCollection);
+            if (ref != null) {
+              try {
+                final data = jsonDecode(item.payload) as Map<String, dynamic>;
+                batch.set(ref.doc(item.docId), data, SetOptions(merge: true));
+                chunkIds.add(item.id);
+              } catch (_) {
+                debugPrint('FirestoreSync: Quarantined malformed payload ID ${item.id} in collection ${item.collection}');
+              }
+            }
+          }
+        }
+
+        // Final async bounds check before pushing to network
+        if (_auth.uid != currentUserUid) return;
+
+        await batch.commit();
+        successfulIds.addAll(chunkIds);
+      }
+
+      if (successfulIds.isNotEmpty) {
+        await isar.writeTxn(() async {
+          await isar.syncQueueItems.deleteAll(successfulIds);
+        });
+      }
     } catch (e) {
       debugPrint('FirestoreSync: Error flushing queue: $e');
+    } finally {
+      _isFlushing = false;
     }
   }
 

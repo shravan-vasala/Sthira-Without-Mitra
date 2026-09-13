@@ -7,6 +7,7 @@ class CoachNoteRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
+  Future<void> detachSync() async { _sync = null; }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -23,8 +24,9 @@ class CoachNoteRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.coachNotes.put(note);
+      _sync?.queueSyncInTxn(_isar, 'coach_notes', note.date, note.toJson());
     });
-    _sync?.syncToCloud('coach_notes', note.date, note.toJson());
+    _sync?.triggerFlush();
   }
 
   List<CoachNote> getRecentNotes(int limit) {

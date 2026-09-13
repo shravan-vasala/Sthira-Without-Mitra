@@ -10,6 +10,7 @@ class ExerciseLogRepository {
   Stream<void> get watchUpdates => _isar.exerciseLogs.watchLazy(fireImmediately: true);
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
+  Future<void> detachSync() async { _sync = null; }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -27,8 +28,9 @@ class ExerciseLogRepository {
     if (existing != null) pr.id = existing.id;
     await _isar.writeTxn(() async {
       await _isar.exercisePrs.put(pr);
+      _sync?.queueSyncInTxn(_isar, 'exercise_prs', pr.exerciseName, pr.toJson());
     });
-    _sync?.syncToCloud('exercise_prs', pr.exerciseName, pr.toJson());
+    _sync?.triggerFlush();
   }
 
   ExerciseLog? getLog(String date, String instanceId) {
@@ -45,8 +47,9 @@ class ExerciseLogRepository {
     if (existing != null) log.id = existing.id;
     await _isar.writeTxn(() async {
       await _isar.exerciseLogs.put(log);
+      _sync?.queueSyncInTxn(_isar, 'exercise_logs', log.key, log.toJson());
     });
-    _sync?.syncToCloud('exercise_logs', log.key, log.toJson());
+    _sync?.triggerFlush();
   }
 
   Future<void> deleteLog(String date, String instanceId) async {
@@ -54,8 +57,9 @@ class ExerciseLogRepository {
     if (existing != null) {
       await _isar.writeTxn(() async {
         await _isar.exerciseLogs.delete(existing.id);
+        _sync?.queueDeleteInTxn(_isar, 'exercise_logs', existing.key);
       });
-      _sync?.deleteFromCloud('exercise_logs', existing.key);
+      _sync?.triggerFlush();
     }
   }
 

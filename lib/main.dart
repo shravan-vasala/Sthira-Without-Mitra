@@ -28,6 +28,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_sync_service.dart';
+import 'services/app_database_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Models
@@ -68,30 +69,8 @@ Future<void> main() async {
       const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
     );
 
-    final dir = await getApplicationDocumentsDirectory();
-    final isar = await Isar.open([
-      UserProfileSchema,
-      DailyLogSchema,
-      WorkoutPlanSchema,
-      WorkoutSessionSchema,
-      DailyMealLogSchema,
-      MealPlanSchema,
-      HabitSchema,
-      HabitCompletionSchema,
-      ScannedMealLogSchema,
-      ProgressPhotoSchema,
-      ExerciseLogSchema,
-      ExercisePrSchema,
-      CoachNoteSchema,
-      BodyStatsSchema,
-      BadgeSchema,
-      AppConfigSchema,
-      AiCacheEntrySchema,
-      FoodSearchCacheSchema,
-      UserFoodLogSchema,
-      FriendSchema,
-      SyncQueueItemSchema,
-    ], directory: dir.path);
+    final authService = AuthService();
+    final isar = await AppDatabaseManager.openDatabaseForUser(authService.uid);
 
     await SchemaMigrationService.runStartupMigrations(isar);
 
@@ -126,7 +105,6 @@ Future<void> main() async {
       NotificationService().init(),
     ]);
 
-    final authService = AuthService();
     final firestoreSyncService = FirestoreSyncService(authService);
 
     workoutRepo.attachSync(firestoreSyncService);

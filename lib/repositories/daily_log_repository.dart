@@ -112,8 +112,9 @@ class DailyLogRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.dailyLogs.put(updatedLog);
+      _sync?.queueSyncInTxn(_isar, 'daily_logs', updatedLog.date, updatedLog.toJson());
     });
-    _sync?.syncToCloud('daily_logs', updatedLog.date, updatedLog.toJson());
+    _sync?.triggerFlush();
     _updates.add(null);
   }
 
