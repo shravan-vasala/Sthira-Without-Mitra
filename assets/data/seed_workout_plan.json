@@ -2,7 +2,7 @@
   "planName": "Phase 1 (8 Weeks)",
   "days": [
     {
-      "dayId": "beg_day1",
+      "dayId": "monday",
       "label": "Monday",
       "sections": [
         {
@@ -184,7 +184,7 @@
       ]
     },
     {
-      "dayId": "beg_day2",
+      "dayId": "tuesday",
       "label": "Tuesday",
       "sections": [
         {
@@ -367,7 +367,7 @@
       ]
     },
     {
-      "dayId": "Home Cardio",
+      "dayId": "wednesday",
       "label": "Wednesday",
       "sections": [
         {
@@ -389,7 +389,7 @@
       ]
     },
     {
-      "dayId": "beg_day3",
+      "dayId": "thursday",
       "label": "Thursday",
       "sections": [
         {
@@ -572,7 +572,7 @@
       ]
     },
     {
-      "dayId": "beg_day4",
+      "dayId": "friday",
       "label": "Friday",
       "sections": [
         {
@@ -744,7 +744,7 @@
       ]
     },
     {
-      "dayId": "HIIT",
+      "dayId": "saturday",
       "label": "Saturday",
       "sections": [
         {
@@ -882,7 +882,7 @@
       ]
     },
     {
-      "dayId": "Rest",
+      "dayId": "sunday",
       "label": "Sunday",
       "sections": [
         {
