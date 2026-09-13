@@ -12,6 +12,7 @@ class AppTheme {
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'General Sans',
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColorsLight().scaffoldBg,
       primaryColor: AppColorsLight().primary,
@@ -297,6 +298,7 @@ class AppTheme {
   static ThemeData get dark {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'General Sans',
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColorsDark().scaffoldBg,
       primaryColor: AppColorsDark().primary,
