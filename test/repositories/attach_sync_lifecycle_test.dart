@@ -106,7 +106,8 @@ void main() {
       });
 
       // Allow event loop to process
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 500));
+      await pumpEventQueue(times: 20);
 
       final count = isar.dailyMealLogs.where().countSync();
       expect(count, equals(1), reason: 'Should not create duplicate records from duplicate listeners');
@@ -135,7 +136,8 @@ void main() {
         }
       });
 
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 500));
+      await pumpEventQueue(times: 20);
 
       final log = isar.dailyMealLogs.where().dateEqualTo('2026-09-14').findFirstSync();
       expect(log, isNull, reason: 'Event from Account A must not write after switching to Account B');
@@ -166,7 +168,8 @@ void main() {
         }
       });
 
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 500));
+      await pumpEventQueue(times: 20);
 
       final refreshedLog = repo.getLog(date);
       expect(refreshedLog?.weight, equals(75.0), reason: 'Newer local edit must be preserved over older cloud event');
