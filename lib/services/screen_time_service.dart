@@ -8,6 +8,32 @@ final screenTimeServiceProvider = Provider<ScreenTimeService>((ref) {
   return ScreenTimeService();
 });
 
+class ScreenTimeResult {
+  final String status; // 'success', 'denied', 'unavailable', 'failed'
+  final int? minutes;
+  final String? measuredDate;
+  final int? timestamp;
+  final String? error;
+
+  ScreenTimeResult({
+    required this.status,
+    this.minutes,
+    this.measuredDate,
+    this.timestamp,
+    this.error,
+  });
+
+  factory ScreenTimeResult.fromJson(Map<dynamic, dynamic> json) {
+    return ScreenTimeResult(
+      status: json['status'] as String? ?? 'failed',
+      minutes: json['minutes'] as int?,
+      measuredDate: json['measuredDate'] as String?,
+      timestamp: json['timestamp'] as int?,
+      error: json['error'] as String?,
+    );
+  }
+}
+
 class ScreenTimeService {
   static const MethodChannel _channel = MethodChannel(
     'com.trufit.trufit_bodamma/screentime',
@@ -39,24 +65,28 @@ class ScreenTimeService {
     }
   }
 
-  /// Fetches screen time (totalTimeInForeground) in minutes for the current day
-  /// Fetches screen time (totalTimeInForeground) in minutes for the current day
-  /// Returns null if permission is not granted, platform is not Android, or an error occurs.
-  Future<int?> getScreenTimeForToday() async {
-    if (!Platform.isAndroid) return null;
+  /// Fetches screen time (totalTimeInForeground) structured result for the current native day
+  Future<ScreenTimeResult> getScreenTimeForToday() async {
+    if (!Platform.isAndroid) {
+      return ScreenTimeResult(status: 'unsupported');
+    }
+    
     try {
-      final int minutes = await _channel.invokeMethod('getScreenTime');
-      return minutes;
+      final resultMap = await _channel.invokeMethod('getScreenTime');
+      if (resultMap is Map) {
+         return ScreenTimeResult.fromJson(resultMap);
+      }
+      return ScreenTimeResult(status: 'failed', error: 'Invalid response format');
     } on PlatformException catch (e) {
       if (e.code == 'PERMISSION_DENIED') {
         debugPrint('Screen time permission denied.');
-      } else {
-        debugPrint('Failed to get screen time: ${e.message}');
+        return ScreenTimeResult(status: 'denied', error: e.message);
       }
-      return null;
+      debugPrint('Failed to get screen time: ${e.message}');
+      return ScreenTimeResult(status: 'failed', error: e.message);
     } catch (e) {
       debugPrint('Error getting screen time: $e');
-      return null;
+      return ScreenTimeResult(status: 'failed', error: e.toString());
     }
   }
 }

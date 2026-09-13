@@ -57,11 +57,24 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
 
       // Sync Screen Time
       if (ref.read(profileProvider).screenTimeEnabled) {
-        final screenTimeMins = await ref
+        final currentUid = ref.read(authServiceProvider).uid;
+        
+        final screenTimeResult = await ref
             .read(screenTimeServiceProvider)
             .getScreenTimeForToday();
-        if (screenTimeMins != null) {
-          await dailyLogRepo.updateScreenTime(todayStr, screenTimeMins);
+            
+        // Check cancellation/ownership pre-write
+        if (currentUid != null && currentUid == ref.read(authServiceProvider).uid) {
+          if (screenTimeResult.status == 'success' && 
+              screenTimeResult.measuredDate != null && 
+              screenTimeResult.minutes != null) {
+                
+            // Discard overlapping local-drift; Use authoritative native boundaries
+            await dailyLogRepo.updateScreenTime(
+                screenTimeResult.measuredDate!, 
+                screenTimeResult.minutes!,
+            );
+          }
         }
       }
 

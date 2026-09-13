@@ -25,8 +25,8 @@ class MainActivity : FlutterFragmentActivity() {
                     return@setMethodCallHandler
                 }
 
-                val screenTime = getScreenTimeForToday()
-                result.success(screenTime)
+                val screenTimeResult = getScreenTimeForTodayResult()
+                result.success(screenTimeResult)
             } else if (call.method == "checkPermission") {
                 result.success(checkUsageStatsPermission())
             } else if (call.method == "openUsageSettings") {
@@ -51,26 +51,48 @@ class MainActivity : FlutterFragmentActivity() {
         return mode == AppOpsManager.MODE_ALLOWED
     }
 
-    private fun getScreenTimeForToday(): Int {
-        val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        val startTime = calendar.timeInMillis
-        val endTime = System.currentTimeMillis()
-
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
-        
-        var totalTimeInMillis: Long = 0
-        if (stats != null) {
-            for (usageStats in stats) {
-                totalTimeInMillis += usageStats.totalTimeInForeground
+    private fun getScreenTimeForTodayResult(): Map<String, Any?> {
+        return try {
+            val hasPermission = checkUsageStatsPermission()
+            if (!hasPermission) {
+                return mapOf("status" to "denied")
             }
+
+            val usageStatsManager = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val startTime = calendar.timeInMillis
+            val endTime = System.currentTimeMillis()
+
+            val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+            
+            if (stats == null) {
+                mapOf("status" to "unavailable")
+            } else {
+                var totalTimeInMillis: Long = 0
+                for (usageStats in stats) {
+                    totalTimeInMillis += usageStats.totalTimeInForeground
+                }
+                
+                // Native calculates the explicit bounded day for accurate rollover capture
+                val year = calendar.get(Calendar.YEAR)
+                val month = calendar.get(Calendar.MONTH) + 1
+                val day = calendar.get(Calendar.DAY_OF_MONTH)
+                val dateStr = String.format("%04d-%02d-%02d", year, month, day)
+
+                mapOf(
+                    "status" to "success",
+                    "minutes" to (totalTimeInMillis / (1000 * 60)).toInt(),
+                    "measuredDate" to dateStr,
+                    "timestamp" to endTime
+                )
+            }
+        } catch (e: Exception) {
+            mapOf("status" to "failed", "error" to e.message)
         }
-        
-        return (totalTimeInMillis / (1000 * 60)).toInt()
     }
 }
