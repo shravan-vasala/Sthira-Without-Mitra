@@ -15,31 +15,47 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  Future<void>? _initFuture;
 
   Future<void> init() async {
     if (_initialized) return;
+    if (_initFuture != null) {
+      return _initFuture;
+    }
+    _initFuture = _doInit();
+    try {
+      await _initFuture;
+    } finally {
+      _initFuture = null;
+    }
+  }
 
+  Future<void> _doInit() async {
     tz.initializeTimeZones();
 
     try {
       final tzInfo = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
     } catch (e) {
-      // Explicitly handle failure instead of defaulting to UTC silently
-      throw Exception('Failed to resolve local timezone: $e');
+      debugPrint('Failed to resolve local timezone: $e');
+      return;
     }
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('ic_stat_sthira');
 
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    await _notificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationResponse,
-    );
-    _initialized = true;
+    try {
+      final result = await _notificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: _onNotificationResponse,
+      );
+      _initialized = result ?? false;
+    } catch (e) {
+      debugPrint('Failed to initialize local notifications: $e');
+    }
   }
 
   void _onNotificationResponse(NotificationResponse response) {
@@ -105,6 +121,7 @@ class NotificationService {
     bool addSkip = true,
   }) async {
     if (!_initialized) await init();
+    if (!_initialized) return;
 
     final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
     if (tzDate.isBefore(tz.TZDateTime.now(tz.local))) return;
@@ -145,6 +162,7 @@ class NotificationService {
     bool enableVibration = true,
   }) async {
     if (!_initialized) await init();
+    if (!_initialized) return;
 
     final title = 'Rest Complete!';
     final body = exerciseName != null

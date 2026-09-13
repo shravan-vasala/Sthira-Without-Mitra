@@ -1,6 +1,6 @@
-# Sasirekha Design System Reference
+# Sthira Design System Reference
 
-Here is your beautifully structured **Sasirekha Design System** cheat sheet, reflecting our dark, grounded, borderless, and premium "Steady Aura" aesthetic!
+Here is your beautifully structured **Sthira Design System** cheat sheet, reflecting our dark, grounded, borderless, and premium "Steady Aura" aesthetic!
 
 <br>
 
@@ -8,7 +8,7 @@ Here is your beautifully structured **Sasirekha Design System** cheat sheet, ref
   
   <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
     <div>
-      <h2 style="margin: 0; font-family: 'Cabinet Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #E29B65; letter-spacing: -1px;">Sasirekha</h2>
+      <h2 style="margin: 0; font-family: 'Cabinet Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #E29B65; letter-spacing: -1px;">Sthira</h2>
       <div style="color: #7FA35C; font-weight: 500; font-size: 16px; margin-top: 4px;">steady, borderless, every day</div>
     </div>
     <div style="text-align: right;">
@@ -59,9 +59,9 @@ Here is your beautifully structured **Sasirekha Design System** cheat sheet, ref
   </div>
 </div>
 
-## DESIGN CONTEXT: "Sasirekha Minimalist Tile Style"
+## DESIGN CONTEXT: "Sthira Minimalist Tile Style"
 
-When building or refactoring lists, menus, or repeating items—such as the "MEALS" or "HABITS" sections—strictly adhere to the **Sasirekha Minimalist Tile Style** based on the exact visual anatomy:
+When building or refactoring lists, menus, or repeating items—such as the "MEALS" or "HABITS" sections—strictly adhere to the **Sthira Minimalist Tile Style** based on the exact visual anatomy:
 1. **The Tile Foundation (Rounded Cards):** Use distinct, softly lifted cards (`SurfaceCard` or bounded `Container`) floating on the dark scaffold. The tile's background color should be the slightly lighter `Dark Surface` (`#171F1B`) using a substantial corner radius (e.g., `24px`). Do NOT make them entirely transparent/flush; the tile boundary is crucial.
 2. **Elegant Typography Hierarchy:** Inside the tile, primary titles are cleanly weighted (e.g., bold `w700`, ~18px, `Off-White` text). Directly beneath them, subtitles sit flush with a lighter weight and muted color (e.g., `Muted Sage`).
 3. **Muted Structural Separators:** Instead of harsh 1px `Divider` lines, use thick but heavily subdued horizontal bars (e.g., a 4px tall progress track where the background color nearly blends into the card background) to separate header context from numeric data.
@@ -72,7 +72,7 @@ When building or refactoring lists, menus, or repeating items—such as the "MEA
 ## DESIGN CONTEXT: "Section Headers & Hero Metrics"
 
 When organizing sections (like "HABITS", "MEALS", or "DAILY PROGRESS") and presenting hero scores, strictly replicate the following typographic anatomy:
-1. **Section Headers (All Caps & Tracked):** Headings that introduce entire sections must be highly typographic. Use all caps, a small font size (~13-14px), heavy weight (`w800` or `bold`), and wide tracking (letter-spacing: ~1.2px or more). Their color is usually an accent (like the `#E29B65` Sandy Peach) to clearly delineate areas on the dark scaffold.
+1. **Section Headers (Sentence Case):** Headings that introduce entire sections must act as clean dividers. Use sentence case, a small font size (~15-16px), medium/bold weight (`w600`), and normal tracking. Their color is usually an accent (like the `#E29B65` Sandy Peach) to clearly delineate areas on the dark scaffold. Do not force all-caps or extreme spacing.
 2. **Integrated Header Scores:** Instead of massive distinct metric cards, integrate the hero score for a section directly into the section header text using parentheses if applicable (e.g., `HABITS (0/3)`). This provides an instant summary without occupying vertical space.
 3. **Header Decorators:** Feel free to use tiny, simple leading or trailing icons (like a small line chart or a pencil edit icon) perfectly baselined with the section header text.
 4. **Hero Stats within Tiles:** When hero data lives *inside* a tile (like `Today's Meals`), it must avoid thick structural rings or colored pie charts. Instead, list the core progressive stats on a single typographic line (`0/4 meals • 0/1400 kcal`). This maximizes data density while relying absolutely zero on "boxiness" or generic gamified styles.

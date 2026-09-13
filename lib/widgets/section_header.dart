@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/layout_insets.dart';
 
-/// Uppercase purple section label used on Home / Workout / similar lists.
+/// Main section label used on Home / Workout / similar lists.
 class SectionHeader extends StatelessWidget {
   const SectionHeader(
     this.title, {
@@ -34,7 +34,7 @@ class SectionHeader extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Cabinet Grotesk',
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: context.colors.primary,
               letterSpacing: 0,
             ),

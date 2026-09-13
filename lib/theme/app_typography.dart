@@ -22,7 +22,7 @@ class AppTypography {
   TextStyle get titleLarge => TextStyle(
     fontFamily: 'Cabinet Grotesk',
     fontSize: 22,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w700,
     letterSpacing: -0.5,
     color: context.colors.textDark,
   );
@@ -30,7 +30,7 @@ class AppTypography {
   TextStyle get title => TextStyle(
     fontFamily: 'Cabinet Grotesk',
     fontSize: 18,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w700,
     color: context.colors.textDark,
   );
 

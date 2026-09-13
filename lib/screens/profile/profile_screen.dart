@@ -1017,7 +1017,8 @@ class _SettingsSwitch extends StatelessWidget {
         onChanged: onChanged,
         activeThumbColor: context.colors.primary,
         secondary: Container(
-          padding: const EdgeInsets.all(10),
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
             color: context.colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(14),

@@ -155,7 +155,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColorsLight().primary,
-          foregroundColor: AppColorsLight().white,
+          foregroundColor: AppColorsLight().onPrimary,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
@@ -443,7 +443,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColorsDark().primary,
-          foregroundColor: AppColorsDark().white,
+          foregroundColor: AppColorsDark().onPrimary,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),

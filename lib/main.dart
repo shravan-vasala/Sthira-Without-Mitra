@@ -57,35 +57,6 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
 
-    // ── Manual font loading ──
-    // Load fonts explicitly via FontLoader to ensure they register
-    // with the engine before the first frame renders.
-    final fontAssets = <String, List<String>>{
-      'Cabinet Grotesk': [
-        'assets/fonts/CabinetGrotesk-Light.ttf',
-        'assets/fonts/CabinetGrotesk-Regular.ttf',
-        'assets/fonts/CabinetGrotesk-Medium.ttf',
-        'assets/fonts/CabinetGrotesk-Bold.ttf',
-        'assets/fonts/CabinetGrotesk-Extrabold.ttf',
-        'assets/fonts/CabinetGrotesk-Black.ttf',
-      ],
-      'General Sans': [
-        'assets/fonts/GeneralSans-Light.ttf',
-        'assets/fonts/GeneralSans-Regular.ttf',
-        'assets/fonts/GeneralSans-Medium.ttf',
-        'assets/fonts/GeneralSans-Semibold.ttf',
-        'assets/fonts/GeneralSans-Bold.ttf',
-      ],
-    };
-    for (final entry in fontAssets.entries) {
-      final loader = FontLoader(entry.key);
-      for (final assetPath in entry.value) {
-        loader.addFont(rootBundle.load(assetPath));
-      }
-      await loader.load();
-    }
-    debugPrint('✅ All custom fonts loaded manually via FontLoader');
-
     // Lock to portrait
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -122,8 +93,7 @@ Future<void> main() async {
       SyncQueueItemSchema,
     ], directory: dir.path);
 
-    // ignore: unawaited_futures
-    SchemaMigrationService.runStartupMigrations(isar);
+    await SchemaMigrationService.runStartupMigrations(isar);
 
     // Initialize all repositories
     final workoutRepo = WorkoutRepository();

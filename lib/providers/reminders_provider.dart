@@ -58,6 +58,25 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
   }
 
   Future<void> updateConfig(ReminderConfig newConfig) async {
+    final isEnabling = (newConfig.habitsEnabled && !state.habitsEnabled) ||
+        (newConfig.workoutsEnabled && !state.workoutsEnabled) ||
+        (newConfig.mealsEnabled && !state.mealsEnabled) ||
+        (newConfig.backupEnabled && !state.backupEnabled) ||
+        (newConfig.photosEnabled && !state.photosEnabled);
+
+    if (isEnabling) {
+      final granted = await _notificationService.requestPermissions();
+      if (!granted) {
+        newConfig = newConfig.copyWith(
+          habitsEnabled: state.habitsEnabled,
+          workoutsEnabled: state.workoutsEnabled,
+          mealsEnabled: state.mealsEnabled,
+          backupEnabled: state.backupEnabled,
+          photosEnabled: state.photosEnabled,
+        );
+      }
+    }
+
     state = newConfig;
     await _prefs.setString(_key, newConfig.toJson());
     await _queueSync();
@@ -79,27 +98,6 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
   }
 
   Future<void> _syncNotifications() async {
-    // Request permission if enabling anything
-    if (state.habitsEnabled ||
-        state.workoutsEnabled ||
-        state.mealsEnabled ||
-        state.backupEnabled ||
-        state.photosEnabled) {
-      final granted = await _notificationService.requestPermissions();
-      if (!granted) {
-        final reverted = state.copyWith(
-          habitsEnabled: false,
-          workoutsEnabled: false,
-          mealsEnabled: false,
-          backupEnabled: false,
-          photosEnabled: false,
-        );
-        state = reverted;
-        await _prefs.setString(_key, reverted.toJson());
-        await _notificationService.cancelAll(); // fallback
-        return;
-      }
-    }
 
     final profile = ref.read(profileProvider);
     final userName = profile.name.isNotEmpty ? profile.name : 'there';
