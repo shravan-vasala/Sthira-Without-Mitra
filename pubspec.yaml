@@ -90,6 +90,9 @@ flutter:
           weight: 600
         - asset: assets/fonts/GeneralSans-Bold.ttf
           weight: 700
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat-Regular.ttf
 
 flutter_launcher_icons:
   android: true
