@@ -32,6 +32,15 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
       if (success && mounted) {
         Navigator.of(context).pop();
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to prepare share image'),
+            backgroundColor: context.colors.red,
+          )
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }

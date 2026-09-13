@@ -67,14 +67,19 @@ class ShareCardExporter {
     overlayState.insert(overlayEntry);
 
     try {
-      // Wait for it to paint layout
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      final boundary =
-          boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      RenderRepaintBoundary? boundary;
       
-      if (boundary == null) {
-        throw Exception("Failed to find boundary");
+      // Poll until the boundary is fully painted or timeout (max 2 seconds)
+      for (int i = 0; i < 40; i++) {
+        await Future.delayed(const Duration(milliseconds: 50));
+        boundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+        if (boundary != null && !boundary.debugNeedsPaint) {
+          break;
+        }
+      }
+
+      if (boundary == null || boundary.debugNeedsPaint) {
+        throw Exception("Failed to render boundary in time.");
       }
 
       // Render it at 3x to get 1080 width exactly natively.
@@ -82,10 +87,13 @@ class ShareCardExporter {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData?.buffer.asUint8List();
 
+      image.dispose(); // Explicit RAM sweep post capturing bytes
+
       if (pngBytes == null) throw Exception("Failed to encode bytes");
 
       final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/$fileName.png').create();
+      // Ensure unique filename
+      final file = await File('${tempDir.path}/${fileName}_${DateTime.now().millisecondsSinceEpoch}.png').create();
       await file.writeAsBytes(pngBytes);
 
       final xFile = XFile(file.path, mimeType: 'image/png');

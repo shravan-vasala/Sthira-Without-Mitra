@@ -658,24 +658,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   ) async {
     if (!context.mounted) return;
 
-    // ignore: unawaited_futures
+    BuildContext? dialogContext;
     showDialog(
       context: context,
       useRootNavigator: true,
       barrierDismissible: false,
-      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      builder: (ctx) {
+        dialogContext = ctx;
+        return const Center(child: CircularProgressIndicator());
+      },
     );
 
     try {
       final exportService = ref.read(csvExportServiceProvider);
       final result = await exportService.exportData(startDate);
 
+      if (dialogContext != null && dialogContext!.mounted) {
+        Navigator.of(dialogContext!).pop(); // Explicitly pop dialog only
+      }
+
       if (!context.mounted) return;
-      Navigator.of(context, rootNavigator: true).pop(); // hide loading
 
       if (result.isSuccess && result.filePath != null) {
-        // ignore: deprecated_member_use
-        await Share.shareXFiles([XFile(result.filePath!)], text: 'Sthira Data Export');
+        try {
+          // ignore: deprecated_member_use
+          await Share.shareXFiles([XFile(result.filePath!)], text: 'Sthira Data Export');
+        } catch (shareErr) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to share: $shareErr')),
+            );
+          }
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -685,8 +699,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         );
       }
     } catch (e) {
+      if (dialogContext != null && dialogContext!.mounted) {
+        Navigator.of(dialogContext!).pop();
+      }
       if (!context.mounted) return;
-      Navigator.of(context, rootNavigator: true).pop(); // hide loading
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Export error: $e'),

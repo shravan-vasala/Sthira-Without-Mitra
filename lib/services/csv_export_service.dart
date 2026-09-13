@@ -9,6 +9,7 @@ import '../models/exercise_log.dart';
 import '../models/habit.dart';
 import '../models/body_stats.dart';
 import '../models/daily_meal_log.dart';
+import '../models/app_config.dart';
 
 class CsvExportResult {
   final bool isSuccess;
@@ -21,11 +22,30 @@ class CsvExportResult {
 class CsvExportService {
   dynamic _sanitizeForCsv(dynamic value) {
     if (value is String) {
-      if (value.startsWith('=') || value.startsWith('+') || value.startsWith('-') || value.startsWith('@') || value.startsWith('\t') || value.startsWith('\r')) {
+      final trimmed = value.trimLeft();
+      if (trimmed.startsWith('=') || 
+          trimmed.startsWith('+') || 
+          trimmed.startsWith('-') || 
+          trimmed.startsWith('@') || 
+          trimmed.startsWith('\t') || 
+          trimmed.startsWith('\r') || 
+          trimmed.startsWith('\n')) {
         return "'$value";
       }
     }
     return value;
+  }
+
+  bool _isWithinRange(String dateStr, DateTime? normalizedStart, DateTime? normalizedEnd) {
+    if (normalizedStart == null || normalizedEnd == null) return true;
+    try {
+      final date = DateTime.parse(dateStr);
+      // Ensure time component doesn't break comparisons
+      final dateOnly = DateTime(date.year, date.month, date.day);
+      return !dateOnly.isBefore(normalizedStart) && dateOnly.isBefore(normalizedEnd);
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<CsvExportResult> exportData(DateTime? startDate) async {
@@ -41,238 +61,216 @@ class CsvExportService {
       final isar = Isar.getInstance();
       if (isar == null) return CsvExportResult(isSuccess: false, errorMessage: 'Database not initialized.');
 
-      await addCsv('daily_logs.csv', await _exportDailyLogs(isar, startDate));
-      await addCsv(
-        'exercise_logs.csv',
-        await _exportExerciseLogs(isar, startDate),
-      );
-      await addCsv(
-        'habits.csv',
-        await _exportHabitCompletions(isar, startDate),
-      );
-      await addCsv('body_stats.csv', await _exportBodyStats(isar, startDate));
-      await addCsv('meals.csv', await _exportMeals(isar, startDate));
+      DateTime? normalizedStart;
+      DateTime? normalizedEnd;
+      String rangeStr = 'All Time';
+      int intendedDays = 0;
 
-      if (archive.isEmpty) return CsvExportResult(isSuccess: false, errorMessage: 'No records found for the selected time range.');
+      if (startDate != null) {
+        final now = DateTime.now();
+        normalizedStart = DateTime(startDate.year, startDate.month, startDate.day);
+        normalizedEnd = DateTime(now.year, now.month, now.day).add(const Duration(days: 1)); // Exclusive
+        intendedDays = normalizedEnd.difference(normalizedStart).inDays;
+        rangeStr = '${normalizedStart.toIso8601String().split('T')[0]} to ${now.toIso8601String().split('T')[0]} ($intendedDays days)';
+      }
+
+      final startSnapshot = DateTime.now();
+      
+      final dailyResult = await _exportDailyLogs(isar, normalizedStart, normalizedEnd);
+      final exerciseResult = await _exportExerciseLogs(isar, normalizedStart, normalizedEnd);
+      final habitsResult = await _exportHabitCompletions(isar, normalizedStart, normalizedEnd);
+      final bodyStatsResult = await _exportBodyStats(isar, normalizedStart, normalizedEnd);
+      final mealsResult = await _exportMeals(isar, normalizedStart, normalizedEnd);
+
+      await addCsv('daily_logs.csv', dailyResult['csv']);
+      await addCsv('exercise_logs.csv', exerciseResult['csv']);
+      await addCsv('habits.csv', habitsResult['csv']);
+      await addCsv('body_stats.csv', bodyStatsResult['csv']);
+      await addCsv('meals.csv', mealsResult['csv']);
+      await addCsv('meal_items.csv', mealsResult['itemsCsv']);
+
+      if (archive.isEmpty) return CsvExportResult(isSuccess: true, errorMessage: 'No records found for the selected time range.');
+
+      // Manifest
+      final manifestJson = jsonEncode({
+         "exportDate": startSnapshot.toIso8601String(),
+         "range": rangeStr,
+         "scope": "CSV Export is a snapshot of selected metrics and is NOT a restorable account backup.",
+         "categories": {
+            "dailyLogs": {"count": dailyResult['count'], "errors": dailyResult['errors']},
+            "exerciseLogs": {"count": exerciseResult['count'], "errors": exerciseResult['errors']},
+            "habits": {"count": habitsResult['count'], "errors": habitsResult['errors']},
+            "bodyStats": {"count": bodyStatsResult['count'], "errors": bodyStatsResult['errors']},
+            "meals": {"count": mealsResult['count'], "errors": mealsResult['errors']},
+            "mealItems": {"count": mealsResult['itemsCount'], "errors": mealsResult['itemsErrors']},
+         }
+      });
+      await addCsv('manifest.json', manifestJson);
 
       final zipData = ZipEncoder().encode(archive);
-
       final tempDir = await getTemporaryDirectory();
 
-      // Cleanup old export files
+      // Clean up exports older than 1 hour safely, avoiding collision
       try {
-        final files = tempDir.listSync();
-        for (final file in files) {
+        final nowTime = DateTime.now();
+        for (final file in tempDir.listSync()) {
           if (file is File && file.path.contains('trufit_export_') && file.path.endsWith('.zip')) {
-            file.deleteSync();
+            final stat = file.statSync();
+            if (nowTime.difference(stat.modified).inHours >= 1) {
+              file.deleteSync();
+            }
           }
         }
       } catch (_) {}
 
-      final fileName =
-          'trufit_export_${DateTime.now().millisecondsSinceEpoch}.zip';
+      final fileName = 'trufit_export_${startSnapshot.millisecondsSinceEpoch}.zip';
       final zipFile = File('${tempDir.path}/$fileName');
       await zipFile.writeAsBytes(zipData);
 
       return CsvExportResult(isSuccess: true, filePath: zipFile.path);
     } catch (e) {
-      // ignore: avoid_print
-      print('Export error: $e');
       return CsvExportResult(isSuccess: false, errorMessage: 'Export failed: $e');
     }
   }
 
-  bool _isAfterStartDate(String dateStr, DateTime? startDate) {
-    if (startDate == null) return true;
-    try {
-      final date = DateTime.parse(dateStr);
-      return date.isAfter(startDate.subtract(const Duration(days: 1)));
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<String?> _exportDailyLogs(Isar isar, DateTime? startDate) async {
+  Future<Map<String, dynamic>> _exportDailyLogs(Isar isar, DateTime? start, DateTime? end) async {
     final logs = isar.dailyLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
+    int errors = 0;
 
-    // Headers
     rows.add([
-      'Date',
-      'Weight (kg)',
-      'Steps',
-      'Steps Source',
-      'Sleep Hours',
-      'Sleep Source',
-      'Body Fat',
-      'Workout Completed',
-      'Workout Day ID',
-      'Water (ml)',
-      'Screen Time (mins)',
-      'Updated At',
+      'Date', 'Weight (kg)', 'Steps', 'Steps Source', 'Sleep Hours',
+      'Sleep Source', 'Body Fat', 'Workout Completed', 'Workout Day ID',
+      'Water (ml)', 'Screen Time (mins)', 'Updated At'
     ].map(_sanitizeForCsv).toList());
 
     for (final log in logs) {
       try {
-        if (!_isAfterStartDate(log.date, startDate)) continue;
-
+        if (!_isWithinRange(log.date, start, end)) continue;
         rows.add([
-          log.date,
-          log.weight ?? '',
-          log.steps ?? '',
-          log.stepsSource ?? '',
-          log.sleepHours ?? '',
-          log.sleepSource ?? '',
-          log.bodyFat ?? '',
-          log.workoutCompleted,
-          log.workoutDayId ?? '',
-          log.waterMl ?? '',
-          log.screenTimeMinutes ?? '',
-          log.updatedAt?.toIso8601String() ?? '',
+          log.date, log.weight ?? '', log.steps ?? '', log.stepsSource ?? '',
+          log.sleepHours ?? '', log.sleepSource ?? '', log.bodyFat ?? '',
+          log.workoutCompleted, log.workoutDayId ?? '', log.waterMl ?? '',
+          log.screenTimeMinutes ?? '', log.updatedAt?.toIso8601String() ?? '',
         ].map(_sanitizeForCsv).toList());
-      } catch (_) {}
+      } catch (_) { errors++; }
     }
 
-    if (rows.length == 1) return null; // Only headers
-    return csv.encode(rows);
+    return {'csv': rows.length > 1 ? csv.encode(rows) : null, 'count': rows.length > 1 ? rows.length - 1 : 0, 'errors': errors};
   }
 
-  Future<String?> _exportExerciseLogs(Isar isar, DateTime? startDate) async {
+  Future<Map<String, dynamic>> _exportExerciseLogs(Isar isar, DateTime? start, DateTime? end) async {
     final logs = isar.exerciseLogs.where().findAllSync();
     final rows = <List<dynamic>>[];
+    int errors = 0;
 
-    rows.add(['Date', 'Exercise', 'Set', 'Reps', 'Weight (kg)'].map(_sanitizeForCsv).toList());
+    rows.add(['Date', 'Exercise ID', 'Exercise Name', 'Set', 'Reps', 'Weight (kg)'].map(_sanitizeForCsv).toList());
 
     for (final log in logs) {
       try {
-        if (!_isAfterStartDate(log.date, startDate)) continue;
-
+        if (!_isWithinRange(log.date, start, end)) continue;
         for (final set in log.sets) {
           rows.add([
-            log.date,
-            log.exerciseName,
-            set.setNumber,
-            set.reps,
-            set.weight,
+            log.date, log.id, log.exerciseName, set.setNumber, set.reps, set.weight
           ].map(_sanitizeForCsv).toList());
         }
-      } catch (_) {}
+      } catch (_) { errors++; }
     }
 
-    if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return {'csv': rows.length > 1 ? csv.encode(rows) : null, 'count': rows.length > 1 ? rows.length - 1 : 0, 'errors': errors};
   }
 
-  Future<String?> _exportHabitCompletions(
-    Isar isar,
-    DateTime? startDate,
-  ) async {
+  Future<Map<String, dynamic>> _exportHabitCompletions(Isar isar, DateTime? start, DateTime? end) async {
     final completions = isar.habitCompletions.where().findAllSync();
     final habitList = isar.habits.where().findAllSync();
 
     final habits = <String, Habit>{};
-    for (final h in habitList) {
-      habits[h.id] = h;
-    }
+    for (final h in habitList) { habits[h.id] = h; }
 
     final rows = <List<dynamic>>[];
-    rows.add(['Date', 'Habit ID', 'Habit Name', 'Value', 'Override'].map(_sanitizeForCsv).toList());
+    int errors = 0;
+    rows.add(['Date', 'Habit ID', 'Habit Name', 'Type', 'Unit', 'Value', 'Override'].map(_sanitizeForCsv).toList());
 
     for (final completion in completions) {
       try {
-        if (!_isAfterStartDate(completion.date, startDate)) continue;
+        if (!_isWithinRange(completion.date, start, end)) continue;
 
-        for (final entry in completion.completions.entries) {
-          final habitId = entry.key;
-          final habitName = habits[habitId]?.name ?? habitId;
-          final val = entry.value;
+        final allKeys = <String>{...completion.completions.keys, ...completion.overrides.keys};
+        for (final habitId in allKeys) {
+          final habitName = habits[habitId]?.name ?? 'Unknown Habit ($habitId)';
+          final habitType = habits[habitId]?.type ?? '';
+          final unit = habits[habitId]?.unit ?? '';
+          final val = completion.completions[habitId] ?? '';
           final override = completion.overrides[habitId] ?? '';
 
-          rows.add([completion.date, habitId, habitName, val, override].map(_sanitizeForCsv).toList());
+          rows.add([completion.date, habitId, habitName, habitType, unit, val, override].map(_sanitizeForCsv).toList());
         }
-      } catch (_) {}
+      } catch (_) { errors++; }
     }
 
-    if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return {'csv': rows.length > 1 ? csv.encode(rows) : null, 'count': rows.length > 1 ? rows.length - 1 : 0, 'errors': errors};
   }
 
-  Future<String?> _exportBodyStats(Isar isar, DateTime? startDate) async {
+  Future<Map<String, dynamic>> _exportBodyStats(Isar isar, DateTime? start, DateTime? end) async {
     final statsList = isar.bodyStats.where().findAllSync();
     final rows = <List<dynamic>>[];
+    int errors = 0;
 
     rows.add([
-      'Date',
-      'Unit',
-      'Waist',
-      'Hips',
-      'Chest',
-      'Left Arm',
-      'Right Arm',
-      'Left Thigh',
-      'Right Thigh',
-      'Neck',
+      'Date', 'Unit', 'Waist', 'Hips', 'Chest', 'Left Arm', 'Right Arm', 'Left Thigh', 'Right Thigh', 'Neck'
     ].map(_sanitizeForCsv).toList());
 
     for (final stats in statsList) {
       try {
-        if (!_isAfterStartDate(stats.date, startDate)) continue;
-
+        if (!_isWithinRange(stats.date, start, end)) continue;
         rows.add([
-          stats.date,
-          stats.unit,
-          stats.waist ?? '',
-          stats.hips ?? '',
-          stats.chest ?? '',
-          stats.leftArm ?? '',
-          stats.rightArm ?? '',
-          stats.leftThigh ?? '',
-          stats.rightThigh ?? '',
-          stats.neck ?? '',
+          stats.date, stats.unit, stats.waist ?? '', stats.hips ?? '', stats.chest ?? '',
+          stats.leftArm ?? '', stats.rightArm ?? '', stats.leftThigh ?? '', stats.rightThigh ?? '', stats.neck ?? ''
         ].map(_sanitizeForCsv).toList());
-      } catch (_) {}
+      } catch (_) { errors++; }
     }
 
-    if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return {'csv': rows.length > 1 ? csv.encode(rows) : null, 'count': rows.length > 1 ? rows.length - 1 : 0, 'errors': errors};
   }
 
-  Future<String?> _exportMeals(Isar isar, DateTime? startDate) async {
+  Future<Map<String, dynamic>> _exportMeals(Isar isar, DateTime? start, DateTime? end) async {
     final logs = isar.dailyMealLogs.where().findAllSync();
-    final rows = <List<dynamic>>[];
+    final mealRows = <List<dynamic>>[];
+    final itemRows = <List<dynamic>>[];
+    int mealErrs = 0;
+    int itemErrs = 0;
 
-    rows.add([
-      'Date',
-      'Slot',
-      'Total Calories',
-      'Total Protein (g)',
-      'Total Carbs (g)',
-      'Total Fat (g)',
-    ].map(_sanitizeForCsv).toList());
+    mealRows.add(['Date', 'Slot', 'Total Calories', 'Total Protein (g)', 'Total Carbs (g)', 'Total Fat (g)'].map(_sanitizeForCsv).toList());
+    itemRows.add(['Date', 'Slot', 'Item Name', 'Portion', 'Calories', 'Protein (g)', 'Carbs (g)', 'Fat (g)', 'Provenance', 'Resolved'].map(_sanitizeForCsv).toList());
 
     for (final log in logs) {
       try {
-        if (!_isAfterStartDate(log.date, startDate)) continue;
+        if (!_isWithinRange(log.date, start, end)) continue;
 
         for (final entry in log.customSlots.entries) {
           final slotName = entry.key;
           final slot = entry.value;
 
           if (slot.totalCalories > 0 || slot.items.isNotEmpty) {
-            rows.add([
-              log.date,
-              slotName,
-              slot.totalCalories,
-              slot.totalProtein,
-              slot.totalCarbs,
-              slot.totalFat,
-            ].map(_sanitizeForCsv).toList());
+             mealRows.add([log.date, slotName, slot.totalCalories, slot.totalProtein, slot.totalCarbs, slot.totalFat].map(_sanitizeForCsv).toList());
+          }
+
+          for (final item in slot.items) {
+             try {
+                itemRows.add([log.date, slotName, item.name, item.portion, item.computedNutrition?.kcal, item.computedNutrition?.proteinG, item.computedNutrition?.carbsG, item.computedNutrition?.fatG, item.provenance, item.resolved].map(_sanitizeForCsv).toList());
+             } catch (_) { itemErrs++; }
           }
         }
-      } catch (_) {}
+      } catch (_) { mealErrs++; }
     }
 
-    if (rows.length == 1) return null;
-    return csv.encode(rows);
+    return {
+      'csv': mealRows.length > 1 ? csv.encode(mealRows) : null,
+      'count': mealRows.length > 1 ? mealRows.length - 1 : 0,
+      'errors': mealErrs,
+      'itemsCsv': itemRows.length > 1 ? csv.encode(itemRows) : null,
+      'itemsCount': itemRows.length > 1 ? itemRows.length - 1 : 0,
+      'itemsErrors': itemErrs,
+    };
   }
 }
