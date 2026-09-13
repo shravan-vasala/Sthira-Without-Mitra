@@ -144,20 +144,27 @@ class HealthConnectService {
       DateTime? currentEnd;
 
       for (final data in healthData) {
+        // Clip date within the current 24-hour search boundary correctly
+        final actualStart = data.dateFrom.isBefore(start) ? start : data.dateFrom;
+        final actualEnd = data.dateTo.isAfter(end) ? end : data.dateTo;
+        if (actualStart.isAfter(actualEnd) || actualStart.isAtSameMomentAs(actualEnd)) {
+          continue;
+        }
+
         if (currentStart == null) {
-          currentStart = data.dateFrom;
-          currentEnd = data.dateTo;
+          currentStart = actualStart;
+          currentEnd = actualEnd;
         } else {
-          if (data.dateFrom.isBefore(currentEnd!)) {
+          if (actualStart.isBefore(currentEnd!)) {
             // Overlapping, extend currentEnd if this session ends later
-            if (data.dateTo.isAfter(currentEnd)) {
-              currentEnd = data.dateTo;
+            if (actualEnd.isAfter(currentEnd)) {
+              currentEnd = actualEnd;
             }
           } else {
             // No overlap, add previous interval and start new
             totalMinutes += currentEnd.difference(currentStart).inMinutes;
-            currentStart = data.dateFrom;
-            currentEnd = data.dateTo;
+            currentStart = actualStart;
+            currentEnd = actualEnd;
           }
         }
       }
@@ -191,11 +198,7 @@ class HealthConnectService {
 
     final historyGranted = await requestHistoryAccess();
     if (!historyGranted) {
-      await _isar.writeTxn(() async {
-        await _isar.appConfigs.put(
-          AppConfig(key: _backfillDoneKey, value: 'true'),
-        );
-      });
+      // Do not write _backfillDoneKey if not granted, so it's retryable
       return [];
     }
 
@@ -210,7 +213,7 @@ class HealthConnectService {
       final steps = await getStepsForDate(date);
       final sleep = await getSleepForDate(date);
 
-      if ((steps != null && steps > 0) || (sleep != null && sleep > 0)) {
+      if (steps != null || sleep != null) {
         results.add(HealthDailyData(dateStr: dateStr, steps: steps, sleepHours: sleep));
       }
     }
@@ -236,7 +239,7 @@ class HealthConnectService {
       final steps = await getStepsForDate(date);
       final sleep = await getSleepForDate(date);
 
-      if ((steps != null && steps > 0) || (sleep != null && sleep > 0)) {
+      if (steps != null || sleep != null) {
         results.add(HealthDailyData(dateStr: dateStr, steps: steps, sleepHours: sleep));
       }
     }

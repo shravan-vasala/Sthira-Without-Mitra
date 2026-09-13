@@ -158,6 +158,11 @@ class MealRepository {
         DailyMealLog(date: date);
   }
 
+  bool isMealLogged(String date, String slotId) {
+    final log = getDailyLog(date);
+    return log.customSlots.containsKey(slotId);
+  }
+
   Stream<DailyMealLog?> watchDailyLog(String date) {
     return _isar.dailyMealLogs
         .where()

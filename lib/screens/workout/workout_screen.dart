@@ -457,9 +457,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   Future<void> _persistWorkoutFinished(WidgetRef ref, String dayId, {String status = 'completed'}) async {
     final dateStr = ref.read(dateStringProvider);
     await ref.read(workoutRepoProvider).finishWorkout(dateStr, dayId, status: status);
-    if (status == 'completed') {
-      await ref.read(dailyLogProvider.notifier).markWorkoutCompleted(dayId);
-    }
+    await ref.read(dailyLogProvider.notifier).updateWorkoutStatus(dayId, status);
   }
 
   void _executeFinish(
@@ -765,7 +763,6 @@ class _SectionWidgetState extends State<_SectionWidget> {
               }
               final exerciseIndex = index ~/ 2;
               final exercise = widget.section.exercises[exerciseIndex];
-              exercise.instanceId = '${widget.section.title ?? 'section_${widget.sectionIndex}'}_${exerciseIndex}_${exercise.name}';
               return Container(
                 key: (widget.jumpToIndex == exerciseIndex) ? _jumpKey : null,
                 child: ExerciseCard(

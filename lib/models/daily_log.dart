@@ -14,11 +14,14 @@ class DailyLog {
   final double? sleepHours;
   final String? sleepSource; // 'healthConnect' | 'manual' | null
   final double? bodyFat;
-  final bool workoutCompleted;
+  final String? workoutStatus; // 'completed', 'partial', 'skipped', null
   final String? workoutDayId;
   final int? waterMl;
   final int? screenTimeMinutes;
   final DateTime? updatedAt;
+
+  // Preserve legacy boolean getter
+  bool get workoutCompleted => workoutStatus == 'completed';
 
   DailyLog({
     required this.date,
@@ -28,7 +31,7 @@ class DailyLog {
     this.sleepHours,
     this.sleepSource,
     this.bodyFat,
-    this.workoutCompleted = false,
+    this.workoutStatus,
     this.workoutDayId,
     this.waterMl,
     this.screenTimeMinutes,
@@ -44,7 +47,8 @@ class DailyLog {
       sleepHours: (json['sleepHours'] as num?)?.toDouble(),
       sleepSource: json['sleepSource'] as String?,
       bodyFat: (json['bodyFat'] as num?)?.toDouble(),
-      workoutCompleted: json['workoutCompleted'] as bool? ?? false,
+      workoutStatus: json['workoutStatus'] as String? ?? 
+          ((json['workoutCompleted'] as bool? ?? false) ? 'completed' : null),
       workoutDayId: json['workoutDayId'] as String?,
       waterMl: json['waterMl'] as int?,
       screenTimeMinutes: json['screenTimeMinutes'] as int?,
@@ -62,7 +66,7 @@ class DailyLog {
     if (sleepHours != null) 'sleepHours': sleepHours,
     if (sleepSource != null) 'sleepSource': sleepSource,
     if (bodyFat != null) 'bodyFat': bodyFat,
-    'workoutCompleted': workoutCompleted,
+    if (workoutStatus != null) 'workoutStatus': workoutStatus,
     if (workoutDayId != null) 'workoutDayId': workoutDayId,
     if (waterMl != null) 'waterMl': waterMl,
     if (screenTimeMinutes != null) 'screenTimeMinutes': screenTimeMinutes,
@@ -76,7 +80,7 @@ class DailyLog {
     double? sleepHours,
     String? sleepSource,
     double? bodyFat,
-    bool? workoutCompleted,
+    String? workoutStatus,
     String? workoutDayId,
     int? waterMl,
     int? screenTimeMinutes,
@@ -90,7 +94,7 @@ class DailyLog {
       sleepHours: sleepHours ?? this.sleepHours,
       sleepSource: sleepSource ?? this.sleepSource,
       bodyFat: bodyFat ?? this.bodyFat,
-      workoutCompleted: workoutCompleted ?? this.workoutCompleted,
+      workoutStatus: workoutStatus ?? this.workoutStatus,
       workoutDayId: workoutDayId ?? this.workoutDayId,
       waterMl: waterMl ?? this.waterMl,
       screenTimeMinutes: screenTimeMinutes ?? this.screenTimeMinutes,
@@ -107,7 +111,7 @@ class DailyLog {
       sleepHours: sleepHours,
       sleepSource: sleepSource,
       bodyFat: bodyFat,
-      workoutCompleted: workoutCompleted,
+      workoutStatus: workoutStatus,
       workoutDayId: workoutDayId,
       waterMl: waterMl,
       screenTimeMinutes: screenTimeMinutes,
@@ -124,7 +128,7 @@ class DailyLog {
       sleepHours: sleepHours,
       sleepSource: sleepSource,
       bodyFat: bodyFat,
-      workoutCompleted: workoutCompleted,
+      workoutStatus: workoutStatus,
       workoutDayId: workoutDayId,
       waterMl: waterMl,
       screenTimeMinutes: screenTimeMinutes,
@@ -141,7 +145,7 @@ class DailyLog {
       sleepHours: null,
       sleepSource: null,
       bodyFat: bodyFat,
-      workoutCompleted: workoutCompleted,
+      workoutStatus: workoutStatus,
       workoutDayId: workoutDayId,
       waterMl: waterMl,
       screenTimeMinutes: screenTimeMinutes,
@@ -158,7 +162,7 @@ class DailyLog {
       sleepHours: sleepHours,
       sleepSource: sleepSource,
       bodyFat: null,
-      workoutCompleted: workoutCompleted,
+      workoutStatus: workoutStatus,
       workoutDayId: workoutDayId,
       waterMl: waterMl,
       screenTimeMinutes: screenTimeMinutes,
@@ -175,7 +179,7 @@ class DailyLog {
       sleepHours: sleepHours,
       sleepSource: sleepSource,
       bodyFat: bodyFat,
-      workoutCompleted: workoutCompleted,
+      workoutStatus: workoutStatus,
       workoutDayId: workoutDayId,
       waterMl: null,
       screenTimeMinutes: screenTimeMinutes,
@@ -187,6 +191,6 @@ class DailyLog {
       weight != null ||
       steps != null ||
       sleepHours != null ||
-      workoutCompleted ||
+      workoutStatus != null ||
       screenTimeMinutes != null;
 }

@@ -23,8 +23,8 @@ void main() {
   final monday = DateTime(2023, 10, 2); // Monday
   final sunday = DateTime(2023, 10, 1); // Sunday
 
-  test('isRestDay is true for Sunday or empty sections', () {
-    expect(WorkoutCompletion.isRestDay(trainingDay, sunday), isTrue);
+  test('isRestDay is true for empty sections only', () {
+    expect(WorkoutCompletion.isRestDay(trainingDay, sunday), isFalse);
     expect(WorkoutCompletion.isRestDay(restDay, monday), isTrue);
     expect(WorkoutCompletion.isRestDay(trainingDay, monday), isFalse);
   });
@@ -95,7 +95,7 @@ void main() {
           day: trainingDay,
           dateTime: monday,
           hasLog: hasLog,
-          dailyLog: DailyLog(date: '2023-10-02', workoutCompleted: true),
+          dailyLog: DailyLog(date: '2023-10-02', workoutStatus: 'completed'),
         ),
         isTrue,
       );

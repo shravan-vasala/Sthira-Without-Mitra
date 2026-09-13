@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -13,6 +14,8 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
+      
+  final actionStream = StreamController<NotificationResponse>.broadcast();
 
   bool _initialized = false;
   Future<void>? _initFuture;
@@ -53,20 +56,21 @@ class NotificationService {
         onDidReceiveNotificationResponse: _onNotificationResponse,
       );
       _initialized = result ?? false;
+
+      // Handle App Launch explicitly for Prompt 01 fix
+      final details = await _notificationsPlugin.getNotificationAppLaunchDetails();
+      if (details != null && details.didNotificationLaunchApp && details.notificationResponse != null) {
+         // Emit via Future microtask to ensure router is ready
+         Future.microtask(() => actionStream.add(details.notificationResponse!));
+      }
     } catch (e) {
       debugPrint('Failed to initialize local notifications: $e');
     }
   }
 
   void _onNotificationResponse(NotificationResponse response) {
-    // Handle Snooze, Skip, and Mark Done actions
-    final action = response.actionId;
-    final payload = response.payload;
-    if (action != null) {
-      debugPrint('Notification Action received: $action with payload: $payload');
-      // In a real app, this would route to a stream or provider
-      // For now, it logs the action safely.
-    }
+    debugPrint('Notification Action received: ${response.actionId} with payload: ${response.payload}');
+    actionStream.add(response);
   }
 
   Future<bool> requestPermissions() async {
@@ -76,8 +80,17 @@ class NotificationService {
 
     if (androidImplementation != null) {
       final bool? granted = await androidImplementation.requestNotificationsPermission();
+      // Do not bind inexact routine permissions to exact alarms.
+      return granted ?? false; 
+    }
+    return false;
+  }
+  
+  Future<bool> requestExactAlarmPermission() async {
+    final androidImplementation = _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (androidImplementation != null) {
       final bool? exactGranted = await androidImplementation.requestExactAlarmsPermission();
-      return (granted ?? false) && (exactGranted ?? false);
+      return exactGranted ?? false;
     }
     return false;
   }
@@ -128,10 +141,10 @@ class NotificationService {
 
     final actions = <AndroidNotificationAction>[];
     if (addSnooze) {
-      actions.add(const AndroidNotificationAction('snooze', 'Snooze'));
+      actions.add(const AndroidNotificationAction('snooze', 'Snooze', showsUserInterface: true));
     }
     if (addSkip) {
-      actions.add(const AndroidNotificationAction('skip', 'Skip Today'));
+      actions.add(const AndroidNotificationAction('skip', 'Skip Today', showsUserInterface: true));
     }
 
     await _notificationsPlugin.zonedSchedule(
@@ -149,7 +162,7 @@ class NotificationService {
           actions: actions.isNotEmpty ? actions : null,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       payload: payload,
     );

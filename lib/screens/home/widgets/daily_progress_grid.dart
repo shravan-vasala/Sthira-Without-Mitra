@@ -140,9 +140,11 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
     final prefs = ref.read(sharedPreferencesProvider);
     // Simply query Health Connect if authorization exists.
     // Relying organically on healthConnect stepsSource in the UI.
-    var connected = await hcService.isAuthorized();
+    var connected = await hcService.canReadSteps();
     if (!connected) {
-      connected = await hcService.canReadSteps();
+      connected = await hcService.isAuthorized();
+      // Even if authorized, if we can't read steps and it's today, we might need a sync or we might have lost permission.
+      // We will let 'connected' be the definitive source of truth to avoid hiding Connect forever.
     }
 
     if (mounted) {

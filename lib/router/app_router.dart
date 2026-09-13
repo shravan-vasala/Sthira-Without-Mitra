@@ -20,6 +20,7 @@ import '../theme/app_theme.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
+import '../providers/reminders_provider.dart';
 import '../widgets/badge_overlay_host.dart';
 import '../screens/social/social_feed_screen.dart';
 import '../screens/social/connect_screen.dart';

@@ -18,6 +18,7 @@ import '../../widgets/primary_button.dart';
 import 'widgets/trophy_room_card.dart';
 import 'widgets/journey_stats_strip.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/reminders_provider.dart';
 import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../services/diagnostic_logger.dart';
@@ -873,6 +874,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                       ),
                     );
                     if (confirm == true) {
+                      await ref.read(remindersProvider.notifier).clearOnSignOut();
                       await ref.read(authServiceProvider).signOut();
                     }
                   },

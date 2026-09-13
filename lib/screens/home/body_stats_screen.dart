@@ -76,6 +76,20 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
     }
   }
 
+  bool _hasMutatedFields(BodyStats? original) {
+    if (original == null) return true;
+    final m = original.allMeasurements;
+    for (final f in _fields) {
+      final prefillVal = (m[f] != null) ? m[f]!.toStringAsFixed(1) : '';
+      final currentVal = _controllers[f]!.text.trim();
+      // If any field has been changed by the user, return true.
+      if (prefillVal != currentVal && (prefillVal != '' || currentVal != '')) {
+         return true;
+      }
+    }
+    return false;
+  }
+
   @override
   void dispose() {
     for (final c in _controllers.values) {
@@ -280,7 +294,23 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
   Future<void> _save() async {
     setState(() => _isSaving = true);
     try {
-      final date = ref.read(dateStringProvider);
+      final date = _pinnedDateStr;
+      
+      // Prevent silent duplication of prefill logic
+      if (_isPrefilled && _prefillDate != date) {
+         final latest = ref.read(bodyStatsRepoProvider).getLatestStats();
+         if (!_hasMutatedFields(latest)) {
+            // Nothing was mutated, cancel save
+            if (mounted) {
+              setState(() {
+                _isEditing = false;
+                _isSaving = false;
+              });
+            }
+            return;
+         }
+      }
+      
       final stats = BodyStats(
         date: date,
         waist: double.tryParse(_controllers['Waist']!.text),

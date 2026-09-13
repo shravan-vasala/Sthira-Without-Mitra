@@ -65,7 +65,17 @@ class ExerciseLogRepository {
 
   bool hasLog(String date, String instanceId) {
     final log = getLog(date, instanceId);
-    return log != null && log.sets.isNotEmpty;
+    if (log == null) return false;
+    
+    // We cannot easily import WorkoutCompletion here due to potential circular dependencies,
+    // so we duplicate the meaningful work check or we assume log.sets.isNotEmpty is meaningful 
+    // IF we trust the saver to delete bad logs.
+    // However, the rule states to verify it here.
+    if (log.sets.isEmpty) return false;
+    for (final s in log.sets) {
+       if ((s.reps ?? 0) > 0 || (s.weight ?? 0.0) > 0) return true;
+    }
+    return false;
   }
 
   List<ExerciseLog> getLogsForExercise(String exerciseName) {

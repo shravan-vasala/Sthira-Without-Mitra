@@ -1,5 +1,6 @@
 import '../models/daily_log.dart';
 import '../models/workout_plan.dart';
+import '../models/exercise_log.dart';
 import '../repositories/exercise_log_repository.dart';
 
 /// Shared workout completion rules (Approach A):
@@ -7,9 +8,18 @@ import '../repositories/exercise_log_repository.dart';
 /// - [DailyLog.workoutCompleted] is the day-level Finish flag (full or early).
 /// - Planned rest days count as done for scoring / day-done checks.
 class WorkoutCompletion {
-  /// Sunday or a day with no workout sections.
+  /// A day with no workout sections.
   static bool isRestDay(WorkoutDay day, DateTime date) {
-    return date.weekday == DateTime.sunday || day.sections.isEmpty;
+    return day.sections.isEmpty;
+  }
+
+  /// Whether the logged work has non-zero positive effort.
+  static bool hasMeaningfulWork(ExerciseLog log) {
+    if (log.sets.isEmpty) return false;
+    for (final s in log.sets) {
+       if ((s.reps ?? 0) > 0 || (s.weight ?? 0.0) > 0) return true;
+    }
+    return false;
   }
 
   /// Resolves the scheduled [WorkoutDay] for [date] using stored schedule semantics.
@@ -35,10 +45,10 @@ class WorkoutCompletion {
   static bool isSectionComplete(
     String date,
     WorkoutSection section,
-    bool Function(String date, String exerciseName) hasLog,
+    bool Function(String date, String instanceId) hasLog,
   ) {
     return section.exercises.isNotEmpty &&
-        section.exercises.every((ex) => hasLog(date, ex.name ?? ''));
+        section.exercises.every((ex) => hasLog(date, ex.instanceId ?? ''));
   }
 
   static bool isSectionCompleteWithRepo(
@@ -53,7 +63,7 @@ class WorkoutCompletion {
   static bool isTrainingDayComplete(
     String date,
     WorkoutDay day,
-    bool Function(String date, String exerciseName) hasLog,
+    bool Function(String date, String instanceId) hasLog,
   ) {
     if (day.sections.isEmpty) return false;
     return day.sections.every((sec) => isSectionComplete(date, sec, hasLog));
@@ -73,7 +83,7 @@ class WorkoutCompletion {
     required String date,
     required WorkoutDay day,
     required DateTime dateTime,
-    required bool Function(String date, String exerciseName) hasLog,
+    required bool Function(String date, String instanceId) hasLog,
     required DailyLog dailyLog,
   }) {
     if (isRestDay(day, dateTime)) return true;
@@ -101,7 +111,7 @@ class WorkoutCompletion {
   static int completedSectionCount(
     String date,
     WorkoutDay day,
-    bool Function(String date, String exerciseName) hasLog,
+    bool Function(String date, String instanceId) hasLog,
   ) {
     var count = 0;
     for (final sec in day.sections) {

@@ -41,8 +41,32 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
       vsync: this,
       duration: Duration(seconds: _totalSeconds),
     );
-    // Initialize animation value to 1.0 (full)
     _animationController.value = 1.0;
+
+    Future.microtask(() {
+      final prefs = ref.read(sharedPreferencesProvider);
+      final savedStartStr = prefs.getString('timer_start_${widget.habit.id}');
+      final savedRem = prefs.getInt('timer_rem_${widget.habit.id}');
+
+      if (savedStartStr != null && savedRem != null) {
+        final savedStart = DateTime.parse(savedStartStr);
+        final elapsed = DateTime.now().difference(savedStart).inSeconds;
+        int restoredRemaining = savedRem - elapsed;
+        
+        if (restoredRemaining <= 0) {
+           _remainingSeconds = 0;
+           _completeTimer();
+        } else {
+           setState(() {
+             _remainingSeconds = restoredRemaining;
+             _isRunning = true;
+             _lastStartTime = savedStart;
+             _secondsPassedThisSession = elapsed;
+             _resumeInternalTimer();
+           });
+        }
+      }
+    });
   }
 
   @override
@@ -55,12 +79,22 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
   void _startTimer() {
     if (_remainingSeconds <= 0) return;
 
+    final prefs = ref.read(sharedPreferencesProvider);
+    final now = DateTime.now();
     setState(() {
       _isRunning = true;
-      _lastStartTime = DateTime.now();
+      _lastStartTime = now;
       _secondsPassedThisSession = 0;
     });
 
+    prefs.setString('timer_start_${widget.habit.id}', now.toIso8601String());
+    prefs.setInt('timer_rem_${widget.habit.id}', _remainingSeconds);
+
+    _resumeInternalTimer();
+  }
+
+  void _resumeInternalTimer() {
+    if (_remainingSeconds <= 0) return;
     _animationController.reverse(from: _remainingSeconds / _totalSeconds);
 
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
@@ -86,6 +120,10 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
   }
 
   void _pauseTimer() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    prefs.remove('timer_start_${widget.habit.id}');
+    prefs.remove('timer_rem_${widget.habit.id}');
+
     setState(() {
       _isRunning = false;
       _lastStartTime = null;
@@ -96,6 +134,10 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
   }
 
   void _completeTimer() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    prefs.remove('timer_start_${widget.habit.id}');
+    prefs.remove('timer_rem_${widget.habit.id}');
+
     _timer?.cancel();
     _animationController.stop();
     setState(() {
@@ -207,6 +249,9 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                         _remainingSeconds = _totalSeconds;
                         _animationController.value = 1.0;
                       });
+                      final prefs = ref.read(sharedPreferencesProvider);
+                      prefs.remove('timer_start_${widget.habit.id}');
+                      prefs.remove('timer_rem_${widget.habit.id}');
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),

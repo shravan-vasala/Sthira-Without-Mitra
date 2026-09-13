@@ -145,7 +145,7 @@ class DailyLogRepository {
       bool changed = false;
 
       // Don't overwrite manual steps
-      if (data.steps != null && data.steps > 0) {
+      if (data.steps != null) {
         if (log.stepsSource != 'manual') {
           updatedLog = updatedLog.copyWith(steps: data.steps, stepsSource: 'healthConnect');
           changed = true;
@@ -153,7 +153,7 @@ class DailyLogRepository {
       }
 
       // Don't overwrite manual sleep
-      if (data.sleepHours != null && data.sleepHours > 0) {
+      if (data.sleepHours != null) {
         if (log.sleepSource != 'manual') {
           updatedLog = updatedLog.copyWith(sleepHours: data.sleepHours, sleepSource: 'healthConnect');
           changed = true;
@@ -181,9 +181,9 @@ class DailyLogRepository {
     await saveLog(log.copyWith(bodyFat: bodyFat));
   }
 
-  Future<void> markWorkoutCompleted(String date, String dayId) async {
+  Future<void> updateWorkoutStatus(String date, String dayId, String status) async {
     final log = getOrCreate(date);
-    await saveLog(log.copyWith(workoutCompleted: true, workoutDayId: dayId));
+    await saveLog(log.copyWith(workoutStatus: status, workoutDayId: dayId));
   }
 
   List<DailyLog> getLogsInRange(String startDate, String endDate) {

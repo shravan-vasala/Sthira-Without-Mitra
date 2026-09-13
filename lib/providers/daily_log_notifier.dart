@@ -79,7 +79,10 @@ class DailyLogNotifier extends Notifier<DailyLog> {
       if (hours >= habit.target) {
         await habitRepo.setCompletion(date, habit.id, true);
       } else {
-        await habitRepo.setCompletion(date, habit.id, false);
+        final current = habitRepo.getCompletions(date).completions[habit.id];
+        if (current != true) {
+          await habitRepo.setCompletion(date, habit.id, false);
+        }
       }
     }
     if (state.date == date) {
@@ -101,7 +104,10 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final habitRepo = ref.read(habitRepoProvider);
     final allHabits = habitRepo.getHabits();
     for (final habit in allHabits.where((h) => h.type == HabitType.autoSleep)) {
-      await habitRepo.setCompletion(date, habit.id, false);
+      final current = habitRepo.getCompletions(date).completions[habit.id];
+      if (current != true) {
+         await habitRepo.setCompletion(date, habit.id, false);
+      }
     }
     if (state.date == date) {
       ref.invalidate(habitCompletionsProvider);
@@ -152,7 +158,10 @@ class DailyLogNotifier extends Notifier<DailyLog> {
       if (waterMl >= targetInMl) {
         await habitRepo.setCompletion(date, waterHabit.id, true);
       } else {
-        await habitRepo.setCompletion(date, waterHabit.id, false);
+        final current = habitRepo.getCompletions(date).completions[waterHabit.id];
+        if (current != true) {
+          await habitRepo.setCompletion(date, waterHabit.id, false);
+        }
       }
     }
     if (state.date == date) {
@@ -175,16 +184,19 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final habitRepo = ref.read(habitRepoProvider);
     final waterHabit = habitRepo.getHabits().where((h) => h.id == 'water').firstOrNull;
     if (waterHabit != null) {
-      await habitRepo.setCompletion(date, waterHabit.id, false);
+      final current = habitRepo.getCompletions(date).completions[waterHabit.id];
+      if (current != true) {
+        await habitRepo.setCompletion(date, waterHabit.id, false);
+      }
     }
     if (state.date == date) {
       ref.invalidate(habitCompletionsProvider);
     }
   }
 
-  Future<void> markWorkoutCompleted(String dayId) async {
+  Future<void> updateWorkoutStatus(String dayId, String status) async {
     final repo = ref.read(dailyLogRepoProvider);
-    await repo.markWorkoutCompleted(state.date, dayId);
+    await repo.updateWorkoutStatus(state.date, dayId, status);
     state = repo.getOrCreate(state.date);
 
     final profile = ref.read(profileProvider);

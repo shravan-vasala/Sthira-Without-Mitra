@@ -48,7 +48,7 @@ void main() {
     } catch (_) {}
   });
 
-  group('ExerciseCard Widget Tests', skip: true, () {
+  group('ExerciseCard Widget Tests', () {
     testWidgets('renders exercise name and reps correctly', (
       WidgetTester tester,
     ) async {

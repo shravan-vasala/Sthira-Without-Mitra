@@ -51,6 +51,7 @@ class WidgetCoordinator {
   }
 
   Future<void> _clearWidgetData() async {
+    _debounceTimer?.cancel();
     _updateGeneration++;
     final gen = _updateGeneration;
     try {
@@ -189,8 +190,8 @@ class WidgetCoordinator {
         'habitsDone': habitsDone,
         'totalHabits': totalHabits,
         
-        'energy': totalCal > 0 ? totalCal : null,
-        'protein': totalProtein > 0 ? totalProtein : null,
+        'energy': mealsLogged > 0 ? (totalCal > 0 ? totalCal : 0) : null,
+        'protein': mealsLogged > 0 ? (totalProtein > 0 ? totalProtein : 0) : null,
         
         'isRest': isRest,
         'workoutTitle': workoutTitle,

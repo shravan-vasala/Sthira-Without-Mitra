@@ -20,22 +20,15 @@ class WorkoutRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    // ALWAYS load the seed plan to ensure latest JSON changes are available.
+    // Only seed if no plans exist at all (non-destructive policy)
+    final existingCount = _isar.workoutPlans.where().countSync();
+    if (existingCount > 0) return;
+
     final jsonStr = await rootBundle.loadString(
       'assets/data/seed_workout_plan.json',
     );
-    final plan = WorkoutPlan.fromJson(
-      jsonDecode(jsonStr) as Map<String, dynamic>,
-    );
-
-    final existing = getPlan(plan.planName);
-    if (existing != null) {
-      plan.id = existing.id;
-    }
-
-    await _isar.writeTxn(() async {
-      await _isar.workoutPlans.put(plan);
-    });
+    // Leverage the robust parser which correctly assigns stable IDs and validates the schema
+    await savePlanJson('beginner_plan', jsonStr);
   }
 
   List<WorkoutPlan> getAllPlans() {
@@ -123,38 +116,53 @@ class WorkoutRepository {
         day['dayId'] = const Uuid().v4();
       }
 
-      final exercises = day['exercises'];
-      if (exercises != null && exercises is! List) {
+      final sections = day['sections'];
+      if (sections != null && sections is! List) {
         throw FormatException(
-          '"exercises" in day "${day['dayName'] ?? 'unknown'}" must be an array',
+          '"sections" in day "${day['dayName'] ?? day['dayId']}" must be an array',
         );
       }
 
-      if (exercises != null) {
-        for (final ex in exercises) {
-          if (ex is! Map<String, dynamic>) {
-            throw const FormatException('Each exercise must be an object');
+      if (sections != null) {
+        for (final section in sections) {
+          if (section is! Map<String, dynamic>) {
+            throw const FormatException('Each section must be an object');
           }
-          final name = ex['name']?.toString() ?? '';
-          if (name.trim().isEmpty) {
-            throw const FormatException('An exercise is missing a "name"');
-          }
-          final reps = ex['reps']?.toString() ?? '';
-          if (reps.trim().isEmpty) {
-            throw FormatException('Exercise "$name" is missing "reps"');
+          final exercises = section['exercises'];
+          if (exercises != null && exercises is! List) {
+            throw FormatException(
+              '"exercises" in section "${section['title'] ?? 'unknown'}" must be an array',
+            );
           }
 
-          final yt = ex['youtubeUrl']?.toString() ?? '';
-          if (yt.isNotEmpty) {
-            if (!yt.contains('youtube.com/watch') && !yt.contains('youtu.be')) {
-              throw FormatException(
-                'Invalid YouTube URL format for exercise "$name". Use youtube.com/watch or youtu.be',
-              );
+          if (exercises != null) {
+            for (final ex in exercises) {
+              if (ex is! Map<String, dynamic>) {
+                throw const FormatException('Each exercise must be an object');
+              }
+              final name = ex['name']?.toString() ?? '';
+              if (name.trim().isEmpty) {
+                throw const FormatException('An exercise is missing a "name"');
+              }
+              final reps = ex['reps'];
+              final duration = ex['durationSeconds'];
+              if ((reps == null || (reps is List && reps.isEmpty)) && (duration == null || duration <= 0)) {
+                throw FormatException('Exercise "$name" is missing "reps" or valid "durationSeconds"');
+              }
+
+              final yt = ex['youtubeUrl']?.toString() ?? '';
+              if (yt.isNotEmpty) {
+                if (!yt.contains('youtube.com/watch') && !yt.contains('youtu.be') && !yt.contains('youtube.com/shorts')) {
+                  throw FormatException(
+                    'Invalid YouTube URL format for exercise "$name". Use youtube.com/watch, youtu.be, or shorts',
+                  );
+                }
+              }
+              
+              if (ex['instanceId'] == null || ex['instanceId'].toString().trim().isEmpty) {
+                ex['instanceId'] = const Uuid().v4();
+              }
             }
-          }
-          
-          if (ex['instanceId'] == null || ex['instanceId'].toString().trim().isEmpty) {
-            ex['instanceId'] = const Uuid().v4();
           }
         }
       }

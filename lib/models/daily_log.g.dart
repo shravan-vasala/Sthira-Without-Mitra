@@ -81,6 +81,11 @@ const DailyLogSchema = CollectionSchema(
       id: 12,
       name: r'workoutDayId',
       type: IsarType.string,
+    ),
+    r'workoutStatus': PropertySchema(
+      id: 13,
+      name: r'workoutStatus',
+      type: IsarType.string,
     )
   },
   estimateSize: _dailyLogEstimateSize,
@@ -136,6 +141,12 @@ int _dailyLogEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.workoutStatus;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -158,6 +169,7 @@ void _dailyLogSerialize(
   writer.writeDouble(offsets[10], object.weight);
   writer.writeBool(offsets[11], object.workoutCompleted);
   writer.writeString(offsets[12], object.workoutDayId);
+  writer.writeString(offsets[13], object.workoutStatus);
 }
 
 DailyLog _dailyLogDeserialize(
@@ -177,8 +189,8 @@ DailyLog _dailyLogDeserialize(
     updatedAt: reader.readDateTimeOrNull(offsets[8]),
     waterMl: reader.readLongOrNull(offsets[9]),
     weight: reader.readDoubleOrNull(offsets[10]),
-    workoutCompleted: reader.readBoolOrNull(offsets[11]) ?? false,
     workoutDayId: reader.readStringOrNull(offsets[12]),
+    workoutStatus: reader.readStringOrNull(offsets[13]),
   );
   object.id = id;
   return object;
@@ -214,8 +226,10 @@ P _dailyLogDeserializeProp<P>(
     case 10:
       return (reader.readDoubleOrNull(offset)) as P;
     case 11:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readBool(offset)) as P;
     case 12:
+      return (reader.readStringOrNull(offset)) as P;
+    case 13:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1575,6 +1589,158 @@ extension DailyLogQueryFilter
       ));
     });
   }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      workoutStatusIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'workoutStatus',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      workoutStatusIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'workoutStatus',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      workoutStatusGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'workoutStatus',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      workoutStatusStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'workoutStatus',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      workoutStatusIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'workoutStatus',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      workoutStatusIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'workoutStatus',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension DailyLogQueryObject
@@ -1737,6 +1903,18 @@ extension DailyLogQuerySortBy on QueryBuilder<DailyLog, DailyLog, QSortBy> {
   QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByWorkoutDayIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'workoutDayId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByWorkoutStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'workoutStatus', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByWorkoutStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'workoutStatus', Sort.desc);
     });
   }
 }
@@ -1910,6 +2088,18 @@ extension DailyLogQuerySortThenBy
       return query.addSortBy(r'workoutDayId', Sort.desc);
     });
   }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByWorkoutStatus() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'workoutStatus', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByWorkoutStatusDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'workoutStatus', Sort.desc);
+    });
+  }
 }
 
 extension DailyLogQueryWhereDistinct
@@ -1993,6 +2183,14 @@ extension DailyLogQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'workoutDayId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByWorkoutStatus(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'workoutStatus',
+          caseSensitive: caseSensitive);
     });
   }
 }
@@ -2080,6 +2278,12 @@ extension DailyLogQueryProperty
   QueryBuilder<DailyLog, String?, QQueryOperations> workoutDayIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'workoutDayId');
+    });
+  }
+
+  QueryBuilder<DailyLog, String?, QQueryOperations> workoutStatusProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'workoutStatus');
     });
   }
 }
