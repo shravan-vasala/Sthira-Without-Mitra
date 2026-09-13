@@ -95,4 +95,4 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "assets/icon/sunflower_logo.jpg"
+  image_path: "assets/icon/sunflower_logo.png"
