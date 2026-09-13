@@ -62,6 +62,7 @@ class _PhotoCalorieScannerSheetState
   int _elapsedSeconds = 0;
   Timer? _countdownTimer;
   int _cooldownSeconds = 0;
+  CancellationToken? _cancellationToken;
 
   void _startStatusTimer() {
     _elapsedSeconds = 0;
@@ -97,6 +98,7 @@ class _PhotoCalorieScannerSheetState
 
   void _cancelAnalysis() {
     _analysisSessionToken++;
+    _cancellationToken?.cancel();
     _statusTimer?.cancel();
     setState(() {
       _isAnalyzing = false;
@@ -113,9 +115,15 @@ class _PhotoCalorieScannerSheetState
   final Map<int, MealItemLog> _baseItems = {};
   final Map<int, double> _itemScales = {};
 
+  late String _initialDate;
+  late String _initialUid;
+
   @override
   void initState() {
     super.initState();
+    _initialDate = ref.read(dateStringProvider);
+    _initialUid = ref.read(authServiceProvider).uid ?? '';
+    
     _describeMode = widget.isManualEntry;
     if (_describeMode) {
       // Stay on describe form until she estimates or adds items herself.
@@ -126,6 +134,7 @@ class _PhotoCalorieScannerSheetState
 
   @override
   void dispose() {
+    _cancellationToken?.cancel();
     _statusTimer?.cancel();
     _countdownTimer?.cancel();
     _descriptionCtrl.dispose();
@@ -207,9 +216,23 @@ class _PhotoCalorieScannerSheetState
     return MealItemLog(
       name: src.name,
       portion: src.portion,
-      computedNutrition: src.computedNutrition,
+      computedNutrition: src.computedNutrition != null ? FoodNutrition(
+        kcal: src.computedNutrition!.kcal,
+        proteinG: src.computedNutrition!.proteinG,
+        carbsG: src.computedNutrition!.carbsG,
+        fatG: src.computedNutrition!.fatG,
+      ) : null,
+      baseNutrition: src.baseNutrition != null ? FoodNutrition(
+        kcal: src.baseNutrition!.kcal,
+        proteinG: src.baseNutrition!.proteinG,
+        carbsG: src.baseNutrition!.carbsG,
+        fatG: src.baseNutrition!.fatG,
+      ) : null,
       resolved: src.resolved,
       provenance: src.provenance,
+      isPer100g: src.isPer100g,
+      servingGrams: src.servingGrams,
+      consumedGrams: src.consumedGrams,
     );
   }
 
@@ -244,6 +267,9 @@ class _PhotoCalorieScannerSheetState
       _errorCause = null;
     });
     final currentToken = ++_analysisSessionToken;
+    _cancellationToken?.cancel();
+    _cancellationToken = CancellationToken();
+
     _startStatusTimer();
 
     try {
@@ -266,6 +292,7 @@ class _PhotoCalorieScannerSheetState
             mimeType,
             _descriptionCtrl.text,
             skipCache,
+            _cancellationToken,
           );
 
       if (!mounted) return;
@@ -304,12 +331,14 @@ class _PhotoCalorieScannerSheetState
       _selectedImages = [];
     });
     final currentToken = ++_analysisSessionToken;
+    _cancellationToken?.cancel();
+    _cancellationToken = CancellationToken();
     _startStatusTimer();
 
     try {
       final result = await ref
           .read(geminiFoodServiceProvider)
-          .analyzeFoodText(text);
+          .analyzeFoodText(text, _cancellationToken);
 
       if (!mounted) return;
 
@@ -680,21 +709,41 @@ class _PhotoCalorieScannerSheetState
     setState(() {
       _itemScales[index] = scale;
       final base = _baseItems[index]!;
-      _items[index] = MealItemLog(
-        name: base.name,
-        portion: base.portion,
-        computedNutrition: FoodNutrition(
+      FoodNutrition? newComputed;
+      bool newResolved = base.resolved;
+      final newConsumedGrams = base.consumedGrams != null ? (base.consumedGrams! * scale) : null;
+      
+      if (base.baseNutrition != null && newConsumedGrams != null) {
+        try {
+          newComputed = FoodNutrition.compute(
+            consumedGrams: newConsumedGrams,
+            baseNutrition: base.baseNutrition!,
+            isPer100g: base.isPer100g,
+            servingGrams: base.servingGrams,
+          );
+          newResolved = true;
+        } on FormatException catch (_) {
+          newResolved = false;
+        }
+      } else {
+        newComputed = FoodNutrition(
           kcal: ((base.computedNutrition?.kcal ?? 0) * scale).roundToDouble(),
           proteinG: double.parse(((base.computedNutrition?.proteinG ?? 0.0) * scale).toStringAsFixed(1)),
           carbsG: double.parse(((base.computedNutrition?.carbsG ?? 0.0) * scale).toStringAsFixed(1)),
           fatG: double.parse(((base.computedNutrition?.fatG ?? 0.0) * scale).toStringAsFixed(1)),
-        ),
+        );
+      }
+
+      _items[index] = MealItemLog(
+        name: base.name,
+        portion: base.portion,
+        computedNutrition: newComputed,
         baseNutrition: base.baseNutrition,
         isPer100g: base.isPer100g,
         servingGrams: base.servingGrams,
-        consumedGrams: base.consumedGrams != null ? base.consumedGrams! * scale : null,
+        consumedGrams: newConsumedGrams,
         provenance: base.provenance,
-        resolved: base.resolved,
+        resolved: newResolved,
       );
       _recalculateTotals();
     });
@@ -754,17 +803,23 @@ class _PhotoCalorieScannerSheetState
       confidence: _confidence ?? widget.appendToLog?.confidence,
     );
     
-    // Personal Portion Memory: Ensure 'yours' modifications are written back to the local brain
+    // Personal Portion Memory: Ensure 'yours' and 'ai_estimate' modifications are written back to the local brain
     try {
       final isar = Isar.getInstance();
       if (isar != null) {
         for (var i in _items) {
-          if (i.provenance == 'yours' && (i.computedNutrition?.kcal ?? 0) > 0) {
+          if ((i.provenance == 'yours' || i.provenance == 'ai_estimate') && (i.computedNutrition?.kcal ?? 0) > 0) {
             final normalized = i.name?.toLowerCase().trim();
             if (normalized != null && normalized.isNotEmpty) {
               await isar.writeTxn(() async {
-                // If it already exists, overwrite it so prioritizing her latest manual portion
-                await isar.userFoodLogs.filter().normalizedNameEqualTo(normalized).deleteAll();
+                if (i.provenance == 'yours') {
+                  // If it already exists, overwrite it so prioritizing her latest manual portion
+                  await isar.userFoodLogs.filter().normalizedNameEqualTo(normalized).deleteAll();
+                } else if (i.provenance == 'ai_estimate') {
+                  // AI estimates only save if missing.
+                  final count = await isar.userFoodLogs.filter().normalizedNameEqualTo(normalized).count();
+                  if (count > 0) return;
+                }
                 await isar.userFoodLogs.put(
                   UserFoodLog(
                     normalizedName: normalized,
@@ -772,6 +827,7 @@ class _PhotoCalorieScannerSheetState
                     baseNutrition: i.computedNutrition ?? FoodNutrition(),
                     isPer100g: false,
                     servingGrams: i.consumedGrams,
+                    provenance: i.provenance,
                     addedAt: DateTime.now(),
                   )
                 );
@@ -784,9 +840,22 @@ class _PhotoCalorieScannerSheetState
        // silently fail portion memory if db throws
     }
 
+      final currentDate = ref.read(dateStringProvider);
+      final currentUid = ref.read(authServiceProvider).uid ?? '';
+      
+      if (currentDate != _initialDate || currentUid != _initialUid) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Date or account changed. Cannot save into stale log.')),
+          );
+        }
+        setState(() => _isSavingMeal = false);
+        return;
+      }
+
       await ref
           .read(dailyMealLogProvider.notifier)
-          .saveMealSlot(widget.slotId, slotLog);
+          .saveMealSlot(widget.slotId, slotLog, targetDate: _initialDate);
 
       if (mounted) {
         // ignore: unawaited_futures

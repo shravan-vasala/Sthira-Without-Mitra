@@ -7,13 +7,19 @@ import '../models/daily_meal_log.dart';
 import '../models/daily_stats_snapshot.dart';
 import 'app_providers.dart';
 
+import '../services/ai_client.dart';
+
 class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
   late String dateStr;
-  String? _fetchingDate;
+  int _currentRequestId = 0;
+  CancellationToken? _cancellationToken;
 
   @override
   FutureOr<CoachNote> build() async {
     dateStr = ref.watch(dateStringProvider);
+    ref.onDispose(() {
+      _cancellationToken?.cancel();
+    });
     return _loadForDate();
   }
 
@@ -46,8 +52,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
   }
 
   Future<void> fetchNote({bool force = false, bool background = false}) async {
-    if (_fetchingDate == dateStr && !force) return;
-    _fetchingDate = dateStr;
+    final int requestId = ++_currentRequestId;
     final targetDateStr = dateStr;
 
     final repo = ref.read(coachNoteRepoProvider);
@@ -72,6 +77,10 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
     }
 
     if (!shouldRegenerate) return;
+
+    // A completely new generation has started for this request
+    _cancellationToken?.cancel();
+    _cancellationToken = CancellationToken();
 
     if (!background) state = const AsyncValue.loading();
     try {
@@ -141,6 +150,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         weightTrend: todayStats.weightTrend,
         isRestDay: todayStats.isRestDay,
         daysSinceLastWorkout: todayStats.daysSinceLastWorkout,
+        cancellationToken: _cancellationToken,
       );
 
       String accumulatedNote = "";
@@ -168,7 +178,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         }
       }
 
-      if (dateStr != targetDateStr) return; // User navigated away
+      if (_currentRequestId != requestId || dateStr != targetDateStr) return; // Stale request or navigated away
 
       if (accumulatedNote.isEmpty)
         throw Exception('Failed to generate note stream');
@@ -190,13 +200,20 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         DateTime.now().toIso8601String(),
       );
     } catch (e, st) {
-      if (dateStr != targetDateStr) return;
+      if (_currentRequestId != requestId || dateStr != targetDateStr) return;
       if (!background || !state.hasValue || state.value?.note == 'Generating...') {
-        state = AsyncValue.error(e, st);
+        // Fallback to cache on transient error
+        final repo = ref.read(coachNoteRepoProvider);
+        final cached = repo.getNote(targetDateStr);
+        if (cached != null) {
+          state = AsyncValue.data(cached);
+        } else {
+          state = AsyncValue.error(e, st);
+        }
       }
     } finally {
-      if (_fetchingDate == targetDateStr) {
-        _fetchingDate = null;
+      if (_currentRequestId == requestId) {
+        // no lock to clear
       }
     }
   }

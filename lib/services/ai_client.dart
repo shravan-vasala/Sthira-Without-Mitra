@@ -8,7 +8,16 @@ import 'dart:async';
 import 'dart:io';
 import 'image_preprocessor.dart';
 
-enum AiErrorCause { invalidKey, offline, notFound, rateLimited, overloaded, parse, timeout, unknown }
+class CancellationToken {
+  bool _isCancelled = false;
+  bool get isCancelled => _isCancelled;
+
+  void cancel() {
+    _isCancelled = true;
+  }
+}
+
+enum AiErrorCause { invalidKey, offline, notFound, rateLimited, overloaded, parse, timeout, cancelled, unknown }
 
 class AiException implements Exception {
   final String message;
@@ -122,6 +131,7 @@ class AiClient {
     required String apiKey,
     bool skipCache = false,
     Map<String, dynamic>? responseSchema,
+    CancellationToken? cancellationToken,
   }) async {
     if (apiKey == null || apiKey.isEmpty) {
       throw AiException('API Key is required. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
@@ -158,6 +168,10 @@ class AiClient {
     if (breaker.isOpen) {
       throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
     }
+    
+    if (cancellationToken?.isCancelled ?? false) {
+      throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+    }
 
     final modelsToUse = isVision ? visionModelsToTry : textModelsToTry;
     final overallDeadline = DateTime.now().add(Duration(seconds: isVision ? 75 : 40));
@@ -173,6 +187,9 @@ class AiClient {
       int attempt = 0;
       
       while (attempt <= maxRetries) {
+        if (cancellationToken?.isCancelled ?? false) {
+          throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+        }
         if (DateTime.now().isAfter(overallDeadline)) break;
         final remaining = overallDeadline.difference(DateTime.now());
         final attemptTimeout = remaining < perAttemptTimeout ? remaining : perAttemptTimeout;
@@ -236,7 +253,9 @@ class AiClient {
             if (attempt < maxRetries) {
               final delay = attempt == 0 ? 1 : 2;
               if (DateTime.now().add(Duration(seconds: delay)).isAfter(overallDeadline)) break;
+              if (cancellationToken?.isCancelled ?? false) break;
               await Future.delayed(Duration(seconds: delay));
+              if (cancellationToken?.isCancelled ?? false) break;
               attempt++;
               continue;
             } else {
@@ -245,7 +264,9 @@ class AiClient {
           } else if (cause == AiErrorCause.overloaded) {
             if (attempt == 0) {
               if (DateTime.now().add(const Duration(seconds: 2)).isAfter(overallDeadline)) break;
+              if (cancellationToken?.isCancelled ?? false) break;
               await Future.delayed(const Duration(seconds: 2));
+              if (cancellationToken?.isCancelled ?? false) break;
               attempt++;
               continue;
             } else {
@@ -259,6 +280,10 @@ class AiClient {
       }
     }
 
+    if (cancellationToken?.isCancelled ?? false) {
+      throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+    }
+    
     if (DateTime.now().isAfter(overallDeadline)) {
       throw AiException('The AI is taking too long right now. Please try again.', cause: AiErrorCause.timeout);
     }
@@ -344,6 +369,7 @@ class AiClient {
     String? apiKey,
     Duration overallTimeout = const Duration(seconds: 40),
     Duration inactivityTimeout = const Duration(seconds: 15),
+    CancellationToken? cancellationToken,
   }) {
     if (_textCircuitBreaker.isOpen) {
       throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
@@ -367,7 +393,8 @@ class AiClient {
     }
 
     void tryNextModel() {
-      if (isCancelled || controller.isClosed) return;
+      currentSub?.cancel();
+      if (isCancelled || controller.isClosed || (cancellationToken?.isCancelled ?? false)) return;
 
       if (modelIndex >= textModelsToTry.length) {
         if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
@@ -378,6 +405,7 @@ class AiClient {
         return;
       }
 
+      final currentAttemptIndex = modelIndex;
       final modelName = textModelsToTry[modelIndex++];
       sw.reset();
       sw.start();
@@ -385,9 +413,9 @@ class AiClient {
 
       void resetInactivityTimer() {
         inactivityTimer?.cancel();
-        if (isCancelled || controller.isClosed) return;
+        if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
         inactivityTimer = Timer(inactivityTimeout, () {
-          if (isCancelled || controller.isClosed) return;
+          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
           currentSub?.cancel();
           if (yieldedAny) {
             cleanup();
@@ -412,7 +440,7 @@ class AiClient {
 
         currentSub = stream.listen(
           (chunk) {
-            if (isCancelled || controller.isClosed) return;
+            if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
             if (chunk != null && chunk.isNotEmpty) {
               if (firstTokenMs == null) {
                 firstTokenMs = sw.elapsedMilliseconds;
@@ -423,7 +451,7 @@ class AiClient {
             }
           },
           onError: (e) {
-            if (isCancelled || controller.isClosed) return;
+            if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
             sw.stop();
             final errStr = e.toString();
             final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
@@ -462,7 +490,7 @@ class AiClient {
             }
           },
           onDone: () {
-            if (isCancelled || controller.isClosed) return;
+            if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
             if (!yieldedAny) {
               tryNextModel();
               return;
@@ -481,7 +509,7 @@ class AiClient {
           },
         );
       } catch (e) {
-        if (isCancelled || controller.isClosed) return;
+        if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
         final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(e.toString());
         lastCause = cause;
         tryNextModel();
@@ -562,3 +590,4 @@ class AiClient {
     }
   }
 }
+

@@ -41,6 +41,18 @@ class MockCloudSyncService implements ICloudSyncService {
   void deleteFromCloud(String collection, String docId) {}
 
   @override
+  void queueSyncInTxn(Isar isar, String collection, String docId, Map<String, dynamic> data) {}
+
+  @override
+  void queueDeleteInTxn(Isar isar, String collection, String docId) {}
+
+  @override
+  void queueProfileInTxn(Isar isar, Map<String, dynamic> data) {}
+
+  @override
+  void triggerFlush() {}
+
+  @override
   void syncProfile(Map<String, dynamic> data) {}
 
   @override

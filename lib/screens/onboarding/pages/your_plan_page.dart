@@ -7,7 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 class YourPlanPage extends StatefulWidget {
   final double initialCalories;
-  final double heightCm;
+  final double? heightCm;
   final double? weightKg;
   final List<String> selectedHabitIds;
   final bool isManuallyEdited;
@@ -81,16 +81,14 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
   }
 
   void _updateMacroPreview() {
-    if (widget.weightKg != null) {
-      _macroPreview = TargetCalculator.calculate(
-        heightCm: widget.heightCm,
-        weightKg: widget.weightKg!,
-        age: 29, // Default assumption per user request (sister)
-        gender: 'F',
-        goal: 'Maintain',
-        activityLevel: 'Sedentary',
-      );
-    }
+    _macroPreview = TargetCalculator.calculate(
+      heightCm: widget.heightCm,
+      weightKg: widget.weightKg,
+      age: null,
+      gender: null,
+      goal: 'Maintain',
+      activityLevel: null,
+    );
   }
 
   void _suggestMacros() {
@@ -138,13 +136,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
 
   TargetMacros? _getDynamicMacrosForCalories(double cal) {
     if (_macroPreview == null) return null;
-    final factor = cal / _macroPreview!.calories;
-    return TargetMacros(
-      calories: cal.round(),
-      proteinG: (_macroPreview!.proteinG * factor).round(),
-      carbsG: (_macroPreview!.carbsG * factor).round(),
-      fatG: (_macroPreview!.fatG * factor).round(),
-    );
+    return TargetCalculator.rebalanceForCalories(cal.round(), _macroPreview!);
   }
 
   @override
@@ -250,13 +242,27 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Based on default assumptions (29F, Maintain, Sedentary)',
-                          style: TextStyle(
-                            fontFamily: 'General Sans',
-                            fontSize: 12,
-                            color: Colors.white.withOpacity(0.5),
-                          ),
+                        Builder(
+                          builder: (ctx) {
+                            List<String> defaults = [];
+                            if (widget.heightCm == null) defaults.add('Height');
+                            if (widget.weightKg == null) defaults.add('Weight');
+                            defaults.add('Age');
+                            defaults.add('Sex');
+                            
+                            if (defaults.isEmpty) {
+                              return const SizedBox();
+                            }
+                            return Text(
+                              'Estimate uses default ${defaults.join(', ')}',
+                              style: TextStyle(
+                                fontFamily: 'General Sans',
+                                fontSize: 12,
+                                color: Colors.white.withValues(alpha: 0.5),
+                              ),
+                              textAlign: TextAlign.center,
+                            );
+                          }
                         ),
                       ],
                     ),

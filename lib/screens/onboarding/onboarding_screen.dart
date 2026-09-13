@@ -117,10 +117,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return false;
     
+    double? finalHeight;
     final hText = _heightController.text;
-    if (hText.isEmpty) return false;
-    final height = double.tryParse(hText);
-    if (height == null || height < 100 || height > 230) return false;
+    if (hText.isNotEmpty) {
+      final h = double.tryParse(hText);
+      if (h == null || h < 100 || h > 230) return false;
+      finalHeight = h;
+    }
 
     double? finalWeight;
     final wText = _weightController.text;
@@ -140,7 +143,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       current.copyWith(
         name: name,
         coachName: _coachNameController.text.trim(),
-        height: height,
+        height: finalHeight,
+        clearHeight: hText.isEmpty,
         currentWeight: finalWeight,
         clearCurrentWeight: wText.isEmpty,
         useKg: _useKg,
@@ -216,7 +220,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       YourPlanPage(
                         initialCalories: _targetCalories,
-                        heightCm: double.tryParse(_heightController.text) ?? 160.0,
+                        heightCm: double.tryParse(_heightController.text),
                         weightKg: double.tryParse(_weightController.text) != null
                             ? (_useKg
                                 ? double.parse(_weightController.text)

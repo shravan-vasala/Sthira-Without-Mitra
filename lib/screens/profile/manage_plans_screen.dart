@@ -189,14 +189,12 @@ class ManagePlansScreen extends ConsumerWidget {
                   ),
                   TextButton.icon(
                     onPressed: () {
-                      final rawWeight = profile.currentWeight ?? profile.targetWeight ?? (profile.useKg ? 70.0 : 154.0);
-                      final currentKg = profile.useKg ? rawWeight : rawWeight / 2.20462;
                       final targets = TargetCalculator.calculate(
                         heightCm: profile.height,
-                        weightKg: currentKg,
-                        age: profile.age ?? 30,
-                        gender: profile.gender ?? 'M',
-                        goal: profile.primaryGoal ?? 'Maintain',
+                        weightKg: profile.currentWeight ?? profile.targetWeight,
+                        age: profile.age,
+                        gender: profile.gender,
+                        goal: profile.primaryGoal,
                         activityLevel: 'Sedentary',
                       );
                       ref

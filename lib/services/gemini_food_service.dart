@@ -91,11 +91,10 @@ Portion estimation guidelines:
 - Pay close attention to cooked vs raw states (cooked rice expands 2-3x, meat shrinks ~25%)
 - When in doubt about portion size, estimate for a moderate single-person meal, not a large/shared serving
 ''';
-
   static const _systemInstruction =
       'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine. '
       'You accurately identify specific regional dishes, cooking methods (especially the heavy use of oil/ghee in Indian cooking), '
-      'and you are highly skilled at estimating single-person portion sizes visually. You never overestimate single servings. '
+      'and you are highly skilled at estimating single-person portion sizes visually. Provide unbiased estimates based on standard recipes. '
       'You strictly output only valid JSON data.\n\n'
       'EXAMPLE:\n'
       'User: I had 2 idlis with coconut chutney and a small bowl of sambar.\n'
@@ -139,6 +138,7 @@ Portion estimation guidelines:
     String mimeType, [
     String? userContext,
     bool skipCache = false,
+    CancellationToken? cancellationToken,
   ]) async {
     _ensureApiKey();
     final hint = userContext != null && userContext.trim().isNotEmpty
@@ -159,13 +159,14 @@ $_jsonShape
       apiKey: apiKey ?? '',
       skipCache: skipCache,
       responseSchema: _foodAnalysisSchema,
+      cancellationToken: cancellationToken,
     );
-    return _processAiResponse(response);
+    return _processAiResponse(response, cancellationToken: cancellationToken);
   }
 
   /// Estimate macros from a free-text description of what was eaten at home.
   @override
-  Future<Map<String, dynamic>?> analyzeFoodText(String description) async {
+  Future<Map<String, dynamic>?> analyzeFoodText(String description, [CancellationToken? cancellationToken]) async {
     final trimmed = description.trim();
     if (trimmed.isEmpty) {
       throw Exception('Please describe what you ate.');
@@ -184,7 +185,7 @@ $_jsonShape
             jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
         if (!decoded.containsKey('total')) {
           // Legacy cached raw data lacking totals — process it
-          return await _processAiResponse(decoded);
+          return await _processAiResponse(decoded, cancellationToken: cancellationToken);
         }
         return decoded;
       } catch (_) {
@@ -316,10 +317,11 @@ $_jsonShape
       systemInstruction: _systemInstruction,
       apiKey: apiKey ?? '',
       responseSchema: _foodAnalysisSchema,
+      cancellationToken: cancellationToken,
     );
 
     // Merge AI response with Local items
-    final aiParsed = await _processAiResponse(response);
+    final aiParsed = await _processAiResponse(response, cancellationToken: cancellationToken);
     if (aiParsed != null && localItems.isNotEmpty) {
        final allItems = [...localItems, ...(aiParsed['items'] ?? [])];
        double tCal = 0, tP = 0, tC = 0, tF = 0;
@@ -340,18 +342,20 @@ $_jsonShape
           if (unresolvedCount > 0) 'unresolved_count': unresolvedCount,
        };
        // Store the final merged result
-       await isar.writeTxn(() async {
-         await isar.foodSearchCaches.put(
-           FoodSearchCache(
-             normalizedQuery: normalizedQuery,
-             cachedResponseJson: jsonEncode(aiParsed), timestamp: DateTime.now(), schemaVersion: '1',
-           ),
-         );
-       });
+       if (!(cancellationToken?.isCancelled ?? false)) {
+         await isar.writeTxn(() async {
+           await isar.foodSearchCaches.put(
+             FoodSearchCache(
+               normalizedQuery: normalizedQuery,
+               cachedResponseJson: jsonEncode(aiParsed), timestamp: DateTime.now(), schemaVersion: '1',
+             ),
+           );
+         });
+       }
        return aiParsed;
     }
 
-    if (aiParsed != null) {
+    if (aiParsed != null && !(cancellationToken?.isCancelled ?? false)) {
       await isar.writeTxn(() async {
          await isar.foodSearchCaches.put(
            FoodSearchCache(
@@ -366,8 +370,9 @@ $_jsonShape
   }
 
   Future<Map<String, Map<String, dynamic>>> _fallbackBatchLookup(
-    List<String> dishNames,
-  ) async {
+    List<String> dishNames, {
+    CancellationToken? cancellationToken,
+  }) async {
     final isar = Isar.getInstance()!;
     final Map<String, Map<String, dynamic>> results = {};
     final List<String> toFetch = [];
@@ -436,9 +441,10 @@ Return ONLY a JSON object containing an array called "items":
           'You are a nutrition database. Provide exact values per 100g.',
       apiKey: apiKey ?? '',
       responseSchema: fallbackSchema,
+      cancellationToken: cancellationToken,
     );
 
-    if (response != null && response['items'] is List) {
+    if (response != null && response['items'] is List && !(cancellationToken?.isCancelled ?? false)) {
       await isar.writeTxn(() async {
         for (var item in response['items']) {
           if (item is! Map) continue;
@@ -487,25 +493,6 @@ Return ONLY a JSON object containing an array called "items":
                 cachedResponseJson: jsonEncode(safeResponse), timestamp: DateTime.now(), schemaVersion: '1',
               ),
             );
-
-            // Self-Growing DB: Promote verified unknown foods to permanent local memory
-            final exists = await isar.userFoodLogs.where().normalizedNameEqualTo(normalized).count();
-            if (exists == 0) {
-               await isar.userFoodLogs.put(
-                  UserFoodLog(
-                    normalizedName: normalized,
-                    originalName: queriedName,
-                    baseNutrition: FoodNutrition(
-                      kcal: finalKcal,
-                      proteinG: prot,
-                      carbsG: carb,
-                      fatG: fat,
-                    ),
-                    isPer100g: true,
-                    addedAt: DateTime.now(),
-                  )
-               );
-            }
           }
         }
       });
@@ -527,8 +514,9 @@ Return ONLY a JSON object containing an array called "items":
   }
 
   Future<Map<String, dynamic>?> _processAiResponse(
-    Map<String, dynamic>? aiResponse,
-  ) async {
+    Map<String, dynamic>? aiResponse, {
+    CancellationToken? cancellationToken,
+  }) async {
     if (aiResponse == null) return null;
     await nutritionLookup.load();
 
@@ -552,7 +540,7 @@ Return ONLY a JSON object containing an array called "items":
     Map<String, Map<String, dynamic>> batchResults = {};
     if (unknownNames.isNotEmpty) {
       hadUnknown = true;
-      batchResults = await _fallbackBatchLookup(unknownNames);
+      batchResults = await _fallbackBatchLookup(unknownNames, cancellationToken: cancellationToken);
     }
 
     for (var item in items) {
@@ -584,10 +572,11 @@ Return ONLY a JSON object containing an array called "items":
           );
           isPer100g = true;
           servingGrams = null;
-          provenance = 'fallback';
+          provenance = 'ai_estimate';
         } else {
           baseNut = FoodNutrition(); // All zeroes
           isPer100g = true;
+          provenance = 'ai_estimate';
         }
       }
 
@@ -785,16 +774,18 @@ Do NOT use JSON.
 
     try {
       await client.models.generateContent(
-        model: 'gemini-3.7-flash',
+        model: 'gemini-3.5-flash-lite', // use lightweight probe
         request: GenerateContentRequest(
           contents: [Content.text('ping')],
         ),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 15));
       return;
     } catch (e) {
       final errorString = e.toString();
       if (errorString.contains('API_KEY_INVALID') ||
           errorString.contains('API key not valid') ||
+          errorString.contains('403') ||
+          errorString.contains('Permission denied') ||
           errorString.contains('disabled') ||
           errorString.contains('has not been used in project') ||
           errorString.contains('deactivated') ||

@@ -149,7 +149,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Height: ${profile.height.toStringAsFixed(0)} cm',
+                      'Height: ${profile.height?.toStringAsFixed(0) ?? "Not set"} cm',
                       style: TextStyle(
                         fontSize: 14,
                         color: context.colors.textMedium,
@@ -1066,6 +1066,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
 
   String? _localPhotoPath;
   bool _clearPhoto = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -1074,7 +1075,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     nameController = TextEditingController(text: profile.name);
     coachNameController = TextEditingController(text: profile.coachName);
     heightController = TextEditingController(
-      text: profile.height.toStringAsFixed(0),
+      text: profile.height?.toStringAsFixed(0) ?? '',
     );
     double? displayTarget = profile.targetWeight;
     if (displayTarget != null && !profile.useKg) {
@@ -1393,9 +1394,11 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             ),
             const SizedBox(height: 28),
             PrimaryButton(
-              label: 'Save',
-              onPressed: () async {
-                final heightText = heightController.text.trim();
+              label: _isSaving ? 'Saving...' : 'Save',
+              onPressed: _isSaving ? () {} : () async {
+                setState(() => _isSaving = true);
+                try {
+                  final heightText = heightController.text.trim();
                 final targetText = targetController.text.trim();
                 final calText = caloriesController.text.trim();
                 final proText = proteinController.text.trim();
@@ -1409,7 +1412,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 final parsedCar = carText.isEmpty ? null : int.tryParse(carText);
                 final parsedFat = fatText.isEmpty ? null : int.tryParse(fatText);
 
-                if (parsedHeight == null || parsedHeight <= 0 || parsedHeight > 300) {
+                if (heightText.isNotEmpty && (parsedHeight == null || parsedHeight <= 0 || parsedHeight > 300)) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid height (1-300)')));
                   return;
                 }
@@ -1435,6 +1438,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   name: nameController.text,
                   coachName: coachNameController.text.trim(),
                   height: parsedHeight,
+                  clearHeight: heightText.isEmpty,
                   targetWeight: finalTargetKg,
                   clearTargetWeight: targetText.isEmpty,
                   targetCalories: parsedCal,
@@ -1457,7 +1461,12 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 if (mounted) {
                   Navigator.of(context).pop();
                 }
-              },
+              } catch (e) {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+              } finally {
+                if (mounted) setState(() => _isSaving = false);
+              }
+            },
             ),
             SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
           ],

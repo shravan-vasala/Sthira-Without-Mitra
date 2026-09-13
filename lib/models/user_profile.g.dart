@@ -261,7 +261,7 @@ UserProfile _userProfileDeserialize(
     currentPhaseWeek: reader.readLongOrNull(offsets[5]) ?? 1,
     currentWeight: reader.readDoubleOrNull(offsets[6]),
     gender: reader.readStringOrNull(offsets[7]),
-    height: reader.readDoubleOrNull(offsets[8]) ?? 160,
+    height: reader.readDoubleOrNull(offsets[8]),
     name: reader.readStringOrNull(offsets[12]) ?? '',
     photoPath: reader.readStringOrNull(offsets[13]),
     planStartDate: reader.readDateTimeOrNull(offsets[14]),
@@ -307,7 +307,7 @@ P _userProfileDeserializeProp<P>(
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readDoubleOrNull(offset) ?? 160) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 9:
       return (reader.readDouble(offset)) as P;
     case 10:
@@ -1382,8 +1382,25 @@ extension UserProfileQueryFilter
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> heightIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'height',
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      heightIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'height',
+      ));
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> heightEqualTo(
-    double value, {
+    double? value, {
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1397,7 +1414,7 @@ extension UserProfileQueryFilter
 
   QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
       heightGreaterThan(
-    double value, {
+    double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
   }) {
@@ -1412,7 +1429,7 @@ extension UserProfileQueryFilter
   }
 
   QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> heightLessThan(
-    double value, {
+    double? value, {
     bool include = false,
     double epsilon = Query.epsilon,
   }) {
@@ -1427,8 +1444,8 @@ extension UserProfileQueryFilter
   }
 
   QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> heightBetween(
-    double lower,
-    double upper, {
+    double? lower,
+    double? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     double epsilon = Query.epsilon,
@@ -3810,7 +3827,7 @@ extension UserProfileQueryProperty
     });
   }
 
-  QueryBuilder<UserProfile, double, QQueryOperations> heightProperty() {
+  QueryBuilder<UserProfile, double?, QQueryOperations> heightProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'height');
     });

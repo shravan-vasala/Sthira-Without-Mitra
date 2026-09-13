@@ -284,7 +284,9 @@ final aiCacheProvider = Provider<AiCache>((ref) {
 });
 
 final aiClientProvider = Provider<AiClient>((ref) {
-  return AiClient(cache: ref.watch(aiCacheProvider));
+  final client = AiClient(cache: ref.watch(aiCacheProvider));
+  ref.onDispose(() => client.dispose());
+  return client;
 });
 
 final nutritionLookupServiceProvider = Provider<NutritionLookupService>((ref) {

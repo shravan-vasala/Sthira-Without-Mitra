@@ -31,14 +31,17 @@ class CoachService {
     required String weightTrend,
     required bool isRestDay,
     required int daysSinceLastWorkout,
+    CancellationToken? cancellationToken,
   }) async* {
     final coachLabel = coachName.trim().isEmpty ? 'Coach' : coachName.trim();
 
     final hasManualKey = apiKey != null && apiKey!.isNotEmpty;
+    final hasLogs = steps > 0 || sleep > 0 || calories > 0 || habitsDone > 0 || workoutsDone > 0;
 
-    if (!hasManualKey) {
-      yield '__LOCAL__';
-      yield _generateTemplatedNote(
+    if (!hasManualKey || !hasLogs) {
+      if (!(cancellationToken?.isCancelled ?? false)) {
+        yield '__LOCAL__';
+        yield _generateTemplatedNote(
         userName,
         steps,
         sleep,
@@ -50,6 +53,7 @@ class CoachService {
         isRestDay,
         daysSinceLastWorkout,
       );
+      }
       return;
     }
 
@@ -86,10 +90,12 @@ Return exactly the note text, and nothing else.
         prompt: prompt,
         systemInstruction: systemInstruction,
         apiKey: apiKey,
+        cancellationToken: cancellationToken,
       );
 
       yield '__AI__';
       await for (final chunk in stream) {
+        if (cancellationToken?.isCancelled ?? false) break;
         yield chunk;
       }
       return;

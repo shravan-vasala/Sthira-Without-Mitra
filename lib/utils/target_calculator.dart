@@ -13,26 +13,33 @@ class TargetMacros {
 }
 
 class TargetCalculator {
+  static const double defaultHeightCm = 153.0;
+  static const double defaultWeightKg = 66.0;
+  static const int defaultAge = 29;
+  static const String defaultGender = 'F';
+  static const String defaultActivity = 'Sedentary';
+
   /// Calculate suggested targets using Mifflin-St Jeor equation.
   static TargetMacros calculate({
-    required double heightCm,
+    required double? heightCm,
     required double? weightKg,
     required int? age,
     required String? gender,
     required String? goal,
     required String? activityLevel,
   }) {
-    final weight = weightKg ?? 70.0;
-    final a = age ?? 30;
-    final isMale = (gender ?? 'M').toUpperCase() == 'M';
+    final weight = weightKg ?? defaultWeightKg;
+    final h = heightCm ?? defaultHeightCm;
+    final a = age ?? defaultAge;
+    final isMale = (gender ?? defaultGender).toUpperCase() == 'M';
 
     // Mifflin-St Jeor BMR
-    double bmr = (10 * weight) + (6.25 * heightCm) - (5 * a);
+    double bmr = (10 * weight) + (6.25 * h) - (5 * a);
     bmr += isMale ? 5 : -161;
 
     // Activity multiplier
-    double multiplier = 1.2; // Sedentary
-    switch (activityLevel?.toLowerCase()) {
+    double multiplier = 1.2; // defaultActivity (Sedentary)
+    switch ((activityLevel ?? defaultActivity).toLowerCase()) {
       case 'lightly active':
       case 'light':
         multiplier = 1.375;
@@ -80,6 +87,43 @@ class TargetCalculator {
 
     return TargetMacros(
       calories: targetCalories,
+      proteinG: _roundToNearest5(protein),
+      fatG: _roundToNearest5(fat),
+      carbsG: _roundToNearest5(carbs),
+    );
+  }
+
+  /// Adjust calories up/down while maintaining the absolute protein target 
+  /// and assigning the remainder between carbs and fat.
+  static TargetMacros rebalanceForCalories(int newCalories, TargetMacros originalBase) {
+    if (newCalories < 1200) newCalories = 1200;
+
+    // Keep protein fixed
+    double protein = originalBase.proteinG.toDouble();
+    double caloriesFromProtein = protein * 4;
+
+    // What's left over?
+    double remainingCalories = newCalories - caloriesFromProtein;
+    if (remainingCalories < 0) {
+      // Infeasible: protein alone exceeds the targeted calories!
+      // Scale protein down heavily so it fits.
+      protein = (newCalories * 0.4) / 4; 
+      remainingCalories = newCalories - (protein * 4);
+    }
+
+    // Assign up to 25% of total calories to fat, but not exceeding remaining
+    double targetFatCals = newCalories * 0.25;
+    if (targetFatCals > remainingCalories) {
+      targetFatCals = remainingCalories;
+    }
+    double fat = targetFatCals / 9;
+
+    // Remainder goes to carbs
+    double carbs = (remainingCalories - targetFatCals) / 4;
+    if (carbs < 0) carbs = 0;
+
+    return TargetMacros(
+      calories: newCalories,
       proteinG: _roundToNearest5(protein),
       fatG: _roundToNearest5(fat),
       carbsG: _roundToNearest5(carbs),

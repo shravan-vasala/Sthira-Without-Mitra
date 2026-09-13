@@ -12,7 +12,7 @@ class UserProfile {
   /// Display name for the AI / notes coach (e.g. "Shravan"). Empty → generic "Coach".
   final String coachName;
   final String? photoPath;
-  final double height; // in cm
+  final double? height; // in cm
   final double? targetWeight; // in kg
   final bool useKg;
   final int targetCalories;
@@ -61,7 +61,7 @@ class UserProfile {
     this.name = '',
     this.coachName = '',
     this.photoPath,
-    this.height = 160,
+    this.height,
     this.targetWeight,
     this.useKg = true,
     this.targetCalories = 1250,
@@ -121,10 +121,10 @@ class UserProfile {
     return 'Coach $n';
   }
 
-  double get heightInMeters => height / 100;
+  double get heightInMeters => (height ?? 153.0) / 100;
 
   double? computeBmi(double? weight) {
-    if (weight == null || height <= 0) return null;
+    if (weight == null || height == null || height! <= 0) return null;
     return weight / (heightInMeters * heightInMeters);
   }
 
@@ -146,7 +146,7 @@ class UserProfile {
       name: json['name'] as String? ?? '',
       coachName: json['coachName'] as String? ?? '',
       photoPath: json['photoPath'] as String?,
-      height: (json['height'] as num?)?.toDouble() ?? 160,
+      height: (json['height'] as num?)?.toDouble(),
       targetWeight: (json['targetWeight'] as num?)?.toDouble(),
       useKg: json['useKg'] as bool? ?? true,
       targetCalories: (json['targetCalories'] as num?)?.toInt() ?? 1250,
@@ -209,7 +209,7 @@ class UserProfile {
     'name': name,
     'coachName': coachName,
     if (photoPath != null) 'photoPath': photoPath,
-    'height': height,
+    if (height != null) 'height': height,
     if (targetWeight != null) 'targetWeight': targetWeight,
     'useKg': useKg,
     'targetCalories': targetCalories,
@@ -264,12 +264,13 @@ class UserProfile {
     bool clearGeminiApiKey = false,
     bool clearTargetWeight = false,
     bool clearCurrentWeight = false,
+    bool clearHeight = false,
   }) {
     final updated = UserProfile(
       name: name ?? this.name,
       coachName: coachName ?? this.coachName,
       photoPath: clearPhoto ? null : (photoPath ?? this.photoPath),
-      height: height ?? this.height,
+      height: clearHeight ? null : (height ?? this.height),
       targetWeight: clearTargetWeight ? null : (targetWeight ?? this.targetWeight),
       useKg: useKg ?? this.useKg,
       targetCalories: targetCalories ?? this.targetCalories,

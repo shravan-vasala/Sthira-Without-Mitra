@@ -1,0 +1,871 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 61.0.0 (108.0.0 available)
+  _flutterfire_internals 1.3.59 (1.3.77 available)
+  analyzer 5.13.0 (14.4.0 available)
+  archive 4.0.9 (4.2.0 available)
+  build 2.4.1 (4.0.11 available)
+  build_config 1.1.2 (1.3.3 available)
+  build_daemon 4.1.5 (4.1.6 available)
+  build_resolvers 2.4.2 (3.0.4 available)
+  build_runner 2.4.13 (2.16.1 available)
+  build_runner_core 7.3.2 (9.3.2 available)
+  built_value 8.12.7 (8.13.0 available)
+  cached_network_image 3.4.1 (4.0.0 available)
+  cached_network_image_platform_interface 4.1.1 (5.0.0 available)
+  cached_network_image_web 1.3.1 (2.0.0 available)
+  carp_serializable 2.0.1 (3.0.0 available)
+  cli_util 0.4.2 (0.6.0 available)
+  clock 1.1.2 (1.1.3 available)
+  cloud_firestore 5.6.12 (6.9.0 available)
+  cloud_firestore_platform_interface 6.6.12 (8.0.7 available)
+  cloud_firestore_web 4.4.12 (5.7.3 available)
+  code_assets 1.2.1 (2.0.0 available)
+  code_builder 4.11.1 (4.12.0 available)
+  cross_file 0.3.5+4 (0.3.5+5 available)
+  dart_style 2.3.2 (3.1.13 available)
+  dbus 0.7.14 (0.7.15 available)
+  device_info_plus 12.4.0 (13.2.0 available)
+  device_info_plus_platform_interface 7.0.3 (8.1.0 available)
+  file_picker 8.3.7 (12.3.0 available)
+  file_selector_linux 0.9.4 (0.9.4+1 available)
+  file_selector_macos 0.9.5 (0.9.5+1 available)
+  file_selector_windows 0.9.3+5 (0.9.3+6 available)
+  firebase_analytics 11.6.0 (12.5.0 available)
+  firebase_analytics_platform_interface 4.4.3 (6.0.7 available)
+  firebase_analytics_web 0.5.10+16 (0.6.1+13 available)
+  firebase_auth 5.7.0 (6.6.1 available)
+  firebase_auth_platform_interface 7.7.3 (9.0.7 available)
+  firebase_auth_web 5.15.3 (6.2.7 available)
+  firebase_core 3.15.2 (4.14.0 available)
+  firebase_core_platform_interface 6.0.3 (8.1.1 available)
+  firebase_core_web 2.24.1 (3.11.0 available)
+  fl_chart 0.70.2 (1.2.0 available)
+  flutter_launcher_icons 0.13.1 (0.14.4 available)
+  flutter_local_notifications 17.2.4 (22.3.1 available)
+  flutter_local_notifications_linux 4.0.1 (8.0.1 available)
+  flutter_local_notifications_platform_interface 7.2.0 (12.2.0 available)
+  flutter_riverpod 2.6.1 (3.4.3 available)
+  flutter_secure_storage 10.3.1 (11.1.1 available)
+  flutter_secure_storage_darwin 0.3.2 (0.4.2 available)
+  flutter_secure_storage_linux 3.0.2 (3.0.3 available)
+  flutter_secure_storage_platform_interface 2.0.3 (2.1.0 available)
+  flutter_secure_storage_windows 4.1.0 (4.2.2 available)
+  glob 2.1.3 (2.2.0 available)
+  go_router 14.8.1 (18.0.1 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.17 available)
+  google_sign_in_ios 5.9.0 (6.3.3 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.3 available)
+  googleai_dart 11.0.0 (12.0.1 available)
+  health 13.3.1 (13.3.2 available)
+  home_widget 0.9.3 (0.9.4 available)
+  hooks 2.0.2 (2.2.0 available)
+  image_picker_android 0.8.13+19 (0.8.13+23 available)
+  image_picker_ios 0.8.13+6 (0.8.13+7 available)
+  intl 0.19.0 (0.20.3 available)
+  io 1.0.5 (1.1.0 available)
+  jni_flutter 1.0.2 (1.0.3 available)
+  js 0.6.7 (0.7.2 available)
+  matcher 0.12.19 (0.12.20 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.0 (1.19.0 available)
+  mime 2.0.0 (2.1.0 available)
+  objective_c 9.5.0 (9.6.0 available)
+  package_config 2.2.0 (3.0.0 available)
+  package_info_plus 9.0.1 (10.2.1 available)
+  package_info_plus_platform_interface 3.2.1 (4.1.0 available)
+  permission_handler 11.4.0 (13.0.2 available)
+  permission_handler_android 12.1.0 (14.1.0 available)
+  permission_handler_platform_interface 4.4.0 (4.4.1 available)
+  platform 3.1.6 (3.2.0 available)
+  pointycastle 3.9.1 (4.0.0 available)
+  pool 1.5.2 (1.5.3 available)
+  pub_semver 2.2.0 (2.2.1 available)
+  pubspec_parse 1.5.0 (1.6.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  riverpod 2.6.1 (3.4.3 available)
+  share_plus 12.0.2 (13.3.0 available)
+  share_plus_platform_interface 6.1.0 (7.2.0 available)
+  shared_preferences_android 2.4.27 (2.4.28 available)
+  shared_preferences_foundation 2.5.6 (2.5.7 available)
+  shelf_web_socket 2.0.1 (3.0.0 available)
+  source_gen 1.5.0 (4.3.0 available)
+  sqflite 2.4.3 (2.4.4 available)
+  sqflite_android 2.4.3 (2.4.4 available)
+  sqflite_common 2.5.11 (2.5.12 available)
+  sqflite_darwin 2.4.3+1 (2.4.4 available)
+  sqflite_platform_interface 2.4.1 (2.4.2 available)
+  stack_trace 1.12.1 (1.12.2 available)
+  stream_transform 2.1.1 (2.1.2 available)
+  synchronized 3.4.1+1 (3.4.2 available)
+  test_api 0.7.11 (0.7.14 available)
+  timezone 0.9.4 (0.11.1 available)
+  url_launcher_android 6.3.32 (6.3.33 available)
+  url_launcher_ios 6.4.1 (6.4.2 available)
+  url_launcher_linux 3.2.2 (3.2.3 available)
+  url_launcher_macos 3.2.5 (3.2.6 available)
+  url_launcher_windows 3.1.5 (3.1.6 available)
+  vector_math 2.2.0 (2.4.2 available)
+  vm_service 15.2.0 (15.3.0 available)
+  wakelock_plus 1.5.2 (1.8.0 available)
+  wakelock_plus_platform_interface 1.6.0 (1.7.0 available)
+  webview_flutter_android 4.14.0 (4.14.1 available)
+  webview_flutter_wkwebview 3.26.0 (3.26.1 available)
+  win32 5.15.0 (6.4.0 available)
+  win32_registry 2.1.0 (3.0.3 available)
+  xml 6.6.1 (7.0.1 available)
+  yaml 3.1.3 (3.1.4 available)
+Got dependencies!
+117 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart
+00:00 +0: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService round-trip encryption and decryption (v2)
+00:00 +1: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService round-trip encryption and decryption (v2)
+00:00 +2: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService round-trip encryption and decryption (v2)
+00:00 +3: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService round-trip encryption and decryption (v2)
+00:00 +4: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService round-trip encryption and decryption (v2)
+00:00 +5: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService round-trip encryption and decryption (v2)
+00:00 +6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService round-trip encryption and decryption (v2)
+00:01 +7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService rejection on wrong password (v2)
+00:01 +8: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService rejection on wrong password (v2)
+00:01 +9: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService rejection on wrong password (v2)
+lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+              onPressed: _isSaving ? () {} : () async {
+                                                      ^
+00:02 +10: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService rejection on tampered bytes (GCM tag verification)
+lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                } catch (e) {
+                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+Try adding either a catch or finally clause, or remove the try statement.
+                try {
+                ^^^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+              },
+              ^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                } catch (e) {
+                         ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                } finally {
+                  ^^^^^^^
+00:03 +11: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService successful decryption of v1 legacy data
+00:03 +12: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/backup_encryption_test.dart: BackupEncryptionService rejection on wrong password (v1)
+00:06 +13 -1: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/coach_note_notifier_test.dart [E]
+  Failed to load "C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/coach_note_notifier_test.dart":
+  Compilation failed for testPath=C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/coach_note_notifier_test.dart: lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+                onPressed: _isSaving ? () {} : () async {
+                                                        ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                  } catch (e) {
+                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+  Try adding either a catch or finally clause, or remove the try statement.
+                  try {
+                  ^^^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+  Try inserting an identifier before ','.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+                },
+                ^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  } catch (e) {
+                           ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                  } finally {
+                    ^^^^^^^
+  .
+lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+              onPressed: _isSaving ? () {} : () async {
+                                                      ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                } catch (e) {
+                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+Try adding either a catch or finally clause, or remove the try statement.
+                try {
+                ^^^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+              },
+              ^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                } catch (e) {
+                         ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                } finally {
+                  ^^^^^^^
+00:12 +13 -2: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/daily_score_provider_test.dart [E]
+  Failed to load "C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/daily_score_provider_test.dart":
+  Compilation failed for testPath=C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/daily_score_provider_test.dart: lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+                onPressed: _isSaving ? () {} : () async {
+                                                        ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                  } catch (e) {
+                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+  Try adding either a catch or finally clause, or remove the try statement.
+                  try {
+                  ^^^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+  Try inserting an identifier before ','.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+                },
+                ^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  } catch (e) {
+                           ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                  } finally {
+                    ^^^^^^^
+  .
+lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+              onPressed: _isSaving ? () {} : () async {
+                                                      ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                } catch (e) {
+                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+Try adding either a catch or finally clause, or remove the try statement.
+                try {
+                ^^^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+              },
+              ^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                } catch (e) {
+                         ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                } finally {
+                  ^^^^^^^
+00:18 +13 -3: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/habit_streak_test.dart [E]
+  Failed to load "C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/habit_streak_test.dart":
+  Compilation failed for testPath=C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/habit_streak_test.dart: lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+                onPressed: _isSaving ? () {} : () async {
+                                                        ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                  } catch (e) {
+                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+  Try adding either a catch or finally clause, or remove the try statement.
+                  try {
+                  ^^^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+  Try inserting an identifier before ','.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+                },
+                ^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  } catch (e) {
+                           ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                  } finally {
+                    ^^^^^^^
+  .
+test/repositories/attach_sync_lifecycle_test.dart:12:7: Error: The non-abstract class 'MockCloudSyncService' is missing implementations for these members:
+ - ICloudSyncService.queueDeleteInTxn
+ - ICloudSyncService.queueProfileInTxn
+ - ICloudSyncService.queueSyncInTxn
+ - ICloudSyncService.triggerFlush
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+class MockCloudSyncService implements ICloudSyncService {
+      ^^^^^^^^^^^^^^^^^^^^
+lib/interfaces/i_cloud_sync_service.dart:21:8: Context: 'ICloudSyncService.queueDeleteInTxn' is defined here.
+  void queueDeleteInTxn(Isar isar, String collection, String docId);
+       ^^^^^^^^^^^^^^^^
+lib/interfaces/i_cloud_sync_service.dart:22:8: Context: 'ICloudSyncService.queueProfileInTxn' is defined here.
+  void queueProfileInTxn(Isar isar, Map<String, dynamic> data);
+       ^^^^^^^^^^^^^^^^^
+lib/interfaces/i_cloud_sync_service.dart:20:8: Context: 'ICloudSyncService.queueSyncInTxn' is defined here.
+  void queueSyncInTxn(Isar isar, String collection, String docId, Map<String, dynamic> data);
+       ^^^^^^^^^^^^^^
+lib/interfaces/i_cloud_sync_service.dart:23:8: Context: 'ICloudSyncService.triggerFlush' is defined here.
+  void triggerFlush();
+       ^^^^^^^^^^^^
+00:19 +13 -4: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/repositories/attach_sync_lifecycle_test.dart [E]
+  Failed to load "C:/Users/sande/OneDrive/Desktop/Without Mitra/test/repositories/attach_sync_lifecycle_test.dart":
+  Compilation failed for testPath=C:/Users/sande/OneDrive/Desktop/Without Mitra/test/repositories/attach_sync_lifecycle_test.dart: test/repositories/attach_sync_lifecycle_test.dart:12:7: Error: The non-abstract class 'MockCloudSyncService' is missing implementations for these members:
+   - ICloudSyncService.queueDeleteInTxn
+   - ICloudSyncService.queueProfileInTxn
+   - ICloudSyncService.queueSyncInTxn
+   - ICloudSyncService.triggerFlush
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  class MockCloudSyncService implements ICloudSyncService {
+        ^^^^^^^^^^^^^^^^^^^^
+  lib/interfaces/i_cloud_sync_service.dart:21:8: Context: 'ICloudSyncService.queueDeleteInTxn' is defined here.
+    void queueDeleteInTxn(Isar isar, String collection, String docId);
+         ^^^^^^^^^^^^^^^^
+  lib/interfaces/i_cloud_sync_service.dart:22:8: Context: 'ICloudSyncService.queueProfileInTxn' is defined here.
+    void queueProfileInTxn(Isar isar, Map<String, dynamic> data);
+         ^^^^^^^^^^^^^^^^^
+  lib/interfaces/i_cloud_sync_service.dart:20:8: Context: 'ICloudSyncService.queueSyncInTxn' is defined here.
+    void queueSyncInTxn(Isar isar, String collection, String docId, Map<String, dynamic> data);
+         ^^^^^^^^^^^^^^
+  lib/interfaces/i_cloud_sync_service.dart:23:8: Context: 'ICloudSyncService.triggerFlush' is defined here.
+    void triggerFlush();
+         ^^^^^^^^^^^^
+  .
+lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+              onPressed: _isSaving ? () {} : () async {
+                                                      ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                } catch (e) {
+                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+Try adding either a catch or finally clause, or remove the try statement.
+                try {
+                ^^^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+              },
+              ^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                } catch (e) {
+                         ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                } finally {
+                  ^^^^^^^
+00:25 +13 -5: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/progress/progress_screen_rendering_test.dart [E]
+  Failed to load "C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/progress/progress_screen_rendering_test.dart":
+  Compilation failed for testPath=C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/progress/progress_screen_rendering_test.dart: lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+                onPressed: _isSaving ? () {} : () async {
+                                                        ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                  } catch (e) {
+                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+  Try adding either a catch or finally clause, or remove the try statement.
+                  try {
+                  ^^^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+  Try inserting an identifier before ','.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+                },
+                ^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  } catch (e) {
+                           ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                  } finally {
+                    ^^^^^^^
+  .
+lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+              onPressed: _isSaving ? () {} : () async {
+                                                      ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                } catch (e) {
+                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+Try adding either a catch or finally clause, or remove the try statement.
+                try {
+                ^^^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+              },
+              ^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                } catch (e) {
+                         ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                } finally {
+                  ^^^^^^^
+00:32 +13 -6: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/workout/widgets/exercise_card_test.dart [E]
+  Failed to load "C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/workout/widgets/exercise_card_test.dart":
+  Compilation failed for testPath=C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/workout/widgets/exercise_card_test.dart: lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+                onPressed: _isSaving ? () {} : () async {
+                                                        ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                  } catch (e) {
+                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+  Try adding either a catch or finally clause, or remove the try statement.
+                  try {
+                  ^^^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+  Try inserting an identifier before ','.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+                },
+                ^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  } catch (e) {
+                           ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                  } finally {
+                    ^^^^^^^
+  .
+00:34 +13 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Simulate silent or stalled AI stream (inactivity timeout triggers)
+00:34 +14 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+AiClient: Trying model: gemini-3.7-flash (attempt 1)...
+00:35 +15 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:35 +16 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+              onPressed: _isSaving ? () {} : () async {
+                                                      ^
+00:35 +17 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:35 +18 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:35 +19 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:35 +20 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:35 +21 -6: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+AiClient: Trying model: gemini-3.7-flash (attempt 2)...
+AiClient: Trying model: gemini-3.6-flash (attempt 1)...
+lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                } catch (e) {
+                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                } finally {
+                  ^^^^^^^
+lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+Try adding either a catch or finally clause, or remove the try statement.
+                try {
+                ^^^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+              },
+              ^
+lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+              },
+               ^
+lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                } catch (e) {
+                         ^
+lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                } catch (e) {
+                  ^^^^^
+lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                          ^
+lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+ - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                } finally {
+                  ^^^^^^^
+AiClient: Trying model: gemini-3.6-flash (attempt 2)...
+AiClient: Trying model: gemini-3.5-flash-lite (attempt 1)...
+00:39 +21 -7: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/progress_aggregation_service_test.dart [E]
+  Failed to load "C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/progress_aggregation_service_test.dart":
+  Compilation failed for testPath=C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/progress_aggregation_service_test.dart: lib/screens/profile/profile_screen.dart:1398:55: Error: Can't find '}' to match '{'.
+                onPressed: _isSaving ? () {} : () async {
+                                                        ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: 'catch' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1463:27: Error: Expected ';' after this.
+                  } catch (e) {
+                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: 'finally' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: Expected ';' after this.
+                  } finally {
+                    ^^^^^^^
+  lib/screens/profile/profile_screen.dart:1400:17: Error: A try block must be followed by an 'on', 'catch', or 'finally' clause.
+  Try adding either a catch or finally clause, or remove the try statement.
+                  try {
+                  ^^^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Expected an identifier, but got ','.
+  Try inserting an identifier before ','.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1468:15: Error: Expected ';' after this.
+                },
+                ^
+  lib/screens/profile/profile_screen.dart:1468:16: Error: Unexpected token ';'.
+                },
+                 ^
+  lib/screens/profile/profile_screen.dart:1463:26: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                  } catch (e) {
+                           ^
+  lib/screens/profile/profile_screen.dart:1463:19: Error: The method 'catch' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'catch'.
+                  } catch (e) {
+                    ^^^^^
+  lib/screens/profile/profile_screen.dart:1464:107: Error: The getter 'e' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'e'.
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                                                                                            ^
+  lib/screens/profile/profile_screen.dart:1465:19: Error: The getter 'finally' isn't defined for the type '_EditProfileSheetState'.
+   - '_EditProfileSheetState' is from 'package:trufit_bodamma/screens/profile/profile_screen.dart' ('lib/screens/profile/profile_screen.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'finally'.
+                  } finally {
+                    ^^^^^^^
+  .
+00:40 +21 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+AiClient: Trying model: gemini-3.5-flash-lite (attempt 2)...
+00:40 +22 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+AiClient: Trying model: gemini-3.1-flash-lite (attempt 1)...
+00:40 +23 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +24 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +25 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +26 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +27 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +28 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +29 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +30 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +31 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:41 +32 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +33 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +34 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +35 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +36 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +37 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +38 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +39 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +40 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +41 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +42 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +43 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +44 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +45 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+00:42 +46 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Global deadline terminates fallback chain across models
+AiClient: Trying model: gemini-3.1-flash-lite (attempt 2)...
+00:42 +47 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Cancellation of one stream leaves concurrent stream running unimpeded
+00:42 +48 -7: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Malformed JSON throws AiException with parse cause
+AiClient: Trying model: gemini-3.7-flash (attempt 1)...
+00:42 +49 -7: Some tests failed.
+
+Failing tests:
+  C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/coach_note_notifier_test.dart: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/coach_note_notifier_test.dart
+  C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/daily_score_provider_test.dart: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/daily_score_provider_test.dart
+  C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/habit_streak_test.dart: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/habit_streak_test.dart
+  C:/Users/sande/OneDrive/Desktop/Without Mitra/test/repositories/attach_sync_lifecycle_test.dart: loading C:/Users/sande/OneDrive/Desktop/Without Mitra/test/repositories/attach_sync_lifecycle_test.dart
+  ... and 3 more

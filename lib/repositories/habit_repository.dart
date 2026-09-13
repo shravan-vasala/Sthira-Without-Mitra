@@ -56,6 +56,7 @@ class HabitRepository {
         _sync?.queueDeleteInTxn(_isar, 'habit_config', id);
       });
       _sync?.triggerFlush();
+    }
   }
 
   Future<void> reorderHabits(List<Habit> reordered) async {

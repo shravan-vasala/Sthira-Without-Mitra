@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -34,6 +35,13 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
   bool _isStreaming = false;
   String? _suggestionText;
   String? _error;
+  StreamSubscription<String>? _activeSub;
+
+  @override
+  void dispose() {
+    _activeSub?.cancel();
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(AIMealSuggestionCard oldWidget) {
@@ -44,6 +52,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         oldWidget.remainingFat != widget.remainingFat ||
         oldWidget.mealName != widget.mealName) {
       if (_suggestionText != null || _error != null || _isLoading || _isStreaming) {
+        _activeSub?.cancel();
         setState(() {
           _suggestionText = null;
           _error = null;
@@ -55,6 +64,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
   }
 
   Future<void> _fetchSuggestion() async {
+    _activeSub?.cancel();
     setState(() {
       _isLoading = true;
       _isStreaming = false;
@@ -86,34 +96,43 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
       );
 
       bool isFirstChunk = true;
-      await for (final chunk in stream) {
-        if (mounted) {
-          setState(() {
-            if (isFirstChunk) {
+      _activeSub = stream.listen(
+        (chunk) {
+          if (mounted) {
+            setState(() {
+              if (isFirstChunk) {
+                _isLoading = false;
+                _isStreaming = true;
+                _suggestionText = '';
+                isFirstChunk = false;
+              }
+              _suggestionText = (_suggestionText ?? '') + chunk;
+            });
+          }
+        },
+        onError: (e) {
+          if (mounted) {
+            setState(() {
+              _error = e.toString();
               _isLoading = false;
-              _isStreaming = true;
-              _suggestionText = '';
-              isFirstChunk = false;
+              _isStreaming = false;
+            });
+          }
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _isStreaming = false;
+            });
+            if (isFirstChunk) {
+              setState(() {
+                _isLoading = false;
+                _error = 'Failed to generate a suggestion. Please try again.';
+              });
             }
-            _suggestionText = (_suggestionText ?? '') + chunk;
-          });
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _isStreaming = false;
-        });
-      }
-
-      if (isFirstChunk && mounted) {
-        // Stream completed without yielding anything
-        setState(() {
-          _isLoading = false;
-          _isStreaming = false;
-          _error = 'Failed to generate a suggestion. Please try again.';
-        });
-      }
+          }
+        },
+      );
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -129,6 +148,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
   Widget build(BuildContext context) {
     ref.listen(dateStringProvider, (previous, next) {
       if (previous != next && mounted) {
+        _activeSub?.cancel();
         setState(() {
           _suggestionText = null;
           _error = null;

@@ -73,10 +73,10 @@ class FoodNutrition {
     }
 
     return FoodNutrition(
-      kcal: baseNutrition.kcal * multiplier,
-      proteinG: baseNutrition.proteinG * multiplier,
-      carbsG: baseNutrition.carbsG * multiplier,
-      fatG: baseNutrition.fatG * multiplier,
+      kcal: (baseNutrition.kcal * multiplier).clamp(0.0, 99999.0),
+      proteinG: (baseNutrition.proteinG * multiplier).clamp(0.0, 9999.0),
+      carbsG: (baseNutrition.carbsG * multiplier).clamp(0.0, 9999.0),
+      fatG: (baseNutrition.fatG * multiplier).clamp(0.0, 9999.0),
     );
   }
 }

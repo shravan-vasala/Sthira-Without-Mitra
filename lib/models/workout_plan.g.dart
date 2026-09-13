@@ -1668,58 +1668,63 @@ const ExerciseSchema = Schema(
       name: r'durationSeconds',
       type: IsarType.long,
     ),
-    r'name': PropertySchema(
+    r'instanceId': PropertySchema(
       id: 2,
+      name: r'instanceId',
+      type: IsarType.string,
+    ),
+    r'name': PropertySchema(
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'note': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'note',
       type: IsarType.string,
     ),
     r'reps': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'reps',
       type: IsarType.stringList,
     ),
     r'repsDisplay': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'repsDisplay',
       type: IsarType.string,
     ),
     r'restSecondsAfterSet': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'restSecondsAfterSet',
       type: IsarType.long,
     ),
     r'setCount': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'setCount',
       type: IsarType.long,
     ),
     r'sideInfo': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'sideInfo',
       type: IsarType.string,
     ),
     r'thumbnailUrl': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'thumbnailUrl',
       type: IsarType.string,
     ),
     r'weightKg': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'weightKg',
       type: IsarType.double,
     ),
     r'youtubeUrl': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'youtubeUrl',
       type: IsarType.string,
     ),
     r'youtubeVideoId': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'youtubeVideoId',
       type: IsarType.string,
     )
@@ -1738,6 +1743,12 @@ int _exerciseEstimateSize(
   var bytesCount = offsets.last;
   {
     final value = object.displayName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.instanceId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -1782,17 +1793,18 @@ void _exerciseSerialize(
 ) {
   writer.writeString(offsets[0], object.displayName);
   writer.writeLong(offsets[1], object.durationSeconds);
-  writer.writeString(offsets[2], object.name);
-  writer.writeString(offsets[3], object.note);
-  writer.writeStringList(offsets[4], object.reps);
-  writer.writeString(offsets[5], object.repsDisplay);
-  writer.writeLong(offsets[6], object.restSecondsAfterSet);
-  writer.writeLong(offsets[7], object.setCount);
-  writer.writeString(offsets[8], object.sideInfo);
-  writer.writeString(offsets[9], object.thumbnailUrl);
-  writer.writeDouble(offsets[10], object.weightKg);
-  writer.writeString(offsets[11], object.youtubeUrl);
-  writer.writeString(offsets[12], object.youtubeVideoId);
+  writer.writeString(offsets[2], object.instanceId);
+  writer.writeString(offsets[3], object.name);
+  writer.writeString(offsets[4], object.note);
+  writer.writeStringList(offsets[5], object.reps);
+  writer.writeString(offsets[6], object.repsDisplay);
+  writer.writeLong(offsets[7], object.restSecondsAfterSet);
+  writer.writeLong(offsets[8], object.setCount);
+  writer.writeString(offsets[9], object.sideInfo);
+  writer.writeString(offsets[10], object.thumbnailUrl);
+  writer.writeDouble(offsets[11], object.weightKg);
+  writer.writeString(offsets[12], object.youtubeUrl);
+  writer.writeString(offsets[13], object.youtubeVideoId);
 }
 
 Exercise _exerciseDeserialize(
@@ -1804,14 +1816,15 @@ Exercise _exerciseDeserialize(
   final object = Exercise(
     displayName: reader.readStringOrNull(offsets[0]),
     durationSeconds: reader.readLongOrNull(offsets[1]),
-    name: reader.readStringOrNull(offsets[2]),
-    note: reader.readStringOrNull(offsets[3]) ?? '',
-    reps: reader.readStringList(offsets[4]) ?? const [],
-    restSecondsAfterSet: reader.readLongOrNull(offsets[6]) ?? 0,
-    sideInfo: reader.readStringOrNull(offsets[8]) ?? 'None',
-    weightKg: reader.readDoubleOrNull(offsets[10]),
-    youtubeUrl: reader.readStringOrNull(offsets[11]),
+    name: reader.readStringOrNull(offsets[3]),
+    note: reader.readStringOrNull(offsets[4]) ?? '',
+    reps: reader.readStringList(offsets[5]) ?? const [],
+    restSecondsAfterSet: reader.readLongOrNull(offsets[7]) ?? 0,
+    sideInfo: reader.readStringOrNull(offsets[9]) ?? 'None',
+    weightKg: reader.readDoubleOrNull(offsets[11]),
+    youtubeUrl: reader.readStringOrNull(offsets[12]),
   );
+  object.instanceId = reader.readStringOrNull(offsets[2]);
   return object;
 }
 
@@ -1829,24 +1842,26 @@ P _exerciseDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 4:
-      return (reader.readStringList(offset) ?? const []) as P;
-    case 5:
-      return (reader.readString(offset)) as P;
-    case 6:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 7:
-      return (reader.readLong(offset)) as P;
-    case 8:
-      return (reader.readStringOrNull(offset) ?? 'None') as P;
-    case 9:
-      return (reader.readString(offset)) as P;
-    case 10:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 11:
       return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 5:
+      return (reader.readStringList(offset) ?? const []) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 8:
+      return (reader.readLong(offset)) as P;
+    case 9:
+      return (reader.readStringOrNull(offset) ?? 'None') as P;
+    case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 12:
+      return (reader.readStringOrNull(offset)) as P;
+    case 13:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2074,6 +2089,154 @@ extension ExerciseQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'instanceId',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      instanceIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'instanceId',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'instanceId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'instanceId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'instanceId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> instanceIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'instanceId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
+      instanceIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'instanceId',
+        value: '',
       ));
     });
   }

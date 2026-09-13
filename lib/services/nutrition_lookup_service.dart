@@ -47,6 +47,7 @@ class NutritionLookupService {
           baseNutrition: userFood.baseNutrition,
           isPer100g: userFood.isPer100g,
           servingGrams: userFood.servingGrams,
+          provenance: userFood.provenance ?? 'legacy',
         );
       }
     }
@@ -68,75 +69,8 @@ class NutritionLookupService {
       }
     }
 
-    // 3. Token-subset match
-    final candidates = <Map<String, dynamic>>[];
-    final neutralModifiers = {'plain', 'steamed', 'white', 'cooked'};
-
-    for (var item in _nutritionTable) {
-      final nameTokens = _tokenize(item['name'] as String);
-      final aliases = List<String>.from(item['aliases'] ?? []);
-
-      bool matched = false;
-      int matchedTokensCount = 0;
-
-      // Check name token subset
-      if (nameTokens.isNotEmpty &&
-          nameTokens.every((t) => queryTokens.contains(t))) {
-        matched = true;
-        matchedTokensCount = nameTokens.length;
-      }
-
-      // Check aliases token subset
-      if (!matched) {
-        for (var alias in aliases) {
-          final aliasTokens = _tokenize(alias);
-          if (aliasTokens.isEmpty) continue;
-
-          // Single-token alias strict rule
-          if (aliasTokens.length == 1) {
-            final t = aliasTokens.first;
-            // Check if query is exactly that token + neutral modifiers
-            final nonNeutralQueryTokens = queryTokens
-                .where((qt) => !neutralModifiers.contains(qt))
-                .toList();
-            if (nonNeutralQueryTokens.length == 1 &&
-                nonNeutralQueryTokens.first == t) {
-              matched = true;
-              matchedTokensCount = 1;
-              break;
-            }
-          } else {
-            // Multi-token alias
-            if (aliasTokens.every((t) => queryTokens.contains(t))) {
-              matched = true;
-              matchedTokensCount = aliasTokens.length;
-              break;
-            }
-          }
-        }
-      }
-
-      if (matched) {
-        candidates.add({
-          'item': item,
-          'matchedTokensCount': matchedTokensCount,
-          'nameLength': (item['name'] as String).length,
-        });
-      }
-    }
-
-    if (candidates.isEmpty) return null;
-
-    // Sort by most matched tokens wins, then longest (most specific) name
-    candidates.sort((a, b) {
-      final cmp1 = (b['matchedTokensCount'] as int).compareTo(
-        a['matchedTokensCount'] as int,
-      );
-      if (cmp1 != 0) return cmp1;
-      return (b['nameLength'] as int).compareTo(a['nameLength'] as int);
-    });
-
-    return _mapToResult(candidates.first['item'] as Map<String, dynamic>);
+    // Subsets are dangerous (e.g. "fried rice" matching "rice"); exact/alias only.
+    return null;
   }
 
   NutritionLookupResult _mapToResult(Map<String, dynamic> item) {
@@ -159,7 +93,7 @@ class NutritionLookupService {
       isPer100g: isPer100g,
       servingGrams: (item['defaultPortionG'] as num?)?.toDouble(), // Default serving grams in JSON
       baseQuantityUnit: item['base_quantity_unit'] as String?,
-      provenance: 'local_db',
+      provenance: 'database',
     );
   }
 

@@ -78,8 +78,6 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
       } else if (h < 100 || h > 230) {
         hError = 'Must be 100-230 cm';
       }
-    } else if (widget.showErrors) {
-      hError = 'Required';
     }
 
     final wText = widget.weightController.text;
@@ -227,7 +225,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                     children: [
                       AppTextField(
                         controller: widget.heightController,
-                        labelText: 'Height',
+                        labelText: 'Height (Optional)',
                         hintText: '153 cm',
                         keyboardType: TextInputType.number,
                       ),
@@ -249,8 +247,8 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                     children: [
                       AppTextField(
                         controller: widget.weightController,
-                        labelText: 'Weight',
-                        hintText: widget.useKg ? '63 kg' : '138 lb',
+                        labelText: 'Weight (Optional)',
+                        hintText: widget.useKg ? '66 kg' : '145 lb',
                         keyboardType: TextInputType.number,
                       ),
                       if (_weightError.isNotEmpty)
