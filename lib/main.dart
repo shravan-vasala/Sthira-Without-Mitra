@@ -52,6 +52,7 @@ import 'models/food_search_cache.dart';
 import 'models/user_food_log.dart';
 import 'models/friend.dart';
 import 'models/sync_queue_item.dart';
+import 'services/ai_cache.dart';
 
 Future<void> main() async {
   try {
@@ -157,10 +158,15 @@ Future<void> main() async {
           authServiceProvider.overrideWithValue(authService),
           firestoreSyncServiceProvider.overrideWithValue(firestoreSyncService),
           sharedPreferencesProvider.overrideWithValue(prefs),
+          diagnosticLoggerProvider.overrideWithValue(logger),
         ],
         child: const TruFitApp(),
       ),
     );
+
+    // Unawaited routine background cache pruning uncoupled from strict schema migrations safely
+    // ignore: unawaited_futures
+    AiCache().prune();
   } catch (e, stack) {
     try {
       final dir = await getApplicationDocumentsDirectory();

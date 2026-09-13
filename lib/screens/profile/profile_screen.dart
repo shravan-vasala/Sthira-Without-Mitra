@@ -1815,14 +1815,10 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                         sb.writeln('Generated: ${DateTime.now().toIso8601String()}');
                         sb.writeln('==============================\n');
                         for (final log in logs) {
-                          String msg = log.message;
-                          msg = msg.replaceAll(RegExp(r'AIza[0-9A-Za-z-_]{35}'), '[REDACTED_API_KEY]');
                           sb.writeln('[${log.level}] ${log.timestamp.toIso8601String()}');
-                          sb.writeln(msg);
+                          sb.writeln(log.message);
                           if (log.error != null) {
-                            String err = log.error!;
-                            err = err.replaceAll(RegExp(r'AIza[0-9A-Za-z-_]{35}'), '[REDACTED_API_KEY]');
-                            sb.writeln('Error: $err');
+                            sb.writeln('Error: ${log.error}');
                           }
                           if (log.stackTrace != null) {
                             sb.writeln('Stack: ${log.stackTrace}');

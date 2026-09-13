@@ -31,19 +31,7 @@ class SchemaMigrationService {
       );
     });
 
-    // --- Cache Pruning ---
-    // Drop AiCacheEntry elements older than 90 days
-    final cutoff = DateTime.now().subtract(const Duration(days: 90));
-    await isar.writeTxn(() async {
-      final oldEntries = isar.aiCacheEntrys
-          .where()
-          .filter()
-          .timestampLessThan(cutoff)
-          .findAllSync();
-      if (oldEntries.isNotEmpty) {
-        await isar.aiCacheEntrys.deleteAll(oldEntries.map((e) => e.id).toList());
-      }
-    });
+    // AiCache pruning has been extracted explicitly to AiCache.prune() running independently
   }
 
   /// Run migrations for in-memory backup data before writing to storage during a restore.

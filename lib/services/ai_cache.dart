@@ -80,4 +80,24 @@ class AiCache {
       await _isar.aiCacheEntrys.put(entry);
     });
   }
+
+  /// Extracts routine bounded cache cleanup out of one-time schema version migrations.
+  /// Runs reliably uncoupled from startup schema blocks.
+  Future<void> prune() async {
+    try {
+      final cutoff = DateTime.now().subtract(const Duration(days: 90));
+      await _isar.writeTxn(() async {
+        final oldEntries = _isar.aiCacheEntrys
+            .where()
+            .filter()
+            .timestampLessThan(cutoff)
+            .findAllSync();
+        if (oldEntries.isNotEmpty) {
+          await _isar.aiCacheEntrys.deleteAll(oldEntries.map((e) => e.id).toList());
+        }
+      });
+    } catch (_) {
+      // Ignore background cache pruning failures safely
+    }
+  }
 }

@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/app_providers.dart';
 
-final diagnosticLoggerProvider = Provider<DiagnosticLogger>((ref) {
+final diagnosticLoggerProvider = ChangeNotifierProvider<DiagnosticLogger>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return DiagnosticLogger(prefs);
 });
@@ -43,12 +43,14 @@ class DiagnosticLog {
       );
 }
 
-class DiagnosticLogger {
+class DiagnosticLogger extends ChangeNotifier {
   static const int _maxLogs = 100;
+  static const int _maxBytesPerField = 4096; // Guard against massive arbitrary payloads crashing JSON
   static const String _prefsKey = 'diagnostic_ring_buffer';
 
   final SharedPreferences _prefs;
   final Queue<DiagnosticLog> _logs = Queue<DiagnosticLog>();
+  int _persistGeneration = 0;
 
   DiagnosticLogger(this._prefs) {
     _loadFromPrefs();
@@ -60,45 +62,72 @@ class DiagnosticLogger {
       if (str != null) {
         final List<dynamic> decoded = jsonDecode(str);
         for (var item in decoded) {
-          if (item is Map<String, dynamic>) {
-            _logs.addLast(DiagnosticLog.fromJson(item));
+          try {
+            if (item is Map<String, dynamic>) {
+              // Re-apply sanity bounds to prevent malicious historical modifications
+              _logs.addLast(DiagnosticLog.fromJson(item));
+            }
+          } catch (itemErr) {
+            // Ignore single malformed block
           }
+        }
+        // Ensure bounds upon parsing
+        while (_logs.length > _maxLogs) {
+          _logs.removeLast();
         }
       }
     } catch (e) {
-      debugPrint('DiagnosticLogger failed to load: $e');
+      debugPrint('DiagnosticLogger failed to load globally: $e');
     }
   }
 
   void _saveToPrefs() {
+    final gen = _persistGeneration;
     try {
       final str = jsonEncode(_logs.map((e) => e.toJson()).toList());
-      _prefs.setString(_prefsKey, str);
+      // Serialize check preventing overlapping clears mid-flight rendering
+      if (gen == _persistGeneration) {
+         _prefs.setString(_prefsKey, str);
+      }
     } catch (e) {
-      debugPrint('DiagnosticLogger failed to save: $e');
+      debugPrint('DiagnosticLogger failed saving preferences: $e');
     }
+  }
+
+  String _sanitize(String content) {
+    var safe = content;
+    safe = safe.replaceAll(RegExp(r'AIza[0-9A-Za-z-_]{35}'), '[REDACTED_API_KEY]');
+    // Scrub secret query parameters (e.g. ?token=..., &key=...)
+    safe = safe.replaceAll(RegExp(r'([?&])(?:key|token|auth|password|secret|credential)=[^&\s"]+'), r'$1[REDACTED_PARAM]');
+    // Limit bounds explicitly restricting extreme runaway strings structurally
+    if (safe.length > _maxBytesPerField) {
+       safe = safe.substring(0, _maxBytesPerField) + '...[TRUNCATED]';
+    }
+    return safe;
   }
 
   void _addLog(String level, String message, [dynamic error, StackTrace? stack]) {
     final log = DiagnosticLog(
       timestamp: DateTime.now(),
       level: level,
-      message: message,
-      error: error?.toString(),
-      stackTrace: stack?.toString(),
+      message: _sanitize(message),
+      error: error != null ? _sanitize(error.toString()) : null,
+      stackTrace: stack != null ? _sanitize(stack.toString()) : null,
     );
 
     _logs.addFirst(log);
-    if (_logs.length > _maxLogs) {
+    while (_logs.length > _maxLogs) {
       _logs.removeLast();
     }
 
-    // Persist synchronously for best-effort crash survival
+    notifyListeners();
+
+    // Persist synchronously for best-effort boundaries gracefully bounded!
     _saveToPrefs();
     
     // Also echo to console in debug mode
     if (kDebugMode) {
-      print('[$level] $message ${error != null ? '\nError: $error' : ''}');
+      print('[$level] ${log.message} ${log.error != null ? '\nError: ${log.error}' : ''}');
     }
   }
 
@@ -109,8 +138,12 @@ class DiagnosticLogger {
   List<DiagnosticLog> getLogs() => _logs.toList();
   
   void clear() {
+    _persistGeneration++;
     _logs.clear();
-    _prefs.remove(_prefsKey);
+    notifyListeners();
+    try {
+       _prefs.remove(_prefsKey);
+    } catch (_) {}
   }
 }
 
