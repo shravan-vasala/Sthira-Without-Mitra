@@ -2,9 +2,13 @@ import 'package:isar/isar.dart';
 import '../models/friend.dart';
 
 class FriendRepository {
-  final Isar isar;
+  late Isar isar;
 
   FriendRepository(this.isar);
+
+  Future<void> init(Isar newIsar) async {
+    isar = newIsar;
+  }
 
   List<Friend> getAllFriends() {
     return isar.friends.where().sortByAddedAtDesc().findAllSync();

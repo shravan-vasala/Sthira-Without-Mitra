@@ -17,11 +17,14 @@ class SocialSyncService {
   Future<void> pushProfile(SocialProfile profile) async {
     if (!canSync) return;
 
+    final capturedUid = _auth.uid;
     _debouncer?.cancel();
     _debouncer = Timer(const Duration(seconds: 3), () {
+      if (!_auth.isSignedIn || _auth.uid != capturedUid) return;
+
       _db
           .collection('social_profiles')
-          .doc(_auth.uid!)
+          .doc(capturedUid)
           .set(profile.toJson(), SetOptions(merge: true))
           .catchError((e) {
             debugPrint('SocialSyncService: Error pushing profile: $e');
@@ -122,13 +125,13 @@ class SocialSyncService {
         'allowedReaders': FieldValue.arrayUnion([requesterUid]),
       });
 
-      // Delete the request from my requests
+      // Update the request from my requests (DO NOT DELETE to satisfy transaction GET)
       final myRequestRef = _db
           .collection('friend_requests')
           .doc(currentUid)
           .collection('requests')
           .doc(requesterUid);
-      batch.delete(myRequestRef);
+      batch.update(myRequestRef, {'accepted': true});
 
       // Write an acceptance marker for the requester
       final theirRequestRef = _db

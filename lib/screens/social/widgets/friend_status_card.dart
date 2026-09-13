@@ -44,14 +44,14 @@ class FriendStatusCard extends ConsumerWidget {
         }
 
         final now = DateTime.now();
-        final isStale =
-            profile.lastUpdatedAt.day != now.day ||
-            diffInDays(profile.lastUpdatedAt, now) > 0;
+        final daysStale = diffInDays(profile.lastUpdatedAt, now);
+        final isDailyStale = profile.lastUpdatedAt.day != now.day || daysStale > 0;
+        final isWeeklyStale = daysStale >= 7;
 
-        final Color iconColor = isStale
+        final Color iconColor = isDailyStale
             ? context.colors.textMedium.withValues(alpha: 0.5)
             : context.colors.primary;
-        final Color textColor = isStale
+        final Color textColor = isDailyStale
             ? context.colors.textMedium.withValues(alpha: 0.5)
             : context.colors.textDark;
 
@@ -78,15 +78,15 @@ class FriendStatusCard extends ConsumerWidget {
                                 color: context.colors.textDark,
                               ),
                             ),
-                            if (profile.todayScore != null) ...[
+                            if (profile.todayScore != null && !isDailyStale) ...[
                               const SizedBox(width: 8),
-                              _ScoreBadge(score: profile.todayScore!, isStale: isStale),
+                              _ScoreBadge(score: profile.todayScore!, isStale: isDailyStale),
                             ]
                           ],
                         ),
                         Text(
-                          isStale
-                              ? 'Last active ${diffInDays(profile.lastUpdatedAt, now) > 0 ? diffInDays(profile.lastUpdatedAt, now) : 1}d ago'
+                          isDailyStale
+                              ? 'Last active ${daysStale > 0 ? daysStale : 1}d ago'
                               : 'Updated ${_timeAgo(profile.lastUpdatedAt)}',
                           style: TextStyle(
                             color: context.colors.textMedium,
@@ -105,25 +105,25 @@ class FriendStatusCard extends ConsumerWidget {
                 children: [
                   _StatBlock(
                     icon: Icons.directions_walk,
-                    rawValue: profile.todaySteps,
+                    rawValue: isDailyStale ? null : profile.todaySteps,
                     useDecimalFormat: true,
                     label: 'Steps',
                     color: iconColor,
                     textColor: textColor,
-                    progress: profile.todaySteps / 10000.0,
+                    progress: isDailyStale ? 0 : profile.todaySteps / 10000.0,
                   ),
                   _StatBlock(
                     icon: Icons.fitness_center,
-                    rawValue: profile.todayWorkouts,
+                    rawValue: isDailyStale ? null : profile.todayWorkouts,
                     useDecimalFormat: false,
                     label: 'Workouts',
                     color: iconColor,
                     textColor: textColor,
-                    progress: profile.todayWorkouts >= 1 ? 1.0 : 0.0,
+                    progress: isDailyStale ? 0 : (profile.todayWorkouts >= 1 ? 1.0 : 0.0),
                   ),
                   _StatBlock(
                     icon: Icons.local_fire_department,
-                    rawValue: profile.currentStreak,
+                    rawValue: isWeeklyStale ? null : profile.currentStreak,
                     useDecimalFormat: false,
                     label: 'Streak',
                     color: iconColor,
@@ -147,6 +147,10 @@ class FriendStatusCard extends ConsumerWidget {
           title: Text(
             'Error loading profile',
             style: TextStyle(color: context.colors.red),
+          ),
+          trailing: IconButton(
+            icon: Icon(Icons.refresh, color: context.colors.textMedium),
+            onPressed: () => ref.invalidate(friendProfileStreamProvider(friend.uid)),
           ),
         ),
       ),
@@ -297,7 +301,7 @@ class FriendStatusCard extends ConsumerWidget {
 
 class _StatBlock extends StatelessWidget {
   final IconData icon;
-  final int rawValue;
+  final int? rawValue;
   final bool useDecimalFormat;
   final String label;
   final Color color;
@@ -320,24 +324,36 @@ class _StatBlock extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 28),
         const SizedBox(height: 4),
-        TweenAnimationBuilder<int>(
-          tween: IntTween(begin: 0, end: rawValue),
-          duration: const Duration(milliseconds: 1000),
-          curve: Curves.easeOutQuart,
-          builder: (context, val, child) {
-            final displayString = useDecimalFormat ? NumberFormat.decimalPattern().format(val) : val.toString();
-            return Text(
-              displayString,
-              style: AppTheme.numeric(
-                TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                  color: textColor,
-                ),
-              ),
-            );
-          },
-        ),
+        if (rawValue == null)
+           Text(
+             '-',
+             style: AppTheme.numeric(
+               TextStyle(
+                 fontWeight: FontWeight.w800,
+                 fontSize: 18,
+                 color: textColor,
+               ),
+             ),
+           )
+        else
+           TweenAnimationBuilder<int>(
+             tween: IntTween(begin: 0, end: rawValue!),
+             duration: const Duration(milliseconds: 1000),
+             curve: Curves.easeOutQuart,
+             builder: (context, val, child) {
+               final displayString = useDecimalFormat ? NumberFormat.decimalPattern().format(val) : val.toString();
+               return Text(
+                 displayString,
+                 style: AppTheme.numeric(
+                   TextStyle(
+                     fontWeight: FontWeight.w800,
+                     fontSize: 18,
+                     color: textColor,
+                   ),
+                 ),
+               );
+             },
+           ),
         Text(
           label,
           style: TextStyle(

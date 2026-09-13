@@ -349,6 +349,7 @@ class CloudSyncController extends Notifier<CloudSyncState> {
         ref.read(exerciseLogRepoProvider).init(newIsar),
         ref.read(coachNoteRepoProvider).init(newIsar),
         ref.read(badgeRepoProvider).init(newIsar),
+        ref.read(friendRepoProvider).init(newIsar),
       ]);
 
       // Re-attach sync subscriptions NOW that we are logged in, so they get their cloud listeners.
@@ -389,6 +390,7 @@ class CloudSyncController extends Notifier<CloudSyncState> {
         ref.invalidate(dailyLogProvider);
         ref.invalidate(dailyMealLogProvider);
         ref.invalidate(latestBodyStatsProvider);
+        ref.invalidate(friendsListStreamProvider);
       } else {
         syncService.syncProfile(
           ref.read(profileRepoProvider).exportProfileForCloud(),
