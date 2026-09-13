@@ -785,7 +785,7 @@ Do NOT use JSON.
 
     try {
       await client.models.generateContent(
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3.7-flash',
         request: GenerateContentRequest(
           contents: [Content.text('ping')],
         ),
