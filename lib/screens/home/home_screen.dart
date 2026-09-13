@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/insights_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -57,33 +58,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  // ignore: unused_element
-  void _scrollTo(GlobalKey key) {
-    final target = key.currentContext;
-    if (target != null) {
-      Scrollable.ensureVisible(
-        target,
-        duration: const Duration(milliseconds: 360),
-        curve: Curves.easeOutCubic,
-      );
-    }
-  }
-
-  Widget _staggerWrap(BuildContext context, int index, Widget child) {
-    if (MediaQuery.disableAnimationsOf(context)) return child;
-    return child
-        .animate(delay: (index * 80).ms)
-        .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-        .slideY(begin: 0.08, end: 0, duration: 400.ms, curve: Curves.easeOut);
-  }
+  // Removed _staggerWrap logic entirely to rely on a separate Stateful widget
 
   @override
   Widget build(BuildContext context) {
     ref.watch(badgeEngineProvider); // Initialize Gamification Engine
     final plan = ref.watch(workoutPlanProvider);
     ref.watch(syncControllerProvider);
-    // ignore: unused_local_variable
     final dailyScore = ref.watch(dailyScoreProvider);
+    final hasInsight = ref.watch(insightsProvider).isNotEmpty;
 
     // One calm day-complete sheet when primary buckets fill (today only).
     ref.listen<DailyScore>(dailyScoreProvider, (prev, next) {
@@ -145,24 +128,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 2. Week calendar + score
-                      _staggerWrap(context, 1, const WeekCalendarStrip()),
+                      StaggeredFadeIn(index: 1, child: const WeekCalendarStrip()),
                       const SizedBox(height: 24),
 
-                      // 2.5 Daily Insight
-                      _staggerWrap(context, 2, const DailyInsightCard()),
-                      const SizedBox(height: 24),
+                      // 2.5 Daily Insight OR Coach Notes
+                      if (hasInsight) ...[
+                        StaggeredFadeIn(index: 2, child: const DailyInsightCard()),
+                        const SizedBox(height: 24),
+                      ] else ...[
+                        StaggeredFadeIn(index: 2, child: const CoachNotesCard()),
+                        const SizedBox(height: 24),
+                      ],
 
                       // 3. Workout (primary daily action)
                       if (plan != null && plan.days.isNotEmpty) ...[
-                        _staggerWrap(context, 3, _WorkoutsSection(plan: plan)),
+                        StaggeredFadeIn(index: 3, child: _WorkoutsSection(plan: plan)),
                         const SizedBox(height: 24),
                       ],
 
                       // 4. Habits
-                      _staggerWrap(
-                        context,
-                        4,
-                        Column(
+                      StaggeredFadeIn(
+                        index: 4,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             KeyedSubtree(
@@ -181,10 +168,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 5. Meals
-                      _staggerWrap(
-                        context,
-                        5,
-                        Column(
+                      StaggeredFadeIn(
+                        index: 5,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             KeyedSubtree(
@@ -199,10 +185,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 6. Daily progress metrics
-                      _staggerWrap(
-                        context,
-                        6,
-                        Column(
+                      StaggeredFadeIn(
+                        index: 6,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             KeyedSubtree(
@@ -219,11 +204,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-
-                      // 7. Coach notes last (below fold)
-                      _staggerWrap(context, 7, const CoachNotesCard()),
-                      const SizedBox(height: 24),
+                      
+                      // Explicit bottom clearance for floating nav constraints
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -238,6 +221,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ],
     );
+  }
+}
+
+class StaggeredFadeIn extends StatefulWidget {
+  final int index;
+  final Widget child;
+
+  const StaggeredFadeIn({super.key, required this.index, required this.child});
+
+  @override
+  State<StaggeredFadeIn> createState() => _StaggeredFadeInState();
+}
+
+class _StaggeredFadeInState extends State<StaggeredFadeIn> {
+  bool _played = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _played = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
+    return _played
+        ? widget.child
+        : widget.child
+            .animate(delay: (widget.index * 60).ms)
+            .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+            .slideY(begin: 0.08, end: 0, duration: 400.ms, curve: Curves.easeOut);
   }
 }
 
@@ -303,12 +319,45 @@ class _HomeGreetingTitle extends ConsumerWidget {
             ),
           ),
         if (!isToday) ...[
-          const SizedBox(height: 4),
-          Text(
-            'Looking at ${DateFormat('EEE, MMM d').format(selected)}',
-            style: context.text.body.copyWith(
-              color: context.colors.primary,
-            ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                DateFormat('EEEE, MMM d').format(selected),
+                style: context.text.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.textDark,
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () {
+                  ref.read(selectedDateProvider.notifier).state = today;
+                  ref.read(weekOffsetProvider.notifier).state = 0;
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: context.colors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today_rounded, size: 12, color: context.colors.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Return to Today',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ],
@@ -378,13 +427,15 @@ class _HabitsCountLabel extends ConsumerWidget {
         .where((h) => isHabitCompleted(h, completions, dailyLog))
         .length;
 
-    return Text(
-      '($completedCount/${habits.length})',
-      style: TextStyle(
-        letterSpacing: 1.2,
-        fontWeight: FontWeight.w800,
-        color: context.colors.primary,
-        fontSize: 13,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Text(
+        '$completedCount/${habits.length}',
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: context.colors.textMedium,
+          fontSize: 14,
+        ),
       ),
     );
   }

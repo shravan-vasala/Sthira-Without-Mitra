@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../utils/format_units.dart';
@@ -41,9 +42,9 @@ class DailyProgressGrid extends ConsumerWidget {
     } else if (isFuture) {
       weightSubtitle = 'No data';
     } else {
-      final lastWeight = _lastLoggedWeight(ref, selectedDateStr);
-      weightSubtitle = lastWeight != null
-          ? 'Last: ${lastWeight.toStringAsFixed(1)} kg'
+      final weightData = _lastLoggedWeight(ref, selectedDateStr);
+      weightSubtitle = weightData != null
+          ? 'Last: ${weightData.weight.toStringAsFixed(1)} kg (${DateFormat('MMM d').format(weightData.date)})'
           : 'Tap to log';
     }
 
@@ -94,7 +95,7 @@ class DailyProgressGrid extends ConsumerWidget {
     );
   }
 
-  double? _lastLoggedWeight(WidgetRef ref, String beforeOrOnDate) {
+  ({double weight, DateTime date})? _lastLoggedWeight(WidgetRef ref, String beforeOrOnDate) {
     final repo = ref.read(dailyLogRepoProvider);
     final end = DateTime.parse(beforeOrOnDate);
     final start = end.subtract(const Duration(days: 90));
@@ -103,7 +104,10 @@ class DailyProgressGrid extends ConsumerWidget {
     final logs = repo.getLogsInRange(startStr, beforeOrOnDate);
     for (int i = logs.length - 1; i >= 0; i--) {
       final w = logs[i].weight;
-      if (w != null) return w;
+      if (w != null) {
+        final date = DateTime.parse(logs[i].date);
+        return (weight: w, date: date);
+      }
     }
     return null;
   }
@@ -134,16 +138,11 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
   Future<void> _checkHealthConnectStatus() async {
     final hcService = ref.read(healthConnectServiceProvider);
     final prefs = ref.read(sharedPreferencesProvider);
-    final everConnected = prefs.getBool('hc_connected') ?? false;
-
-    // hasPermissions is flaky on Android after process death — also trust
-    // a prior successful sync, and probe read access when unsure.
-    var connected = everConnected || await hcService.isAuthorized();
+    // Simply query Health Connect if authorization exists.
+    // Relying organically on healthConnect stepsSource in the UI.
+    var connected = await hcService.isAuthorized();
     if (!connected) {
       connected = await hcService.canReadSteps();
-      if (connected) {
-        await prefs.setBool('hc_connected', true);
-      }
     }
 
     if (mounted) {
@@ -241,7 +240,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
     if (_checkingPermission) {
       stepsSubtitle = 'Checking sync...';
     } else if (steps != null) {
-      stepsSubtitle = '$steps steps';
+      stepsSubtitle = '${NumberFormat.decimalPattern().format(steps)} steps';
       if (stepsSource == 'healthConnect') {
         sourceHint = 'Synced';
       } else if (stepsSource == 'manual') {
@@ -314,7 +313,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           curve: Curves.easeOutQuart,
                           builder: (context, val, child) {
                             return Text(
-                              '$val steps',
+                              '${NumberFormat.decimalPattern().format(val)} steps',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -332,7 +331,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                               fontWeight: FontWeight.w500,
                               color: context.colors.textMedium,
                             ),
-                            overflow: TextOverflow.ellipsis,
+                            // Removed TextOverflow.ellipsis to allow graceful multi-line wrapping
                           ),
                         ),
                       if (sourceHint != null) ...[
@@ -348,7 +347,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           child: Text(
                             sourceHint,
                             style: TextStyle(
-                              fontSize: 9,
+                              fontSize: 11, // Properly scaled readable token
                               fontWeight: FontWeight.w600,
                               color: (sourceHint == 'Synced' || sourceHint == 'Connected')
                                   ? context.colors.green

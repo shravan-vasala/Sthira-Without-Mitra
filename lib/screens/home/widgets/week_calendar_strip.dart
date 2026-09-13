@@ -155,8 +155,8 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   'This week',
                   style: TextStyle(
                     fontFamily: 'Cabinet Grotesk',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                     color: context.colors.textDark,
                   ),
                 ),

@@ -7,6 +7,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
+import '../../../widgets/section_header.dart';
 
 class DailyScoreSheet extends ConsumerStatefulWidget {
   const DailyScoreSheet({super.key});
@@ -151,15 +152,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               ],
             ).animate().fade(delay: 400.ms),
 
-          const SizedBox(height: 24),
-          Text(
-            'SCORE BREAKDOWN',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-              color: context.colors.primary,
-            ),
+          const SectionHeader(
+            'Score breakdown',
+            horizontalPadding: 0,
           ),
           const SizedBox(height: 12),
 
@@ -214,8 +209,39 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
 
           const SizedBox(height: 32),
 
+          // 2.3a No categories scheduled state
+          if (scoreData.totalMax <= 0) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.colors.border.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.self_improvement_rounded,
+                    color: context.colors.textMedium,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'No categories scheduled today.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.colors.textDark,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fade(delay: 340.ms),
+          ]
           // 2.4 Perfect day state (retained)
-          if (scoreData.remainingLabels.isEmpty && scoreData.totalScore == scoreData.totalMax && scoreData.totalMax > 0) ...[
+          else if (scoreData.remainingLabels.isEmpty && scoreData.totalScore == scoreData.totalMax && scoreData.totalMax > 0) ...[
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(16),
