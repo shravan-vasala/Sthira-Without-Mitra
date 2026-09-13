@@ -183,7 +183,7 @@ Future<void> main() async {
 
     // Run weekly auto-backup (non-blocking)
     // ignore: unawaited_futures
-    BackupService().autoBackup();
+    BackupService(authService).autoBackup();
 
     final initialGeminiKey = await profileRepo.getSecureGeminiKey();
     final prefs = await SharedPreferences.getInstance();
