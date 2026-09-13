@@ -8,4 +8,6 @@
     <color name="sthira_peach_muted">#40E29B65</color>
     <color name="sthira_tile_highlight">#1E2A24</color>
     <color name="sthira_transparent">#00000000</color>
+    <color name="launch_aubergine">#FFFFFF</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>
