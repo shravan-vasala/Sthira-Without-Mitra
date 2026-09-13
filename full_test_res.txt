@@ -129,3 +129,14 @@ AiClient: Trying model: gemini-3.1-flash-lite (attempt 2)...
 00:20 +85 ~1 -2: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/ai_resilience_test.dart: AI Resilience & Safety Tests Malformed JSON throws AiException with parse cause
 AiClient: Trying model: gemini-3.7-flash (attempt 1)...
 00:20 +86 ~1 -2: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/workout/widgets/exercise_card_test.dart: ExerciseCard Widget Tests renders exercise name and reps correctly
+10:12 +86 ~1 -3: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/workout/widgets/exercise_card_test.dart: ExerciseCard Widget Tests renders exercise name and reps correctly [E]
+  TimeoutException after 0:10:00.000000: Test timed out after 10 minutes.
+  dart:isolate  _RawReceivePort._handleMessage
+  
+10:12 +86 ~1 -3: C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/workout/widgets/exercise_card_test.dart: (tearDownAll)
+10:12 +86 ~1 -3: Some tests failed.
+
+Failing tests:
+  C:/Users/sande/OneDrive/Desktop/Without Mitra/test/providers/daily_score_provider_test.dart: Saving exercise log marks workout as partially/fully complete in daily score
+  C:/Users/sande/OneDrive/Desktop/Without Mitra/test/screens/workout/widgets/exercise_card_test.dart: ExerciseCard Widget Tests renders exercise name and reps correctly
+  C:/Users/sande/OneDrive/Desktop/Without Mitra/test/services/credential_provider_test.dart: Credential State Notifier launch with key A -> clear -> remains absent

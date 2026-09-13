@@ -190,16 +190,32 @@ class BackupService {
       Uint8List bytes = file.readAsBytesSync();
       bool isEncrypted = false;
       
-      // Check for magic bytes 'TFBK'
-      if (bytes.length > 4 && bytes[0] == 84 && bytes[1] == 70 && bytes[2] == 66 && bytes[3] == 75) {
+      final format = BackupEncryptionService.detectFormat(bytes);
+
+      if (format == BackupFormat.unknownVersion) {
+        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Unsupported backup format version.');
+      } else if (format == BackupFormat.v2) {
         isEncrypted = true;
         if (password == null || password.isEmpty) {
           return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Password required');
         }
         try {
-          bytes = BackupEncryptionService.decryptBytes(bytes, password);
+          bytes = BackupEncryptionService.decryptV2(bytes, password);
         } catch (e) {
           return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Incorrect password or corrupted file');
+        }
+      } else if (format == BackupFormat.v1legacy) {
+        isEncrypted = true;
+        if (password == null || password.isEmpty) {
+          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Password required for legacy backup');
+        }
+        try {
+          bytes = BackupEncryptionService.decryptV1(bytes, password);
+          if (bytes.length < 4 || bytes[0] != 80 || bytes[1] != 75 || bytes[2] != 3 || bytes[3] != 4) {
+             throw Exception('Header check failed');
+          }
+        } catch (e) {
+          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Incorrect legacy password or corrupted file');
         }
       }
 
@@ -284,12 +300,27 @@ class BackupService {
 
       Uint8List bytes = File(zipPath).readAsBytesSync();
       
-      // Check for magic bytes 'TFBK'
-      if (bytes.length > 4 && bytes[0] == 84 && bytes[1] == 70 && bytes[2] == 66 && bytes[3] == 75) {
+      final format = BackupEncryptionService.detectFormat(bytes);
+
+      if (format == BackupFormat.unknownVersion) {
+        throw Exception('Unsupported backup format version.');
+      } else if (format == BackupFormat.v2) {
         if (password == null || password.isEmpty) {
           throw Exception('Password required to restore encrypted backup');
         }
-        bytes = BackupEncryptionService.decryptBytes(bytes, password);
+        bytes = BackupEncryptionService.decryptV2(bytes, password);
+      } else if (format == BackupFormat.v1legacy) {
+        if (password == null || password.isEmpty) {
+          throw Exception('Password required to restore legacy backup');
+        }
+        try {
+          bytes = BackupEncryptionService.decryptV1(bytes, password);
+          if (bytes.length < 4 || bytes[0] != 80 || bytes[1] != 75 || bytes[2] != 3 || bytes[3] != 4) {
+             throw Exception('Invalid zip structure');
+          }
+        } catch(e) {
+          throw Exception('Incorrect legacy password or corrupted file');
+        }
       }
 
       final archive = ZipDecoder().decodeBytes(bytes);

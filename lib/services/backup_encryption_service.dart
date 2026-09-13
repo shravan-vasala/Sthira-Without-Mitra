@@ -7,6 +7,13 @@ import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/digests/sha256.dart';
 import 'package:pointycastle/key_derivators/api.dart';
 
+enum BackupFormat {
+  unencrypted,
+  v2,
+  v1legacy,
+  unknownVersion
+}
+
 class BackupEncryptionService {
   static const _magic = [84, 70, 66, 75]; // 'TFBK'
   static const _version = 2;
@@ -36,25 +43,29 @@ class BackupEncryptionService {
     return out.toBytes();
   }
 
-  /// Decrypts data, automatically detecting v2 (GCM/PBKDF2) or v1 (CBC/SHA256) formats.
-  static Uint8List decryptBytes(Uint8List data, String password) {
-    if (data.length < 5) throw Exception('Invalid encrypted data: too short');
-
-    final isV2 =
+  static BackupFormat detectFormat(Uint8List data) {
+    if (data.length > 4 && 
         data[0] == _magic[0] &&
         data[1] == _magic[1] &&
         data[2] == _magic[2] &&
-        data[3] == _magic[3] &&
-        data[4] == _version;
-
-    if (isV2) {
-      return _decryptV2(data, password);
-    } else {
-      return _decryptV1(data, password);
+        data[3] == _magic[3]) {
+      
+      if (data.length > 4 && data[4] == _version) {
+        return BackupFormat.v2;
+      }
+      return BackupFormat.unknownVersion;
     }
+    
+    // Check for ZIP magic 'PK\x03\x04' -> [80, 75, 3, 4]
+    if (data.length > 4 && data[0] == 80 && data[1] == 75 && data[2] == 3 && data[3] == 4) {
+      return BackupFormat.unencrypted;
+    }
+    
+    // If not TFBK and not plaintext zip, it's possibly headerless v1
+    return BackupFormat.v1legacy;
   }
 
-  static Uint8List _decryptV2(Uint8List data, String password) {
+  static Uint8List decryptV2(Uint8List data, String password) {
     // Header: 4 magic + 1 version + 16 salt + 12 nonce = 33 bytes
     if (data.length < 33)
       throw Exception('Invalid v2 encrypted data: too short');
@@ -78,7 +89,7 @@ class BackupEncryptionService {
     return Uint8List.fromList(decryptedList);
   }
 
-  static Uint8List _decryptV1(Uint8List data, String password) {
+  static Uint8List decryptV1(Uint8List data, String password) {
     if (data.length < 16)
       throw Exception('Invalid v1 encrypted data: too short');
 
