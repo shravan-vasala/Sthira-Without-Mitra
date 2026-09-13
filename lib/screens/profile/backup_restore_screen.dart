@@ -387,7 +387,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       setState(() => _isLoading = true);
 
       final syncService = ref.read(firestoreSyncServiceProvider);
-      syncService.pauseSync();
+      await syncService.pauseAndDrainSync();
 
       try {
         await backupService.createBackup(includeMedia: true); // Pre-restore safety backup

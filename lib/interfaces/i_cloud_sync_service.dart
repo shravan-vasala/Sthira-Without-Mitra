@@ -8,6 +8,7 @@ abstract class ICloudSyncService {
   Future<void> flushNow();
 
   void pauseSync();
+  Future<void> pauseAndDrainSync();
   void resumeSync();
 
   void syncToCloud(String collection, String docId, Map<String, dynamic> data);

@@ -4,7 +4,11 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import '../models/user_profile.dart';
+import '../models/sync_queue_item.dart';
+import '../models/app_config.dart';
 import '../models/daily_log.dart';
 import '../models/habit.dart';
 import '../models/meal_plan.dart';
@@ -239,6 +243,9 @@ class BackupService {
         if (dataMap is! Map<String, dynamic>) {
           return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid data format (not a JSON object)');
         }
+        if (dataMap.isEmpty) {
+          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid data format (empty object string)');
+        }
       } catch (_) {
         return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Corrupted data.json file');
       }
@@ -317,7 +324,12 @@ class BackupService {
       for (final file in archive) {
         final name = file.name.toLowerCase();
         if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.gif')) {
-           final safePath = file.name.replaceAll('..', ''); 
+           final normalized = file.name.replaceAll('\\', '/');
+           final segments = normalized.split('/').where((s) => s.isNotEmpty && s != '.').toList();
+           if (segments.contains('..')) {
+             continue; // reject path traversal
+           }
+           final safePath = segments.join('/');
            String targetPath = '${appDir.path}/$safePath';
            
            // Legacy fallback
@@ -336,7 +348,15 @@ class BackupService {
 
       // 2. Database transaction
       await isar.writeTxn(() async {
+        // Protect queue and configuration from being wiped
+        final savedQueue = isar.syncQueueItems.where().exportJsonSync();
+        final savedConfig = isar.appConfigs.where().exportJsonSync();
+
         await isar.clear();
+        
+        isar.syncQueueItems.importJsonSync(savedQueue);
+        isar.appConfigs.importJsonSync(savedConfig);
+
         
         if (migratedData['userProfiles'] != null) isar.userProfiles.importJsonSync(migratedData['userProfiles']);
         if (migratedData['dailyLogs'] != null) isar.dailyLogs.importJsonSync(migratedData['dailyLogs']);
@@ -383,6 +403,15 @@ class BackupService {
     if (kIsWeb) return;
     
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastAutoDateStr = prefs.getString('last_auto_backup_date');
+      if (lastAutoDateStr != null) {
+        final lastDate = DateTime.tryParse(lastAutoDateStr);
+        if (lastDate != null && DateTime.now().difference(lastDate).inDays < 7) {
+           return; // wait for 7 days
+        }
+      }
+
       final appDir = await getApplicationDocumentsDirectory();
       final backupDir = Directory('${appDir.path}/auto_backups');
       if (!await backupDir.exists()) await backupDir.create(recursive: true);
@@ -393,6 +422,9 @@ class BackupService {
          final destFile = File('${backupDir.path}/auto_backup_${DateTime.now().millisecondsSinceEpoch}.zip');
          await zipFile.copy(destFile.path);
          await zipFile.delete();
+         
+         await prefs.setString('last_auto_backup_date', DateTime.now().toIso8601String());
+         await prefs.setString('last_auto_backup_display', DateFormat('MMM dd, yyyy').format(DateTime.now()));
       }
 
       // Cleanup to keep only recent max logs

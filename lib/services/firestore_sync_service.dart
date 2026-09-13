@@ -55,6 +55,14 @@ class FirestoreSyncService implements ICloudSyncService {
   void pauseSync() => _isSyncPaused = true;
 
   @override
+  Future<void> pauseAndDrainSync() async {
+    _isSyncPaused = true;
+    while (_isFlushing) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
+  @override
   void resumeSync() {
     _isSyncPaused = false;
     flushQueue();
