@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import '../models/progress_photo.dart';
 
 class MediaRepository {
@@ -25,9 +26,10 @@ class MediaRepository {
   // Save any media file to a given category subdirectory
   Future<String> saveMediaFile(String sourcePath, String category) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final uuidStr = const Uuid().v4();
     final extension = sourcePath.split('.').last.toLowerCase();
     final ext = ['jpg', 'jpeg', 'png', 'webp'].contains(extension) ? extension : 'jpg';
-    final relPath = '$category/${category}_$timestamp.$ext';
+    final relPath = '$category/${category}_${timestamp}_$uuidStr.$ext';
     final destPath = kIsWeb ? sourcePath : '$_baseDir/$relPath';
 
     if (!kIsWeb) {
@@ -50,15 +52,16 @@ class MediaRepository {
     String? note,
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final relPath = 'progress_photos/${date}_$timestamp.jpg';
-    final destPath = kIsWeb ? 'web_photo_${date}_$timestamp.jpg' : '$_baseDir/$relPath';
+    final uuidStr = const Uuid().v4();
+    final relPath = 'progress_photos/${date}_${timestamp}_$uuidStr.jpg';
+    final destPath = kIsWeb ? 'web_photo_${date}_${timestamp}_$uuidStr.jpg' : '$_baseDir/$relPath';
 
+    File? copiedFile;
     if (!kIsWeb) {
-      final file = File(destPath);
-      await file.writeAsBytes(imageBytes);
+      copiedFile = File(destPath);
+      await copiedFile.writeAsBytes(imageBytes);
     }
 
-    // Save detailed metadata with relative path if not web
     final storedPath = kIsWeb ? destPath : relPath;
     final meta = ProgressPhoto(
       path: storedPath,
@@ -67,9 +70,16 @@ class MediaRepository {
       weight: weight,
       note: note,
     );
-    await _isar.writeTxn(() async {
-      await _isar.progressPhotos.put(meta);
-    });
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.progressPhotos.put(meta);
+      });
+    } catch (e) {
+      if (copiedFile != null && await copiedFile.exists()) {
+        try { await copiedFile.delete(); } catch(_) {}
+      }
+      rethrow;
+    }
 
     return storedPath;
   }
@@ -83,14 +93,15 @@ class MediaRepository {
     String? note,
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final relPath = 'progress_photos/${date}_$timestamp.jpg';
+    final uuidStr = const Uuid().v4();
+    final relPath = 'progress_photos/${date}_${timestamp}_$uuidStr.jpg';
     final destPath = kIsWeb ? sourcePath : '$_baseDir/$relPath';
 
+    File? copiedFile;
     if (!kIsWeb) {
-      await File(sourcePath).copy(destPath);
+      copiedFile = await File(sourcePath).copy(destPath);
     }
 
-    // Save detailed metadata
     final storedPath = kIsWeb ? destPath : relPath;
     final meta = ProgressPhoto(
       path: storedPath,
@@ -99,14 +110,25 @@ class MediaRepository {
       weight: weight,
       note: note,
     );
-    await _isar.writeTxn(() async {
-      await _isar.progressPhotos.put(meta);
-    });
+    
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.progressPhotos.put(meta);
+      });
+    } catch (e) {
+      if (copiedFile != null && await copiedFile.exists()) {
+        try { await copiedFile.delete(); } catch (_) {}
+      }
+      rethrow;
+    }
 
     return storedPath;
   }
 
   String getAbsolutePath(String storedPath) {
+    if (storedPath.contains('..')) {
+      throw ArgumentError('Path traversal detected');
+    }
     if (kIsWeb) return storedPath;
     if (storedPath.startsWith('/')) { // legacy absolute path
       if (storedPath.contains('trufit_media/')) {
@@ -178,7 +200,7 @@ class MediaRepository {
     if (!kIsWeb) {
       final file = File(getAbsolutePath(photoPath));
       if (await file.exists()) {
-        await file.delete();
+        try { await file.delete(); } catch (_) {}
       }
     }
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import '../models/scanned_meal_log.dart';
 
 class PhotoMealRepository {
@@ -17,33 +18,6 @@ class PhotoMealRepository {
     } else {
       _baseDir = 'trufit_meal_photos';
     }
-    
-    // ignore: unawaited_futures
-    _cleanupOldPhotos(30);
-  }
-
-  Future<void> _cleanupOldPhotos(int daysOld) async {
-    final cutoff = DateTime.now().subtract(Duration(days: daysOld)).toIso8601String();
-    final oldLogs = _isar.scannedMealLogs
-        .filter()
-        .timestampLessThan(cutoff)
-        .findAllSync();
-
-    for (final log in oldLogs) {
-      if (!kIsWeb) {
-        final file = File(getAbsolutePath(log.photoPath));
-        if (await file.exists()) {
-          try {
-            await file.delete();
-          } catch (e) {
-            debugPrint('Failed to delete old meal photo: $e');
-          }
-        }
-      }
-      await _isar.writeTxn(() async {
-        await _isar.scannedMealLogs.delete(log.idInternal);
-      });
-    }
   }
 
   Future<ScannedMealLog> saveScannedMeal({
@@ -58,21 +32,23 @@ class PhotoMealRepository {
     required double portionMultiplier,
   }) async {
     final timestampMs = DateTime.now().millisecondsSinceEpoch;
+    final uuidStr = const Uuid().v4();
     final ext = sourcePhotoPath.contains('.')
         ? sourcePhotoPath.split('.').last
         : 'jpg';
     
-    final relPath = '${date}_$timestampMs.$ext';
+    final relPath = '${date}_${timestampMs}_$uuidStr.$ext';
     final destPath = kIsWeb ? sourcePhotoPath : '$_baseDir/$relPath';
 
+    File? copiedFile;
     if (!kIsWeb) {
-      await File(sourcePhotoPath).copy(destPath);
+      copiedFile = await File(sourcePhotoPath).copy(destPath);
     }
 
     final storedPath = kIsWeb ? destPath : relPath;
 
     final log = ScannedMealLog(
-      id: 'photo_meal_$timestampMs',
+      id: 'photo_meal_${timestampMs}_$uuidStr',
       date: date,
       photoPath: storedPath,
       mealType: mealType,
@@ -85,13 +61,23 @@ class PhotoMealRepository {
       timestamp: DateTime.now().toIso8601String(),
     );
 
-    await _isar.writeTxn(() async {
-      await _isar.scannedMealLogs.put(log);
-    });
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.scannedMealLogs.put(log);
+      });
+    } catch (e) {
+      if (copiedFile != null && await copiedFile.exists()) {
+        try { await copiedFile.delete(); } catch(_) {}
+      }
+      rethrow;
+    }
     return log;
   }
 
   String getAbsolutePath(String storedPath) {
+    if (storedPath.contains('..')) {
+      throw ArgumentError('Path traversal detected');
+    }
     if (kIsWeb) return storedPath;
     if (storedPath.startsWith('/')) { // legacy absolute path
       if (storedPath.contains('trufit_meal_photos/')) {
@@ -117,17 +103,17 @@ class PhotoMealRepository {
   }
 
   Future<void> deleteScannedMeal(String id) async {
-    final log = _isar.scannedMealLogs.where().idEqualTo(id).findFirstSync();
+    final log = await _isar.scannedMealLogs.where().idEqualTo(id).findFirst();
     if (log != null) {
-      if (!kIsWeb) {
-        final file = File(getAbsolutePath(log.photoPath));
-        if (await file.exists()) {
-          await file.delete();
-        }
-      }
       await _isar.writeTxn(() async {
         await _isar.scannedMealLogs.delete(log.idInternal);
       });
+      if (!kIsWeb) {
+        final file = File(getAbsolutePath(log.photoPath));
+        if (await file.exists()) {
+          try { await file.delete(); } catch(_) {}
+        }
+      }
     }
   }
 }
