@@ -14,7 +14,7 @@ import 'widgets/rest_timer_label.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../widgets/primary_button.dart';
 import '../../providers/rest_timer_provider.dart';
-
+import '../../utils/workout_formatting.dart';
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({
     super.key,
@@ -117,7 +117,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
     // Title: use section name when filtered, day label when showing all
     final String appBarTitle = isFiltered
-        ? workoutDay.sections[_activeSectionIndex!].title ?? ''
+        ? formatSectionTitle(workoutDay.sections[_activeSectionIndex!].title, _activeSectionIndex!)
         : workoutDay.label ?? workoutDay.dayId ?? '';
 
     // Progress counts for current view
@@ -292,7 +292,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Showing: ${workoutDay.sections[_activeSectionIndex!].title}',
+                        'Showing: ${formatSectionTitle(workoutDay.sections[_activeSectionIndex!].title, _activeSectionIndex!)}',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -718,7 +718,7 @@ class _SectionWidgetState extends State<_SectionWidget> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    widget.section.title ?? '',
+                    formatSectionTitle(widget.section.title, widget.sectionIndex),
                     style: TextStyle(
                       fontFamily: 'Cabinet Grotesk',
                       fontSize: 16,

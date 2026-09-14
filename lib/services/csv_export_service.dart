@@ -141,7 +141,8 @@ class CsvExportService {
     rows.add([
       'Date', 'Weight (kg)', 'Steps', 'Steps Source', 'Sleep Hours',
       'Sleep Source', 'Body Fat', 'Workout Completed', 'Workout Day ID',
-      'Water (ml)', 'Screen Time (mins)', 'Updated At'
+      'Water (ml)', 'Screen Time (mins)', 'Updated At',
+      'Day Feeling', 'Day Note', 'Check-in Updated At'
     ].map(_sanitizeForCsv).toList());
 
     for (final log in logs) {
@@ -152,6 +153,7 @@ class CsvExportService {
           log.sleepHours ?? '', log.sleepSource ?? '', log.bodyFat ?? '',
           log.workoutCompleted, log.workoutDayId ?? '', log.waterMl ?? '',
           log.screenTimeMinutes ?? '', log.updatedAt?.toIso8601String() ?? '',
+          log.dayFeeling ?? '', log.dayNote ?? '', log.checkInUpdatedAt?.toIso8601String() ?? '',
         ].map(_sanitizeForCsv).toList());
       } catch (_) { errors++; }
     }

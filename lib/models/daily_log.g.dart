@@ -22,68 +22,83 @@ const DailyLogSchema = CollectionSchema(
       name: r'bodyFat',
       type: IsarType.double,
     ),
-    r'date': PropertySchema(
+    r'checkInUpdatedAt': PropertySchema(
       id: 1,
+      name: r'checkInUpdatedAt',
+      type: IsarType.dateTime,
+    ),
+    r'date': PropertySchema(
+      id: 2,
       name: r'date',
       type: IsarType.string,
     ),
+    r'dayFeeling': PropertySchema(
+      id: 3,
+      name: r'dayFeeling',
+      type: IsarType.string,
+    ),
+    r'dayNote': PropertySchema(
+      id: 4,
+      name: r'dayNote',
+      type: IsarType.string,
+    ),
     r'hasAnyActivity': PropertySchema(
-      id: 2,
+      id: 5,
       name: r'hasAnyActivity',
       type: IsarType.bool,
     ),
     r'screenTimeMinutes': PropertySchema(
-      id: 3,
+      id: 6,
       name: r'screenTimeMinutes',
       type: IsarType.long,
     ),
     r'sleepHours': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'sleepHours',
       type: IsarType.double,
     ),
     r'sleepSource': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'sleepSource',
       type: IsarType.string,
     ),
     r'steps': PropertySchema(
-      id: 6,
+      id: 9,
       name: r'steps',
       type: IsarType.long,
     ),
     r'stepsSource': PropertySchema(
-      id: 7,
+      id: 10,
       name: r'stepsSource',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 8,
+      id: 11,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
     r'waterMl': PropertySchema(
-      id: 9,
+      id: 12,
       name: r'waterMl',
       type: IsarType.long,
     ),
     r'weight': PropertySchema(
-      id: 10,
+      id: 13,
       name: r'weight',
       type: IsarType.double,
     ),
     r'workoutCompleted': PropertySchema(
-      id: 11,
+      id: 14,
       name: r'workoutCompleted',
       type: IsarType.bool,
     ),
     r'workoutDayId': PropertySchema(
-      id: 12,
+      id: 15,
       name: r'workoutDayId',
       type: IsarType.string,
     ),
     r'workoutStatus': PropertySchema(
-      id: 13,
+      id: 16,
       name: r'workoutStatus',
       type: IsarType.string,
     )
@@ -124,6 +139,18 @@ int _dailyLogEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.date.length * 3;
   {
+    final value = object.dayFeeling;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.dayNote;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.sleepSource;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -157,19 +184,22 @@ void _dailyLogSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.bodyFat);
-  writer.writeString(offsets[1], object.date);
-  writer.writeBool(offsets[2], object.hasAnyActivity);
-  writer.writeLong(offsets[3], object.screenTimeMinutes);
-  writer.writeDouble(offsets[4], object.sleepHours);
-  writer.writeString(offsets[5], object.sleepSource);
-  writer.writeLong(offsets[6], object.steps);
-  writer.writeString(offsets[7], object.stepsSource);
-  writer.writeDateTime(offsets[8], object.updatedAt);
-  writer.writeLong(offsets[9], object.waterMl);
-  writer.writeDouble(offsets[10], object.weight);
-  writer.writeBool(offsets[11], object.workoutCompleted);
-  writer.writeString(offsets[12], object.workoutDayId);
-  writer.writeString(offsets[13], object.workoutStatus);
+  writer.writeDateTime(offsets[1], object.checkInUpdatedAt);
+  writer.writeString(offsets[2], object.date);
+  writer.writeString(offsets[3], object.dayFeeling);
+  writer.writeString(offsets[4], object.dayNote);
+  writer.writeBool(offsets[5], object.hasAnyActivity);
+  writer.writeLong(offsets[6], object.screenTimeMinutes);
+  writer.writeDouble(offsets[7], object.sleepHours);
+  writer.writeString(offsets[8], object.sleepSource);
+  writer.writeLong(offsets[9], object.steps);
+  writer.writeString(offsets[10], object.stepsSource);
+  writer.writeDateTime(offsets[11], object.updatedAt);
+  writer.writeLong(offsets[12], object.waterMl);
+  writer.writeDouble(offsets[13], object.weight);
+  writer.writeBool(offsets[14], object.workoutCompleted);
+  writer.writeString(offsets[15], object.workoutDayId);
+  writer.writeString(offsets[16], object.workoutStatus);
 }
 
 DailyLog _dailyLogDeserialize(
@@ -180,17 +210,20 @@ DailyLog _dailyLogDeserialize(
 ) {
   final object = DailyLog(
     bodyFat: reader.readDoubleOrNull(offsets[0]),
-    date: reader.readString(offsets[1]),
-    screenTimeMinutes: reader.readLongOrNull(offsets[3]),
-    sleepHours: reader.readDoubleOrNull(offsets[4]),
-    sleepSource: reader.readStringOrNull(offsets[5]),
-    steps: reader.readLongOrNull(offsets[6]),
-    stepsSource: reader.readStringOrNull(offsets[7]),
-    updatedAt: reader.readDateTimeOrNull(offsets[8]),
-    waterMl: reader.readLongOrNull(offsets[9]),
-    weight: reader.readDoubleOrNull(offsets[10]),
-    workoutDayId: reader.readStringOrNull(offsets[12]),
-    workoutStatus: reader.readStringOrNull(offsets[13]),
+    checkInUpdatedAt: reader.readDateTimeOrNull(offsets[1]),
+    date: reader.readString(offsets[2]),
+    dayFeeling: reader.readStringOrNull(offsets[3]),
+    dayNote: reader.readStringOrNull(offsets[4]),
+    screenTimeMinutes: reader.readLongOrNull(offsets[6]),
+    sleepHours: reader.readDoubleOrNull(offsets[7]),
+    sleepSource: reader.readStringOrNull(offsets[8]),
+    steps: reader.readLongOrNull(offsets[9]),
+    stepsSource: reader.readStringOrNull(offsets[10]),
+    updatedAt: reader.readDateTimeOrNull(offsets[11]),
+    waterMl: reader.readLongOrNull(offsets[12]),
+    weight: reader.readDoubleOrNull(offsets[13]),
+    workoutDayId: reader.readStringOrNull(offsets[15]),
+    workoutStatus: reader.readStringOrNull(offsets[16]),
   );
   object.id = id;
   return object;
@@ -206,30 +239,36 @@ P _dailyLogDeserializeProp<P>(
     case 0:
       return (reader.readDoubleOrNull(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readLongOrNull(offset)) as P;
-    case 4:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readBool(offset)) as P;
     case 6:
       return (reader.readLongOrNull(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 8:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 9:
       return (reader.readLongOrNull(offset)) as P;
     case 10:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 11:
-      return (reader.readBool(offset)) as P;
-    case 12:
       return (reader.readStringOrNull(offset)) as P;
+    case 11:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 12:
+      return (reader.readLongOrNull(offset)) as P;
     case 13:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 14:
+      return (reader.readBool(offset)) as P;
+    case 15:
+      return (reader.readStringOrNull(offset)) as P;
+    case 16:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -501,6 +540,80 @@ extension DailyLogQueryFilter
     });
   }
 
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      checkInUpdatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'checkInUpdatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      checkInUpdatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'checkInUpdatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      checkInUpdatedAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'checkInUpdatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      checkInUpdatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'checkInUpdatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      checkInUpdatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'checkInUpdatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      checkInUpdatedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'checkInUpdatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dateEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -626,6 +739,300 @@ extension DailyLogQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'date',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'dayFeeling',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      dayFeelingIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'dayFeeling',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dayFeeling',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dayFeeling',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayFeeling',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
+      dayFeelingIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'dayFeeling',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'dayNote',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'dayNote',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dayNote',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dayNote',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayNote',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'dayNote',
         value: '',
       ));
     });
@@ -1762,6 +2169,18 @@ extension DailyLogQuerySortBy on QueryBuilder<DailyLog, DailyLog, QSortBy> {
     });
   }
 
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByCheckInUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'checkInUpdatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByCheckInUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'checkInUpdatedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.asc);
@@ -1771,6 +2190,30 @@ extension DailyLogQuerySortBy on QueryBuilder<DailyLog, DailyLog, QSortBy> {
   QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByDayFeeling() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayFeeling', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByDayFeelingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayFeeling', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByDayNote() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayNote', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> sortByDayNoteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayNote', Sort.desc);
     });
   }
 
@@ -1933,6 +2376,18 @@ extension DailyLogQuerySortThenBy
     });
   }
 
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByCheckInUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'checkInUpdatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByCheckInUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'checkInUpdatedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.asc);
@@ -1942,6 +2397,30 @@ extension DailyLogQuerySortThenBy
   QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByDayFeeling() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayFeeling', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByDayFeelingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayFeeling', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByDayNote() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayNote', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QAfterSortBy> thenByDayNoteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayNote', Sort.desc);
     });
   }
 
@@ -2110,10 +2589,30 @@ extension DailyLogQueryWhereDistinct
     });
   }
 
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByCheckInUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'checkInUpdatedAt');
+    });
+  }
+
   QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDate(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'date', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDayFeeling(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dayFeeling', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDayNote(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dayNote', caseSensitive: caseSensitive);
     });
   }
 
@@ -2209,9 +2708,28 @@ extension DailyLogQueryProperty
     });
   }
 
+  QueryBuilder<DailyLog, DateTime?, QQueryOperations>
+      checkInUpdatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'checkInUpdatedAt');
+    });
+  }
+
   QueryBuilder<DailyLog, String, QQueryOperations> dateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'date');
+    });
+  }
+
+  QueryBuilder<DailyLog, String?, QQueryOperations> dayFeelingProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dayFeeling');
+    });
+  }
+
+  QueryBuilder<DailyLog, String?, QQueryOperations> dayNoteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dayNote');
     });
   }
 

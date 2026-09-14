@@ -159,6 +159,18 @@ class DailyLogRepository {
     await _updateLogSafe(date, (log) => log.copyWith(weight: weight));
   }
 
+  Future<void> updateCheckIn(String date, String feeling, String? note) async {
+    await _updateLogSafe(date, (log) => log.copyWith(
+      dayFeeling: feeling,
+      dayNote: note,
+      checkInUpdatedAt: DateTime.now(),
+    ));
+  }
+
+  Future<void> removeCheckIn(String date) async {
+    await _updateLogSafe(date, (log) => log.clearCheckIn());
+  }
+
   Future<void> updateSteps(String date, int steps, {String? source}) async {
     await _updateLogSafe(date, (log) => log.copyWith(steps: steps, stepsSource: source));
   }

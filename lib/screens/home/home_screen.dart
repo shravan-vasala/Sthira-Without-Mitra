@@ -12,6 +12,7 @@ import '../../services/health_connect_service.dart';
 import '../../services/screen_time_service.dart';
 import '../../models/habit.dart';
 import '../../utils/workout_completion.dart';
+import '../../utils/workout_formatting.dart';
 import '../../widgets/section_header.dart';
 import '../../theme/layout_insets.dart';
 import '../../theme/app_typography.dart';
@@ -26,8 +27,8 @@ import 'widgets/daily_progress_grid.dart';
 import 'widgets/coach_notes_card.dart';
 import 'widgets/daily_insight_card.dart';
 import 'widgets/day_complete_sheet.dart';
-
-import 'widgets/day_complete_sheet.dart';
+import 'widgets/past_day_summary_sheet.dart';
+import 'widgets/daily_checkin_row.dart';
 import '../../providers/gamification_provider.dart';
 
 
@@ -190,6 +191,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             const SizedBox(height: 12),
                             const DailyProgressGrid(),
+                            const SizedBox(height: 16),
+                            const DailyCheckInRow(),
                             const SizedBox(height: 16),
                             const _WeeklySummaryLink(),
                           ],
@@ -523,20 +526,7 @@ class _WorkoutsSection extends ConsumerWidget {
         );
         if (isCompleted) completedCount++;
 
-        String title = (i == 0) ? (day.dayId ?? '') : (sec.title ?? '');
-        
-        if (title.startsWith('beg_day')) {
-          title = 'Beginner Day ${title.substring(7)}';
-        } else if (title.startsWith('int_day')) {
-          title = 'Intermediate Day ${title.substring(7)}';
-        } else if (title.startsWith('adv_day')) {
-          title = 'Advanced Day ${title.substring(7)}';
-        }
-
-        if ((sec.title?.toLowerCase() ?? '').contains('cooldown') ||
-            (sec.title?.toLowerCase() ?? '').contains('cool down')) {
-          title = 'Cool down';
-        }
+        String title = formatSectionTitle(sec.title, i);
 
         int exercisesLogged = 0;
         int firstUnloggedIndex = -1;

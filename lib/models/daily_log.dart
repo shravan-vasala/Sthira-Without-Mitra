@@ -19,6 +19,11 @@ class DailyLog {
   final int? waterMl;
   final int? screenTimeMinutes;
   final DateTime? updatedAt;
+  
+  // Daily check-in
+  final String? dayFeeling;
+  final String? dayNote;
+  final DateTime? checkInUpdatedAt;
 
   // Preserve legacy boolean getter
   bool get workoutCompleted => workoutStatus == 'completed';
@@ -36,6 +41,9 @@ class DailyLog {
     this.waterMl,
     this.screenTimeMinutes,
     this.updatedAt,
+    this.dayFeeling,
+    this.dayNote,
+    this.checkInUpdatedAt,
   });
 
   factory DailyLog.fromJson(Map<String, dynamic> json) {
@@ -55,6 +63,11 @@ class DailyLog {
       updatedAt: json['updatedAt'] != null
           ? DateTime.tryParse(json['updatedAt'])
           : null,
+      dayFeeling: json['dayFeeling'] as String?,
+      dayNote: json['dayNote'] as String?,
+      checkInUpdatedAt: json['checkInUpdatedAt'] != null
+          ? DateTime.tryParse(json['checkInUpdatedAt'])
+          : null,
     );
   }
 
@@ -71,6 +84,9 @@ class DailyLog {
     if (waterMl != null) 'waterMl': waterMl,
     if (screenTimeMinutes != null) 'screenTimeMinutes': screenTimeMinutes,
     if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+    if (dayFeeling != null) 'dayFeeling': dayFeeling,
+    if (dayNote != null) 'dayNote': dayNote,
+    if (checkInUpdatedAt != null) 'checkInUpdatedAt': checkInUpdatedAt!.toIso8601String(),
   };
 
   DailyLog copyWith({
@@ -85,6 +101,9 @@ class DailyLog {
     int? waterMl,
     int? screenTimeMinutes,
     DateTime? updatedAt,
+    String? dayFeeling,
+    String? dayNote,
+    DateTime? checkInUpdatedAt,
   }) {
     return DailyLog(
       date: date,
@@ -99,6 +118,29 @@ class DailyLog {
       waterMl: waterMl ?? this.waterMl,
       screenTimeMinutes: screenTimeMinutes ?? this.screenTimeMinutes,
       updatedAt: updatedAt ?? this.updatedAt,
+      dayFeeling: dayFeeling ?? this.dayFeeling,
+      dayNote: dayNote ?? this.dayNote,
+      checkInUpdatedAt: checkInUpdatedAt ?? this.checkInUpdatedAt,
+    );
+  }
+
+  DailyLog clearCheckIn() {
+    return DailyLog(
+      date: date,
+      weight: weight,
+      steps: steps,
+      stepsSource: stepsSource,
+      sleepHours: sleepHours,
+      sleepSource: sleepSource,
+      bodyFat: bodyFat,
+      workoutStatus: workoutStatus,
+      workoutDayId: workoutDayId,
+      waterMl: waterMl,
+      screenTimeMinutes: screenTimeMinutes,
+      updatedAt: updatedAt,
+      dayFeeling: null,
+      dayNote: null,
+      checkInUpdatedAt: null,
     );
   }
 
@@ -116,6 +158,9 @@ class DailyLog {
       waterMl: waterMl,
       screenTimeMinutes: screenTimeMinutes,
       updatedAt: updatedAt,
+      dayFeeling: dayFeeling,
+      dayNote: dayNote,
+      checkInUpdatedAt: checkInUpdatedAt,
     );
   }
 
@@ -133,6 +178,9 @@ class DailyLog {
       waterMl: waterMl,
       screenTimeMinutes: screenTimeMinutes,
       updatedAt: updatedAt,
+      dayFeeling: dayFeeling,
+      dayNote: dayNote,
+      checkInUpdatedAt: checkInUpdatedAt,
     );
   }
 
