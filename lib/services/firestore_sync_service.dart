@@ -41,7 +41,7 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   Stream<int> get pendingCountStream {
-    final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
     if (isar == null) return Stream.value(0);
     return isar.syncQueueItems
         .watchLazy(fireImmediately: true)
@@ -145,7 +145,7 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   void syncToCloud(String collection, String docId, Map<String, dynamic> data) {
-    final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
     if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
         queueSyncInTxn(isar, collection, docId, data);
@@ -156,7 +156,7 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   void deleteFromCloud(String collection, String docId) {
-    final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
     if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
         queueDeleteInTxn(isar, collection, docId);
@@ -167,7 +167,7 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   void syncProfile(Map<String, dynamic> data) {
-    final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
     if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
         queueProfileInTxn(isar, data);
@@ -195,7 +195,7 @@ class FirestoreSyncService implements ICloudSyncService {
     _isFlushing = true;
     try {
       while (true) {
-        final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+        final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
         if (isar == null) break;
 
         final currentUserUid = _auth.uid;

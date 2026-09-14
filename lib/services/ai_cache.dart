@@ -8,7 +8,7 @@ class AiCache {
   final Duration defaultTtl = const Duration(hours: 24);
 
   AiCache() {
-    _isar = Isar.getInstance(Isar.getInstanceNames().first)!;
+    _isar = Isar.getInstance(Isar.instanceNames.first)!;
   }
 
   String _hash(String prompt, String? systemInstruction, String? imageContext, String? schemaStr) {

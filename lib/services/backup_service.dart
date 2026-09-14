@@ -71,7 +71,7 @@ class BackupService {
     }
 
     try {
-      final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+      final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
       if (isar == null) throw Exception('Isar instance not found.');
 
       final appDir = await getApplicationDocumentsDirectory();
@@ -295,7 +295,7 @@ class BackupService {
     
     try {
       await stagingDir.create();
-      final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+      final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
       if (isar == null) throw Exception('Isar instance not found.');
 
       Uint8List bytes = File(zipPath).readAsBytesSync();

@@ -805,7 +805,7 @@ class _PhotoCalorieScannerSheetState
     
     // Personal Portion Memory: Ensure 'yours' and 'ai_estimate' modifications are written back to the local brain
     try {
-      final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+      final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
       if (isar != null) {
         for (var i in _items) {
           if ((i.provenance == 'yours' || i.provenance == 'ai_estimate') && (i.computedNutrition?.kcal ?? 0) > 0) {
@@ -1892,7 +1892,7 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
   }
 
   void _setupSubscription() {
-    final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
     if (isar != null) {
       _subscription = isar.userFoodLogs.watchLazy().listen((_) {
         _loadMyFoods();
@@ -1907,7 +1907,7 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
   }
 
   Future<void> _loadMyFoods() async {
-    final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
     if (isar == null) return;
     
     // Sort by most recently added/edited for "Recent" effect

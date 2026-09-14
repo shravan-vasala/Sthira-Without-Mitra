@@ -58,7 +58,7 @@ class CsvExportService {
         archive.addFile(ArchiveFile.bytes(name, bytes));
       }
 
-      final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
+      final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
       if (isar == null) return CsvExportResult(isSuccess: false, errorMessage: 'Database not initialized.');
 
       DateTime? normalizedStart;
