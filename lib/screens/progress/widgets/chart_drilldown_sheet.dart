@@ -36,6 +36,7 @@ class ChartDrilldownSheet extends ConsumerWidget {
       range: bucket.endDate.difference(bucket.startDate).inDays <= 7 ? TimeRange.weekly : TimeRange.oneMonth,
       rangeStart: bucket.startDate,
       rangeEnd: bucket.endDate,
+      today: DateTime.now(),
       heightInMeters: profile.heightInMeters,
       useKg: useKg,
     );

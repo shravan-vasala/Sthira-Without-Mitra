@@ -18,6 +18,7 @@ abstract class AppColorsPalette {
   Color get card;
   Color get onPrimary;
   Color get onSurface;
+  Color get warning;
   Color get orange;
   Color get green;
   Color get greenLight;
@@ -70,6 +71,8 @@ class AppColorsLight implements AppColorsPalette {
   Color get onPrimary => const Color(0xFF2D1A25); // Dark text on the sandy button
   @override
   Color get onSurface => const Color(0xFF2D1A25);
+  @override
+  Color get warning => const Color(0xFFE0912F);
   @override
   Color get orange => const Color(0xFFE0912F);
   @override
@@ -153,6 +156,8 @@ class AppColorsDark implements AppColorsPalette {
   Color get onPrimary => const Color(0xFF2D1A25);
   @override
   Color get onSurface => const Color(0xFFEFE8EA);
+  @override
+  Color get warning => const Color(0xFFE0912F);
   @override
   Color get orange => const Color(0xFFE0912F);
   @override

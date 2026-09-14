@@ -7,7 +7,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../services/progress_aggregation_service.dart';
 
-enum ChartTimeFormat { weekly, oneMonth, threeMonths, sixMonths, twelveMonths }
+enum ChartTimeFormat { weekly, monthly, oneMonth, threeMonths, sixMonths, twelveMonths, allTime }
 
 class ChartDataPoint {
   final DateTime date;

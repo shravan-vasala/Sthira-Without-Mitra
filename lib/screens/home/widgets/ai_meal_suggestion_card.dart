@@ -6,6 +6,7 @@ import '../../../theme/app_colors.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../providers/app_providers.dart';
+import '../../../services/ai_client.dart';
 
 class AIMealSuggestionCard extends ConsumerStatefulWidget {
   final int remainingCalories;

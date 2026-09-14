@@ -20,6 +20,8 @@ abstract class IAiFoodService {
     String? mealName,
     int? mealsLeft,
     List<String>? previousMeals,
+    String? targetDate,
+    CancellationToken? cancellationToken,
   });
 
   Future<void> verifyApiKey(String key);

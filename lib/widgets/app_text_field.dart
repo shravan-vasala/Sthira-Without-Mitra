@@ -12,6 +12,7 @@ class AppTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final bool centerText;
   final Function(String)? onChanged;
+  final FocusNode? focusNode;
 
   const AppTextField({
     super.key,
@@ -25,6 +26,7 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.centerText = false,
     this.onChanged,
+    this.focusNode,
   });
 
   @override
@@ -46,6 +48,7 @@ class AppTextField extends StatelessWidget {
           ),
         TextField(
           controller: controller,
+          focusNode: focusNode,
           keyboardType: keyboardType,
           textCapitalization: capitalization,
           obscureText: obscureText,

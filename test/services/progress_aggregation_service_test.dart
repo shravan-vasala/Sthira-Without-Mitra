@@ -21,6 +21,7 @@ void main() {
         range: TimeRange.threeMonths,
         rangeStart: start,
         rangeEnd: end,
+        today: today,
         heightInMeters: 1.8,
         useKg: true,
       );
@@ -47,6 +48,7 @@ void main() {
         range: TimeRange.twelveMonths,
         rangeStart: start,
         rangeEnd: end,
+        today: today,
         heightInMeters: 1.8,
         useKg: true,
       );
@@ -84,7 +86,7 @@ void main() {
       // Check Steps (May 1 should have 0, May 2 should be null, May 3 null)
       final stepBuckets = ProgressAggregationService.aggregate(
         logs: logs, mealLogs: mealLogs, metric: MetricType.steps, range: TimeRange.weekly,
-        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true,
+        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true, today: today,
       );
       expect(stepBuckets[0].average, 0.0);
       expect(stepBuckets[1].average, null); // gap
@@ -92,7 +94,7 @@ void main() {
       // Check Calories (May 1 null, May 2 1500)
       final calBuckets = ProgressAggregationService.aggregate(
         logs: logs, mealLogs: mealLogs, metric: MetricType.calories, range: TimeRange.weekly,
-        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true,
+        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true, today: today,
       );
       expect(calBuckets[0].average, null); // gap
       expect(calBuckets[1].average, 1500.0);
@@ -104,13 +106,13 @@ void main() {
       
       final bucketsKg = ProgressAggregationService.aggregate(
         logs: logs, mealLogs: [], metric: MetricType.weight, range: TimeRange.weekly,
-        rangeStart: start, rangeEnd: start, heightInMeters: 1.8, useKg: true,
+        rangeStart: start, rangeEnd: start, heightInMeters: 1.8, useKg: true, today: today,
       );
       expect(bucketsKg.first.average, 100.0);
       
       final bucketsLb = ProgressAggregationService.aggregate(
         logs: logs, mealLogs: [], metric: MetricType.weight, range: TimeRange.weekly,
-        rangeStart: start, rangeEnd: start, heightInMeters: 1.8, useKg: false,
+        rangeStart: start, rangeEnd: start, heightInMeters: 1.8, useKg: false, today: today,
       );
       expect(bucketsLb.first.average, closeTo(220.462, 0.001));
     });
@@ -121,7 +123,7 @@ void main() {
       
       final buckets = ProgressAggregationService.aggregate(
         logs: [], mealLogs: [], metric: MetricType.weight, range: TimeRange.threeMonths, // weekly buckets
-        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true,
+        rangeStart: start, rangeEnd: end, heightInMeters: 1.8, useKg: true, today: today,
       );
       
       // The eligibleDaysCount should NOT include the future days.
@@ -138,7 +140,7 @@ void main() {
       // Height is 0 (invalid)
       final buckets = ProgressAggregationService.aggregate(
         logs: logs, mealLogs: [], metric: MetricType.bmi, range: TimeRange.weekly,
-        rangeStart: start, rangeEnd: start, heightInMeters: 0.0, useKg: true,
+        rangeStart: start, rangeEnd: start, heightInMeters: 0.0, useKg: true, today: today,
       );
       
       // BMI should be null gracefully rather than Infinity or NaN

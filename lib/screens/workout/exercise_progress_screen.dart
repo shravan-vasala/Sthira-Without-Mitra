@@ -78,7 +78,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
 
     List<String> maxWeightStats = [];
     if (maxWeightData.isNotEmpty) {
-      final weights = maxWeightData.map((d) => d.value).toList();
+      final weights = maxWeightData.map((d) => d.value ?? 0.0).toList();
       final max = weights.reduce((a, b) => a > b ? a : b);
       final last = weights.last;
       final avg = weights.reduce((a, b) => a + b) / weights.length;
@@ -96,7 +96,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
 
     List<String> totalVolumeStats = [];
     if (totalVolumeData.isNotEmpty) {
-      final vols = totalVolumeData.map((d) => d.value).toList();
+      final vols = totalVolumeData.map((d) => d.value ?? 0.0).toList();
       final max = vols.reduce((a, b) => a > b ? a : b);
       final last = vols.last;
       final avg = vols.reduce((a, b) => a + b) / vols.length;
