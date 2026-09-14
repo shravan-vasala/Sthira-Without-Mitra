@@ -111,14 +111,11 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 parent: _staggerController,
                 curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
               ).value;
-              Widget logo = ClipRRect(
-                borderRadius: BorderRadius.circular(40),
-                child: Image.asset(
-                  'assets/icon/logo.jpeg',
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
-                ),
+              Widget logo = Image.asset(
+                'assets/icon/sunflower-foreground-1024.png',
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
               );
               if (!MediaQuery.disableAnimationsOf(context)) {
                 logo = logo.animate(onPlay: (controller) => controller.repeat()).shimmer(
