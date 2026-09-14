@@ -386,6 +386,24 @@ class CloudSyncController extends Notifier<CloudSyncState> {
 
         final mealPlans = await syncService.pullCollection('meal_plans');
         await ref.read(mealRepoProvider).importPlansFromCloud(mealPlans);
+        
+        final habitConfig = await syncService.pullCollection('habit_config');
+        await ref.read(habitRepoProvider).importConfigFromCloud(habitConfig);
+
+        final habitCompletions = await syncService.pullCollection('habit_completions');
+        await ref.read(habitRepoProvider).importCompletionsFromCloud(habitCompletions);
+
+        final exLogs = await syncService.pullCollection('exercise_logs');
+        await ref.read(exerciseLogRepoProvider).importLogsFromCloud(exLogs);
+
+        final exPrs = await syncService.pullCollection('exercise_prs');
+        await ref.read(exerciseLogRepoProvider).importPrsFromCloud(exPrs);
+
+        final coachNotes = await syncService.pullCollection('coach_notes');
+        await ref.read(coachNoteRepoProvider).importNotesFromCloud(coachNotes);
+
+        final badges = await syncService.pullCollection('badges');
+        await ref.read(badgeRepoProvider).importFromCloud(badges);
 
         ref.invalidate(profileProvider);
         ref.invalidate(dailyLogProvider);
@@ -423,6 +441,22 @@ class CloudSyncController extends Notifier<CloudSyncState> {
         await syncService.bulkSync(
           'meal_plans',
           ref.read(mealRepoProvider).exportPlansForCloud(),
+        );
+        await syncService.bulkSync(
+           'exercise_logs',
+           ref.read(exerciseLogRepoProvider).exportLogsForCloud(),
+        );
+        await syncService.bulkSync(
+           'exercise_prs',
+           ref.read(exerciseLogRepoProvider).exportPrsForCloud(),
+        );
+        await syncService.bulkSync(
+           'coach_notes',
+           ref.read(coachNoteRepoProvider).exportNotesForCloud(),
+        );
+        await syncService.bulkSync(
+           'badges',
+           ref.read(badgeRepoProvider).exportForCloud(),
         );
       }
       state = CloudSyncState.success;

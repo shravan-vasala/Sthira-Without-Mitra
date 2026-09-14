@@ -1,6 +1,8 @@
 import 'package:isar/isar.dart';
 import '../models/body_stats.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import 'dart:convert';
+import '../models/sync_queue_item.dart';
 
 class BodyStatsRepository {
   late Isar _isar;
@@ -24,7 +26,9 @@ class BodyStatsRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.bodyStats.put(stats);
-      _sync?.queueSyncInTxn(_isar, 'body_stats', stats.date, stats.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'body_stats', docId: stats.date, payload: jsonEncode(stats.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }

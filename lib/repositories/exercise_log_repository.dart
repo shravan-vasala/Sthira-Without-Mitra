@@ -2,6 +2,8 @@ import 'package:isar/isar.dart';
 import '../models/exercise_log.dart';
 import '../models/exercise_pr.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import 'dart:convert';
+import '../models/sync_queue_item.dart';
 
 class ExerciseLogRepository {
   late Isar _isar;
@@ -28,7 +30,9 @@ class ExerciseLogRepository {
     if (existing != null) pr.id = existing.id;
     await _isar.writeTxn(() async {
       await _isar.exercisePrs.put(pr);
-      _sync?.queueSyncInTxn(_isar, 'exercise_prs', pr.exerciseName, pr.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'exercise_prs', docId: pr.exerciseName, payload: jsonEncode(pr.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -47,7 +51,9 @@ class ExerciseLogRepository {
     if (existing != null) log.id = existing.id;
     await _isar.writeTxn(() async {
       await _isar.exerciseLogs.put(log);
-      _sync?.queueSyncInTxn(_isar, 'exercise_logs', log.key, log.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'exercise_logs', docId: log.key, payload: jsonEncode(log.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -57,7 +63,9 @@ class ExerciseLogRepository {
     if (existing != null) {
       await _isar.writeTxn(() async {
         await _isar.exerciseLogs.delete(existing.id);
-        _sync?.queueDeleteInTxn(_isar, 'exercise_logs', existing.key);
+        if (_isar.name != 'guest') {
+          _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_delete_/exercise_logs', docId: existing.key, payload: '{}', timestamp: DateTime.now()));
+        }
       });
       _sync?.triggerFlush();
     }

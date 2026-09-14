@@ -98,7 +98,7 @@ class ExerciseCard extends ConsumerWidget {
                       width: 90,
                       height: 68,
                       decoration: BoxDecoration(
-                        color: context.colors.lavenderCard,
+                        color: context.colors.insetSurface,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child:
@@ -340,7 +340,7 @@ class ExerciseCard extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: context.colors.lavenderCard.withValues(alpha: 0.6),
+                  color: context.colors.insetSurface,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(

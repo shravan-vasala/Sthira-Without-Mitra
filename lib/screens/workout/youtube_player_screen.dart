@@ -29,6 +29,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
   bool _isLoading = true;
   bool _hasError = false;
   String _errorMessage = '';
+  int _initRequestGen = 0;
 
   @override
   void initState() {
@@ -37,12 +38,18 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
   }
 
   Future<void> _initializePlayer() async {
+    _controller?.close();
+    _controller = null;
+    
+    final currentReq = ++_initRequestGen;
+
     setState(() {
       _isLoading = true;
       _hasError = false;
     });
 
     if (widget.videoId.isEmpty) {
+      if (!mounted || currentReq != _initRequestGen) return;
       setState(() {
         _hasError = true;
         _errorMessage = 'Invalid or missing video ID.';
@@ -53,6 +60,8 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
 
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
+      if (!mounted || currentReq != _initRequestGen) return;
+      
       if (connectivityResult.contains(ConnectivityResult.none)) {
         setState(() {
           _hasError = true;
@@ -62,6 +71,8 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
         return;
       }
     } catch (_) {}
+
+    if (!mounted || currentReq != _initRequestGen) return;
 
     final controller = YoutubePlayerController.fromVideoId(
       videoId: widget.videoId,
@@ -110,18 +121,12 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
     super.dispose();
   }
 
-  Widget _buildErrorState() {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: IconButton(
-          tooltip: 'Back',
-          icon: Icon(Icons.arrow_back_ios_rounded, color: context.colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Center(
+  Widget _buildVideoPlaceholder() {
+    return Container(
+      color: Colors.black,
+      height: 250,
+      width: double.infinity,
+      child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
@@ -131,7 +136,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
               const SizedBox(height: 16),
               Text(
                 _errorMessage,
-                style: TextStyle(color: context.colors.white, fontSize: 16),
+                style: TextStyle(color: context.colors.white, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -163,19 +168,24 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        body: Center(child: CircularProgressIndicator(color: context.colors.white)),
+        body: Column(
+          children: [
+            Container(
+              height: 250,
+              width: double.infinity,
+              color: context.colors.card.withValues(alpha: 0.1),
+              child: Center(child: CircularProgressIndicator(color: context.colors.white)),
+            ),
+          ],
+        ),
       );
-    }
-
-    if (_hasError || _controller == null) {
-      return _buildErrorState();
     }
 
     return PopScope(
       canPop: !_isFullScreen,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && _isFullScreen) {
-          _controller!.exitFullScreen();
+          _controller?.exitFullScreen();
         }
       },
       // ignore: deprecated_member_use
@@ -207,16 +217,19 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                GestureDetector(
-                  onDoubleTap: () {
-                    if (_isFullScreen) {
-                      _controller!.exitFullScreen();
-                    } else {
-                      _controller!.enterFullScreen();
-                    }
-                  },
-                  child: player,
-                ),
+                if (_hasError || _controller == null)
+                  _buildVideoPlaceholder()
+                else
+                  GestureDetector(
+                    onDoubleTap: () {
+                      if (_isFullScreen) {
+                        _controller!.exitFullScreen();
+                      } else {
+                        _controller!.enterFullScreen();
+                      }
+                    },
+                    child: player,
+                  ),
                 if (!_isFullScreen) ...[
                   const SizedBox(height: 20),
                   Padding(
@@ -258,9 +271,10 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                             ),
                           ),
                         const SizedBox(height: 24),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
+                        if (!_hasError && _controller != null)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
                             onPressed: () => _controller!.enterFullScreen(),
                             icon: Icon(
                               Icons.fullscreen,

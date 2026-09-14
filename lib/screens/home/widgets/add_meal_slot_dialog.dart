@@ -19,6 +19,16 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
   bool _addToEveryDay = false;
   bool _isSaving = false;
   String? _errorText;
+  
+  String? _establishedId;
+  late String _capturedTargetDate;
+  bool _profileSaveCompleted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _capturedTargetDate = ref.read(dateStringProvider);
+  }
 
   @override
   void dispose() {
@@ -40,15 +50,19 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
     }
     
     final nameLower = name.toLowerCase();
-    final profile = ref.read(profileProvider);
-    final isProfileDuplicate = profile.customMealSlots.any((slot) => (slot['name'] as String?)?.toLowerCase() == nameLower);
     
-    final dailyLog = ref.read(dailyMealLogProvider);
-    final isDailyDuplicate = dailyLog?.customSlots.values.any((slot) => slot.name?.toLowerCase() == nameLower) ?? false;
-    
-    if (isProfileDuplicate || isDailyDuplicate) {
-      setState(() => _errorText = 'A meal slot with this name already exists');
-      return;
+    // Only check for duplicates if we haven't established an ID yet
+    if (_establishedId == null) {
+      final profile = ref.read(profileProvider);
+      final isProfileDuplicate = profile.customMealSlots.any((slot) => (slot['name'] as String?)?.toLowerCase() == nameLower);
+      
+      final dailyLog = ref.read(dailyMealLogProvider);
+      final isDailyDuplicate = dailyLog?.customSlots.values.any((slot) => slot.name?.toLowerCase() == nameLower) ?? false;
+      
+      if (isProfileDuplicate || isDailyDuplicate) {
+        setState(() => _errorText = 'A meal slot with this name already exists');
+        return;
+      }
     }
     
     setState(() {
@@ -56,16 +70,14 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       _isSaving = true;
     });
 
-    final id =
-        '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch}';
+    _establishedId ??= '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch}';
 
     try {
-      final targetDateStr = ref.read(dateStringProvider);
-      
-      if (_addToEveryDay) {
+      if (_addToEveryDay && !_profileSaveCompleted) {
+        final profile = ref.read(profileProvider);
         final updatedSlots =
             List<Map<String, dynamic>>.from(profile.customMealSlots)..add({
-              'id': id,
+              'id': _establishedId,
               'name': name,
               'emoji': _selectedEmoji,
               'isDefault': true,
@@ -73,6 +85,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
         await ref
             .read(profileProvider.notifier)
             .updateProfile(profile.copyWith(customMealSlots: updatedSlots));
+        _profileSaveCompleted = true;
       }
 
       // Create an empty log entry for today so it immediately appears (and persists name/emoji)
@@ -86,7 +99,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
         totalFat: 0,
       );
 
-      await ref.read(dailyMealLogProvider.notifier).saveMealSlot(id, slotLog, targetDate: targetDateStr);
+      await ref.read(dailyMealLogProvider.notifier).saveMealSlot(_establishedId!, slotLog, targetDate: _capturedTargetDate);
 
       if (mounted) {
         Navigator.pop(context);
@@ -195,7 +208,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0, top: 4.0),
               child: Text(
-                'If enabled, this slot will appear every day. Otherwise, just for ${DateFormat('MMM d').format(DateTime.parse(ref.watch(dateStringProvider)))}.',
+                'If enabled, this slot will appear every day. Otherwise, just for ${DateFormat('MMM d').format(DateTime.parse(_capturedTargetDate))}.',
                 style: TextStyle(
                   fontSize: 12,
                   color: context.colors.textMedium,

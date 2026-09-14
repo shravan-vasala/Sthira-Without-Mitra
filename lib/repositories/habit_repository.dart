@@ -2,6 +2,8 @@ import 'package:isar/isar.dart';
 import '../models/habit.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 import '../models/app_config.dart';
+import 'dart:convert';
+import '../models/sync_queue_item.dart';
 
 class HabitRepository {
   late Isar _isar;
@@ -46,7 +48,9 @@ class HabitRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.habits.put(updatedHabit);
-      _sync?.queueSyncInTxn(_isar, 'habit_config', updatedHabit.id, updatedHabit.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_config', docId: updatedHabit.id, payload: jsonEncode(updatedHabit.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -56,7 +60,9 @@ class HabitRepository {
     if (existing != null) {
       await _isar.writeTxn(() async {
         await _isar.habits.delete(existing.idInternal);
-        _sync?.queueDeleteInTxn(_isar, 'habit_config', id);
+        if (_isar.name != 'guest') {
+          _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_delete_/habit_config', docId: id, payload: '{}', timestamp: DateTime.now()));
+        }
       });
       _sync?.triggerFlush();
     }
@@ -71,7 +77,9 @@ class HabitRepository {
           h.idInternal = existing.idInternal;
         }
         await _isar.habits.put(h);
-        _sync?.queueSyncInTxn(_isar, 'habit_config', h.id, h.toJson());
+        if (_isar.name != 'guest') {
+          _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_config', docId: h.id, payload: jsonEncode(h.toJson()), timestamp: DateTime.now()));
+        }
       }
     });
     _sync?.triggerFlush();
@@ -109,12 +117,9 @@ class HabitRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.habitCompletions.put(updatedCompletion);
-      _sync?.queueSyncInTxn(
-        _isar,
-        'habit_completions',
-        updatedCompletion.date,
-        updatedCompletion.toJson(),
-      );
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_completions', docId: updatedCompletion.date, payload: jsonEncode(updatedCompletion.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -129,7 +134,9 @@ class HabitRepository {
       updated.id = current.id;
       
       await _isar.habitCompletions.put(updated);
-      _sync?.queueSyncInTxn(_isar, 'habit_completions', updated.date, updated.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_completions', docId: updated.date, payload: jsonEncode(updated.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }

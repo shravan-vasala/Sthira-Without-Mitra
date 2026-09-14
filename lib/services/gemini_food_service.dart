@@ -643,6 +643,7 @@ Return ONLY a JSON object containing an array called "items":
     int? mealsLeft,
     List<String>? previousMeals,
     String? targetDate,
+    CancellationToken? cancellationToken,
   }) async* {
     _ensureApiKey();
 
@@ -732,15 +733,17 @@ Do NOT use JSON.
         systemInstruction:
             'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
         apiKey: apiKey ?? '',
+        cancellationToken: cancellationToken,
       );
 
       final buffer = StringBuffer();
       await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
+        if (cancellationToken?.isCancelled ?? false) break;
         buffer.write(chunk);
         yield chunk;
       }
 
-      if (buffer.isNotEmpty) {
+      if (buffer.isNotEmpty && !(cancellationToken?.isCancelled ?? false)) {
         // ignore: unawaited_futures
         prefs.setString(cacheKey, buffer.toString());
       }
@@ -772,39 +775,47 @@ Do NOT use JSON.
       config: GoogleAIConfig.googleAI(authProvider: ApiKeyProvider(key.trim())),
     );
 
+    String lastError = '';
+    
     try {
-      await client.models.generateContent(
-        model: 'gemini-3.5-flash-lite', // use lightweight probe
-        request: GenerateContentRequest(
-          contents: [Content.text('ping')],
-        ),
-      ).timeout(const Duration(seconds: 15));
-      return;
-    } catch (e) {
-      final errorString = e.toString();
-      if (errorString.contains('API_KEY_INVALID') ||
-          errorString.contains('API key not valid') ||
-          errorString.contains('403') ||
-          errorString.contains('Permission denied') ||
-          errorString.contains('disabled') ||
-          errorString.contains('has not been used in project') ||
-          errorString.contains('deactivated') ||
-          errorString.contains('SERVICE_DISABLED') ||
-          errorString.contains('PERMISSION_DENIED')) {
-        throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.');
-      } else if (errorString.contains('403') || errorString.contains('forbidden')) {
-        throw AiException('Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.');
-      } else if (errorString.contains('404') || errorString.contains('not found')) {
-        throw AiException('Model not found (404). Your key is valid but the requested model is unavailable.');
-      } else if (errorString.contains('429') || errorString.contains('quota')) {
-        throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');
-      } else if (errorString.contains('TimeoutException') ||
-          errorString.contains('Timeout') ||
-          errorString.contains('SocketException') ||
-          errorString.contains('Failed host lookup')) {
-        throw AiException('Network error. Please check your internet connection.');
+      for (String modelName in AiClient.textModelsToTry) {
+        try {
+          await client.models.generateContent(
+            model: modelName,
+            request: GenerateContentRequest(
+              contents: [Content.text('ping')],
+            ),
+          ).timeout(const Duration(seconds: 10));
+          return; // Success!
+        } catch (e) {
+          final errorString = e.toString();
+          lastError = errorString;
+          if (errorString.contains('404') || errorString.contains('not found')) {
+            continue; // Try next model
+          } else if (errorString.contains('API_KEY_INVALID') ||
+              errorString.contains('API key not valid') ||
+              errorString.contains('403') ||
+              errorString.contains('Permission denied') ||
+              errorString.contains('disabled') ||
+              errorString.contains('has not been used in project') ||
+              errorString.contains('deactivated') ||
+              errorString.contains('SERVICE_DISABLED') ||
+              errorString.contains('PERMISSION_DENIED')) {
+            throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.');
+          } else if (errorString.contains('403') || errorString.contains('forbidden')) {
+            throw AiException('Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.');
+          } else if (errorString.contains('429') || errorString.contains('quota')) {
+            throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');
+          } else {
+            throw AiException('Connection failed. Are you offline?');
+          }
+        }
       }
-      throw AiException('Could not verify key: $errorString');
+      
+      if (lastError.contains('404') || lastError.contains('not found')) {
+        throw AiException('Model not found (404). Your key is valid but the required models are unavailable to your account.');
+      }
+      throw AiException('Could not verify API Key.');
     } finally {
       client.close();
     }

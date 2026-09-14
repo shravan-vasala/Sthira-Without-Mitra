@@ -174,6 +174,7 @@ class AiClient {
     }
 
     final modelsToUse = isVision ? visionModelsToTry : textModelsToTry;
+    // We expect the cancellationToken to carry its own deadline logic if needed, but we give a sensible max here
     final overallDeadline = DateTime.now().add(Duration(seconds: isVision ? 75 : 40));
     final perAttemptTimeout = Duration(seconds: isVision ? 40 : 20);
     
@@ -197,7 +198,8 @@ class AiClient {
         final sw = Stopwatch()..start();
         try {
           debugPrint('AiClient: Trying model: $modelName (attempt ${attempt + 1})...');
-          final response = await _callModel(
+          
+          final waitFuture = _callModel(
             modelName: modelName,
             prompt: prompt,
             systemInstruction: systemInstruction,
@@ -207,6 +209,27 @@ class AiClient {
             timeout: attemptTimeout,
             responseSchema: responseSchema,
           );
+          
+          // Poll cancellation while waiting
+          String? response;
+          bool localCancel = false;
+          while (true) {
+            final test = await Future.any([
+              waitFuture,
+              Future.delayed(const Duration(milliseconds: 500), () => 'CANCEL_POLL')
+            ]);
+            if (cancellationToken?.isCancelled ?? false) {
+              localCancel = true;
+              break;
+            }
+            if (test != 'CANCEL_POLL') {
+              response = test;
+              break;
+            }
+          }
+          if (localCancel) {
+            throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+          }
           sw.stop();
           
           if (response == null || response.isEmpty) throw AiException("Empty response", cause: AiErrorCause.unknown);
@@ -392,16 +415,19 @@ class AiClient {
       currentSub?.cancel();
     }
 
-    void tryNextModel() {
-      currentSub?.cancel();
+    Future<void> tryNextModel() async {
+      await currentSub?.cancel();
+      currentSub = null;
       if (isCancelled || controller.isClosed || (cancellationToken?.isCancelled ?? false)) return;
 
       if (modelIndex >= textModelsToTry.length) {
         if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
           _textCircuitBreaker.recordFailure();
         }
-        controller.addError(AiException('Failed to generate response. Please try again later.', cause: lastCause));
-        controller.close();
+        if (!controller.isClosed) {
+          controller.addError(AiException('Failed to generate response. Please try again later.', cause: lastCause));
+          controller.close();
+        }
         return;
       }
 
@@ -416,11 +442,12 @@ class AiClient {
         if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
         inactivityTimer = Timer(inactivityTimeout, () {
           if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
-          currentSub?.cancel();
           if (yieldedAny) {
             cleanup();
-            controller.addError(AiException('Stream failed midway. Please try again.', cause: AiErrorCause.timeout));
-            controller.close();
+            if (!controller.isClosed) {
+              controller.addError(AiException('Stream failed midway. Please try again.', cause: AiErrorCause.timeout));
+              controller.close();
+            }
           } else {
             lastCause = AiErrorCause.timeout;
             tryNextModel();
@@ -438,76 +465,94 @@ class AiClient {
           apiKey: apiKey,
         );
 
-        currentSub = stream.listen(
-          (chunk) {
-            if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
-            if (chunk != null && chunk.isNotEmpty) {
-              if (firstTokenMs == null) {
-                firstTokenMs = sw.elapsedMilliseconds;
-              }
-              yieldedAny = true;
-              resetInactivityTimer();
-              controller.add(chunk);
+        final thisAttemptSub = stream.listen(null);
+        currentSub = thisAttemptSub;
+        
+        thisAttemptSub.onData((chunk) {
+          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+          if (cancellationToken?.isCancelled ?? false) {
+             cleanup();
+             if (!controller.isClosed) controller.close();
+             return;
+          }
+          if (chunk != null && chunk.isNotEmpty) {
+            if (firstTokenMs == null) {
+              firstTokenMs = sw.elapsedMilliseconds;
             }
-          },
-          onError: (e) {
-            if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
-            sw.stop();
-            final errStr = e.toString();
-            final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
-            lastCause = cause;
+            yieldedAny = true;
+            resetInactivityTimer();
+            controller.add(chunk);
+          }
+        });
+        
+        thisAttemptSub.onError((e) {
+          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+          sw.stop();
+          final errStr = e.toString();
+          final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
+          lastCause = cause;
 
-            AiLogger.log(
-              purpose: 'text stream fallback',
-              model: modelName,
-              durationMs: sw.elapsedMilliseconds,
-              firstTokenMs: firstTokenMs,
-              outcome: cause.toString(),
-            );
+          AiLogger.log(
+            purpose: 'text stream fallback',
+            model: modelName,
+            durationMs: sw.elapsedMilliseconds,
+            firstTokenMs: firstTokenMs,
+            outcome: cause.toString(),
+          );
 
-            if (yieldedAny) {
-              cleanup();
+          if (yieldedAny) {
+            cleanup();
+            if (!controller.isClosed) {
               controller.addError(AiException('Stream failed midway. Please try again.', cause: cause));
               controller.close();
-            } else if (cause == AiErrorCause.parse) {
-              cleanup();
+            }
+          } else if (cause == AiErrorCause.parse) {
+            cleanup();
+            if (!controller.isClosed) {
               controller.addError(AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause));
               controller.close();
-            } else if (cause == AiErrorCause.invalidKey) {
-              cleanup();
+            }
+          } else if (cause == AiErrorCause.invalidKey) {
+            cleanup();
+            if (!controller.isClosed) {
               controller.addError(AiException('This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.', cause: cause));
               controller.close();
-            } else if (cause == AiErrorCause.offline) {
-              cleanup();
+            }
+          } else if (cause == AiErrorCause.offline) {
+            cleanup();
+            if (!controller.isClosed) {
               controller.addError(AiException('You seem to be offline. Please check your internet connection.', cause: cause));
               controller.close();
-            } else if (cause == AiErrorCause.timeout) {
-              cleanup();
+            }
+          } else if (cause == AiErrorCause.timeout) {
+            cleanup();
+            if (!controller.isClosed) {
               controller.addError(AiException('AI stream timed out.', cause: AiErrorCause.timeout));
               controller.close();
-            } else {
-              tryNextModel();
             }
-          },
-          onDone: () {
-            if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
-            if (!yieldedAny) {
-              tryNextModel();
-              return;
-            }
-            cleanup();
-            sw.stop();
-            AiLogger.log(
-              purpose: 'text stream',
-              model: modelName,
-              durationMs: sw.elapsedMilliseconds,
-              firstTokenMs: firstTokenMs,
-              outcome: 'success',
-            );
-            _textCircuitBreaker.recordSuccess();
-            controller.close();
-          },
-        );
+          } else {
+            tryNextModel();
+          }
+        });
+        
+        thisAttemptSub.onDone(() {
+          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+          if (!yieldedAny) {
+            tryNextModel();
+            return;
+          }
+          cleanup();
+          sw.stop();
+          AiLogger.log(
+            purpose: 'text stream',
+            model: modelName,
+            durationMs: sw.elapsedMilliseconds,
+            firstTokenMs: firstTokenMs,
+            outcome: 'success',
+          );
+          _textCircuitBreaker.recordSuccess();
+          if (!controller.isClosed) controller.close();
+        });
       } catch (e) {
         if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
         final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(e.toString());
@@ -521,8 +566,10 @@ class AiClient {
         overallTimer = Timer(overallTimeout, () {
           if (isCancelled || controller.isClosed) return;
           cleanup();
-          controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
-          controller.close();
+          if (!controller.isClosed) {
+            controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
+            controller.close();
+          }
         });
         tryNextModel();
       },

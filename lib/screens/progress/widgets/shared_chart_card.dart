@@ -7,7 +7,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../services/progress_aggregation_service.dart';
 
-enum ChartTimeFormat { weekly, monthly, sixMonths, allTime }
+enum ChartTimeFormat { weekly, oneMonth, threeMonths, sixMonths, twelveMonths }
 
 class ChartDataPoint {
   final DateTime date;
@@ -72,7 +72,7 @@ class SharedChartCard extends StatelessWidget {
 
   bool get _isCount => metric.isCount;
 
-  bool get _useBars => metric.plotType == ChartPlotType.bar && timeFormat != ChartTimeFormat.sixMonths;
+  bool get _useBars => metric.plotType == ChartPlotType.bar && (timeFormat == ChartTimeFormat.weekly || timeFormat == ChartTimeFormat.oneMonth);
 
   String _unitSuffix() {
     if (metric.showKgLbToggle) return useKg ? ' kg' : ' lb';
@@ -98,7 +98,7 @@ class SharedChartCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: context.colors.lavenderCard,
+                color: context.colors.insetSurface,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -216,8 +216,7 @@ class SharedChartCard extends StatelessWidget {
     );
   }
 
-  double get _maxXValue =>
-      endDate.difference(startDate).inDays.toDouble().clamp(1.0, 9999.0);
+  double get _maxXValue => data.isEmpty ? 1.0 : (data.length - 1).toDouble();
 
   (double, double) _yRange(Iterable<double> ys) {
     final allYs = ys.toList();
@@ -330,29 +329,30 @@ class SharedChartCard extends StatelessWidget {
   }
 
   Widget _bottomTitle(BuildContext context, double value, TitleMeta meta) {
-    final int daysOffset = value.round();
-    final maxX = _maxXValue;
-    if (daysOffset < 0 || daysOffset > maxX) {
+    final int index = value.round();
+    if (index < 0 || index >= data.length) {
       return const SizedBox.shrink();
     }
 
-    final date = startDate.add(Duration(days: daysOffset));
+    final date = data[index].date;
     String label;
 
     if (timeFormat == ChartTimeFormat.weekly) {
       label = DateFormat('E').format(date);
-    } else if (timeFormat == ChartTimeFormat.monthly) {
+    } else if (timeFormat == ChartTimeFormat.oneMonth) {
       final lastDay = DateTime(date.year, date.month + 1, 0).day;
       final show = date.day == 1 || date.day == 8 || date.day == 15 || date.day == 22 || date.day == lastDay;
       if (!show) return const SizedBox.shrink();
       label = date.day.toString();
       if (date.day == 1) label = '${DateFormat('MMM').format(date)}\n$label';
-    } else if (timeFormat == ChartTimeFormat.sixMonths) {
-      if (date.day != 1) return const SizedBox.shrink();
+    } else if (timeFormat == ChartTimeFormat.threeMonths || timeFormat == ChartTimeFormat.sixMonths) {
+      bool show = false;
+      if (index == 0) show = true;
+      else if (data[index].date.month != data[index - 1].date.month) show = true;
+      if (!show) return const SizedBox.shrink();
       label = DateFormat('MMM').format(date);
       if (date.month == 1) label = DateFormat('MMM\nyy').format(date);
     } else {
-      if (date.day != 1) return const SizedBox.shrink();
       label = DateFormat('MMM').format(date);
       if (date.month == 1) label = DateFormat('MMM\nyy').format(date);
     }
@@ -394,7 +394,7 @@ class SharedChartCard extends StatelessWidget {
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          interval: timeFormat == ChartTimeFormat.weekly ? 1 : null,
+          interval: 1,
           getTitlesWidget: (value, meta) => _bottomTitle(context, value, meta),
         ),
       ),
@@ -447,24 +447,18 @@ class SharedChartCard extends StatelessWidget {
   }
 
   ChartDataPoint? _getPointForOffset(double xOffset) {
-    final offsetInt = xOffset.toInt();
-    for (final d in data) {
-      if (d.date.difference(startDate).inDays == offsetInt) return d;
-    }
+    final index = xOffset.toInt();
+    if (index >= 0 && index < data.length) return data[index];
     return null;
   }
 
   // Removed redundant _segmentSpots. We will do this inline in _buildLineChart.
 
   Widget _buildBarChart(BuildContext context) {
-    final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
-    final byDay = {
-      for (final d in sorted) if (d.value != null) d.date.difference(startDate).inDays: d.value!,
-    };
     final primary = context.colors.primary;
-    final validVals = sorted.where((d) => d.value != null).map((d) => d.value!);
+    final validVals = data.where((d) => d.value != null).map((d) => d.value!);
     final (minY, maxY) = validVals.isEmpty ? (0.0, 10.0) : _yRange(validVals);
-    final daySpan = _maxXValue.toInt();
+    final daySpan = data.length;
     final barWidth = daySpan <= 7
         ? 14.0
         : daySpan <= 31
@@ -473,20 +467,20 @@ class SharedChartCard extends StatelessWidget {
         ? 3.0
         : 1.2;
 
-    // One group per calendar day so missing days stay as visual gaps.
+    // One group per calendar bucket
     final groups = <BarChartGroupData>[
-      for (int x = 0; x <= daySpan; x++)
+      for (int x = 0; x < daySpan; x++)
         BarChartGroupData(
           x: x,
           barRods: [
             BarChartRodData(
-              toY: byDay[x] ?? 0,
+              toY: data[x].value ?? 0,
               width: barWidth,
-              borderRadius: byDay.containsKey(x)
+              borderRadius: data[x].value != null
                   ? const BorderRadius.vertical(top: Radius.circular(4))
                   : BorderRadius.zero,
-              color: byDay.containsKey(x) ? primary : Colors.transparent,
-              gradient: byDay.containsKey(x)
+              color: data[x].value != null ? primary : Colors.transparent,
+              gradient: data[x].value != null
                   ? LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
@@ -536,11 +530,10 @@ class SharedChartCard extends StatelessWidget {
           touchTooltipData: BarTouchTooltipData(
             getTooltipColor: (_) => context.colors.textDark,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              if (!byDay.containsKey(group.x)) {
+              if (data[group.x].value == null) {
                 return null;
               }
-              final pt = _getPointForOffset(group.x.toDouble());
-              if (pt == null) return null;
+              final pt = data[group.x];
               return BarTooltipItem(
                 _tooltipText(pt),
                 TextStyle(
@@ -557,13 +550,12 @@ class SharedChartCard extends StatelessWidget {
   }
 
   Widget _buildLineChart(BuildContext context) {
-    final sorted = data.toList()..sort((a, b) => a.date.compareTo(b.date));
-    
     final segments = <List<FlSpot>>[];
     var currentSegment = <FlSpot>[];
-    for (final d in sorted) {
+    for (int i = 0; i < data.length; i++) {
+      final d = data[i];
       if (d.value != null && d.value!.isFinite) {
-        currentSegment.add(FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value!));
+        currentSegment.add(FlSpot(i.toDouble(), d.value!));
       } else if (currentSegment.isNotEmpty) {
         segments.add(currentSegment);
         currentSegment = <FlSpot>[];
@@ -654,7 +646,7 @@ class SharedChartCard extends StatelessWidget {
         ),
       if (hasTrend)
         LineChartBarData(
-          spots: trendData!.where((d) => d.value != null).map((d) => FlSpot(d.date.difference(startDate).inDays.toDouble(), d.value!)).toList(),
+          spots: trendData!.asMap().entries.where((e) => e.value.value != null).map((e) => FlSpot(e.key.toDouble(), e.value.value!)).toList(),
           isCurved: true,
           curveSmoothness: 0.3,
           color: primary,
@@ -718,10 +710,9 @@ class SharedChartCard extends StatelessWidget {
             getTooltipColor: (touchedSpot) => context.colors.textDark,
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
-                final date = startDate.add(Duration(days: spot.x.toInt()));
                 final isTrend = spot.barIndex == segments.length;
                 final prefix = isTrend ? '7-Day Trend\n' : 'Measured\n';
-                final pt = isTrend ? ChartDataPoint(date, spot.y) : (_getPointForOffset(spot.x) ?? ChartDataPoint(date, spot.y));
+                final pt = isTrend ? trendData![spot.x.toInt()] : data[spot.x.toInt()];
                 return LineTooltipItem(
                   '$prefix${_tooltipText(pt)}',
                   TextStyle(

@@ -110,13 +110,16 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final d = DateTime(now.year, now.month, now.day);
     switch (_selectedRange) {
       case TimeRange.weekly:
-        return d.subtract(const Duration(days: 6)); // 7 days inclusive
+        return DateTime(d.year, d.month, d.day - 6);
       case TimeRange.oneMonth:
-        return _clampMonth(d, 1).add(const Duration(days: 1));
+        final m = _clampMonth(d, 1);
+        return DateTime(m.year, m.month, m.day + 1);
       case TimeRange.threeMonths:
-        return _clampMonth(d, 3).add(const Duration(days: 1));
+        final m = _clampMonth(d, 3);
+        return DateTime(m.year, m.month, m.day + 1);
       case TimeRange.sixMonths:
-        return _clampMonth(d, 6).add(const Duration(days: 1));
+        final m = _clampMonth(d, 6);
+        return DateTime(m.year, m.month, m.day + 1);
       case TimeRange.twelveMonths:
         return DateTime(d.year, d.month - 11, 1);
     }
@@ -168,7 +171,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         final window = data.where((d) => d.value != null && !d.date.isBefore(windowStart) && !d.date.isAfter(data[i].date)).toList();
         if (window.isNotEmpty) {
           final sum = window.fold<double>(0, (p, c) => p + c.value!);
-          trend.add(ChartDataPoint(data[i].date, sum / window.length));
+          trend.add(ChartDataPoint(data[i].date, sum / window.length, bucket: data[i].bucket));
+        } else {
+          trend.add(ChartDataPoint(data[i].date, null, bucket: data[i].bucket));
         }
     }
     return trend;
@@ -205,26 +210,39 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final validData = data.where((d) => d.value != null && d.value!.isFinite).toList();
     if (validData.isEmpty) return 'No recorded data for this period.';
     
-    int loggedDays = 0;
-    for (final d in validData) {
-      loggedDays += d.bucket?.validDaysCount ?? 1;
+    int validDaysCount = 0;
+    int eligibleDaysCount = 0;
+    for (final d in data) { // sum across all buckets in data!
+      if (d.bucket != null) {
+        validDaysCount += d.bucket!.validDaysCount;
+        eligibleDaysCount += d.bucket!.eligibleDaysCount;
+      }
     }
+    if (eligibleDaysCount == 0) eligibleDaysCount = validDaysCount == 0 ? 1 : validDaysCount; // fallback
     
     final isTrendMetric = metric == MetricType.weight || metric == MetricType.bodyFat || metric == MetricType.bmi;
     if (isTrendMetric && validData.length >= 2) {
       final trend = _calculateTrendData(validData);
-      if (trend.isEmpty) trend.addAll(validData);
-      final delta = trend.last.value! - trend.first.value!;
-      final abs = delta.abs();
-      final sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
-      switch (metric) {
-        case MetricType.weight: return 'Logged $loggedDays days. $sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start.';
-        case MetricType.bodyFat: return 'Logged $loggedDays days. Progress: $sign${abs.toStringAsFixed(1)}% vs start.';
-        case MetricType.bmi: return 'Logged $loggedDays days. BMI shifted $sign${abs.toStringAsFixed(1)}.';
-        default: break;
+      ChartDataPoint? validFirst, validLast;
+      for (final t in trend) {
+        if (t.value != null) {
+          validFirst ??= t;
+          validLast = t;
+        }
+      }
+      if (validFirst != null && validLast != null && validFirst != validLast) {
+        final delta = validLast.value! - validFirst.value!;
+        final abs = delta.abs();
+        final sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
+        switch (metric) {
+           case MetricType.weight: return 'Coverage: $validDaysCount/$eligibleDaysCount days. $sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start.';
+           case MetricType.bodyFat: return 'Coverage: $validDaysCount/$eligibleDaysCount days. Progress: $sign${abs.toStringAsFixed(1)}% vs start.';
+           case MetricType.bmi: return 'Coverage: $validDaysCount/$eligibleDaysCount days. BMI shifted $sign${abs.toStringAsFixed(1)}.';
+           default: break;
+        }
       }
     }
-    return 'Consistently logged for $loggedDays days this period.';
+    return 'Coverage: $validDaysCount/$eligibleDaysCount calendar days logged.';
   }
 
   String _overviewUnit(MetricType metric, bool useKg) {
@@ -378,10 +396,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     ChartTimeFormat format;
     switch (_selectedRange) {
       case TimeRange.weekly: format = ChartTimeFormat.weekly; break;
-      case TimeRange.oneMonth:
-      case TimeRange.threeMonths: format = ChartTimeFormat.monthly; break;
+      case TimeRange.oneMonth: format = ChartTimeFormat.oneMonth; break;
+      case TimeRange.threeMonths: format = ChartTimeFormat.threeMonths; break;
       case TimeRange.sixMonths: format = ChartTimeFormat.sixMonths; break;
-      case TimeRange.twelveMonths: format = ChartTimeFormat.allTime; break;
+      case TimeRange.twelveMonths: format = ChartTimeFormat.twelveMonths; break;
     }
 
     String emptyMessage = 'No ${_metricLabel(_selectedMetric).toLowerCase()} entries yet.';

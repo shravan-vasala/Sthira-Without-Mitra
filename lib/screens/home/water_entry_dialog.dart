@@ -116,7 +116,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: context.colors.lavenderCard,
+                  color: context.colors.insetSurface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

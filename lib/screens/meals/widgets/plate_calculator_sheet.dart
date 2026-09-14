@@ -53,7 +53,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     final macros = _calculatedMacros;
     return AppSheet(
       title: 'Visual Plate Calculator',
-      subtitle: 'Adjusting one proportion automatically redistributes the others to maintain 100%. Values are rough educational estimates for a standard 500g plate.',
+      subtitle: 'Values are rough educational examples for a standard 500g plate. For accurate meal tracking and precise nutrition, please log your actual food.',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -234,14 +234,35 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
           style: TextStyle(fontSize: 12, color: context.colors.textLight),
         ),
         const SizedBox(height: 4),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            if (isGiant)
+              Text(
+                '~',
+                style: AppTheme.numeric(TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.primary.withValues(alpha: 0.5),
+                )),
+              ),
+            Text(
+              value,
+              style: AppTheme.numeric(TextStyle(
+                fontSize: isGiant ? 32 : 16,
+                fontWeight: isGiant ? FontWeight.w800 : FontWeight.w700,
+                fontFamily: 'Cabinet Grotesk',
+                color: isGiant ? context.colors.primary : context.colors.textDark,
+              )),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
         Text(
-          value,
-          style: AppTheme.numeric(TextStyle(
-            fontSize: isGiant ? 32 : 16,
-            fontWeight: isGiant ? FontWeight.w800 : FontWeight.w700,
-            fontFamily: 'Cabinet Grotesk',
-            color: isGiant ? context.colors.primary : context.colors.textDark,
-          )),
+          'Example',
+          style: TextStyle(fontSize: 9, color: context.colors.textMedium),
         ),
       ],
     );

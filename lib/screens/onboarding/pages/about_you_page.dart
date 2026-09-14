@@ -7,6 +7,9 @@ class AboutYouPage extends StatefulWidget {
   final TextEditingController coachController;
   final TextEditingController heightController;
   final TextEditingController weightController;
+  final FocusNode? nameFocus;
+  final FocusNode? heightFocus;
+  final FocusNode? weightFocus;
   final bool useKg;
   final bool showErrors;
   final VoidCallback onToggleUnit;
@@ -17,6 +20,9 @@ class AboutYouPage extends StatefulWidget {
     required this.coachController,
     required this.heightController,
     required this.weightController,
+    this.nameFocus,
+    this.heightFocus,
+    this.weightFocus,
     required this.useKg,
     this.showErrors = false,
     required this.onToggleUnit,
@@ -135,7 +141,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 64),
+          const SizedBox(height: 32),
           _buildAnimEntrance(
             0,
             Column(
@@ -161,7 +167,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
               ],
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 24),
           _buildAnimEntrance(
             1,
             Column(
@@ -169,6 +175,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
               children: [
                 AppTextField(
                   controller: widget.nameController,
+                  focusNode: widget.nameFocus,
                   labelText: 'Your Name',
                   hintText: 'Eg. Bodamma',
                   capitalization: TextCapitalization.words,
@@ -225,6 +232,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                     children: [
                       AppTextField(
                         controller: widget.heightController,
+                        focusNode: widget.heightFocus,
                         labelText: 'Height (Optional)',
                         hintText: '153 cm',
                         keyboardType: TextInputType.number,
@@ -247,6 +255,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                     children: [
                       AppTextField(
                         controller: widget.weightController,
+                        focusNode: widget.weightFocus,
                         labelText: 'Weight (Optional)',
                         hintText: widget.useKg ? '66 kg' : '145 lb',
                         keyboardType: TextInputType.number,

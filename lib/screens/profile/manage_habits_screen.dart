@@ -145,41 +145,76 @@ class _HabitListTile extends ConsumerWidget {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text(
-                      'Delete Habit?',
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    content: const Text(
-                      'Are you sure you want to delete this habit? History will be kept for past days, but it won\'t appear anymore.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          ref
-                              .read(habitRepoProvider)
-                              .deleteHabit(habit.id)
-                              .then((_) {
-                                if (!context.mounted) return;
-                                ref.invalidate(habitsProvider);
-                                Navigator.pop(ctx);
-                              });
-                        },
-                        child: Text(
-                          'Delete',
-                          style: TextStyle(color: context.colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
+                  builder: (ctx) {
+                    bool isDeleting = false;
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        return AlertDialog(
+                          backgroundColor: context.colors.card,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          title: Text(
+                            'Delete Habit?',
+                            style: TextStyle(
+                              fontFamily: 'Cabinet Grotesk',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: context.colors.textDark,
+                            ),
+                          ),
+                          content: Text(
+                            'Are you sure you want to delete this habit? History will be kept for past days, but it won\'t appear anymore.',
+                            style: TextStyle(color: context.colors.textMedium),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: isDeleting ? null : () => Navigator.pop(ctx),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: context.colors.textMedium,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: isDeleting
+                                  ? null
+                                  : () async {
+                                      setState(() => isDeleting = true);
+                                      try {
+                                        await ref.read(habitRepoProvider).deleteHabit(habit.id);
+                                        if (!ctx.mounted) return;
+                                        ref.invalidate(habitsProvider);
+                                        Navigator.pop(ctx);
+                                      } catch (e) {
+                                        if (!ctx.mounted) return;
+                                        Navigator.pop(ctx);
+                                        ScaffoldMessenger.of(ctx).showSnackBar(
+                                          SnackBar(content: Text('Failed to delete: $e')),
+                                        );
+                                      }
+                                    },
+                              child: isDeleting
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : Text(
+                                      'Delete',
+                                      style: TextStyle(
+                                        color: context.colors.red,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        );
+                      }
+                    );
+                  },
                 );
               },
             ),
@@ -231,11 +266,13 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
 
   String? _targetError;
   String? _stepError;
+  String? _nameError;
 
   String _selectedIcon = 'check';
   HabitType _type = HabitType.checkbox;
   bool _isWaterHabit = false;
   List<int>? _activeDays;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -281,31 +318,46 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
     _nameCtrl.text = 'Drink $targetLabel $unit of water';
   }
 
-  void _submit() {
-    var name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
+  Future<void> _submit() async {
+    if (_isSaving) return;
 
-    var target = double.tryParse(_targetCtrl.text) ?? 0.0;
-    var step = double.tryParse(_stepCtrl.text) ?? 0.0;
+    var name = _nameCtrl.text.trim();
+    bool hasError = false;
+
+    if (name.isEmpty && !_isWaterHabit) {
+      setState(() => _nameError = 'Name is required');
+      hasError = true;
+    } else {
+      setState(() => _nameError = null);
+    }
+
+    var target = 1.0;
+    var step = 1.0;
     var unit = _unitCtrl.text.trim();
 
-    bool hasError = false;
-    if (target <= 0) {
-      setState(() => _targetError = 'Must be > 0');
-      hasError = true;
+    if (_showGoalFields) {
+      final pTarget = double.tryParse(_targetCtrl.text);
+      if (pTarget == null || !pTarget.isFinite || pTarget <= 0) {
+        setState(() => _targetError = 'Must be > 0');
+        hasError = true;
+      } else {
+        target = pTarget;
+        setState(() => _targetError = null);
+      }
     } else {
       setState(() => _targetError = null);
     }
     
     if (_type == HabitType.counter && !_isWaterHabit) {
-      if (step <= 0) {
+      final pStep = double.tryParse(_stepCtrl.text);
+      if (pStep == null || !pStep.isFinite || pStep <= 0) {
         setState(() => _stepError = 'Must be > 0');
         hasError = true;
       } else {
+        step = pStep;
         setState(() => _stepError = null);
       }
     } else {
-      step = 1.0;
       setState(() => _stepError = null);
     }
 
@@ -316,7 +368,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
     if (_isWaterHabit) {
       type = HabitType.checkbox;
       if (unit.isEmpty) unit = 'L';
-      if (target <= 0) target = 3.0;
+      if (target <= 0) target = 3.0; // Fallback
       final targetLabel = target == target.roundToDouble()
           ? target.toInt().toString()
           : target.toString();
@@ -340,11 +392,19 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
       order: isNew ? ref.read(habitsProvider).length : widget.habit!.order,
     );
 
-    ref.read(habitRepoProvider).saveHabit(updated).then((_) {
+    setState(() => _isSaving = true);
+    try {
+      await ref.read(habitRepoProvider).saveHabit(updated);
       if (!mounted) return;
       ref.invalidate(habitsProvider);
       Navigator.pop(context);
-    });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save: $e')),
+      );
+    }
   }
 
   bool get _showGoalFields => _isWaterHabit || _type != HabitType.checkbox;
@@ -372,7 +432,8 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               controller: _nameCtrl,
               style: TextStyle(color: context.colors.textDark),
               decoration: InputDecoration(
-                labelText: _isWaterHabit ? 'Water Habit Name' : 'Habit Name',
+                labelText: _isWaterHabit ? 'Water habit name' : 'Habit name',
+                errorText: _nameError,
                 hintText: 'e.g. Meditate 10 min',
                 filled: true,
                 fillColor: context.colors.inputFill,
@@ -438,10 +499,18 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Active Days',
+              'Active days',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: context.colors.textMedium,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Leave all days unselected to pause this habit. Select all days to run every day.',
+              style: TextStyle(
+                fontSize: 13,
+                color: context.colors.textLight,
               ),
             ),
             const SizedBox(height: 12),
@@ -624,7 +693,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 controller: _stepCtrl,
                 style: TextStyle(color: context.colors.textDark),
                 decoration: InputDecoration(
-                  labelText: 'Increment Step (e.g. 0.25)',
+                  labelText: 'Increment step (e.g. 0.25)',
                   errorText: _stepError,
                   filled: true,
                   fillColor: context.colors.inputFill,
@@ -653,7 +722,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed: _submit,
+          onPressed: _isSaving ? null : _submit,
           style: ElevatedButton.styleFrom(
             backgroundColor: context.colors.primary,
             foregroundColor: context.colors.onPrimary,
@@ -661,7 +730,13 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: const Text('Save'),
+          child: _isSaving
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                )
+              : const Text('Save'),
         ),
       ],
     );

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:isar/isar.dart';
 import '../models/badge.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import '../models/sync_queue_item.dart';
 
 class BadgeRepository {
   late Isar _isar;
@@ -29,8 +30,9 @@ class BadgeRepository {
 
   Future<void> attachSync(ICloudSyncService sync) async {
     await detachSync();
-    _sync = sync;
+    _syncGeneration++; // Synchronous unique generation
     final currentGen = _syncGeneration;
+    _sync = sync;
     final targetUid = sync.currentUid;
     _attachedUid = targetUid;
 
@@ -125,7 +127,9 @@ class BadgeRepository {
         badge.idInternal = existing.idInternal;
       }
       await _isar.badges.put(badge);
-      _sync?.queueSyncInTxn(_isar, 'badges', badge.id, badge.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'badges', docId: badge.id, payload: jsonEncode(badge.toJson()), timestamp: DateTime.now()));
+      }
     });
 
     _sync?.triggerFlush();

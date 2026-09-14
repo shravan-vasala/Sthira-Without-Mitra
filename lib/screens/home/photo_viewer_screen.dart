@@ -34,6 +34,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
   late List<PhotoItem> _photos;
   bool _showOverlay = true;
   bool _isZoomed = false;
+  bool _isDeleting = false;
 
   @override
   void initState() {
@@ -50,6 +51,8 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
   }
 
   void _deleteCurrentPhoto() {
+    if (_isDeleting) return;
+    
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -61,8 +64,11 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () async {
+            onPressed: _isDeleting ? null : () async {
               Navigator.pop(ctx);
+              if (!mounted) return;
+              
+              setState(() => _isDeleting = true);
               final item = _photos[_currentIndex];
 
               try {
@@ -71,6 +77,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                     .deletePhoto(item.date, item.path);
               } catch (e) {
                 if (mounted) {
+                  setState(() => _isDeleting = false);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed to delete photo: $e')),
                   );
@@ -80,17 +87,21 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
 
               if (!mounted) return;
 
-              setState(() {
-                _photos.removeAt(_currentIndex);
-                if (_photos.isEmpty) {
-                  Navigator.pop(context);
-                } else {
+              final updatedPhotos = List<PhotoItem>.from(_photos)
+                ..removeWhere((p) => p.path == item.path);
+
+              if (updatedPhotos.isEmpty) {
+                Navigator.pop(context);
+              } else {
+                setState(() {
+                  _photos = updatedPhotos;
+                  _isDeleting = false;
                   if (_currentIndex >= _photos.length) {
                     _currentIndex = _photos.length - 1;
-                    _pageController.jumpToPage(_currentIndex);
                   }
-                }
-              });
+                });
+                _pageController.jumpToPage(_currentIndex);
+              }
             },
             child: Text('Delete', style: TextStyle(color: context.colors.red)),
           ),

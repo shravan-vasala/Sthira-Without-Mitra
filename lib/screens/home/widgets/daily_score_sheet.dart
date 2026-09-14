@@ -282,9 +282,10 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               title: Text(
                 'How scoring works',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textMedium,
+                  fontFamily: 'Cabinet Grotesk',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textDark,
                 ),
               ),
               children: [

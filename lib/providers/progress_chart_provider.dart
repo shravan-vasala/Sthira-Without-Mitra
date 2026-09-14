@@ -11,6 +11,8 @@ final aggregatedChartProvider = Provider.autoDispose.family<List<ChartBucket>, (
   final logs = ref.watch(dailyLogsRangeProvider((startStr, endStr)));
   final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
   final profile = ref.watch(profileProvider);
+  final now = ref.watch(clockProvider);
+  final today = DateTime(now.year, now.month, now.day);
 
   return ProgressAggregationService.aggregate(
     logs: logs,
@@ -19,6 +21,7 @@ final aggregatedChartProvider = Provider.autoDispose.family<List<ChartBucket>, (
     range: args.range,
     rangeStart: args.start,
     rangeEnd: args.end,
+    today: today,
     heightInMeters: profile.heightInMeters,
     useKg: profile.useKg,
   );

@@ -24,8 +24,8 @@ class RestTimerLabel extends ConsumerWidget {
     final displaySeconds = isActive ? timerState.remainingSeconds : seconds;
 
     final display = displaySeconds >= 60
-        ? '${displaySeconds ~/ 60} MIN${displaySeconds % 60 > 0 ? ' ${displaySeconds % 60} SEC' : ''}'
-        : '$displaySeconds SEC';
+        ? '${displaySeconds ~/ 60} min${displaySeconds % 60 > 0 ? ' ${displaySeconds % 60} sec' : ''}'
+        : '$displaySeconds sec';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -52,16 +52,15 @@ class RestTimerLabel extends ConsumerWidget {
                 const SizedBox(width: 4),
                 Text(
                   isActive
-                      ? 'RESTING FOR $display'
-                      : 'REST FOR $display AFTER SET',
+                      ? 'Resting for $display'
+                      : 'Rest for $display after set',
                   style: AppTheme.numeric(
                     TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                       color: isActive
                           ? context.colors.orange
                           : context.colors.textLight,
-                      letterSpacing: 0.8,
                     ),
                   ),
                 ),

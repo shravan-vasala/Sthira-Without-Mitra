@@ -71,7 +71,7 @@ class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add_alt_1_rounded),
-            onPressed: () => context.go('/social/connect'),
+            onPressed: () => context.push('/social/connect'),
           ),
         ],
       ),
@@ -401,7 +401,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Add Friends',
-            onPressed: () => context.go('/social/connect'),
+            onPressed: () => context.push('/social/connect'),
           ),
         ],
       );

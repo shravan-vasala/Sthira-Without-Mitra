@@ -4,8 +4,8 @@ import 'package:uuid/uuid.dart';
 import 'package:isar/isar.dart';
 import '../models/daily_meal_log.dart';
 import '../models/meal_plan.dart';
-import 'package:flutter/services.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import '../models/sync_queue_item.dart';
 import 'package:flutter/foundation.dart';
 
 class MealRepository {
@@ -36,8 +36,9 @@ class MealRepository {
 
   Future<void> attachSync(ICloudSyncService sync) async {
     await detachSync();
-    _sync = sync;
+    _syncGeneration++; // Synchronous unique generation
     final currentGen = _syncGeneration;
+    _sync = sync;
     final targetUid = sync.currentUid;
     _attachedUid = targetUid;
 
@@ -73,6 +74,14 @@ class MealRepository {
                     _attachedUid != targetUid) {
                   return;
                 }
+                final reloaded = _isar.dailyMealLogs.where().dateEqualTo(entry.key).findFirstSync();
+                if (reloaded != null && incomingUpdatedAt != null) {
+                  final reloadedUpdatedAt = DateTime.tryParse(reloaded.toJson()['updatedAt'].toString() ?? '');
+                  if (reloadedUpdatedAt != null && incomingUpdatedAt.isBefore(reloadedUpdatedAt)) {
+                    return;
+                  }
+                }
+                if (reloaded != null) log.id = reloaded.id;
                 await _isar.dailyMealLogs.put(log);
               });
             }
@@ -200,7 +209,15 @@ class MealRepository {
       await _isar.dailyMealLogs.put(log);
       final payload = log.toJson();
       payload['updatedAt'] = DateTime.now().toIso8601String();
-      _sync?.queueSyncInTxn(_isar, 'meal_logs', log.date, payload);
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: 'meal_logs',
+          docId: log.date,
+          payload: jsonEncode(payload),
+          timestamp: DateTime.now(),
+        ));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -222,7 +239,15 @@ class MealRepository {
       await _isar.dailyMealLogs.put(updated);
       final payload = updated.toJson();
       payload['updatedAt'] = DateTime.now().toIso8601String();
-      _sync?.queueSyncInTxn(_isar, 'meal_logs', updated.date, payload);
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: 'meal_logs',
+          docId: updated.date,
+          payload: jsonEncode(payload),
+          timestamp: DateTime.now(),
+        ));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -240,7 +265,15 @@ class MealRepository {
       await _isar.dailyMealLogs.put(updated);
       final payload = updated.toJson();
       payload['updatedAt'] = DateTime.now().toIso8601String();
-      _sync?.queueSyncInTxn(_isar, 'meal_logs', updated.date, payload);
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: 'meal_logs',
+          docId: updated.date,
+          payload: jsonEncode(payload),
+          timestamp: DateTime.now(),
+        ));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -299,7 +332,15 @@ class MealRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.mealPlans.put(plan);
-      _sync?.queueSyncInTxn(_isar, 'meal_plans', key, plan.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: 'meal_plans',
+          docId: key,
+          payload: jsonEncode(plan.toJson()),
+          timestamp: DateTime.now(),
+        ));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -314,8 +355,22 @@ class MealRepository {
         await _isar.mealPlans.delete(existing.id);
       }
       await _isar.mealPlans.put(newPlan);
-      _sync?.queueDeleteInTxn(_isar, 'meal_plans', oldKey);
-      _sync?.queueSyncInTxn(_isar, 'meal_plans', newKey, newPlan.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: '_delete_/meal_plans',
+          docId: oldKey,
+          payload: '{}',
+          timestamp: DateTime.now(),
+        ));
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: 'meal_plans',
+          docId: newKey,
+          payload: jsonEncode(newPlan.toJson()),
+          timestamp: DateTime.now(),
+        ));
+      }
     });
     _sync?.triggerFlush();
   }

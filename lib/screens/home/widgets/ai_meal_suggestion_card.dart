@@ -36,10 +36,12 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
   String? _suggestionText;
   String? _error;
   StreamSubscription<String>? _activeSub;
+  CancellationToken? _cancelToken;
 
   @override
   void dispose() {
     _activeSub?.cancel();
+    _cancelToken?.cancel();
     super.dispose();
   }
 
@@ -53,6 +55,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         oldWidget.mealName != widget.mealName) {
       if (_suggestionText != null || _error != null || _isLoading || _isStreaming) {
         _activeSub?.cancel();
+        _cancelToken?.cancel();
         setState(() {
           _suggestionText = null;
           _error = null;
@@ -65,6 +68,8 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
 
   Future<void> _fetchSuggestion() async {
     _activeSub?.cancel();
+    _cancelToken?.cancel();
+    _cancelToken = CancellationToken();
     setState(() {
       _isLoading = true;
       _isStreaming = false;
@@ -93,6 +98,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
         mealName: widget.mealName,
         mealsLeft: widget.mealsLeft,
         previousMeals: previousMeals,
+        cancellationToken: _cancelToken,
       );
 
       bool isFirstChunk = true;
@@ -149,6 +155,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
     ref.listen(dateStringProvider, (previous, next) {
       if (previous != next && mounted) {
         _activeSub?.cancel();
+        _cancelToken?.cancel();
         setState(() {
           _suggestionText = null;
           _error = null;

@@ -6,6 +6,7 @@ import 'package:isar/isar.dart';
 import '../models/workout_plan.dart';
 import '../models/workout_session.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import '../models/sync_queue_item.dart';
 
 class WorkoutRepository {
   late Isar _isar;
@@ -68,7 +69,9 @@ class WorkoutRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.workoutPlans.put(plan);
-      _sync?.queueSyncInTxn(_isar, 'workout_plans', key, plan.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'workout_plans', docId: key, payload: jsonEncode(plan.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -83,8 +86,10 @@ class WorkoutRepository {
         await _isar.workoutPlans.delete(existing.id);
       }
       await _isar.workoutPlans.put(newPlan);
-      _sync?.queueDeleteInTxn(_isar, 'workout_plans', oldKey);
-      _sync?.queueSyncInTxn(_isar, 'workout_plans', newKey, newPlan.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_delete_/workout_plans', docId: oldKey, payload: '{}', timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'workout_plans', docId: newKey, payload: jsonEncode(newPlan.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }
@@ -194,7 +199,9 @@ class WorkoutRepository {
 
     await _isar.writeTxn(() async {
       await _isar.workoutSessions.put(newSession);
-      _sync?.queueSyncInTxn(_isar, 'workout_sessions', key, data);
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'workout_sessions', docId: key, payload: jsonEncode(data), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }

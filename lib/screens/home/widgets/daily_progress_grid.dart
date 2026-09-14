@@ -337,9 +337,9 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           ),
                         ),
                       if (sourceHint != null) ...[
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: (sourceHint == 'Synced' || sourceHint == 'Connected')
                                 ? context.colors.green.withValues(alpha: 0.1)
@@ -349,7 +349,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           child: Text(
                             sourceHint,
                             style: TextStyle(
-                              fontSize: 11, // Properly scaled readable token
+                              fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: (sourceHint == 'Synced' || sourceHint == 'Connected')
                                   ? context.colors.green
@@ -398,8 +398,11 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               if (steps != null) ...[
                 GestureDetector(
                   onTap: () => context.push('/progress?metric=steps'),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    height: 48,
+                    width: 48,
+                    alignment: Alignment.center,
                     child: Icon(Icons.show_chart_rounded, size: 22, color: context.colors.textMedium),
                   ),
                 ),
@@ -535,8 +538,11 @@ class _ProgressCard extends ConsumerWidget {
               if (onChartTap != null && displaySubtitle != 'Tap to log' && displaySubtitle != 'Tap to view' && displaySubtitle != 'No data yet') ...[
                 GestureDetector(
                   onTap: onChartTap,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    height: 48,
+                    width: 48,
+                    alignment: Alignment.center,
                     child: Icon(Icons.show_chart_rounded, size: 22, color: context.colors.textMedium),
                   ),
                 ),

@@ -43,14 +43,42 @@ class ExerciseProgressScreen extends ConsumerWidget {
     final sortedLogs = List<ExerciseLog>.from(logs)
       ..sort((a, b) => a.date.compareTo(b.date));
 
+    // Aggregate logs by date to ensure one point per day
+    final Map<String, double> dailyMaxWeight = {};
+    final Map<String, double> dailyTotalVolume = {};
+    int malformedCount = 0;
+
+    for (var log in sortedLogs) {
+      try {
+        final parsedDate = DateTime.parse(log.date);
+        final dateStr = "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+        
+        final weight = log.maxWeight * weightMultiplier;
+        final vol = log.totalVolume * weightMultiplier;
+        
+        if (!weight.isFinite || !vol.isFinite) {
+          malformedCount++;
+          continue;
+        }
+
+        if (!dailyMaxWeight.containsKey(dateStr) || weight > dailyMaxWeight[dateStr]!) {
+          dailyMaxWeight[dateStr] = weight;
+        }
+        
+        dailyTotalVolume[dateStr] = (dailyTotalVolume[dateStr] ?? 0.0) + vol;
+      } catch (_) {
+        malformedCount++;
+      }
+    }
+
     // Prepare Max Weight Data and Stats
-    final List<ChartDataPoint> maxWeightData = sortedLogs
-        .map((l) => ChartDataPoint(DateTime.parse(l.date), l.maxWeight * weightMultiplier))
-        .toList();
+    final List<ChartDataPoint> maxWeightData = dailyMaxWeight.entries
+        .map((e) => ChartDataPoint(DateTime.parse(e.key), e.value))
+        .toList()..sort((a, b) => a.date.compareTo(b.date));
 
     List<String> maxWeightStats = [];
-    if (sortedLogs.isNotEmpty) {
-      final weights = sortedLogs.map((l) => l.maxWeight * weightMultiplier).toList();
+    if (maxWeightData.isNotEmpty) {
+      final weights = maxWeightData.map((d) => d.value).toList();
       final max = weights.reduce((a, b) => a > b ? a : b);
       final last = weights.last;
       final avg = weights.reduce((a, b) => a + b) / weights.length;
@@ -62,13 +90,13 @@ class ExerciseProgressScreen extends ConsumerWidget {
     }
 
     // Prepare Total Volume Data and Stats
-    final List<ChartDataPoint> totalVolumeData = sortedLogs
-        .map((l) => ChartDataPoint(DateTime.parse(l.date), l.totalVolume * weightMultiplier))
-        .toList();
+    final List<ChartDataPoint> totalVolumeData = dailyTotalVolume.entries
+        .map((e) => ChartDataPoint(DateTime.parse(e.key), e.value))
+        .toList()..sort((a, b) => a.date.compareTo(b.date));
 
     List<String> totalVolumeStats = [];
-    if (sortedLogs.isNotEmpty) {
-      final vols = sortedLogs.map((l) => l.totalVolume * weightMultiplier).toList();
+    if (totalVolumeData.isNotEmpty) {
+      final vols = totalVolumeData.map((d) => d.value).toList();
       final max = vols.reduce((a, b) => a > b ? a : b);
       final last = vols.last;
       final avg = vols.reduce((a, b) => a + b) / vols.length;
@@ -155,7 +183,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       SharedChartCard(
-                        metric: MetricSpec(title: 'Total Volume', unit: unitLabel, isCount: false),
+                        metric: MetricSpec(title: 'Total Volume', unit: '$unitLabel (load×reps)', isCount: false),
                         data: totalVolumeData,
                         statLabels: const ['BEST', 'LAST', 'AVERAGE'],
                         statValues: totalVolumeStats,
@@ -165,6 +193,24 @@ class ExerciseProgressScreen extends ConsumerWidget {
                         emptyMessage: 'No data logged yet',
                       ),
                       const SizedBox(height: 20),
+                      if (malformedCount > 0) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: context.colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Skipped $malformedCount malformed historic logs to keep charts accurate.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                       Text(
                         'HISTORY',
                         style: TextStyle(

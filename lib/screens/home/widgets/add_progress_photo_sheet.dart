@@ -268,7 +268,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: context.colors.lavender,
+                  color: context.colors.insetSurface,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(

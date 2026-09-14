@@ -34,6 +34,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _coachNameController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
+  
+  final _nameFocus = FocusNode();
+  final _heightFocus = FocusNode();
+  final _weightFocus = FocusNode();
+  
   bool _useKg = true;
 
   double _targetCalories = 1250;
@@ -44,6 +49,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    final profile = ref.read(profileProvider);
+    _nameController.text = profile.name;
+    if (profile.coachName != null) _coachNameController.text = profile.coachName!;
+    if (profile.height != null) _heightController.text = profile.height.toString();
+    _useKg = profile.useKg;
+    if (profile.currentWeight != null) {
+      double displayW = _useKg ? profile.currentWeight! : profile.currentWeight! * 2.20462;
+      _weightController.text = displayW.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+    }
+    if (profile.targetCalories > 0) {
+      _targetCalories = profile.targetCalories.toDouble();
+      _isCaloriesManuallyEdited = true;
+    }
+    
+    final currentHabits = ref.read(habitRepoProvider).getHabits();
+    if (currentHabits.isNotEmpty) {
+      _selectedHabitIds.clear();
+      _selectedHabitIds.addAll(currentHabits.map((h) => h.id));
+    }
+
     _nameController.addListener(_triggerRebuild);
     _heightController.addListener(_triggerRebuild);
     _weightController.addListener(_triggerRebuild);
@@ -61,8 +86,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _pageController.dispose();
     _nameController.dispose();
     _coachNameController.dispose();
-    _heightController.dispose();
     _weightController.dispose();
+    _nameFocus.dispose();
+    _heightFocus.dispose();
+    _weightFocus.dispose();
     super.dispose();
   }
 
@@ -76,11 +103,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     try {
       if (_currentPage == 1) {
         setState(() => _showErrors = true);
-        if (!await _saveProfile()) return;
+        if (!_validateProfile()) return;
+        if (!mounted) return;
       }
       if (_currentPage == 2) {
-        if (_selectedHabitIds.isEmpty) return; // Must have 1
-        await _saveGoals();
+        if (_selectedHabitIds.isEmpty) return;
       }
       
       if (_currentPage < _totalPages - 1) {
@@ -90,13 +117,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           curve: Curves.easeInOut,
         );
       } else {
-        // Connect screen complete!
+        await _commitAllToDb();
         await ref.read(onboardingCompletedProvider.notifier).commitLocalSetup();
         
+        if (!mounted) return;
         HapticFeedback.lightImpact();
         setState(() {
           _showCompletion = true;
         });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not save: $e. Please try again.')),
+        );
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -113,70 +147,79 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  Future<bool> _saveProfile() async {
+  bool _validateProfile() {
     final name = _nameController.text.trim();
-    if (name.isEmpty) return false;
+    if (name.isEmpty) {
+      FocusScope.of(context).requestFocus(_nameFocus);
+      return false;
+    }
     
-    double? finalHeight;
     final hText = _heightController.text;
     if (hText.isNotEmpty) {
       final h = double.tryParse(hText);
-      if (h == null || h < 100 || h > 230) return false;
-      finalHeight = h;
+      if (h == null || h < 100 || h > 230) {
+        FocusScope.of(context).requestFocus(_heightFocus);
+        return false;
+      }
     }
 
-    double? finalWeight;
     final wText = _weightController.text;
     if (wText.isNotEmpty) {
       final w = double.tryParse(wText);
       if (w != null) {
         final double wKg = _useKg ? w : w / 2.20462;
-        if (wKg < 30 || wKg > 200) return false;
-        finalWeight = wKg;
+        if (wKg < 30 || wKg > 200) {
+          FocusScope.of(context).requestFocus(_weightFocus);
+          return false;
+        }
       } else {
+        FocusScope.of(context).requestFocus(_weightFocus);
         return false;
       }
+    }
+    return true;
+  }
+
+  Future<void> _commitAllToDb() async {
+    double? finalHeight;
+    final hText = _heightController.text;
+    if (hText.isNotEmpty) finalHeight = double.tryParse(hText);
+
+    double? finalWeight;
+    final wText = _weightController.text;
+    if (wText.isNotEmpty) {
+      final w = double.tryParse(wText);
+      if (w != null) finalWeight = _useKg ? w : w / 2.20462;
     }
 
     final current = ref.read(profileProvider);
     await ref.read(profileProvider.notifier).updateProfile(
       current.copyWith(
-        name: name,
+        name: _nameController.text.trim(),
         coachName: _coachNameController.text.trim(),
         height: finalHeight,
         clearHeight: hText.isEmpty,
         currentWeight: finalWeight,
         clearCurrentWeight: wText.isEmpty,
         useKg: _useKg,
-      ),
-    );
-    return true;
-  }
-
-  Future<void> _saveGoals() async {
-    final current = ref.read(profileProvider);
-    await ref.read(profileProvider.notifier).updateProfile(
-      current.copyWith(
         targetCalories: _targetCalories.round(),
         targetProteinG: _targetMacros?.proteinG,
         targetCarbsG: _targetMacros?.carbsG,
         targetFatG: _targetMacros?.fatG,
       ),
     );
+
     final habitRepo = ref.read(habitRepoProvider);
-
     final currentHabits = habitRepo.getHabits();
-    for (final habit in currentHabits) {
-      if (!_selectedHabitIds.contains(habit.id)) {
-        await habitRepo.deleteHabit(habit.id);
+    
+    for (final defHabit in Habit.defaults) {
+      final isSelected = _selectedHabitIds.contains(defHabit.id);
+      final exists = currentHabits.any((h) => h.id == defHabit.id);
+      if (isSelected && !exists) {
+        await habitRepo.saveHabit(defHabit);
+      } else if (!isSelected && exists) {
+        await habitRepo.deleteHabit(defHabit.id);
       }
-    }
-
-    final selected = Habit.defaults
-        .where((h) => _selectedHabitIds.contains(h.id))
-        .toList();
-    for (final habit in selected) {
-      await habitRepo.saveHabit(habit);
     }
   }
 
@@ -191,10 +234,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F1513),
-      body: Stack(
-        children: [
-          SthiraAuraBackground(currentPage: _currentPage),
-          SafeArea(
+      body: PopScope(
+        canPop: _currentPage == 0,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop && !_isSaving) {
+             _goBack();
+          }
+        },
+        child: Stack(
+          children: [
+            SthiraAuraBackground(currentPage: _currentPage),
+            SafeArea(
             child: Column(
               children: [
                 Expanded(
@@ -209,11 +259,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         coachController: _coachNameController,
                         heightController: _heightController,
                         weightController: _weightController,
+                        nameFocus: _nameFocus,
+                        heightFocus: _heightFocus,
+                        weightFocus: _weightFocus,
                         useKg: _useKg,
                         showErrors: _showErrors,
                         onToggleUnit: () {
                           HapticFeedback.selectionClick();
                           setState(() {
+                            final wText = _weightController.text;
+                            if (wText.isNotEmpty) {
+                              final w = double.tryParse(wText);
+                              if (w != null) {
+                                if (_useKg) {
+                                  _weightController.text = (w * 2.20462).round().toString();
+                                } else {
+                                  _weightController.text = (w / 2.20462).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+                                }
+                              }
+                            }
                             _useKg = !_useKg;
                           });
                         },
@@ -253,7 +317,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 _NavButtons(
                   currentPage: _currentPage,
                   totalPages: _totalPages,
-                  canGoNext: _canGoNext(), // dynamic calculation based on current fields
+                  canGoNext: _canGoNext(),
+                  isSaving: _isSaving,
                   onNext: _goNext,
                   onBack: _goBack,
                 ),
@@ -280,6 +345,7 @@ class _NavButtons extends StatelessWidget {
   final int currentPage;
   final int totalPages;
   final bool canGoNext;
+  final bool isSaving;
   final VoidCallback onNext;
   final VoidCallback onBack;
 
@@ -287,6 +353,7 @@ class _NavButtons extends StatelessWidget {
     required this.currentPage,
     required this.totalPages,
     required this.canGoNext,
+    required this.isSaving,
     required this.onNext,
     required this.onBack,
   });
@@ -350,26 +417,22 @@ class _NavButtons extends StatelessWidget {
                         color: canGoNext ? context.colors.primary : context.colors.primary.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(
-                        _isLastPage ? 'Start my journey' : 'Next',
-                        style: TextStyle(
-                          fontFamily: 'General Sans',
-                          color: canGoNext ? context.colors.onPrimary : Colors.white.withOpacity(0.5),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: _isLastPage && isSaving
+                          ? const SizedBox(
+                              width: 20, 
+                              height: 20, 
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                            )
+                          : Text(
+                              _isLastPage ? 'Start my journey' : 'Next',
+                              style: TextStyle(
+                                fontFamily: 'General Sans',
+                                color: canGoNext ? context.colors.onPrimary : Colors.white.withOpacity(0.5),
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                              ),
+                            ),
                     );
-                    
-                    if (!MediaQuery.disableAnimationsOf(context)) {
-                      btn = btn.animate(
-                        target: canGoNext ? 1 : 0, 
-                        onPlay: (controller) => controller.repeat(),
-                      ).shimmer(
-                        duration: 2000.ms,
-                        color: Colors.white.withValues(alpha: 0.15),
-                      );
-                    }
                     
                     return btn;
                   }

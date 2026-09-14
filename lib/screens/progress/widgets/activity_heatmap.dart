@@ -15,45 +15,64 @@ class ActivityHeatmap extends ConsumerStatefulWidget {
 
 class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
   final ScrollController _scrollController = ScrollController();
+  final List<GlobalKey> _monthKeys = List.generate(12, (_) => GlobalKey());
+  bool _hasScrolledInitially = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToCurrentMonth();
+      if (mounted) _scrollToCurrentMonth();
     });
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _scrollToCurrentMonth() {
+    if (!mounted) return;
     final year = ref.read(selectedYearProvider);
     final now = DateTime.now();
+    final disableAnimations = MediaQuery.of(context).disableAnimations;
+
     if (year == now.year && _scrollController.hasClients) {
-      final screenWidth = MediaQuery.sizeOf(context).width;
-      final cardWidth = (screenWidth - 40 - 16) / 2;
-      
-      final innerPadding = 12.0;
-      final availableGridWidth = cardWidth - (innerPadding * 2);
-      final double cellSize = (availableGridWidth / 8.2).floorToDouble();
-      final estimatedHeight = 20.0 + 16.0 + 12.0 + 8.0 + (6 * (cellSize + 3.0)) + 24.0;
-      final rowHeight = estimatedHeight + 16.0;
-      
-      final int rowIndex = (now.month - 1) ~/ 2;
-      final double offset = rowIndex * rowHeight;
-      
-      _scrollController.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutCubic,
-      );
+      if (!_hasScrolledInitially) {
+        final monthKey = _monthKeys[now.month - 1];
+        if (monthKey.currentContext != null) {
+          if (disableAnimations) {
+            Scrollable.ensureVisible(monthKey.currentContext!);
+          } else {
+            Scrollable.ensureVisible(
+              monthKey.currentContext!,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOutCubic,
+            );
+          }
+          _hasScrolledInitially = true;
+        }
+      }
     } else if (_scrollController.hasClients) {
-      _scrollController.jumpTo(0);
+      if (disableAnimations) {
+        _scrollController.jumpTo(0);
+      } else {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
+        );
+      }
     }
   }
 
   Color _getColorForScore(BuildContext context, int score) {
     if (score == -1) return Colors.transparent;
     if (score == -2) return context.colors.inputFill;
-    if (score == 0) return context.colors.border;
+    if (score == 0) {
+      return context.colors.border;
+    }
     if (score < 25) return context.colors.primary.withValues(alpha: 0.25);
     if (score < 50) return context.colors.primary.withValues(alpha: 0.50);
     if (score < 75) return context.colors.primary.withValues(alpha: 0.75);
@@ -66,8 +85,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
     final heatmapAsync = ref.watch(yearlyActivityHeatmapProvider(year));
 
     ref.listen(selectedYearProvider, (prev, next) {
+      _hasScrolledInitially = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToCurrentMonth();
+        if (mounted) _scrollToCurrentMonth();
       });
     });
 
@@ -145,7 +165,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final double cardWidth = (constraints.maxWidth - 40 - 16) / 2;
+                  final bool isWide = constraints.maxWidth > 500;
+                  final int crossAxisCount = isWide ? 2 : 1;
+                  final double cardWidth = (constraints.maxWidth - 40 - (16 * (crossAxisCount - 1))) / crossAxisCount;
                   
                   final innerPadding = 12.0;
                   final availableGridWidth = cardWidth - (innerPadding * 2);
@@ -179,14 +201,14 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: monthsToShow,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                      crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                       childAspectRatio: aspectRatio,
                     ),
                     itemBuilder: (context, index) {
                       final month = index + 1;
-                      return _buildMonthCard(context, year, month, heatmapData, cardWidth);
+                      return _buildMonthCard(context, year, month, heatmapData, cardWidth, _monthKeys[index]);
                     },
                   );
                 }
@@ -237,17 +259,31 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
       error: (e, st) => Container(
         height: 150,
         alignment: Alignment.center,
-        child: Text('Error: $e', style: TextStyle(color: context.colors.red)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded, color: context.colors.red.withValues(alpha: 0.8), size: 32),
+            const SizedBox(height: 12),
+            Text('Failed to load activity.', style: TextStyle(color: context.colors.textMedium)),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => ref.invalidate(yearlyActivityHeatmapProvider),
+              icon: Icon(Icons.refresh_rounded, color: context.colors.primary),
+              label: Text('Retry', style: TextStyle(color: context.colors.primary)),
+            )
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMonthCard(BuildContext context, int year, int month, Map<DateTime, int> heatmapData, double width) {
+  Widget _buildMonthCard(BuildContext context, int year, int month, Map<DateTime, int> heatmapData, double width, GlobalKey key) {
     final firstDayOfMonth = DateTime(year, month, 1);
     final daysInMonth = DateUtils.getDaysInMonth(year, month);
     
-    // We want Sunday to be 0 for standard layout
-    final startWeekday = firstDayOfMonth.weekday == 7 ? 0 : firstDayOfMonth.weekday;
+    // Monday-anchored start of week
+    // DateTime.monday == 1 ... DateTime.sunday == 7
+    final startWeekday = (firstDayOfMonth.weekday - DateTime.monday) % 7;
     
     final totalCells = daysInMonth + startWeekday;
     final totalRows = (totalCells / 7).ceil();
@@ -257,11 +293,10 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
     // Calculate cell size organically
     final innerPadding = 12.0;
     final availableGridWidth = width - (innerPadding * 2);
-    // 7 days in a week. Need to account for small spacing. If cell is W, spacing is roughly W/5.
-    // 7 * W + 6 * (W/5) = availableGridWidth => W = availableGridWidth / 8.2
     final double cellSize = (availableGridWidth / 8.2).floorToDouble();
 
     return Container(
+      key: key,
       width: width, 
       padding: EdgeInsets.all(innerPadding),
       decoration: BoxDecoration(
@@ -290,7 +325,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) {
+            children: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) {
               return SizedBox(
                 width: cellSize,
                 child: Text(
@@ -323,18 +358,27 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                   final currentDate = DateTime(year, month, dayOffset + 1);
                   final score = heatmapData[currentDate] ?? 0;
                   
-                  String tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score';
+                  String tooltipMsg;
+                  if (score == -1) {
+                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nFuture';
+                  } else if (score == -2) {
+                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nNo activity recorded';
+                  } else if (score == 0) {
+                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\n0% (Missed goals)';
+                  } else {
+                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score%';
+                  }
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 3),
                     child: GestureDetector(
-                      onTap: () {
+                      onTap: score == -1 ? null : () {
                         ref.read(selectedDateProvider.notifier).state = currentDate;
                         context.go('/home');
                       },
                       child: Semantics(
                         label: tooltipMsg,
-                        button: true,
+                        button: score != -1,
                         child: Tooltip(
                           message: tooltipMsg,
                           child: Container(
@@ -343,6 +387,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                             decoration: BoxDecoration(
                               color: _getColorForScore(context, score),
                               borderRadius: BorderRadius.circular(4),
+                              border: score == 0 
+                                  ? Border.all(color: context.colors.red.withValues(alpha: 0.3), width: 1)
+                                  : null,
                             ),
                           ),
                         ),
@@ -367,6 +414,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
       decoration: BoxDecoration(
         color: _getColorForScore(context, score),
         borderRadius: BorderRadius.circular(2),
+        border: score == 0 
+            ? Border.all(color: context.colors.red.withValues(alpha: 0.3), width: 1)
+            : null,
       ),
     );
   }

@@ -33,18 +33,16 @@ class ProgressAggregationService {
     required TimeRange range,
     required DateTime rangeStart,
     required DateTime rangeEnd,
+    required DateTime today,
     required double heightInMeters,
     required bool useKg,
   }) {
     if (range == TimeRange.weekly || range == TimeRange.oneMonth) {
-      // Return daily buckets
-      return _buildDailyBuckets(logs, mealLogs, metric, rangeStart, rangeEnd, heightInMeters, useKg);
+      return _buildDailyBuckets(logs, mealLogs, metric, rangeStart, rangeEnd, today, heightInMeters, useKg);
     } else if (range == TimeRange.threeMonths || range == TimeRange.sixMonths) {
-      // Return weekly buckets (Monday to Sunday)
-      return _buildWeeklyBuckets(logs, mealLogs, metric, rangeStart, rangeEnd, heightInMeters, useKg);
+      return _buildWeeklyBuckets(logs, mealLogs, metric, rangeStart, rangeEnd, today, heightInMeters, useKg);
     } else {
-      // 12M: Return monthly buckets
-      return _buildMonthlyBuckets(logs, mealLogs, metric, rangeStart, rangeEnd, heightInMeters, useKg);
+      return _buildMonthlyBuckets(logs, mealLogs, metric, rangeStart, rangeEnd, today, heightInMeters, useKg);
     }
   }
 
@@ -83,7 +81,7 @@ class ProgressAggregationService {
   }
 
   static List<ChartBucket> _buildDailyBuckets(
-      List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, DateTime start, DateTime end, double h, bool useKg) {
+      List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, DateTime start, DateTime end, DateTime today, double h, bool useKg) {
     
     final logsMap = {for (var l in logs) l.date: l};
     final mealMap = {for (var m in mealLogs) m.date: m};
@@ -119,7 +117,7 @@ class ProgressAggregationService {
   }
 
   static List<ChartBucket> _buildWeeklyBuckets(
-      List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, DateTime start, DateTime end, double h, bool useKg) {
+      List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, DateTime start, DateTime end, DateTime today, double h, bool useKg) {
     
     final logsMap = {for (var l in logs) l.date: l};
     final mealMap = {for (var m in mealLogs) m.date: m};
@@ -133,11 +131,10 @@ class ProgressAggregationService {
     }
     
     final endDay = DateTime(end.year, end.month, end.day);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     
     while (!current.isAfter(endDay)) {
       DateTime weekStart = current;
-      DateTime weekEnd = current.add(const Duration(days: 6));
+      DateTime weekEnd = DateTime(current.year, current.month, current.day + 6);
       
       // Clip boundaries to the requested range
       DateTime effectiveStart = weekStart.isBefore(start) ? DateTime(start.year, start.month, start.day) : weekStart;
@@ -146,16 +143,17 @@ class ProgressAggregationService {
       List<double> values = [];
       int eligibleDays = 0;
       
-      for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
-        final d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day + i);
-        if (d.isAfter(today)) continue; // Exclude future days
-        
-        eligibleDays++;
-        final dateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-        final val = _extractValue(logsMap[dateStr], mealMap[dateStr], metric, h, useKg);
-        if (val != null) {
-          values.add(val);
+      DateTime d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day);
+      while (!d.isAfter(effectiveEnd)) {
+        if (!d.isAfter(today)) {
+          eligibleDays++;
+          final dateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+          final val = _extractValue(logsMap[dateStr], mealMap[dateStr], metric, h, useKg);
+          if (val != null) {
+            values.add(val);
+          }
         }
+        d = DateTime(d.year, d.month, d.day + 1);
       }
       
       double? avg;
@@ -187,7 +185,7 @@ class ProgressAggregationService {
   }
 
   static List<ChartBucket> _buildMonthlyBuckets(
-      List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, DateTime start, DateTime end, double h, bool useKg) {
+      List<DailyLog> logs, List<DailyMealLog> mealLogs, MetricType metric, DateTime start, DateTime end, DateTime today, double h, bool useKg) {
     
     final logsMap = {for (var l in logs) l.date: l};
     final mealMap = {for (var m in mealLogs) m.date: m};
@@ -196,7 +194,6 @@ class ProgressAggregationService {
     
     DateTime currentMonthStart = DateTime(start.year, start.month, 1);
     final endDay = DateTime(end.year, end.month, end.day);
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     
     while (!currentMonthStart.isAfter(endDay)) {
       // Find end of month
@@ -206,7 +203,7 @@ class ProgressAggregationService {
         nextMonth = 1;
         nextYear++;
       }
-      DateTime monthEnd = DateTime(nextYear, nextMonth, 1).subtract(const Duration(days: 1));
+      DateTime monthEnd = DateTime(nextYear, nextMonth, 0); // 0th day is last day of previous month
       
       DateTime effectiveStart = currentMonthStart.isBefore(start) ? DateTime(start.year, start.month, start.day) : currentMonthStart;
       DateTime effectiveEnd = monthEnd.isAfter(endDay) ? endDay : monthEnd;
@@ -214,16 +211,17 @@ class ProgressAggregationService {
       List<double> values = [];
       int eligibleDays = 0;
       
-      for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
-        final d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day + i);
-        if (d.isAfter(today)) continue;
-        
-        eligibleDays++;
-        final dateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-        final val = _extractValue(logsMap[dateStr], mealMap[dateStr], metric, h, useKg);
-        if (val != null) {
-          values.add(val);
+      DateTime d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day);
+      while (!d.isAfter(effectiveEnd)) {
+        if (!d.isAfter(today)) {
+          eligibleDays++;
+          final dateStr = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+          final val = _extractValue(logsMap[dateStr], mealMap[dateStr], metric, h, useKg);
+          if (val != null) {
+            values.add(val);
+          }
         }
+        d = DateTime(d.year, d.month, d.day + 1);
       }
       
       double? avg;

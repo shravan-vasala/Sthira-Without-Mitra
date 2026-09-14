@@ -12,6 +12,7 @@ import '../services/ai_client.dart';
 class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
   late String dateStr;
   int _currentRequestId = 0;
+  bool _isFetching = false;
   CancellationToken? _cancellationToken;
 
   @override
@@ -52,6 +53,8 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
   }
 
   Future<void> fetchNote({bool force = false, bool background = false}) async {
+    if (_isFetching && !force) return;
+    
     final int requestId = ++_currentRequestId;
     final targetDateStr = dateStr;
 
@@ -81,6 +84,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
     // A completely new generation has started for this request
     _cancellationToken?.cancel();
     _cancellationToken = CancellationToken();
+    _isFetching = true;
 
     if (!background) state = const AsyncValue.loading();
     try {
@@ -213,7 +217,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       }
     } finally {
       if (_currentRequestId == requestId) {
-        // no lock to clear
+        _isFetching = false;
       }
     }
   }

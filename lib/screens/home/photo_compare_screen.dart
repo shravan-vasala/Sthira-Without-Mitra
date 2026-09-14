@@ -382,6 +382,20 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
 
   void _shareCompare() {
     Haptics.tap();
+    if (_leftPhoto == null || _rightPhoto == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select two photos to share.')));
+      return;
+    }
+
+    final mediaRepo = ref.read(mediaRepoProvider);
+    final leftExists = kIsWeb || File(mediaRepo.getAbsolutePath(_leftPhoto!.path)).existsSync();
+    final rightExists = kIsWeb || File(mediaRepo.getAbsolutePath(_rightPhoto!.path)).existsSync();
+
+    if (!leftExists || !rightExists) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot share missing photos.')));
+      return;
+    }
+
     ShareCardExporter.shareBoundary(
       boundaryKey: _shareKey,
       fileName: 'sthira_compare',
@@ -389,10 +403,50 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     );
   }
 
-  Widget _buildPhotoSource(PhotoItem? item, {BoxFit fit = BoxFit.contain}) {
+  Widget _buildPhotoSource(PhotoItem? item, bool isLeft, {BoxFit fit = BoxFit.contain}) {
     if (item == null) {
       return Container(color: Colors.black);
     }
+
+    final mediaRepo = ref.read(mediaRepoProvider);
+    final exists = kIsWeb || File(mediaRepo.getAbsolutePath(item.path)).existsSync();
+
+    if (!exists) {
+      return Container(
+        color: context.colors.card,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.broken_image_rounded, color: context.colors.textLight.withValues(alpha: 0.5), size: 48),
+              const SizedBox(height: 12),
+              Text('Photo Missing', style: TextStyle(color: context.colors.textLight, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                         if (isLeft) _leftPhoto = null;
+                         else _rightPhoto = null;
+                      });
+                    },
+                    child: Text('Remove', style: TextStyle(color: context.colors.red)),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () => _pickPhoto(isLeft),
+                    child: Text('Replace', style: TextStyle(color: context.colors.primary)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return kIsWeb
         ? Image.network(
             item.path,
@@ -400,7 +454,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
           )
         : Image.file(
-            File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)),
+            File(mediaRepo.getAbsolutePath(item.path)),
             fit: fit,
             errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
           );
@@ -427,7 +481,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                 child: InteractiveViewer(
                   transformationController: _transformController,
                   maxScale: 4.0,
-                  child: _buildPhotoSource(_leftPhoto),
+                  child: _buildPhotoSource(_leftPhoto, true),
                 ),
               ),
             ),
@@ -440,7 +494,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                 child: InteractiveViewer(
                   transformationController: _transformController,
                   maxScale: 4.0,
-                  child: _buildPhotoSource(_rightPhoto),
+                  child: _buildPhotoSource(_rightPhoto, false),
                 ),
               ),
             ),
@@ -460,11 +514,11 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
           fit: StackFit.expand,
           children: [
             // Bottom photo (Right)
-            _buildPhotoSource(_rightPhoto, fit: BoxFit.cover),
+            _buildPhotoSource(_rightPhoto, false, fit: BoxFit.cover),
             // Top photo (Left) clipped
             ClipRect(
               clipper: _SliderClipper(splitFraction: _sliderPosition),
-              child: _buildPhotoSource(_leftPhoto, fit: BoxFit.cover),
+              child: _buildPhotoSource(_leftPhoto, true, fit: BoxFit.cover),
             ),
             // Slider Handle
             Align(
@@ -540,6 +594,9 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // React to any potential deletions while this was a background tab or sheet
+    ref.watch(progressPhotosStreamProvider);
+
     final wData = _getWeightDelta();
     final weightDeltaText = wData['text'] as String;
     final wColor = wData['color'] as Color?;

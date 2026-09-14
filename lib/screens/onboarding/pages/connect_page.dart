@@ -81,7 +81,20 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
     // Current statuses
     final cred = ref.watch(credentialProvider);
     final hasGemini = cred.status == CredentialStatus.present && (cred.key ?? '').isNotEmpty;
+    
     final cloudConnected = ref.watch(isSignedInProvider);
+    final syncState = ref.watch(cloudSyncControllerProvider);
+    
+    String cloudStatusText = 'Local-only';
+    if (cloudConnected) {
+      if (syncState == CloudSyncState.syncing) {
+        cloudStatusText = 'Sync pending';
+      } else if (syncState == CloudSyncState.error) {
+        cloudStatusText = 'Retry';
+      } else {
+        cloudStatusText = 'Connected';
+      }
+    }
     
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -136,12 +149,12 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
               statusText: _healthConnected ? 'Connected' : 'Optional',
               statusActive: _healthConnected,
               onTap: () async {
-                final result = await showAppBottomSheet<bool>(
+                await showAppBottomSheet<bool>(
                   context: context,
                   builder: (_) => const HealthConnectSheet(),
                 );
-                if (result == true) {
-                  setState(() => _healthConnected = true);
+                if (mounted) {
+                  await _checkHealthStatus();
                 }
               },
             ),
@@ -153,7 +166,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
               icon: Icons.camera_alt_rounded,
               title: 'AI Food Scanning',
               subtitle: 'Scan meals using Gemini AI.',
-              statusText: hasGemini ? 'Connected' : 'Missing Key',
+              statusText: hasGemini ? 'Key saved' : 'Missing Key',
               statusActive: hasGemini,
               onTap: () {
                 showAppBottomSheet(
@@ -170,7 +183,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
               icon: Icons.cloud_sync_rounded,
               title: 'Cloud Backup',
               subtitle: 'Securely sync your progress.',
-              statusText: cloudConnected ? 'Syncing...' : 'Local-only',
+              statusText: cloudStatusText,
               statusActive: cloudConnected,
               onTap: () async {
                 await showAppBottomSheet<bool>(

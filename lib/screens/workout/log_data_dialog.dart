@@ -152,26 +152,24 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
               const SizedBox(width: 40),
               Expanded(
                 child: Text(
-                  'REPS',
+                  'Reps',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: context.colors.textLight,
-                    letterSpacing: 1,
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'WEIGHT (${ref.watch(profileProvider).useKg ? 'kg' : 'lb'})',
+                  'Weight (${ref.watch(profileProvider).useKg ? 'kg' : 'lb'})',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: context.colors.textLight,
-                    letterSpacing: 1,
                   ),
                 ),
               ),

@@ -9,6 +9,8 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
+import '../../widgets/app_bottom_sheet.dart';
+import '../../widgets/setup_sheets.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -83,7 +85,12 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
             const SizedBox(height: 24),
             PrimaryButton(
               label: 'Sign In',
-              onPressed: () => context.push('/auth'),
+              onPressed: () {
+                showAppBottomSheet(
+                   context: context,
+                   builder: (ctx) => const CloudSyncSheet(),
+                );
+              },
             ),
           ],
         ),

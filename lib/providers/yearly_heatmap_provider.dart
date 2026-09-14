@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'app_providers.dart';
 import '../models/daily_log.dart';
+import '../utils/time_utils.dart';
 
 final selectedYearProvider = StateProvider<int>((ref) => DateTime.now().year);
 
@@ -43,13 +44,13 @@ final yearlyActivityHeatmapProvider =
 
         final date = startDate.add(Duration(days: i));
         
-        final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-        if (date.isAfter(today)) {
+        final today = startOfDay();
+        if (startOfDay(date).isAfter(today)) {
           result[date] = -1;
           continue;
         }
 
-        final dateStr = DateFormat('yyyy-MM-dd').format(date);
+        final dateStr = todayKey(date);
         final completions = habitRepo.getCompletions(dateStr);
         final rawDailyLog = dailyLogRepo.getLog(dateStr);
         final mealLog = mealRepo.getDailyLog(dateStr);

@@ -35,7 +35,7 @@ class YearlyActivityScreen extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: context.colors.lavenderCard,
+                    color: context.colors.insetSurface,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -49,7 +49,7 @@ class YearlyActivityScreen extends ConsumerWidget {
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
-                          'Consistency is key. The more days you track your habits, log your workouts, and hit your nutrition goals, the brighter your heatmap will shine.',
+                          'Consistency is key. Track habits, workouts, and nutrition to brighten your heatmap. Unrecorded days are lightly shaded, while missed goals are outlined.',
                           style: TextStyle(
                             color: context.colors.textDark,
                             fontSize: 14,

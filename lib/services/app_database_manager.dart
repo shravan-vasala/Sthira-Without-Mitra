@@ -69,9 +69,9 @@ class AppDatabaseManager {
 
     if (!File(targetDbPath).existsSync() && File(oldDbPath).existsSync()) {
       debugPrint('AppDatabaseManager: Migrating legacy root database to scoped directory for $isarName...');
-      File(oldDbPath).renameSync(targetDbPath);
+      File(oldDbPath).copySync(targetDbPath);
       if (File(oldLockPath).existsSync()) {
-        File(oldLockPath).renameSync('${targetDir.path}/$isarName.lock');
+        File(oldLockPath).copySync('${targetDir.path}/$isarName.lock');
       }
     }
     

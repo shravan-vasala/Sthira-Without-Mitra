@@ -1,6 +1,8 @@
 import 'package:isar/isar.dart';
 import '../models/coach_note.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import 'dart:convert';
+import '../models/sync_queue_item.dart';
 
 class CoachNoteRepository {
   late Isar _isar;
@@ -24,7 +26,9 @@ class CoachNoteRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.coachNotes.put(note);
-      _sync?.queueSyncInTxn(_isar, 'coach_notes', note.date, note.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'coach_notes', docId: note.date, payload: jsonEncode(note.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }

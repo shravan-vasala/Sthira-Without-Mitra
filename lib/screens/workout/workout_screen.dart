@@ -279,7 +279,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     vertical: 10,
                   ),
                     decoration: BoxDecoration(
-                      color: context.colors.lavenderCard,
+                      color: context.colors.insetSurface,
                       borderRadius: BorderRadius.circular(14),
                       // Sthira: No borders! Let floating backgrounds separate space
                     ),
@@ -556,7 +556,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: context.colors.lavenderCard,
+        color: context.colors.insetSurface,
         borderRadius: BorderRadius.circular(20),
         // Sthira: No borders! Use shadow for elevation
         boxShadow: [
@@ -716,20 +716,23 @@ class _SectionWidgetState extends State<_SectionWidget> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  widget.section.title?.toUpperCase() ?? '',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.primary,
-                    letterSpacing: 1.2,
+                Expanded(
+                  child: Text(
+                    widget.section.title ?? '',
+                    style: TextStyle(
+                      fontFamily: 'Cabinet Grotesk',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.colors.textDark,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Text(
                   '${widget.section.exercises.length} exercises',
                   style: TextStyle(
                     fontSize: 12,
+                    fontWeight: FontWeight.w600,
                     color: context.colors.textMedium,
                   ),
                 ),

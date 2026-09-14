@@ -27,7 +27,7 @@ abstract class AppColorsPalette {
   Color get pinkIcon;
   Color get mint;
   Color get mintIcon;
-  Color get lavenderCard;
+  Color get insetSurface;
   Color get textDark;
   Color get textMedium;
   Color get textLight;
@@ -89,7 +89,7 @@ class AppColorsLight implements AppColorsPalette {
   @override
   Color get mintIcon => const Color(0xFF4E9B8F);
   @override
-  Color get lavenderCard => const Color(0xFFF5EBE1);
+  Color get insetSurface => const Color(0xFFF5EBE1);
   @override
   Color get textDark => const Color(0xFF2D1A25);
   @override
@@ -172,7 +172,7 @@ class AppColorsDark implements AppColorsPalette {
   @override
   Color get mintIcon => const Color(0xFF4E9B8F);
   @override
-  Color get lavenderCard => const Color(0xFF2B2326);
+  Color get insetSurface => const Color(0xFF1C2622);
   @override
   Color get textDark => const Color(0xFFEFE8EA);
   @override

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:isar/isar.dart';
 import '../models/daily_log.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import '../models/sync_queue_item.dart';
 
 class DailyLogRepository {
   late Isar _isar;
@@ -34,8 +35,9 @@ class DailyLogRepository {
   /// Attach a Firestore sync service (called after sign-in).
   Future<void> attachSync(ICloudSyncService sync) async {
     await detachSync();
-    _sync = sync;
+    _syncGeneration++; // Synchronous unique generation
     final currentGen = _syncGeneration;
+    _sync = sync;
     final targetUid = sync.currentUid;
     _attachedUid = targetUid;
 
@@ -66,6 +68,11 @@ class DailyLogRepository {
                     _attachedUid != targetUid) {
                   return;
                 }
+                final reloaded = _isar.dailyLogs.where().dateEqualTo(entry.key).findFirstSync();
+                if (reloaded?.updatedAt != null && log.updatedAt != null && log.updatedAt!.isBefore(reloaded!.updatedAt!)) {
+                  return;
+                }
+                if (reloaded != null) log.id = reloaded.id;
                 await _isar.dailyLogs.put(log);
               });
               _updates.add(null);
@@ -112,7 +119,15 @@ class DailyLogRepository {
     }
     await _isar.writeTxn(() async {
       await _isar.dailyLogs.put(updatedLog);
-      _sync?.queueSyncInTxn(_isar, 'daily_logs', updatedLog.date, updatedLog.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: 'daily_logs',
+          docId: updatedLog.date,
+          payload: jsonEncode(updatedLog.toJson()),
+          timestamp: DateTime.now(),
+        ));
+      }
     });
     _sync?.triggerFlush();
     _updates.add(null);
@@ -126,7 +141,15 @@ class DailyLogRepository {
       updated.id = current.id;
       
       await _isar.dailyLogs.put(updated);
-      _sync?.queueSyncInTxn(_isar, 'daily_logs', updated.date, updated.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(
+          uid: _isar.name,
+          collection: 'daily_logs',
+          docId: updated.date,
+          payload: jsonEncode(updated.toJson()),
+          timestamp: DateTime.now(),
+        ));
+      }
     });
     _sync?.triggerFlush();
     _updates.add(null);

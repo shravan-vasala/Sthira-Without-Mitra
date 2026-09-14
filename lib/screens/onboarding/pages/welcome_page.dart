@@ -435,7 +435,7 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
   Future<void> _playSequence(bool disableAnim) async {
     if (disableAnim) {
       _fadeController.value = 1.0;
-      await Future.delayed(const Duration(milliseconds: 1200));
+      await Future.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
       widget.onComplete();
       return;
@@ -443,8 +443,7 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
 
     await Future.delayed(const Duration(milliseconds: 100));
     if (!mounted) return;
-    _fadeController.forward();
-    await Future.delayed(const Duration(milliseconds: 1600));
+    await _fadeController.forward();
     if (!mounted) return;
     widget.onComplete();
   }
@@ -472,8 +471,12 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
                     curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
                   ).value,
                   child: Text(
-                    'Your journey starts now,\n${widget.name}.',
+                    widget.name.isEmpty
+                        ? 'Your journey starts now.'
+                        : 'Your journey starts now,\n${widget.name}.',
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontFamily: 'Cabinet Grotesk',
                       fontSize: 32,

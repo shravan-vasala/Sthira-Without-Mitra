@@ -30,6 +30,7 @@ class _PhysiquePicturesScreenState
   final _picker = ImagePicker();
 
   bool _isSelectionMode = false;
+  bool _isDeleting = false;
   final Set<String> _selectedPhotos = {};
   String _currentFilter = 'all';
 
@@ -47,7 +48,7 @@ class _PhysiquePicturesScreenState
   }
 
   void _deleteSelected(Map<String, List<String>> photosByDate) {
-    if (_selectedPhotos.isEmpty) return;
+    if (_selectedPhotos.isEmpty || _isDeleting) return;
     
     showAppBottomSheet(
       context: context,
@@ -59,8 +60,9 @@ class _PhysiquePicturesScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             PrimaryButton(
-              onPressed: () async {
+              onPressed: _isDeleting ? null : () async {
                 Navigator.pop(ctx);
+                setState(() => _isDeleting = true);
                 final toDelete = <String, List<String>>{};
                 for (final path in _selectedPhotos) {
                   for (final entry in photosByDate.entries) {
@@ -76,10 +78,12 @@ class _PhysiquePicturesScreenState
                     setState(() {
                       _selectedPhotos.clear();
                       _isSelectionMode = false;
+                      _isDeleting = false;
                     });
                   }
                 } catch (e) {
                   if (mounted) {
+                    setState(() => _isDeleting = false);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Failed to delete photos: $e')),
                     );

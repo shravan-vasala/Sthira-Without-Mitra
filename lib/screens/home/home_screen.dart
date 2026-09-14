@@ -131,24 +131,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       StaggeredFadeIn(index: 1, child: const WeekCalendarStrip()),
                       const SizedBox(height: 24),
 
-                      // 2.5 Daily Insight OR Coach Notes
-                      if (hasInsight) ...[
-                        StaggeredFadeIn(index: 2, child: const DailyInsightCard()),
-                        const SizedBox(height: 24),
-                      ] else ...[
-                        StaggeredFadeIn(index: 2, child: const CoachNotesCard()),
-                        const SizedBox(height: 24),
-                      ],
-
                       // 3. Workout (primary daily action)
                       if (plan != null && plan.days.isNotEmpty) ...[
-                        StaggeredFadeIn(index: 3, child: _WorkoutsSection(plan: plan)),
+                        StaggeredFadeIn(index: 2, child: _WorkoutsSection(plan: plan)),
                         const SizedBox(height: 24),
                       ],
 
                       // 4. Habits
                       StaggeredFadeIn(
-                        index: 4,
+                        index: 3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -169,7 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 5. Meals
                       StaggeredFadeIn(
-                        index: 5,
+                        index: 4,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -186,7 +177,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 6. Daily progress metrics
                       StaggeredFadeIn(
-                        index: 6,
+                        index: 5,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -205,6 +196,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       
+                      const SizedBox(height: 24),
+                      
+                      // 7. Secondary Coach/Insight
+                      if (hasInsight)
+                        StaggeredFadeIn(
+                          index: 6,
+                          child: const DailyInsightCard(),
+                        )
+                      else
+                        StaggeredFadeIn(
+                          index: 6,
+                          child: const CoachNotesCard(),
+                        ),
+
                       // Explicit bottom clearance for floating nav constraints
                       const SizedBox(height: 100),
                     ],
@@ -432,8 +437,8 @@ class _HabitsCountLabel extends ConsumerWidget {
       child: Text(
         '$completedCount/${habits.length}',
         style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: context.colors.textMedium,
+          fontWeight: FontWeight.w500,
+          color: context.colors.textLight,
           fontSize: 14,
         ),
       ),

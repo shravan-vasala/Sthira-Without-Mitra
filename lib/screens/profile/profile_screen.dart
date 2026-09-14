@@ -99,14 +99,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           builder: (_) => AvatarPickerSheet(currentAvatar: profile.photoPath),
                         );
                         if (result != null) {
-                          if (result == 'DELETE') {
-                            ref.read(profileProvider.notifier).updateProfile(
-                                  profile.copyWith(clearPhoto: true),
-                                );
-                          } else {
-                            ref.read(profileProvider.notifier).updateProfile(
-                                  profile.copyWith(photoPath: result),
-                                );
+                          try {
+                            if (result == 'DELETE') {
+                              await ref.read(profileProvider.notifier).updateProfile(
+                                    profile.copyWith(clearPhoto: true),
+                                  );
+                            } else {
+                              await ref.read(profileProvider.notifier).updateProfile(
+                                    profile.copyWith(photoPath: result),
+                                  );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed to update avatar: $e')),
+                              );
+                            }
                           }
                         }
                       },
@@ -736,13 +744,16 @@ class _CloudSyncCard extends ConsumerStatefulWidget {
 }
 
 class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
-
   @override
   Widget build(BuildContext context) {
     final isSignedIn = ref.watch(isSignedInProvider);
     final userEmail = ref.watch(userEmailProvider);
     final syncState = ref.watch(cloudSyncControllerProvider);
     final isSyncing = syncState == CloudSyncState.syncing;
+    final errorMessage = ref.read(cloudSyncControllerProvider.notifier).errorMessage;
+
+    final pendingCountAsync = ref.watch(syncPendingCountProvider);
+    final pendingCount = pendingCountAsync.value ?? 0;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -791,10 +802,30 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
           const SizedBox(height: 12),
           Text(
             isSignedIn
-                ? 'Your text data is securely synced as $userEmail. Photos are NOT cloud-synced. Use ZIP backup to move media.'
+                ? 'Your text data is securely synced as $userEmail. Photos are NOT cloud-synced.'
                 : 'Sign in to sync your text data across devices. Photos are NOT cloud-synced.',
             style: TextStyle(color: context.colors.textMedium, fontSize: 13),
           ),
+          if (isSignedIn && pendingCount > 0 && !isSyncing) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.sync_problem_rounded, color: context.colors.warning, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  '$pendingCount pending edits not yet synced',
+                  style: TextStyle(color: context.colors.warning, fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+          if (errorMessage != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Error: $errorMessage',
+              style: TextStyle(color: context.colors.red, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: 16),
           if (isSyncing)
             Center(
@@ -838,13 +869,17 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: isSyncing ? null : () {
-                      ref.read(syncControllerProvider.notifier).sync(isManualRefresh: true);
+                    onPressed: pendingCount == 0 ? null : () async {
+                      try {
+                        await ref.read(firestoreSyncServiceProvider).flushNow();
+                      } catch (e) {
+                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sync failed: $e')));
+                      }
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
                       side: BorderSide(
-                        color: context.colors.primary.withValues(alpha: 0.5),
+                        color: pendingCount > 0 ? context.colors.primary : context.colors.primary.withValues(alpha: 0.2),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -852,49 +887,43 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                       ),
                     ),
                     icon: const Icon(Icons.sync),
-                    label: const Text('Sync Now'),
+                    label: Text(pendingCount > 0 ? 'Sync $pendingCount Edits' : 'Up to date'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 IconButton(
                   onPressed: () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        backgroundColor: context.colors.card,
-                        title: Text(
-                          'Sign Out',
-                          style: TextStyle(color: context.colors.textDark),
+                    if (pendingCount > 0) {
+                      final force = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: context.colors.card,
+                          title: Text('Unsynced Changes', style: TextStyle(color: context.colors.textDark)),
+                          content: Text('You have $pendingCount unsynced edits. Signing out now means they will stay locally but won\'t be in the cloud. Proceed?', style: TextStyle(color: context.colors.textMedium)),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: TextStyle(color: context.colors.textLight))),
+                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out Anyway', style: TextStyle(color: context.colors.red))),
+                          ],
                         ),
-                        content: Text(
-                          'Are you sure you want to sign out?',
-                          style: TextStyle(color: context.colors.textMedium),
+                      );
+                      if (force != true) return;
+                    } else {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: context.colors.card,
+                          title: Text('Sign Out', style: TextStyle(color: context.colors.textDark)),
+                          content: Text('Are you sure you want to sign out?', style: TextStyle(color: context.colors.textMedium)),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: TextStyle(color: context.colors.textLight))),
+                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out', style: TextStyle(color: context.colors.red, fontWeight: FontWeight.bold))),
+                          ],
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: Text(
-                              'Cancel',
-                              style: TextStyle(color: context.colors.textLight),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: Text(
-                              'Sign Out',
-                              style: TextStyle(
-                                color: context.colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
-                      await ref.read(remindersProvider.notifier).clearOnSignOut();
-                      await ref.read(authServiceProvider).signOut();
+                      );
+                      if (confirm != true) return;
                     }
+                    await ref.read(remindersProvider.notifier).clearOnSignOut();
+                    await ref.read(authServiceProvider).signOut();
                   },
                   tooltip: 'Sign out',
                   icon: Icon(Icons.logout, color: context.colors.red),
@@ -1277,7 +1306,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                       height: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: context.colors.lavenderCard,
+                        color: context.colors.insetSurface,
                       ),
                       child: ClipOval(
                         child: _localPhotoPath != null && !_clearPhoto

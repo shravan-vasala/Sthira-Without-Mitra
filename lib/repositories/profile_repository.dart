@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import '../models/user_profile.dart';
 import '../interfaces/i_cloud_sync_service.dart';
+import 'dart:convert';
+import '../models/sync_queue_item.dart';
 
 class ProfileRepository {
   late Isar _isar;
@@ -53,7 +55,9 @@ class ProfileRepository {
   Future<void> saveProfile(UserProfile profile) async {
     await _isar.writeTxn(() async {
       await _isar.userProfiles.put(profile);
-      _sync?.queueProfileInTxn(_isar, profile.toJson());
+      if (_isar.name != 'guest') {
+        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_profile_', docId: 'profile', payload: jsonEncode(profile.toJson()), timestamp: DateTime.now()));
+      }
     });
     _sync?.triggerFlush();
   }
