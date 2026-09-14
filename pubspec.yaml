@@ -96,4 +96,4 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "assets/icon/sunflower_menu_logo_1024.png"
+  image_path: "assets/icon/logo.jpeg"

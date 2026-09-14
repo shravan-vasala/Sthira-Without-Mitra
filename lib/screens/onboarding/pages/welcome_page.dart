@@ -114,7 +114,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
               Widget logo = ClipRRect(
                 borderRadius: BorderRadius.circular(40),
                 child: Image.asset(
-                  'assets/icon/sunflower_menu_logo_1024.png',
+                  'assets/icon/logo.jpeg',
                   width: 120,
                   height: 120,
                   fit: BoxFit.cover,
