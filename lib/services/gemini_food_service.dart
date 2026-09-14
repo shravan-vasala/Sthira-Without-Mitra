@@ -173,7 +173,7 @@ $_jsonShape
     }
 
     final normalizedQuery = trimmed.toLowerCase();
-    final isar = Isar.getInstance()!;
+    final isar = Isar.getInstance(Isar.getInstanceNames().first)!;
     final cached = isar.foodSearchCaches
         .where()
         .normalizedQueryEqualTo(normalizedQuery)
@@ -373,7 +373,7 @@ $_jsonShape
     List<String> dishNames, {
     CancellationToken? cancellationToken,
   }) async {
-    final isar = Isar.getInstance()!;
+    final isar = Isar.getInstance(Isar.getInstanceNames().first)!;
     final Map<String, Map<String, dynamic>> results = {};
     final List<String> toFetch = [];
 
