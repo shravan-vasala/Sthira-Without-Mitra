@@ -102,7 +102,7 @@ Future<void> main() async {
       exerciseLogRepo.init(isar),
       coachNoteRepo.init(isar),
       badgeRepo.init(isar),
-      healthConnectService.init(),
+      healthConnectService.init(isar),
       NotificationService().init(),
     ]);
 

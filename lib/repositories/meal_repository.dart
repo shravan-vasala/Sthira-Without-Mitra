@@ -75,7 +75,7 @@ class MealRepository {
                     _attachedUid != targetUid) {
                   return;
                 }
-                final reloaded = _isar.dailyMealLogs.where().dateEqualTo(entry.key).findFirstSync();
+                final reloaded = await _isar.dailyMealLogs.where().dateEqualTo(entry.key).findFirst();
                 if (reloaded != null && incomingUpdatedAt != null) {
                   final reloadedUpdatedAt = DateTime.tryParse(reloaded.toJson()['updatedAt'].toString() ?? '');
                   if (reloadedUpdatedAt != null && incomingUpdatedAt.isBefore(reloadedUpdatedAt)) {

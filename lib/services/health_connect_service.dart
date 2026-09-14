@@ -15,8 +15,8 @@ class HealthConnectService {
   late final Isar _isar;
   bool _configured = false;
 
-  Future<void> init() async {
-    _isar = Isar.getInstance()!;
+  Future<void> init(Isar isar) async {
+    _isar = isar;
   }
 
   Future<void> _ensureConfigured() async {

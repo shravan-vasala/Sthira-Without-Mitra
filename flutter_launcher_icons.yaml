@@ -1,5 +1,5 @@
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
-  image_path: "assets/icon/sunflower_menu_logo_1024.png"
+  image_path: "assets/icon/logo.jpeg"
   min_sdk_android: 21
