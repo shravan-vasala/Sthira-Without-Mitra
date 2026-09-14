@@ -34,7 +34,7 @@ class NutritionLookupService {
     final queryStr = queryTokens.join(' ');
 
     // 0. Check UserFoodLog (Personalized Local DB) first (Exact match)
-    final isar = Isar.getInstance();
+    final isar = Isar.getInstanceNames().isNotEmpty ? Isar.getInstance(Isar.getInstanceNames().first) : null;
     if (isar != null) {
       final userFood = isar.userFoodLogs
           .where()
