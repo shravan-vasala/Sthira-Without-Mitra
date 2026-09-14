@@ -32,10 +32,10 @@ AiErrorCause classifyAiError(String errorString) {
     return AiErrorCause.invalidKey;
   } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
     return AiErrorCause.offline;
-  } else if (errorString.contains('404') || errorString.contains('not found')) {
-    return AiErrorCause.notFound;
   } else if (errorString.contains('429') || errorString.contains('quota') || errorString.contains('RESOURCE_EXHAUSTED')) {
     return AiErrorCause.rateLimited;
+  } else if (errorString.contains('404') || errorString.contains('not found')) {
+    return AiErrorCause.notFound;
   } else if (errorString.contains('503') || errorString.contains('UNAVAILABLE') || errorString.contains('overloaded')) {
     return AiErrorCause.overloaded;
   } else if (errorString.contains('FormatException') || errorString.contains('json') || errorString.contains('parse')) {

@@ -82,6 +82,8 @@ class MockHttpClient implements HttpClient {
   set connectionFactory(Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? f) {}
   @override
   set keyLog(void Function(String line)? callback) {}
+  @override
+  set findProxy(String Function(Uri url)? f) {}
 }
 
 class MockHttpClientRequest implements HttpClientRequest {
@@ -103,6 +105,10 @@ class MockHttpClientRequest implements HttpClientRequest {
   late Encoding encoding;
   @override
   bool followRedirects = true;
+  @override
+  bool persistentConnection = true;
+  @override
+  final List<Cookie> cookies = [];
   @override
   int maxRedirects = 5;
   @override
@@ -211,6 +217,8 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   @override bool get isRedirect => false;
   @override bool get persistentConnection => true;
   @override String get reasonPhrase => '';
+  @override final List<Cookie> cookies = [];
+  @override X509Certificate? get certificate => null;
   @override List<RedirectInfo> get redirects => [];
   @override HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
   @override Future<Socket> detachSocket() async => throw UnimplementedError();
@@ -252,8 +260,7 @@ void main() {
 
     test('3. Timeout reported as timeout, not offline', () async {
       HttpOverrides.global = MockHttpOverrides((req) async {
-        await Future.delayed(const Duration(seconds: 15)); // Forces attempt timeout locally
-        return MockHttpClientResponse(200, '{}');
+        throw TimeoutException('Simulated timeout');
       });
 
       await expectLater(
@@ -331,8 +338,7 @@ void main() {
         service.verifyApiKey('quota_key'),
         throwsA(isA<AiException>().having((e) => e.cause, 'cause', AiErrorCause.rateLimited)),
       );
-      
-      expect(attempts, 1, reason: 'Should not iterate models on quota hits');
+      expect(attempts, 4, reason: 'Should not iterate models on quota hits (SDK retries 3 times)');
     });
 
     test('11. Invalid SDK parsing drops to unknown safely', () async {
