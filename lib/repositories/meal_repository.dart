@@ -18,6 +18,8 @@ class MealRepository {
   final List<StreamSubscription> _syncSubscriptions = [];
   final Map<String, DateTime> _localEdits = {};
 
+  String defaultPlanName = "Meal Plan";
+
   Stream<void> get watchUpdates => _isar.dailyMealLogs.watchLazy(fireImmediately: true);
 
   Future<void> detachSync() async {
@@ -145,18 +147,19 @@ class MealRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    final bodammaPlan = _isar.mealPlans
+    final jsonStr = await rootBundle.loadString(
+      'assets/data/seed_meal_plan.json',
+    );
+    final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final plan = MealPlan.fromJson(map);
+    defaultPlanName = plan.planName;
+
+    final existingPlan = _isar.mealPlans
         .where()
-        .planNameEqualTo("Bodamma's Glow & Lean Master Routine")
+        .planNameEqualTo(plan.planName)
         .findFirstSync();
 
-    if (bodammaPlan == null) {
-      final jsonStr = await rootBundle.loadString(
-        'assets/data/seed_meal_plan.json',
-      );
-      final plan = MealPlan.fromJson(
-        jsonDecode(jsonStr) as Map<String, dynamic>,
-      );
+    if (existingPlan == null) {
       await _isar.writeTxn(() async {
         await _isar.mealPlans.put(plan);
       });
@@ -322,6 +325,17 @@ class MealRepository {
         }
       } else if (nutrition != null) {
         throw const FormatException('"nutritionTarget" must be an object');
+      }
+
+      if (meal['suggestions'] != null) {
+        if (meal['suggestions'] is! List) {
+          throw FormatException('"suggestions" in meal "${meal['name'] ?? 'unknown'}" must be an array');
+        }
+        for (final item in meal['suggestions']) {
+          if (item is! String) {
+            throw FormatException('Suggestion in meal "${meal['name'] ?? 'unknown'}" is not a valid string. Found: ${item.runtimeType}');
+          }
+        }
       }
     }
 

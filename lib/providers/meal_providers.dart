@@ -8,8 +8,12 @@ final mealPlanProvider = Provider<MealPlan?>((ref) {
   final repo = ref.watch(mealRepoProvider);
   final profile = ref.watch(profileProvider);
 
-  final activePlanId = profile.activeMealPlan ?? "Bodamma's Glow & Lean Master Routine";
-  return repo.getMealPlan(activePlanId);
+  final activePlanId = profile.activeMealPlan ?? repo.defaultPlanName;
+  MealPlan? plan = repo.getMealPlan(activePlanId);
+  if (plan == null && repo.defaultPlanName != activePlanId) {
+    plan = repo.getMealPlan(repo.defaultPlanName);
+  }
+  return plan;
 });
 
 class DailyMealLogNotifier extends Notifier<DailyMealLog> {
