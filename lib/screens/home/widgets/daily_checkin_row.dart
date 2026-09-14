@@ -21,21 +21,15 @@ class DailyCheckInRow extends ConsumerWidget {
     final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
     final isToday = dateStr == todayStr;
     
-    final dailyLogAsync = ref.watch(dailyLogProvider(dateStr));
-    
-    return dailyLogAsync.when(
-      data: (dailyLog) {
-        final hasCheckIn = dailyLog?.dayFeeling != null;
-        return _CheckInCard(
-          dateStr: dateStr, 
-          isToday: isToday, 
-          dailyLog: dailyLog, 
-          hasCheckIn: hasCheckIn,
-          colors: colors,
-        );
-      },
-      loading: () => const SizedBox(height: 72), // Placeholder height
-      error: (_, __) => const SizedBox.shrink(),
+    final dailyLog = ref.watch(dailyLogProvider);
+    final hasCheckIn = dailyLog.dayFeeling != null;
+
+    return _CheckInCard(
+      dateStr: dateStr, 
+      isToday: isToday, 
+      dailyLog: dailyLog, 
+      hasCheckIn: hasCheckIn,
+      colors: colors,
     );
   }
 }

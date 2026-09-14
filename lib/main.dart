@@ -158,7 +158,7 @@ Future<void> main() async {
           authServiceProvider.overrideWithValue(authService),
           firestoreSyncServiceProvider.overrideWithValue(firestoreSyncService),
           sharedPreferencesProvider.overrideWithValue(prefs),
-          diagnosticLoggerProvider.overrideWithValue(logger),
+          diagnosticLoggerProvider.overrideWith((ref) => logger),
         ],
         child: const TruFitApp(),
       ),

@@ -137,7 +137,7 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Remove', style: TextStyle(color: context.colors.error)),
+            child: Text('Remove', style: TextStyle(color: context.colors.red)),
           ),
         ],
       ),
@@ -175,7 +175,7 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Discard', style: TextStyle(color: context.colors.error)),
+            child: Text('Discard', style: TextStyle(color: context.colors.red)),
           ),
         ],
       ),
@@ -390,7 +390,7 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
                 TextButton(
                   onPressed: _isSaving ? null : _remove,
                   style: TextButton.styleFrom(
-                    foregroundColor: colors.error,
+                    foregroundColor: colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
