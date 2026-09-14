@@ -337,6 +337,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               GestureDetector(
+                onTap: () => _showGitaSheet(context),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    '2:47',
+                    style: TextStyle(
+                      fontFamily: 'Cabinet Grotesk',
+                      fontSize: 16,
+                      color: const Color(0xFFE29B65).withOpacity(0.8),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              GestureDetector(
                 onTap: () {
                   _devTapCount++;
                   if (_devTapCount >= 7) {
@@ -390,6 +408,60 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showGitaSheet(BuildContext context) {
+    showAppBottomSheet(
+      context: context,
+      builder: (ctx) => AppSheet(
+        scrollable: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                '2:47',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Cabinet Grotesk',
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.textDark,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'General Sans',
+                  fontSize: 15,
+                  height: 1.5,
+                  color: context.colors.textMedium,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Caveat',
+                    fontSize: 22,
+                    color: context.colors.textDark.withValues(alpha: 0.85),
+                    height: 1.3,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

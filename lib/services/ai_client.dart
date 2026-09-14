@@ -27,7 +27,7 @@ class AiException implements Exception {
   String toString() => message;
 }
 
-AiErrorCause _classifyError(String errorString) {
+AiErrorCause classifyAiError(String errorString) {
   if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project') || errorString.contains('deactivated') || errorString.contains('SERVICE_DISABLED') || errorString.contains('PERMISSION_DENIED') || errorString.contains('403') || errorString.contains('forbidden')) {
     return AiErrorCause.invalidKey;
   } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
@@ -252,7 +252,7 @@ class AiClient {
         } catch (e) {
           sw.stop();
           final errStr = e.toString();
-          final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
+          final cause = (e is AiException && e.cause != null) ? e.cause! : classifyAiError(errStr);
           lastCause = cause;
           lastErrorMsg = errStr;
           
@@ -489,7 +489,7 @@ class AiClient {
           if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
           sw.stop();
           final errStr = e.toString();
-          final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(errStr);
+          final cause = (e is AiException && e.cause != null) ? e.cause! : classifyAiError(errStr);
           lastCause = cause;
 
           AiLogger.log(
@@ -555,7 +555,7 @@ class AiClient {
         });
       } catch (e) {
         if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
-        final cause = (e is AiException && e.cause != null) ? e.cause! : _classifyError(e.toString());
+        final cause = (e is AiException && e.cause != null) ? e.cause! : classifyAiError(e.toString());
         lastCause = cause;
         tryNextModel();
       }

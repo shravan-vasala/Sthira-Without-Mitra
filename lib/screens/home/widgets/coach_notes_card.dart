@@ -11,7 +11,9 @@ import '../../../widgets/async_error_card.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 
 class CoachNotesCard extends ConsumerWidget {
-  const CoachNotesCard({super.key});
+  const CoachNotesCard({super.key, this.topMargin = 12.0});
+
+  final double topMargin;
 
   void _showHistory(BuildContext context, WidgetRef ref) {
     final repo = ref.read(coachNoteRepoProvider);
@@ -94,9 +96,11 @@ class CoachNotesCard extends ConsumerWidget {
     final hasKey = cred.status == CredentialStatus.present && (cred.key ?? '').isNotEmpty;
 
     return SurfaceCard(
-      margin: const EdgeInsets.symmetric(
-        horizontal: kScreenPadding,
-        vertical: 12,
+      margin: EdgeInsets.only(
+        left: kScreenPadding,
+        right: kScreenPadding,
+        top: topMargin,
+        bottom: 12,
       ),
       onTap: () => _showHistory(context, ref),
       child: Column(

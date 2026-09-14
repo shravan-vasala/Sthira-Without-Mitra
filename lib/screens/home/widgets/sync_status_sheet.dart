@@ -205,11 +205,14 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
             height: 56,
             child: ElevatedButton(
               onPressed: () async {
-                setState(() => _errorMessage = null);
+                setState(() {
+                  _errorMessage = null;
+                  _checking = true;
+                });
+                
                 final hcService = ref.read(healthConnectServiceProvider);
-                final dailyLogRepo = ref.read(dailyLogRepoProvider);
-                final habitRepo = ref.read(habitRepoProvider);
                 final prefs = ref.read(sharedPreferencesProvider);
+                final selectedDate = ref.read(dateStringProvider);
 
                 try {
                   final isAvail = await hcService.isAvailable();
@@ -217,6 +220,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                     setState(() {
                       _errorMessage = 'Health Connect is not available on this device.';
                       _errorAction = 'Install Health Connect';
+                      _checking = false;
                     });
                     return;
                   }
@@ -235,30 +239,23 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                     setState(() {
                       _errorMessage = 'Missing permissions to read steps.';
                       _errorAction = 'Grant Permission';
+                      _checking = false;
                     });
                     await _loadStatus();
                     return;
                   }
 
-                  final todayData = await hcService.syncToday();
-                  final steps = todayData?.steps;
-                  if (todayData != null) await dailyLogRepo.updateFromHealthConnect([todayData]);
-                  if (steps != null) {
-                    await prefs.setBool('hc_connected', true);
-                    await prefs.setString(
-                      'last_hc_sync_time',
-                      DateTime.now().toIso8601String(),
-                    );
-                    ref.read(stepsSourceProvider.notifier).state = StepsSource.healthConnect;
-                  }
-
-                  ref.invalidate(dailyLogProvider);
-                  ref.invalidate(habitCompletionsProvider);
+                  await ref.read(syncControllerProvider.notifier).sync(
+                    isManualRefresh: true,
+                    explicitTargetDate: selectedDate,
+                  );
+                  
                   if (context.mounted) Navigator.of(context).pop();
                 } catch (e) {
                   setState(() {
                     _errorMessage = 'An unexpected error occurred during sync.';
                     _errorAction = null;
+                    _checking = false;
                   });
                   await _loadStatus();
                 }

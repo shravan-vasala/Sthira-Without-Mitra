@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 import '../../../models/daily_log.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
-import '../../../theme/app_typography.dart';
+import '../../../theme/layout_insets.dart';
 import 'daily_checkin_sheet.dart';
+import 'dart:math' as math;
 
 class DailyCheckInRow extends ConsumerWidget {
   const DailyCheckInRow({super.key});
@@ -16,7 +17,6 @@ class DailyCheckInRow extends ConsumerWidget {
     final now = DateTime.now();
     final todayStr = DateFormat('yyyy-MM-dd').format(now);
     
-    // We observe the selected day's log
     final selectedDate = ref.watch(selectedDateProvider);
     final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
     final isToday = dateStr == todayStr;
@@ -24,12 +24,15 @@ class DailyCheckInRow extends ConsumerWidget {
     final dailyLog = ref.watch(dailyLogProvider);
     final hasCheckIn = dailyLog.dayFeeling != null;
 
-    return _CheckInCard(
-      dateStr: dateStr, 
-      isToday: isToday, 
-      dailyLog: dailyLog, 
-      hasCheckIn: hasCheckIn,
-      colors: colors,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+      child: _CheckInCard(
+        dateStr: dateStr, 
+        isToday: isToday, 
+        dailyLog: dailyLog, 
+        hasCheckIn: hasCheckIn,
+        colors: colors,
+      ),
     );
   }
 }
@@ -60,102 +63,135 @@ class _CheckInCard extends StatelessWidget {
     }
   }
 
-  IconData _feelingIcon(String feeling) {
-    switch (feeling) {
-      case 'veryLow': return Icons.sentiment_very_dissatisfied_rounded;
-      case 'low': return Icons.sentiment_dissatisfied_rounded;
-      case 'okay': return Icons.sentiment_neutral_rounded;
-      case 'good': return Icons.sentiment_satisfied_rounded;
-      case 'great': return Icons.sentiment_very_satisfied_rounded;
-      default: return Icons.sentiment_neutral_rounded;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         DailyCheckInSheet.show(context, dateStr, dailyLog);
       },
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: colors.card,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: colors.primary.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: hasCheckIn 
-                    ? colors.orange.withValues(alpha: 0.15)
-                    : colors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                hasCheckIn ? _feelingIcon(dailyLog!.dayFeeling!) : Icons.sentiment_satisfied_alt_rounded,
-                color: hasCheckIn ? colors.orange : colors.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
+            CloverIcon(color: colors.green, size: 24),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    hasCheckIn 
-                        ? 'Felt ${_feelingLabel(dailyLog!.dayFeeling!).toLowerCase()}'
-                        : (isToday ? 'How are you feeling today?' : 'How did this day feel?'),
+                    'Daily check-in',
                     style: TextStyle(
-                      fontFamily: 'General Sans',
+                      fontFamily: 'Cabinet Grotesk',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: colors.textDark,
                     ),
                   ),
-                  if (hasCheckIn && dailyLog!.dayNote != null && dailyLog!.dayNote!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      dailyLog!.dayNote!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'General Sans',
-                        fontSize: 13,
-                        color: colors.textDark.withValues(alpha: 0.6),
-                      ),
+                  const SizedBox(height: 2),
+                  Text(
+                    hasCheckIn 
+                        ? '${_feelingLabel(dailyLog!.dayFeeling!)} · Tap to edit'
+                        : (isToday ? 'How did today feel?' : 'How did this day feel?'),
+                    style: TextStyle(
+                      fontFamily: 'General Sans',
+                      fontSize: 13,
+                      color: colors.textMedium,
                     ),
-                  ] else if (!hasCheckIn) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Tap to check in',
-                      style: TextStyle(
-                        fontFamily: 'General Sans',
-                        fontSize: 13,
-                        color: colors.textDark.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
             Icon(
               Icons.chevron_right_rounded,
-              color: colors.textDark.withValues(alpha: 0.3),
+              color: colors.textLight,
+              size: 16,
             ),
           ],
         ),
       ),
     );
   }
+}
+
+// CustomPainter for the Four-Leaf Clover
+class CloverIcon extends StatelessWidget {
+  const CloverIcon({super.key, required this.color, required this.size});
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _CloverPainter(color: color),
+      ),
+    );
+  }
+}
+
+class _CloverPainter extends CustomPainter {
+  final Color color;
+  _CloverPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 5;
+
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+
+    // Draw the 4 leaves (rotated to fit gracefully)
+    for (int i = 0; i < 4; i++) {
+        canvas.save();
+        canvas.rotate((math.pi / 2) * i + math.pi / 4);
+        
+        final path = Path();
+        path.moveTo(0, 0);
+        path.cubicTo(
+            radius * 1.5, -radius * 0.5,
+            radius * 1.5, -radius * 2.5,
+            0, -radius * 2
+        );
+        path.cubicTo(
+            -radius * 1.5, -radius * 2.5,
+            -radius * 1.5, -radius * 0.5,
+            0, 0
+        );
+        
+        canvas.drawPath(path, paint);
+        canvas.restore();
+    }
+
+    // Draw a small stem
+    final stemPath = Path();
+    stemPath.moveTo(0, radius);
+    stemPath.quadraticBezierTo(
+        -radius * 0.5, radius * 2,
+        -radius * 0.2, radius * 2.5
+    );
+    paint.style = PaintingStyle.stroke;
+    canvas.drawPath(stemPath, paint);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_CloverPainter oldDelegate) => color != oldDelegate.color;
 }

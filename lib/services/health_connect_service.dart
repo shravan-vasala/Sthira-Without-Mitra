@@ -8,6 +8,17 @@ import '../models/feature_availability.dart';
 
 enum StepsSource { healthConnect, manual, none }
 
+enum HealthStatus { success, empty, error }
+
+class HealthReadResult<T> {
+  final HealthStatus status;
+  final T? data;
+
+  HealthReadResult.success(this.data) : status = HealthStatus.success;
+  HealthReadResult.empty() : status = HealthStatus.empty, data = null;
+  HealthReadResult.error() : status = HealthStatus.error, data = null;
+}
+
 class HealthConnectService {
   static const String _backfillDoneKey = 'health_connect_backfill_done';
 
@@ -80,37 +91,35 @@ class HealthConnectService {
     }
   }
 
-  /// Get today's total step count from Health Connect.
-  Future<int?> getTodaySteps() async {
+  Future<HealthReadResult<int>> getTodaySteps() async {
     try {
       await _ensureConfigured();
       final now = DateTime.now();
       final midnight = DateTime(now.year, now.month, now.day);
       final steps = await _health.getTotalStepsInInterval(midnight, now);
-      return steps;
+      return steps != null ? HealthReadResult.success(steps) : HealthReadResult.empty();
     } catch (_) {
-      return null;
+      return HealthReadResult.error();
     }
   }
 
-  /// Get step count for a specific calendar day.
-  Future<int?> getStepsForDate(DateTime date) async {
+  Future<HealthReadResult<int>> getStepsForDate(DateTime date) async {
     try {
       await _ensureConfigured();
       final start = DateTime(date.year, date.month, date.day);
-      final end = start
-          .add(const Duration(days: 1))
-          .subtract(const Duration(seconds: 1));
+      var end = start.add(const Duration(days: 1));
+      final now = DateTime.now();
+      if (end.isAfter(now)) {
+        end = now;
+      }
       final steps = await _health.getTotalStepsInInterval(start, end);
-      return steps;
+      return steps != null ? HealthReadResult.success(steps) : HealthReadResult.empty();
     } catch (_) {
-      return null;
+      return HealthReadResult.error();
     }
   }
 
-  /// Get sleep hours for a specific calendar day.
-  /// Health Connect often stores sleep sessions from previous night to current morning.
-  Future<double?> getSleepForDate(DateTime date) async {
+  Future<HealthReadResult<double>> getSleepForDate(DateTime date) async {
     try {
       await _ensureConfigured();
       // Sleep for a date usually means sleep ending on that date
@@ -135,7 +144,7 @@ class HealthConnectService {
         endTime: end,
       );
 
-      if (healthData.isEmpty) return null;
+      if (healthData.isEmpty) return HealthReadResult.empty();
 
       // Deduplicate overlapping sleep sessions
       healthData.sort((a, b) => a.dateFrom.compareTo(b.dateFrom));
@@ -172,9 +181,9 @@ class HealthConnectService {
         totalMinutes += currentEnd.difference(currentStart).inMinutes;
       }
 
-      return double.parse((totalMinutes / 60).toStringAsFixed(1));
+      return HealthReadResult.success(double.parse((totalMinutes / 60).toStringAsFixed(1)));
     } catch (_) {
-      return null;
+      return HealthReadResult.error();
     }
   }
 
@@ -213,18 +222,20 @@ class HealthConnectService {
       final steps = await getStepsForDate(date);
       final sleep = await getSleepForDate(date);
 
-      if (steps != null || sleep != null) {
-        results.add(HealthDailyData(dateStr: dateStr, steps: steps, sleepHours: sleep));
+      if (steps.status != HealthStatus.error || sleep.status != HealthStatus.error) {
+        results.add(HealthDailyData(dateStr: dateStr, stepsResult: steps, sleepResult: sleep));
       }
     }
 
+    return results;
+  }
+
+  Future<void> markBackfillDone() async {
     await _isar.writeTxn(() async {
       await _isar.appConfigs.put(
         AppConfig(key: _backfillDoneKey, value: 'true'),
       );
     });
-    
-    return results;
   }
 
   Future<List<HealthDailyData>> syncLast7Days() async {
@@ -239,8 +250,8 @@ class HealthConnectService {
       final steps = await getStepsForDate(date);
       final sleep = await getSleepForDate(date);
 
-      if (steps != null || sleep != null) {
-        results.add(HealthDailyData(dateStr: dateStr, steps: steps, sleepHours: sleep));
+      if (steps.status != HealthStatus.error || sleep.status != HealthStatus.error) {
+        results.add(HealthDailyData(dateStr: dateStr, stepsResult: steps, sleepResult: sleep));
       }
     }
 
@@ -253,8 +264,8 @@ class HealthConnectService {
     final steps = await getTodaySteps();
     final sleep = await getSleepForDate(now);
     
-    if (steps != null || sleep != null) {
-      return HealthDailyData(dateStr: dateStr, steps: steps, sleepHours: sleep);
+    if (steps.status != HealthStatus.error || sleep.status != HealthStatus.error) {
+      return HealthDailyData(dateStr: dateStr, stepsResult: steps, sleepResult: sleep);
     }
     return null;
   }
@@ -264,7 +275,7 @@ class HealthConnectService {
   Future<bool> canReadSteps() async {
     try {
       final steps = await getTodaySteps();
-      return steps != null;
+      return steps.status != HealthStatus.error;
     } catch (_) {
       return false;
     }
@@ -273,13 +284,13 @@ class HealthConnectService {
 
 class HealthDailyData {
   final String dateStr;
-  final int? steps;
-  final double? sleepHours;
+  final HealthReadResult<int> stepsResult;
+  final HealthReadResult<double> sleepResult;
 
   HealthDailyData({
     required this.dateStr,
-    this.steps,
-    this.sleepHours,
+    required this.stepsResult,
+    required this.sleepResult,
   });
 }
 

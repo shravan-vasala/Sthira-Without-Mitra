@@ -129,17 +129,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 2. Week calendar + score
-                      StaggeredFadeIn(index: 1, child: const WeekCalendarStrip()),
+                      StaggeredFadeIn(key: const ValueKey('calendar_strip'), index: 1, child: const WeekCalendarStrip()),
                       const SizedBox(height: 24),
 
                       // 3. Workout (primary daily action)
                       if (plan != null && plan.days.isNotEmpty) ...[
-                        StaggeredFadeIn(index: 2, child: _WorkoutsSection(plan: plan)),
+                        StaggeredFadeIn(key: const ValueKey('workouts_section'), index: 2, child: _WorkoutsSection(plan: plan)),
                         const SizedBox(height: 24),
                       ],
 
                       // 4. Habits
                       StaggeredFadeIn(
+                        key: const ValueKey('habits_section'),
                         index: 3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,6 +162,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 5. Meals
                       StaggeredFadeIn(
+                        key: const ValueKey('meals_section'),
                         index: 4,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,6 +180,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       // 6. Daily progress metrics
                       StaggeredFadeIn(
+                        key: const ValueKey('progress_section'),
                         index: 5,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,24 +196,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const DailyProgressGrid(),
                             const SizedBox(height: 16),
                             const DailyCheckInRow(),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             const _WeeklySummaryLink(),
                           ],
                         ),
                       ),
                       
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       
                       // 7. Secondary Coach/Insight
                       if (hasInsight)
                         StaggeredFadeIn(
+                          key: const ValueKey('insight_card'),
                           index: 6,
                           child: const DailyInsightCard(),
                         )
                       else
                         StaggeredFadeIn(
+                          key: const ValueKey('coach_notes_card'),
                           index: 6,
-                          child: const CoachNotesCard(),
+                          child: const CoachNotesCard(topMargin: 0),
                         ),
 
                       // Explicit bottom clearance for floating nav constraints

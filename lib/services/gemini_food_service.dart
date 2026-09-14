@@ -771,51 +771,61 @@ Do NOT use JSON.
 
   @override
   Future<void> verifyApiKey(String key) async {
+    final trimmedKey = key.trim();
     final client = GoogleAIClient(
-      config: GoogleAIConfig.googleAI(authProvider: ApiKeyProvider(key.trim())),
+      config: GoogleAIConfig.googleAI(authProvider: ApiKeyProvider(trimmedKey)),
     );
 
-    String lastError = '';
+    final deadline = DateTime.now().add(const Duration(seconds: 30));
+    AiErrorCause? lastCause;
     
     try {
       for (String modelName in AiClient.textModelsToTry) {
+        if (DateTime.now().isAfter(deadline)) break;
+        
         try {
+          final remaining = deadline.difference(DateTime.now());
+          final attemptTimeout = remaining < const Duration(seconds: 10) 
+              ? remaining 
+              : const Duration(seconds: 10);
+          
           await client.models.generateContent(
             model: modelName,
             request: GenerateContentRequest(
               contents: [Content.text('ping')],
+              generationConfig: GenerationConfig(maxOutputTokens: 10),
             ),
-          ).timeout(const Duration(seconds: 10));
+          ).timeout(attemptTimeout);
+          
           return; // Success!
         } catch (e) {
-          final errorString = e.toString();
-          lastError = errorString;
-          if (errorString.contains('404') || errorString.contains('not found')) {
-            continue; // Try next model
-          } else if (errorString.contains('API_KEY_INVALID') ||
-              errorString.contains('API key not valid') ||
-              errorString.contains('403') ||
-              errorString.contains('Permission denied') ||
-              errorString.contains('disabled') ||
-              errorString.contains('has not been used in project') ||
-              errorString.contains('deactivated') ||
-              errorString.contains('SERVICE_DISABLED') ||
-              errorString.contains('PERMISSION_DENIED')) {
-            throw AiException('This API key\'s project has the Gemini API disabled — check Google AI Studio.');
-          } else if (errorString.contains('403') || errorString.contains('forbidden')) {
-            throw AiException('Access Forbidden (403). Ensure your API key has no IP/app restrictions, your region is supported, and billing is enabled in Google Cloud.');
-          } else if (errorString.contains('429') || errorString.contains('quota')) {
-            throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');
-          } else {
-            throw AiException('Connection failed. Are you offline?\nDetails: $errorString');
+          lastCause = classifyAiError(e.toString());
+          
+          switch (lastCause) {
+            case AiErrorCause.invalidKey:
+              throw AiException('This key cannot access the requested Gemini service.', cause: lastCause);
+            case AiErrorCause.offline:
+              throw AiException('Couldn\'t reach Gemini. Check your connection and try again.', cause: lastCause);
+            case AiErrorCause.rateLimited:
+              throw AiException('Gemini quota or rate limit reached. Check usage or try later.', cause: lastCause);
+            case AiErrorCause.notFound:
+              continue; // Try next model
+            case AiErrorCause.timeout:
+            case AiErrorCause.overloaded:
+              continue; // Bounded transient loop
+            default:
+              throw AiException('Couldn\'t verify the key. Please try again.', cause: lastCause);
           }
         }
       }
       
-      if (lastError.contains('404') || lastError.contains('not found')) {
-        throw AiException('Model not found (404). Your key is valid but the required models are unavailable to your account.');
+      if (lastCause == AiErrorCause.timeout || DateTime.now().isAfter(deadline)) {
+        throw AiException('Verification timed out. Please try again.', cause: AiErrorCause.timeout);
+      } else if (lastCause == AiErrorCause.notFound) {
+        throw AiException('Model unavailable or unsupported for the requested API operation.', cause: AiErrorCause.notFound);
       }
-      throw AiException('Could not verify API Key.');
+      
+      throw AiException('Couldn\'t verify the key. Please try again.', cause: lastCause ?? AiErrorCause.unknown);
     } finally {
       client.close();
     }

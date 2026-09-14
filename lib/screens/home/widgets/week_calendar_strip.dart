@@ -68,6 +68,7 @@ class WeekCalendarStrip extends ConsumerStatefulWidget {
 class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
   late PageController _pageController;
   final int _basePage = 10000;
+  bool _isManualAnimate = false;
 
   @override
   void initState() {
@@ -90,9 +91,12 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
     final today = DateTime(now.year, now.month, now.day);
 
     ref.listen<int>(weekOffsetProvider, (prev, next) {
-      if (_pageController.hasClients) {
+      if (_pageController.hasClients && !_isManualAnimate) {
         final targetPage = _basePage + next;
-        if (_pageController.page?.round() != targetPage) {
+        
+        // Prevent hijacking natural PageView swipe velocities
+        final currentPage = _pageController.page ?? targetPage.toDouble();
+        if ((currentPage - targetPage).abs() > 0.5) {
           _pageController.animateToPage(
             targetPage,
             duration: const Duration(milliseconds: 300),
@@ -122,15 +126,13 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     lastDate: DateTime(2030),
                     builder: (context, child) {
                       return Theme(
-                        data: ThemeData.dark().copyWith(
-                          colorScheme: ColorScheme.dark(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: Theme.of(context).colorScheme.copyWith(
                             primary: context.colors.primary,
                             surface: context.colors.card,
                             onSurface: context.colors.textDark,
                           ),
-                          dialogTheme: DialogThemeData(
-                            backgroundColor: context.colors.card,
-                          ),
+                          dialogBackgroundColor: context.colors.card,
                         ),
                         child: child!,
                       );
@@ -219,7 +221,9 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (idx) {
+                _isManualAnimate = true;
                 ref.read(weekOffsetProvider.notifier).state = idx - _basePage;
+                Future.microtask(() => _isManualAnimate = false);
               },
               itemBuilder: (context, index) {
                 final weekOffset = index - _basePage;

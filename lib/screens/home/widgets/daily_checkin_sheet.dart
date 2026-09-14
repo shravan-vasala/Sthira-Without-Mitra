@@ -4,9 +4,10 @@ import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_typography.dart';
 import '../../../theme/layout_insets.dart';
-import '../../../widgets/primary_button.dart';
+import '../../../widgets/app_bottom_sheet.dart';
 import '../../../models/daily_log.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 class DailyCheckInSheet extends ConsumerStatefulWidget {
   const DailyCheckInSheet({
@@ -19,13 +20,9 @@ class DailyCheckInSheet extends ConsumerStatefulWidget {
   final DailyLog? existingLog;
 
   static Future<void> show(BuildContext context, String dateStr, DailyLog? existingLog) {
-    return showModalBottomSheet(
+    return showAppBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.colors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (context) => DailyCheckInSheet(
         dateStr: dateStr,
         existingLog: existingLog,
@@ -56,17 +53,6 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
     }
   }
 
-  IconData _feelingIcon(String feeling) {
-    switch (feeling) {
-      case 'veryLow': return Icons.sentiment_very_dissatisfied_rounded;
-      case 'low': return Icons.sentiment_dissatisfied_rounded;
-      case 'okay': return Icons.sentiment_neutral_rounded;
-      case 'good': return Icons.sentiment_satisfied_rounded;
-      case 'great': return Icons.sentiment_very_satisfied_rounded;
-      default: return Icons.sentiment_neutral_rounded;
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -82,9 +68,9 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
   }
 
   void _onNoteChanged() {
-    setState(() {
-      _hasChanges = true;
-    });
+    if (!_hasChanges) {
+      setState(() => _hasChanges = true);
+    }
   }
 
   String _formatDate() {
@@ -160,9 +146,14 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
   }
 
   Future<bool> _onWillPop() async {
-    if (!_hasChanges && _selectedFeeling == widget.existingLog?.dayFeeling) {
-      return true;
+    final initialNote = widget.existingLog?.dayNote ?? '';
+    final currentNote = _noteController.text;
+    final initialFeeling = widget.existingLog?.dayFeeling;
+    
+    if (initialNote == currentNote && initialFeeling == _selectedFeeling) {
+      return true; // no actual changes
     }
+    
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -189,6 +180,8 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
     final isExisting = widget.existingLog?.dayFeeling != null;
     final canSave = _selectedFeeling != null;
 
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -203,12 +196,12 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
+              // Use AppSheet wrapper style without padding inside so we maintain our own padding rhythm here
+              const SizedBox(height: 8),
               Center(
                 child: Container(
                   width: 40,
@@ -239,9 +232,8 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
                   color: colors.textDark.withValues(alpha: 0.6),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
-              // Feelings Prompt
               Text(
                 _isToday() ? 'How did today feel?' : 'How did this day feel?',
                 style: TextStyle(
@@ -253,20 +245,18 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
               ),
               const SizedBox(height: 16),
               
-              // Feelings row
               LayoutBuilder(
                 builder: (context, constraints) {
+                  final itemWidth = (constraints.maxWidth - (8 * 4)) / 5;
+                  final useRow = itemWidth >= 56; // Threshold adjusted to 56 as per requirement
+
                   return Wrap(
                     spacing: 8,
                     runSpacing: 12,
                     alignment: WrapAlignment.spaceBetween,
                     children: _feelings.map((f) {
                       final isSelected = _selectedFeeling == f;
-                      // Determine width (try fit 5 in a row if wide enough, else wrap)
-                      // If constraints < 300, it'll naturally wrap
-                      final itemWidth = (constraints.maxWidth - (8 * 4)) / 5;
-                      final useRow = itemWidth >= 50;
-
+                      
                       return GestureDetector(
                         onTap: () {
                           setState(() {
@@ -274,46 +264,89 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
                             _hasChanges = true;
                           });
                         },
-                        child: Container(
-                          width: useRow ? itemWidth : null,
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedContainer(
+                          duration: disableAnimations ? Duration.zero : const Duration(milliseconds: 160),
+                          curve: Curves.easeInOut,
+                          width: useRow ? itemWidth : constraints.maxWidth, // Stretch to full width if not enough space
                           padding: EdgeInsets.symmetric(
                             horizontal: useRow ? 0 : 16, 
-                            vertical: 12
+                            vertical: useRow ? 16 : 14
                           ),
                           decoration: BoxDecoration(
                             color: isSelected 
-                                ? colors.orange.withValues(alpha: 0.15) 
-                                : colors.primary.withValues(alpha: 0.05),
+                                ? colors.orange.withValues(alpha: 0.2) 
+                                : colors.card,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected ? colors.orange : Colors.transparent,
+                              color: isSelected ? colors.orange : colors.border,
                               width: 1.5,
                             ),
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _feelingIcon(f),
-                                color: isSelected ? colors.orange : colors.primary,
-                                size: 28,
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                _feelingLabel(f),
-                                style: TextStyle(
-                                  fontFamily: 'General Sans',
-                                  fontSize: 12,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                  color: isSelected ? colors.orange : colors.primary,
+                          child: useRow
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        BotanicalIcon(
+                                          feeling: f,
+                                          color: isSelected ? colors.orange : (colors.green),
+                                          size: 24,
+                                        ),
+                                        if (isSelected)
+                                          Positioned(
+                                            right: -2,
+                                            bottom: -2,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: colors.orange,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              padding: const EdgeInsets.all(2),
+                                              child: Icon(Icons.check, size: 8, color: colors.onPrimary),
+                                            ),
+                                          )
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _feelingLabel(f),
+                                      style: TextStyle(
+                                        fontFamily: 'General Sans',
+                                        fontSize: 12,
+                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                        color: isSelected ? colors.orange : colors.textMedium,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                )
+                              : Row( // Compact full-width row design
+                                  children: [
+                                    BotanicalIcon(
+                                      feeling: f,
+                                      color: isSelected ? colors.orange : (colors.green),
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Text(
+                                        _feelingLabel(f),
+                                        style: TextStyle(
+                                          fontFamily: 'General Sans',
+                                          fontSize: 14,
+                                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                          color: isSelected ? colors.orange : colors.textMedium,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Icon(Icons.check_circle_rounded, color: colors.orange, size: 20),
+                                  ],
                                 ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.visible,
-                              ),
-                            ],
-                          ),
                         ),
                       );
                     }).toList(),
@@ -321,38 +354,38 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
                 },
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
-              // Note field
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Anything you\'d like to note?',
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textDark,
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Anything you\'d like to note? ',
+                      style: TextStyle(
+                        fontFamily: 'General Sans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textDark,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Optional',
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: colors.textDark.withValues(alpha: 0.5),
+                    TextSpan(
+                      text: ' (Optional)',
+                      style: TextStyle(
+                        fontFamily: 'General Sans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: colors.textDark.withValues(alpha: 0.5),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _noteController,
                 maxLength: 500,
-                maxLines: 3,
-                minLines: 3,
+                maxLines: 4,
+                minLines: 2,
                 style: TextStyle(
                   fontFamily: 'General Sans',
                   fontSize: 15,
@@ -376,14 +409,14 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
-              // Actions
-              PrimaryButton(
+              _CheckInSaveButton(
                 label: isExisting ? 'Save changes' : 'Save check-in',
                 onPressed: canSave ? _save : null,
                 isLoading: _isSaving,
                 icon: Icons.check_rounded,
+                colors: colors,
               ),
               if (isExisting) ...[
                 const SizedBox(height: 12),
@@ -412,4 +445,190 @@ class _DailyCheckInSheetState extends ConsumerState<DailyCheckInSheet> {
       ),
     );
   }
+}
+
+// Dedicated CheckIn Save action explicitly enforcing custom disabled colors.
+class _CheckInSaveButton extends StatelessWidget {
+  const _CheckInSaveButton({
+    required this.label,
+    required this.onPressed,
+    required this.isLoading,
+    required this.icon,
+    required this.colors,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData icon;
+  final AppColorsPalette colors;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool disabled = onPressed == null;
+
+    final content = isLoading
+        ? SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: colors.onPrimary,
+            ),
+          )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: disabled ? colors.textMedium : colors.onPrimary),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: disabled ? colors.textMedium : colors.onPrimary,
+                ),
+              ),
+            ],
+          );
+
+    return SizedBox(
+      width: double.infinity,
+      height: kPrimaryButtonHeight,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.primary,
+          disabledBackgroundColor: colors.card,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(kButtonRadius),
+            side: disabled ? BorderSide(color: colors.border.withValues(alpha: 0.5)) : BorderSide.none,
+          ),
+        ),
+        child: content,
+      ),
+    );
+  }
+}
+
+class BotanicalIcon extends StatelessWidget {
+  const BotanicalIcon({super.key, required this.feeling, required this.color, required this.size});
+  final String feeling;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _BotanicalPainter(feeling: feeling, color: color),
+      ),
+    );
+  }
+}
+
+class _BotanicalPainter extends CustomPainter {
+  final String feeling;
+  final Color color;
+  _BotanicalPainter({required this.feeling, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+      
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 4;
+
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+
+    switch(feeling) {
+      case 'veryLow':
+        // healthy single leaf
+        final path = Path();
+        path.moveTo(0, radius);
+        path.quadraticBezierTo(-radius, 0, 0, -radius*1.2);
+        path.quadraticBezierTo(radius, 0, 0, radius);
+        canvas.drawPath(path, paint);
+        canvas.drawLine(Offset(0, radius), Offset(0, -radius*1.2), paint); // leaf vein
+        canvas.drawLine(Offset(0, radius), Offset(0, radius * 1.5), paint); // stem
+        break;
+      case 'low':
+        // two-leaf sprout
+        paint.style = PaintingStyle.stroke;
+        // left leaf
+        final path = Path();
+        path.moveTo(0, radius * 0.5);
+        path.quadraticBezierTo(-radius * 1.2, radius * 0.2, -radius * 0.8, -radius * 0.6);
+        path.quadraticBezierTo(-radius * 0.1, -radius * 0.1, 0, radius * 0.5);
+        canvas.drawPath(path, paint);
+        // right leaf
+        final path2 = Path();
+        path2.moveTo(0, radius * 0.5);
+        path2.quadraticBezierTo(radius * 1.2, radius * 0.2, radius * 0.8, -radius * 0.6);
+        path2.quadraticBezierTo(radius * 0.1, -radius * 0.1, 0, radius * 0.5);
+        canvas.drawPath(path2, paint);
+        canvas.drawLine(Offset(0, radius * 0.5), Offset(0, radius * 1.5), paint);
+        break;
+      case 'okay':
+        // closed flower bud
+        final path = Path();
+        path.moveTo(0, -radius * 1.2);
+        path.quadraticBezierTo(-radius*1.2, -radius * 0.2, 0, radius * 0.8);
+        path.quadraticBezierTo(radius*1.2, -radius * 0.2, 0, -radius * 1.2);
+        canvas.drawPath(path, paint);
+        // inner petals hinting
+        canvas.drawLine(Offset(0, radius * 0.8), Offset(0, -radius * 0.4), paint);
+        canvas.drawLine(Offset(0, radius * 0.8), Offset(0, radius * 1.5), paint);
+        break;
+      case 'good':
+        // simple open flower
+        final leafPaint = Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 1.8..strokeCap = StrokeCap.round..strokeJoin = StrokeJoin.round;
+        for (int i = 0; i < 5; i++) {
+          canvas.save();
+          canvas.rotate((math.pi * 2 / 5) * i);
+          final path = Path();
+          path.moveTo(0, radius * 0.2);
+          path.quadraticBezierTo(-radius * 0.8, -radius * 0.5, 0, -radius * 1.4);
+          path.quadraticBezierTo(radius * 0.8, -radius * 0.5, 0, radius * 0.2);
+          canvas.drawPath(path, leafPaint);
+          canvas.restore();
+        }
+        paint.style = PaintingStyle.fill;
+        canvas.drawCircle(const Offset(0, 0), radius * 0.35, paint);
+        break;
+      case 'great':
+        // small sunflower
+        final leafPaint = Paint()..color = color..style = PaintingStyle.fill;
+        for (int i = 0; i < 12; i++) {
+          canvas.save();
+          canvas.rotate((math.pi * 2 / 12) * i);
+          final path = Path();
+          path.moveTo(0, 0);
+          path.quadraticBezierTo(-radius * 0.4, -radius * 0.8, 0, -radius * 1.3);
+          path.quadraticBezierTo(radius * 0.4, -radius * 0.8, 0, 0);
+          canvas.drawPath(path, leafPaint);
+          canvas.restore();
+        }
+        canvas.drawCircle(const Offset(0, 0), radius * 0.55, paint);
+        break;
+      default:
+        break;
+    }
+    
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_BotanicalPainter oldDelegate) => 
+    feeling != oldDelegate.feeling || color != oldDelegate.color;
 }

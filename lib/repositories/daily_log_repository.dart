@@ -4,6 +4,7 @@ import 'package:isar/isar.dart';
 import '../models/daily_log.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 import '../models/sync_queue_item.dart';
+import '../services/health_connect_service.dart';
 
 class DailyLogRepository {
   late Isar _isar;
@@ -187,11 +188,19 @@ class DailyLogRepository {
     for (final data in healthDataList) {
       await _updateLogSafe(data.dateStr, (log) {
         var updated = log;
-        if (data.steps != null && log.stepsSource != 'manual') {
-          updated = updated.copyWith(steps: data.steps, stepsSource: 'healthConnect');
+        if (log.stepsSource != 'manual') {
+          if (data.stepsResult.status == HealthStatus.success) {
+            updated = updated.copyWith(steps: data.stepsResult.data, stepsSource: 'healthConnect');
+          } else if (data.stepsResult.status == HealthStatus.empty) {
+            updated = updated.copyWith(steps: 0, stepsSource: 'healthConnect');
+          }
         }
-        if (data.sleepHours != null && log.sleepSource != 'manual') {
-          updated = updated.copyWith(sleepHours: data.sleepHours, sleepSource: 'healthConnect');
+        if (log.sleepSource != 'manual') {
+          if (data.sleepResult.status == HealthStatus.success) {
+            updated = updated.copyWith(sleepHours: data.sleepResult.data, sleepSource: 'healthConnect');
+          } else if (data.sleepResult.status == HealthStatus.empty) {
+            updated = updated.copyWith(sleepHours: 0.0, sleepSource: 'healthConnect');
+          }
         }
         return updated;
       });

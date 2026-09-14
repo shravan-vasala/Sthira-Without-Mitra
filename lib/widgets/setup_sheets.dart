@@ -26,6 +26,8 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
   String _errorMessage = '';
   bool _obscureKey = true;
 
+  int _attemptToken = 0;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +47,8 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
   Future<void> _save() async {
     final key = _geminiController.text.trim();
     final coach = _coachController.text.trim();
+    
+    final currentToken = ++_attemptToken;
 
     if (key.isNotEmpty) {
       setState(() {
@@ -53,17 +57,21 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
       });
       try {
         await ref.read(geminiFoodServiceProvider).verifyApiKey(key);
+        
+        // Late cancellation check before finalizing persistence:
+        if (!mounted || currentToken != _attemptToken || _geminiController.text.trim() != key) return;
+        
         await ref.read(credentialProvider.notifier).saveKey(key);
       } catch (e) {
-        if (mounted) {
+        if (mounted && currentToken == _attemptToken) {
           setState(() {
             _isVerifying = false;
-            _errorMessage = e.toString().replaceAll('Exception: ', '');
+            _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('AiException: ', '');
           });
         }
         return;
       }
-      if (mounted) {
+      if (mounted && currentToken == _attemptToken) {
         setState(() => _isVerifying = false);
       }
     } else {
@@ -71,15 +79,17 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
       try {
         await ref.read(credentialProvider.notifier).removeKey();
       } catch (e) {
-        if (mounted) {
+        if (mounted && currentToken == _attemptToken) {
           setState(() {
             _isVerifying = false;
-            _errorMessage = e.toString().replaceAll('Exception: ', '');
+            _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('AiException: ', '');
           });
         }
         return;
       }
     }
+    
+    if (!mounted || currentToken != _attemptToken) return;
     
     final current = ref.read(profileProvider);
     await ref.read(profileProvider.notifier).updateProfile(

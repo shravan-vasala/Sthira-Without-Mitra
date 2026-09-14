@@ -21,14 +21,22 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   // Build sets (copying weight from last log if needed)
   final lastLog = repo.getLastLog(exercise.name ?? '', beforeDate: dateStr);
   final List<SetLog> sets = [];
-  for (int i = 0; i < exercise.setCount; i++) {
-    double weight = exercise.weightKg ?? 0.0;
-    if (exercise.weightKg == null &&
-        lastLog != null &&
-        i < lastLog.sets.length) {
-      weight = lastLog.sets[i].weight ?? 0.0;
+  
+  if (reps > 0) {
+    for (int i = 0; i < exercise.setCount; i++) {
+      double weight = exercise.weightKg ?? 0.0;
+      if (exercise.weightKg == null &&
+          lastLog != null &&
+          i < lastLog.sets.length) {
+        weight = lastLog.sets[i].weight ?? 0.0;
+      }
+      sets.add(SetLog(setNumber: sets.length + 1, reps: reps, weight: weight));
     }
-    sets.add(SetLog(setNumber: i + 1, reps: reps, weight: weight));
+  }
+
+  if (sets.isEmpty) {
+    // Cannot save as planned if there are no parsable reps
+    return PrUpdateResult(newPr: ExercisePr(exerciseName: exercise.name ?? ''));
   }
 
   final newLog = ExerciseLog(

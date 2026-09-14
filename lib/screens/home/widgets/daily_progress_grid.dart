@@ -185,7 +185,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
       DateTime.now().toIso8601String(),
     );
     final todayData = await hcService.syncToday();
-    final steps = todayData?.steps;
+    final steps = todayData?.stepsResult.data;
     if (todayData != null) await dailyLogRepo.updateFromHealthConnect([todayData]);
     final last7 = await hcService.syncLast7Days();
     if (last7.isNotEmpty) await dailyLogRepo.updateFromHealthConnect(last7);

@@ -98,59 +98,52 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                         letterSpacing: 2.0,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(1),
-                      child: LinearProgressIndicator(
-                        value: scoreData.totalMax > 0 ? value / scoreData.totalMax : 0.0,
-                        backgroundColor: context.colors.border.withValues(alpha: 0.3),
-                        color: intScore == scoreData.totalMax.toInt() ? context.colors.green : animColor,
-                        minHeight: 2,
-                      ),
-                    ),
                   ],
                 );
               },
             ),
           ).animate().fade().scale(begin: const Offset(0.95, 0.95)),
 
-          const SizedBox(height: 16),
+          Builder(
+            builder: (context) {
+              final showComparison = scoreData.yesterdayScore != null && (scoreData.totalScore - scoreData.yesterdayScore!) != 0;
+              final showAverage = scoreData.sevenDayAverage != null;
 
-          // Delta Row
-          if (scoreData.yesterdayScore != null ||
-              scoreData.sevenDayAverage != null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (scoreData.yesterdayScore != null) ...[
-                  _DeltaChip(
-                    current: scoreData.totalScore,
-                    previous: scoreData.yesterdayScore!,
-                    label: 'vs yesterday',
-                  ),
-                    Text(
-                      '·',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.textMedium,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+              if (!showComparison && !showAverage) {
+                return const SizedBox(height: 24);
+              }
+
+              return Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Column(
+                    children: [
+                      if (showComparison) ...[
+                        _DeltaChip(
+                          current: scoreData.totalScore,
+                          previous: scoreData.yesterdayScore!,
+                          label: 'vs yesterday',
+                        ),
+                        if (showAverage) const SizedBox(height: 8),
+                      ],
+                      if (showAverage)
+                        Text(
+                          '7-day avg ${scoreData.sevenDayAverage}',
+                          style: AppTheme.numeric(
+                            TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: context.colors.textMedium,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ).animate().fade(delay: 400.ms),
+                  const SizedBox(height: 24),
                 ],
-                if (scoreData.sevenDayAverage != null)
-                  Text(
-                    '7-day avg ${scoreData.sevenDayAverage}',
-                    style: AppTheme.numeric(
-                      TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.textMedium,
-                      ),
-                    ),
-                  ),
-              ],
-            ).animate().fade(delay: 400.ms),
+              );
+            },
+          ),
 
           const SectionHeader(
             'Score breakdown',
@@ -343,14 +336,17 @@ class _DeltaChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: color, size: 16),
-          Text(
-            '${diff.abs()} $label',
-            style: AppTheme.numeric(
-              TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: color,
+          Flexible(
+            child: Text(
+              '${diff.abs()} $label',
+              style: AppTheme.numeric(
+                TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
+              softWrap: true,
             ),
           ),
         ],
