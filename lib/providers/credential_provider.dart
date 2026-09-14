@@ -71,7 +71,8 @@ class CredentialNotifier extends Notifier<CredentialState> {
     try {
       final repo = ref.read(profileRepoProvider);
       await repo.deleteSecureGeminiKey();
-      state = state.copyWith(status: CredentialStatus.removed, key: null, errorMessage: null);
+      // Direct construction — copyWith can't null-out key due to `key ?? this.key`
+      state = const CredentialState(status: CredentialStatus.removed);
     } catch (e) {
       state = state.copyWith(status: CredentialStatus.error, errorMessage: 'Failed to clear API key.');
       throw Exception('Failed to clear API key.');
