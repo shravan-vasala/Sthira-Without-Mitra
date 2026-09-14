@@ -807,7 +807,7 @@ Do NOT use JSON.
           } else if (errorString.contains('429') || errorString.contains('quota')) {
             throw AiException('We\'re experiencing heavy traffic! Please wait a minute.');
           } else {
-            throw AiException('Connection failed. Are you offline?');
+            throw AiException('Connection failed. Are you offline?\nDetails: $errorString');
           }
         }
       }
