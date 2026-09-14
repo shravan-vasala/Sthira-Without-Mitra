@@ -81,12 +81,14 @@ class AiClient {
   final AiClientCircuitBreaker _textCircuitBreaker = AiClientCircuitBreaker();
   
   static const visionModelsToTry = [
+    'gemini-3.8-flash',
     'gemini-3.7-flash',
     'gemini-3.6-flash',
     'gemini-3.5-flash',
   ];
 
   static const textModelsToTry = [
+    'gemini-3.8-flash',
     'gemini-3.7-flash',
     'gemini-3.6-flash',
     'gemini-3.5-flash-lite',

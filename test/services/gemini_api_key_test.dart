@@ -306,8 +306,8 @@ void main() {
       int attempts = 0;
       HttpOverrides.global = MockHttpOverrides((req) async {
         attempts++;
-        if (req.uri.path.contains('gemini-3.7-flash')) {
-          return MockHttpClientResponse(404, '{"error": {"message": "models/gemini-3.7-flash not found"}}');
+        if (req.uri.path.contains('gemini-3.8-flash')) {
+          return MockHttpClientResponse(404, '{"error": {"message": "models/gemini-3.8-flash not found"}}');
         }
         return MockHttpClientResponse(200, '{"candidates": []}');
       });
