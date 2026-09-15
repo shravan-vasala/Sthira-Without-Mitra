@@ -5,6 +5,7 @@ import '../../../models/friend.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
+import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class FriendStatusCard extends ConsumerWidget {
@@ -19,25 +20,22 @@ class FriendStatusCard extends ConsumerWidget {
     return profileAsync.when(
       data: (profile) {
         if (profile == null) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: _buildAvatar(null, friend.name, friend.uid, context),
-              title: Text(
-                friend.name,
-                style: context.text.bodyStrong.copyWith(
-                  color: context.colors.textDark,
-                ),
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: _buildAvatar(null, friend.name, friend.uid, context),
+            title: Text(
+              friend.name,
+              style: context.text.bodyStrong.copyWith(
+                color: context.colors.textDark,
               ),
-              subtitle: Text(
-                'No recent activity.',
-                style: context.text.body.copyWith(
-                  color: context.colors.textMedium,
-                ),
-              ),
-              trailing: _buildOverflowMenu(context, ref, friend),
             ),
+            subtitle: Text(
+              'No recent activity.',
+              style: context.text.body.copyWith(
+                color: context.colors.textMedium,
+              ),
+            ),
+            trailing: _buildOverflowMenu(context, ref, friend),
           );
         }
 
@@ -54,20 +52,18 @@ class FriendStatusCard extends ConsumerWidget {
             ? context.colors.textMedium.withValues(alpha: 0.5)
             : context.colors.textDark;
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
                   _buildAvatar(
                     profile.avatarUrl,
                     profile.name,
                     profile.uid,
                     context,
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: Spacing.inline),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,13 +72,13 @@ class FriendStatusCard extends ConsumerWidget {
                           children: [
                             Text(
                               profile.name,
-                              style: context.text.cardTitle.copyWith(
+                              style: context.text.bodyStrong.copyWith(
                                 color: context.colors.textDark,
                               ),
                             ),
                             if (profile.todayScore != null &&
                                 !isDailyStale) ...[
-                              const SizedBox(width: 8),
+                              const SizedBox(width: Spacing.inline),
                               _ScoreBadge(
                                 score: profile.todayScore!,
                                 isStale: isDailyStale,
@@ -90,6 +86,7 @@ class FriendStatusCard extends ConsumerWidget {
                             ],
                           ],
                         ),
+                        const SizedBox(height: Spacing.textPair),
                         Text(
                           isDailyStale
                               ? 'Last active ${daysStale > 0 ? daysStale : 1}d ago'
@@ -140,26 +137,19 @@ class FriendStatusCard extends ConsumerWidget {
                 ],
               ),
             ],
-          ),
-        );
+          );
       },
-      loading: () => const Padding(
-        padding: EdgeInsets.only(bottom: 24),
-        child: Center(child: CircularProgressIndicator()),
-      ),
-      error: (e, st) => Padding(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            'Error loading profile',
-            style: context.text.body.copyWith(color: context.colors.red),
-          ),
-          trailing: IconButton(
-            icon: Icon(Icons.refresh_rounded, color: context.colors.textMedium),
-            onPressed: () =>
-                ref.invalidate(friendProfileStreamProvider(friend.uid)),
-          ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, st) => ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(
+          'Error loading profile',
+          style: context.text.body.copyWith(color: context.colors.red),
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.refresh_rounded, color: context.colors.textMedium),
+          onPressed: () =>
+              ref.invalidate(friendProfileStreamProvider(friend.uid)),
         ),
       ),
     );
@@ -173,7 +163,8 @@ class FriendStatusCard extends ConsumerWidget {
     return PopupMenuButton<String>(
       icon: Icon(
         Icons.more_vert_rounded,
-        color: context.colors.textMedium.withValues(alpha: 0.5),
+        size: IconSize.nav,
+        color: context.colors.textMedium,
       ),
       color: context.colors.card,
       onSelected: (value) {
@@ -186,11 +177,11 @@ class FriendStatusCard extends ConsumerWidget {
           value: 'remove',
           child: Row(
             children: [
-              Icon(Icons.delete_outline_rounded, color: context.colors.red, size: 20),
-              const SizedBox(width: 12),
+              Icon(Icons.delete_outline_rounded, color: context.colors.red, size: IconSize.row),
+              const SizedBox(width: Spacing.stack),
               Text(
                 'Remove Friend',
-                style: context.text.body.copyWith(color: context.colors.red),
+                style: context.text.bodyStrong.copyWith(color: context.colors.red),
               ),
             ],
           ),
@@ -215,7 +206,7 @@ class FriendStatusCard extends ConsumerWidget {
   ) {
     if (avatarUrl != null && avatarUrl.startsWith('assets/')) {
       return CircleAvatar(
-        radius: 24,
+        radius: 20,
         backgroundColor: Colors.transparent,
         backgroundImage: AssetImage(avatarUrl),
       );
@@ -231,17 +222,14 @@ class FriendStatusCard extends ConsumerWidget {
       const Color(0xFFB5A5AA).withValues(alpha: 0.3), // Muted Sage
     ];
     final color = pastelColors[hash % pastelColors.length];
-    final textColor = color.withValues(
-      alpha: 1.0,
-    ); // Make it fully opaque for text
 
     final initials = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?';
     return CircleAvatar(
-      radius: 24,
+      radius: 20,
       backgroundColor: color,
       child: Text(
         initials,
-        style: context.text.screenTitle.copyWith(
+        style: context.text.bodyStrong.copyWith(
           color: context.colors.textDark,
         ),
       ),
@@ -278,7 +266,7 @@ class FriendStatusCard extends ConsumerWidget {
                 await ref
                     .read(socialSyncServiceProvider)
                     .removeFriendAccess(friend.uid);
-                ref.read(friendRepoProvider).removeFriend(friend.uid);
+                await ref.read(friendRepoProvider).removeFriend(friend.uid);
                 if (ctx.mounted) {
                   Navigator.of(ctx).pop();
                 }
@@ -346,8 +334,8 @@ class _StatBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: 4),
+        Icon(icon, color: color, size: IconSize.row),
+        const SizedBox(height: Spacing.textPair),
         if (rawValue == null)
           Text(
             '-',
@@ -378,8 +366,8 @@ class _StatBlock extends StatelessWidget {
             color: context.colors.textMedium,
           ),
         ),
-        if (progress != null) ...[
-          const SizedBox(height: 8),
+        const SizedBox(height: Spacing.inline),
+        if (progress != null)
           SizedBox(
             width: 48,
             height: 4,
@@ -396,8 +384,18 @@ class _StatBlock extends StatelessWidget {
                 );
               },
             ),
+          )
+        else
+          SizedBox(
+            width: 48,
+            height: 4,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
           ),
-        ],
       ],
     );
   }
@@ -417,7 +415,7 @@ class _ScoreBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(Radii.micro),
       ),
       child: Center(
         child: Text(

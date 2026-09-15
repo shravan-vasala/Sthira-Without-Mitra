@@ -106,6 +106,22 @@ class AppTheme {
           textStyle: text.bodyStrong,
         ),
       ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColorsLight().primary;
+            }
+            return Colors.transparent;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColorsLight().surface;
+            }
+            return AppColorsLight().textMedium;
+          }),
+        ),
+      ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColorsLight().primary,
@@ -308,6 +324,22 @@ class AppTheme {
             borderRadius: BorderRadius.circular(Radii.control),
           ),
           textStyle: text.bodyStrong,
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColorsDark().primary;
+            }
+            return Colors.transparent;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColorsDark().surface;
+            }
+            return AppColorsDark().textMedium;
+          }),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(

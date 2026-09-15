@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 import '../../models/social_profile.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/app_spacing.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
 
@@ -123,24 +124,22 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               );
             }
             final requests = snapshot.data ?? [];
-            if (requests.isEmpty)
+            if (requests.isEmpty) {
               return const SliverToBoxAdapter(child: SizedBox.shrink());
+            }
 
             return SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      top: 16,
-                      bottom: 8,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.screen,
+                      vertical: Spacing.stack,
                     ),
                     child: Text(
                       'Friend Requests',
-                      style: context.text.body.copyWith(
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.eyebrow,
                     ),
                   ),
                   ListView.builder(
@@ -159,8 +158,8 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                          horizontal: Spacing.screen,
+                          vertical: Spacing.inline,
                         ),
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
@@ -183,13 +182,15 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                             ),
                           ),
                           trailing: isProcessing
-                              ? const Padding(
-                                  padding: EdgeInsets.all(12.0),
-                                  child: SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                              ? const SizedBox(
+                                  width: 96,
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
                                     ),
                                   ),
                                 )
@@ -210,7 +211,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                                           await syncService.acceptFriendRequest(
                                             fromUid,
                                           );
-                                          ref
+                                          await ref
                                               .read(friendRepoProvider)
                                               .addFriend(
                                                 fromUid,
@@ -218,12 +219,13 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                                                 avatarUrl: avatarUrl,
                                               );
                                         } finally {
-                                          if (mounted)
+                                          if (mounted) {
                                             setState(
                                               () => _processingRequests.remove(
                                                 fromUid,
                                               ),
                                             );
+                                          }
                                         }
                                       },
                                     ),
@@ -242,12 +244,13 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                                           await syncService
                                               .declineFriendRequest(fromUid);
                                         } finally {
-                                          if (mounted)
+                                          if (mounted) {
                                             setState(
                                               () => _processingRequests.remove(
                                                 fromUid,
                                               ),
                                             );
+                                          }
                                         }
                                       },
                                     ),
@@ -257,7 +260,6 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                       );
                     },
                   ),
-                  const SizedBox(height: 8),
                 ],
               ),
             );
@@ -282,7 +284,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               );
             }
             return SliverPadding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   return FriendStatusCard(friend: friends[index]);
@@ -296,7 +298,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
           error: (err, st) => SliverFillRemaining(
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(Spacing.section),
                 child: Text(
                   'Error: $err',
                   textAlign: TextAlign.center,
@@ -473,7 +475,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.screen, vertical: Spacing.section),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -493,18 +495,6 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                   setState(() => _period = val.first);
                   _triggerHaptic();
                 },
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.selected))
-                      return context.colors.primary;
-                    return Colors.transparent;
-                  }),
-                  foregroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.selected))
-                      return context.colors.surface;
-                    return context.colors.textMedium;
-                  }),
-                ),
               ),
               const SizedBox(width: 8),
               SegmentedButton<LeaderboardMetric>(
@@ -523,18 +513,6 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                   setState(() => _metric = val.first);
                   _triggerHaptic();
                 },
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.selected))
-                      return context.colors.primary;
-                    return Colors.transparent;
-                  }),
-                  foregroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.selected))
-                      return context.colors.surface;
-                    return context.colors.textMedium;
-                  }),
-                ),
               ),
             ],
           ),
@@ -544,7 +522,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
             duration: const Duration(milliseconds: 400),
             child: ListView(
               key: ValueKey('${_period}_$_metric'),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
               children: [
                 if (hasTop3)
                   _PodiumView(
@@ -553,7 +531,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                     period: _period,
                     metric: _metric,
                   ),
-                if (hasTop3) const SizedBox(height: 24),
+                if (hasTop3) const SizedBox(height: Spacing.section),
 
                 ...loadingSkeletons,
 
@@ -568,12 +546,10 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
 
                 if (inactiveProfiles.isNotEmpty) ...[
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.block),
                     child: Text(
                       'Inactive',
-                      style: context.text.body.copyWith(
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.eyebrow,
                     ),
                   ),
                   ...inactiveProfiles.map(
@@ -673,28 +649,29 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     if (rank != null) {
       if (rank == 1) {
         rankWidget = Icon(Icons.workspace_premium_rounded, color: context.colors.gold);
-      } else if (rank == 2)
+      } else if (rank == 2) {
         rankWidget = Icon(
           Icons.workspace_premium_rounded,
           color: context.colors.silver,
         );
-      else if (rank == 3)
+      } else if (rank == 3) {
         rankWidget = Icon(
           Icons.workspace_premium_rounded,
           color: context.colors.bronze,
         );
-      else
+      } else {
         rankWidget = SizedBox(
           width: 24,
           child: Center(
             child: Text(
               '#$rank',
-              style: context.text.body.copyWith(
+              style: context.text.bodyStrong.copyWith(
                 color: context.colors.textMedium,
               ),
             ),
           ),
         );
+      }
     }
 
     final container = Container(
@@ -704,9 +681,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
               color: context.colors.primary.withValues(alpha: 0.1),
             )
           : null,
-      padding: isMe
-          ? const EdgeInsets.all(8)
-          : const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         leading: Row(
@@ -743,23 +718,16 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                 ),
               ),
             ),
+            const SizedBox(height: Spacing.textPair),
             Text(
               secondaryMetric,
-              style: AppTheme.numeric(
-                context.text.caption.copyWith(color: context.colors.textMedium),
-              ),
+              style: context.text.caption.copyWith(color: context.colors.textMedium),
             ),
           ],
         ),
       ),
     );
 
-    if (isMe) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: container,
-      );
-    }
     return container;
   }
 
@@ -909,12 +877,24 @@ class _PodiumView extends ConsumerWidget {
               final displayStr = metric == LeaderboardMetric.score
                   ? val.toString()
                   : NumberFormat.compact().format(val);
-              return Text(
-                displayStr,
-                style: AppTheme.numeric(
-                  context.text.body.copyWith(color: ringColor),
-                ),
-              );
+              
+              if (metric == LeaderboardMetric.score) {
+                return Text(
+                  displayStr,
+                  style: context.text.display.copyWith(
+                    color: ringColor,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                );
+              } else {
+                return Text(
+                  displayStr,
+                  style: context.text.metric.copyWith(
+                    color: ringColor,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                );
+              }
             },
           );
         })(),
@@ -932,8 +912,8 @@ class _SkeletonRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Theme.of(context).brightness == Brightness.dark
@@ -941,7 +921,7 @@ class _SkeletonRow extends StatelessWidget {
                   : Colors.black12,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: Spacing.inline),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../providers/app_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
@@ -109,15 +110,15 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
         children: [
           Text(
             'YOUR UNIQUE ID',
-            style: context.text.caption.copyWith(color: context.colors.primary),
+            style: context.text.eyebrow,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.stack),
           Semantics(
             button: true,
             label: 'Copy ID to clipboard',
             child: GestureDetector(
               onTap: () async {
-                HapticFeedback.lightImpact();
+                await HapticFeedback.lightImpact();
                 try {
                   await Clipboard.setData(ClipboardData(text: uid));
                   if (!mounted) return;
@@ -126,28 +127,24 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
                     if (mounted) setState(() => _copied = false);
                   });
                 } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Failed to copy ID to clipboard.'),
-                        backgroundColor: context.colors.red,
-                      ),
-                    );
-                  }
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Failed to copy ID to clipboard.'),
+                      backgroundColor: context.colors.red,
+                    ),
+                  );
                 }
               },
               child:
                   Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 32),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 32,
-                        ),
+                        margin: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+                        padding: const EdgeInsets.all(Spacing.cardPad),
                         decoration: BoxDecoration(
                           color: _copied
                               ? context.colors.primary.withValues(alpha: 0.1)
                               : context.colors.card,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(Radii.card),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -155,13 +152,14 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
                             Text(
                               uid,
                               textAlign: TextAlign.center,
-                              style: context.text.screenTitle.copyWith(
+                              style: context.text.cardTitle.copyWith(
                                 color: _copied
                                     ? context.colors.primary
                                     : context.colors.textDark,
+                                fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: Spacing.section),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -208,7 +206,7 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
                       ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.major),
           PrimaryButton(
             label: 'Share Invitation',
             icon: Icons.share_rounded,
@@ -327,23 +325,22 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(Spacing.screen),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 32),
           Text(
             'ENTER FRIEND ID',
-            style: context.text.caption.copyWith(color: context.colors.primary),
+            style: context.text.eyebrow,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: Spacing.stack),
           AppTextField(
             controller: _controller,
             labelText: 'User ID',
             hintText: 'Paste ID here...',
             prefixIcon: Icons.badge_rounded,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.major),
           PrimaryButton(
             label: _isProcessing ? 'Sending...' : 'Send Request',
             icon: Icons.send_rounded,
