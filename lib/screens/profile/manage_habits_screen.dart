@@ -6,6 +6,10 @@ import '../../providers/app_providers.dart';
 import '../../models/habit.dart';
 import '../../utils/habit_icons.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_spacing.dart';
+import '../../widgets/app_bottom_sheet.dart';
+import '../../widgets/primary_button.dart';
+import '../../widgets/settings_row.dart';
 
 class ManageHabitsScreen extends ConsumerStatefulWidget {
   const ManageHabitsScreen({super.key});
@@ -50,7 +54,10 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
               ),
             )
           : ReorderableListView.builder(
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 100),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.screen,
+                vertical: Spacing.section,
+              ),
               itemCount: habits.length,
               // ignore: deprecated_member_use
               onReorder: (oldIndex, newIndex) {
@@ -83,7 +90,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
   }
 
   void _showEditorDialog(BuildContext context, WidgetRef ref, Habit? habit) {
-    showDialog(
+    showAppBottomSheet(
       context: context,
       builder: (ctx) => _HabitEditorDialog(habit: habit),
     );
@@ -98,128 +105,128 @@ class _HabitListTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       key: key,
-      // No border, floating item
-      child: ListTile(
-        leading: Icon(
-          HabitIcons.resolve(habit.icon),
-          color: context.colors.primary,
-          size: 28,
-        ),
-        title: Text(
-          habit.name,
-          style: context.text.body.copyWith(color: context.colors.textDark),
-        ),
-        subtitle: Text(
-          _getTypeDescription(habit),
-          style: context.text.body.copyWith(color: context.colors.textMedium),
-        ),
+      margin: const EdgeInsets.only(bottom: Spacing.stack),
+      child: SettingsRow(
+        icon: HabitIcons.resolve(habit.icon),
+        title: habit.name,
+        subtitle: _getTypeDescription(habit),
+        showChevron: false,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: Icon(Icons.edit_rounded, color: context.colors.textMedium),
-              tooltip: 'Edit habit',
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => _HabitEditorDialog(habit: habit),
-                );
-              },
-            ),
-            IconButton(
+            PopupMenuButton<String>(
               icon: Icon(
-                Icons.delete_outline_rounded,
+                Icons.more_horiz_rounded,
                 color: context.colors.textMedium,
               ),
-              tooltip: 'Delete habit',
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) {
-                    bool isDeleting = false;
-                    return StatefulBuilder(
-                      builder: (context, setState) {
-                        return AlertDialog(
-                          backgroundColor: context.colors.card,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          title: Text(
-                            'Delete Habit?',
-                            style: context.text.screenTitle.copyWith(
-                              color: context.colors.textDark,
-                            ),
-                          ),
-                          content: Text(
-                            'Are you sure you want to delete this habit? History will be kept for past days, but it won\'t appear anymore.',
-                            style: context.text.body.copyWith(
-                              color: context.colors.textMedium,
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: isDeleting
-                                  ? null
-                                  : () => Navigator.pop(ctx),
-                              child: Text(
-                                'Cancel',
-                                style: context.text.body.copyWith(
-                                  color: context.colors.textMedium,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: isDeleting
-                                  ? null
-                                  : () async {
-                                      setState(() => isDeleting = true);
-                                      try {
-                                        await ref
-                                            .read(habitRepoProvider)
-                                            .deleteHabit(habit.id);
-                                        if (!ctx.mounted) return;
-                                        ref.invalidate(habitsProvider);
-                                        Navigator.pop(ctx);
-                                      } catch (e) {
-                                        if (!ctx.mounted) return;
-                                        Navigator.pop(ctx);
-                                        ScaffoldMessenger.of(ctx).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Failed to delete: $e',
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                              child: isDeleting
-                                  ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text(
-                                      'Delete',
-                                      style: context.text.body.copyWith(
-                                        color: context.colors.red,
-                                      ),
-                                    ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                );
+              color: context.colors.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Radii.card),
+              ),
+              onSelected: (val) {
+                if (val == 'edit') {
+                  showAppBottomSheet(
+                    context: context,
+                    builder: (ctx) => _HabitEditorDialog(habit: habit),
+                  );
+                } else if (val == 'delete') {
+                  _showDeleteConfirm(context, ref);
+                }
               },
+              itemBuilder: (ctx) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Text('Edit', style: context.text.body),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(
+                    'Delete',
+                    style: context.text.body.copyWith(color: context.colors.red),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: Spacing.inline),
             Icon(Icons.drag_handle_rounded, color: context.colors.textMedium),
           ],
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirm(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        bool isDeleting = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: context.colors.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Radii.sheet),
+              ),
+              title: Text(
+                'Delete Habit?',
+                style: context.text.screenTitle.copyWith(
+                  color: context.colors.textDark,
+                ),
+              ),
+              content: Text(
+                'Are you sure you want to delete this habit? History will be kept for past days, but it won\'t appear anymore.',
+                style: context.text.body.copyWith(
+                  color: context.colors.textMedium,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isDeleting ? null : () => Navigator.pop(ctx),
+                  child: Text(
+                    'Cancel',
+                    style: context.text.body.copyWith(
+                      color: context.colors.textMedium,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: isDeleting
+                      ? null
+                      : () async {
+                          setState(() => isDeleting = true);
+                          try {
+                            await ref
+                                .read(habitRepoProvider)
+                                .deleteHabit(habit.id);
+                            if (!ctx.mounted) return;
+                            ref.invalidate(habitsProvider);
+                            Navigator.pop(ctx);
+                          } catch (e) {
+                            if (!ctx.mounted) return;
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              SnackBar(content: Text('Failed to delete: $e')),
+                            );
+                          }
+                        },
+                  child: isDeleting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          'Delete',
+                          style: context.text.body.copyWith(
+                            color: context.colors.red,
+                          ),
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -412,20 +419,14 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: context.colors.card,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text(
-        widget.habit == null ? 'Add Habit' : 'Edit Habit',
-        style: context.text.screenTitle.copyWith(
-          color: context.colors.textDark,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return AppSheet(
+      title: widget.habit == null ? 'Add Habit' : 'Edit Habit',
+      scrollable: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: Spacing.stack),
             TextField(
               controller: _nameCtrl,
               style: context.text.body.copyWith(color: context.colors.textDark),
@@ -466,14 +467,14 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
             const SizedBox(height: 16),
             Text(
               'Icon',
-              style: context.text.body.copyWith(
+              style: context.text.eyebrow.copyWith(
                 color: context.colors.textMedium,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.stack),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: Spacing.inline,
+              runSpacing: Spacing.inline,
               children: HabitIcons.options.map((opt) {
                 final isSelected = opt.id == _selectedIcon;
                 return GestureDetector(
@@ -486,11 +487,11 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                       color: isSelected
                           ? context.colors.primary.withValues(alpha: 0.2)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Radii.chip),
                     ),
                     child: Icon(
                       opt.icon,
-                      size: 22,
+                      size: IconSize.row,
                       color: isSelected
                           ? context.colors.primary
                           : context.colors.textMedium,
@@ -499,21 +500,21 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.section),
             Text(
               'Active days',
-              style: context.text.body.copyWith(
+              style: context.text.eyebrow.copyWith(
                 color: context.colors.textMedium,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.textPair),
             Text(
               'Leave all days unselected to pause this habit. Select all days to run every day.',
               style: context.text.caption.copyWith(
-                color: context.colors.textLight,
+                color: context.colors.textMedium,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.stack),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(7, (index) {
@@ -543,7 +544,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                       color: isSelected
                           ? context.colors.primary.withValues(alpha: 0.15)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(18),
+                      shape: BoxShape.circle,
                     ),
                     child: Text(
                       labels[index],
@@ -558,7 +559,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               }),
             ),
             if (!_isWaterHabit) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: Spacing.section),
               DropdownButtonFormField<HabitType>(
                 initialValue: _type,
                 dropdownColor: context.colors.card,
@@ -705,7 +706,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               ],
             ],
             if (_type == HabitType.counter && !_isWaterHabit) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.stack),
               TextField(
                 controller: _stepCtrl,
                 style: context.text.body.copyWith(
@@ -726,38 +727,29 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 ),
               ),
             ],
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            'Cancel',
-            style: context.text.body.copyWith(color: context.colors.textMedium),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: _isSaving ? null : _submit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.colors.primary,
-            foregroundColor: context.colors.onPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: Spacing.major),
+            SizedBox(
+              width: double.infinity,
+              child: PrimaryButton(
+                onPressed: _isSaving ? () {} : _submit,
+                label: _isSaving ? 'Saving...' : 'Save',
+              ),
             ),
-          ),
-          child: _isSaving
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
+            const SizedBox(height: Spacing.section),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: context.text.body.copyWith(
+                    color: context.colors.textMedium,
                   ),
-                )
-              : const Text('Save'),
-        ),
-      ],
+                ),
+              ),
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
     );
   }
 }
