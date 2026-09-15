@@ -22,7 +22,9 @@ import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../services/diagnostic_logger.dart';
 import '../home/share_preview_sheet.dart';
+import '../../widgets/settings_row.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_spacing.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -60,16 +62,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.screen,
+            vertical: Spacing.section,
+          ),
           child: Column(
             children: [
               // Profile header
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(Spacing.cardPadTight),
                 decoration: BoxDecoration(
                   color: context.colors.card,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(Radii.card),
                 ),
                 child: Column(
                   children: [
@@ -109,8 +114,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         }
                       },
                       child: Container(
-                        width: 100,
-                        height: 100,
+                        width: 72,
+                        height: 72,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.transparent,
@@ -120,15 +125,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ? (profile.photoPath!.startsWith('assets/')
                                     ? Image.asset(
                                         profile.photoPath!,
-                                        width: 100,
-                                        height: 100,
+                                        width: 72,
+                                        height: 72,
                                         fit: BoxFit.cover,
                                       )
                                     : (File(profile.photoPath!).existsSync()
                                           ? Image.file(
                                               File(profile.photoPath!),
-                                              width: 100,
-                                              height: 100,
+                                              width: 72,
+                                              height: 72,
                                               fit: BoxFit.cover,
                                             )
                                           : _buildDefaultAvatar(
@@ -139,7 +144,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: Spacing.stack),
                     Text(
                       profile.name,
                       style: context.text.screenTitle.copyWith(
@@ -165,20 +170,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.section),
 
               // Journey Stats Strip
               const JourneyStatsStrip(),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: Spacing.section),
 
               // Cloud Sync
               const _CloudSyncCard(),
+              const SizedBox(height: Spacing.stack),
 
               const TrophyRoomCard(),
+              const SizedBox(height: Spacing.stack),
 
               // Menu items
-              _MenuCard(
+              SettingsRow(
                 icon: Icons.edit_rounded,
                 title: 'Edit Profile',
                 subtitle: 'Name, height, target weight',
@@ -189,7 +195,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   );
                 },
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.auto_awesome_rounded,
                 title: 'AI Settings',
                 subtitle: 'Coach name & Gemini API key',
@@ -198,7 +205,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   builder: (_) => const AiSetupSheet(),
                 ),
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.history_rounded,
                 title: 'Recent AI Activity',
                 subtitle: 'View local diagnostic logs',
@@ -207,96 +215,117 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   builder: (_) => const _AiActivitySheet(),
                 ),
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.fitness_center_rounded,
                 title: 'Manage Plans',
                 subtitle: 'Edit workout & meal JSON',
                 onTap: () => context.go('/profile/manage-plans'),
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.notifications_rounded,
                 title: 'Reminders',
                 subtitle: 'Daily habits, workouts, and backups',
                 onTap: () => context.go('/profile/reminders'),
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.swap_horiz_rounded,
                 title: 'Unit Preference',
                 subtitle:
                     'Currently: ${profile.useKg ? 'Kilograms (kg)' : 'Pounds (lb)'}',
                 onTap: () => _showUnitDialog(context, ref),
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.dark_mode_rounded,
                 title: 'Theme',
                 subtitle:
                     'Currently: ${_themeLabel(ref.watch(themeModeProvider))}',
                 onTap: () => _showThemeDialog(context, ref),
               ),
-              _SettingsSwitch(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.volume_up_rounded,
                 title: 'Rest Timer Sound',
                 subtitle: 'Play alert sound when rest finishes',
-                value: profile.restTimerSound,
-                onChanged: (val) {
-                  ref
-                      .read(profileProvider.notifier)
-                      .updateProfile(profile.copyWith(restTimerSound: val));
-                },
+                showChevron: false,
+                trailing: Switch(
+                  value: profile.restTimerSound,
+                  activeColor: context.colors.primary,
+                  onChanged: (val) {
+                    ref
+                        .read(profileProvider.notifier)
+                        .updateProfile(profile.copyWith(restTimerSound: val));
+                  },
+                ),
               ),
-              if (Platform.isAndroid)
-                _SettingsSwitch(
+              const SizedBox(height: Spacing.stack),
+              if (Platform.isAndroid) ...[
+                SettingsRow(
                   icon: Icons.smartphone_rounded,
                   title: 'Screen Time Tracking',
                   subtitle: profile.screenTimeEnabled
                       ? 'Enabled (Tracks device screen time)'
                       : 'Disabled (Opt-in to track screen time)',
-                  value: profile.screenTimeEnabled,
-                  onChanged: (val) async {
-                    if (val) {
-                      // Attempt to enable
-                      final hasPermission = await ref
-                          .read(screenTimeServiceProvider)
-                          .checkPermission();
-                      if (hasPermission) {
+                  showChevron: false,
+                  trailing: Switch(
+                    value: profile.screenTimeEnabled,
+                    activeColor: context.colors.primary,
+                    onChanged: (val) async {
+                      if (val) {
+                        // Attempt to enable
+                        final hasPermission = await ref
+                            .read(screenTimeServiceProvider)
+                            .checkPermission();
+                        if (hasPermission) {
+                          // ignore: unawaited_futures
+                          ref
+                              .read(profileProvider.notifier)
+                              .updateProfile(
+                                profile.copyWith(screenTimeEnabled: true),
+                              );
+                        } else {
+                          if (context.mounted) {
+                            _showScreenTimePermissionDialog(
+                              context,
+                              ref,
+                              profile,
+                            );
+                          }
+                        }
+                      } else {
+                        // Disable
                         // ignore: unawaited_futures
                         ref
                             .read(profileProvider.notifier)
                             .updateProfile(
-                              profile.copyWith(screenTimeEnabled: true),
+                              profile.copyWith(screenTimeEnabled: false),
                             );
-                      } else {
-                        if (context.mounted) {
-                          _showScreenTimePermissionDialog(
-                            context,
-                            ref,
-                            profile,
-                          );
-                        }
                       }
-                    } else {
-                      // Disable
-                      // ignore: unawaited_futures
-                      ref
-                          .read(profileProvider.notifier)
-                          .updateProfile(
-                            profile.copyWith(screenTimeEnabled: false),
-                          );
-                    }
-                  },
+                    },
+                  ),
                 ),
-              _SettingsSwitch(
+                const SizedBox(height: Spacing.stack),
+              ],
+              SettingsRow(
                 icon: Icons.vibration_rounded,
                 title: 'Rest Timer Vibration',
                 subtitle: 'Vibrate when rest finishes',
-                value: profile.restTimerVibration,
-                onChanged: (val) {
-                  ref
-                      .read(profileProvider.notifier)
-                      .updateProfile(profile.copyWith(restTimerVibration: val));
-                },
+                showChevron: false,
+                trailing: Switch(
+                  value: profile.restTimerVibration,
+                  activeColor: context.colors.primary,
+                  onChanged: (val) {
+                    ref
+                        .read(profileProvider.notifier)
+                        .updateProfile(profile.copyWith(restTimerVibration: val));
+                  },
+                ),
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.backup_rounded,
                 title: 'Backup & Restore',
                 subtitle: 'Export or restore all data & photos',
@@ -304,7 +333,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   context.go('/profile/backup-restore');
                 },
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.ios_share_rounded,
                 title: 'Share Progress',
                 subtitle: 'Generate a progress summary card',
@@ -318,7 +348,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   );
                 },
               ),
-              _MenuCard(
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
                 icon: Icons.table_chart_rounded,
                 title: 'Export Data',
                 subtitle: 'Download logs and stats as CSV',
@@ -513,31 +544,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [true, false].map((isKg) {
                   final selected = profile.useKg == isKg;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    selected: selected,
-                    leading: Icon(
-                      isKg ? Icons.monitor_weight_rounded : Icons.scale_rounded,
-                      color: selected ? colors.primary : colors.textMedium,
-                    ),
-                    title: Text(
-                      isKg ? 'Kilograms (kg)' : 'Pounds (lb)',
-                      style: context.text.body.copyWith(color: colors.textDark),
-                    ),
-                    subtitle: Text(
-                      isKg ? 'Metric system' : 'Imperial system',
-                      style: context.text.caption.copyWith(
-                        color: colors.textMedium,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: Spacing.stack),
+                    child: SettingsRow(
+                      icon: isKg ? Icons.monitor_weight_rounded : Icons.scale_rounded,
+                      title: isKg ? 'Kilograms (kg)' : 'Pounds (lb)',
+                      subtitle: isKg ? 'Metric system' : 'Imperial system',
+                      showChevron: false,
+                      trailing: Icon(
+                        selected
+                            ? Icons.check_circle_rounded
+                            : Icons.circle_outlined,
+                        color: selected ? colors.primary : colors.border,
                       ),
-                    ),
-                    trailing: Icon(
-                      selected
-                          ? Icons.check_circle_rounded
-                          : Icons.circle_outlined,
-                      color: selected ? colors.primary : colors.border,
-                    ),
-                    onTap: () async {
-                      if (profile.useKg != isKg) {
+                      onTap: () async {
+                        if (profile.useKg != isKg) {
                         await ref.read(profileProvider.notifier).toggleUnit();
                         if (ctx.mounted) {
                           ScaffoldMessenger.of(ctx).showSnackBar(
@@ -548,7 +569,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         }
                       }
                       if (ctx.mounted) Navigator.pop(ctx);
-                    },
+                      },
+                    ),
                   );
                 }).toList(),
               ),
@@ -607,31 +629,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: ThemeMode.values.map((mode) {
                   final selected = current == mode;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    selected: selected,
-                    leading: Icon(
-                      icon(mode),
-                      color: selected ? colors.primary : colors.textMedium,
-                    ),
-                    title: Text(
-                      label(mode),
-                      style: context.text.body.copyWith(color: colors.textDark),
-                    ),
-                    subtitle: Text(
-                      subtitle(mode),
-                      style: context.text.caption.copyWith(
-                        color: colors.textMedium,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: Spacing.stack),
+                    child: SettingsRow(
+                      icon: icon(mode),
+                      title: label(mode),
+                      subtitle: subtitle(mode),
+                      showChevron: false,
+                      trailing: Icon(
+                        selected
+                            ? Icons.check_circle_rounded
+                            : Icons.circle_outlined,
+                        color: selected ? colors.primary : colors.border,
                       ),
-                    ),
-                    trailing: Icon(
-                      selected
-                          ? Icons.check_circle_rounded
-                          : Icons.circle_outlined,
-                      color: selected ? colors.primary : colors.border,
-                    ),
-                    onTap: () async {
-                      if (current != mode) {
+                      onTap: () async {
+                        if (current != mode) {
                         await ref
                             .read(themeModeProvider.notifier)
                             .setThemeMode(mode);
@@ -644,7 +656,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         }
                       }
                       if (ctx.mounted) Navigator.pop(ctx);
-                    },
+                      },
+                    ),
                   );
                 }).toList(),
               ),
@@ -663,10 +676,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _ExportOptionTile(
+            SettingsRow(
               title: 'Last 30 Days (Inclusive)',
               onTap: () {
-                // Sheet is on the root navigator; pop with sheet context.
                 Navigator.of(sheetContext).pop();
                 _handleExport(
                   context,
@@ -675,7 +687,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 );
               },
             ),
-            _ExportOptionTile(
+            const SizedBox(height: Spacing.stack),
+            SettingsRow(
               title: 'Last 90 Days (Inclusive)',
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -686,7 +699,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 );
               },
             ),
-            _ExportOptionTile(
+            const SizedBox(height: Spacing.stack),
+            SettingsRow(
               title: 'All Time',
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -1049,158 +1063,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
   }
 }
 
-class _ExportOptionTile extends StatelessWidget {
-  final String title;
-  final VoidCallback onTap;
 
-  const _ExportOptionTile({required this.title, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      title: Text(
-        title,
-        style: context.text.body.copyWith(color: context.colors.textDark),
-      ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: context.colors.textMedium,
-        size: 16,
-      ),
-      onTap: onTap,
-    );
-  }
-}
-
-class _MenuCard extends StatelessWidget {
-  const _MenuCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: title,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: context.colors.card,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: context.colors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: context.colors.primary, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: context.text.bodyStrong.copyWith(
-                        color: context.colors.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: context.text.micro.copyWith(
-                        color: context.colors.textMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: context.colors.textLight,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsSwitch extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _SettingsSwitch({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: BorderRadius.circular(kCardRadius),
-      ),
-      child: SwitchListTile(
-        value: value,
-        onChanged: onChanged,
-        activeThumbColor: context.colors.primary,
-        secondary: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: context.colors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(icon, color: context.colors.primary, size: 22),
-        ),
-        title: Text(
-          title,
-          style: context.text.bodyStrong.copyWith(
-            color: context.colors.textDark,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: context.text.caption.copyWith(
-            color: context.colors.textMedium,
-          ),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(kCardRadius),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-    );
-  }
-}
 
 class _EditProfileSheet extends ConsumerStatefulWidget {
   const _EditProfileSheet();
@@ -1331,28 +1194,30 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.camera_alt_rounded, color: context.colors.primary),
-              title: const Text('Take a picture'),
+            SettingsRow(
+              icon: Icons.camera_alt_rounded,
+              title: 'Take a picture',
+              showChevron: false,
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.camera);
               },
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.photo_library_rounded, color: context.colors.primary),
-              title: const Text('Choose from gallery'),
+            const SizedBox(height: Spacing.stack),
+            SettingsRow(
+              icon: Icons.photo_library_rounded,
+              title: 'Choose from gallery',
+              showChevron: false,
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.gallery);
               },
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.pets_rounded, color: context.colors.primary),
-              title: const Text('Choose preset avatar'),
+            const SizedBox(height: Spacing.stack),
+            SettingsRow(
+              icon: Icons.pets_rounded,
+              title: 'Choose preset avatar',
+              showChevron: false,
               onTap: () async {
                 Navigator.pop(ctx);
                 final selectedAvatar = await showAppBottomSheet<String>(
@@ -1375,14 +1240,12 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 }
               },
             ),
-            if (_localPhotoPath != null && !_clearPhoto)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.delete_rounded, color: context.colors.red),
-                title: Text(
-                  'Remove photo',
-                  style: context.text.body.copyWith(color: context.colors.red),
-                ),
+            if (_localPhotoPath != null && !_clearPhoto) ...[
+              const SizedBox(height: Spacing.stack),
+              SettingsRow(
+                icon: Icons.delete_rounded,
+                title: 'Remove photo',
+                showChevron: false,
                 onTap: () async {
                   Navigator.pop(ctx);
                   setState(() {
@@ -1391,6 +1254,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                   });
                 },
               ),
+            ],
           ],
         ),
       ),
@@ -1414,8 +1278,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
               child: Stack(
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 72,
+                    height: 72,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: context.colors.insetSurface,
@@ -1425,8 +1289,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                           ? (_localPhotoPath!.startsWith('assets/')
                                 ? Image.asset(
                                     _localPhotoPath!,
-                                    width: 80,
-                                    height: 80,
+                                    width: 72,
+                                    height: 72,
                                     fit: BoxFit.cover,
                                   )
                                 : Image.file(
@@ -1435,8 +1299,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                           .read(mediaRepoProvider)
                                           .getAbsolutePath(_localPhotoPath!),
                                     ),
-                                    width: 80,
-                                    height: 80,
+                                    width: 72,
+                                    height: 72,
                                     fit: BoxFit.cover,
                                   ))
                           : Center(
@@ -1449,7 +1313,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                     )
                                   : Icon(
                                       Icons.person_rounded,
-                                      size: 40,
+                                      size: 32,
                                       color: context.colors.primary,
                                     ),
                             ),
@@ -2030,7 +1894,7 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text(
+                            title: Text(
                               'Clear Diagnostics',
                               style: context.text.body,
                             ),
