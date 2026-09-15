@@ -83,7 +83,7 @@ class AvatarPickerSheet extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.check_circle,
+                              Icons.check_circle_rounded,
                               color: context.colors.primary,
                               size: 20,
                             ),

@@ -385,7 +385,7 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
                 ? 'Synced!'
                 : 'Enable Cloud Sync',
             isLoading: isSyncing,
-            icon: isSuccess ? Icons.check_circle : Icons.cloud_upload_rounded,
+            icon: isSuccess ? Icons.check_circle_rounded : Icons.cloud_upload_rounded,
           ),
           if (errorMessage != null) ...[
             const SizedBox(height: 16),

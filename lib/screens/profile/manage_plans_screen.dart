@@ -25,7 +25,7 @@ class ManagePlansScreen extends ConsumerWidget {
           title: const Text('Manage Plans'),
           leading: Navigator.canPop(context)
               ? IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_rounded),
+                  icon: const Icon(Icons.arrow_back_rounded),
                   onPressed: () => Navigator.pop(context),
                 )
               : null,
@@ -301,7 +301,6 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
                       ),
                       child: Icon(
                         opt.icon,
-                        size: 24,
                         color: isSelected
                             ? context.colors.primary
                             : context.colors.textMedium,
@@ -370,7 +369,6 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
           child: ListTile(
             leading: Icon(
               MealIcons.resolve(slot['emoji'] as String?),
-              size: 24,
               color: context.colors.primary,
             ),
             title: Text(slot['name'] as String, style: context.text.body),

@@ -54,7 +54,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
         title: const Text('Reminders'),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -220,7 +220,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                             value: config.backupDayOfWeek,
                             underline: const SizedBox(),
                             icon: Icon(
-                              Icons.arrow_drop_down,
+                              Icons.arrow_drop_down_rounded,
                               color: context.colors.primary,
                             ),
                             items: [

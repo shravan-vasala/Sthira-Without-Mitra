@@ -177,7 +177,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         ),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -198,7 +198,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.check_circle,
+                      Icons.check_circle_rounded,
                       color: context.colors.green,
                       size: 16,
                     ),
@@ -639,7 +639,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               IconButton(
                 padding: EdgeInsets.zero,
                 icon: Icon(
-                  Icons.exposure_plus_1,
+                  Icons.exposure_plus_1_rounded,
                   color: context.colors.primary,
                 ), // 30s roughly
                 onPressed: () =>

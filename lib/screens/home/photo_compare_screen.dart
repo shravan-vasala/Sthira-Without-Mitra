@@ -559,7 +559,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.add_photo_alternate, color: context.colors.textLight.withValues(alpha: 0.5), size: 48),
+              Icon(Icons.add_photo_alternate_rounded, color: context.colors.textLight.withValues(alpha: 0.5), size: 48),
               const SizedBox(height: 8),
               Text('Select Photo', style: context.text.body.copyWith(color: context.colors.textLight)),
             ],

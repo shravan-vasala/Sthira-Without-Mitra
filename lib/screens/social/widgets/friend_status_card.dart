@@ -109,7 +109,7 @@ class FriendStatusCard extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _StatBlock(
-                    icon: Icons.directions_walk,
+                    icon: Icons.directions_walk_rounded,
                     rawValue: isDailyStale ? null : profile.todaySteps,
                     useDecimalFormat: true,
                     label: 'Steps',
@@ -118,7 +118,7 @@ class FriendStatusCard extends ConsumerWidget {
                     progress: isDailyStale ? 0 : profile.todaySteps / 10000.0,
                   ),
                   _StatBlock(
-                    icon: Icons.fitness_center,
+                    icon: Icons.fitness_center_rounded,
                     rawValue: isDailyStale ? null : profile.todayWorkouts,
                     useDecimalFormat: false,
                     label: 'Workouts',
@@ -129,7 +129,7 @@ class FriendStatusCard extends ConsumerWidget {
                         : (profile.todayWorkouts >= 1 ? 1.0 : 0.0),
                   ),
                   _StatBlock(
-                    icon: Icons.local_fire_department,
+                    icon: Icons.local_fire_department_rounded,
                     rawValue: isWeeklyStale ? null : profile.currentStreak,
                     useDecimalFormat: false,
                     label: 'Streak',
@@ -156,7 +156,7 @@ class FriendStatusCard extends ConsumerWidget {
             style: context.text.body.copyWith(color: context.colors.red),
           ),
           trailing: IconButton(
-            icon: Icon(Icons.refresh, color: context.colors.textMedium),
+            icon: Icon(Icons.refresh_rounded, color: context.colors.textMedium),
             onPressed: () =>
                 ref.invalidate(friendProfileStreamProvider(friend.uid)),
           ),
@@ -172,7 +172,7 @@ class FriendStatusCard extends ConsumerWidget {
   ) {
     return PopupMenuButton<String>(
       icon: Icon(
-        Icons.more_vert,
+        Icons.more_vert_rounded,
         color: context.colors.textMedium.withValues(alpha: 0.5),
       ),
       color: context.colors.card,
@@ -186,7 +186,7 @@ class FriendStatusCard extends ConsumerWidget {
           value: 'remove',
           child: Row(
             children: [
-              Icon(Icons.delete_outline, color: context.colors.red, size: 20),
+              Icon(Icons.delete_outline_rounded, color: context.colors.red, size: 20),
               const SizedBox(width: 12),
               Text(
                 'Remove Friend',

@@ -165,7 +165,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
           backgroundColor: Colors.black,
           leading: IconButton(
             tooltip: 'Back',
-            icon: Icon(Icons.arrow_back_ios_rounded, color: context.colors.white),
+            icon: Icon(Icons.arrow_back_rounded, color: context.colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
@@ -206,7 +206,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                     leading: IconButton(
                       tooltip: 'Back',
                       icon: Icon(
-                        Icons.arrow_back_ios_rounded,
+                        Icons.arrow_back_rounded,
                         color: context.colors.white,
                       ),
                       onPressed: () => Navigator.of(context).pop(),
@@ -263,7 +263,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                             child: TextButton.icon(
                             onPressed: () => _controller!.enterFullScreen(),
                             icon: Icon(
-                              Icons.fullscreen,
+                              Icons.fullscreen_rounded,
                               color: context.colors.primary,
                             ),
                             label: Text(

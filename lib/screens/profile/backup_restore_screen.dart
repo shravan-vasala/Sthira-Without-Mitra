@@ -468,7 +468,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         title: const Text('Backup & Restore'),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,

@@ -210,7 +210,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                       IconButton(
                         tooltip: 'Back',
                         icon: const Icon(
-                          Icons.arrow_back_ios_rounded,
+                          Icons.arrow_back_rounded,
                           color: Colors.white,
                         ),
                         onPressed: () => Navigator.pop(context),

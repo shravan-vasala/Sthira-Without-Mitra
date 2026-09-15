@@ -9,6 +9,7 @@ import '../../../utils/workout_completion.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import 'past_day_summary_sheet.dart';
 import 'daily_score_sheet.dart';
+import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 /// Activity flags for each day in a week (keyed by yyyy-MM-dd).
@@ -158,7 +159,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const _DailyScoreBadge(),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: Spacing.inline),
                   IconButton(
                     tooltip: 'Previous week',
                     visualDensity: VisualDensity.compact,
@@ -181,7 +182,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: Spacing.inline),
                   IconButton(
                     tooltip: 'Next week',
                     visualDensity: VisualDensity.compact,
@@ -208,7 +209,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.stack),
 
           // Week day circles
           SizedBox(
@@ -396,7 +397,7 @@ class _DayCircleState extends ConsumerState<_DayCircle>
                 color: context.colors.textLight,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.inline),
             ScaleTransition(
               scale: _scaleAnim,
               child: AnimatedContainer(
@@ -423,7 +424,7 @@ class _DayCircleState extends ConsumerState<_DayCircle>
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: Spacing.inline),
             // Activity dot (hidden on rest days)
             SizedBox(
               width: 8,

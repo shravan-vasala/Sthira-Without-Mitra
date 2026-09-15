@@ -1850,7 +1850,7 @@ class _PhotoCalorieScannerSheetState
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: _addItem,
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Icons.add_rounded),
                   label: const Text('Add Item'),
                 ),
               ],

@@ -129,7 +129,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.health_and_safety,
+                    Icons.health_and_safety_rounded,
                     size: 16,
                     color: context.colors.primary,
                   ),

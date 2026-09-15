@@ -333,8 +333,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                               children: [
                                 Icon(
                                   timerState.isPaused
-                                      ? Icons.pause_circle_filled
-                                      : Icons.timer,
+                                      ? Icons.pause_circle_filled_rounded
+                                      : Icons.timer_rounded,
                                   color: context.colors.onPrimary,
                                   size: 28,
                                 ),
@@ -435,7 +435,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                             .read(restTimerProvider.notifier)
                                             .stopTimer();
                                       },
-                                      icon: const Icon(Icons.close),
+                                      icon: const Icon(Icons.close_rounded),
                                       color: context.colors.white,
                                       tooltip: 'Close timer',
                                     ),
@@ -574,8 +574,7 @@ class _NavBarItem extends StatelessWidget {
               color: isSelected
                   ? context.colors.onPrimary
                   : const Color(0xFF8A9A93),
-              size: 24,
-            ),
+              ),
           ),
         ),
       ),

@@ -44,7 +44,7 @@ class _SocialFeedScreenState extends ConsumerState<SocialFeedScreen>
         title: const Text('Social'),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -198,7 +198,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                                   children: [
                                     IconButton(
                                       icon: Icon(
-                                        Icons.check_circle,
+                                        Icons.check_circle_rounded,
                                         color: context.colors.primary,
                                       ),
                                       onPressed: () async {
@@ -229,7 +229,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                                     ),
                                     IconButton(
                                       icon: Icon(
-                                        Icons.cancel,
+                                        Icons.cancel_rounded,
                                         color: context.colors.textMedium
                                             .withValues(alpha: 0.5),
                                       ),
@@ -272,7 +272,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     EmptyStateView(
-                      icon: Icons.people_outline,
+                      icon: Icons.people_outline_rounded,
                       title: 'No friends connected yet.',
                       subtitle:
                           'Tap the top right icon to connect and share your progress.',
@@ -672,15 +672,15 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     Widget? rankWidget;
     if (rank != null) {
       if (rank == 1) {
-        rankWidget = Icon(Icons.workspace_premium, color: context.colors.gold);
+        rankWidget = Icon(Icons.workspace_premium_rounded, color: context.colors.gold);
       } else if (rank == 2)
         rankWidget = Icon(
-          Icons.workspace_premium,
+          Icons.workspace_premium_rounded,
           color: context.colors.silver,
         );
       else if (rank == 3)
         rankWidget = Icon(
-          Icons.workspace_premium,
+          Icons.workspace_premium_rounded,
           color: context.colors.bronze,
         );
       else

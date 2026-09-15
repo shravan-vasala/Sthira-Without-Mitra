@@ -107,7 +107,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
         title: const Text('Body Stats'),
         leading: _isEditing
             ? IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.close_rounded),
                 onPressed: () {
                   setState(() {
                     _isEditing = false;
@@ -116,7 +116,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                 },
               )
             : IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.of(context).pop(),
               ),
         actions: [

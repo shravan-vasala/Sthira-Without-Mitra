@@ -13,6 +13,7 @@ import '../../utils/workout_formatting.dart';
 import '../../widgets/section_header.dart';
 import '../../theme/layout_insets.dart';
 import '../../theme/app_typography.dart';
+import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/badge_engine_provider.dart';
 import '../../widgets/surface_card.dart';
@@ -118,7 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: _HomeGreetingTitle(),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: Spacing.section),
 
                         // 2. Week calendar + score
                         const StaggeredFadeIn(
@@ -126,7 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           index: 1,
                           child: WeekCalendarStrip(),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: Spacing.section),
 
                         // 3. Workout (primary daily action)
                         if (plan != null && plan.days.isNotEmpty) ...[
@@ -135,7 +136,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             index: 2,
                             child: _WorkoutsSection(plan: plan),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: Spacing.section),
                         ],
 
                         // 4. Habits
@@ -153,12 +154,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   countLabel: _HabitsCountLabel(),
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: Spacing.stack),
                               const HabitsCard(),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: Spacing.section),
 
                         // 5. Meals
                         StaggeredFadeIn(
@@ -171,12 +172,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 key: _mealsKey,
                                 child: const SectionHeader('Meals'),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: Spacing.stack),
                               const MealsCard(),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: Spacing.section),
 
                         // 6. Daily progress metrics
                         StaggeredFadeIn(
@@ -192,15 +193,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   icon: Icons.show_chart_rounded,
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: Spacing.stack),
                               const DailyProgressGrid(),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: Spacing.stack),
                               const _WeeklySummaryLink(),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: Spacing.section),
 
                         // 7. Secondary Coach/Insight
                         if (hasInsight)
@@ -217,7 +218,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
 
                         // Explicit bottom clearance for floating nav constraints
-                        const SizedBox(height: 100),
+                        const SizedBox(height: kShellScrollBottomPadding),
                       ],
                     ),
                   ),
@@ -226,8 +227,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ),
-
-        const Align(alignment: Alignment.topCenter),
       ],
     );
   }
@@ -377,42 +376,32 @@ class _WeeklySummaryLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GestureDetector(
-        onTap: () => context.push('/progress/weekly-summary'),
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: context.colors.card,
-            borderRadius: BorderRadius.circular(16),
+    return SurfaceCard(
+      onTap: () => context.push('/progress/weekly-summary'),
+      margin: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Icon(
+            Icons.insights_rounded,
+            color: context.colors.primary,
+            size: 20,
           ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.insights_rounded,
-                color: context.colors.primary,
-                size: 20,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              "This week's summary",
+              style: context.text.body.copyWith(
+                color: context.colors.textDark,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  "This week's summary",
-                  style: context.text.body.copyWith(
-                    color: context.colors.textDark,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: context.colors.textLight,
-                size: 16,
-              ),
-            ],
+            ),
           ),
-        ),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: context.colors.textLight,
+            size: 16,
+          ),
+        ],
       ),
     );
   }
@@ -506,6 +495,7 @@ class _WorkoutsSection extends ConsumerWidget {
       if (isWholeDayCompleted) completedCount = 1;
     } else {
       for (int i = 0; i < day.sections.length; i++) {
+        if (i > 0) cards.add(const SizedBox(height: Spacing.stack));
         final sec = day.sections[i];
 
         final isCompleted = WorkoutCompletion.isSectionCompleteWithRepo(
@@ -603,11 +593,8 @@ class _WorkoutsSection extends ConsumerWidget {
                 )
               : null,
         ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-          child: Column(children: cards),
-        ),
+        const SizedBox(height: Spacing.stack),
+        Column(children: cards),
       ],
     );
   }
@@ -622,14 +609,11 @@ class _WorkoutsSection extends ConsumerWidget {
     String? heroTag,
     VoidCallback? onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: SurfaceCard(
-        onTap: isFuture ? null : onTap,
-        color: context.colors.card,
-        border: null,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
+    return SurfaceCard(
+      onTap: isFuture ? null : onTap,
+      margin: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.cardPad, vertical: Spacing.cardPadTight),
+      child: Row(
           children: [
             Expanded(
               child: Column(
@@ -655,10 +639,10 @@ class _WorkoutsSection extends ConsumerWidget {
                         color: context.colors.textDark,
                       ),
                     ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: Gap.x4),
                   Text(
                     subtitle,
-                    style: context.text.micro.copyWith(
+                    style: context.text.caption.copyWith(
                       color: context.colors.textMedium,
                     ),
                   ),
@@ -693,9 +677,7 @@ class _WorkoutsSection extends ConsumerWidget {
                   size: 16,
                 ),
               ),
-          ],
         ),
-      ),
-    );
+      );
   }
 }

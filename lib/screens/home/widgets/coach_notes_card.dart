@@ -9,6 +9,7 @@ import '../../../providers/credential_provider.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/async_error_card.dart';
 import '../../../widgets/app_bottom_sheet.dart';
+import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class CoachNotesCard extends ConsumerWidget {
@@ -56,7 +57,7 @@ class CoachNotesCard extends ConsumerWidget {
                               ),
                               if (h.isAi)
                                 Icon(
-                                  Icons.auto_awesome,
+                                  Icons.auto_awesome_rounded,
                                   size: 12,
                                   color: context.colors.primary.withValues(
                                     alpha: 0.6,
@@ -98,7 +99,7 @@ class CoachNotesCard extends ConsumerWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   color: context.colors.primary,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(Radii.chip),
                 ),
                 child: Icon(
                   Icons.sports_rounded,
@@ -110,7 +111,7 @@ class CoachNotesCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   profile.coachDisplayName,
-                  style: context.text.bodyStrong.copyWith(color: context.colors.primary),
+                  style: context.text.cardTitle.copyWith(color: context.colors.primary),
                 ),
               ),
               if (!hasKey)
@@ -160,7 +161,7 @@ class CoachNotesCard extends ConsumerWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.auto_awesome,
+                        Icons.auto_awesome_rounded,
                         size: 12,
                         color: context.colors.primary.withValues(alpha: 0.6),
                       ),
@@ -175,15 +176,12 @@ class CoachNotesCard extends ConsumerWidget {
                 ],
               ],
             ),
-            loading: () => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(
-                'Coach is writing...',
-                style: context.text.body.copyWith(color: context.colors.textMedium),
-              ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
-                duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1500.ms,
-                color: context.colors.primary,
-              ),
+            loading: () => Text(
+              'Coach is writing...',
+              style: context.text.body.copyWith(color: context.colors.textMedium),
+            ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
+              duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1500.ms,
+              color: context.colors.primary,
             ),
             error: (err, stack) => AsyncErrorCard(
               title: 'Coach is offline',

@@ -149,7 +149,6 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                       IconButton(
                         icon: Icon(
                           Icons.chevron_right_rounded,
-                          size: 16,
                           color: year < DateTime.now().year
                               ? context.colors.textDark
                               : context.colors.textLight,

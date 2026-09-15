@@ -9,6 +9,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/health_connect_service.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../weight_entry_dialog.dart';
 import '../steps_entry_dialog.dart';
@@ -61,7 +62,7 @@ class DailyProgressGrid extends ConsumerWidget {
             subtitle: 'Tap to view',
             onTap: () => context.go('/home/body-stats'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           _ProgressCard(
             title: 'Physique',
             icon: Icons.camera_alt_rounded,
@@ -70,7 +71,7 @@ class DailyProgressGrid extends ConsumerWidget {
             thumbnails: flattenedPhotos,
             onTap: () => context.go('/home/physique-pictures'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           _ProgressCard(
             title: 'Body Weight',
             icon: Icons.monitor_weight_rounded,
@@ -86,7 +87,7 @@ class DailyProgressGrid extends ConsumerWidget {
                   },
             onChartTap: () => context.push('/progress?metric=weight'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           _StepsCard(isFuture: isFuture, isToday: isToday),
         ],
       ),
@@ -279,7 +280,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: context.colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(Radii.chip),
               ),
               child: Icon(Icons.directions_walk_rounded, size: 20, color: context.colors.green),
             ),
@@ -304,7 +305,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           builder: (context, val, child) {
                             return Text(
                               '${NumberFormat.decimalPattern().format(val)} steps',
-                              style: context.text.body.copyWith(color: context.colors.textMedium),
+                              style: context.text.caption.copyWith(color: context.colors.textMedium),
                             );
                           }
                         )
@@ -312,7 +313,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                         Flexible(
                           child: Text(
                             stepsSubtitle,
-                            style: context.text.body.copyWith(color: context.colors.textMedium),
+                            style: context.text.caption.copyWith(color: context.colors.textMedium),
                             // Removed TextOverflow.ellipsis to allow graceful multi-line wrapping
                           ),
                         ),
@@ -324,7 +325,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                             color: (sourceHint == 'Synced' || sourceHint == 'Connected')
                                 ? context.colors.green.withValues(alpha: 0.1)
                                 : context.colors.border,
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(Radii.micro),
                           ),
                           child: Text(
                             sourceHint,
@@ -427,7 +428,7 @@ class _ProgressCard extends ConsumerWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(Radii.chip),
               ),
               child: Icon(icon, size: 20, color: iconColor),
             ),
@@ -440,10 +441,10 @@ class _ProgressCard extends ConsumerWidget {
                     title,
                     style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: Gap.x4),
                   Text(
                     displaySubtitle,
-                    style: context.text.body.copyWith(color: context.colors.textMedium),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                   ),
                 ],
               ),
@@ -455,7 +456,7 @@ class _ProgressCard extends ConsumerWidget {
                     (path) => Padding(
                       padding: const EdgeInsets.only(right: 4),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(Radii.micro),
                         child: kIsWeb
                             ? Image.network(path, width: 36, height: 36, fit: BoxFit.cover)
                             : Image.file(
@@ -475,7 +476,7 @@ class _ProgressCard extends ConsumerWidget {
                       height: 36,
                       decoration: BoxDecoration(
                         color: context.colors.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(Radii.micro),
                       ),
                       alignment: Alignment.center,
                       child: Text(

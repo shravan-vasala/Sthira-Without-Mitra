@@ -771,7 +771,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 color: context.colors.primary,
               ),
             )
-          : Icon(Icons.person, size: 40, color: context.colors.primary),
+          : Icon(Icons.person_rounded, size: 40, color: context.colors.primary),
     );
   }
 }
@@ -906,7 +906,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                icon: const Icon(Icons.login),
+                icon: const Icon(Icons.login_rounded),
                 label: const Text('Sign in with Google'),
               ),
             )
@@ -940,7 +940,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: const Icon(Icons.sync),
+                    icon: const Icon(Icons.sync_rounded),
                     label: Text(
                       pendingCount > 0
                           ? 'Sync $pendingCount Edits'
@@ -1036,7 +1036,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                     await ref.read(authServiceProvider).signOut();
                   },
                   tooltip: 'Sign out',
-                  icon: Icon(Icons.logout, color: context.colors.red),
+                  icon: Icon(Icons.logout_rounded, color: context.colors.red),
                   style: IconButton.styleFrom(
                     backgroundColor: context.colors.red.withValues(alpha: 0.1),
                   ),
@@ -1333,7 +1333,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
           children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.camera_alt, color: context.colors.primary),
+              leading: Icon(Icons.camera_alt_rounded, color: context.colors.primary),
               title: const Text('Take a picture'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -1342,7 +1342,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.photo_library, color: context.colors.primary),
+              leading: Icon(Icons.photo_library_rounded, color: context.colors.primary),
               title: const Text('Choose from gallery'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -1351,7 +1351,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.pets, color: context.colors.primary),
+              leading: Icon(Icons.pets_rounded, color: context.colors.primary),
               title: const Text('Choose preset avatar'),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -1378,7 +1378,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             if (_localPhotoPath != null && !_clearPhoto)
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.delete, color: context.colors.red),
+                leading: Icon(Icons.delete_rounded, color: context.colors.red),
                 title: Text(
                   'Remove photo',
                   style: context.text.body.copyWith(color: context.colors.red),
@@ -1448,7 +1448,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                       ),
                                     )
                                   : Icon(
-                                      Icons.person,
+                                      Icons.person_rounded,
                                       size: 40,
                                       color: context.colors.primary,
                                     ),
@@ -1465,7 +1465,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.camera_alt,
+                        Icons.camera_alt_rounded,
                         color: context.colors.onPrimary,
                         size: 14,
                       ),

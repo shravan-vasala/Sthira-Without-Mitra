@@ -361,7 +361,6 @@ class _HabitTile extends StatelessWidget {
         children: [
           Icon(
             HabitIcons.resolve(habit.icon),
-            size: 24,
             color: selected
                 ? context.colors.primary
                 : context.colors.textMedium,
@@ -379,8 +378,7 @@ class _HabitTile extends StatelessWidget {
             Icon(
               Icons.check_circle_rounded,
               color: context.colors.primary,
-              size: 24,
-            ),
+              ),
         ],
       ),
     );

@@ -227,7 +227,7 @@ class _IntegrationRow extends StatelessWidget {
                 color: context.colors.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: context.colors.primary, size: 24),
+              child: Icon(icon, color: context.colors.primary, ),
             ),
             const SizedBox(width: 16),
             Expanded(

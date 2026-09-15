@@ -124,7 +124,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
         title: Text(displayTitle),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -281,8 +281,7 @@ class _PrSummary extends StatelessWidget {
               Icon(
                 Icons.emoji_events_rounded,
                 color: context.colors.gold,
-                size: 24,
-              ),
+                ),
               const SizedBox(width: 8),
               Text(
                 'PERSONAL RECORDS',

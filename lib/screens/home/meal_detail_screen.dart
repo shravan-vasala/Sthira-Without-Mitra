@@ -92,7 +92,7 @@ class MealDetailScreen extends ConsumerWidget {
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -594,7 +594,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                   children: [
                     Icon(
                       MealIcons.resolve(widget.slotEmoji),
-                      size: 24,
                       color: context.colors.textDark,
                     ),
                     const SizedBox(width: 12),

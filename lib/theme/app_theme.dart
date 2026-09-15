@@ -43,6 +43,9 @@ class AppTheme {
           TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
         },
       ),
+      iconTheme: IconThemeData(
+        color: AppColorsLight().textDark,
+      ),
       cardTheme: CardThemeData(
         color: AppColorsLight().card,
         elevation: 0,
@@ -65,11 +68,9 @@ class AppTheme {
           color: AppColorsLight().textDark,
         ),
         iconTheme: IconThemeData(
-          size: IconSize.nav,
           color: AppColorsLight().textDark,
         ),
         actionsIconTheme: IconThemeData(
-          size: IconSize.nav,
           color: AppColorsLight().textDark,
         ),
       ),
@@ -246,6 +247,9 @@ class AppTheme {
           TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
         },
       ),
+      iconTheme: IconThemeData(
+        color: AppColorsDark().textDark,
+      ),
       cardTheme: CardThemeData(
         color: AppColorsDark().card,
         elevation: 0,
@@ -268,11 +272,9 @@ class AppTheme {
           color: AppColorsDark().textDark,
         ),
         iconTheme: IconThemeData(
-          size: IconSize.nav,
           color: AppColorsDark().textDark,
         ),
         actionsIconTheme: IconThemeData(
-          size: IconSize.nav,
           color: AppColorsDark().textDark,
         ),
       ),

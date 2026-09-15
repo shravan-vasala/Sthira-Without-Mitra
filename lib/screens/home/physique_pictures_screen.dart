@@ -148,7 +148,7 @@ class _PhysiquePicturesScreenState
           icon: Icon(
             _isSelectionMode
                 ? Icons.close_rounded
-                : Icons.arrow_back_ios_rounded,
+                : Icons.arrow_back_rounded,
           ),
           onPressed: () {
             if (_isSelectionMode) {

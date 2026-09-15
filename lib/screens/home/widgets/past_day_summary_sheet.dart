@@ -407,8 +407,7 @@ class _SummaryRow extends StatelessWidget {
               Icon(
                 Icons.check_circle_rounded,
                 color: context.colors.green,
-                size: 24,
-              )
+                )
             else
               Icon(
                 Icons.chevron_right_rounded,

@@ -439,8 +439,7 @@ class _PoseSelectorOption extends StatelessWidget {
               color: isSelected
                   ? context.colors.onPrimary
                   : context.colors.primary,
-              size: 24,
-            ),
+              ),
             const SizedBox(height: 4),
             Text(
               label,

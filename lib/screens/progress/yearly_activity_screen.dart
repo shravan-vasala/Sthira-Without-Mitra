@@ -15,7 +15,7 @@ class YearlyActivityScreen extends ConsumerWidget {
         title: const Text('Yearly Activity'),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -45,8 +45,7 @@ class YearlyActivityScreen extends ConsumerWidget {
                       Icon(
                         Icons.insights_rounded,
                         color: context.colors.primary,
-                        size: 24,
-                      ),
+                        ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(

@@ -35,7 +35,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
         title: const Text('Weekly Progress'),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -143,7 +143,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
                           ),
                           _StatCard(
                             title: 'Sleep',
-                            icon: Icons.nightlight_round,
+                            icon: Icons.nightlight_round_rounded,
                             numericValue: summary.avgSleep,
                             unit: 'h',
                             decimals: 1,

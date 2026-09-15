@@ -5,6 +5,7 @@ import '../../../models/insight.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/insights_provider.dart';
 import '../../../widgets/surface_card.dart';
+import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class DailyInsightCard extends ConsumerWidget {
@@ -35,26 +36,25 @@ class DailyInsightCard extends ConsumerWidget {
       ),
     };
 
-    return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SurfaceCard(
-            color: context.colors.card,
-            border: null, // Sthira: No borders!
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+    return SurfaceCard(
+      margin: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+      color: context.colors.card,
+      border: null, // Sthira: No borders!
+      padding: const EdgeInsets.all(Spacing.cardPad),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: bgColor,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(Radii.chip),
                       ),
                       child: Icon(insight.icon, color: iconColor, size: 18),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: Spacing.inline),
                     Expanded(
                       child: Text(
                         insight.type == InsightType.trend ? 'TREND' : 'INSIGHT',
@@ -65,14 +65,14 @@ class DailyInsightCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: Spacing.stack),
                 Text(
                   insight.title,
-                  style: context.text.bodyStrong.copyWith(
+                  style: context.text.cardTitle.copyWith(
                     color: context.colors.textDark,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: Gap.x4),
                 Text(
                   insight.description,
                   style: context.text.caption.copyWith(
@@ -80,7 +80,6 @@ class DailyInsightCard extends ConsumerWidget {
                   ),
                 ),
               ],
-            ),
           ),
         )
         .animate()

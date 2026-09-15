@@ -25,7 +25,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
         title: const Text('Manage Habits'),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
@@ -72,7 +72,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
         child: FloatingActionButton.extended(
           onPressed: () => _showEditorDialog(context, ref, null),
           backgroundColor: context.colors.primary,
-          icon: Icon(Icons.add, color: context.colors.onPrimary),
+          icon: Icon(Icons.add_rounded, color: context.colors.onPrimary),
           label: Text(
             'Add Habit',
             style: context.text.body.copyWith(color: context.colors.onPrimary),

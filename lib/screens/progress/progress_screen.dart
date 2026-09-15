@@ -819,7 +819,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         title: Text(_metricTitle(_selectedMetric)),
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => Navigator.pop(context),
               )
             : null,

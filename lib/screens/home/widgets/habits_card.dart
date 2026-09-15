@@ -12,6 +12,7 @@ import '../sleep_entry_dialog.dart';
 import '../water_entry_dialog.dart';
 import 'timer_entry_dialog.dart';
 import '../../../widgets/empty_state_view.dart';
+import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class HabitsCard extends ConsumerWidget {
@@ -35,28 +36,29 @@ class HabitsCard extends ConsumerWidget {
     return SurfaceCard(
       margin: const EdgeInsets.symmetric(horizontal: kScreenPadding),
       padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (int i = 0; i < habits.length; i++) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: _HabitItem(
-                habit: habits[i],
-                isCompleted: isHabitCompleted(habits[i], completions, dailyLog),
-                isFuture: isFuture,
-                progress: getHabitProgress(habits[i], completions, dailyLog),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: Gap.x8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (int i = 0; i < habits.length; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.screen, vertical: Spacing.stack),
+                child: _HabitItem(
+                  habit: habits[i],
+                  isCompleted: isHabitCompleted(habits[i], completions, dailyLog),
+                  isFuture: isFuture,
+                  progress: getHabitProgress(habits[i], completions, dailyLog),
+                ),
               ),
-            ),
-            if (i < habits.length - 1) const SizedBox(height: 2),
+            if (habits.isEmpty)
+              const EmptyStateView(
+                icon: Icons.self_improvement_rounded,
+                title: 'No habits yet',
+                subtitle: 'Tap edit to add a few — water, sleep, or a walk.',
+              ),
           ],
-          if (habits.isEmpty)
-            const EmptyStateView(
-              icon: Icons.self_improvement_rounded,
-              title: 'No habits yet',
-              subtitle: 'Tap edit to add a few — water, sleep, or a walk.',
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -103,8 +105,8 @@ class _HabitItem extends ConsumerWidget {
                 child: Row(
                   children: [
                     SizedBox(
-                      width: 48,
-                      height: 48,
+                      width: 44,
+                      height: 44,
                       child: Center(
                         child: _LivelyHabitCircle(
                           isCompleted: isCompleted,
@@ -114,7 +116,7 @@ class _HabitItem extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 2),
+                    const SizedBox(width: Spacing.inline),
 
                     // Habit Name & Progress
                     Expanded(
@@ -227,7 +229,7 @@ class _HabitItem extends ConsumerWidget {
               Row(
                 children: [
                   _MiniButton(
-                    icon: Icons.remove,
+                    icon: Icons.remove_rounded,
                     onTap: () {
                       final newProg = (progress - habit.step).clamp(
                         0.0,
@@ -240,7 +242,7 @@ class _HabitItem extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   _MiniButton(
-                    icon: Icons.add,
+                    icon: Icons.add_rounded,
                     onTap: () {
                       final newProg = (progress + habit.step).clamp(
                         0.0,
@@ -355,8 +357,7 @@ class _HabitItem extends ConsumerWidget {
     return Icon(
       HabitIcons.resolve(iconKey),
       color: context.colors.textLight,
-      size: 24,
-    );
+      );
   }
 
   String _formatProgress() {
@@ -602,7 +603,7 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
           alignment: Alignment.center,
           children: [
             widget.isCompleted
-                ? Icon(Icons.check, color: context.colors.onPrimary, size: 16)
+                ? Icon(Icons.check_rounded, color: context.colors.onPrimary, size: 16)
                 : (widget.isFuture
                       ? Icon(
                           Icons.lock_outline_rounded,

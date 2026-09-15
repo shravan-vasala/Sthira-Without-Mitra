@@ -7,6 +7,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_typography.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
@@ -118,9 +119,9 @@ class MealsCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: Spacing.block),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(Radii.micro),
                     child: LinearProgressIndicator(
                       value: progress,
                       backgroundColor: context.colors.primary.withValues(
@@ -134,7 +135,7 @@ class MealsCard extends ConsumerWidget {
                       minHeight: 6,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: Spacing.stack),
                   TweenAnimationBuilder<int>(
                     tween: IntTween(begin: 0, end: completedCal),
                     duration: MediaQuery.disableAnimationsOf(context)
@@ -145,16 +146,15 @@ class MealsCard extends ConsumerWidget {
                       return Text(
                         '$completedMeals/$totalMeals meals  ·  $val/$totalCal kcal',
                         style: AppTheme.numeric(
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: context.colors.textMedium,
-                              ) ??
-                              context.text.body,
+                          context.text.caption.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: context.colors.textMedium,
+                          ),
                         ),
                       );
                     },
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: Spacing.inline),
                   Row(
                     children: [
                       _MacroPill(
@@ -176,7 +176,7 @@ class MealsCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: Spacing.stack),
                   Text(
                     isFuture || isToday
                         ? (isOverTarget
@@ -189,7 +189,6 @@ class MealsCard extends ConsumerWidget {
                       color: context.colors.textMedium,
                     ),
                   ),
-                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -218,7 +217,7 @@ class _MacroPill extends StatelessWidget {
         color: color.withValues(
           alpha: 0.15,
         ), // Bumped alpha slightly after removing border
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(Radii.micro),
         // Sthira: Borders eradicated
       ),
       child: TweenAnimationBuilder<double>(

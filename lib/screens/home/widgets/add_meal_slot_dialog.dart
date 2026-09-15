@@ -181,7 +181,6 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                     ),
                     child: Icon(
                       opt.icon,
-                      size: 24,
                       color: isSelected
                           ? context.colors.primary
                           : context.colors.textMedium,

@@ -201,7 +201,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
           Row(
             children: [
               Icon(
-                Icons.auto_awesome,
+                Icons.auto_awesome_rounded,
                 color: context.colors.primary,
                 size: 20,
               ),

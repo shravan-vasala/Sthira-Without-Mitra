@@ -123,8 +123,7 @@ class ExerciseCard extends ConsumerWidget {
                                 Icon(
                                   Icons.search_rounded,
                                   color: context.colors.primary,
-                                  size: 24,
-                                ),
+                                  ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Search YT',
@@ -260,7 +259,7 @@ class ExerciseCard extends ConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(
-                                  Icons.emoji_events,
+                                  Icons.emoji_events_rounded,
                                   size: 14,
                                   color: Color(0xFFB8860B),
                                 ),
@@ -332,7 +331,7 @@ class ExerciseCard extends ConsumerWidget {
                                     return Transform.scale(
                                       scale: scale,
                                       child: Icon(
-                                        Icons.check,
+                                        Icons.check_rounded,
                                         color: context.colors.onPrimary,
                                         size: 18,
                                       ),
