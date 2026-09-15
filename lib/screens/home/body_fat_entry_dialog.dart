@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class BodyFatEntryDialog extends ConsumerStatefulWidget {
   const BodyFatEntryDialog({super.key});
@@ -74,12 +75,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
             children: [
               Text(
                 'Log Body Fat',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
               ),
               if (_isExistingEntry)
                 TextButton(
@@ -105,10 +101,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
           const SizedBox(height: 8),
           Text(
             'Enter your body fat percentage for $dateFormatted',
-            style: TextStyle(
-              fontSize: 14,
-              color: context.colors.textMedium,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
           const SizedBox(height: 24),
           TextField(
@@ -116,12 +109,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
             enabled: !_isSaving,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.display.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
             cursorColor: context.colors.primary,
             decoration: InputDecoration(
@@ -141,18 +129,9 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                 borderSide: BorderSide.none,
               ),
               hintText: '0.0',
-              hintStyle: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textLight,
-              ),
+              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
               suffixText: '%',
-              suffixStyle: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 18,
@@ -190,11 +169,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               child: Center(
                 child: Text(
                   'Prefilled from a previous measurement',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.colors.textMedium,
-                    fontStyle: FontStyle.italic,
-                  ),
+                  style: context.text.caption.copyWith(color: context.colors.textMedium),
                 ),
               ),
             ),

@@ -7,6 +7,7 @@ import '../../providers/app_providers.dart';
 
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class SleepEntryDialog extends ConsumerStatefulWidget {
   const SleepEntryDialog({super.key});
@@ -117,12 +118,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
             children: [
               Text(
                 'Log Sleep',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
               ),
               if (_hasExistingEntry)
                 TextButton(
@@ -142,18 +138,13 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
           const SizedBox(height: 8),
           Text(
             'Logging sleep for the night of $nightBeforeFormatted\n(Waking up on $dateFormatted)',
-            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
           const SizedBox(height: 24),
           TextField(
             controller: _controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.display.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
             enabled: !isFuture,
             onChanged: (_) {
@@ -182,18 +173,9 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                 borderSide: BorderSide.none,
               ),
               hintText: '0.0',
-              hintStyle: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textLight,
-              ),
+              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
               suffixText: 'hrs',
-              suffixStyle: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
             ),
           ),
           if (_errorText != null)
@@ -203,22 +185,14 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                 alignment: Alignment.center,
                 child: Text(
                   _errorText!,
-                  style: TextStyle(
-                    color: context.colors.red,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.red),
                 ),
               ),
             ),
           const SizedBox(height: 24),
           Text(
             'Or calculate automatically from times:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: context.colors.textMedium,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
           const SizedBox(height: 12),
           Row(
@@ -294,23 +268,14 @@ class _TimePickerCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 4),
             Text(
               time != null ? time!.format(context) : '--:--',
-              style: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: time != null
+              style: context.text.cardTitle.copyWith(color: time != null
                     ? context.colors.textDark
-                    : context.colors.textLight,
-              ),
+                    : context.colors.textLight),
             ),
           ],
         ),

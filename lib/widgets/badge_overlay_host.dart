@@ -4,11 +4,11 @@ import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/badge_engine_provider.dart';
 import '../models/badge.dart';
 import '../theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class BadgeOverlayHost extends ConsumerStatefulWidget {
   const BadgeOverlayHost({super.key});
@@ -185,7 +185,7 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                                         alignment: Alignment.center,
                                         child: Text(
                                           _currentBadge!.iconEmoji,
-                                          style: const TextStyle(fontSize: 26),
+                                          style: context.text.screenTitle,
                                         ),
                                       )
                                       .animate(key: ValueKey(_currentBadge!.id))
@@ -204,41 +204,24 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                                   children: [
                                     Text(
                                       'ACHIEVEMENT UNLOCKED',
-                                      style: TextStyle(
-                                        color: context.colors.gold,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 1.5,
-                                      ),
+                                      style: context.text.micro.copyWith(color: context.colors.gold),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       _currentBadge!.title,
-                                      style: TextStyle(
-                                        fontFamily: 'Cabinet Grotesk',
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w800,
-                                        color: context.colors.textDark,
-                                      ),
+                                      style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       _currentBadge!.description,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: context.colors.textMedium,
-                                      ),
+                                      style: context.text.micro.copyWith(color: context.colors.textMedium),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       '$unlockedCount of $totalCount unlocked',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: context.colors.textLight,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: context.text.micro.copyWith(color: context.colors.textLight),
                                     ),
                                   ],
                                 ),

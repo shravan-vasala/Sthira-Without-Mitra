@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AppTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -39,11 +40,7 @@ class AppTextField extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8.0, left: 4),
             child: Text(
               labelText,
-              style: TextStyle(
-                color: context.colors.textMedium,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
           ),
         TextField(
@@ -53,18 +50,11 @@ class AppTextField extends StatelessWidget {
           textCapitalization: capitalization,
           obscureText: obscureText,
           textAlign: centerText ? TextAlign.center : TextAlign.left,
-          style: TextStyle(
-            color: context.colors.textDark,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: TextStyle(
-              color: context.colors.textLight,
-              fontSize: 16,
-            ),
+            hintStyle: context.text.bodyStrong.copyWith(color: context.colors.textLight),
             prefixIcon: prefixIcon != null
                 ? Icon(prefixIcon, color: context.colors.textMedium)
                 : null,

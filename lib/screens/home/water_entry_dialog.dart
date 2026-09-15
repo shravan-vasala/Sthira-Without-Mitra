@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class WaterEntryDialog extends ConsumerStatefulWidget {
   const WaterEntryDialog({super.key});
@@ -103,12 +104,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
             children: [
               Text(
                 'Water Intake',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -121,11 +117,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                 ),
                 child: Text(
                   dateFormatted,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.primary,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.primary),
                 ),
               ),
             ],
@@ -143,33 +135,18 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                   children: [
                     Text(
                       '$_currentAmount ml',
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: isGoalReached ? context.colors.green : context.colors.primary,
-                        height: 1.0,
-                        letterSpacing: -0.5,
-                      ),
+                      style: context.text.display.copyWith(color: isGoalReached ? context.colors.green : context.colors.primary),
                     ),
                     const SizedBox(height: 4),
                     if (hasTarget)
                       Text(
                         'Goal: ${targetInMl.toInt()} ml',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.textMedium,
-                        ),
+                        style: context.text.body.copyWith(color: context.colors.textMedium),
                       )
                     else
                       Text(
                         'No goal set',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.textMedium,
-                        ),
+                        style: context.text.body.copyWith(color: context.colors.textMedium),
                       ),
                   ],
                 ),
@@ -184,11 +161,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       const SizedBox(width: 4),
                       Text(
                         'Goal reached',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.green,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.green),
                       ),
                     ],
                   ),
@@ -235,10 +208,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                   Expanded(
                     child: Text(
                       'You cannot log water for future dates.',
-                      style: TextStyle(
-                        color: context.colors.textDark,
-                        fontSize: 13,
-                      ),
+                      style: context.text.caption.copyWith(color: context.colors.textDark),
                     ),
                   ),
                 ],
@@ -247,11 +217,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
           else ...[
             Text(
               'Total (ml)',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 8),
             Row(
@@ -261,12 +227,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     controller: _controller,
                     keyboardType: TextInputType.number,
                     enabled: !_isSaving,
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                     onChanged: _onTextChanged,
                     decoration: InputDecoration(
                       filled: true,
@@ -276,10 +237,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         vertical: 16,
                       ),
                       suffixText: 'ml',
-                      suffixStyle: TextStyle(
-                        fontSize: 16,
-                        color: context.colors.textMedium,
-                      ),
+                      suffixStyle: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(color: context.colors.border),
@@ -318,7 +276,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     ),
                     child: const Text(
                       '+ 250ml',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: context.text.body,
                     ),
                   ),
                 ),
@@ -338,7 +296,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     ),
                     child: const Text(
                       '+ 500ml',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: context.text.body,
                     ),
                   ),
                 ),
@@ -358,7 +316,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     ),
                     child: const Text(
                       '+ 1L',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: context.text.body,
                     ),
                   ),
                 ),
@@ -390,10 +348,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       ),
                       child: const Text(
                         'Clear',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: context.text.bodyStrong,
                       ),
                     ),
                   ),

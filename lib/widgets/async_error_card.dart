@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AsyncErrorCard extends StatelessWidget {
   final String title;
@@ -37,11 +38,7 @@ class AsyncErrorCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.red,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.red),
                 ),
               ),
             ],
@@ -49,11 +46,7 @@ class AsyncErrorCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             message,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.colors.textDark,
-              height: 1.4,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textDark),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 12),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -9,7 +8,7 @@ import '../providers/credential_provider.dart';
 import 'app_bottom_sheet.dart';
 import 'app_text_field.dart';
 import 'primary_button.dart';
-import 'surface_card.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AiSetupSheet extends ConsumerStatefulWidget {
   const AiSetupSheet({super.key});
@@ -150,7 +149,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colors.red.withOpacity(0.1),
+                color: context.colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -160,7 +159,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
                   Expanded(
                     child: Text(
                       _errorMessage,
-                      style: TextStyle(color: context.colors.red, fontSize: 13),
+                      style: context.text.caption.copyWith(color: context.colors.red),
                     ),
                   ),
                 ],
@@ -175,7 +174,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
               icon: Icon(Icons.open_in_new_rounded, size: 16, color: context.colors.primary),
               label: Text(
                 'Get Gemini API Key',
-                style: TextStyle(color: context.colors.primary, fontWeight: FontWeight.w600),
+                style: context.text.body.copyWith(color: context.colors.primary),
               ),
             ),
           ),
@@ -281,10 +280,7 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
             Text(
               _status,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: _status.contains('Connected') ? context.colors.primary : context.colors.red,
-                fontWeight: FontWeight.w500,
-              ),
+              style: context.text.body.copyWith(color: _status.contains('Connected') ? context.colors.primary : context.colors.red),
             ),
             if (!_status.contains('Connected')) ...[
               const SizedBox(height: 16),
@@ -351,10 +347,7 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
             Text(
               errorMessage,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.colors.red,
-                fontWeight: FontWeight.w500,
-              ),
+              style: context.text.body.copyWith(color: context.colors.red),
             ),
           ],
           if (isSuccess) ...[
@@ -362,10 +355,7 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
             Text(
               'Connected! Your data is securely backed up.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.colors.primary,
-                fontWeight: FontWeight.w500,
-              ),
+              style: context.text.body.copyWith(color: context.colors.primary),
             ),
           ],
         ],

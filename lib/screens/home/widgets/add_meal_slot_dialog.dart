@@ -5,6 +5,7 @@ import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
 import '../../../models/daily_meal_log.dart';
 import '../../../utils/meal_icons.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AddMealSlotDialog extends ConsumerStatefulWidget {
   const AddMealSlotDialog({super.key});
@@ -57,7 +58,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       final isProfileDuplicate = profile.customMealSlots.any((slot) => (slot['name'] as String?)?.toLowerCase() == nameLower);
       
       final dailyLog = ref.read(dailyMealLogProvider);
-      final isDailyDuplicate = dailyLog?.customSlots.values.any((slot) => slot.name?.toLowerCase() == nameLower) ?? false;
+      final isDailyDuplicate = dailyLog.customSlots.values.any((slot) => slot.name?.toLowerCase() == nameLower) ?? false;
       
       if (isProfileDuplicate || isDailyDuplicate) {
         setState(() => _errorText = 'A meal slot with this name already exists');
@@ -121,7 +122,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: const Text(
         'Add Meal Slot',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        style: context.text.screenTitle,
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -150,10 +151,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
             const SizedBox(height: 20),
             Text(
               'Choose an icon',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -197,10 +195,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                 Expanded(
                   child: Text(
                     'Add to every day?',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.body.copyWith(color: context.colors.textDark),
                   ),
                 ),
               ],
@@ -209,10 +204,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
               padding: const EdgeInsets.only(left: 8.0, top: 4.0),
               child: Text(
                 'If enabled, this slot will appear every day. Otherwise, just for ${DateFormat('MMM d').format(DateTime.parse(_capturedTargetDate))}.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.colors.textMedium,
-                ),
+                style: context.text.micro.copyWith(color: context.colors.textMedium),
               ),
             ),
           ],
@@ -223,7 +215,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(
             'Cancel',
-            style: TextStyle(color: context.colors.textLight),
+            style: context.text.body.copyWith(color: context.colors.textLight),
           ),
         ),
         ElevatedButton(

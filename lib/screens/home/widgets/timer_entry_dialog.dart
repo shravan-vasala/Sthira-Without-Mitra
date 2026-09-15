@@ -7,6 +7,7 @@ import '../../../models/habit.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class TimerEntryDialog extends ConsumerStatefulWidget {
   final Habit habit;
@@ -51,7 +52,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
       if (savedStartStr != null && savedRem != null) {
         final savedStart = DateTime.parse(savedStartStr);
         final elapsed = DateTime.now().difference(savedStart).inSeconds;
-        int restoredRemaining = savedRem - elapsed;
+        final int restoredRemaining = savedRem - elapsed;
         
         if (restoredRemaining <= 0) {
            _remainingSeconds = 0;
@@ -182,18 +183,13 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
         children: [
           Text(
             widget.habit.name,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Closing this sheet will cancel the timer',
-            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -222,12 +218,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                   Center(
                     child: Text(
                       _formatTime(_remainingSeconds),
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
+                      style: context.text.metric.copyWith(color: context.colors.textDark),
                     ),
                   ),
                 ],
@@ -265,7 +256,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                     ),
                     child: const Text(
                       'Reset',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: context.text.body,
                     ),
                   ),
                 ),

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/layout_insets.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 /// Consistent modal bottom sheets that clear the floating shell nav.
 Future<T?> showAppBottomSheet<T>({
@@ -60,22 +61,13 @@ class AppSheet extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             title!,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 8),
             Text(
               subtitle!,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
           ],
           const SizedBox(height: 20),

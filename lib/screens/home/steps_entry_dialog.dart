@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class StepsEntryDialog extends ConsumerStatefulWidget {
 
@@ -63,12 +64,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
             children: [
               Text(
                 'Log Steps',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
               ),
               if (_hasExistingEntry)
                 TextButton(
@@ -88,22 +84,14 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
           const SizedBox(height: 8),
           Text(
             isToday ? 'Enter your step count for today' : 'Enter your step count for $dateFormatted',
-            style: TextStyle(
-              fontSize: 16,
-              color: context.colors.textMedium,
-            ),
+            style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
           ),
           const SizedBox(height: 24),
           TextField(
             controller: _controller,
             keyboardType: TextInputType.number,
             autofocus: true,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.display.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
             onChanged: (_) {
               if (_errorText != null) {
@@ -114,18 +102,9 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               filled: true,
               fillColor: context.colors.inputFill,
               hintText: '0',
-              hintStyle: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textLight,
-              ),
+              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
               suffixText: 'steps',
-              suffixStyle: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
@@ -145,11 +124,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 _errorText!,
-                style: TextStyle(
-                  color: context.colors.red,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: context.text.body.copyWith(color: context.colors.red),
               ),
             ),
           if (_isHealthConnect)
@@ -163,10 +138,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
                   Flexible(
                     child: Text(
                       'Synced from Health Connect. Manual saves will override sync for this day.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.micro.copyWith(color: context.colors.textMedium),
                       textAlign: TextAlign.center,
                     ),
                   ),

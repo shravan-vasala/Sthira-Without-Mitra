@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import 'app_bottom_sheet.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AvatarPickerSheet extends StatelessWidget {
   final String? currentAvatar;
@@ -102,11 +103,7 @@ class AvatarPickerSheet extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 child: Text(
                   'Remove Avatar',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
                 ),
               ),
             ),

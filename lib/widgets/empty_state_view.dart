@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class EmptyStateView extends StatelessWidget {
   final IconData icon;
@@ -37,22 +38,13 @@ class EmptyStateView extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.colors.textDark,
-              letterSpacing: -0.3,
-            ),
+            style: context.text.cardTitle.copyWith(color: context.colors.textDark),
           ),
           const SizedBox(height: 8),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.colors.textMedium,
-              height: 1.4,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
         ],
       ),

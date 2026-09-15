@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
 
 class OfflineBanner extends StatelessWidget {
   final String message;
@@ -22,11 +23,7 @@ class OfflineBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                fontSize: 13,
-                color: context.colors.orange,
-                fontWeight: FontWeight.w500,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.orange),
             ),
           ),
         ],

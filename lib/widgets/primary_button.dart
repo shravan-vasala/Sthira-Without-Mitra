@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/layout_insets.dart';
+import '../theme/app_typography.dart';
 
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -48,21 +49,13 @@ class _PrimaryButtonState extends State<PrimaryButton> {
                     const SizedBox(width: 8),
                     Text(
                       widget.label,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.onPrimary,
-                      ),
+                      style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
                     ),
                   ],
                 )
               : Text(
                   widget.label,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.onPrimary,
-                  ),
+                  style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
                 ));
 
     final btn = SizedBox(
@@ -125,10 +118,7 @@ class _CompactButtonState extends State<CompactButton> {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = const TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w700,
-    );
+    final textStyle = context.text.caption.copyWith(fontWeight: FontWeight.w700);
 
     final child = widget.icon != null
         ? Row(

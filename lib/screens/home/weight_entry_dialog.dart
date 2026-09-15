@@ -8,6 +8,7 @@ import '../../providers/app_providers.dart';
 import '../../utils/format_units.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class WeightEntryDialog extends ConsumerStatefulWidget {
   const WeightEntryDialog({super.key});
@@ -81,12 +82,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             controller: _controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.display.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
             cursorColor: context.colors.primary,
             onChanged: (_) {
@@ -110,18 +106,9 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
                 borderSide: BorderSide.none,
               ),
               hintText: '0.0',
-              hintStyle: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textLight,
-              ),
+              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
               suffixText: unit,
-              suffixStyle: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 18,
@@ -133,11 +120,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
-                style: TextStyle(
-                  color: context.colors.textMedium,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
             ),
           if (_errorText != null)
@@ -145,11 +128,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 _errorText!,
-                style: TextStyle(
-                  color: context.colors.red,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: context.text.body.copyWith(color: context.colors.red),
               ),
             ),
           const SizedBox(height: 24),

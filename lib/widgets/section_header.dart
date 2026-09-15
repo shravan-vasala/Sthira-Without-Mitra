@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/layout_insets.dart';
+import '../theme/app_typography.dart';
 
 /// Main section label used on Home / Workout / similar lists.
 class SectionHeader extends StatelessWidget {
@@ -31,17 +32,11 @@ class SectionHeader extends StatelessWidget {
           ],
           Text(
             title,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: context.colors.primary,
-              letterSpacing: 0,
-            ),
+            style: context.text.sectionLabel,
           ),
           if (countLabel != null) ...[const SizedBox(width: 8), countLabel!],
           const Spacer(),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );
