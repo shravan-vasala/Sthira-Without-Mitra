@@ -54,39 +54,13 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
     final dateFormatted = '${selectedDate.day} $monthStr';
 
     return AppSheet(
+      title: 'Log Steps',
+      subtitle: isToday ? 'Enter your step count for today' : 'Enter your step count for $dateFormatted',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Log Steps',
-                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-              ),
-              if (_hasExistingEntry)
-                TextButton(
-                  onPressed: () async {
-                    await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
-                    if (mounted) Navigator.of(context).pop();
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.pinkIcon,
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(0, 0),
-                  ),
-                  child: const Text('Clear entry'),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            isToday ? 'Enter your step count for today' : 'Enter your step count for $dateFormatted',
-            style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
-          ),
-          const SizedBox(height: 24),
           TextField(
             controller: _controller,
             keyboardType: TextInputType.number,
@@ -167,7 +141,21 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               }
             },
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
+          if (_hasExistingEntry) ...[
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: () async {
+                  await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
+                  if (mounted) Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.pinkIcon,
+                ),
+                child: const Text('Clear entry'),
+              ),
+            ),
+          ],
         ],
       ),
     );

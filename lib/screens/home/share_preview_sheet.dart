@@ -5,6 +5,7 @@ import '../../providers/app_providers.dart';
 import '../../share/share_card_exporter.dart';
 import '../../share/daily_share_layout.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../widgets/app_bottom_sheet.dart';
 
 class SharePreviewSheet extends ConsumerStatefulWidget {
   const SharePreviewSheet({super.key});
@@ -95,32 +96,13 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     final previewWidth = 360.0;
     final previewHeight = _format == ShareFormat.post ? 450.0 : 640.0;
 
-    return SafeArea(
-      bottom: true,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-        decoration: BoxDecoration(
-          color: context.colors.scaffoldBg,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Share Your Progress',
-              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
-            ),
-            const SizedBox(height: 16),
+    return AppSheet(
+      title: 'Share Your Progress',
+      scrollable: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
 
             // Format Toggle Chips
             Row(
@@ -199,8 +181,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

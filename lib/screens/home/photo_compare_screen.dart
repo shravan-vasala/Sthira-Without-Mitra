@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../widgets/app_bottom_sheet.dart';
 import 'photo_viewer_screen.dart'; // To reuse PhotoItem
 import '../../share/share_card_exporter.dart';
 import '../../services/haptics.dart';
@@ -204,11 +205,9 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
     }
     
     Haptics.tap();
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.colors.scaffoldBg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setStateSheet) {
           final filtered = _pickerFilter == 'all'
@@ -220,18 +219,12 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             maxChildSize: 0.9,
             minChildSize: 0.5,
             expand: false,
-            builder: (ctx, scrollController) => CustomScrollView(
-              controller: scrollController,
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                    child: Text(
-                      'Select Photo',
-                      style: context.text.cardTitle.copyWith(color: context.colors.textDark),
-                    ),
-                  ),
-                ),
+            builder: (ctx, scrollController) => AppSheet(
+              title: 'Select Photo',
+              draggable: true,
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),

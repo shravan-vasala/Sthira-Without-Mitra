@@ -108,39 +108,13 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
     final nightBeforeFormatted = DateFormat('EEE, d MMM').format(selectedDate.subtract(const Duration(days: 1)));
 
     return AppSheet(
+      title: 'Log Sleep',
+      subtitle: 'Logging sleep for the night of $nightBeforeFormatted\n(Waking up on $dateFormatted)',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Log Sleep',
-                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-              ),
-              if (_hasExistingEntry)
-                TextButton(
-                  onPressed: () async {
-                    await ref.read(dailyLogProvider.notifier).clearSleepForDate(_pinnedDateStr);
-                    if (mounted) Navigator.of(context).pop();
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.pinkIcon,
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(0, 0),
-                  ),
-                  child: const Text('Clear entry'),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Logging sleep for the night of $nightBeforeFormatted\n(Waking up on $dateFormatted)',
-            style: context.text.body.copyWith(color: context.colors.textMedium),
-          ),
-          const SizedBox(height: 24),
           TextField(
             controller: _controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -234,8 +208,23 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                       });
                     }
                   },
+                  },
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
+          if (_hasExistingEntry) ...[
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: () async {
+                  await ref.read(dailyLogProvider.notifier).clearSleepForDate(_pinnedDateStr);
+                  if (mounted) Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.pinkIcon,
+                ),
+                child: const Text('Clear entry'),
+              ),
+            ),
+          ],
         ],
       ),
     );

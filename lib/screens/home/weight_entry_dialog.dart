@@ -152,7 +152,6 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               }
             },
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),
     );

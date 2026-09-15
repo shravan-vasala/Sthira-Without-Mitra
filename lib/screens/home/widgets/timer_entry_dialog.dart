@@ -176,23 +176,13 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     final progress = _remainingSeconds / _totalSeconds;
 
     return AppSheet(
+      title: widget.habit.name,
+      subtitle: 'Closing this sheet will cancel the timer',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            widget.habit.name,
-            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Closing this sheet will cancel the timer',
-            style: context.text.body.copyWith(color: context.colors.textMedium),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
 
           Center(
             child: SizedBox(
@@ -254,7 +244,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Reset',
                       style: context.text.body,
                     ),
@@ -287,7 +277,6 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
               ),
             ],
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
         ],
       ),
     );

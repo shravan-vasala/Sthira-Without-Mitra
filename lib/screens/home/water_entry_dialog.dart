@@ -93,36 +93,14 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
     final isGoalReached = hasTarget && _currentAmount >= targetInMl;
 
     return AppSheet(
+      title: 'Water Intake',
+      subtitle: dateFormatted,
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Water Intake',
-                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: context.colors.insetSurface,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  dateFormatted,
-                  style: context.text.micro.copyWith(color: context.colors.primary),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+
 
           // Progress Display
           if (!isFuture) ...[

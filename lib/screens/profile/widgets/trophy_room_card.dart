@@ -8,6 +8,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../models/badge.dart';
 import '../../../share/share_card_exporter.dart';
+import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/surface_card.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
@@ -88,27 +89,19 @@ class _BadgeItem extends StatelessWidget {
   static void showDetailSheet(BuildContext context, Badge badge) {
     HapticFeedback.lightImpact();
     // Wrap with the generic bottom sheet handler
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
-      backgroundColor: context.colors.surface,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
       builder: (context) {
         final isUnlocked = badge.isUnlocked;
         final disableAnimations = MediaQuery.disableAnimationsOf(context);
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 24,
-              right: 24,
-              top: 40,
-              bottom: MediaQuery.paddingOf(context).bottom + 24,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+        return AppSheet(
+          title: badge.title,
+          subtitle: badge.description,
+          scrollable: true,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
                 Container(
                   width: 90,
                   height: 90,
@@ -128,18 +121,6 @@ class _BadgeItem extends StatelessWidget {
                   .animate(target: (isUnlocked && !disableAnimations) ? 1 : 0)
                   .shimmer(duration: 600.ms, color: Colors.white24),
   
-                const SizedBox(height: 32),
-                Text(
-                  badge.title,
-                  style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  badge.description,
-                  style: context.text.body.copyWith(color: context.colors.textMedium),
-                  textAlign: TextAlign.center,
-                ),
                 const SizedBox(height: 32),
   
                 if (isUnlocked) ...[
@@ -207,8 +188,7 @@ class _BadgeItem extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                     label: 'Got it',
                   ),
-              ],
-            ),
+            ],
           ),
         );
       },

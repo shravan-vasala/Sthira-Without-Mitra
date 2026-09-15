@@ -1095,33 +1095,10 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
     }
 
     return AppSheet(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(headerIcon, size: 24, color: headerColor),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: context.text.screenTitle,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              desc,
-              style: context.text.body.copyWith(color: context.colors.textMedium),
-            ),
-            const SizedBox(height: 48),
-          ],
-        ),
-      ),
+      title: title,
+      subtitle: desc,
+      scrollable: true,
+      child: const SizedBox(height: 28),
     );
   }
 }

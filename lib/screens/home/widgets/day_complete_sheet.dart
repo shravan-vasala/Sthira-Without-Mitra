@@ -60,6 +60,9 @@ class DayCompleteSheet extends ConsumerWidget {
     final greetName = name.trim().isEmpty ? 'you' : name.trim();
 
     return AppSheet(
+      title: 'Day complete, $greetName',
+      subtitle: 'Habits, meals, and workout are done. Score ${score.totalScore} — nice consistency.',
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -88,24 +91,11 @@ class DayCompleteSheet extends ConsumerWidget {
                   end: const Offset(1.0, 1.0),
                 ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Day complete, $greetName',
-            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Habits, meals, and workout are done. Score ${score.totalScore} — nice consistency.',
-            style: context.text.body.copyWith(color: context.colors.textMedium),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
+
           PrimaryButton(
             label: 'Keep going',
             onPressed: () => Navigator.of(context).pop(),
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),
     );

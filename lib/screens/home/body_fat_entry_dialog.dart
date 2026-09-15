@@ -65,44 +65,13 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
 
     return AppSheet(
+      title: 'Log Body Fat',
+      subtitle: 'Enter your body fat percentage for $dateFormatted',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Log Body Fat',
-                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-              ),
-              if (_isExistingEntry)
-                TextButton(
-                  onPressed: _isSaving
-                      ? null
-                      : () async {
-                          setState(() => _isSaving = true);
-                          try {
-                            await ref.read(dailyLogProvider.notifier).clearBodyFatForDate(_pinnedDateStr);
-                            if (context.mounted) Navigator.of(context).pop();
-                          } catch (_) {
-                            setState(() {
-                              _isSaving = false;
-                              _errorText = 'Failed to clear. Try again.';
-                            });
-                          }
-                       },
-                  style: TextButton.styleFrom(foregroundColor: context.colors.red),
-                  child: _isSaving ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Clear'),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Enter your body fat percentage for $dateFormatted',
-            style: context.text.body.copyWith(color: context.colors.textMedium),
-          ),
           const SizedBox(height: 24),
           TextField(
             controller: _controller,
@@ -173,7 +142,29 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                 ),
               ),
             ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
+          if (_isExistingEntry) ...[
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: _isSaving
+                    ? null
+                    : () async {
+                        setState(() => _isSaving = true);
+                        try {
+                          await ref.read(dailyLogProvider.notifier).clearBodyFatForDate(_pinnedDateStr);
+                          if (context.mounted) Navigator.of(context).pop();
+                        } catch (_) {
+                          setState(() {
+                            _isSaving = false;
+                            _errorText = 'Failed to clear. Try again.';
+                          });
+                        }
+                     },
+                style: TextButton.styleFrom(foregroundColor: context.colors.red),
+                child: _isSaving ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Clear'),
+              ),
+            ),
+          ],
         ],
       ),
     );

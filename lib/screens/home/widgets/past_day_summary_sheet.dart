@@ -9,7 +9,6 @@ import '../../../router/app_router.dart';
 import '../../../utils/workout_completion.dart';
 import '../../../utils/meal_icons.dart';
 import '../../../models/daily_stats_snapshot.dart';
-import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class PastDaySummarySheet extends ConsumerWidget {
   final DateTime date;
@@ -137,65 +136,32 @@ class PastDaySummarySheet extends ConsumerWidget {
       waterHabit = allHabits.firstWhere((h) => h.id == 'water');
     } catch (_) {}
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            const SizedBox(height: 12),
-            Container(
-              width: 48,
-              height: 4,
+    return AppSheet(
+      title: DateFormat('EEE, dd MMM').format(date),
+      subtitle: '$totalDone of $totalThings things completed',
+      scrollable: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
               decoration: BoxDecoration(
-                color: context.colors.textLight.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+                color: statusColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                statusText,
+                style: context.text.caption.copyWith(color: statusColor),
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        DateFormat('EEE, dd MMM').format(date),
-                        style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '$totalDone of $totalThings things completed',
-                        style: context.text.body.copyWith(color: context.colors.textLight),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      statusText,
-                      style: context.text.caption.copyWith(color: statusColor),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+          ),
+          const SizedBox(height: 24),
 
             // Rows
             Padding(

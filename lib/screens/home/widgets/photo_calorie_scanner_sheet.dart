@@ -885,6 +885,12 @@ class _PhotoCalorieScannerSheetState
         : 'Log ${widget.slotDisplayName}';
 
     return AppSheet(
+      title: title,
+      subtitle: widget.appendToLog != null
+          ? 'Add another serving to this meal'
+          : _describeMode
+          ? 'Describe home cooking — AI estimates macros'
+          : 'Photo of your plate works best for home meals',
       scrollable: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -894,50 +900,6 @@ class _PhotoCalorieScannerSheetState
               padding: EdgeInsets.only(bottom: 12.0),
               child: OfflineBanner(),
             ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.colors.card,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: context.colors.border),
-                ),
-                child: Icon(
-                  widget.appendToLog != null
-                      ? Icons.add_circle_outline_rounded
-                      : _describeMode
-                      ? Icons.edit_note_rounded
-                      : Icons.camera_alt_rounded,
-                  color: context.colors.primary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: context.text.display.copyWith(color: context.colors.textDark),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.appendToLog != null
-                          ? 'Add another serving to this meal'
-                          : _describeMode
-                          ? 'Describe home cooking — AI estimates macros'
-                          : 'Photo of your plate works best for home meals',
-                      style: context.text.caption.copyWith(color: context.colors.textMedium),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
 
           if (showChooser && !_describeMode) ...[
             SurfaceCard(
@@ -1501,10 +1463,10 @@ class _PhotoCalorieScannerSheetState
                   ],
                 ),
               ),
-            Expanded(
-              child: ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                itemCount: _items.length,
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _items.length,
                 separatorBuilder: (_, index) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final item = _items[index];
@@ -1628,7 +1590,6 @@ class _PhotoCalorieScannerSheetState
                 );
                 },
               ),
-            ),
             const SizedBox(height: 12),
             Row(
               children: [

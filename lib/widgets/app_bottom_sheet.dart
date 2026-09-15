@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../theme/layout_insets.dart';
+import '../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 /// Consistent modal bottom sheets that clear the floating shell nav.
@@ -32,7 +32,8 @@ class AppSheet extends StatelessWidget {
     this.title,
     this.subtitle,
     this.maxHeightFactor = 0.9,
-    this.scrollable = false,
+    this.scrollable = true,
+    this.draggable = false,
   });
 
   final Widget child;
@@ -40,6 +41,7 @@ class AppSheet extends StatelessWidget {
   final String? subtitle;
   final double maxHeightFactor;
   final bool scrollable;
+  final bool draggable;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class AppSheet extends StatelessWidget {
             height: 4,
             decoration: BoxDecoration(
               color: context.colors.border,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(Radii.micro),
             ),
           ),
         ),
@@ -64,16 +66,18 @@ class AppSheet extends StatelessWidget {
             style: context.text.screenTitle.copyWith(color: context.colors.textDark),
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.inline),
             Text(
               subtitle!,
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.caption.copyWith(color: context.colors.textMedium),
             ),
           ],
           const SizedBox(height: 20),
         ] else
-          const SizedBox(height: 16),
-        if (scrollable)
+          const SizedBox(height: 20),
+        if (draggable)
+          Expanded(child: child)
+        else if (scrollable)
           Flexible(
             child: SingleChildScrollView(child: child),
           )
@@ -90,21 +94,21 @@ class AppSheet extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(kSheetRadius),
+            top: Radius.circular(Radii.sheet),
           ),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: Container(
-              constraints: BoxConstraints(
+              constraints: draggable ? null : BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * maxHeightFactor,
               ),
               decoration: BoxDecoration(
                 color: context.colors.card.withValues(alpha: 0.85),
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(kSheetRadius),
+                  top: Radius.circular(Radii.sheet),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              padding: const EdgeInsets.fromLTRB(Spacing.sheetPadH, Gap.x16, Spacing.sheetPadH, Spacing.section),
               child: content,
             ),
           ),
