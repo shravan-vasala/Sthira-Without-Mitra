@@ -5,7 +5,8 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../utils/meal_icons.dart';
 import '../../utils/target_calculator.dart';
-import '../../widgets/surface_card.dart';
+import '../../theme/app_spacing.dart';
+import '../../widgets/settings_row.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ManagePlansScreen extends ConsumerWidget {
@@ -32,9 +33,9 @@ class ManagePlansScreen extends ConsumerWidget {
           bottom: const TabBar(
             isScrollable: true,
             tabs: [
-              const Tab(text: 'Workout Plans'),
-              const Tab(text: 'Meal Plans'),
-              const Tab(text: 'Meal Slots'),
+              Tab(text: 'Workout Plans'),
+              Tab(text: 'Meal Plans'),
+              Tab(text: 'Meal Slots'),
             ],
           ),
         ),
@@ -42,7 +43,10 @@ class ManagePlansScreen extends ConsumerWidget {
           children: [
             // Active Plans Selection
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.screen,
+                vertical: Spacing.stack,
+              ),
               color: context.colors.card,
               child: Row(
                 children: [
@@ -59,7 +63,7 @@ class ManagePlansScreen extends ConsumerWidget {
                         DropdownButton<String>(
                           value: profile.activeWorkoutPlan,
                           isExpanded: true,
-                          hint: const Text(
+                          hint: Text(
                             'Select Plan',
                             style: context.text.body,
                           ),
@@ -123,7 +127,7 @@ class ManagePlansScreen extends ConsumerWidget {
                         DropdownButton<String>(
                           value: profile.activeMealPlan,
                           isExpanded: true,
-                          hint: const Text(
+                          hint: Text(
                             'Select Plan',
                             style: context.text.body,
                           ),
@@ -153,7 +157,11 @@ class ManagePlansScreen extends ConsumerWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
+              padding: const EdgeInsets.only(
+                left: Spacing.screen,
+                right: Spacing.screen,
+                bottom: Spacing.stack,
+              ),
               color: context.colors.card,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -356,25 +364,22 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
     final slots = profile.customMealSlots;
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.screen,
+        vertical: Spacing.section,
+      ),
       itemCount: slots.length,
       itemBuilder: (context, index) {
         final slot = slots[index];
         final isDefault = slot['isDefault'] == true;
 
-        return SurfaceCard(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: EdgeInsets.zero,
-          elevation: SurfaceCardElevation.nested,
-          child: ListTile(
-            leading: Icon(
-              MealIcons.resolve(slot['emoji'] as String?),
-              color: context.colors.primary,
-            ),
-            title: Text(slot['name'] as String, style: context.text.body),
-            subtitle: Text(
-              isDefault ? 'Default Slot' : 'Custom Recurring Slot',
-            ),
+        return Container(
+          margin: const EdgeInsets.only(bottom: Spacing.stack),
+          child: SettingsRow(
+            icon: MealIcons.resolve(slot['emoji'] as String?),
+            title: slot['name'] as String,
+            subtitle: isDefault ? 'Default Slot' : 'Custom Recurring Slot',
+            showChevron: false,
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -392,14 +397,31 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: const Text('Delete Slot?'),
-                          content: const Text(
+                          backgroundColor: context.colors.card,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Radii.sheet),
+                          ),
+                          title: Text(
+                            'Delete Slot?',
+                            style: context.text.screenTitle.copyWith(
+                              color: context.colors.textDark,
+                            ),
+                          ),
+                          content: Text(
                             'This will remove the slot from your daily template.\n\nAny meals you have already logged under this slot on past or current days will not be erased.',
+                            style: context.text.body.copyWith(
+                              color: context.colors.textMedium,
+                            ),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Cancel'),
+                              child: Text(
+                                'Cancel',
+                                style: context.text.body.copyWith(
+                                  color: context.colors.textMedium,
+                                ),
+                              ),
                             ),
                             TextButton(
                               onPressed: () async {
@@ -589,7 +611,7 @@ class _PlanEditorState extends State<_PlanEditor> {
   Future<void> _save() async {
     if (_selectedKey == null) return;
     try {
-      final decoded = jsonDecode(_controller.text);
+      final decoded = jsonDecode(_controller.text) as Map<String, dynamic>;
       final newPlanName = decoded['planName']?.toString();
 
       if (newPlanName != null && newPlanName != _selectedKey) {
@@ -618,6 +640,7 @@ class _PlanEditorState extends State<_PlanEditor> {
         );
 
         if (confirmRename == null) return;
+        if (!mounted) return;
 
         if (confirmRename == true) {
           // Rename logic
@@ -625,16 +648,17 @@ class _PlanEditorState extends State<_PlanEditor> {
             final repo = ProviderScope.containerOf(
               context,
             ).read(workoutRepoProvider);
-            await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
-
             final profileNotifier = ProviderScope.containerOf(
               context,
             ).read(profileProvider.notifier);
             final profile = ProviderScope.containerOf(
               context,
             ).read(profileProvider);
+
+            await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
+
             if (profile.activeWorkoutPlan == _selectedKey) {
-              profileNotifier.updateProfile(
+              await profileNotifier.updateProfile(
                 profile.copyWith(activeWorkoutPlan: newPlanName),
               );
             }
@@ -642,16 +666,17 @@ class _PlanEditorState extends State<_PlanEditor> {
             final repo = ProviderScope.containerOf(
               context,
             ).read(mealRepoProvider);
-            await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
-
             final profileNotifier = ProviderScope.containerOf(
               context,
             ).read(profileProvider.notifier);
             final profile = ProviderScope.containerOf(
               context,
             ).read(profileProvider);
+
+            await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
+
             if (profile.activeMealPlan == _selectedKey) {
-              profileNotifier.updateProfile(
+              await profileNotifier.updateProfile(
                 profile.copyWith(activeMealPlan: newPlanName),
               );
             }
