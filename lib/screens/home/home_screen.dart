@@ -107,12 +107,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 12),
                         const Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 8,
+                            horizontal: kScreenPadding,
                           ),
-                          child: _HomeGreetingTitle(),
+                          child: StaggeredFadeIn(
+                            key: ValueKey('home_greeting'),
+                            index: 0,
+                            child: _HomeGreetingTitle(),
+                          ),
                         ),
                         const SizedBox(height: 24),
 
@@ -280,7 +284,8 @@ class _HomeGreetingTitle extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(midnightTickProvider);
-    final name = ref.watch(profileProvider.select((p) => p.name)).trim();
+    final profile = ref.watch(profileProvider);
+    final name = profile.name.trim();
     final selected = ref.watch(selectedDateProvider);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -290,43 +295,39 @@ class _HomeGreetingTitle extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (name.isEmpty)
-          Text(
-            _timeGreeting(),
-            style: context.text.screenTitle.copyWith(
-              color: context.colors.textMedium,
-            ),
-          )
-        else
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: '${_timeGreeting()}, ',
-                  style: context.text.screenTitle.copyWith(
-                    color: context.colors.textMedium,
-                  ),
-                ),
-                TextSpan(
-                  text: name,
-                  style: context.text.screenTitle.copyWith(
-                    color: context.colors.textDark,
-                  ),
-                ),
-              ],
-            ),
+        Text(
+          DateFormat('EEEE, d MMMM').format(selected).toUpperCase(),
+          style: context.text.eyebrow.copyWith(
+            color: context.colors.textLight,
           ),
-        if (!isToday) ...[
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                DateFormat('EEEE, MMM d').format(selected),
-                style: context.text.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textDark,
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: name.isEmpty
+                          ? _timeGreeting()
+                          : '${_timeGreeting()}, ',
+                      style: context.text.screenTitle.copyWith(
+                        color: context.colors.textMedium,
+                      ),
+                    ),
+                    if (name.isNotEmpty)
+                      TextSpan(
+                        text: name,
+                        style: context.text.screenTitle.copyWith(
+                          color: context.colors.textDark,
+                        ),
+                      ),
+                  ],
                 ),
               ),
+            ),
+            if (!isToday) ...[
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: () {
@@ -343,6 +344,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.calendar_today_rounded,
@@ -361,8 +363,8 @@ class _HomeGreetingTitle extends ConsumerWidget {
                 ),
               ),
             ],
-          ),
-        ],
+          ],
+        ),
       ],
     );
   }
@@ -448,7 +450,7 @@ class _HabitsEditButton extends StatelessWidget {
           rootNavigator: true,
         ).push(MaterialPageRoute(builder: (_) => const ManageHabitsScreen()));
       },
-      icon: Icon(Icons.edit_rounded, color: context.colors.primary, size: 24),
+      icon: Icon(Icons.edit_rounded, color: context.colors.primary, ),
     );
   }
 }
@@ -674,8 +676,7 @@ class _WorkoutsSection extends ConsumerWidget {
                 child: Icon(
                   Icons.check_rounded,
                   color: context.colors.green,
-                  size: 24,
-                ),
+                  ),
               )
             else if (isRest)
               Icon(

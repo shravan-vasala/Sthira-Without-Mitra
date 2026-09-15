@@ -109,7 +109,6 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: kScreenPadding,
-        vertical: 8,
       ),
       child: Column(
         children: [
