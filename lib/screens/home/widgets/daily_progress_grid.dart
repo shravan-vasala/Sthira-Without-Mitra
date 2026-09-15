@@ -3,19 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../utils/format_units.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/health_connect_service.dart';
 import '../../../widgets/app_bottom_sheet.dart';
-import '../../../theme/app_theme.dart';
 import '../weight_entry_dialog.dart';
 import '../steps_entry_dialog.dart';
 import 'sync_status_sheet.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class DailyProgressGrid extends ConsumerWidget {
   const DailyProgressGrid({super.key});
@@ -297,12 +295,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 children: [
                   Text(
                     'Steps',
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -316,11 +309,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           builder: (context, val, child) {
                             return Text(
                               '${NumberFormat.decimalPattern().format(val)} steps',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: context.colors.textMedium,
-                              ),
+                              style: context.text.body.copyWith(color: context.colors.textMedium),
                             );
                           }
                         )
@@ -328,11 +317,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                         Flexible(
                           child: Text(
                             stepsSubtitle,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: context.colors.textMedium,
-                            ),
+                            style: context.text.body.copyWith(color: context.colors.textMedium),
                             // Removed TextOverflow.ellipsis to allow graceful multi-line wrapping
                           ),
                         ),
@@ -348,13 +333,9 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                           ),
                           child: Text(
                             sourceHint,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: (sourceHint == 'Synced' || sourceHint == 'Connected')
+                            style: context.text.micro.copyWith(color: (sourceHint == 'Synced' || sourceHint == 'Connected')
                                   ? context.colors.green
-                                  : context.colors.textMedium,
-                            ),
+                                  : context.colors.textMedium),
                           ),
                         ),
                       ]
@@ -386,11 +367,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                   ),
                   child: Text(
                     'Connect',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.primary,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.primary),
                   ),
                 ),
               )
@@ -471,21 +448,12 @@ class _ProgressCard extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     displaySubtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.body.copyWith(color: context.colors.textMedium),
                   ),
                 ],
               ),
@@ -522,11 +490,7 @@ class _ProgressCard extends ConsumerWidget {
                       alignment: Alignment.center,
                       child: Text(
                         '+${thumbnails!.length - 3}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.primary,
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.primary),
                       ),
                     ),
                   const SizedBox(width: 8),

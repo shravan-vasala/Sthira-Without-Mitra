@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class DailyShareCard extends ConsumerWidget {
   const DailyShareCard({super.key});
@@ -94,20 +95,11 @@ class DailyShareCard extends ConsumerWidget {
                   children: [
                     Text(
                       'STHIRA',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 2,
-                        fontSize: 12,
-                      ),
+                      style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.8)),
                     ),
                       Text(
                         DateFormat('MMM d').format(DateTime.parse(ref.watch(dateStringProvider))),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
+                        style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.8)),
                     ),
                   ],
                 ),
@@ -115,22 +107,12 @@ class DailyShareCard extends ConsumerWidget {
 
                 Text(
                   "$name's Day",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    height: 1.1,
-                    letterSpacing: -0.5,
-                  ),
+                  style: context.text.display.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   _getSubtitle(score.totalScore),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: context.text.bodyStrong.copyWith(color: Colors.white.withValues(alpha: 0.9)),
                 ),
 
                 const Spacer(),
@@ -238,22 +220,12 @@ class _StatBox extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-            ),
+            style: context.text.screenTitle.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-            ),
+            style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.8)),
           ),
         ],
       ),

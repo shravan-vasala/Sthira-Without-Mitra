@@ -6,6 +6,7 @@ import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 bool _isShowingDayComplete = false;
 
@@ -90,21 +91,13 @@ class DayCompleteSheet extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Day complete, $greetName',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Habits, meals, and workout are done. Score ${score.totalScore} — nice consistency.',
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.4,
-              color: context.colors.textMedium,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),

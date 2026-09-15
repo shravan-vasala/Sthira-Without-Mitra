@@ -5,6 +5,7 @@ import '../../../models/insight.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/insights_provider.dart';
 import '../../../widgets/surface_card.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class DailyInsightCard extends ConsumerWidget {
   const DailyInsightCard({super.key});
@@ -57,12 +58,7 @@ class DailyInsightCard extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     insight.type == InsightType.trend ? 'TREND' : 'INSIGHT',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: context.colors.textMedium,
-                      letterSpacing: 1.5,
-                    ),
+                    style: context.text.micro.copyWith(color: context.colors.textMedium),
                   ),
                 ),
               ],
@@ -70,22 +66,12 @@ class DailyInsightCard extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               insight.title,
-              style: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textDark,
-              ),
+              style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
             ),
             const SizedBox(height: 6),
             Text(
               insight.description,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textMedium,
-                height: 1.4,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.textMedium),
             ),
           ],
         ),

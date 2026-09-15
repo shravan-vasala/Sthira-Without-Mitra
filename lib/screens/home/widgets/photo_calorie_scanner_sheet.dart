@@ -10,16 +10,15 @@ import 'package:image_picker/image_picker.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
 import '../../../models/daily_meal_log.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:isar/isar.dart';
 import '../../../models/user_food_log.dart';
-import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../models/food_nutrition.dart';
 import '../../../widgets/offline_banner.dart';
 import '../../../widgets/primary_button.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 /// Opens with photo-first capture, or describe-in-text when [isManualEntry] is true.
 class PhotoCalorieScannerSheet extends ConsumerStatefulWidget {
@@ -519,10 +518,7 @@ class _PhotoCalorieScannerSheetState
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Edit Item',
-          style: TextStyle(
-            color: context.colors.textDark,
-            fontWeight: FontWeight.bold,
-          ),
+          style: context.text.body.copyWith(color: context.colors.textDark),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -532,7 +528,7 @@ class _PhotoCalorieScannerSheetState
                 controller: nameCtrl,
                 decoration: InputDecoration(
                   labelText: 'Name',
-                  labelStyle: TextStyle(color: context.colors.textMedium),
+                  labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.colors.primary),
                   ),
@@ -543,7 +539,7 @@ class _PhotoCalorieScannerSheetState
                 controller: portionCtrl,
                 decoration: InputDecoration(
                   labelText: 'Portion',
-                  labelStyle: TextStyle(color: context.colors.textMedium),
+                  labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.colors.primary),
                   ),
@@ -552,10 +548,10 @@ class _PhotoCalorieScannerSheetState
               const SizedBox(height: 12),
               TextField(
                 controller: calsCtrl,
-                style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
+                style: context.text.body,
                 decoration: InputDecoration(
                   labelText: 'Calories',
-                  labelStyle: TextStyle(color: context.colors.textMedium, fontFamily: 'General Sans'),
+                  labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.colors.primary),
                   ),
@@ -568,14 +564,10 @@ class _PhotoCalorieScannerSheetState
                   Expanded(
                     child: TextField(
                       controller: pCtrl,
-                      style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
+                      style: context.text.body,
                       decoration: InputDecoration(
                         labelText: 'Pro(g)',
-                        labelStyle: TextStyle(
-                          color: context.colors.textMedium,
-                          fontSize: 13,
-                          fontFamily: 'General Sans',
-                        ),
+                        labelStyle: context.text.caption.copyWith(color: context.colors.textMedium),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
                           vertical: 8,
@@ -591,14 +583,10 @@ class _PhotoCalorieScannerSheetState
                   Expanded(
                     child: TextField(
                       controller: cCtrl,
-                      style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
+                      style: context.text.body,
                       decoration: InputDecoration(
                         labelText: 'Carb(g)',
-                        labelStyle: TextStyle(
-                          color: context.colors.textMedium,
-                          fontSize: 13,
-                          fontFamily: 'General Sans',
-                        ),
+                        labelStyle: context.text.caption.copyWith(color: context.colors.textMedium),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
                           vertical: 8,
@@ -614,14 +602,10 @@ class _PhotoCalorieScannerSheetState
                   Expanded(
                     child: TextField(
                       controller: fCtrl,
-                      style: const TextStyle(fontFamily: 'Cabinet Grotesk'),
+                      style: context.text.body,
                       decoration: InputDecoration(
                         labelText: 'Fat(g)',
-                        labelStyle: TextStyle(
-                          color: context.colors.textMedium,
-                          fontSize: 13,
-                          fontFamily: 'General Sans',
-                        ),
+                        labelStyle: context.text.caption.copyWith(color: context.colors.textMedium),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
                           vertical: 8,
@@ -937,14 +921,7 @@ class _PhotoCalorieScannerSheetState
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                        color: context.colors.textDark,
-                        height: 1.1,
-                      ),
+                      style: context.text.display.copyWith(color: context.colors.textDark),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -953,11 +930,7 @@ class _PhotoCalorieScannerSheetState
                           : _describeMode
                           ? 'Describe home cooking — AI estimates macros'
                           : 'Photo of your plate works best for home meals',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.caption.copyWith(color: context.colors.textMedium),
                     ),
                   ],
                 ),
@@ -979,20 +952,12 @@ class _PhotoCalorieScannerSheetState
                   const SizedBox(height: 16),
                   Text(
                     'Snap what you ate',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Best for home-cooked plates',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -1013,7 +978,7 @@ class _PhotoCalorieScannerSheetState
                               children: [
                                 Icon(Icons.camera_rounded, size: 18, color: context.colors.primary),
                                 const SizedBox(width: 8),
-                                Text('Camera', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: context.colors.primary)),
+                                Text('Camera', style: context.text.body.copyWith(color: context.colors.primary)),
                               ],
                             ),
                           ),
@@ -1036,7 +1001,7 @@ class _PhotoCalorieScannerSheetState
                               children: [
                                 Icon(Icons.photo_library_rounded, size: 18, color: context.colors.textDark),
                                 const SizedBox(width: 8),
-                                Text('Gallery', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.colors.textDark)),
+                                Text('Gallery', style: context.text.body.copyWith(color: context.colors.textDark)),
                               ],
                             ),
                           ),
@@ -1062,11 +1027,7 @@ class _PhotoCalorieScannerSheetState
                     Expanded(
                       child: Text(
                         'Or describe in text',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.textDark,
-                        ),
+                        style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                       ),
                     ),
                     Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
@@ -1089,11 +1050,7 @@ class _PhotoCalorieScannerSheetState
                     Expanded(
                       child: Text(
                         'Enter macros yourself',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.textDark,
-                        ),
+                        style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                       ),
                     ),
                     Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
@@ -1104,11 +1061,7 @@ class _PhotoCalorieScannerSheetState
           ] else if (showChooser && _describeMode) ...[
             Text(
               'What did you eat?',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: context.colors.textDark,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textDark),
             ),
             const SizedBox(height: 8),
             _MyFoodsScroller(
@@ -1200,17 +1153,13 @@ class _PhotoCalorieScannerSheetState
                   const SizedBox(height: 8),
                   Text(
                     'AI Service Offline',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.orange[800],
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: Colors.orange[800]),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'The AI system is temporarily overwhelmed or unavailable. Please log your macros manually for now.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: Colors.orange[800]),
+                    style: context.text.caption.copyWith(color: Colors.orange[800]),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -1251,10 +1200,7 @@ class _PhotoCalorieScannerSheetState
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: TextStyle(
-                            color: context.colors.textDark,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.text.body.copyWith(color: context.colors.textDark),
                         ),
                       ),
                     ],
@@ -1269,21 +1215,14 @@ class _PhotoCalorieScannerSheetState
                       child: ExpansionTile(
                         title: Text(
                           'Details',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.colors.red,
-                          ),
+                          style: context.text.caption.copyWith(color: context.colors.red),
                         ),
                         tilePadding: EdgeInsets.zero,
                         childrenPadding: const EdgeInsets.only(bottom: 8),
                         children: [
                           Text(
                             _techErrorMsg!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'monospace',
-                              color: context.colors.textMedium,
-                            ),
+                            style: context.text.micro.copyWith(color: context.colors.textMedium),
                           ),
                         ],
                       ),
@@ -1381,11 +1320,7 @@ class _PhotoCalorieScannerSheetState
                                   Text(
                                     'Add angle\n(Max 3)',
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: context.colors.primary,
-                                    ),
+                                    style: context.text.micro.copyWith(color: context.colors.primary),
                                   ),
                                 ],
                               ),
@@ -1419,8 +1354,9 @@ class _PhotoCalorieScannerSheetState
                                     onTap: () {
                                       setState(() {
                                         _selectedImages.removeAt(index);
-                                        if (_selectedImages.isEmpty)
+                                        if (_selectedImages.isEmpty) {
                                           _analysisComplete = false;
+                                        }
                                       });
                                     },
                                     child: Container(
@@ -1475,11 +1411,7 @@ class _PhotoCalorieScannerSheetState
                                       : _elapsedSeconds < 12
                                           ? 'Looking up nutrition details...'
                                           : 'Still working — big plates take a moment...',
-                              style: TextStyle(
-                                color: context.colors.textDark,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
+                              style: context.text.caption.copyWith(color: context.colors.textDark),
                               maxLines: 2,
                             ),
                           ),
@@ -1501,11 +1433,7 @@ class _PhotoCalorieScannerSheetState
               const SizedBox(height: 16),
               Text(
                 'Optional hint',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textDark),
               ),
               const SizedBox(height: 6),
               TextField(
@@ -1561,15 +1489,11 @@ class _PhotoCalorieScannerSheetState
                           const SizedBox(width: 6),
                           Text(
                             '${_confidence![0].toUpperCase()}${_confidence!.substring(1)} confidence',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: _confidence == 'low' 
+                            style: context.text.micro.copyWith(color: _confidence == 'low' 
                                 ? context.colors.red 
                                 : _confidence == 'medium' 
                                   ? context.colors.orange 
-                                  : context.colors.green,
-                            ),
+                                  : context.colors.green),
                           ),
                         ],
                       ),
@@ -1637,22 +1561,13 @@ class _PhotoCalorieScannerSheetState
                               children: [
                                 Text(
                                   item.name ?? 'Unknown',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16,
-                                    color: isResolved ? context.colors.textDark : context.colors.orange,
-                                  ),
+                                  style: context.text.bodyStrong.copyWith(color: isResolved ? context.colors.textDark : context.colors.orange),
                                 ),
                                 const SizedBox(height: 4),
                                   if (isResolved) ...[
                                   Text(
                                     '${item.portion} • ${item.computedNutrition?.kcal.round() ?? 0} kcal',
-                                    style: TextStyle(
-                                      fontFamily: 'Cabinet Grotesk',
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: context.colors.primary,
-                                    ),
+                                    style: context.text.caption.copyWith(color: context.colors.primary),
                                   ),
                                   const SizedBox(height: 8),
                                   Wrap(
@@ -1692,11 +1607,7 @@ class _PhotoCalorieScannerSheetState
                                 ] else ...[
                                   Text(
                                     'Couldn\'t estimate — tap edit to fix',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: context.colors.textMedium,
-                                    ),
+                                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                                   ),
                                 ],
                               ],
@@ -1749,11 +1660,7 @@ class _PhotoCalorieScannerSheetState
                           children: [
                             Text(
                               'TOTAL',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: _unresolvedCount > 0 ? context.colors.orange : context.colors.primary,
-                              ),
+                              style: context.text.micro.copyWith(color: _unresolvedCount > 0 ? context.colors.orange : context.colors.primary),
                             ),
                             if (_unresolvedCount > 0) ...[
                               const Spacer(),
@@ -1765,11 +1672,7 @@ class _PhotoCalorieScannerSheetState
                                 ),
                                 child: Text(
                                   '+$_unresolvedCount to review',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: context.colors.onPrimary,
-                                  ),
+                                  style: context.text.micro.copyWith(color: context.colors.onPrimary),
                                 ),
                               ),
                             ],
@@ -1778,12 +1681,7 @@ class _PhotoCalorieScannerSheetState
                         const SizedBox(height: 2),
                         Text(
                           '$_totalCalories kcal',
-                          style: TextStyle(
-                            fontFamily: 'Cabinet Grotesk',
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: context.colors.textDark,
-                          ),
+                          style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                         ),
                       ],
                     ),
@@ -1824,12 +1722,7 @@ class _PhotoCalorieScannerSheetState
       ),
       child: Text(
         '$label: $value',
-        style: TextStyle(
-          fontFamily: 'Cabinet Grotesk',
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
+        style: context.text.micro.copyWith(color: color),
       ),
     );
   }
@@ -1850,11 +1743,7 @@ class _PhotoCalorieScannerSheetState
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? context.colors.primary : context.colors.textMedium,
-          ),
+          style: context.text.micro.copyWith(color: isSelected ? context.colors.primary : context.colors.textMedium),
         ),
       ),
     );
@@ -1931,7 +1820,7 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: _myFoods.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final food = _myFoods[index];
               return GestureDetector(
@@ -1956,11 +1845,7 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
                       const SizedBox(width: 6),
                       Text(
                         food.originalName,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.primary,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.primary),
                       ),
                     ],
                   ),

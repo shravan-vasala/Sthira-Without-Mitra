@@ -3,7 +3,6 @@ import '../../../utils/meal_completion.dart';
 import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../theme/app_theme.dart';
@@ -51,7 +50,7 @@ class MealsCard extends ConsumerWidget {
     final isFuture = selectedDate.isAfter(today);
     final isToday = selectedDate.isAtSameMomentAs(today);
 
-    int totalMeals = MealCompletion.calculateTotalMeals(profile, dailyLog);
+    final int totalMeals = MealCompletion.calculateTotalMeals(profile, dailyLog);
 
     final slots = <({String id, String name, String emoji})>[];
     for (final s in profile.customMealSlots) {
@@ -93,21 +92,12 @@ class MealsCard extends ConsumerWidget {
                           children: [
                             Text(
                               isToday ? "Today's Meals" : (isFuture ? "Upcoming Meals" : "Meals"),
-                              style: TextStyle(
-                                fontFamily: 'Cabinet Grotesk',
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color: context.colors.textDark,
-                              ),
+                              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               planName,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: context.colors.textMedium,
-                              ),
+                              style: context.text.caption.copyWith(color: context.colors.textMedium),
                             ),
                           ],
                         ),
@@ -144,7 +134,7 @@ class MealsCard extends ConsumerWidget {
                                 fontWeight: FontWeight.w600,
                                 color: context.colors.textMedium,
                               ) ??
-                              const TextStyle(),
+                              context.text.body,
                         ),
                       );
                     }
@@ -180,11 +170,7 @@ class MealsCard extends ConsumerWidget {
                         : (isOverTarget
                             ? '${completedCal - totalCal} kcal above target'
                             : 'Below target by ${totalCal - completedCal} kcal'),
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 12,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.micro.copyWith(color: context.colors.textMedium),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -224,7 +210,7 @@ class _MacroPill extends StatelessWidget {
           return Text(
             '$label: ${val.toStringAsFixed(0)}g',
             style: AppTheme.numeric(
-              TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+              context.text.micro.copyWith(color: color),
             ),
           );
         }

@@ -7,6 +7,7 @@ import '../../../widgets/surface_card.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/ai_client.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AIMealSuggestionCard extends ConsumerStatefulWidget {
   final int remainingCalories;
@@ -181,19 +182,12 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
               const SizedBox(height: 12),
               Text(
                 'Calorie Goal Reached!',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.cardTitle.copyWith(color: context.colors.textDark),
               ),
               const SizedBox(height: 4),
               Text(
                 'You hit your target for today. Great job!',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.colors.textMedium,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -219,11 +213,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                 const SizedBox(width: 8),
                 Text(
                   'Smart Meal Suggestion',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                 ),
               ],
             ),
@@ -274,22 +264,12 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                 children: [
                    Text(
                     _suggestionText!,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textDark,
-                      height: 1.4,
-                    ),
+                    style: context.text.body.copyWith(color: context.colors.textDark),
                   ),
                   if (_isStreaming)
                     Text(
                       '▍',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.primary,
-                        height: 1.4,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.primary),
                     ).animate(onPlay: (c) => c.repeat()).fade(duration: 400.ms),
                 ]
               ),
@@ -304,17 +284,13 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
             ] else ...[
               Text(
                 'Need ideas for your next meal? I can suggest a dish that perfectly fits your remaining macros (${widget.remainingCalories} kcal left).',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.colors.textMedium,
-                  height: 1.4,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
                 Text(
                   _error!,
-                  style: TextStyle(color: context.colors.red, fontSize: 12),
+                  style: context.text.micro.copyWith(color: context.colors.red),
                 ),
               ],
               const SizedBox(height: 16),

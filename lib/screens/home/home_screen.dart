@@ -5,11 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
-import '../../providers/sync_controller.dart';
 import '../../providers/midnight_tick_provider.dart';
 
-import '../../services/health_connect_service.dart';
-import '../../services/screen_time_service.dart';
 import '../../models/habit.dart';
 import '../../utils/workout_completion.dart';
 import '../../utils/workout_formatting.dart';
@@ -27,8 +24,6 @@ import 'widgets/daily_progress_grid.dart';
 import 'widgets/coach_notes_card.dart';
 import 'widgets/daily_insight_card.dart';
 import 'widgets/day_complete_sheet.dart';
-import 'widgets/past_day_summary_sheet.dart';
-import '../../providers/gamification_provider.dart';
 
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -92,8 +87,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen<int>(mealStreakProvider, (prev, next) {
       if (next == 3 && (prev == null || prev < 3)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
+          const SnackBar(
+            content: Text(
               '3-day meal tracking streak achieved.',
             ),
           ),
@@ -128,7 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // 2. Week calendar + score
-                      StaggeredFadeIn(key: const ValueKey('calendar_strip'), index: 1, child: const WeekCalendarStrip()),
+                      const StaggeredFadeIn(key: ValueKey('calendar_strip'), index: 1, child: WeekCalendarStrip()),
                       const SizedBox(height: 24),
 
                       // 3. Workout (primary daily action)
@@ -203,16 +198,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       
                       // 7. Secondary Coach/Insight
                       if (hasInsight)
-                        StaggeredFadeIn(
-                          key: const ValueKey('insight_card'),
+                        const StaggeredFadeIn(
+                          key: ValueKey('insight_card'),
                           index: 6,
-                          child: const DailyInsightCard(),
+                          child: DailyInsightCard(),
                         )
                       else
-                        StaggeredFadeIn(
-                          key: const ValueKey('coach_notes_card'),
+                        const StaggeredFadeIn(
+                          key: ValueKey('coach_notes_card'),
                           index: 6,
-                          child: const CoachNotesCard(topMargin: 0),
+                          child: CoachNotesCard(topMargin: 0),
                         ),
 
                       // Explicit bottom clearance for floating nav constraints
@@ -226,7 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
 
-        Align(
+        const Align(
           alignment: Alignment.topCenter,
         ),
       ],
@@ -293,13 +288,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
         if (name.isEmpty)
           Text(
             _timeGreeting(),
-            style: TextStyle(
-              fontFamily: 'General Sans',
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-              color: context.colors.textMedium,
-              letterSpacing: -0.3,
-            ),
+            style: context.text.screenTitle.copyWith(color: context.colors.textMedium),
           )
         else
           Text.rich(
@@ -307,23 +296,11 @@ class _HomeGreetingTitle extends ConsumerWidget {
               children: [
                 TextSpan(
                   text: '${_timeGreeting()}, ',
-                  style: TextStyle(
-                    fontFamily: 'General Sans',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w400,
-                    color: context.colors.textMedium,
-                    letterSpacing: -0.3,
-                  ),
+                  style: context.text.screenTitle.copyWith(color: context.colors.textMedium),
                 ),
                 TextSpan(
                   text: name,
-                  style: TextStyle(
-                    fontFamily: 'General Sans',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textDark,
-                    letterSpacing: -0.3,
-                  ),
+                  style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                 ),
               ],
             ),
@@ -357,11 +334,7 @@ class _HomeGreetingTitle extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Text(
                         'Return to Today',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.primary,
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.primary),
                       ),
                     ],
                   ),
@@ -405,11 +378,7 @@ class _WeeklySummaryLink extends StatelessWidget {
               Expanded(
                 child: Text(
                   "This week's summary",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textDark),
                 ),
               ),
               Icon(
@@ -441,11 +410,7 @@ class _HabitsCountLabel extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: Text(
         '$completedCount/${habits.length}',
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          color: context.colors.textLight,
-          fontSize: 14,
-        ),
+        style: context.text.body.copyWith(color: context.colors.textLight),
       ),
     );
   }
@@ -478,8 +443,9 @@ class _WorkoutsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final workoutPlan = ref.watch(workoutPlanProvider);
     final phaseProgress = ref.watch(phaseProgressProvider);
-    if (workoutPlan == null || workoutPlan.days.isEmpty)
+    if (workoutPlan == null || workoutPlan.days.isEmpty) {
       return const SizedBox();
+    }
 
     final dateStr = ref.watch(dateStringProvider);
 
@@ -528,7 +494,7 @@ class _WorkoutsSection extends ConsumerWidget {
         );
         if (isCompleted) completedCount++;
 
-        String title = formatSectionTitle(sec.title, i);
+        final String title = formatSectionTitle(sec.title, i);
 
         int exercisesLogged = 0;
         int firstUnloggedIndex = -1;
@@ -582,23 +548,14 @@ class _WorkoutsSection extends ConsumerWidget {
           'Workouts',
           countLabel: Text(
             '($completedCount/$total)',
-            style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'General Sans',
-              fontWeight: FontWeight.w500,
-              color: context.colors.primary.withValues(alpha: 0.8),
-            ),
+            style: context.text.body.copyWith(color: context.colors.primary.withValues(alpha: 0.8)),
           ),
           trailing: phaseProgress.isPhaseActive
               ? Row(
                   children: [
                     Text(
                       'Week ${phaseProgress.currentWeek} of ${phaseProgress.totalWeeks}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.primary,
-                      ),
+                      style: context.text.micro.copyWith(color: context.colors.primary),
                     ),
                     const SizedBox(width: 8),
                     SizedBox(
@@ -658,32 +615,19 @@ class _WorkoutsSection extends ConsumerWidget {
                         color: Colors.transparent,
                         child: Text(
                           title,
-                          style: TextStyle(
-                            fontFamily: 'Cabinet Grotesk',
-                            color: context.colors.textDark,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                         ),
                       ),
                     )
                   else
                     Text(
                       title,
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        color: context.colors.textDark,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                     ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      color: context.colors.textMedium,
-                      fontSize: 12,
-                    ),
+                    style: context.text.micro.copyWith(color: context.colors.textMedium),
                   ),
                 ],
               ),

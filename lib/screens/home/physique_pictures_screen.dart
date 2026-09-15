@@ -11,11 +11,11 @@ import '../../widgets/empty_state_view.dart';
 import '../../services/haptics.dart';
 import 'widgets/add_progress_photo_sheet.dart';
 import '../../providers/app_providers.dart';
-import '../../repositories/media_repository.dart';
 import '../../theme/app_theme.dart';
 import 'photo_compare_screen.dart';
 import 'photo_viewer_screen.dart';
 import '../../theme/layout_insets.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class PhysiquePicturesScreen extends ConsumerStatefulWidget {
   const PhysiquePicturesScreen({super.key});
@@ -95,7 +95,7 @@ class _PhysiquePicturesScreenState
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel', style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.w600)),
+              child: Text('Cancel', style: context.text.body.copyWith(color: context.colors.textDark)),
             ),
           ],
         ),
@@ -170,13 +170,13 @@ class _PhysiquePicturesScreenState
               icon: Icon(Icons.compare_rounded, color: context.colors.primary),
               label: Text(
                 'Compare',
-                style: TextStyle(color: context.colors.primary),
+                style: context.text.body.copyWith(color: context.colors.primary),
               ),
             ),
         ],
       ),
       floatingActionButton: rawPhotos.isEmpty ? null : Padding(
-        padding: EdgeInsets.only(bottom: kFloatingNavClearance),
+        padding: const EdgeInsets.only(bottom: kFloatingNavClearance),
         child: FloatingActionButton.extended(
           onPressed: _addPhoto,
           backgroundColor: context.colors.primary,
@@ -184,7 +184,7 @@ class _PhysiquePicturesScreenState
             Icons.add_a_photo_rounded,
             color: context.colors.onPrimary,
           ),
-          label: Text('Add photo', style: TextStyle(color: context.colors.onPrimary, fontWeight: FontWeight.w700)),
+          label: Text('Add photo', style: context.text.body.copyWith(color: context.colors.onPrimary)),
         ),
       ),
       body: Column(
@@ -243,7 +243,7 @@ class _PhysiquePicturesScreenState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        EmptyStateView(
+                        const EmptyStateView(
                           icon: Icons.photo_library_outlined,
                           title: 'No progress photos yet',
                           subtitle: 'Add your first photo to track your journey.',
@@ -263,7 +263,7 @@ class _PhysiquePicturesScreenState
                 ? Center(
                     child: Text(
                       'No photos for this pose.',
-                      style: TextStyle(color: context.colors.textMedium),
+                      style: context.text.body.copyWith(color: context.colors.textMedium),
                     ),
                   )
                 : ListView.builder(
@@ -283,11 +283,7 @@ class _PhysiquePicturesScreenState
                             padding: const EdgeInsets.only(bottom: 12),
                               child: Text(
                                 formattedDate,
-                                style: AppTheme.numeric(TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.colors.textDark,
-                                )),
+                                style: AppTheme.numeric(context.text.bodyStrong.copyWith(color: context.colors.textDark)),
                               ),
                           ),
                           GridView.builder(
@@ -393,11 +389,7 @@ class _PhysiquePicturesScreenState
                                           ),
                                           child: Text(
                                             poseTag.toUpperCase(),
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                              color: context.colors.onPrimary,
-                                            ),
+                                            style: context.text.micro.copyWith(color: context.colors.onPrimary),
                                           ),
                                         ),
                                       ),
@@ -419,11 +411,7 @@ class _PhysiquePicturesScreenState
                                           ),
                                             child: Text(
                                               '${weight}kg',
-                                              style: AppTheme.numeric(TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w700,
-                                                color: context.colors.onPrimary,
-                                              )),
+                                              style: AppTheme.numeric(context.text.micro.copyWith(color: context.colors.onPrimary)),
                                             ),
                                         ),
                                       ),
@@ -543,18 +531,14 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? context.colors.primary : context.colors.primary.withOpacity(0.15),
+          color: isSelected ? context.colors.primary : context.colors.primary.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: isSelected
+          style: context.text.caption.copyWith(color: isSelected
                 ? context.colors.onPrimary
-                : context.colors.primary,
-          ),
+                : context.colors.primary),
         ),
       ),
     );

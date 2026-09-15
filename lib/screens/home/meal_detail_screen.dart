@@ -13,7 +13,6 @@ import '../../models/food_nutrition.dart';
 import '../../models/meal_plan.dart';
 import '../../utils/meal_plan_complete.dart';
 import '../../widgets/app_bottom_sheet.dart';
-import '../../widgets/primary_button.dart';
 import '../../widgets/surface_card.dart';
 import '../../utils/meal_icons.dart';
 import 'widgets/photo_calorie_scanner_sheet.dart';
@@ -21,6 +20,7 @@ import 'widgets/add_meal_slot_dialog.dart';
 import 'widgets/ai_meal_suggestion_card.dart';
 import '../meals/widgets/plate_calculator_sheet.dart';
 import '../../theme/app_theme.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class MealDetailScreen extends ConsumerWidget {
   const MealDetailScreen({super.key});
@@ -81,11 +81,7 @@ class MealDetailScreen extends ConsumerWidget {
             Text(titleText),
             Text(
               planName,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.textMedium),
             ),
           ],
         ),
@@ -168,10 +164,7 @@ class MealDetailScreen extends ConsumerWidget {
                     icon: const Icon(Icons.add_rounded, size: 20),
                     label: const Text(
                       'Add another meal',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                      ),
+                      style: context.text.bodyStrong,
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
@@ -197,10 +190,7 @@ class MealDetailScreen extends ConsumerWidget {
                     icon: const Icon(Icons.pie_chart_outline_rounded, size: 20),
                     label: const Text(
                       'Visual Plate Calculator',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                      ),
+                      style: context.text.bodyStrong,
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.indigo,
@@ -270,14 +260,7 @@ class _CalorieHeader extends StatelessWidget {
                 builder: (context, val, child) {
                   return Text(
                     '$val',
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 56,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.5,
-                      height: 1.0,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.metric.copyWith(color: context.colors.textDark),
                   );
                 },
               ),
@@ -285,29 +268,17 @@ class _CalorieHeader extends StatelessWidget {
               if (target == 0)
                 Text(
                   ' kcal',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textMedium),
                 )
               else if (isOverTarget)
                 Text(
                   '+${(eaten - target).toInt()} over target',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.orange,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.orange),
                 )
               else
                 Text(
                   '/ ${target.toInt()} kcal',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textMedium),
                 ),
             ],
           ),
@@ -372,34 +343,21 @@ class _MinimalMacroStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: context.colors.textMedium,
-            letterSpacing: 0.5,
-          ),
+          style: context.text.micro.copyWith(color: context.colors.textMedium),
         ),
         const SizedBox(height: 4),
         if (target == 0)
           Text(
             '${current.toInt()}g',
             style: AppTheme.numeric(
-              TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textDark,
-              ),
+              context.text.body.copyWith(color: context.colors.textDark),
             ),
           )
         else
           Text(
             '${current.toInt()} / ${target.toInt()}g',
             style: AppTheme.numeric(
-              TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textDark,
-              ),
+              context.text.body.copyWith(color: context.colors.textDark),
             ),
           ),
       ],
@@ -431,33 +389,21 @@ class _MacroBar extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textMedium,
-                ),
+                style: context.text.micro.copyWith(color: context.colors.textMedium),
               ),
             ),
             if (target == 0)
               Text(
                 '${current.toStringAsFixed(0)}g',
                 style: AppTheme.numeric(
-                  TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textDark,
-                  ),
+                  context.text.micro.copyWith(color: context.colors.textDark),
                 ),
               )
             else
               Text(
                 '${current.toStringAsFixed(0)}/${target.toStringAsFixed(0)}g',
                 style: AppTheme.numeric(
-                  TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textDark,
-                  ),
+                  context.text.micro.copyWith(color: context.colors.textDark),
                 ),
               ),
           ],
@@ -479,13 +425,13 @@ class _MacroBar extends StatelessWidget {
 
 class _MealSlotCard extends ConsumerStatefulWidget {
   const _MealSlotCard({
-    Key? key,
+    super.key,
     required this.slotId,
     required this.slotName,
     required this.slotEmoji,
     this.slotLog,
     this.plannedMeal,
-  }) : super(key: key);
+  });
 
   final String slotId;
   final String slotName;
@@ -622,11 +568,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                         children: [
                           Text(
                             widget.slotName,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.textDark,
-                            ),
+                            style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                           ),
                           if (_hasLog)
                             TweenAnimationBuilder<double>(
@@ -645,45 +587,30 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                     children: [
                                       TextSpan(
                                         text: '$cal kcal',
-                                        style: TextStyle(
-                                          color: context.colors.primary,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                        style: context.text.body.copyWith(color: context.colors.primary),
                                       ),
                                       const TextSpan(text: '   '),
-                                      TextSpan(text: 'P: ', style: TextStyle(color: context.colors.green.withValues(alpha: 0.9), fontSize: 11)),
+                                      TextSpan(text: 'P: ', style: context.text.micro.copyWith(color: context.colors.green.withValues(alpha: 0.9))),
                                       TextSpan(text: '${p}g   '),
-                                      TextSpan(text: 'C: ', style: TextStyle(color: context.colors.orange.withValues(alpha: 0.9), fontSize: 11)),
+                                      TextSpan(text: 'C: ', style: context.text.micro.copyWith(color: context.colors.orange.withValues(alpha: 0.9))),
                                       TextSpan(text: '${c}g   '),
-                                      TextSpan(text: 'F: ', style: TextStyle(color: context.colors.primary.withValues(alpha: 0.9), fontSize: 11)),
+                                      TextSpan(text: 'F: ', style: context.text.micro.copyWith(color: context.colors.primary.withValues(alpha: 0.9))),
                                       TextSpan(text: '${f}g'),
                                     ],
                                   ),
-                                  style: AppTheme.numeric(TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: context.colors.textMedium,
-                                  )),
+                                  style: AppTheme.numeric(context.text.caption.copyWith(color: context.colors.textMedium)),
                                 );
                               },
                             )
                           else if (planned != null && planned.calories > 0)
                             Text(
                               'Target ~${planned.calories} kcal',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: context.colors.textMedium,
-                              ),
+                              style: context.text.caption.copyWith(color: context.colors.textMedium),
                             )
                           else
                             Text(
                               'Tap to log',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: context.colors.textMedium,
-                              ),
+                              style: context.text.caption.copyWith(color: context.colors.textMedium),
                             ),
                         ],
                       ),
@@ -777,12 +704,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                       return <InlineSpan>[
                                         TextSpan(
                                           text: '• ${item.portion} ${item.name} ',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            height: 1.5,
-                                            fontWeight: FontWeight.w500,
-                                            color: context.colors.textMedium,
-                                          ),
+                                          style: context.text.caption.copyWith(color: context.colors.textMedium),
                                         ),
                                         if (item.provenance != null)
                                           WidgetSpan(
@@ -812,7 +734,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 ),
                                 onPressed: () => _openScanner(context, false, append: true),
                                 icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
-                                label: const Text('Add Serving', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                label: const Text('Add Serving', style: context.text.caption),
                               ),
                               const SizedBox(width: 20),
                               if (ref.watch(dateStringProvider) != DateFormat('yyyy-MM-dd').format(DateTime.now()))
@@ -825,7 +747,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                   ),
                                   onPressed: _repeatMeal,
                                   icon: const Icon(Icons.copy_rounded, size: 16),
-                                  label: const Text('Repeat', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                  label: const Text('Repeat', style: context.text.caption),
                                 )
                               else
                                 TextButton.icon(
@@ -837,7 +759,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                   ),
                                   onPressed: () => _openScanner(context, false),
                                   icon: const Icon(Icons.refresh_rounded, size: 16),
-                                  label: const Text('Replace', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                  label: const Text('Replace', style: context.text.caption),
                                 ),
                               const Spacer(),
                               IconButton(
@@ -887,7 +809,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                    ),
                                    onPressed: () => _openScanner(context, false),
                                    icon: const Icon(Icons.camera_alt_outlined, size: 18),
-                                   label: const Text('Take photo', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                                   label: const Text('Take photo', style: context.text.body),
                                  ),
                                ),
                                const SizedBox(width: 12),
@@ -902,7 +824,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                    ),
                                    onPressed: () => _openScanner(context, true),
                                    icon: const Icon(Icons.notes_rounded, size: 18),
-                                   label: const Text('Describe', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                                   label: const Text('Describe', style: context.text.body),
                                  ),
                                ),
                              ],
@@ -914,11 +836,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                  onTap: () => _toggleCompletedAsPlanned(planned),
                                  child: Text(
                                    'Or mark completed as planned',
-                                   style: TextStyle(
-                                     fontSize: 13,
-                                     fontWeight: FontWeight.w600,
-                                     color: context.colors.textMedium,
-                                   ),
+                                   style: context.text.caption.copyWith(color: context.colors.textMedium),
                                  ),
                                ),
                              ),
@@ -958,11 +876,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                  const SizedBox(width: 8),
                  Text(
                    'Suggestions',
-                   style: TextStyle(
-                     fontSize: 14,
-                     fontWeight: FontWeight.w700,
-                     color: context.colors.textDark,
-                   ),
+                   style: context.text.body.copyWith(color: context.colors.textDark),
                  ),
                  const Spacer(),
                  Icon(
@@ -995,12 +909,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                     Expanded(
                       child: Text(
                         suggestion,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.textMedium,
-                          height: 1.4,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.textMedium),
                       ),
                     ),
                   ],
@@ -1047,7 +956,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
               onPressed: () => Navigator.of(ctx).pop(true),
               child: const Text(
                 'Overwrite',
-                style: TextStyle(color: Colors.red),
+                style: context.text.body.copyWith(color: Colors.red),
               ),
             ),
           ],
@@ -1142,11 +1051,7 @@ class _ProvenanceBadge extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               label.substring(0, 1).toUpperCase() + label.substring(1),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
+              style: context.text.micro.copyWith(color: color),
             ),
           ],
         ),
@@ -1203,11 +1108,7 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: context.text.screenTitle,
                   ),
                 ),
               ],
@@ -1215,11 +1116,7 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               desc,
-              style: TextStyle(
-                fontSize: 15,
-                color: context.colors.textMedium,
-                height: 1.4,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 48),
           ],

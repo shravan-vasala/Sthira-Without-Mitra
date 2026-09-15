@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../providers/app_providers.dart';
@@ -10,6 +9,7 @@ import '../../../utils/workout_completion.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import 'past_day_summary_sheet.dart';
 import 'daily_score_sheet.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 /// Activity flags for each day in a week (keyed by yyyy-MM-dd).
 /// Rebuilds when selected-day logs/habits/meals or exercise logs change, then
@@ -131,8 +131,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                             primary: context.colors.primary,
                             surface: context.colors.card,
                             onSurface: context.colors.textDark,
-                          ),
-                          dialogBackgroundColor: context.colors.card,
+                          ), dialogTheme: DialogThemeData(backgroundColor: context.colors.card),
                         ),
                         child: child!,
                       );
@@ -155,12 +154,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                 },
                 child: Text(
                   'This week',
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                 ),
               ),
               const Spacer(),
@@ -391,11 +385,7 @@ class _DayCircleState extends ConsumerState<_DayCircle>
         children: [
           Text(
             dayName.toUpperCase(),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: context.colors.textLight,
-            ),
+            style: context.text.micro.copyWith(color: context.colors.textLight),
           ),
           const SizedBox(height: 8),
           ScaleTransition(
@@ -413,17 +403,11 @@ class _DayCircleState extends ConsumerState<_DayCircle>
               child: Center(
                 child: Text(
                   dayNum,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: widget.isSelected
-                        ? FontWeight.w700
-                        : FontWeight.w600,
-                    color: widget.isSelected
+                  style: context.text.body.copyWith(color: widget.isSelected
                         ? context.colors.onPrimary
                         : (widget.isToday
                               ? context.colors.primary
-                              : context.colors.textDark),
-                  ),
+                              : context.colors.textDark)),
                 ),
               ),
             ),
@@ -575,12 +559,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
               builder: (context, value, child) {
                 return Text(
                   isFuture ? '--' : value.toString(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: textColor,
-                    letterSpacing: -0.2,
-                  ),
+                  style: context.text.body.copyWith(color: textColor),
                 );
               },
             ),

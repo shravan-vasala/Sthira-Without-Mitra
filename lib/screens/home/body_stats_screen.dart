@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/body_stats.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class BodyStatsScreen extends ConsumerStatefulWidget {
   const BodyStatsScreen({super.key});
@@ -140,10 +141,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                   )
                 : Text(
                     _isEditing ? 'Save' : 'Edit',
-                    style: TextStyle(
-                      color: context.colors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: context.text.body.copyWith(color: context.colors.primary),
                   ),
           ),
         ],
@@ -159,23 +157,14 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
               children: [
                 Text(
                   'ALL MEASUREMENTS FOR ${DateFormat('MMM d, yyyy').format(DateTime.parse(_pinnedDateStr)).toUpperCase()}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.primary,
-                    letterSpacing: 1.5,
-                  ),
+                  style: context.text.caption.copyWith(color: context.colors.primary),
                 ),
                 if (_isPrefilled && _prefillDate != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
                       'Prefilled from ${DateFormat('MMM d').format(DateTime.parse(_prefillDate!))} measurement',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.colors.textMedium,
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style: context.text.micro.copyWith(color: context.colors.textMedium),
                     ),
                   ),
               ],
@@ -213,11 +202,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
         children: [
           Text(
             field,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: context.colors.textMedium,
-            ),
+            style: context.text.caption.copyWith(color: context.colors.textMedium),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -230,13 +215,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                       child: TextField(
                         controller: _controllers[field],
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: TextStyle(
-                          fontFamily: 'Cabinet Grotesk',
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: context.colors.primary,
-                          height: 1.0,
-                        ),
+                        style: context.text.screenTitle.copyWith(color: context.colors.primary),
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           border: InputBorder.none,
@@ -250,11 +229,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
                         'cm',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textMedium,
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.textMedium),
                       ),
                     ),
                   ],
@@ -264,24 +239,14 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                   children: [
                     Text(
                       _controllers[field]!.text.isEmpty ? '--' : _controllers[field]!.text,
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: _controllers[field]!.text.isEmpty ? context.colors.textLight : context.colors.textDark,
-                        height: 1.0,
-                      ),
+                      style: context.text.screenTitle.copyWith(color: _controllers[field]!.text.isEmpty ? context.colors.textLight : context.colors.textDark),
                     ),
                     const SizedBox(width: 4),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
                         'cm',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textMedium,
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.textMedium),
                       ),
                     ),
                   ],

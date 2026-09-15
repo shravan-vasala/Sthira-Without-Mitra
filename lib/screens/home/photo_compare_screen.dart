@@ -10,6 +10,7 @@ import '../../share/share_card_exporter.dart';
 import '../../services/haptics.dart';
 import '../../utils/format_units.dart';
 import '../../theme/app_theme.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 enum CompareMode { sideBySide, slider }
 
@@ -120,12 +121,14 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
       final diff = d2.difference(d1).inDays.abs();
       
       String timePart;
-      if (diff == 0) timePart = 'Same day';
-      else if (diff < 30) timePart = '$diff days apart';
+      if (diff == 0) {
+        timePart = 'Same day';
+      } else if (diff < 30) timePart = '$diff days apart';
       else {
         final months = (diff / 30).round();
-        if (months == 1) timePart = '1 month apart';
-        else if (months < 12) timePart = '$months months apart';
+        if (months == 1) {
+          timePart = '1 month apart';
+        } else if (months < 12) timePart = '$months months apart';
         else {
           final years = (months / 12).toStringAsFixed(1);
           timePart = '$years years apart';
@@ -225,7 +228,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                     child: Text(
                       'Select Photo',
-                      style: TextStyle(fontFamily: 'Cabinet Grotesk', fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark),
+                      style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                     ),
                   ),
                 ),
@@ -276,8 +279,11 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                               }
                               Haptics.tap();
                               setState(() {
-                                if (isLeft) _leftPhoto = item;
-                                else _rightPhoto = item;
+                                if (isLeft) {
+                                  _leftPhoto = item;
+                                } else {
+                                  _rightPhoto = item;
+                                }
                               });
                               Navigator.pop(ctx);
                             },
@@ -287,8 +293,8 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: kIsWeb
-                                        ? Image.network(item.path, fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54)))
-                                        : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54))),
+                                        ? Image.network(item.path, fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54)))
+                                        : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54))),
                                   ),
                                 ),
                                 if (isCurrentSelected)
@@ -315,7 +321,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                                           ),
                                           child: Text(
                                             item.poseTag,
-                                            style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
+                                            style: context.text.micro.copyWith(color: Colors.white),
                                           ),
                                         ),
                                       Container(
@@ -326,7 +332,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                                         ),
                                         child: Text(
                                           _formatDateShort(item.date),
-                                          style: AppTheme.numeric(const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
+                                          style: AppTheme.numeric(context.text.micro.copyWith(color: Colors.white)),
                                         ),
                                       ),
                                     ],
@@ -369,11 +375,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
           ),
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? context.colors.onPrimary : context.colors.textDark,
-            ),
+            style: context.text.caption.copyWith(color: isSelected ? context.colors.onPrimary : context.colors.textDark),
           ),
         ),
       ),
@@ -420,7 +422,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             children: [
               Icon(Icons.broken_image_rounded, color: context.colors.textLight.withValues(alpha: 0.5), size: 48),
               const SizedBox(height: 12),
-              Text('Photo Missing', style: TextStyle(color: context.colors.textLight, fontWeight: FontWeight.bold)),
+              Text('Photo Missing', style: context.text.body.copyWith(color: context.colors.textLight)),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -428,16 +430,19 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                   TextButton(
                     onPressed: () {
                       setState(() {
-                         if (isLeft) _leftPhoto = null;
-                         else _rightPhoto = null;
+                         if (isLeft) {
+                           _leftPhoto = null;
+                         } else {
+                           _rightPhoto = null;
+                         }
                       });
                     },
-                    child: Text('Remove', style: TextStyle(color: context.colors.red)),
+                    child: Text('Remove', style: context.text.body.copyWith(color: context.colors.red)),
                   ),
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => _pickPhoto(isLeft),
-                    child: Text('Replace', style: TextStyle(color: context.colors.primary)),
+                    child: Text('Replace', style: context.text.body.copyWith(color: context.colors.primary)),
                   ),
                 ],
               ),
@@ -451,12 +456,12 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
         ? Image.network(
             item.path,
             fit: fit,
-            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
+            errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
           )
         : Image.file(
             File(mediaRepo.getAbsolutePath(item.path)),
             fit: fit,
-            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
+            errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48)),
           );
   }
   
@@ -563,7 +568,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             children: [
               Icon(Icons.add_photo_alternate, color: context.colors.textLight.withValues(alpha: 0.5), size: 48),
               const SizedBox(height: 8),
-              Text('Select Photo', style: TextStyle(color: context.colors.textLight)),
+              Text('Select Photo', style: context.text.body.copyWith(color: context.colors.textLight)),
             ],
           ),
         ),
@@ -573,7 +578,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
 
   String _getCaption(PhotoItem? item) {
     if (item == null) return '';
-    String datePart = _formatDateShort(item.date);
+    final String datePart = _formatDateShort(item.date);
     
     final meta = ref.read(mediaRepoProvider).getProgressPhotoMeta(item.date, item.path);
     final log = ref.read(dailyLogRepoProvider).getLog(item.date);
@@ -614,12 +619,12 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             ButtonSegment(
               value: CompareMode.sideBySide, 
               icon: const Icon(Icons.splitscreen_rounded),
-              label: Text('Side', style: TextStyle(fontSize: 12, color: _mode == CompareMode.sideBySide ? Colors.black : Colors.white)),
+              label: Text('Side', style: context.text.micro.copyWith(color: _mode == CompareMode.sideBySide ? Colors.black : Colors.white)),
             ),
             ButtonSegment(
               value: CompareMode.slider,
               icon: const Icon(Icons.compare_arrows_rounded),
-              label: Text('Slider', style: TextStyle(fontSize: 12, color: _mode == CompareMode.slider ? Colors.black : Colors.white)),
+              label: Text('Slider', style: context.text.micro.copyWith(color: _mode == CompareMode.slider ? Colors.black : Colors.white)),
             ),
           ],
           selected: {_mode},
@@ -674,14 +679,14 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                             child: Text(
                               _getCaption(_leftPhoto),
                               textAlign: TextAlign.center,
-                              style: AppTheme.numeric(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              style: AppTheme.numeric(context.text.caption.copyWith(color: Colors.white)),
                             ),
                           ),
                           Expanded(
                             child: Text(
                               _getCaption(_rightPhoto),
                               textAlign: TextAlign.center,
-                              style: AppTheme.numeric(const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              style: AppTheme.numeric(context.text.caption.copyWith(color: Colors.white)),
                             ),
                           ),
                         ],
@@ -710,11 +715,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                   ),
                   child: Text(
                     '${_getTimeDeltaText()}$weightDeltaText',
-                    style: AppTheme.numeric(TextStyle(
-                      color: context.colors.onPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    )),
+                    style: AppTheme.numeric(context.text.caption.copyWith(color: context.colors.onPrimary)),
                   ),
                 ),
               ),

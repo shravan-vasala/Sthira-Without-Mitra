@@ -9,6 +9,7 @@ import '../../../router/app_router.dart';
 import '../../../utils/workout_completion.dart';
 import '../../../utils/meal_icons.dart';
 import '../../../models/daily_stats_snapshot.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class PastDaySummarySheet extends ConsumerWidget {
   final DateTime date;
@@ -93,8 +94,9 @@ class PastDaySummarySheet extends ConsumerWidget {
             (s) => s['id'] == slotId,
             orElse: () => <String, dynamic>{},
           );
-          if (profileSlot.isNotEmpty)
+          if (profileSlot.isNotEmpty) {
             loggedIcons.add(MealIcons.resolve(profileSlot['emoji'] as String?));
+          }
         }
       }
     }
@@ -167,21 +169,12 @@ class PastDaySummarySheet extends ConsumerWidget {
                     children: [
                       Text(
                         DateFormat('EEE, dd MMM').format(date),
-                        style: TextStyle(
-                          fontFamily: 'Cabinet Grotesk',
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: context.colors.textDark,
-                        ),
+                        style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         '$totalDone of $totalThings things completed',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.textLight,
-                        ),
+                        style: context.text.body.copyWith(color: context.colors.textLight),
                       ),
                     ],
                   ),
@@ -196,11 +189,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                     ),
                     child: Text(
                       statusText,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: statusColor,
-                      ),
+                      style: context.text.caption.copyWith(color: statusColor),
                     ),
                   ),
                 ],
@@ -219,11 +208,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                     color: context.colors.primary,
                     titleWidget: Text(
                       workoutDayName,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.textDark,
-                      ),
+                      style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                     ),
                     subtitle: isRestDay
                         ? 'Recovery day'
@@ -260,19 +245,11 @@ class PastDaySummarySheet extends ConsumerWidget {
                         if (loggedIcons.isNotEmpty)
                           Text(
                             '· ',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.textDark,
-                            ),
+                            style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                           ),
                         Text(
                           '$completedMeals/$totalMealsTarget logged · ${mealLog.totalCalories} / ${profile.targetCalories} kcal',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.textDark,
-                          ),
+                          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                         ),
                       ],
                     ),
@@ -294,11 +271,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                     color: context.colors.primary,
                     titleWidget: Text(
                       'Habits ($completedHabits/$totalHabitsTarget)',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.textDark,
-                      ),
+                      style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                     ),
                     subtitle: missedHabits.isNotEmpty
                         ? 'Missed: $missedHabits'
@@ -397,11 +370,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                   },
                   child: Text(
                     'Open full day',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.onPrimary,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
                   ),
                 ),
               ),
@@ -461,11 +430,7 @@ class _SummaryRow extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textLight,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textLight),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -520,19 +485,11 @@ class _MetricBox extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textLight,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textLight),
                 ),
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textDark),
                 ),
               ],
             ),

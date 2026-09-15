@@ -12,6 +12,7 @@ import '../sleep_entry_dialog.dart';
 import '../water_entry_dialog.dart';
 import 'timer_entry_dialog.dart';
 import '../../../widgets/empty_state_view.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class HabitsCard extends ConsumerWidget {
   const HabitsCard({super.key});
@@ -123,16 +124,9 @@ class _HabitItem extends ConsumerWidget {
                         children: [
                           Text(
                             habit.name,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: isCompleted
+                            style: context.text.body.copyWith(color: isCompleted
                                   ? context.colors.textLight
-                                  : context.colors.textDark,
-                              decoration: isCompleted
-                                  ? TextDecoration.lineThrough
-                                  : TextDecoration.none,
-                            ),
+                                  : context.colors.textDark),
                           ),
                           if (habit.type == HabitType.checkbox &&
                               habit.unit.isNotEmpty &&
@@ -141,10 +135,7 @@ class _HabitItem extends ConsumerWidget {
                               padding: const EdgeInsets.only(top: 2),
                               child: Text(
                                 'Goal: ${habit.target == habit.target.roundToDouble() ? habit.target.toInt() : habit.target} ${habit.unit}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: context.colors.textMedium,
-                                ),
+                                style: context.text.micro.copyWith(color: context.colors.textMedium),
                               ),
                             ),
                           Row(
@@ -171,10 +162,7 @@ class _HabitItem extends ConsumerWidget {
                                     ),
                                     child: Text(
                                       _formatProgress(),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: context.colors.textMedium,
-                                      ),
+                                      style: context.text.micro.copyWith(color: context.colors.textMedium),
                                     ),
                                   ),
                                 ),
@@ -208,11 +196,7 @@ class _HabitItem extends ConsumerWidget {
                                           const SizedBox(width: 2),
                                           Text(
                                             '$streak Day Streak',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                              color: context.colors.orange,
-                                            ),
+                                            style: context.text.micro.copyWith(color: context.colors.orange),
                                           ),
                                         ],
                                       ),
@@ -470,8 +454,9 @@ class _HabitItem extends ConsumerWidget {
       return;
     }
 
-    if (habit.type != HabitType.autoSteps && habit.type != HabitType.autoSleep)
+    if (habit.type != HabitType.autoSteps && habit.type != HabitType.autoSleep) {
       return;
+    }
 
     final isSyncCompleted = isCompleted && override == null;
 

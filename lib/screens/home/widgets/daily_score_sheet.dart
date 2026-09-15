@@ -8,6 +8,7 @@ import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/section_header.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class DailyScoreSheet extends ConsumerStatefulWidget {
   const DailyScoreSheet({super.key});
@@ -29,14 +30,14 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
             padding: const EdgeInsets.symmetric(vertical: 32.0),
             child: Text(
               'Data not available for future dates.',
-              style: TextStyle(color: context.colors.textLight, fontSize: 16),
+              style: context.text.bodyStrong.copyWith(color: context.colors.textLight),
             ),
           ),
         ),
       );
     }
 
-    int percentage = scoreData.totalMax > 0
+    final int percentage = scoreData.totalMax > 0
         ? ((scoreData.totalScore / scoreData.totalMax) * 100).round()
         : 0;
 
@@ -61,15 +62,15 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               builder: (context, value, child) {
                 final intScore = value.round();
 
-                int currentPercentage = scoreData.totalMax > 0
+                final int currentPercentage = scoreData.totalMax > 0
                     ? ((intScore / scoreData.totalMax) * 100).round()
                     : 0;
 
                 // Color dynamically shifts during animation
                 Color animColor = context.colors.green;
-                if (currentPercentage < 50)
+                if (currentPercentage < 50) {
                   animColor = context.colors.red;
-                else if (currentPercentage < 80)
+                } else if (currentPercentage < 80)
                   animColor = context.colors.orange;
 
                 return Column(
@@ -77,26 +78,15 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     Text(
                       '$intScore',
                       style: AppTheme.numeric(
-                        TextStyle(
-                          fontSize: 64,
-                          fontWeight: FontWeight.w800,
-                          color: intScore == scoreData.totalMax.toInt()
+                        context.text.metric.copyWith(color: intScore == scoreData.totalMax.toInt()
                               ? context.colors.green
-                              : animColor,
-                          height: 1.0,
-                          letterSpacing: -2.0,
-                        ),
+                              : animColor),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'of ${scoreData.totalMax.toInt()}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.textMedium,
-                        letterSpacing: 2.0,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.textMedium),
                     ),
                   ],
                 );
@@ -130,11 +120,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                         Text(
                           '7-day avg ${scoreData.sevenDayAverage}',
                           style: AppTheme.numeric(
-                            TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: context.colors.textMedium,
-                            ),
+                            context.text.caption.copyWith(color: context.colors.textMedium),
                           ),
                         ),
                     ],
@@ -222,11 +208,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   Expanded(
                     child: Text(
                       'No categories scheduled today.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.textDark,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                     ),
                   ),
                 ],
@@ -253,11 +235,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   Expanded(
                     child: Text(
                       'Perfect day — everything done ✨',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.green,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.green),
                     ),
                   ),
                 ],
@@ -274,23 +252,14 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               tilePadding: EdgeInsets.zero,
               title: Text(
                 'How scoring works',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
               ),
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: Text(
                     'Score is weighted proportionally based on scheduled categories (Habits up to 50, Workouts up to 30, Meals up to 20).',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: context.colors.textMedium,
-                      height: 1.5,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                     textAlign: TextAlign.start,
                   ),
                 ),
@@ -340,11 +309,7 @@ class _DeltaChip extends StatelessWidget {
             child: Text(
               '${diff.abs()} $label',
               style: AppTheme.numeric(
-                TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
+                context.text.caption.copyWith(color: color),
               ),
               softWrap: true,
             ),
@@ -422,11 +387,7 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                           children: [
                             Text(
                               label,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: context.colors.textDark,
-                              ),
+                              style: context.text.body.copyWith(color: context.colors.textDark),
                             ),
                             Row(
                               children: [
@@ -441,11 +402,7 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                                 Text(
                                   statusText,
                                   style: AppTheme.numeric(
-                                    TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: context.colors.textMedium,
-                                    ),
+                                    context.text.caption.copyWith(color: context.colors.textMedium),
                                   ),
                                 ),
                               ],

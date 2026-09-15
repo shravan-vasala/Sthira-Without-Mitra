@@ -11,6 +11,7 @@ import '../../../widgets/primary_button.dart';
 import '../../../providers/app_providers.dart';
 import '../../../utils/format_units.dart';
 import '../photo_viewer_screen.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AddProgressPhotoSheet extends ConsumerStatefulWidget {
   const AddProgressPhotoSheet({super.key});
@@ -151,12 +152,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
         children: [
           Text(
             'POSE (REQUIRED)',
-              style: TextStyle(
-                fontWeight: FontWeight.w800, 
-                fontSize: 13,
-                letterSpacing: 1.5,
-                color: context.colors.primary,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.primary),
             ),
             const SizedBox(height: 12),
             Row(
@@ -194,12 +190,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
             if (_pickedImage == null) ...[
               Text(
                 'SOURCE',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800, 
-                  fontSize: 13,
-                  letterSpacing: 1.5,
-                  color: context.colors.primary,
-                ),
+                style: context.text.caption.copyWith(color: context.colors.primary),
               ),
               const SizedBox(height: 12),
               Row(
@@ -243,18 +234,11 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                             const SizedBox(height: 6),
                             Text(
                               'Match Angle',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: context.colors.primary,
-                              ),
+                              style: context.text.micro.copyWith(color: context.colors.primary),
                             ),
                             Text(
                               _formatDate(referencePhoto.date),
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: context.colors.textLight,
-                              ),
+                              style: context.text.micro.copyWith(color: context.colors.textLight),
                             ),
                           ],
                         ),
@@ -286,10 +270,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                         children: [
                           Text(
                             'Looks good?',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.textDark,
-                            ),
+                            style: context.text.body.copyWith(color: context.colors.textDark),
                           ),
                           TextButton(
                             onPressed: () => setState(() => _pickedImage = null),
@@ -301,7 +282,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                             ),
                             child: Text(
                               'Retake',
-                              style: TextStyle(color: context.colors.primary, fontSize: 13),
+                              style: context.text.caption.copyWith(color: context.colors.primary),
                             ),
                           ),
                         ],
@@ -316,7 +297,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
             TextField(
               controller: _weightController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: AppTheme.numeric(TextStyle(color: context.colors.textDark)),
+              style: AppTheme.numeric(context.text.body.copyWith(color: context.colors.textDark)),
               decoration: InputDecoration(
                 labelText: 'Weight (Optional)',
                 prefixIcon: Icon(Icons.monitor_weight_outlined, color: context.colors.textLight),
@@ -339,7 +320,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
             const SizedBox(height: 12),
             TextField(
               controller: _noteController,
-              style: TextStyle(color: context.colors.textDark),
+              style: context.text.body.copyWith(color: context.colors.textDark),
               decoration: InputDecoration(
                 labelText: 'Note (Optional)',
                 prefixIcon: Icon(Icons.notes_rounded, color: context.colors.textLight),
@@ -418,11 +399,7 @@ class _PoseSelectorOption extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: isSelected ? context.colors.onPrimary : context.colors.textDark,
-              ),
+              style: context.text.micro.copyWith(color: isSelected ? context.colors.onPrimary : context.colors.textDark),
             ),
           ],
         ),
@@ -462,11 +439,7 @@ class _SourceTile extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: context.colors.primary,
-              ),
+              style: context.text.micro.copyWith(color: context.colors.primary),
             ),
           ],
         ),

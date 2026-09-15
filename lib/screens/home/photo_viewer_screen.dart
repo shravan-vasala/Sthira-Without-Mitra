@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class PhotoItem {
   final String path;
@@ -103,7 +104,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                 _pageController.jumpToPage(_currentIndex);
               }
             },
-            child: Text('Delete', style: TextStyle(color: context.colors.red)),
+            child: Text('Delete', style: context.text.body.copyWith(color: context.colors.red)),
           ),
         ],
       ),
@@ -135,8 +136,9 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_photos.isEmpty)
+    if (_photos.isEmpty) {
       return const Scaffold(backgroundColor: Colors.black);
+    }
 
     final currentPhoto = _photos[_currentIndex];
     final poseLabel = _poseLabel(currentPhoto.poseTag);
@@ -207,12 +209,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                       Expanded(
                         child: Text(
                           titleText,
-                          style: const TextStyle(
-                            fontFamily: 'Cabinet Grotesk',
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.text.bodyStrong.copyWith(color: Colors.white),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

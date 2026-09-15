@@ -8,6 +8,7 @@ import '../../../services/health_connect_service.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../steps_entry_dialog.dart';
 import '../../../widgets/async_error_card.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class SyncStatusSheet extends ConsumerStatefulWidget {
   const SyncStatusSheet({super.key});
@@ -95,7 +96,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 vertical: 12,
               ),
               decoration: BoxDecoration(
-                color: context.colors.orange.withOpacity(0.1),
+                color: context.colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -109,11 +110,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                   Expanded(
                     child: Text(
                       '$pendingCount items pending cloud sync',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.orange,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.orange),
                     ),
                   ),
                 ],
@@ -127,22 +124,13 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 Text(
                   '$steps',
                   style: AppTheme.numeric(
-                    TextStyle(
-                      fontSize: 56,
-                      fontWeight: FontWeight.w800,
-                      color: context.colors.primary,
-                      height: 1.0,
-                    ),
+                    context.text.metric.copyWith(color: context.colors.primary),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Steps Today',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
                 ),
               ],
             ),
@@ -152,12 +140,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
           // Diagnostics
           Text(
             'Diagnostics',
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.colors.textDark,
-            ),
+            style: context.text.cardTitle.copyWith(color: context.colors.textDark),
           ),
           const SizedBox(height: 16),
           
@@ -268,11 +251,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
               ),
               child: Text(
                 'Refresh Now',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.onPrimary,
-                ),
+                style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
               ),
             ),
           ),
@@ -295,11 +274,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
               ),
               child: Text(
                 'Log Manually Instead',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.primary,
-                ),
+                style: context.text.bodyStrong.copyWith(color: context.colors.primary),
               ),
             ),
           ),
@@ -326,11 +301,7 @@ class _DiagnosticRow extends StatelessWidget {
             flex: 2,
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
           ),
           const SizedBox(width: 8),
@@ -339,11 +310,7 @@ class _DiagnosticRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textDark,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textDark),
             ),
           ),
         ],

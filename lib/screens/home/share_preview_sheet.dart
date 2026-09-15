@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../providers/habit_providers.dart';
-import '../../models/habit.dart';
 import '../../share/share_card_exporter.dart';
 import '../../share/daily_share_layout.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class SharePreviewSheet extends ConsumerStatefulWidget {
   const SharePreviewSheet({super.key});
@@ -36,7 +35,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to prepare share image'),
+            content: const Text('Failed to prepare share image'),
             backgroundColor: context.colors.red,
           )
         );
@@ -119,12 +118,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
             const SizedBox(height: 16),
             Text(
               'Share Your Progress',
-              style: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textDark,
-              ),
+              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
             ),
             const SizedBox(height: 16),
 
@@ -201,10 +195,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
                     : const Icon(Icons.ios_share_rounded),
                 label: Text(
                   _isSharing ? 'Preparing...' : 'Share Image',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: context.text.bodyStrong,
                 ),
               ),
             ),
@@ -243,11 +234,7 @@ class _FormatChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? context.colors.onPrimary : context.colors.textMedium,
-          ),
+          style: context.text.caption.copyWith(color: isSelected ? context.colors.onPrimary : context.colors.textMedium),
         ),
       ),
     );
