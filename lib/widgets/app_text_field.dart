@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AppTextField extends StatelessWidget {
@@ -37,10 +38,10 @@ class AppTextField extends StatelessWidget {
       children: [
         if (labelText.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8.0, left: 4),
+            padding: const EdgeInsets.only(bottom: Spacing.inline, left: 4),
             child: Text(
               labelText,
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.eyebrow.copyWith(color: context.colors.textMedium),
             ),
           ),
         TextField(
@@ -61,25 +62,10 @@ class AppTextField extends StatelessWidget {
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: context.colors.inputFill,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 20,
-            ),
           ),
         ),
       ],
     );
   }
 }
+

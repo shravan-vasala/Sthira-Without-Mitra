@@ -195,7 +195,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
           else ...[
             Text(
               'Total (ml)',
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.eyebrow.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 8),
             Row(
@@ -209,28 +209,9 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     onChanged: _onTextChanged,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: context.colors.card,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
+                      fillColor: context.colors.inputFill,
                       suffixText: 'ml',
                       suffixStyle: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: context.colors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: context.colors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: context.colors.primary,
-                          width: 2,
-                        ),
-                      ),
                     ),
                   ),
                 ),

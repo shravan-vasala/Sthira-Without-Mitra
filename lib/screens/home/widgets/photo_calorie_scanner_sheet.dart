@@ -1101,27 +1101,27 @@ class _PhotoCalorieScannerSheetState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                color: context.colors.orange.withValues(alpha: 0.1),
+                border: Border.all(color: context.colors.orange.withValues(alpha: 0.3)),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.cloud_off_rounded,
-                    color: Colors.orange,
+                    color: context.colors.orange,
                     size: 36,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'AI Service Offline',
-                    style: context.text.bodyStrong.copyWith(color: Colors.orange[800]),
+                    style: context.text.bodyStrong.copyWith(color: context.colors.orange),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'The AI system is temporarily overwhelmed or unavailable. Please log your macros manually for now.',
                     textAlign: TextAlign.center,
-                    style: context.text.caption.copyWith(color: Colors.orange[800]),
+                    style: context.text.caption.copyWith(color: context.colors.orange),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -1131,8 +1131,8 @@ class _PhotoCalorieScannerSheetState
                       icon: const Icon(Icons.edit_rounded, size: 18),
                       label: const Text('Enter manual macros'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
+                        backgroundColor: context.colors.orange,
+                        foregroundColor: context.colors.onPrimary,
                       ),
                     ),
                   ),
@@ -1218,7 +1218,7 @@ class _PhotoCalorieScannerSheetState
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.colors.red,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.colors.onPrimary,
                     ),
                   ),
                 ],
@@ -1323,8 +1323,8 @@ class _PhotoCalorieScannerSheetState
                                     },
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.black54,
+                                      decoration: BoxDecoration(
+                                        color: context.colors.textDark.withValues(alpha: 0.54),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(

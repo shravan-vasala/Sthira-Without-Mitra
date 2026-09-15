@@ -129,7 +129,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
             capitalization: TextCapitalization.words,
             prefixIcon: Icons.sports_rounded,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           AppTextField(
             controller: _geminiController,
             labelText: 'Gemini API Key',

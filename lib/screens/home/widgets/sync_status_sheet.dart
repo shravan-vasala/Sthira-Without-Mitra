@@ -8,6 +8,7 @@ import '../../../services/health_connect_service.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../steps_entry_dialog.dart';
 import '../../../widgets/async_error_card.dart';
+import '../../../widgets/primary_button.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class SyncStatusSheet extends ConsumerStatefulWidget {
@@ -183,11 +184,10 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
           ],
           
           const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: () async {
+          PrimaryButton(
+            label: 'Refresh Now',
+            isLoading: _checking,
+            onPressed: () async {
                 setState(() {
                   _errorMessage = null;
                   _checking = true;
@@ -243,22 +243,11 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                   await _loadStatus();
                 }
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.colors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Text(
-                'Refresh Now',
-                style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
-              ),
-            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: 52,
             child: TextButton(
               onPressed: () {
                 Navigator.of(context).pop();

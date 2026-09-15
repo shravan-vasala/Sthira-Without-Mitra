@@ -73,9 +73,9 @@ class DayCompleteSheet extends ConsumerWidget {
               color: context.colors.green.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_rounded,
-              color: Colors.green,
+              color: context.colors.green,
               size: 36,
             )
                 .animate(

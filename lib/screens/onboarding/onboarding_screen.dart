@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/layout_insets.dart';
 import '../../providers/app_providers.dart';
 import '../../models/habit.dart';
 import '../../utils/target_calculator.dart';
@@ -396,43 +397,37 @@ class _NavButtons extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: context.colors.onPrimary.withValues(alpha: 0.05),
                     ),
-                    child: Icon(Icons.arrow_back_rounded, color: Colors.white.withValues(alpha: 0.7)),
+                    child: Icon(Icons.arrow_back_rounded, color: context.colors.onPrimary.withValues(alpha: 0.7)),
                   ),
                 )
               else
                 const SizedBox(width: 48), // spacer placeholder for first page
                 
-              GestureDetector(
-                onTap: canGoNext ? onNext : null,
-                child: Builder(
-                  builder: (context) {
-                    final Widget btn = AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: canGoNext ? context.colors.primary : context.colors.primary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: _isLastPage && isSaving
-                          ? const SizedBox(
-                              width: 20, 
-                              height: 20, 
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-                            )
-                          : Text(
-                              _isLastPage ? 'Start my journey' : 'Next',
-                              style: context.text.bodyStrong.copyWith(color: canGoNext ? context.colors.onPrimary : Colors.white.withValues(alpha: 0.5)),
-                            ),
-                    );
-                    
-                    return btn;
-                  }
+              ElevatedButton(
+                onPressed: canGoNext ? onNext : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.onPrimary,
+                  disabledBackgroundColor: context.colors.primary.withValues(alpha: 0.3),
+                  disabledForegroundColor: context.colors.onPrimary.withValues(alpha: 0.5),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(kButtonRadius),
+                  ),
                 ),
+                child: _isLastPage && isSaving
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.onPrimary),
+                      )
+                    : Text(
+                        _isLastPage ? 'Start my journey' : 'Next',
+                        style: context.text.bodyStrong.copyWith(color: canGoNext ? context.colors.onPrimary : context.colors.onPrimary.withValues(alpha: 0.5)),
+                      ),
               ),
             ],
           ),

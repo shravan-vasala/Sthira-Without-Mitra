@@ -137,10 +137,6 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                 errorText: _errorText,
                 filled: true,
                 fillColor: context.colors.inputFill,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
               ),
               onChanged: (_) {
                 if (_errorText != null) {
@@ -148,10 +144,10 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                 }
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Text(
               'Choose an icon',
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.eyebrow.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 8),
             Wrap(

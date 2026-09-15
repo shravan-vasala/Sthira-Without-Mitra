@@ -93,26 +93,10 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.inputFill,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
               hintText: '0.0',
               hintStyle: context.text.display.copyWith(color: context.colors.textLight),
               suffixText: unit,
               suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 18,
-              ),
             ),
           ),
           if (_isPastValue && _pastValueDateStr != null && _errorText == null)

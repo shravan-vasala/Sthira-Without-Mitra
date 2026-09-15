@@ -651,7 +651,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 showDialog(
                                   context: context,
                                   builder: (context) => Dialog(
-                                    backgroundColor: Colors.transparent,
+                                    backgroundColor: context.colors.card.withValues(alpha: 0),
                                     insetPadding: EdgeInsets.zero,
                                     child: Stack(
                                       alignment: Alignment.center,
@@ -665,7 +665,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                           top: MediaQuery.paddingOf(context).top + 16,
                                           right: 16,
                                           child: IconButton(
-                                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 32),
+                                            icon: Icon(Icons.close_rounded, color: context.colors.onPrimary, size: 32),
                                             onPressed: () => Navigator.of(context).pop(),
                                           ),
                                         ),
@@ -954,9 +954,9 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text(
+              child: Text(
                 'Overwrite',
-                style: context.text.body.copyWith(color: Colors.red),
+                style: context.text.body.copyWith(color: context.colors.red),
               ),
             ),
           ],

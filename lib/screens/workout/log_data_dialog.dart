@@ -10,6 +10,8 @@ import '../../models/exercise_log.dart';
 import '../../utils/exercise_log_save.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
+import '../../theme/layout_insets.dart';
+import '../../theme/app_spacing.dart';
 
 
 import '../../utils/target_parser.dart';
@@ -213,16 +215,21 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: kPrimaryButtonHeight,
             child: OutlinedButton(
               onPressed: () async {
                 _fillFromPlan();
                 await _persistAndClose(widget.exercise);
               },
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(kButtonRadius),
+                ),
+              ),
               child: const Text('Log as planned'),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: Spacing.stack),
           Semantics(
             label: 'Save Log Data',
             button: true,
@@ -356,7 +363,7 @@ class _StepperField extends StatelessWidget {
             onTap: () => _increment(-step),
             behavior: HitTestBehavior.opaque,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(13.0),
               child: Icon(
                 Icons.remove_rounded,
                 size: 18,
@@ -387,7 +394,7 @@ class _StepperField extends StatelessWidget {
             onTap: () => _increment(step),
             behavior: HitTestBehavior.opaque,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(13.0),
               child: Icon(
                 Icons.add_rounded,
                 size: 18,

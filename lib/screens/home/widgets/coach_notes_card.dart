@@ -132,8 +132,6 @@ class CoachNotesCard extends ConsumerWidget {
                     color: context.colors.primary,
                     size: 20,
                   ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
                   onPressed: () {
                     ref.read(coachNoteProvider.notifier).fetchNote(force: true);
                   },

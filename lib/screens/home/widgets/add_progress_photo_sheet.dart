@@ -275,9 +275,6 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                           TextButton(
                             onPressed: () => setState(() => _pickedImage = null),
                             style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(0, 0),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               alignment: Alignment.centerLeft,
                             ),
                             child: Text(
@@ -301,23 +298,11 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
               decoration: InputDecoration(
                 labelText: 'Weight (Optional)',
                 prefixIcon: Icon(Icons.monitor_weight_outlined, color: context.colors.textLight),
-                fillColor: context.colors.card,
+                fillColor: context.colors.inputFill,
                 filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: context.colors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: context.colors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: context.colors.primary, width: 2),
-                ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             TextField(
               controller: _noteController,
               style: context.text.body.copyWith(color: context.colors.textDark),
@@ -325,20 +310,8 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                 labelText: 'Note (Optional)',
                 prefixIcon: Icon(Icons.notes_rounded, color: context.colors.textLight),
                 hintText: 'e.g. Post-workout pump',
-                fillColor: context.colors.card,
+                fillColor: context.colors.inputFill,
                 filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: context.colors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: context.colors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: context.colors.primary, width: 2),
-                ),
               ),
             ),
             

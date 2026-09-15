@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_colors.dart';
+import 'app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AppTheme {
@@ -76,7 +77,9 @@ class AppTheme {
           foregroundColor: AppColorsLight().onPrimary,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Radii.control),
+          ),
           textStyle: text.bodyStrong,
         ),
       ),
@@ -85,8 +88,18 @@ class AppTheme {
           foregroundColor: AppColorsLight().primary,
           side: BorderSide(color: AppColorsLight().primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Radii.control),
+          ),
           textStyle: text.body,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          iconSize: IconSize.nav,
+          padding: const EdgeInsets.all(Gap.x8),
+          minimumSize: const Size(44, 44),
+          tapTargetSize: MaterialTapTargetSize.padded,
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
@@ -108,20 +121,20 @@ class AppTheme {
         filled: true,
         fillColor: AppColorsLight().inputFill,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(Radii.control),
+          borderSide: BorderSide(color: AppColorsLight().border, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(Radii.control),
+          borderSide: BorderSide(color: AppColorsLight().border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(Radii.control),
           borderSide: BorderSide(color: AppColorsLight().primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
+          horizontal: Spacing.block,
+          vertical: Spacing.block,
         ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: text.body.copyWith(color: AppColorsLight().textMedium),
@@ -237,7 +250,9 @@ class AppTheme {
           foregroundColor: AppColorsDark().onPrimary,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Radii.control),
+          ),
           textStyle: text.bodyStrong,
         ),
       ),
@@ -246,8 +261,18 @@ class AppTheme {
           foregroundColor: AppColorsDark().primary,
           side: BorderSide(color: AppColorsDark().primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Radii.control),
+          ),
           textStyle: text.body,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          iconSize: IconSize.nav,
+          padding: const EdgeInsets.all(Gap.x8),
+          minimumSize: const Size(44, 44),
+          tapTargetSize: MaterialTapTargetSize.padded,
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
@@ -269,20 +294,20 @@ class AppTheme {
         filled: true,
         fillColor: AppColorsDark().inputFill,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(Radii.control),
+          borderSide: BorderSide(color: AppColorsDark().border, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(Radii.control),
           borderSide: BorderSide(color: AppColorsDark().border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(Radii.control),
           borderSide: BorderSide(color: AppColorsDark().primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
+          horizontal: Spacing.block,
+          vertical: Spacing.block,
         ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: text.body.copyWith(color: AppColorsDark().textMedium),
