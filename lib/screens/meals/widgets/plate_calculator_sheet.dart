@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class PlateCalculatorSheet extends StatefulWidget {
   const PlateCalculatorSheet({super.key});
@@ -190,19 +191,11 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textDark),
               ),
               Text(
                 '${value.toInt()}%',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
+                style: context.text.body.copyWith(color: color),
               ),
             ],
           ),
@@ -231,7 +224,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 12, color: context.colors.textLight),
+          style: context.text.micro.copyWith(color: context.colors.textLight),
         ),
         const SizedBox(height: 4),
         Row(
@@ -242,27 +235,18 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             if (isGiant)
               Text(
                 '~',
-                style: AppTheme.numeric(TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.primary.withValues(alpha: 0.5),
-                )),
+                style: AppTheme.numeric(context.text.screenTitle.copyWith(color: context.colors.primary.withValues(alpha: 0.5))),
               ),
             Text(
               value,
-              style: AppTheme.numeric(TextStyle(
-                fontSize: isGiant ? 32 : 16,
-                fontWeight: isGiant ? FontWeight.w800 : FontWeight.w700,
-                fontFamily: 'Cabinet Grotesk',
-                color: isGiant ? context.colors.primary : context.colors.textDark,
-              )),
+              style: AppTheme.numeric(context.text.body.copyWith(color: isGiant ? context.colors.primary : context.colors.textDark)),
             ),
           ],
         ),
         const SizedBox(height: 2),
         Text(
           'Example',
-          style: TextStyle(fontSize: 9, color: context.colors.textMedium),
+          style: context.text.micro.copyWith(color: context.colors.textMedium),
         ),
       ],
     );

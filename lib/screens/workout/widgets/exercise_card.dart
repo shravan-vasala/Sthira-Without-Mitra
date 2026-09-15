@@ -8,11 +8,11 @@ import '../../../providers/app_providers.dart';
 import '../../../models/workout_plan.dart';
 import '../../../utils/exercise_log_save.dart';
 import '../../../widgets/surface_card.dart';
-import '../../../widgets/primary_button.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../theme/app_theme.dart';
 import '../log_data_dialog.dart';
 import '../../../utils/format_units.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ExerciseCard extends ConsumerWidget {
   const ExerciseCard({super.key, required this.exercise, required this.dayId, this.highlight = false});
@@ -116,11 +116,7 @@ class ExerciseCard extends ConsumerWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   'Search YT',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: context.colors.primary,
-                                  ),
+                                  style: context.text.micro.copyWith(color: context.colors.primary),
                                 ),
                               ],
                             )
@@ -191,11 +187,7 @@ class ExerciseCard extends ConsumerWidget {
                     children: [
                       Text(
                         exercise.displayName ?? exercise.name ?? '',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.textDark,
-                        ),
+                        style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                       ),
                       const SizedBox(height: 4),
                       Wrap(
@@ -206,39 +198,27 @@ class ExerciseCard extends ConsumerWidget {
                           Text(
                             '${exercise.repsDisplay} Reps',
                             style: AppTheme.numeric(
-                              TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: context.colors.primary,
-                              ),
+                              context.text.caption.copyWith(color: context.colors.primary),
                             ),
                           ),
                           if (exercise.weightKg != null) ...[
-                            Text('•', style: TextStyle(color: context.colors.border, fontSize: 10)),
+                            Text('•', style: context.text.micro.copyWith(color: context.colors.border)),
                             Text(
                               '${convertFromKg(profile, exercise.weightKg!).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${useKg ? 'kg' : 'lb'}',
                               style: AppTheme.numeric(
-                                TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.colors.primary,
-                                ),
+                                context.text.caption.copyWith(color: context.colors.primary),
                               ),
                             ),
                           ],
                           if (exercise.sideInfo != 'None') ...[
-                            Text('•', style: TextStyle(color: context.colors.border, fontSize: 10)),
+                            Text('•', style: context.text.micro.copyWith(color: context.colors.border)),
                             Text(
                               exercise.sideInfo ?? '',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: context.colors.mintIcon,
-                              ),
+                              style: context.text.micro.copyWith(color: context.colors.mintIcon),
                             ),
                           ],
                           if (pr != null) ...[
-                            Text('•', style: TextStyle(color: context.colors.border, fontSize: 10)),
+                            Text('•', style: context.text.micro.copyWith(color: context.colors.border)),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -253,11 +233,7 @@ class ExerciseCard extends ConsumerWidget {
                                       ? '${convertFromKg(profile, pr.maxWeight).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}${useKg ? 'kg' : 'lb'}'
                                       : '${pr.maxReps} reps',
                                   style: AppTheme.numeric(
-                                    const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFFB8860B),
-                                    ),
+                                    context.text.micro.copyWith(color: const Color(0xFFB8860B)),
                                   ),
                                 ),
                               ],
@@ -269,11 +245,7 @@ class ExerciseCard extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Text(
                           loggedText,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.green,
-                          ),
+                          style: context.text.micro.copyWith(color: context.colors.green),
                         ),
                       ],
                     ],
@@ -356,12 +328,7 @@ class ExerciseCard extends ConsumerWidget {
                       child: Text(
                         // ignore: dead_null_aware_expression
                         exercise.note ?? '',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.textMedium,
-                          fontStyle: FontStyle.italic,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.textMedium),
                       ),
                     ),
                   ],
@@ -473,11 +440,7 @@ class _MinimalAction extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: baseColor,
-              ),
+              style: context.text.caption.copyWith(color: baseColor),
             ),
           ],
         ),

@@ -13,6 +13,7 @@ import '../../widgets/primary_button.dart';
 
 
 import '../../utils/target_parser.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class LogDataDialog extends ConsumerStatefulWidget {
   const LogDataDialog({super.key, required this.exercise});
@@ -154,11 +155,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                 child: Text(
                   'Reps',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textLight,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textLight),
                 ),
               ),
               const SizedBox(width: 12),
@@ -166,11 +163,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                 child: Text(
                   'Weight (${ref.watch(profileProvider).useKg ? 'kg' : 'lb'})',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textLight,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textLight),
                 ),
               ),
             ],
@@ -186,11 +179,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                     child: Text(
                       'Set ${i + 1}',
                       style: AppTheme.numeric(
-                        TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.textDark,
-                        ),
+                        context.text.body.copyWith(color: context.colors.textDark),
                       ),
                     ),
                   ),
@@ -381,16 +370,12 @@ class _StepperField extends StatelessWidget {
               keyboardType: TextInputType.numberWithOptions(decimal: isWeight),
               textAlign: TextAlign.center,
               style: AppTheme.numeric(
-                TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textDark,
-                ),
+                context.text.bodyStrong.copyWith(color: context.colors.textDark),
               ),
               decoration: InputDecoration(
                 isDense: true,
                 hintText: hint,
-                hintStyle: TextStyle(color: context.colors.textLight),
+                hintStyle: context.text.body.copyWith(color: context.colors.textLight),
                 border: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 enabledBorder: InputBorder.none,

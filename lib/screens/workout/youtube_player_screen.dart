@@ -4,6 +4,7 @@ import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class YoutubePlayerScreen extends StatefulWidget {
   const YoutubePlayerScreen({
@@ -136,7 +137,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
               const SizedBox(height: 16),
               Text(
                 _errorMessage,
-                style: TextStyle(color: context.colors.white, fontSize: 14),
+                style: context.text.body.copyWith(color: context.colors.white),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -145,7 +146,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                 icon: Icon(Icons.refresh_rounded, color: context.colors.primary),
                 label: Text(
                   'Retry',
-                  style: TextStyle(color: context.colors.primary, fontSize: 16),
+                  style: context.text.bodyStrong.copyWith(color: context.colors.primary),
                 ),
               ),
             ],
@@ -200,10 +201,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                     backgroundColor: Colors.black,
                     title: Text(
                       'Exercise Video',
-                      style: TextStyle(
-                        color: context.colors.white,
-                        fontSize: 16,
-                      ),
+                      style: context.text.bodyStrong.copyWith(color: context.colors.white),
                     ),
                     leading: IconButton(
                       tooltip: 'Back',
@@ -239,22 +237,14 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                       children: [
                         Text(
                           widget.title,
-                          style: TextStyle(
-                            color: context.colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: context.text.screenTitle.copyWith(color: context.colors.white),
                         ),
                         if (widget.subtitle.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
                             widget.subtitle,
-                            style: TextStyle(
-                              color: context.colors.white.withValues(
-                                alpha: 0.6,
-                              ),
-                              fontSize: 14,
-                            ),
+                            style: context.text.body.copyWith(color: context.colors.white.withValues(
+                                alpha: 0.6),
                           ),
                         ],
                         const SizedBox(height: 8),
@@ -262,12 +252,8 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                           Text(
                             'Reps: ${widget.reps}',
                             style: AppTheme.numeric(
-                              TextStyle(
-                                color: context.colors.white.withValues(
-                                  alpha: 0.7,
-                                ),
-                                fontSize: 16,
-                              ),
+                              context.text.bodyStrong.copyWith(color: context.colors.white.withValues(
+                                  alpha: 0.7),
                             ),
                           ),
                         const SizedBox(height: 24),
@@ -282,10 +268,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                             ),
                             label: Text(
                               'Enter Fullscreen',
-                              style: TextStyle(
-                                color: context.colors.primary,
-                                fontSize: 16,
-                              ),
+                              style: context.text.bodyStrong.copyWith(color: context.colors.primary),
                             ),
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(

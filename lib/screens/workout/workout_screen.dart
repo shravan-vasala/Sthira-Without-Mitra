@@ -3,18 +3,16 @@ import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../models/daily_stats_snapshot.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/target_calculator.dart';
 import '../../providers/app_providers.dart';
 import '../../models/workout_plan.dart';
 import 'widgets/exercise_card.dart';
 import 'widgets/rest_timer_label.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../widgets/primary_button.dart';
-import '../../providers/rest_timer_provider.dart';
 import '../../utils/workout_formatting.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({
     super.key,
@@ -156,22 +154,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                               color: Colors.transparent,
                               child: Text(
                                 appBarTitle,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: context.colors.textDark,
-                                ),
+                                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                               ),
                             ),
                           )
                         else
                           Text(
                             appBarTitle,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: context.colors.textDark,
-                            ),
+                            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                           ),
                           TweenAnimationBuilder<int>(
                             tween: IntTween(begin: 0, end: viewCompleted),
@@ -181,11 +171,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                               return Text(
                                 '$value/$viewExercises exercises done',
                                 style: AppTheme.numeric(
-                                  TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: context.colors.textMedium,
-                                  ),
+                                  context.text.caption.copyWith(color: context.colors.textMedium),
                                 ),
                               );
                             }
@@ -214,11 +200,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                           const SizedBox(width: 4),
                           Text(
                             'Done',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.green,
-                            ),
+                            style: context.text.caption.copyWith(color: context.colors.green),
                           ),
                         ],
                       ),
@@ -257,10 +239,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     Text(
                       'Day total: $completedExercises/$totalExercises',
                       style: AppTheme.numeric(
-                        TextStyle(
-                          fontSize: 11,
-                          color: context.colors.textLight,
-                        ),
+                        context.text.micro.copyWith(color: context.colors.textLight),
                       ),
                     ),
                   ],
@@ -293,20 +272,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       const SizedBox(width: 8),
                       Text(
                         'Showing: ${formatSectionTitle(workoutDay.sections[_activeSectionIndex!].title, _activeSectionIndex!)}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.primary,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.primary),
                       ),
                       const Spacer(),
                       Text(
                         'Show all →',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.colors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.primary),
                       ),
                     ],
                   ),
@@ -492,9 +463,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       color: const Color(0xFFFFD700).withValues(alpha: 0.12), // gold
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.emoji_events_rounded,
-                      color: const Color(0xFFFFD700), // gold
+                      color: Color(0xFFFFD700), // gold
                       size: 40,
                     ),
                   ),
@@ -502,11 +473,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   Text(
                     title,
                     style: AppTheme.numeric(
-                      TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                      ),
+                      context.text.screenTitle.copyWith(color: context.colors.textDark),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -514,22 +481,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   Text(
                     '$completed / $total exercises completed.',
                     style: AppTheme.numeric(
-                      TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.primary,
-                      ),
+                      context.text.bodyStrong.copyWith(color: context.colors.primary),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Session saved. Head home to finish habits and meals if you have any left.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.colors.textMedium,
-                      height: 1.4,
-                    ),
+                    style: context.text.body.copyWith(color: context.colors.textMedium),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
@@ -585,11 +544,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               ),
               Text(
                 '${state.remainingSeconds}',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
               ),
             ],
           ),
@@ -601,19 +556,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               children: [
                 Text(
                   'Resting',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textMedium),
                 ),
                 Text(
                   state.exerciseName ?? 'Rest Timer',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textDark),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -719,22 +666,13 @@ class _SectionWidgetState extends State<_SectionWidget> {
                 Expanded(
                   child: Text(
                     formatSectionTitle(widget.section.title, widget.sectionIndex),
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '${widget.section.exercises.length} exercises',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textMedium),
                 ),
               ],
             ),
@@ -744,11 +682,7 @@ class _SectionWidgetState extends State<_SectionWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text(
                 'No exercises in this section.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.colors.textMedium,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
             )
           else

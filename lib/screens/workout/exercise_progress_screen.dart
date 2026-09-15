@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/exercise_log.dart';
 import '../../models/exercise_pr.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 
 class ExerciseProgressScreen extends ConsumerWidget {
@@ -134,19 +135,12 @@ class ExerciseProgressScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     'No data logged yet',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Log exercise data to see your progress',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: context.colors.textLight,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textLight),
                   ),
                 ],
               ),
@@ -202,23 +196,14 @@ class ExerciseProgressScreen extends ConsumerWidget {
                           ),
                           child: Text(
                             'Skipped $malformedCount malformed historic logs to keep charts accurate.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: context.colors.red,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: context.text.caption.copyWith(color: context.colors.red),
                           ),
                         ),
                         const SizedBox(height: 20),
                       ],
                       Text(
                         'HISTORY',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.textLight,
-                          letterSpacing: 1,
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.textLight),
                       ),
                       const SizedBox(height: 12),
                     ]),
@@ -273,12 +258,7 @@ class _PrSummary extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'PERSONAL RECORDS',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: context.colors.gold,
-                ),
+                style: context.text.body.copyWith(color: context.colors.gold),
               ),
             ],
           ),
@@ -317,15 +297,11 @@ class _PrSummary extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 14, color: context.colors.textMedium),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: context.colors.textDark,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textDark),
           ),
         ],
       ),
@@ -360,11 +336,7 @@ class _HistoryCard extends StatelessWidget {
               children: [
                 Text(
                   formattedDate,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textDark),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -378,10 +350,7 @@ class _HistoryCard extends StatelessWidget {
                     }
                     return '${s.reps}×BW';
                   }).join(' | '),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textMedium),
                 ),
               ],
             ),
@@ -391,15 +360,11 @@ class _HistoryCard extends StatelessWidget {
             children: [
               Text(
                 '${(log.totalVolume * weightMultiplier).toStringAsFixed(0)} $unitLabel',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.primary,
-                ),
+                style: context.text.bodyStrong.copyWith(color: context.colors.primary),
               ),
               Text(
                 'load × reps',
-                style: TextStyle(fontSize: 11, color: context.colors.textLight),
+                style: context.text.micro.copyWith(color: context.colors.textLight),
               ),
             ],
           ),

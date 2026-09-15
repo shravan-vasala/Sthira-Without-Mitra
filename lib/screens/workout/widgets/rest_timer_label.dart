@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../providers/app_providers.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class RestTimerLabel extends ConsumerWidget {
   const RestTimerLabel({
@@ -55,13 +56,9 @@ class RestTimerLabel extends ConsumerWidget {
                       ? 'Resting for $display'
                       : 'Rest for $display after set',
                   style: AppTheme.numeric(
-                    TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: isActive
+                    context.text.micro.copyWith(color: isActive
                           ? context.colors.orange
-                          : context.colors.textLight,
-                    ),
+                          : context.colors.textLight),
                   ),
                 ),
               ],
