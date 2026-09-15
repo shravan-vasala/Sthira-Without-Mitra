@@ -20,11 +20,11 @@ import '../theme/app_theme.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
-import '../providers/reminders_provider.dart';
 import '../widgets/badge_overlay_host.dart';
 import '../screens/social/social_feed_screen.dart';
 import '../screens/social/connect_screen.dart';
 import '../services/haptics.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -64,10 +64,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               const SizedBox(height: 16),
               Text(
                 'This page doesn\'t exist or was removed.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -349,22 +346,14 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                         timerState.exerciseName != null
                                             ? 'Resting for ${timerState.exerciseName}'
                                             : 'Resting',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white70,
-                                        ),
+                                        style: context.text.micro.copyWith(color: Colors.white70),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
                                         '${timerState.remainingSeconds ~/ 60}:${(timerState.remainingSeconds % 60).toString().padLeft(2, '0')}',
                                         style: AppTheme.numeric(
-                                          TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: context.colors.onPrimary,
-                                          ),
+                                          context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
                                         ),
                                       ),
                                     ],
@@ -386,10 +375,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                       child: Text(
                                         '+15s',
                                         style: AppTheme.numeric(
-                                          const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
+                                          context.text.micro,
                                         ),
                                       ),
                                     ),
@@ -405,10 +391,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                       child: Text(
                                         '+30s',
                                         style: AppTheme.numeric(
-                                          const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
+                                          context.text.micro,
                                         ),
                                       ),
                                     ),

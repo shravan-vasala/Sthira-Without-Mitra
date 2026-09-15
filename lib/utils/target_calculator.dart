@@ -74,14 +74,14 @@ class TargetCalculator {
 
     // Macros:
     // Protein: 1.8g / kg
-    double protein = weight * 1.8;
+    final double protein = weight * 1.8;
 
     // Fat: 25% of total calories
-    double fat = (targetCalories * 0.25) / 9;
+    final double fat = (targetCalories * 0.25) / 9;
 
     // Carbs: remainder
-    double caloriesFromProtein = protein * 4;
-    double caloriesFromFat = fat * 9;
+    final double caloriesFromProtein = protein * 4;
+    final double caloriesFromFat = fat * 9;
     double carbs = (targetCalories - caloriesFromProtein - caloriesFromFat) / 4;
     if (carbs < 0) carbs = 0;
 
@@ -100,7 +100,7 @@ class TargetCalculator {
 
     // Keep protein fixed
     double protein = originalBase.proteinG.toDouble();
-    double caloriesFromProtein = protein * 4;
+    final double caloriesFromProtein = protein * 4;
 
     // What's left over?
     double remainingCalories = newCalories - caloriesFromProtein;
@@ -116,7 +116,7 @@ class TargetCalculator {
     if (targetFatCals > remainingCalories) {
       targetFatCals = remainingCalories;
     }
-    double fat = targetFatCals / 9;
+    final double fat = targetFatCals / 9;
 
     // Remainder goes to carbs
     double carbs = (remainingCalories - targetFatCals) / 4;

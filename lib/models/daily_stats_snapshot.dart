@@ -114,8 +114,8 @@ class DailyStatsSnapshot {
     }
 
     // 3. Meals
-    int mealsLogged = mealLog.loggedSlotsCount;
-    int mealsTotal = MealCompletion.calculateTotalMeals(profile, mealLog);
+    final int mealsLogged = mealLog.loggedSlotsCount;
+    final int mealsTotal = MealCompletion.calculateTotalMeals(profile, mealLog);
 
     // 4. Weight Trend
     String weightTrend = 'stable';

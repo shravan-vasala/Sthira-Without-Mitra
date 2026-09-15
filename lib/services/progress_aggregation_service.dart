@@ -133,14 +133,14 @@ class ProgressAggregationService {
     final endDay = DateTime(end.year, end.month, end.day);
     
     while (!current.isAfter(endDay)) {
-      DateTime weekStart = current;
-      DateTime weekEnd = DateTime(current.year, current.month, current.day + 6);
+      final DateTime weekStart = current;
+      final DateTime weekEnd = DateTime(current.year, current.month, current.day + 6);
       
       // Clip boundaries to the requested range
-      DateTime effectiveStart = weekStart.isBefore(start) ? DateTime(start.year, start.month, start.day) : weekStart;
-      DateTime effectiveEnd = weekEnd.isAfter(endDay) ? endDay : weekEnd;
+      final DateTime effectiveStart = weekStart.isBefore(start) ? DateTime(start.year, start.month, start.day) : weekStart;
+      final DateTime effectiveEnd = weekEnd.isAfter(endDay) ? endDay : weekEnd;
       
-      List<double> values = [];
+      final List<double> values = [];
       int eligibleDays = 0;
       
       DateTime d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day);
@@ -165,7 +165,7 @@ class ProgressAggregationService {
         maxVal = values.reduce((a, b) => a > b ? a : b);
       }
       
-      bool isPartial = weekEnd.isAfter(today) || weekStart.isBefore(start) || weekEnd.isAfter(endDay);
+      final bool isPartial = weekEnd.isAfter(today) || weekStart.isBefore(start) || weekEnd.isAfter(endDay);
       
       buckets.add(ChartBucket(
         startDate: effectiveStart,
@@ -203,12 +203,12 @@ class ProgressAggregationService {
         nextMonth = 1;
         nextYear++;
       }
-      DateTime monthEnd = DateTime(nextYear, nextMonth, 0); // 0th day is last day of previous month
+      final DateTime monthEnd = DateTime(nextYear, nextMonth, 0); // 0th day is last day of previous month
       
-      DateTime effectiveStart = currentMonthStart.isBefore(start) ? DateTime(start.year, start.month, start.day) : currentMonthStart;
-      DateTime effectiveEnd = monthEnd.isAfter(endDay) ? endDay : monthEnd;
+      final DateTime effectiveStart = currentMonthStart.isBefore(start) ? DateTime(start.year, start.month, start.day) : currentMonthStart;
+      final DateTime effectiveEnd = monthEnd.isAfter(endDay) ? endDay : monthEnd;
       
-      List<double> values = [];
+      final List<double> values = [];
       int eligibleDays = 0;
       
       DateTime d = DateTime(effectiveStart.year, effectiveStart.month, effectiveStart.day);
@@ -233,7 +233,7 @@ class ProgressAggregationService {
         maxVal = values.reduce((a, b) => a > b ? a : b);
       }
       
-      bool isPartial = monthEnd.isAfter(today) || currentMonthStart.isBefore(start) || monthEnd.isAfter(endDay);
+      final bool isPartial = monthEnd.isAfter(today) || currentMonthStart.isBefore(start) || monthEnd.isAfter(endDay);
       
       buckets.add(ChartBucket(
         startDate: effectiveStart,

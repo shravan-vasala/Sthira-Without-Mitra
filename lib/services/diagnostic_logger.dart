@@ -101,7 +101,7 @@ class DiagnosticLogger extends ChangeNotifier {
     safe = safe.replaceAll(RegExp(r'([?&])(?:key|token|auth|password|secret|credential)=[^&\s"]+'), r'$1[REDACTED_PARAM]');
     // Limit bounds explicitly restricting extreme runaway strings structurally
     if (safe.length > _maxBytesPerField) {
-       safe = safe.substring(0, _maxBytesPerField) + '...[TRUNCATED]';
+       safe = '${safe.substring(0, _maxBytesPerField)}...[TRUNCATED]';
     }
     return safe;
   }

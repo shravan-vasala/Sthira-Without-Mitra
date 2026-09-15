@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trufit_bodamma/providers/credential_provider.dart';
-import 'package:trufit_bodamma/providers/profile_providers.dart';
 import 'package:trufit_bodamma/repositories/profile_repository.dart';
 import 'package:trufit_bodamma/providers/app_providers.dart';
 import 'package:trufit_bodamma/models/user_profile.dart';
@@ -44,7 +43,7 @@ void main() {
     test('launch with key A -> clear -> remains absent', () async {
       final mockRepo = MockProfileRepository(fakeKey: 'KEY_A');
       final container = makeContainer(mockRepo: mockRepo);
-      final sub = container.listen(credentialProvider, (_, __) {});
+      final sub = container.listen(credentialProvider, (_, _) {});
       
       // Wait for initial load
       await Future.delayed(Duration.zero);

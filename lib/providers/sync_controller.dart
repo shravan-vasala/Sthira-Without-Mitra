@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_providers.dart';
 
-import '../models/daily_log.dart';
 import '../services/screen_time_service.dart';
 import '../services/health_connect_service.dart';
 import '../utils/time_utils.dart';

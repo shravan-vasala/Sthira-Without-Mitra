@@ -9,8 +9,6 @@ import '../providers/app_providers.dart';
 import '../models/daily_log.dart';
 import '../models/habit.dart';
 import '../utils/workout_completion.dart';
-import '../utils/time_utils.dart';
-import '../utils/format_units.dart';
 
 final widgetCoordinatorProvider = Provider<WidgetCoordinator>((ref) {
   final coordinator = WidgetCoordinator(ref);
@@ -106,13 +104,13 @@ class WidgetCoordinator {
       final mealLog = mealRepo.getDailyLog(todayStr);
 
       // Count only slots with actual items or photos
-      int mealsLogged = mealLog.customSlots.values
+      final int mealsLogged = mealLog.customSlots.values
           .where((slot) => slot.items.isNotEmpty || slot.photoPath != null)
           .length;
       
       int totalMeals = mealPlan?.meals.length ?? 4;
       // Add extra custom slots to the total if the user added more today
-      int extraSlots = mealLog.customSlots.keys.where((id) {
+      final int extraSlots = mealLog.customSlots.keys.where((id) {
         return mealPlan?.meals.every((m) => m.type != id) ?? true;
       }).length;
       totalMeals += extraSlots;
@@ -136,10 +134,10 @@ class WidgetCoordinator {
       }).toList();
 
       final completions = habitRepo.getCompletions(todayStr);
-      int habitsDone = activeHabitsForToday.where((h) {
+      final int habitsDone = activeHabitsForToday.where((h) {
         return isHabitCompleted(h, completions, log ?? DailyLog(date: todayStr));
       }).length;
-      int totalHabits = activeHabitsForToday.length;
+      final int totalHabits = activeHabitsForToday.length;
 
       // --- 4. Workout ---
       final activePlan = workoutRepo.getActivePlan(

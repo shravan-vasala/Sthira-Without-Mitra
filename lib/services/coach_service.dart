@@ -12,8 +12,9 @@ class CoachService {
   CoachService({this.apiKey, required this.aiClient});
 
   FeatureAvailability get availability {
-    if (apiKey == null || apiKey!.isEmpty)
+    if (apiKey == null || apiKey!.isEmpty) {
       return FeatureAvailability.disabled;
+    }
     return FeatureAvailability.available;
   }
 

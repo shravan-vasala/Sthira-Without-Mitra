@@ -53,6 +53,7 @@ import 'models/user_food_log.dart';
 import 'models/friend.dart';
 import 'models/sync_queue_item.dart';
 import 'services/ai_cache.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 Future<void> main() async {
   try {
@@ -181,7 +182,7 @@ Future<void> main() async {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   'Fatal Error on Startup.\n\nA crash log has been saved to:\n${logFile.path}\n\nError: $e',
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: context.text.bodyStrong.copyWith(color: Colors.red),
                 ),
               ),
             ),
@@ -197,7 +198,7 @@ Future<void> main() async {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   'Fatal Error on Startup:\n\n$e',
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: context.text.bodyStrong.copyWith(color: Colors.red),
                 ),
               ),
             ),

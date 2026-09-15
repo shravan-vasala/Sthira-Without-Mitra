@@ -4,7 +4,6 @@ import 'package:isar/isar.dart';
 import 'package:trufit_bodamma/repositories/photo_meal_repository.dart';
 import 'package:trufit_bodamma/repositories/media_repository.dart';
 import 'package:trufit_bodamma/models/scanned_meal_log.dart';
-import 'package:trufit_bodamma/models/progress_photo.dart';
 import '../helpers/test_isar_setup.dart';
 import 'dart:typed_data';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -168,8 +167,8 @@ void main() {
       final results = await Future.wait([f1, f2]);
       expect(results[0] != results[1], isTrue);
       
-      final meta1 = await repo.getProgressPhotoMeta('2023-01-01', results[0]);
-      final meta2 = await repo.getProgressPhotoMeta('2023-01-01', results[1]);
+      final meta1 = repo.getProgressPhotoMeta('2023-01-01', results[0]);
+      final meta2 = repo.getProgressPhotoMeta('2023-01-01', results[1]);
       
       expect(meta1.path, isNotNull);
       expect(meta2.path, isNotNull);

@@ -24,7 +24,7 @@ void main() {
 
   late Isar isar;
   late ExerciseLogRepository logRepo;
-  late ProfileRepository _profRepo;
+  late ProfileRepository profRepo0;
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +39,7 @@ void main() {
     final profRepo = ProfileRepository();
     await profRepo.init(isar);
     
-    _profRepo = profRepo;
+    profRepo0 = profRepo;
   });
 
   tearDown(() async {
@@ -63,7 +63,7 @@ void main() {
         ProviderScope(
           overrides: [
             exerciseLogRepoProvider.overrideWithValue(logRepo),
-            profileRepoProvider.overrideWithValue(_profRepo),
+            profileRepoProvider.overrideWithValue(profRepo0),
             sharedPreferencesProvider.overrideWithValue(await SharedPreferences.getInstance()),
           ],
           child: MaterialApp(

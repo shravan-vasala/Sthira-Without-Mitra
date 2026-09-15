@@ -9,7 +9,6 @@ import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:archive/archive.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
-import 'package:google_sign_in/google_sign_in.dart';
 
 class MockAuthService implements IAuthService {
   @override
@@ -68,7 +67,7 @@ void main() {
       });
       archive.addFile(ArchiveFile('data.json', dataJson.length, utf8.encode(dataJson)));
       
-      validZipBytes = Uint8List.fromList(ZipEncoder().encode(archive)!);
+      validZipBytes = Uint8List.fromList(ZipEncoder().encode(archive));
     });
 
     test('detectFormat identifies formats correctly', () {

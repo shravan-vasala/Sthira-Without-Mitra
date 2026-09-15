@@ -16,7 +16,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   final profile = ref.read(profileProvider);
 
   // Parse planned reps
-  int reps = TargetParser.parseRepTarget(exercise.repsDisplay ?? '');
+  final int reps = TargetParser.parseRepTarget(exercise.repsDisplay ?? '');
 
   // Build sets (copying weight from last log if needed)
   final lastLog = repo.getLastLog(exercise.name ?? '', beforeDate: dateStr);

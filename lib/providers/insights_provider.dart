@@ -148,7 +148,7 @@ final insightsProvider = Provider<List<Insight>>((ref) {
             type: InsightType.correlation,
             title: 'Sleep Powers Your Movement',
             description:
-                'Over the last 30 days, when you get 7.5h+ sleep, you walk on average \ more steps. Sleep is truly your superpower!',
+                'Over the last 30 days, when you get 7.5h+ sleep, you walk on average  more steps. Sleep is truly your superpower!',
             severity: InsightSeverity.positive,
             dateGenerated: now,
             icon: Icons.bedtime_rounded,

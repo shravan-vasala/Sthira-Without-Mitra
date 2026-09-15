@@ -67,8 +67,9 @@ class BackupEncryptionService {
 
   static Uint8List decryptV2(Uint8List data, String password) {
     // Header: 4 magic + 1 version + 16 salt + 12 nonce = 33 bytes
-    if (data.length < 33)
+    if (data.length < 33) {
       throw Exception('Invalid v2 encrypted data: too short');
+    }
 
     final salt = data.sublist(5, 21);
     final nonceBytes = data.sublist(21, 33);
@@ -90,8 +91,9 @@ class BackupEncryptionService {
   }
 
   static Uint8List decryptV1(Uint8List data, String password) {
-    if (data.length < 16)
+    if (data.length < 16) {
       throw Exception('Invalid v1 encrypted data: too short');
+    }
 
     final keyBytes = sha256.convert(utf8.encode(password)).bytes;
     final key = enc.Key(Uint8List.fromList(keyBytes));

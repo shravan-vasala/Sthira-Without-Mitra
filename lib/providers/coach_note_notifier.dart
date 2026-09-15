@@ -185,8 +185,9 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
 
       if (_currentRequestId != requestId || dateStr != targetDateStr) return; // Stale request or navigated away
 
-      if (accumulatedNote.isEmpty)
+      if (accumulatedNote.isEmpty) {
         throw Exception('Failed to generate note stream');
+      }
 
       final finalNote = CoachNote(
         date: targetDateStr,

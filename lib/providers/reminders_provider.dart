@@ -295,7 +295,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
         } catch (_) {}
       }
       
-      bool needsNudge = lastPhotoDate == null || now.difference(lastPhotoDate).inDays >= 14;
+      final bool needsNudge = lastPhotoDate == null || now.difference(lastPhotoDate).inDays >= 14;
       if (needsNudge) {
         final payload = _buildPayload('photo', DateFormat('yyyy-MM-dd').format(now));
         if (!_isSkipped(payload)) {

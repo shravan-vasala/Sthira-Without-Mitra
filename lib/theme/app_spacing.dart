@@ -25,6 +25,7 @@
 /// | icon 48, 64 | `IconSize.hero` (40) |
 ///
 /// If a gap currently reads as a deliberate odd value, it isn't — it was typed by hand.
+library;
 
 abstract class Gap {
   static const double x2  = 2;   // optical nudge ONLY — baseline correction

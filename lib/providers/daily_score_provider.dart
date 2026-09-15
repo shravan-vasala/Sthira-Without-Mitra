@@ -133,7 +133,7 @@ class DailyScore {
     double mealsScore = 0;
     final double mealsMax = stats.mealsTotal > 0 ? 20.0 : 0.0;
     if (stats.mealsTotal > 0) {
-      double completionScore = (stats.mealsLogged / stats.mealsTotal) * 14.0;
+      final double completionScore = (stats.mealsLogged / stats.mealsTotal) * 14.0;
       double accuracyScore = 0;
 
       // Accuracy bonus only applies if they logged something
@@ -238,8 +238,9 @@ final dailyScoreProvider = Provider<DailyScore>((ref) {
       final hasDailyLog = allDailyLogs.any((l) => l.date == dStr);
       final hasMealLog = allMealLogs.any((l) => l.date == dStr);
       final completions = ref.read(habitRepoProvider).getCompletions(dStr);
-      if (!hasDailyLog && !hasMealLog && completions.completions.isEmpty)
+      if (!hasDailyLog && !hasMealLog && completions.completions.isEmpty) {
         return null;
+      }
 
       final log = allDailyLogs.firstWhere(
         (l) => l.date == dStr,

@@ -9,7 +9,6 @@ import '../models/exercise_log.dart';
 import '../models/habit.dart';
 import '../models/body_stats.dart';
 import '../models/daily_meal_log.dart';
-import '../models/app_config.dart';
 
 class CsvExportResult {
   final bool isSuccess;

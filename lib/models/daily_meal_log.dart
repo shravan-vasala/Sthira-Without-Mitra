@@ -52,22 +52,26 @@ class DailyMealLog {
     final Map<String, MealSlotLog> slots = {};
 
     // Legacy fields migration
-    if (json['breakfast'] != null)
+    if (json['breakfast'] != null) {
       slots['breakfast'] = MealSlotLog.fromJson(
         json['breakfast'] as Map<String, dynamic>,
       );
-    if (json['lunch'] != null)
+    }
+    if (json['lunch'] != null) {
       slots['lunch'] = MealSlotLog.fromJson(
         json['lunch'] as Map<String, dynamic>,
       );
-    if (json['snack'] != null)
+    }
+    if (json['snack'] != null) {
       slots['snack'] = MealSlotLog.fromJson(
         json['snack'] as Map<String, dynamic>,
       );
-    if (json['dinner'] != null)
+    }
+    if (json['dinner'] != null) {
       slots['dinner'] = MealSlotLog.fromJson(
         json['dinner'] as Map<String, dynamic>,
       );
+    }
 
     // New format
     if (json['customSlots'] != null && json['customSlots'] is Map) {

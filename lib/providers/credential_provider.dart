@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../repositories/profile_repository.dart';
 import 'app_providers.dart';
 
 enum CredentialStatus { loading, present, removed, error }

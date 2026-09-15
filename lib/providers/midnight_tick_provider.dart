@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app_providers.dart';
-import '../utils/time_utils.dart';
 
 /// Triggers precisely at midnight local time to roll over the app's 'today' state.
 final midnightTickProvider = NotifierProvider<MidnightTickNotifier, void>(() {

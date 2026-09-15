@@ -8,7 +8,6 @@ import '../models/food_search_cache.dart';
 import '../interfaces/i_ai_food_service.dart';
 import 'nutrition_lookup_service.dart';
 import '../utils/time_utils.dart';
-import '../models/user_food_log.dart';
 import 'package:crypto/crypto.dart';
 
 import 'ai_client.dart';
@@ -258,14 +257,15 @@ $_jsonShape
              quantity = 1.0;
            } else {
              explicitServings = quantity;
-             if (parsedUnit == 'cup') defGrams = 240.0;
-             else if (parsedUnit == 'bowl') defGrams = 250.0;
+             if (parsedUnit == 'cup') {
+               defGrams = 240.0;
+             } else if (parsedUnit == 'bowl') defGrams = 250.0;
              else if (parsedUnit == 'tbsp') defGrams = 15.0;
              else if (parsedUnit == 'tsp') defGrams = 5.0;
              else if (!isPer100g && userServing != null) defGrams = userServing;
            }
            
-           double totalGrams = explicitGrams ?? (defGrams * (explicitServings ?? 1.0));
+           final double totalGrams = explicitGrams ?? (defGrams * (explicitServings ?? 1.0));
            
            final computed = FoodNutrition.compute(
              consumedGrams: explicitGrams,
@@ -660,7 +660,7 @@ Do NOT use JSON.
             model: modelName,
             request: GenerateContentRequest(
               contents: [Content.text('ping')],
-              generationConfig: GenerationConfig(maxOutputTokens: 10),
+              generationConfig: const GenerationConfig(maxOutputTokens: 10),
             ),
           ).timeout(attemptTimeout);
           

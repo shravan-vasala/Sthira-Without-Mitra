@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trufit_bodamma/services/csv_export_service.dart';
-import 'dart:io';
 
 // To effectively test Isar locally without flutter UI we need the core downloaded,
 // but since this is an audit, this unit test represents the adversarial strings

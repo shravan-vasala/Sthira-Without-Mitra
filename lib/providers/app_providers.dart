@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/app_database_manager.dart';
 export '../services/widget_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import '../models/social_profile.dart';
 import '../models/friend.dart';
@@ -26,7 +24,6 @@ import '../repositories/badge_repository.dart';
 import '../repositories/friend_repository.dart';
 import '../services/health_connect_service.dart';
 import '../services/backup_service.dart';
-import '../services/firestore_sync_service.dart';
 import '../services/coach_service.dart';
 import '../services/gemini_food_service.dart';
 import '../services/csv_export_service.dart';

@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trufit_bodamma/services/screen_time_service.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

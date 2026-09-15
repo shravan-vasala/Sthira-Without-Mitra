@@ -1,7 +1,5 @@
 import 'package:isar/isar.dart';
 import '../models/app_config.dart';
-import '../models/user_profile.dart';
-import '../models/ai_cache_entry.dart';
 
 class SchemaMigrationService {
   static const int currentSchemaVersion = 4; // Bumping for Isar

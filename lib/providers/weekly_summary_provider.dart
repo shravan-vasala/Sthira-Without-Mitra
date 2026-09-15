@@ -70,8 +70,9 @@ class WeeklySummary {
     sb.writeln('✅ Habits: ${(habitCompletionRate * 100).toInt()}% completion');
     if (bestHabit != null) sb.writeln('⭐ Best Habit: $bestHabit');
     if (avgSteps > 0) sb.writeln('👟 Avg Steps: $avgSteps (Best: $bestSteps)');
-    if (avgSleep > 0)
+    if (avgSleep > 0) {
       sb.writeln('💤 Avg Sleep: ${avgSleep.toStringAsFixed(1)}h');
+    }
     if (avgCalories > 0) sb.writeln('🔥 Avg Calories: $avgCalories kcal');
     if (weightDelta != 0) {
       final deltaStr = weightDelta > 0

@@ -54,7 +54,7 @@ class MealRepository {
 
             final incomingMap = entry.value;
             DateTime? incomingUpdatedAt;
-            if (incomingMap is Map && incomingMap['updatedAt'] != null) {
+            if (incomingMap['updatedAt'] != null) {
               incomingUpdatedAt = DateTime.tryParse(incomingMap['updatedAt'].toString());
             }
 

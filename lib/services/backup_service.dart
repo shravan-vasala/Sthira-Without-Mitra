@@ -22,7 +22,6 @@ import '../models/workout_session.dart';
 import '../models/coach_note.dart';
 import '../models/body_stats.dart';
 import '../models/daily_meal_log.dart';
-import '../models/habit.dart';
 import '../models/user_food_log.dart';
 import 'schema_migration_service.dart';
 import 'backup_encryption_service.dart';

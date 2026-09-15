@@ -20,6 +20,7 @@ class MockCloudSyncService implements ICloudSyncService {
   bool flushTriggered = false;
   bool shouldThrow = false;
 
+  @override
   void triggerFlush() {
     flushTriggered = true;
   }
@@ -36,7 +37,7 @@ class MockCloudSyncService implements ICloudSyncService {
   }
 
   @override
-  Stream<Map<String, Map<String, dynamic>>> streamCollection(String collection) => Stream.empty();
+  Stream<Map<String, Map<String, dynamic>>> streamCollection(String collection) => const Stream.empty();
   @override
   Future<Map<String, Map<String, dynamic>>> pullCollection(String collection) async => {};
   @override
@@ -182,7 +183,7 @@ void main() {
        final repo = HabitRepository();
        await repo.init(isar);
 
-       var habits = repo.getHabits();
+       final habits = repo.getHabits();
        expect(habits, isNotEmpty); // Seeded.
        
        for (var h in habits) {

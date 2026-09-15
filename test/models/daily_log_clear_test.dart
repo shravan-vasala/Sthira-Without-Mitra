@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../lib/models/daily_log.dart';
+import 'package:trufit_bodamma/models/daily_log.dart';
 
 void main() {
   group('DailyLog Clear Methods', () {

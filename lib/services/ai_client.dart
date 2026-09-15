@@ -138,7 +138,7 @@ class AiClient {
     CancellationToken? cancellationToken,
     DateTime? overallDeadline,
   }) async {
-    if (apiKey == null || apiKey.isEmpty) {
+    if (apiKey.isEmpty) {
       throw AiException('API Key is required. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
     }
 
@@ -189,7 +189,7 @@ class AiClient {
     for (int i = 0; i < modelsToUse.length; i++) {
         if (DateTime.now().isAfter(computedDeadline)) break;
       final modelName = modelsToUse[i];
-      int maxRetries = 1; // max 2 attempts total per model for transient errors
+      final int maxRetries = 1; // max 2 attempts total per model for transient errors
       int attempt = 0;
       
       while (attempt <= maxRetries) {
@@ -470,9 +470,7 @@ class AiClient {
              return;
           }
           if (chunk != null && chunk.isNotEmpty) {
-            if (firstTokenMs == null) {
-              firstTokenMs = sw.elapsedMilliseconds;
-            }
+            firstTokenMs ??= sw.elapsedMilliseconds;
             yieldedAny = true;
             resetInactivityTimer();
             controller.add(chunk);

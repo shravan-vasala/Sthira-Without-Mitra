@@ -7,7 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../router/app_router.dart';
 import '../theme/app_colors.dart';
-import 'app_providers.dart'; // to get profileProvider for settings
+import 'app_providers.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart'; // to get profileProvider for settings
 
 
 String kTimerEndTimeKey = 'rest_timer_end_time';
@@ -219,17 +220,13 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
                   children: [
                     const Text(
                       'Rest Complete',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: context.text.body,
                     ),
                     if (completedExercise != null)
                       Text(
                         'Time for $completedExercise',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.colors.onPrimary.withValues(
-                            alpha: 0.8,
-                          ),
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.onPrimary.withValues(
+                            alpha: 0.8),
                       ),
                   ],
                 ),
