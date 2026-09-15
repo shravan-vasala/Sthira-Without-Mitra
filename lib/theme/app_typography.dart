@@ -9,13 +9,13 @@ import 'app_colors.dart';
 /// 3. If you find yourself writing .copyWith(fontSize: ...), the token set is wrong.
 ///    Stop and report it. Do not add an 11th size.
 extension AppTypographyExtension on BuildContext {
-  AppTypography get text => AppTypography(this);
+  AppTypography get text => AppTypography(colors);
 }
 
 class AppTypography {
-  final BuildContext context;
+  final AppColorsPalette colors;
 
-  AppTypography(this.context);
+  AppTypography(this.colors);
 
   /// THE one hero number on a screen. Max one per screen.
   TextStyle get metric => TextStyle(
@@ -24,7 +24,7 @@ class AppTypography {
         fontWeight: FontWeight.w800,
         letterSpacing: -1.6,
         height: 1.0,
-        color: context.colors.textDark,
+        color: colors.textDark,
       );
 
   /// Large numeric readouts in cards and dialogs
@@ -34,7 +34,7 @@ class AppTypography {
         fontWeight: FontWeight.w800,
         letterSpacing: -1.0,
         height: 1.05,
-        color: context.colors.textDark,
+        color: colors.textDark,
       );
 
   /// AppBar titles, sheet titles, the Home greeting
@@ -44,7 +44,7 @@ class AppTypography {
         fontWeight: FontWeight.w800,
         letterSpacing: -0.6,
         height: 1.15,
-        color: context.colors.textDark,
+        color: colors.textDark,
       );
 
   /// Card / tile titles
@@ -54,7 +54,7 @@ class AppTypography {
         fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
         height: 1.25,
-        color: context.colors.textDark,
+        color: colors.textDark,
       );
 
   /// SectionHeader — colored primary per the design system
@@ -64,7 +64,7 @@ class AppTypography {
         fontWeight: FontWeight.w700,
         letterSpacing: 0,
         height: 1.2,
-        color: context.colors.primary,
+        color: colors.primary,
       );
 
   /// UPPERCASE micro-labels above a group
@@ -74,7 +74,7 @@ class AppTypography {
         fontWeight: FontWeight.w700,
         letterSpacing: 1.2,
         height: 1.2,
-        color: context.colors.textMedium,
+        color: colors.textMedium,
       );
 
   /// Reading text
@@ -84,7 +84,7 @@ class AppTypography {
         fontWeight: FontWeight.w500,
         letterSpacing: 0,
         height: 1.45,
-        color: context.colors.textDark,
+        color: colors.textDark,
       );
 
   /// List-row titles, emphasized body
@@ -94,7 +94,7 @@ class AppTypography {
         fontWeight: FontWeight.w700,
         letterSpacing: 0,
         height: 1.4,
-        color: context.colors.textDark,
+        color: colors.textDark,
       );
 
   /// Metadata, subtitles under a title
@@ -104,7 +104,7 @@ class AppTypography {
         fontWeight: FontWeight.w500,
         letterSpacing: 0,
         height: 1.4,
-        color: context.colors.textMedium,
+        color: colors.textMedium,
       );
 
   /// Pills, badges, chart axis labels
@@ -114,6 +114,6 @@ class AppTypography {
         fontWeight: FontWeight.w600,
         letterSpacing: 0,
         height: 1.2,
-        color: context.colors.textMedium,
+        color: colors.textMedium,
       );
 }

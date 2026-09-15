@@ -12,6 +12,7 @@ class AppTheme {
 
   static ThemeData get light {
     final colors = AppColorsLight();
+    final text = AppTypography(colors);
     return ThemeData(
       useMaterial3: true,
       fontFamily: 'General Sans',
@@ -33,6 +34,7 @@ class AppTheme {
         textMedium: colors.textMedium,
         textLight: colors.textLight,
         primary: colors.primary,
+        text: text,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -56,7 +58,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: context.text.screenTitle.copyWith(color: AppColorsLight().textDark),
+        titleTextStyle: text.screenTitle.copyWith(color: AppColorsLight().textDark),
         iconTheme: IconThemeData(color: AppColorsLight().textDark),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -65,8 +67,8 @@ class AppTheme {
         unselectedItemColor: AppColorsLight().textLight,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
-        selectedLabelStyle: context.text.micro,
-        unselectedLabelStyle: context.text.caption,
+        selectedLabelStyle: text.micro,
+        unselectedLabelStyle: text.caption,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -75,7 +77,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: context.text.bodyStrong,
+          textStyle: text.bodyStrong,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -84,7 +86,7 @@ class AppTheme {
           side: BorderSide(color: AppColorsLight().primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: context.text.body,
+          textStyle: text.body,
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
@@ -97,7 +99,7 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColorsLight().card,
-        contentTextStyle: context.text.body.copyWith(color: AppColorsLight().textDark),
+        contentTextStyle: text.body.copyWith(color: AppColorsLight().textDark),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 12,
@@ -122,9 +124,9 @@ class AppTheme {
           vertical: 16,
         ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
-        labelStyle: context.text.body.copyWith(color: AppColorsLight().textMedium),
-        floatingLabelStyle: context.text.body.copyWith(color: AppColorsLight().primary),
-        hintStyle: context.text.body.copyWith(color: AppColorsLight().textLight),
+        labelStyle: text.body.copyWith(color: AppColorsLight().textMedium),
+        floatingLabelStyle: text.body.copyWith(color: AppColorsLight().primary),
+        hintStyle: text.body.copyWith(color: AppColorsLight().textLight),
       ),
       dividerTheme: DividerThemeData(
         color: AppColorsLight().divider,
@@ -144,32 +146,33 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsLight().card,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: context.text.screenTitle.copyWith(color: AppColorsLight().textDark),
-        contentTextStyle: context.text.body.copyWith(color: AppColorsLight().textMedium),
+        titleTextStyle: text.screenTitle.copyWith(color: AppColorsLight().textDark),
+        contentTextStyle: text.body.copyWith(color: AppColorsLight().textMedium),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: context.text.body.copyWith(color: AppColorsLight().textDark),
+        textStyle: text.body.copyWith(color: AppColorsLight().textDark),
         menuStyle: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(AppColorsLight().card),
           surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: context.text.bodyStrong.copyWith(color: AppColorsLight().textDark),
-        subtitleTextStyle: context.text.caption.copyWith(color: AppColorsLight().textMedium),
+        titleTextStyle: text.bodyStrong.copyWith(color: AppColorsLight().textDark),
+        subtitleTextStyle: text.caption.copyWith(color: AppColorsLight().textMedium),
         iconColor: AppColorsLight().textMedium,
       ),
       canvasColor: AppColorsLight().card,
       popupMenuTheme: PopupMenuThemeData(
         color: AppColorsLight().card,
-        textStyle: context.text.body.copyWith(color: AppColorsLight().textDark),
+        textStyle: text.body.copyWith(color: AppColorsLight().textDark),
       ),
     );
   }
 
   static ThemeData get dark {
     final colors = AppColorsDark();
+    final text = AppTypography(colors);
     return ThemeData(
       useMaterial3: true,
       fontFamily: 'General Sans',
@@ -192,6 +195,7 @@ class AppTheme {
         textMedium: colors.textMedium,
         textLight: colors.textLight,
         primary: colors.primary,
+        text: text,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -215,7 +219,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: context.text.screenTitle.copyWith(color: AppColorsDark().textDark),
+        titleTextStyle: text.screenTitle.copyWith(color: AppColorsDark().textDark),
         iconTheme: IconThemeData(color: AppColorsDark().textDark),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -224,8 +228,8 @@ class AppTheme {
         unselectedItemColor: AppColorsDark().textLight,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
-        selectedLabelStyle: context.text.micro,
-        unselectedLabelStyle: context.text.caption,
+        selectedLabelStyle: text.micro,
+        unselectedLabelStyle: text.caption,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -234,7 +238,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: context.text.bodyStrong,
+          textStyle: text.bodyStrong,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -243,7 +247,7 @@ class AppTheme {
           side: BorderSide(color: AppColorsDark().primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: const StadiumBorder(),
-          textStyle: context.text.body,
+          textStyle: text.body,
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
@@ -256,7 +260,7 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColorsDark().card,
-        contentTextStyle: context.text.body.copyWith(color: AppColorsDark().textDark),
+        contentTextStyle: text.body.copyWith(color: AppColorsDark().textDark),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 12,
@@ -281,9 +285,9 @@ class AppTheme {
           vertical: 16,
         ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
-        labelStyle: context.text.body.copyWith(color: AppColorsDark().textMedium),
-        floatingLabelStyle: context.text.body.copyWith(color: AppColorsDark().primaryLight),
-        hintStyle: context.text.body.copyWith(color: AppColorsDark().textLight),
+        labelStyle: text.body.copyWith(color: AppColorsDark().textMedium),
+        floatingLabelStyle: text.body.copyWith(color: AppColorsDark().primaryLight),
+        hintStyle: text.body.copyWith(color: AppColorsDark().textLight),
       ),
       dividerTheme: DividerThemeData(
         color: AppColorsDark().divider,
@@ -303,26 +307,26 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsDark().card,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: context.text.screenTitle.copyWith(color: AppColorsDark().textDark),
-        contentTextStyle: context.text.body.copyWith(color: AppColorsDark().textMedium),
+        titleTextStyle: text.screenTitle.copyWith(color: AppColorsDark().textDark),
+        contentTextStyle: text.body.copyWith(color: AppColorsDark().textMedium),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: context.text.body.copyWith(color: AppColorsDark().textDark),
+        textStyle: text.body.copyWith(color: AppColorsDark().textDark),
         menuStyle: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(AppColorsDark().card),
           surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: context.text.bodyStrong.copyWith(color: AppColorsDark().textDark),
-        subtitleTextStyle: context.text.caption.copyWith(color: AppColorsDark().textMedium),
+        titleTextStyle: text.bodyStrong.copyWith(color: AppColorsDark().textDark),
+        subtitleTextStyle: text.caption.copyWith(color: AppColorsDark().textMedium),
         iconColor: AppColorsDark().textMedium,
       ),
       canvasColor: AppColorsDark().card,
       popupMenuTheme: PopupMenuThemeData(
         color: AppColorsDark().card,
-        textStyle: context.text.body.copyWith(color: AppColorsDark().textDark),
+        textStyle: text.body.copyWith(color: AppColorsDark().textDark),
       ),
     );
   }
@@ -332,17 +336,18 @@ class AppTheme {
     required Color textMedium,
     required Color textLight,
     required Color primary,
+    required AppTypography text,
   }) {
-    final metric = context.text.metric.copyWith(color: textDark);
-    final display = context.text.display.copyWith(color: textDark);
-    final screenTitle = context.text.screenTitle.copyWith(color: textDark);
-    final cardTitle = context.text.cardTitle.copyWith(color: textDark);
-    final sectionLabel = context.text.bodyStrong.copyWith(color: primary);
-    final eyebrow = context.text.micro.copyWith(color: textMedium);
-    final body = context.text.body.copyWith(color: textDark);
-    final bodyStrong = context.text.bodyStrong.copyWith(color: textDark);
-    final caption = context.text.caption.copyWith(color: textMedium);
-    final micro = context.text.micro.copyWith(color: textMedium);
+    final metric = text.metric.copyWith(color: textDark);
+    final display = text.display.copyWith(color: textDark);
+    final screenTitle = text.screenTitle.copyWith(color: textDark);
+    final cardTitle = text.cardTitle.copyWith(color: textDark);
+    final sectionLabel = text.bodyStrong.copyWith(color: primary);
+    final eyebrow = text.micro.copyWith(color: textMedium);
+    final body = text.body.copyWith(color: textDark);
+    final bodyStrong = text.bodyStrong.copyWith(color: textDark);
+    final caption = text.caption.copyWith(color: textMedium);
+    final micro = text.micro.copyWith(color: textMedium);
 
     return TextTheme(
       displayLarge: metric,
