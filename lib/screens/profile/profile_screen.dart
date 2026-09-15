@@ -4,12 +4,10 @@ import '../../services/ai_client.dart';
 import '../../services/ai_logger.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/setup_sheets.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/layout_insets.dart';
@@ -20,11 +18,11 @@ import 'widgets/journey_stats_strip.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/credential_provider.dart';
 import '../../providers/reminders_provider.dart';
-import '../../providers/rest_timer_provider.dart';
 import '../../services/screen_time_service.dart';
 import '../../widgets/avatar_picker_sheet.dart';
 import '../../services/diagnostic_logger.dart';
 import '../home/share_preview_sheet.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -71,12 +69,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   alignment: Alignment.center,
                   child: Text(
                     'My Profile',
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.display.copyWith(color: context.colors.textDark),
                   ),
                 ),
               ),
@@ -152,28 +145,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 12),
                     Text(
                       profile.name,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                      ),
+                      style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Height: ${profile.height?.toStringAsFixed(0) ?? "Not set"} cm',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.textMedium),
                     ),
                     if (profile.targetWeight != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         'Target: ${(profile.useKg ? profile.targetWeight! : profile.targetWeight! * 2.20462).toStringAsFixed(1)} ${profile.weightUnit}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: context.colors.textMedium,
-                        ),
+                        style: context.text.body.copyWith(color: context.colors.textMedium),
                       ),
                     ],
                   ],
@@ -343,13 +326,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     '2:47',
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 16,
-                      color: const Color(0xFFE29B65).withOpacity(0.8),
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: const Color(0xFFE29B65).withValues(alpha: 0.8)),
                   ),
                 ),
               ),
@@ -373,11 +350,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Text(
                           'Made with ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.primary,
-                          ),
+                          style: context.text.micro.copyWith(color: context.colors.primary),
                         ),
                         Icon(
                           Icons.eco_rounded,
@@ -386,11 +359,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         Text(
                           ' for Bodamma',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.primary,
-                          ),
+                          style: context.text.micro.copyWith(color: context.colors.primary),
                         ),
                       ],
                     ),
@@ -398,10 +367,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const SizedBox(height: 4),
                       Text(
                         _appVersion,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: context.colors.textLight.withValues(alpha: 0.6),
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.textLight.withValues(alpha: 0.6)),
                       ),
                     ],
                   ],
@@ -429,24 +395,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Text(
                 '2:47',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
               ),
               const SizedBox(height: 16),
               Text(
                 'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'General Sans',
-                  fontSize: 15,
-                  height: 1.5,
-                  color: context.colors.textMedium,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
               const SizedBox(height: 24),
               Padding(
@@ -454,12 +409,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Text(
                   "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Caveat',
-                    fontSize: 22,
-                    color: context.colors.textDark.withValues(alpha: 0.85),
-                    height: 1.3,
-                  ),
+                  style: context.text.screenTitle.copyWith(color: context.colors.textDark.withValues(alpha: 0.85)),
                 ),
               ),
             ],
@@ -491,25 +441,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         backgroundColor: context.colors.card,
         title: Text(
           'Enable Screen Time',
-          style: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
-            color: context.colors.textDark,
-          ),
+          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
         ),
         content: Text(
           'Sthira can read your daily screen time to help you build better habits. '
           'This requires "Usage Access" permission.\n\n'
           'Your screen time is only stored locally on this device, and will only be synced to your private cloud if Cloud Sync is enabled.',
-          style: TextStyle(color: context.colors.textMedium),
+          style: context.text.body.copyWith(color: context.colors.textMedium),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Cancel',
-              style: TextStyle(color: context.colors.textLight),
+              style: context.text.body.copyWith(color: context.colors.textLight),
             ),
           ),
           TextButton(
@@ -519,10 +464,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             },
             child: Text(
               'Open Settings',
-              style: TextStyle(
-                color: context.colors.primary,
-                fontWeight: FontWeight.bold,
-              ),
+              style: context.text.body.copyWith(color: context.colors.primary),
             ),
           ),
         ],
@@ -554,15 +496,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     title: Text(
                       isKg ? 'Kilograms (kg)' : 'Pounds (lb)',
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontWeight: FontWeight.w600,
-                        color: colors.textDark,
-                      ),
+                      style: context.text.body.copyWith(color: colors.textDark),
                     ),
                     subtitle: Text(
                       isKg ? 'Metric system' : 'Imperial system',
-                      style: TextStyle(color: colors.textMedium, fontSize: 13),
+                      style: context.text.caption.copyWith(color: colors.textMedium),
                     ),
                     trailing: Icon(
                       selected
@@ -648,15 +586,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     title: Text(
                       label(mode),
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontWeight: FontWeight.w600,
-                        color: colors.textDark,
-                      ),
+                      style: context.text.body.copyWith(color: colors.textDark),
                     ),
                     subtitle: Text(
                       subtitle(mode),
-                      style: TextStyle(color: colors.textMedium, fontSize: 13),
+                      style: context.text.caption.copyWith(color: colors.textMedium),
                     ),
                     trailing: Icon(
                       selected
@@ -797,11 +731,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: name.isNotEmpty
           ? Text(
               name[0].toUpperCase(),
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: context.colors.primary,
-              ),
+              style: context.text.display.copyWith(color: context.colors.primary),
             )
           : Icon(Icons.person, size: 40, color: context.colors.primary),
     );
@@ -842,12 +772,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
               const SizedBox(width: 8),
               Text(
                 'Cloud Sync',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.cardTitle.copyWith(color: context.colors.textDark),
               ),
               const Spacer(),
               if (isSignedIn)
@@ -862,11 +787,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   ),
                   child: Text(
                     'Active',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.colors.green,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: context.text.micro.copyWith(color: context.colors.green),
                   ),
                 ),
             ],
@@ -876,7 +797,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
             isSignedIn
                 ? 'Your text data is securely synced as $userEmail. Photos are NOT cloud-synced.'
                 : 'Sign in to sync your text data across devices. Photos are NOT cloud-synced.',
-            style: TextStyle(color: context.colors.textMedium, fontSize: 13),
+            style: context.text.caption.copyWith(color: context.colors.textMedium),
           ),
           if (isSignedIn && pendingCount > 0 && !isSyncing) ...[
             const SizedBox(height: 12),
@@ -886,7 +807,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                 const SizedBox(width: 8),
                 Text(
                   '$pendingCount pending edits not yet synced',
-                  style: TextStyle(color: context.colors.warning, fontSize: 13, fontWeight: FontWeight.bold),
+                  style: context.text.caption.copyWith(color: context.colors.warning),
                 ),
               ],
             ),
@@ -895,7 +816,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
             const SizedBox(height: 8),
             Text(
               'Error: $errorMessage',
-              style: TextStyle(color: context.colors.red, fontSize: 12),
+              style: context.text.micro.copyWith(color: context.colors.red),
             ),
           ],
           const SizedBox(height: 16),
@@ -911,10 +832,7 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   const SizedBox(height: 8),
                   Text(
                     'Syncing data...',
-                    style: TextStyle(
-                      color: context.colors.primary,
-                      fontSize: 12,
-                    ),
+                    style: context.text.micro.copyWith(color: context.colors.primary),
                   ),
                 ],
               ),
@@ -970,11 +888,11 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           backgroundColor: context.colors.card,
-                          title: Text('Unsynced Changes', style: TextStyle(color: context.colors.textDark)),
-                          content: Text('You have $pendingCount unsynced edits. Signing out now means they will stay locally but won\'t be in the cloud. Proceed?', style: TextStyle(color: context.colors.textMedium)),
+                          title: Text('Unsynced Changes', style: context.text.body.copyWith(color: context.colors.textDark)),
+                          content: Text('You have $pendingCount unsynced edits. Signing out now means they will stay locally but won\'t be in the cloud. Proceed?', style: context.text.body.copyWith(color: context.colors.textMedium)),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: TextStyle(color: context.colors.textLight))),
-                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out Anyway', style: TextStyle(color: context.colors.red))),
+                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: context.text.body.copyWith(color: context.colors.textLight))),
+                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out Anyway', style: context.text.body.copyWith(color: context.colors.red))),
                           ],
                         ),
                       );
@@ -984,11 +902,11 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           backgroundColor: context.colors.card,
-                          title: Text('Sign Out', style: TextStyle(color: context.colors.textDark)),
-                          content: Text('Are you sure you want to sign out?', style: TextStyle(color: context.colors.textMedium)),
+                          title: Text('Sign Out', style: context.text.body.copyWith(color: context.colors.textDark)),
+                          content: Text('Are you sure you want to sign out?', style: context.text.body.copyWith(color: context.colors.textMedium)),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: TextStyle(color: context.colors.textLight))),
-                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out', style: TextStyle(color: context.colors.red, fontWeight: FontWeight.bold))),
+                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: context.text.body.copyWith(color: context.colors.textLight))),
+                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out', style: context.text.body.copyWith(color: context.colors.red))),
                           ],
                         ),
                       );
@@ -1023,10 +941,7 @@ class _ExportOptionTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
       title: Text(
         title,
-        style: TextStyle(
-          color: context.colors.textDark,
-          fontWeight: FontWeight.w600,
-        ),
+        style: context.text.body.copyWith(color: context.colors.textDark),
       ),
       trailing: Icon(
         Icons.chevron_right_rounded,
@@ -1083,20 +998,12 @@ class _MenuCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.micro.copyWith(color: context.colors.textMedium),
                   ),
                 ],
               ),
@@ -1148,16 +1055,11 @@ class _SettingsSwitch extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: context.colors.textDark,
-          ),
+          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(fontSize: 13, color: context.colors.textMedium),
+          style: context.text.caption.copyWith(color: context.colors.textMedium),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kCardRadius),
@@ -1341,7 +1243,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 leading: Icon(Icons.delete, color: context.colors.red),
                 title: Text(
                   'Remove photo',
-                  style: TextStyle(color: context.colors.red),
+                  style: context.text.body.copyWith(color: context.colors.red),
                 ),
                 onTap: () async {
                   Navigator.pop(ctx);
@@ -1399,12 +1301,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                 child: nameController.text.isNotEmpty
                                     ? Text(
                                         nameController.text[0].toUpperCase(),
-                                        style: TextStyle(
-                                          fontFamily: 'Cabinet Grotesk',
-                                          fontSize: 32,
-                                          fontWeight: FontWeight.w800,
-                                          color: context.colors.primary,
-                                        ),
+                                        style: context.text.display.copyWith(color: context.colors.primary),
                                       )
                                     : Icon(
                                         Icons.person,
@@ -1473,11 +1370,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             const SizedBox(height: 16),
             Text(
               'Daily macros (g)',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1620,22 +1513,14 @@ class _ProfileTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: context.colors.textMedium,
-          ),
+          style: context.text.caption.copyWith(color: context.colors.textMedium),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           onChanged: onChanged,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: context.colors.textDark,
-          ),
+          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
           decoration: InputDecoration(
             filled: true,
             fillColor: context.colors.inputFill,
@@ -1684,11 +1569,7 @@ class _AiActivitySheet extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Logs are kept locally on your device for diagnostic purposes (up to 20 recent requests).',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: context.text.caption.copyWith(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1707,39 +1588,28 @@ class _AiActivitySheet extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
               'Logs are kept locally on your device for diagnostic purposes (up to 20 recent requests).',
-              style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
-                fontStyle: FontStyle.italic,
-              ),
+              style: context.text.caption.copyWith(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey),
             ),
           ),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: AiLogger.logs.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final log = AiLogger.logs[index];
               return ListTile(
                 title: Text(
                   '${log.purpose} • ${log.model}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                  style: context.text.body.copyWith(color: Theme.of(context).primaryColor),
                 ),
                 subtitle: Text(
                   'Outcome: ${log.outcome}\n${log.timestamp.toString().substring(11, 16)}',
-                  style: const TextStyle(fontSize: 12),
+                  style: context.text.micro,
                 ),
                 trailing: Text(
                   '${log.durationMs} ms',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: context.text.micro,
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 4),
               );
@@ -1781,13 +1651,13 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
       final sw = Stopwatch()..start();
       try {
         await client.generateJson(
-          prompt: '{"test":"Respond with exactly {\"status\":\"ok\"}"}',
+          prompt: '{"test":"Respond with exactly {"status":"ok"}"}',
           systemInstruction: 'Respond only in valid JSON.',
           apiKey: cred.key ?? '',
           skipCache: true,
         );
         sw.stop();
-        if (mounted)
+        if (mounted) {
           setState(() {
             _results[model] = {
               'status': '✓',
@@ -1795,10 +1665,11 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
               'error': null,
             };
           });
+        }
       } catch (e) {
         sw.stop();
-        final cause = (e is AiException) ? (e as AiException).cause : null;
-        if (mounted)
+        final cause = (e is AiException) ? (e).cause : null;
+        if (mounted) {
           setState(() {
             _results[model] = {
               'status': '✗',
@@ -1806,6 +1677,7 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
               'error': cause?.toString() ?? e.toString(),
             };
           });
+        }
       }
     }
     if (mounted) setState(() => _isTesting = false);
@@ -1841,13 +1713,9 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
                     children: [
                       Text(
                         e.value['status'],
-                        style: TextStyle(
-                          color: e.value['status'] == '✓'
+                        style: context.text.cardTitle.copyWith(color: e.value['status'] == '✓'
                               ? Colors.green
-                              : Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+                              : Colors.red),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -1856,17 +1724,12 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
                           children: [
                             Text(
                               e.key,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: context.text.body,
                             ),
                             if (e.value['error'] != null)
                               Text(
                                 e.value['error'],
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 12,
-                                ),
+                                style: context.text.micro.copyWith(color: Colors.red),
                               ),
                           ],
                         ),
@@ -1876,7 +1739,7 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
                   ),
                 ),
               )
-              .toList(),
+              ,
         ],
       ),
     );
@@ -1905,7 +1768,7 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
               children: [
                 Text(
                   '${logs.length} logs in ring buffer',
-                  style: TextStyle(color: context.colors.textMedium),
+                  style: context.text.body.copyWith(color: context.colors.textMedium),
                 ),
                 Row(
                   children: [
@@ -1939,10 +1802,7 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                           builder: (context) => AlertDialog(
                             title: const Text(
                               'Clear Diagnostics',
-                              style: TextStyle(
-                                fontFamily: 'Cabinet Grotesk',
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: context.text.body,
                             ),
                             content: const Text('Are you sure? This will only clear your local diagnostic logs. It will not erase your actual app data or tracked habits.'),
                             actions: [
@@ -2020,22 +1880,14 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                 ),
                 child: Text(
                   log.level,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: lvlColor,
-                  ),
+                  style: context.text.micro.copyWith(color: lvlColor),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   log.timestamp.toString().substring(0, 19),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: context.colors.textLight,
-                    fontFamily: 'monospace',
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textLight),
                 ),
               ),
             ],
@@ -2043,21 +1895,13 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             log.message,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: context.colors.textDark,
-            ),
+            style: context.text.caption.copyWith(color: context.colors.textDark),
           ),
           if (log.error != null) ...[
             const SizedBox(height: 4),
             Text(
               log.error!,
-              style: TextStyle(
-                fontSize: 12,
-                color: context.colors.red,
-                fontFamily: 'monospace',
-              ),
+              style: context.text.micro.copyWith(color: context.colors.red),
             ),
           ],
         ],

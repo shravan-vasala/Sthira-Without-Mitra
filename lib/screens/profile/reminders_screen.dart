@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/reminders_provider.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class RemindersScreen extends ConsumerStatefulWidget {
   const RemindersScreen({super.key});
@@ -52,12 +53,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       appBar: AppBar(
         title: Text(
           'Reminders',
-          style: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: context.colors.textDark,
-          ),
+          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
@@ -209,10 +205,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                         children: [
                           Text(
                             'Day of Week',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: context.colors.textDark,
-                            ),
+                            style: context.text.body.copyWith(color: context.colors.textDark),
                           ),
                           DropdownButton<int>(
                             value: config.backupDayOfWeek,
@@ -300,13 +293,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
         title,
-        style: TextStyle(
-          fontFamily: 'Cabinet Grotesk',
-          fontSize: 13,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.5,
-          color: context.colors.primary,
-        ),
+        style: context.text.caption.copyWith(color: context.colors.primary),
       ),
     );
   }
@@ -335,19 +322,12 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: context.colors.textDark,
-                      ),
+                      style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.caption.copyWith(color: context.colors.textMedium),
                     ),
                   ],
                 ),
@@ -386,7 +366,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 14, color: context.colors.textDark),
+                  style: context.text.body.copyWith(color: context.colors.textDark),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -396,11 +376,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   ),
                   child: Text(
                     _formatTime(time),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: context.colors.primary,
-                    ),
+                    style: context.text.body.copyWith(color: context.colors.primary),
                   ),
                 ),
               ],
@@ -420,11 +396,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
               Expanded(
                 child: Text(
                   '"$previewText"',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.textLight,
-                    fontStyle: FontStyle.italic,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textLight),
                 ),
               ),
             ],

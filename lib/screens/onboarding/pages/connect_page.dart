@@ -6,6 +6,7 @@ import '../../../widgets/setup_sheets.dart';
 import '../../../providers/app_providers.dart';
 import '../../../providers/credential_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ConnectPage extends ConsumerStatefulWidget {
   const ConnectPage({super.key});
@@ -115,25 +116,13 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
                 const Text(
                   'Connect',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    height: 1.1,
-                    letterSpacing: -1,
-                  ),
+                  style: context.text.metric.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Optional — you can do any of this later in Settings.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'General Sans',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textMedium),
                 ),
               ],
             ),
@@ -229,7 +218,7 @@ class _IntegrationRow extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colors.primary.withOpacity(0.15),
+                color: context.colors.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: context.colors.primary, size: 24),
@@ -241,22 +230,12 @@ class _IntegrationRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                   ),
                 ],
               ),
@@ -286,17 +265,12 @@ class _IntegrationRow extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusActive ? context.colors.primary.withOpacity(0.15) : context.colors.inputFill,
+                      color: statusActive ? context.colors.primary.withValues(alpha: 0.15) : context.colors.inputFill,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       statusText,
-                      style: TextStyle(
-                        fontFamily: 'General Sans',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: statusActive ? context.colors.primary : context.colors.textMedium,
-                      ),
+                      style: context.text.micro.copyWith(color: statusActive ? context.colors.primary : context.colors.textMedium),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -316,12 +290,7 @@ class _IntegrationRow extends StatelessWidget {
                         ],
                         Text(
                           statusActive ? 'Edit' : 'Set up',
-                          style: TextStyle(
-                            fontFamily: 'General Sans',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.primary,
-                          ),
+                          style: context.text.body.copyWith(color: context.colors.primary),
                         ),
                       ],
                     ),

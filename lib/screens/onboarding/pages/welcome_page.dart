@@ -3,6 +3,7 @@ import '../../../theme/app_colors.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -51,24 +52,13 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
               Text(
                 '2:47',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
               ),
               const SizedBox(height: 16),
               Text(
                 'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'General Sans',
-                  fontSize: 15,
-                  height: 1.5,
-                  color: context.colors.textMedium,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
               const SizedBox(height: 24),
               Padding(
@@ -76,12 +66,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 child: Text(
                   "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Caveat',
-                    fontSize: 22,
-                    color: context.colors.textDark.withValues(alpha: 0.85),
-                    height: 1.3,
-                  ),
+                  style: context.text.screenTitle.copyWith(color: context.colors.textDark.withValues(alpha: 0.85)),
                 ),
               ),
             ],
@@ -147,13 +132,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                   children: [
                     Text(
                       'Sthira',
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontSize: 48,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: -1,
-                      ),
+                      style: context.text.metric.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -162,32 +141,18 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                       children: [
                         Text(
                           'स्थिर',
-                          style: TextStyle(
-                            fontFamily: 'General Sans',
-                            fontSize: 20,
-                            color: const Color(0xFFE29B65),
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.text.screenTitle.copyWith(color: const Color(0xFFE29B65)),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             '•',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.3),
-                              fontSize: 16,
-                            ),
+                            style: context.text.bodyStrong.copyWith(color: Colors.white.withValues(alpha: 0.3)),
                           ),
                         ),
                         Text(
                           'steady, every day',
-                          style: TextStyle(
-                            fontFamily: 'General Sans',
-                            fontSize: 16,
-                            color: Colors.white.withOpacity(0.7),
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1.2,
-                          ),
+                          style: context.text.bodyStrong.copyWith(color: Colors.white.withValues(alpha: 0.7)),
                         ),
                       ],
                     ),
@@ -237,13 +202,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
                       '2:47',
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontSize: 16,
-                        color: const Color(0xFFE29B65).withOpacity(0.8),
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
+                      style: context.text.bodyStrong.copyWith(color: const Color(0xFFE29B65).withValues(alpha: 0.8)),
                     ),
                   ),
                 ),
@@ -305,7 +264,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: context.colors.primary.withOpacity(0.1),
+                            color: context.colors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(icon, color: context.colors.primary, size: 20),
@@ -317,22 +276,12 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                             children: [
                               Text(
                                 title,
-                                style: TextStyle(
-                                  fontFamily: 'General Sans',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.colors.textDark,
-                                ),
+                                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 subtitle,
-                                style: TextStyle(
-                                  fontFamily: 'General Sans',
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: context.colors.textMedium,
-                                ),
+                                style: context.text.caption.copyWith(color: context.colors.textMedium),
                               ),
                             ],
                           ),
@@ -370,28 +319,16 @@ class _DedicationLine extends StatelessWidget {
       children: [
         Text(
           'Made with ',
-          style: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 12,
-            color: Colors.white.withOpacity(0.4),
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.3,
-          ),
+          style: context.text.caption.copyWith(color: Colors.white.withValues(alpha: 0.4)),
         ),
         Icon(
           Icons.favorite_rounded,
-          color: context.colors.primary.withOpacity(0.8),
+          color: context.colors.primary.withValues(alpha: 0.8),
           size: 11,
         ),
         Text(
           ' for Bodamma',
-          style: TextStyle(
-            fontFamily: 'General Sans',
-            fontSize: 12,
-            color: Colors.white.withOpacity(0.4),
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.3,
-          ),
+          style: context.text.caption.copyWith(color: Colors.white.withValues(alpha: 0.4)),
         ),
       ],
     );
@@ -474,13 +411,7 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      height: 1.2,
-                    ),
+                    style: context.text.display.copyWith(color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 48),

@@ -4,6 +4,7 @@ import '../../../models/habit.dart';
 import '../../../utils/habit_icons.dart';
 import '../../../utils/target_calculator.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class YourPlanPage extends StatefulWidget {
   final double initialCalories;
@@ -162,14 +163,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                 const Text(
                   'Your Plan',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    height: 1.1,
-                    letterSpacing: -1,
-                  ),
+                  style: context.text.metric.copyWith(color: Colors.white),
                 ),
               ],
             ),
@@ -181,12 +175,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
               children: [
                 Text(
                   '${_currentCalories.round()} kcal',
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 40,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.primary,
-                  ),
+                  style: context.text.metric.copyWith(color: context.colors.primary),
                 ),
                 if (_macroPreview != null)
                   Padding(
@@ -194,11 +183,8 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     child: ActionChip(
                       label: const Text('Suggest for me'),
                       avatar: const Icon(Icons.auto_awesome_rounded, size: 16),
-                      backgroundColor: context.colors.primary.withOpacity(0.15),
-                      labelStyle: TextStyle(
-                          color: context.colors.primary,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'General Sans'),
+                      backgroundColor: context.colors.primary.withValues(alpha: 0.15),
+                      labelStyle: context.text.body.copyWith(color: context.colors.primary),
                       side: BorderSide.none,
                       onPressed: _suggestMacros,
                     ),
@@ -208,7 +194,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: context.colors.primary,
                     thumbColor: context.colors.primary,
-                    inactiveTrackColor: Colors.white.withOpacity(0.1),
+                    inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
                     trackHeight: 2,
                   ),
                   child: Slider(
@@ -244,7 +230,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                         const SizedBox(height: 12),
                         Builder(
                           builder: (ctx) {
-                            List<String> defaults = [];
+                            final List<String> defaults = [];
                             if (widget.heightCm == null) defaults.add('Height');
                             if (widget.weightKg == null) defaults.add('Weight');
                             defaults.add('Age');
@@ -255,11 +241,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                             }
                             return Text(
                               'Estimate uses default ${defaults.join(', ')}',
-                              style: TextStyle(
-                                fontFamily: 'General Sans',
-                                fontSize: 12,
-                                color: Colors.white.withValues(alpha: 0.5),
-                              ),
+                              style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.5)),
                               textAlign: TextAlign.center,
                             );
                           }
@@ -277,12 +259,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
               children: [
                 Text(
                   'Select Habits',
-                  style: TextStyle(
-                    fontFamily: 'General Sans',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
+                  style: context.text.cardTitle.copyWith(color: Colors.white.withValues(alpha: 0.9)),
                 ),
                 const SizedBox(height: 16),
                 ...Habit.defaults.map((habit) {
@@ -301,12 +278,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       'Please select at least one habit to track.',
-                      style: TextStyle(
-                        fontFamily: 'General Sans',
-                        color: context.colors.red,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.red),
                     ),
                   )
               ],
@@ -335,12 +307,7 @@ class _MacroChip extends StatelessWidget {
       ),
       child: Text(
         '$label ${value}g',
-        style: TextStyle(
-          fontFamily: 'General Sans',
-          color: context.colors.primary,
-          fontWeight: FontWeight.w700,
-          fontSize: 13,
-        ),
+        style: context.text.caption.copyWith(color: context.colors.primary),
       ),
     );
   }
@@ -366,7 +333,7 @@ class _HabitTile extends StatelessWidget {
       curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       decoration: BoxDecoration(
-        color: selected ? context.colors.primary.withOpacity(0.15) : context.colors.inputFill,
+        color: selected ? context.colors.primary.withValues(alpha: 0.15) : context.colors.inputFill,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -380,12 +347,7 @@ class _HabitTile extends StatelessWidget {
           Expanded(
             child: Text(
               habit.name,
-              style: TextStyle(
-                fontFamily: 'General Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : context.colors.textDark,
-              ),
+              style: context.text.bodyStrong.copyWith(color: selected ? Colors.white : context.colors.textDark),
             ),
           ),
           if (selected)
@@ -409,7 +371,7 @@ class _HabitTile extends StatelessWidget {
          duration: 200.ms, 
          curve: Curves.easeOutBack,
        )
-       .shimmer(duration: 500.ms, color: Colors.white.withOpacity(0.2));
+       .shimmer(duration: 500.ms, color: Colors.white.withValues(alpha: 0.2));
     }
 
     return GestureDetector(

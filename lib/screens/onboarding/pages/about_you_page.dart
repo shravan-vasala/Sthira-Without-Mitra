@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/app_text_field.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AboutYouPage extends StatefulWidget {
   final TextEditingController nameController;
@@ -155,14 +156,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                 const Text(
                   'About You',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    height: 1.1,
-                    letterSpacing: -1,
-                  ),
+                  style: context.text.metric.copyWith(color: Colors.white),
                 ),
               ],
             ),
@@ -186,7 +180,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                     padding: const EdgeInsets.only(top: 8.0, left: 4),
                     child: Text(
                       _nameError,
-                      style: TextStyle(color: context.colors.red, fontSize: 13),
+                      style: context.text.caption.copyWith(color: context.colors.red),
                     ),
                   ),
               ],
@@ -209,12 +203,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                   padding: const EdgeInsets.only(top: 8.0, left: 4),
                   child: Text(
                     'What should your AI coach call itself?',
-                    style: TextStyle(
-                      fontFamily: 'General Sans',
-                      fontSize: 13,
-                      color: context.colors.textMedium,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                   ),
                 ),
               ],
@@ -242,7 +231,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                           padding: const EdgeInsets.only(top: 8.0, left: 4),
                           child: Text(
                             _heightError,
-                            style: TextStyle(color: context.colors.red, fontSize: 13),
+                            style: context.text.caption.copyWith(color: context.colors.red),
                           ),
                         ),
                     ],
@@ -265,7 +254,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                           padding: const EdgeInsets.only(top: 8.0, left: 4),
                           child: Text(
                             _weightError,
-                            style: TextStyle(color: context.colors.red, fontSize: 13),
+                            style: context.text.caption.copyWith(color: context.colors.red),
                           ),
                         ),
                     ],
@@ -294,12 +283,7 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                       const SizedBox(width: 8),
                       Text(
                         'Switch to ${widget.useKg ? 'Pounds' : 'Kilograms'}',
-                        style: TextStyle(
-                          fontFamily: 'General Sans',
-                          fontSize: 13,
-                          color: context.colors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.primary),
                       ),
                     ],
                   ),

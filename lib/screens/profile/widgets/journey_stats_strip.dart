@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
-import '../../../models/daily_log.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class JourneyStatsStrip extends ConsumerWidget {
   const JourneyStatsStrip({super.key});
@@ -36,7 +36,7 @@ class JourneyStatsStrip extends ConsumerWidget {
       }
     }
 
-    int daysTracked = activeDates.length;
+    final int daysTracked = activeDates.length;
     DateTime? firstTrackedDate;
     if (activeDates.isNotEmpty) {
       final sortedDates = activeDates.toList()..sort();
@@ -93,11 +93,7 @@ class JourneyStatsStrip extends ConsumerWidget {
         const SizedBox(height: 16),
         Text(
           'Member since $memberSinceStr',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: context.colors.textMedium,
-          ),
+          style: context.text.micro.copyWith(color: context.colors.textMedium),
           textAlign: TextAlign.center,
         ),
       ],
@@ -145,11 +141,7 @@ class _StatCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: effectiveColor,
-                ),
+                style: context.text.micro.copyWith(color: effectiveColor),
               ),
             ],
           ),
@@ -164,13 +156,7 @@ class _StatCard extends StatelessWidget {
                 builder: (context, val, _) {
                   return Text(
                     val.toString(),
-                    style: TextStyle(
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: context.colors.textDark,
-                      height: 1.0,
-                    ),
+                    style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                   );
                 },
               ),
@@ -179,11 +165,7 @@ class _StatCard extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
                   unit,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textMedium),
                 ),
               ),
             ],

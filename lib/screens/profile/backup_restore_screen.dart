@@ -8,9 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/profile_providers.dart';
-import '../../providers/daily_log_notifier.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class BackupRestoreScreen extends ConsumerStatefulWidget {
   const BackupRestoreScreen({super.key});
@@ -132,10 +130,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(
           'Encrypted Backup',
-          style: TextStyle(
-            color: context.colors.primary,
-            fontFamily: 'Cabinet Grotesk',
-          ),
+          style: context.text.body.copyWith(color: context.colors.primary),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -238,10 +233,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(
               'Backup Verified ✨',
-              style: TextStyle(
-                color: context.colors.green,
-                fontFamily: 'Cabinet Grotesk',
-              ),
+              style: context.text.body.copyWith(color: context.colors.green),
             ),
             content: Text(
               'App Version: ${verify.appVersion}\n'
@@ -265,10 +257,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(
               'Verification Failed',
-              style: TextStyle(
-                color: context.colors.red,
-                fontFamily: 'Cabinet Grotesk',
-              ),
+              style: context.text.body.copyWith(color: context.colors.red),
             ),
             content: Text(verify.errorMessage ?? 'Invalid backup file.'),
             actions: [
@@ -288,10 +277,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(
               'Verification Error',
-              style: TextStyle(
-                color: context.colors.red,
-                fontFamily: 'Cabinet Grotesk',
-              ),
+              style: context.text.body.copyWith(color: context.colors.red),
             ),
             content: Text('An error occurred while verifying the backup: $e'),
             actions: [
@@ -371,7 +357,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(
                 'Restore',
-                style: TextStyle(color: context.colors.red),
+                style: context.text.body.copyWith(color: context.colors.red),
               ),
             ),
           ],
@@ -412,12 +398,9 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                 result.failedPhotosCount > 0
                     ? 'Restore Complete (with errors)'
                     : 'Restore Complete 🎉',
-                style: TextStyle(
-                  color: result.failedPhotosCount > 0
+                style: context.text.body.copyWith(color: result.failedPhotosCount > 0
                       ? context.colors.orange
-                      : context.colors.green,
-                  fontFamily: 'Cabinet Grotesk',
-                ),
+                      : context.colors.green),
               ),
               content: Text(
                 result.failedPhotosCount > 0
@@ -474,12 +457,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       appBar: AppBar(
         title: Text(
           'Backup & Restore',
-          style: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 24,
-            color: context.colors.textDark,
-            fontWeight: FontWeight.w800,
-          ),
+          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
         ),
         backgroundColor: context.colors.scaffoldBg,
       ),
@@ -506,10 +484,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                           children: [
                             Text(
                               'Last Backup',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: context.colors.textMedium,
-                              ),
+                              style: context.text.body.copyWith(color: context.colors.textMedium),
                             ),
                             if (_isLastBackupEncrypted) ...[
                               const SizedBox(width: 4),
@@ -524,38 +499,24 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                         const SizedBox(height: 8),
                         Text(
                           _lastBackupDate,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: context.colors.primary,
-                          ),
+                          style: context.text.cardTitle.copyWith(color: context.colors.primary),
                         ),
                         if (_lastBackupSize.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
                             _lastBackupSize,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: context.colors.textMedium,
-                            ),
+                            style: context.text.micro.copyWith(color: context.colors.textMedium),
                           ),
                         ],
                         const SizedBox(height: 20),
                         Text(
                           'Last Auto-Backup (Weekly)',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: context.colors.textMedium,
-                          ),
+                          style: context.text.body.copyWith(color: context.colors.textMedium),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _lastAutoBackupDate,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: context.colors.textDark,
-                          ),
+                          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                         ),
                       ],
                     ),
@@ -565,13 +526,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                     children: [
                       Text(
                         'ENCRYPT BACKUP',
-                        style: TextStyle(
-                          fontFamily: 'Cabinet Grotesk',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.5,
-                          color: context.colors.primary,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.primary),
                       ),
                       const Spacer(),
                       Switch(
@@ -683,19 +638,12 @@ class _ActionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                   ),
                 ],
               ),

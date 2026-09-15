@@ -5,13 +5,13 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/habit.dart';
 import '../../utils/target_calculator.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'widgets/sthira_aura_background.dart';
 
 import 'pages/welcome_page.dart';
 import 'pages/about_you_page.dart';
 import 'pages/your_plan_page.dart';
 import 'pages/connect_page.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 String kOnboardingCompletedKey = 'onboarding_completed';
 
@@ -51,11 +51,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.initState();
     final profile = ref.read(profileProvider);
     _nameController.text = profile.name;
-    if (profile.coachName != null) _coachNameController.text = profile.coachName!;
+    _coachNameController.text = profile.coachName;
     if (profile.height != null) _heightController.text = profile.height.toString();
     _useKg = profile.useKg;
     if (profile.currentWeight != null) {
-      double displayW = _useKg ? profile.currentWeight! : profile.currentWeight! * 2.20462;
+      final double displayW = _useKg ? profile.currentWeight! : profile.currentWeight! * 2.20462;
       _weightController.text = displayW.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
     }
     if (profile.targetCalories > 0) {
@@ -379,7 +379,7 @@ class _NavButtons extends StatelessWidget {
                 width: active ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: active || completed ? context.colors.primary : Colors.white.withOpacity(0.2),
+                  color: active || completed ? context.colors.primary : Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -396,9 +396,9 @@ class _NavButtons extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                     ),
-                    child: Icon(Icons.arrow_back_rounded, color: Colors.white.withOpacity(0.7)),
+                    child: Icon(Icons.arrow_back_rounded, color: Colors.white.withValues(alpha: 0.7)),
                   ),
                 )
               else
@@ -408,14 +408,14 @@ class _NavButtons extends StatelessWidget {
                 onTap: canGoNext ? onNext : null,
                 child: Builder(
                   builder: (context) {
-                    Widget btn = AnimatedContainer(
+                    final Widget btn = AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        color: canGoNext ? context.colors.primary : context.colors.primary.withOpacity(0.3),
+                        color: canGoNext ? context.colors.primary : context.colors.primary.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: _isLastPage && isSaving
@@ -426,12 +426,7 @@ class _NavButtons extends StatelessWidget {
                             )
                           : Text(
                               _isLastPage ? 'Start my journey' : 'Next',
-                              style: TextStyle(
-                                fontFamily: 'General Sans',
-                                color: canGoNext ? context.colors.onPrimary : Colors.white.withOpacity(0.5),
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                              ),
+                              style: context.text.bodyStrong.copyWith(color: canGoNext ? context.colors.onPrimary : Colors.white.withValues(alpha: 0.5)),
                             ),
                     );
                     

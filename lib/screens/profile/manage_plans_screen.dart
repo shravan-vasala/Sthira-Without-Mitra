@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 import '../../utils/meal_icons.dart';
 import '../../utils/target_calculator.dart';
 import '../../widgets/surface_card.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ManagePlansScreen extends ConsumerWidget {
   const ManagePlansScreen({super.key});
@@ -52,18 +53,14 @@ class ManagePlansScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Active Workout',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.colors.textMedium,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: context.text.micro.copyWith(color: context.colors.textMedium),
                         ),
                         DropdownButton<String>(
                           value: profile.activeWorkoutPlan,
                           isExpanded: true,
                           hint: const Text(
                             'Select Plan',
-                            style: TextStyle(fontSize: 14),
+                            style: context.text.body,
                           ),
                           items: workoutRepo
                               .getPlanKeys()
@@ -72,7 +69,7 @@ class ManagePlansScreen extends ConsumerWidget {
                                   value: k,
                                   child: Text(
                                     k,
-                                    style: const TextStyle(fontSize: 14),
+                                    style: context.text.body,
                                   ),
                                 ),
                               )
@@ -106,10 +103,7 @@ class ManagePlansScreen extends ConsumerWidget {
                             ),
                             child: Text(
                               'Reset phase progress',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: context.colors.red,
-                              ),
+                              style: context.text.micro.copyWith(color: context.colors.red),
                             ),
                           ),
                       ],
@@ -122,18 +116,14 @@ class ManagePlansScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Active Meals',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.colors.textMedium,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: context.text.micro.copyWith(color: context.colors.textMedium),
                         ),
                         DropdownButton<String>(
                           value: profile.activeMealPlan,
                           isExpanded: true,
                           hint: const Text(
                             'Select Plan',
-                            style: TextStyle(fontSize: 14),
+                            style: context.text.body,
                           ),
                           items: mealRepo
                               .getPlanKeys()
@@ -142,7 +132,7 @@ class ManagePlansScreen extends ConsumerWidget {
                                   value: k,
                                   child: Text(
                                     k,
-                                    style: const TextStyle(fontSize: 14),
+                                    style: context.text.body,
                                   ),
                                 ),
                               )
@@ -174,16 +164,12 @@ class ManagePlansScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'Daily Targets',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.colors.textMedium,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: context.text.micro.copyWith(color: context.colors.textMedium),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${profile.targetCalories} kcal (P:${profile.targetProteinG} C:${profile.targetCarbsG} F:${profile.targetFatG})',
-                        style: const TextStyle(fontSize: 14),
+                        style: context.text.body,
                       ),
                     ],
                   ),
@@ -386,7 +372,7 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
             ),
             title: Text(
               slot['name'] as String,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: context.text.body,
             ),
             subtitle: Text(
               isDefault ? 'Default Slot' : 'Custom Recurring Slot',
@@ -424,7 +410,7 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
                               },
                               child: Text(
                                 'Delete',
-                                style: TextStyle(color: context.colors.red),
+                                style: context.text.body.copyWith(color: context.colors.red),
                               ),
                             ),
                           ],
@@ -514,7 +500,7 @@ class _PlanEditorState extends State<_PlanEditor> {
                     items: keys.map((k) {
                       return DropdownMenuItem(
                         value: k,
-                        child: Text(k, style: const TextStyle(fontSize: 14)),
+                        child: Text(k, style: context.text.body),
                       );
                     }).toList(),
                     onChanged: (v) async {
@@ -533,7 +519,7 @@ class _PlanEditorState extends State<_PlanEditor> {
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx, true),
-                                  child: Text('Discard', style: TextStyle(color: context.colors.red)),
+                                  child: Text('Discard', style: context.text.body.copyWith(color: context.colors.red)),
                                 ),
                               ],
                             ),
@@ -577,12 +563,7 @@ class _PlanEditorState extends State<_PlanEditor> {
                 controller: _controller,
                 maxLines: null,
                 expands: true,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontFamily: 'monospace',
-                  color: context.colors.textDark,
-                  height: 1.5,
-                ),
+                style: context.text.micro.copyWith(color: context.colors.textDark),
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.all(16),
                   border: InputBorder.none,

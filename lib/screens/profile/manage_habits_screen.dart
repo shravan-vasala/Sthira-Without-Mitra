@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../models/habit.dart';
 import '../../utils/habit_icons.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ManageHabitsScreen extends ConsumerStatefulWidget {
   const ManageHabitsScreen({super.key});
@@ -23,11 +24,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
       appBar: AppBar(
         title: Text(
           'Manage Habits',
-          style: TextStyle(
-            color: context.colors.textDark,
-            fontFamily: 'Cabinet Grotesk',
-            fontWeight: FontWeight.bold,
-          ),
+          style: context.text.body.copyWith(color: context.colors.textDark),
         ),
         backgroundColor: context.colors.scaffoldBg,
         foregroundColor: context.colors.textDark,
@@ -53,7 +50,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
           ? Center(
               child: Text(
                 'No habits found. Add one!',
-                style: TextStyle(color: context.colors.textMedium),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
             )
           : ReorderableListView.builder(
@@ -82,7 +79,7 @@ class _ManageHabitsScreenState extends ConsumerState<ManageHabitsScreen> {
           icon: Icon(Icons.add, color: context.colors.onPrimary),
           label: Text(
             'Add Habit',
-            style: TextStyle(color: context.colors.onPrimary),
+            style: context.text.body.copyWith(color: context.colors.onPrimary),
           ),
         ),
       ),
@@ -114,14 +111,11 @@ class _HabitListTile extends ConsumerWidget {
         ),
         title: Text(
           habit.name,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: context.colors.textDark,
-          ),
+          style: context.text.body.copyWith(color: context.colors.textDark),
         ),
         subtitle: Text(
           _getTypeDescription(habit),
-          style: TextStyle(color: context.colors.textMedium),
+          style: context.text.body.copyWith(color: context.colors.textMedium),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -156,26 +150,18 @@ class _HabitListTile extends ConsumerWidget {
                           ),
                           title: Text(
                             'Delete Habit?',
-                            style: TextStyle(
-                              fontFamily: 'Cabinet Grotesk',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: context.colors.textDark,
-                            ),
+                            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                           ),
                           content: Text(
                             'Are you sure you want to delete this habit? History will be kept for past days, but it won\'t appear anymore.',
-                            style: TextStyle(color: context.colors.textMedium),
+                            style: context.text.body.copyWith(color: context.colors.textMedium),
                           ),
                           actions: [
                             TextButton(
                               onPressed: isDeleting ? null : () => Navigator.pop(ctx),
                               child: Text(
                                 'Cancel',
-                                style: TextStyle(
-                                  color: context.colors.textMedium,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: context.text.body.copyWith(color: context.colors.textMedium),
                               ),
                             ),
                             TextButton(
@@ -204,10 +190,7 @@ class _HabitListTile extends ConsumerWidget {
                                     )
                                   : Text(
                                       'Delete',
-                                      style: TextStyle(
-                                        color: context.colors.red,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: context.text.body.copyWith(color: context.colors.red),
                                     ),
                             ),
                           ],
@@ -416,12 +399,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Text(
         widget.habit == null ? 'Add Habit' : 'Edit Habit',
-        style: TextStyle(
-          fontFamily: 'Cabinet Grotesk',
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-          color: context.colors.textDark,
-        ),
+        style: context.text.screenTitle.copyWith(color: context.colors.textDark),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -430,15 +408,15 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
           children: [
             TextField(
               controller: _nameCtrl,
-              style: TextStyle(color: context.colors.textDark),
+              style: context.text.body.copyWith(color: context.colors.textDark),
               decoration: InputDecoration(
                 labelText: _isWaterHabit ? 'Water habit name' : 'Habit name',
                 errorText: _nameError,
                 hintText: 'e.g. Meditate 10 min',
                 filled: true,
                 fillColor: context.colors.inputFill,
-                labelStyle: TextStyle(color: context.colors.textMedium),
-                hintStyle: TextStyle(color: context.colors.textLight),
+                labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
+                hintStyle: context.text.body.copyWith(color: context.colors.textLight),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -449,24 +427,18 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               const SizedBox(height: 8),
               Text(
                 'Daily water goal',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textMedium,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
               const SizedBox(height: 8),
               Text(
                 'Tap once on Home to mark it done. Change how much you aim for below.',
-                style: TextStyle(fontSize: 13, color: context.colors.textLight),
+                style: context.text.caption.copyWith(color: context.colors.textLight),
               ),
             ],
             const SizedBox(height: 16),
             Text(
               'Icon',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -500,18 +472,12 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
             const SizedBox(height: 20),
             Text(
               'Active days',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
             const SizedBox(height: 4),
             Text(
               'Leave all days unselected to pause this habit. Select all days to run every day.',
-              style: TextStyle(
-                fontSize: 13,
-                color: context.colors.textLight,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.textLight),
             ),
             const SizedBox(height: 12),
             Row(
@@ -523,9 +489,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      if (_activeDays == null) {
-                        _activeDays = [1, 2, 3, 4, 5, 6, 7];
-                      }
+                      _activeDays ??= [1, 2, 3, 4, 5, 6, 7];
                       if (isSelected) {
                         _activeDays!.remove(day);
                       } else {
@@ -548,11 +512,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                     ),
                     child: Text(
                       labels[index],
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected ? context.colors.primary : context.colors.textMedium,
-                      ),
+                      style: context.text.body.copyWith(color: isSelected ? context.colors.primary : context.colors.textMedium),
                     ),
                   ),
                 );
@@ -563,11 +523,11 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               DropdownButtonFormField<HabitType>(
                 initialValue: _type,
                 dropdownColor: context.colors.card,
-                style: TextStyle(color: context.colors.textDark, fontSize: 14),
+                style: context.text.body.copyWith(color: context.colors.textDark),
                 iconEnabledColor: context.colors.textMedium,
                 decoration: InputDecoration(
                   labelText: 'Type',
-                  labelStyle: TextStyle(color: context.colors.textMedium),
+                  labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
                   filled: true,
                   fillColor: context.colors.inputFill,
                   border: OutlineInputBorder(
@@ -580,42 +540,42 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                     value: HabitType.checkbox,
                     child: Text(
                       'Checkbox (Tap once)',
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                     ),
                   ),
                   DropdownMenuItem(
                     value: HabitType.counter,
                     child: Text(
                       'Counter (+ / −)',
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                     ),
                   ),
                   DropdownMenuItem(
                     value: HabitType.autoSteps,
                     child: Text(
                       'Auto from Steps',
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                     ),
                   ),
                   DropdownMenuItem(
                     value: HabitType.autoSleep,
                     child: Text(
                       'Auto from Sleep',
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                     ),
                   ),
                   DropdownMenuItem(
                     value: HabitType.autoFromScreenTime,
                     child: Text(
                       'Auto from Screen Time',
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                     ),
                   ),
                   DropdownMenuItem(
                     value: HabitType.timer,
                     child: Text(
                       'Timer (Countdown)',
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                     ),
                   ),
                 ],
@@ -631,7 +591,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                   Expanded(
                     child: TextField(
                       controller: _targetCtrl,
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                       decoration: InputDecoration(
                         labelText: _isWaterHabit ? 'Amount' : 'Target',
                         errorText: _targetError,
@@ -656,7 +616,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                   Expanded(
                     child: TextField(
                       controller: _unitCtrl,
-                      style: TextStyle(color: context.colors.textDark),
+                      style: context.text.body.copyWith(color: context.colors.textDark),
                       decoration: InputDecoration(
                         labelText: _isWaterHabit ? 'Unit' : 'Unit (e.g. L)',
                         filled: true,
@@ -679,11 +639,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 const SizedBox(height: 12),
                 Text(
                   _nameCtrl.text,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.primary,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.primary),
                 ),
               ],
             ],
@@ -691,7 +647,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               const SizedBox(height: 16),
               TextField(
                 controller: _stepCtrl,
-                style: TextStyle(color: context.colors.textDark),
+                style: context.text.body.copyWith(color: context.colors.textDark),
                 decoration: InputDecoration(
                   labelText: 'Increment step (e.g. 0.25)',
                   errorText: _stepError,
@@ -715,10 +671,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(
             'Cancel',
-            style: TextStyle(
-              color: context.colors.textMedium,
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
         ),
         ElevatedButton(

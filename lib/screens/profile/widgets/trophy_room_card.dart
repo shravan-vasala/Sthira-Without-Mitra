@@ -10,6 +10,7 @@ import '../../../models/badge.dart';
 import '../../../share/share_card_exporter.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/surface_card.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class TrophyRoomCard extends ConsumerWidget {
   const TrophyRoomCard({super.key});
@@ -51,13 +52,7 @@ class TrophyRoomCard extends ConsumerWidget {
               builder: (context, val, child) {
                 return Text(
                   'TROPHY ROOM ($val/${badges.length})',
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.primary,
-                    letterSpacing: 1.5,
-                  ),
+                  style: context.text.caption.copyWith(color: context.colors.primary),
                 );
               },
             ),
@@ -126,7 +121,7 @@ class _BadgeItem extends StatelessWidget {
                     opacity: isUnlocked ? 1.0 : 0.4,
                     child: Text(
                       badge.iconEmoji,
-                      style: const TextStyle(fontSize: 42),
+                      style: context.text.metric,
                     ),
                   ),
                 )
@@ -136,22 +131,13 @@ class _BadgeItem extends StatelessWidget {
                 const SizedBox(height: 32),
                 Text(
                   badge.title,
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   badge.description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.4,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.body.copyWith(color: context.colors.textMedium),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -159,24 +145,14 @@ class _BadgeItem extends StatelessWidget {
                 if (isUnlocked) ...[
                   Text(
                     'Unlocked ${DateFormat('MMMM d, yyyy').format(badge.unlockedAt ?? DateTime.now())}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                      color: context.colors.textMedium,
-                    ),
+                    style: context.text.caption.copyWith(color: context.colors.textMedium),
                   ),
                 ] else ...[
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'HOW TO EARN:',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.5,
-                        color: context.colors.textLight,
-                      ),
+                      style: context.text.micro.copyWith(color: context.colors.textLight),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -197,20 +173,12 @@ class _BadgeItem extends StatelessWidget {
                     children: [
                       Text(
                         'Total Progress',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: context.colors.textMedium,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: context.text.caption.copyWith(color: context.colors.textMedium),
                       ),
                       Text(
                         '${badge.currentProgress} / ${badge.requiredProgress}',
                         style: AppTheme.numeric(
-                          TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: context.colors.textDark,
-                          )
+                          context.text.body.copyWith(color: context.colors.textDark)
                         ),
                       ),
                     ],
@@ -264,7 +232,7 @@ class _BadgeItem extends StatelessWidget {
       alignment: Alignment.center,
       child: Opacity(
         opacity: isUnlocked ? 1.0 : 0.4,
-        child: Text(badge.iconEmoji, style: const TextStyle(fontSize: 24)),
+        child: Text(badge.iconEmoji, style: context.text.screenTitle),
       ),
     );
 
@@ -306,30 +274,20 @@ class _BadgeItem extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                height: 1.2,
-                fontWeight: isUnlocked ? FontWeight.w700 : FontWeight.w600,
-                color: isUnlocked ? context.colors.textDark : context.colors.textMedium,
-              ),
+              style: context.text.micro.copyWith(color: isUnlocked ? context.colors.textDark : context.colors.textMedium),
             ),
             const SizedBox(height: 6),
             if (!isUnlocked)
               Text(
                 '${badge.currentProgress}/${badge.requiredProgress}',
                 style: AppTheme.numeric(
-                  TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: context.colors.textMedium.withValues(alpha: 0.5)),
+                  context.text.micro.copyWith(color: context.colors.textMedium.withValues(alpha: 0.5)),
                 ),
               )
             else
               Text(
                 DateFormat('MMM d').format(badge.unlockedAt ?? DateTime.now()),
-                style: TextStyle(
-                  fontSize: 10,
-                  color: context.colors.textMedium,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
+                style: context.text.micro.copyWith(color: context.colors.textMedium),
               ),
           ],
         ),
@@ -375,18 +333,13 @@ class _BadgeShareCard extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               badge.iconEmoji,
-              style: const TextStyle(fontSize: 64),
+              style: context.text.metric,
             ),
           ),
           const SizedBox(height: 32),
           Text(
             badge.title,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: context.colors.textDark,
-            ),
+            style: context.text.display.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -394,23 +347,14 @@ class _BadgeShareCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               badge.description,
-              style: TextStyle(
-                fontSize: 16,
-                height: 1.4,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 40),
           Text(
             'Unlocked on ${DateFormat('MMMM d, yyyy').format(badge.unlockedAt ?? DateTime.now())}',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-              color: context.colors.primary,
-            ),
+            style: context.text.body.copyWith(color: context.colors.primary),
           ),
         ],
       ),
