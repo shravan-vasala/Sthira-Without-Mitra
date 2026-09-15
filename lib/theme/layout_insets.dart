@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_spacing.dart';
+
 /// Clearance for the floating pill bottom nav in [ScaffoldWithNavBar].
 ///
 /// Body uses [extendBody], so scrollables must leave this much room at the
@@ -10,19 +12,19 @@ const double kFloatingNavClearance = 100;
 const double kShellScrollBottomPadding = kFloatingNavClearance + 16;
 
 /// Horizontal inset for main-shell screens (Home / Progress / Profile).
-const double kScreenPadding = 20;
+const double kScreenPadding = Spacing.screen;
 
-/// Default surface card corner radius (matches [CardTheme]).
-const double kCardRadius = 20;
+/// Default surface card corner radius.
+const double kCardRadius = Radii.card;
 
 /// Modal bottom sheet top corner radius (matches [BottomSheetTheme]).
-const double kSheetRadius = 24;
+const double kSheetRadius = Radii.sheet;
 
 /// Primary / elevated button corner radius.
-const double kButtonRadius = 16;
+const double kButtonRadius = Radii.control;
 
-/// Outlined button corner radius (theme default).
-const double kOutlinedButtonRadius = 12;
+/// Outlined button corner radius.
+const double kOutlinedButtonRadius = Radii.control;
 
 /// Full-width primary save CTA height.
 const double kPrimaryButtonHeight = 52;
