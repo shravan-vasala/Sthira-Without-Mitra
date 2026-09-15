@@ -51,7 +51,7 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
       final todayStr = todayKey();
       if (selectedDate == todayStr) {
         // ignore: unawaited_futures
-        ref.read(coachNoteProvider.notifier).fetchNote(force: isManualRefresh);
+        ref.read(coachNoteProvider.notifier).fetchNote(force: false);
       }
 
       // Sync Screen Time

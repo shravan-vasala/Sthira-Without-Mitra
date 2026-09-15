@@ -28,11 +28,15 @@ class AiException implements Exception {
 }
 
 AiErrorCause classifyAiError(String errorString) {
-  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project') || errorString.contains('deactivated') || errorString.contains('SERVICE_DISABLED') || errorString.contains('PERMISSION_DENIED') || errorString.contains('403') || errorString.contains('forbidden')) {
+  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project') || errorString.contains('deactivated') || errorString.contains('SERVICE_DISABLED')) {
+    return AiErrorCause.invalidKey;
+  } else if (errorString.contains('PERMISSION_DENIED') || errorString.contains('403') || errorString.contains('forbidden')) {
+    // 403 could be restricted key. It's an invalid key effectively.
     return AiErrorCause.invalidKey;
   } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
     return AiErrorCause.offline;
   } else if (errorString.contains('429') || errorString.contains('quota') || errorString.contains('RESOURCE_EXHAUSTED')) {
+    // Treat quota exhaust as rate limited, though technically it might be a daily quota.
     return AiErrorCause.rateLimited;
   } else if (errorString.contains('404') || errorString.contains('not found')) {
     return AiErrorCause.notFound;
@@ -42,6 +46,8 @@ AiErrorCause classifyAiError(String errorString) {
     return AiErrorCause.parse;
   } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout')) {
     return AiErrorCause.timeout;
+  } else if (errorString.contains('cancelled')) {
+    return AiErrorCause.cancelled;
   }
   return AiErrorCause.unknown;
 }
@@ -81,16 +87,12 @@ class AiClient {
   final AiClientCircuitBreaker _textCircuitBreaker = AiClientCircuitBreaker();
   
   static const visionModelsToTry = [
-    'gemini-3.8-flash',
     'gemini-3.7-flash',
     'gemini-3.6-flash',
-    'gemini-3.5-flash',
+    'gemini-3.8-flash',
   ];
 
   static const textModelsToTry = [
-    'gemini-3.8-flash',
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
     'gemini-3.5-flash-lite',
     'gemini-3.1-flash-lite',
   ];
@@ -134,6 +136,7 @@ class AiClient {
     bool skipCache = false,
     Map<String, dynamic>? responseSchema,
     CancellationToken? cancellationToken,
+    DateTime? overallDeadline,
   }) async {
     if (apiKey == null || apiKey.isEmpty) {
       throw AiException('API Key is required. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
@@ -177,24 +180,24 @@ class AiClient {
 
     final modelsToUse = isVision ? visionModelsToTry : textModelsToTry;
     // We expect the cancellationToken to carry its own deadline logic if needed, but we give a sensible max here
-    final overallDeadline = DateTime.now().add(Duration(seconds: isVision ? 75 : 40));
-    final perAttemptTimeout = Duration(seconds: isVision ? 40 : 20);
+    final computedDeadline = overallDeadline ?? DateTime.now().add(Duration(seconds: isVision ? 30 : 20));
+    final perAttemptTimeout = Duration(seconds: isVision ? 20 : 15);
     
     AiErrorCause? lastCause;
     String lastErrorMsg = '';
 
     for (int i = 0; i < modelsToUse.length; i++) {
-        if (DateTime.now().isAfter(overallDeadline)) break;
+        if (DateTime.now().isAfter(computedDeadline)) break;
       final modelName = modelsToUse[i];
-      int maxRetries = 2; // only used for rateLimited
+      int maxRetries = 1; // max 2 attempts total per model for transient errors
       int attempt = 0;
       
       while (attempt <= maxRetries) {
         if (cancellationToken?.isCancelled ?? false) {
           throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
         }
-        if (DateTime.now().isAfter(overallDeadline)) break;
-        final remaining = overallDeadline.difference(DateTime.now());
+        if (DateTime.now().isAfter(computedDeadline)) break;
+        final remaining = computedDeadline.difference(DateTime.now());
         final attemptTimeout = remaining < perAttemptTimeout ? remaining : perAttemptTimeout;
 
         final sw = Stopwatch()..start();
@@ -274,23 +277,12 @@ class AiClient {
             throw AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause);
           } else if (cause == AiErrorCause.notFound) {
             break; // Next model
-          } else if (cause == AiErrorCause.rateLimited) {
+          } else if (cause == AiErrorCause.rateLimited || cause == AiErrorCause.overloaded) {
             if (attempt < maxRetries) {
               final delay = attempt == 0 ? 1 : 2;
-              if (DateTime.now().add(Duration(seconds: delay)).isAfter(overallDeadline)) break;
+              if (DateTime.now().add(Duration(seconds: delay)).isAfter(computedDeadline)) break;
               if (cancellationToken?.isCancelled ?? false) break;
               await Future.delayed(Duration(seconds: delay));
-              if (cancellationToken?.isCancelled ?? false) break;
-              attempt++;
-              continue;
-            } else {
-              break; // Next model
-            }
-          } else if (cause == AiErrorCause.overloaded) {
-            if (attempt == 0) {
-              if (DateTime.now().add(const Duration(seconds: 2)).isAfter(overallDeadline)) break;
-              if (cancellationToken?.isCancelled ?? false) break;
-              await Future.delayed(const Duration(seconds: 2));
               if (cancellationToken?.isCancelled ?? false) break;
               attempt++;
               continue;
@@ -309,7 +301,7 @@ class AiClient {
       throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
     }
     
-    if (DateTime.now().isAfter(overallDeadline)) {
+    if (DateTime.now().isAfter(computedDeadline)) {
       throw AiException('The AI is taking too long right now. Please try again.', cause: AiErrorCause.timeout);
     }
     
@@ -392,9 +384,9 @@ class AiClient {
     required String prompt,
     required String systemInstruction,
     String? apiKey,
-    Duration overallTimeout = const Duration(seconds: 40),
     Duration inactivityTimeout = const Duration(seconds: 15),
     CancellationToken? cancellationToken,
+    DateTime? overallDeadline,
   }) {
     if (_textCircuitBreaker.isOpen) {
       throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
@@ -565,14 +557,22 @@ class AiClient {
 
     controller = StreamController<String>(
       onListen: () {
-        overallTimer = Timer(overallTimeout, () {
-          if (isCancelled || controller.isClosed) return;
-          cleanup();
-          if (!controller.isClosed) {
-            controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
-            controller.close();
+        if (overallDeadline != null) {
+          final remaining = overallDeadline.difference(DateTime.now());
+          if (remaining.isNegative) {
+             controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
+             controller.close();
+             return;
           }
-        });
+          overallTimer = Timer(remaining, () {
+            if (isCancelled || controller.isClosed) return;
+            cleanup();
+            if (!controller.isClosed) {
+              controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
+              controller.close();
+            }
+          });
+        }
         tryNextModel();
       },
       onCancel: () {

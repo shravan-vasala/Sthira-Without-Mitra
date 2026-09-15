@@ -33,7 +33,13 @@ Return ONLY a JSON object with the exact following structure and types. Do NOT i
     {
       "name": "Name of the dish (string)",
       "portion": "Estimated portion size (e.g. 1 bowl, 2 pieces)",
-      "estimated_grams": 0
+      "estimated_grams": 0,
+      "estimated_nutrition_if_unknown": {
+        "kcal": 0,
+        "protein_g": 0.0,
+        "carbs_g": 0.0,
+        "fat_g": 0.0
+      }
     }
   ],
   "confidence": "high|medium|low"
@@ -119,6 +125,16 @@ Portion estimation guidelines:
             'name': {'type': 'STRING', 'description': 'Name of the dish'},
             'portion': {'type': 'STRING', 'description': 'Estimated portion size (e.g. 1 bowl, 2 pieces)'},
             'estimated_grams': {'type': 'NUMBER', 'description': 'Estimated weight in grams'},
+            'estimated_nutrition_if_unknown': {
+              'type': 'OBJECT',
+              'description': 'Only provide if the dish is rare or complex. Guess the macros per 100g.',
+              'properties': {
+                'kcal': {'type': 'NUMBER'},
+                'protein_g': {'type': 'NUMBER'},
+                'carbs_g': {'type': 'NUMBER'},
+                'fat_g': {'type': 'NUMBER'}
+              }
+            }
           },
           'required': ['name', 'portion', 'estimated_grams'],
         },
@@ -141,6 +157,7 @@ Portion estimation guidelines:
     CancellationToken? cancellationToken,
   ]) async {
     _ensureApiKey();
+    final deadline = DateTime.now().add(const Duration(seconds: 30));
     final hint = userContext != null && userContext.trim().isNotEmpty
         ? '\nUser provided context/hint: "${userContext.trim()}". Use this to help identify the food, but still estimate macros realistically.'
         : '';
@@ -160,6 +177,7 @@ $_jsonShape
       skipCache: skipCache,
       responseSchema: _foodAnalysisSchema,
       cancellationToken: cancellationToken,
+      overallDeadline: deadline,
     );
     return _processAiResponse(response, cancellationToken: cancellationToken);
   }
@@ -167,6 +185,7 @@ $_jsonShape
   /// Estimate macros from a free-text description of what was eaten at home.
   @override
   Future<Map<String, dynamic>?> analyzeFoodText(String description, [CancellationToken? cancellationToken]) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 20));
     final trimmed = description.trim();
     if (trimmed.isEmpty) {
       throw Exception('Please describe what you ate.');
@@ -318,6 +337,7 @@ $_jsonShape
       apiKey: apiKey ?? '',
       responseSchema: _foodAnalysisSchema,
       cancellationToken: cancellationToken,
+      overallDeadline: deadline,
     );
 
     // Merge AI response with Local items
@@ -369,150 +389,6 @@ $_jsonShape
     return aiParsed;
   }
 
-  Future<Map<String, Map<String, dynamic>>> _fallbackBatchLookup(
-    List<String> dishNames, {
-    CancellationToken? cancellationToken,
-  }) async {
-    final isar = Isar.getInstance(Isar.instanceNames.first)!;
-    final Map<String, Map<String, dynamic>> results = {};
-    final List<String> toFetch = [];
-
-    for (final dish in dishNames) {
-      final normalized = dish.toLowerCase().trim();
-      final cached = isar.foodSearchCaches
-          .where()
-          .normalizedQueryEqualTo('fallback_$normalized')
-          .findFirstSync();
-      if (cached != null) {
-        try {
-          results[dish] =
-              jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
-        } catch (_) {
-          toFetch.add(dish);
-        }
-      } else {
-        toFetch.add(dish);
-      }
-    }
-
-    if (toFetch.isEmpty) return results;
-
-    final namesList = toFetch.map((n) => '"$n"').join(', ');
-    final prompt =
-        '''
-Provide the nutritional values per 100 grams for EACH of these foods: $namesList
-Return ONLY a JSON object containing an array called "items":
-{
-  "items": [
-    {
-      "name": "Exact Name that I queried",
-      "kcal": 0,
-      "protein_g": 0.0,
-      "carbs_g": 0.0,
-      "fat_g": 0.0
-    }
-  ]
-}
-''';
-    final Map<String, dynamic> fallbackSchema = {
-      'type': 'OBJECT',
-      'properties': {
-        'items': {
-          'type': 'ARRAY',
-          'items': {
-            'type': 'OBJECT',
-            'properties': {
-              'name': {'type': 'STRING', 'description': 'Exact Name that I queried'},
-              'kcal': {'type': 'NUMBER', 'description': 'Energy in kcal per 100g'},
-              'protein_g': {'type': 'NUMBER', 'description': 'Protein in g per 100g'},
-              'carbs_g': {'type': 'NUMBER', 'description': 'Carbohydrates in g per 100g'},
-              'fat_g': {'type': 'NUMBER', 'description': 'Fat in g per 100g'},
-            },
-            'required': ['name', 'kcal', 'protein_g', 'carbs_g', 'fat_g'],
-          },
-        },
-      },
-      'required': ['items'],
-    };
-
-    final response = await aiClient.generateJson(
-      prompt: prompt,
-      systemInstruction:
-          'You are a nutrition database. Provide exact values per 100g.',
-      apiKey: apiKey ?? '',
-      responseSchema: fallbackSchema,
-      cancellationToken: cancellationToken,
-    );
-
-    if (response != null && response['items'] is List && !(cancellationToken?.isCancelled ?? false)) {
-      await isar.writeTxn(() async {
-        for (var item in response['items']) {
-          if (item is! Map) continue;
-          final name = item['name']?.toString();
-          if (name == null) continue;
-
-          double prot = (item['protein_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0;
-          double carb = (item['carbs_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0;
-          double fat = (item['fat_g'] as num?)?.clamp(0, 100).toDouble() ?? 0.0;
-
-          // MACRO-ENERGY VALIDATION (AI Fallback Math Fix)
-          // 4 kcal per gram of protein/carbs, 9 kcal per gram of fat
-          double calculatedKcal = (prot * 4) + (carb * 4) + (fat * 9);
-          double aiKcal = (item['kcal'] as num?)?.clamp(0, 900).toDouble() ?? 0.0;
-
-          // If AI hallucinated calories that deviate wildly from physics, overwrite it
-          double finalKcal = aiKcal;
-          if (aiKcal == 0 || (aiKcal - calculatedKcal).abs() > 20) {
-            finalKcal = calculatedKcal;
-          }
-
-          final safeResponse = {
-            'kcal': finalKcal,
-            'protein_g': prot,
-            'carbs_g': carb,
-            'fat_g': fat,
-          };
-
-          results[name] = safeResponse;
-
-          // if there is a slight mismatch in case, store it under the original queried name as well
-          // Improve matching by removing punctuation before matching
-          String normalizeName(String src) => src.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '');
-          
-          final queriedName = toFetch.firstWhere(
-            (element) => normalizeName(element) == normalizeName(name),
-            orElse: () => name,
-          );
-          results[queriedName] = safeResponse;
-
-          if (safeResponse['kcal']! > 0.0) {
-            final normalized = queriedName.toLowerCase().trim();
-            await isar.foodSearchCaches.put(
-              FoodSearchCache(
-                normalizedQuery: 'fallback_$normalized',
-                cachedResponseJson: jsonEncode(safeResponse), timestamp: DateTime.now(), schemaVersion: '1',
-              ),
-            );
-          }
-        }
-      });
-    }
-
-    // Fill in default for any failures (but do NOT cache them)
-    for (final dish in toFetch) {
-      if (!results.containsKey(dish)) {
-        results[dish] = {
-          "kcal": 0.0,
-          "protein_g": 0.0,
-          "carbs_g": 0.0,
-          "fat_g": 0.0,
-        };
-      }
-    }
-
-    return results;
-  }
-
   Future<Map<String, dynamic>?> _processAiResponse(
     Map<String, dynamic>? aiResponse, {
     CancellationToken? cancellationToken,
@@ -527,21 +403,6 @@ Return ONLY a JSON object containing an array called "items":
     bool hadUnknown = false;
 
     final items = aiResponse['items'] as List<dynamic>? ?? [];
-    List<String> unknownNames = [];
-
-    for (var item in items) {
-      if (item is! Map) continue;
-      final name = item['name']?.toString() ?? 'Unknown';
-      if (nutritionLookup.match(name) == null) {
-        if (!unknownNames.contains(name)) unknownNames.add(name);
-      }
-    }
-
-    Map<String, Map<String, dynamic>> batchResults = {};
-    if (unknownNames.isNotEmpty) {
-      hadUnknown = true;
-      batchResults = await _fallbackBatchLookup(unknownNames, cancellationToken: cancellationToken);
-    }
 
     for (var item in items) {
       if (item is! Map) continue;
@@ -562,14 +423,19 @@ Return ONLY a JSON object containing an array called "items":
         servingGrams = match.servingGrams;
         provenance = 'database';
       } else {
-        final fallbackMap = batchResults[name];
-        if (fallbackMap != null) {
+        hadUnknown = true;
+        final fallbackMap = item['estimated_nutrition_if_unknown'];
+        if (fallbackMap != null && fallbackMap is Map) {
           baseNut = FoodNutrition(
             kcal: (fallbackMap['kcal'] as num?)?.toDouble() ?? 0.0,
             proteinG: (fallbackMap['protein_g'] as num?)?.toDouble() ?? 0.0,
             carbsG: (fallbackMap['carbs_g'] as num?)?.toDouble() ?? 0.0,
             fatG: (fallbackMap['fat_g'] as num?)?.toDouble() ?? 0.0,
           );
+          if (baseNut.kcal == 0) {
+            // validate math if AI hallucinates 0 kcal but gives macros
+            baseNut.kcal = (baseNut.proteinG * 4) + (baseNut.carbsG * 4) + (baseNut.fatG * 9);
+          }
           isPer100g = true;
           servingGrams = null;
           provenance = 'ai_estimate';
@@ -734,10 +600,11 @@ Do NOT use JSON.
             'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine.',
         apiKey: apiKey ?? '',
         cancellationToken: cancellationToken,
+        overallDeadline: DateTime.now().add(const Duration(seconds: 15)),
       );
 
       final buffer = StringBuffer();
-      await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
+      await for (final chunk in stream) {
         if (cancellationToken?.isCancelled ?? false) break;
         buffer.write(chunk);
         yield chunk;

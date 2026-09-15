@@ -163,7 +163,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       // Ensure we only save for the date we requested
 
       bool hasYielded = false;
-      await for (final chunk in stream.timeout(const Duration(seconds: 15))) {
+      await for (final chunk in stream) {
         if (dateStr != targetDateStr) break;
         if (chunk.startsWith('__AI__')) {
            resolvedIsAi = true;
@@ -171,6 +171,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
         }
         if (chunk.startsWith('__LOCAL__')) {
            resolvedIsAi = false;
+           accumulatedNote = "";
            continue;
         }
         accumulatedNote += chunk;

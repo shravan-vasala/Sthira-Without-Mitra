@@ -91,6 +91,7 @@ Return exactly the note text, and nothing else.
         systemInstruction: systemInstruction,
         apiKey: apiKey,
         cancellationToken: cancellationToken,
+        overallDeadline: DateTime.now().add(const Duration(seconds: 10)),
       );
 
       yield '__AI__';
