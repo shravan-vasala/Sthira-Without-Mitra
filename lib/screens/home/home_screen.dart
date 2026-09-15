@@ -207,7 +207,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         const StaggeredFadeIn(
                           key: ValueKey('coach_notes_card'),
                           index: 6,
-                          child: CoachNotesCard(topMargin: 0),
+                          child: CoachNotesCard(),
                         ),
 
                       // Explicit bottom clearance for floating nav constraints
@@ -406,12 +406,9 @@ class _HabitsCountLabel extends ConsumerWidget {
         .where((h) => isHabitCompleted(h, completions, dailyLog))
         .length;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Text(
-        '$completedCount/${habits.length}',
-        style: context.text.body.copyWith(color: context.colors.textLight),
-      ),
+    return Text(
+      '$completedCount/${habits.length}',
+      style: context.text.body.copyWith(color: context.colors.textLight),
     );
   }
 }

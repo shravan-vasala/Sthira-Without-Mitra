@@ -4,6 +4,7 @@ import '../../../models/insight.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/insights_provider.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../widgets/section_header.dart';
 
 class InsightsCard extends ConsumerWidget {
   const InsightsCard({super.key});
@@ -19,22 +20,9 @@ class InsightsCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Row(
-            children: [
-              Icon(
-                Icons.lightbulb_outline_rounded,
-                color: context.colors.indigo,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Insights',
-                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
-              ),
-            ],
-          ),
+        const SectionHeader(
+          'Insights',
+          icon: Icons.lightbulb_outline_rounded,
         ),
         SizedBox(
           height: 150,

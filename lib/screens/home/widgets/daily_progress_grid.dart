@@ -255,7 +255,8 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
       }
     }
 
-    return GestureDetector(
+    return SurfaceCard(
+      margin: EdgeInsets.zero,
       onTap: widget.isFuture
           ? null
           : () {
@@ -272,13 +273,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                 );
               }
             },
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: context.colors.card,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
+      child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
@@ -423,15 +418,10 @@ class _ProgressCard extends ConsumerWidget {
       displaySubtitle = subtitle;
     }
 
-    return GestureDetector(
+    return SurfaceCard(
+      margin: EdgeInsets.zero,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: context.colors.card,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
+      child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),

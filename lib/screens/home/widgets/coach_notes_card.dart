@@ -12,9 +12,7 @@ import '../../../widgets/app_bottom_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class CoachNotesCard extends ConsumerWidget {
-  const CoachNotesCard({super.key, this.topMargin = 12.0});
-
-  final double topMargin;
+  const CoachNotesCard({super.key});
 
   void _showHistory(BuildContext context, WidgetRef ref) {
     final repo = ref.read(coachNoteRepoProvider);
@@ -89,12 +87,6 @@ class CoachNotesCard extends ConsumerWidget {
     final hasKey = cred.status == CredentialStatus.present && (cred.key ?? '').isNotEmpty;
 
     return SurfaceCard(
-      margin: EdgeInsets.only(
-        left: kScreenPadding,
-        right: kScreenPadding,
-        top: topMargin,
-        bottom: 12,
-      ),
       onTap: () => _showHistory(context, ref),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

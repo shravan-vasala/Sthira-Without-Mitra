@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../widgets/section_header.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
@@ -90,9 +91,9 @@ class WeeklySummaryScreen extends ConsumerWidget {
 
               const SizedBox(height: 32),
 
-              Text(
+              const SectionHeader(
                 'STATS OVERVIEW',
-                style: context.text.caption.copyWith(color: context.colors.textMedium),
+                horizontalPadding: 0,
               ).animate().fade(delay: 500.ms),
               const SizedBox(height: 16),
 

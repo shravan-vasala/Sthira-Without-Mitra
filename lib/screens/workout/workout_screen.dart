@@ -3,6 +3,7 @@ import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../widgets/section_header.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/app_providers.dart';
@@ -650,33 +651,15 @@ class _SectionWidgetState extends State<_SectionWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Sticky-style section header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: context.colors.primary,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    formatSectionTitle(widget.section.title, widget.sectionIndex),
-                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${widget.section.exercises.length} exercises',
-                  style: context.text.micro.copyWith(color: context.colors.textMedium),
-                ),
-              ],
+          SectionHeader(
+            formatSectionTitle(widget.section.title, widget.sectionIndex),
+            horizontalPadding: 4,
+            countLabel: Text(
+              '${widget.section.exercises.length} exercises',
+              style: context.text.micro.copyWith(color: context.colors.textMedium),
             ),
           ),
+          const SizedBox(height: 12),
           if (widget.section.exercises.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

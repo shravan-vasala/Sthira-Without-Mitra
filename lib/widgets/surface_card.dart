@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../theme/layout_insets.dart';
+import '../theme/app_spacing.dart';
 
 enum SurfaceCardElevation { home, nested }
 
@@ -9,8 +9,9 @@ class SurfaceCard extends StatefulWidget {
   const SurfaceCard({
     super.key,
     required this.child,
-    this.margin,
-    this.padding = const EdgeInsets.all(20),
+    this.margin = const EdgeInsets.symmetric(horizontal: Spacing.screen),
+    this.padding,
+    this.dense = false,
     this.onTap,
     this.border,
     this.color,
@@ -21,6 +22,7 @@ class SurfaceCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry? margin;
   final EdgeInsetsGeometry? padding;
+  final bool dense;
   final VoidCallback? onTap;
   final BoxBorder? border;
   final Color? color;
@@ -55,7 +57,7 @@ class _SurfaceCardState extends State<SurfaceCard> {
 
   @override
   Widget build(BuildContext context) {
-    final radius = widget.borderRadius ?? kCardRadius;
+    final radius = widget.borderRadius ?? Radii.card;
     final isLight = Theme.of(context).brightness == Brightness.light;
     
     final List<BoxShadow> shadows;
@@ -80,7 +82,7 @@ class _SurfaceCardState extends State<SurfaceCard> {
 
     final card = Container(
       margin: widget.margin,
-      padding: widget.padding,
+      padding: widget.padding ?? EdgeInsets.all(widget.dense ? Spacing.cardPadTight : Spacing.cardPad),
       decoration: BoxDecoration(
         color: widget.color ?? context.colors.card,
         borderRadius: BorderRadius.circular(radius),

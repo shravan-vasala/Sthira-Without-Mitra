@@ -114,50 +114,47 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
       child: Column(
         children: [
           // Date header row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime(2024),
-                    lastDate: DateTime(2030),
-                    builder: (context, child) {
-                      return Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: Theme.of(context).colorScheme.copyWith(
-                            primary: context.colors.primary,
-                            surface: context.colors.card,
-                            onSurface: context.colors.textDark,
-                          ), dialogTheme: DialogThemeData(backgroundColor: context.colors.card),
-                        ),
-                        child: child!,
-                      );
-                    },
+          GestureDetector(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: selectedDate,
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2030),
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: Theme.of(context).colorScheme.copyWith(
+                        primary: context.colors.primary,
+                        surface: context.colors.card,
+                        onSurface: context.colors.textDark,
+                      ), dialogTheme: DialogThemeData(backgroundColor: context.colors.card),
+                    ),
+                    child: child!,
                   );
-                  if (picked != null) {
-                    ref.read(selectedDateProvider.notifier).state = picked;
-                    final pickedWeekStart = picked.subtract(
-                      Duration(days: picked.weekday - 1),
-                    );
-                    final todayWeekStart = today.subtract(
-                      Duration(days: today.weekday - 1),
-                    );
-                    final diffDays = pickedWeekStart
-                        .difference(todayWeekStart)
-                        .inDays;
-                    final weekOffset = (diffDays / 7).round();
-                    ref.read(weekOffsetProvider.notifier).state = weekOffset;
-                  }
                 },
-                child: Text(
-                  'This week',
-                  style: context.text.cardTitle.copyWith(color: context.colors.textDark),
-                ),
-              ),
-              const Spacer(),
+              );
+              if (picked != null) {
+                ref.read(selectedDateProvider.notifier).state = picked;
+                final pickedWeekStart = picked.subtract(
+                  Duration(days: picked.weekday - 1),
+                );
+                final todayWeekStart = today.subtract(
+                  Duration(days: today.weekday - 1),
+                );
+                final diffDays = pickedWeekStart
+                    .difference(todayWeekStart)
+                    .inDays;
+                final weekOffset = (diffDays / 7).round();
+                ref.read(weekOffsetProvider.notifier).state = weekOffset;
+              }
+            },
+            child: SectionHeader(
+              'This week',
+              horizontalPadding: 0,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
               const _DailyScoreBadge(),
               const SizedBox(width: 12),
               IconButton(
@@ -205,7 +202,9 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                   ),
                 ),
               ),
-            ],
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 24),
 

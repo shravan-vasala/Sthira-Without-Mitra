@@ -170,54 +170,49 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
     if (widget.remainingCalories <= 0) {
       return SurfaceCard(
         elevation: SurfaceCardElevation.nested,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Icon(
-                Icons.check_circle_rounded,
-                color: context.colors.green,
-                size: 40,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Calorie Goal Reached!',
-                style: context.text.cardTitle.copyWith(color: context.colors.textDark),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'You hit your target for today. Great job!',
-                style: context.text.body.copyWith(color: context.colors.textMedium),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.check_circle_rounded,
+              color: context.colors.green,
+              size: 40,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Calorie Goal Reached!',
+              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'You hit your target for today. Great job!',
+              style: context.text.body.copyWith(color: context.colors.textMedium),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     }
 
     return SurfaceCard(
       elevation: SurfaceCardElevation.nested,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.auto_awesome,
-                  color: context.colors.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Smart Meal Suggestion',
-                  style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.auto_awesome,
+                color: context.colors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Smart Meal Suggestion',
+                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
             if (_isLoading)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
