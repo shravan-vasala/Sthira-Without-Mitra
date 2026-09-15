@@ -6,6 +6,7 @@ import 'package:trufit_bodamma/services/progress_aggregation_service.dart';
 import 'package:trufit_bodamma/screens/progress/progress_screen.dart';
 import 'package:trufit_bodamma/screens/progress/widgets/shared_chart_card.dart';
 import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ChartDrilldownSheet extends ConsumerWidget {
   const ChartDrilldownSheet({
@@ -81,12 +82,7 @@ class ChartDrilldownSheet extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               'Daily Details: ${DateFormat('MMM d').format(bucket.startDate)} - ${DateFormat('MMM d').format(bucket.endDate)}',
-              style: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: context.colors.textDark,
-              ),
+              style: context.text.screenTitle.copyWith(color: context.colors.textDark),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),

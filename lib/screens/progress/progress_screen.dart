@@ -3,10 +3,8 @@ import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/layout_insets.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../providers/app_providers.dart';
-import '../../models/daily_log.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_profile.dart';
 import 'widgets/shared_chart_card.dart';
@@ -15,10 +13,9 @@ import '../home/steps_entry_dialog.dart';
 import '../home/sleep_entry_dialog.dart';
 import '../home/body_fat_entry_dialog.dart';
 import 'widgets/chart_drilldown_sheet.dart';
-import '../../models/daily_meal_log.dart';
-import 'widgets/insights_card.dart';
 import '../../providers/progress_chart_provider.dart';
 import '../../services/progress_aggregation_service.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 enum MetricType {
   weight,
@@ -91,15 +88,17 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     if (details.primaryVelocity == null) return;
     if (details.primaryVelocity! > 300) {
       Haptics.tap();
-      if (_selectedRange == TimeRange.twelveMonths) _setRange(TimeRange.sixMonths);
-      else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.threeMonths);
+      if (_selectedRange == TimeRange.twelveMonths) {
+        _setRange(TimeRange.sixMonths);
+      } else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.threeMonths);
       else if (_selectedRange == TimeRange.threeMonths) _setRange(TimeRange.oneMonth);
       else if (_selectedRange == TimeRange.oneMonth) _setRange(TimeRange.weekly);
       else _setRange(TimeRange.twelveMonths);
     } else if (details.primaryVelocity! < -300) {
       Haptics.tap();
-      if (_selectedRange == TimeRange.weekly) _setRange(TimeRange.oneMonth);
-      else if (_selectedRange == TimeRange.oneMonth) _setRange(TimeRange.threeMonths);
+      if (_selectedRange == TimeRange.weekly) {
+        _setRange(TimeRange.oneMonth);
+      } else if (_selectedRange == TimeRange.oneMonth) _setRange(TimeRange.threeMonths);
       else if (_selectedRange == TimeRange.threeMonths) _setRange(TimeRange.sixMonths);
       else if (_selectedRange == TimeRange.sixMonths) _setRange(TimeRange.twelveMonths);
       else _setRange(TimeRange.weekly);
@@ -132,8 +131,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       targetMonth += 12;
       targetYear--;
     }
-    int lastDay = DateTime(targetYear, targetMonth + 1, 0).day;
-    int targetDay = date.day > lastDay ? lastDay : date.day;
+    final int lastDay = DateTime(targetYear, targetMonth + 1, 0).day;
+    final int targetDay = date.day > lastDay ? lastDay : date.day;
     return DateTime(targetYear, targetMonth, targetDay);
   }
 
@@ -183,25 +182,25 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   MetricSpec _getMetricSpec(MetricType metric, bool useKg) {
     switch (metric) {
       case MetricType.weight: return MetricSpec(title: 'Weight', unit: useKg ? 'kg' : 'lb', isCount: false, plotType: ChartPlotType.line, showKgLbToggle: true);
-      case MetricType.steps: return MetricSpec(title: 'Steps Taken', unit: 'steps', isCount: true, plotType: ChartPlotType.bar);
-      case MetricType.sleep: return MetricSpec(title: 'Sleep Quality', unit: 'h', isCount: false, plotType: ChartPlotType.bar);
-      case MetricType.bmi: return MetricSpec(title: 'BMI Index', unit: '', isCount: false, plotType: ChartPlotType.line);
-      case MetricType.bodyFat: return MetricSpec(title: 'Body Fat', unit: '%', isCount: false, plotType: ChartPlotType.line);
-      case MetricType.calories: return MetricSpec(title: 'Calories', unit: 'kcal', isCount: true, plotType: ChartPlotType.bar);
-      case MetricType.protein: return MetricSpec(title: 'Protein', unit: 'g', isCount: true, plotType: ChartPlotType.bar);
-      case MetricType.screenTime: return MetricSpec(title: 'Screen Time', unit: 'h', isCount: false, plotType: ChartPlotType.bar);
+      case MetricType.steps: return const MetricSpec(title: 'Steps Taken', unit: 'steps', isCount: true, plotType: ChartPlotType.bar);
+      case MetricType.sleep: return const MetricSpec(title: 'Sleep Quality', unit: 'h', isCount: false, plotType: ChartPlotType.bar);
+      case MetricType.bmi: return const MetricSpec(title: 'BMI Index', unit: '', isCount: false, plotType: ChartPlotType.line);
+      case MetricType.bodyFat: return const MetricSpec(title: 'Body Fat', unit: '%', isCount: false, plotType: ChartPlotType.line);
+      case MetricType.calories: return const MetricSpec(title: 'Calories', unit: 'kcal', isCount: true, plotType: ChartPlotType.bar);
+      case MetricType.protein: return const MetricSpec(title: 'Protein', unit: 'g', isCount: true, plotType: ChartPlotType.bar);
+      case MetricType.screenTime: return const MetricSpec(title: 'Screen Time', unit: 'h', isCount: false, plotType: ChartPlotType.bar);
     }
   }
 
   String _formatOverviewValue(double value, MetricType metric, bool useKg) {
     switch (metric) {
-      case MetricType.weight: return '${value.toStringAsFixed(1)}';
+      case MetricType.weight: return value.toStringAsFixed(1);
       case MetricType.steps: return NumberFormat('#,###').format(value.toInt());
-      case MetricType.sleep: return '${value.toStringAsFixed(1)}';
-      case MetricType.screenTime: return '${value.toStringAsFixed(1)}';
-      case MetricType.bodyFat: return '${value.toStringAsFixed(1)}';
+      case MetricType.sleep: return value.toStringAsFixed(1);
+      case MetricType.screenTime: return value.toStringAsFixed(1);
+      case MetricType.bodyFat: return value.toStringAsFixed(1);
       case MetricType.calories: return '${value.toInt()}';
-      case MetricType.protein: return '${value.toStringAsFixed(0)}';
+      case MetricType.protein: return value.toStringAsFixed(0);
       case MetricType.bmi: return value.toStringAsFixed(1);
     }
   }
@@ -265,7 +264,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         padding: const EdgeInsets.symmetric(vertical: 32),
         child: Text(
           'No recorded data for this period.',
-          style: TextStyle(fontSize: 14, color: context.colors.textMedium),
+          style: context.text.body.copyWith(color: context.colors.textMedium),
           textAlign: TextAlign.center,
         ),
       );
@@ -347,9 +346,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           child: Icon(icon, color: context.colors.primary, size: 20),
         ),
         const SizedBox(height: 12),
-        Text(value, style: TextStyle(fontFamily: 'Cabinet Grotesk', fontSize: 18, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+        Text(value, style: context.text.cardTitle.copyWith(color: context.colors.textDark)),
         const SizedBox(height: 2),
-        Text(label, style: TextStyle(fontSize: 12, color: context.colors.textLight)),
+        Text(label, style: context.text.micro.copyWith(color: context.colors.textLight)),
       ],
     );
   }
@@ -377,13 +376,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(value, style: TextStyle(fontFamily: 'Cabinet Grotesk', fontSize: 24, fontWeight: FontWeight.bold, color: context.colors.textDark)),
+              Text(value, style: context.text.screenTitle.copyWith(color: context.colors.textDark)),
               const SizedBox(width: 4),
-              Text(unit, style: TextStyle(fontSize: 14, color: context.colors.textLight)),
+              Text(unit, style: context.text.body.copyWith(color: context.colors.textLight)),
             ],
           ),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 12, color: context.colors.textLight, fontWeight: FontWeight.w500)),
+          Text(label, style: context.text.caption.copyWith(color: context.colors.textLight)),
         ],
       ),
     );
@@ -443,25 +442,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                     final displayValue = data.isNotEmpty ? _formatOverviewValue(value, _selectedMetric, useKg) : '—';
                     return Text(
                       displayValue,
-                      style: TextStyle(
-                        fontFamily: 'Cabinet Grotesk',
-                        fontSize: 48,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.textDark,
-                        letterSpacing: -1.5,
-                      ),
+                      style: context.text.metric.copyWith(color: context.colors.textDark),
                     );
                   }
                 ),
                 const SizedBox(width: 6),
                 Text(
                   unitText,
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.screenTitle.copyWith(color: context.colors.textMedium),
                 ),
               ],
             ),
@@ -472,11 +460,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             child: Text(
               subtitleText,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: context.colors.textMedium,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
           ),
           const SizedBox(height: 24),
@@ -557,7 +541,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 _openDrilldownSheet(_selectedBucket!);
               },
               icon: const Icon(Icons.calendar_view_day_rounded, size: 20),
-              label: const Text('View Daily Details', style: TextStyle(fontFamily: 'Cabinet Grotesk', fontWeight: FontWeight.bold)),
+              label: const Text('View Daily Details', style: context.text.body),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.colors.primary,
                 foregroundColor: context.colors.onPrimary,
@@ -604,13 +588,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
             Text(
               _metricTitle(_selectedMetric),
-              style: TextStyle(
-                fontFamily: 'Cabinet Grotesk',
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: context.colors.textDark,
-                letterSpacing: -0.5,
-              ),
+              style: context.text.screenTitle.copyWith(color: context.colors.textDark),
             ),
             IconButton(
               icon: Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
@@ -701,11 +679,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-            color: isSelected ? context.colors.onPrimary : context.colors.textMedium,
-          ),
+          style: context.text.caption.copyWith(color: isSelected ? context.colors.onPrimary : context.colors.textMedium),
         ),
       ),
     );

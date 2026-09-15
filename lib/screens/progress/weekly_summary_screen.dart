@@ -11,6 +11,7 @@ import '../../providers/weekly_summary_provider.dart';
 import '../../providers/app_providers.dart';
 import '../../share/share_card_exporter.dart';
 import '../../share/weekly_share_layout.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class WeeklySummaryScreen extends ConsumerWidget {
   const WeeklySummaryScreen({super.key});
@@ -32,12 +33,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'Weekly Progress',
-          style: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 24,
-            color: context.colors.textDark,
-            fontWeight: FontWeight.w800,
-          ),
+          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -53,12 +49,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
             children: [
               Text(
                 titleText,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.textMedium,
-                  letterSpacing: 1.2,
-                ),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
                 textAlign: TextAlign.center,
               ).animate().fade().slideY(begin: -0.2),
 
@@ -101,13 +92,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
 
               Text(
                 'STATS OVERVIEW',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  color: context.colors.textMedium,
-                ),
+                style: context.text.caption.copyWith(color: context.colors.textMedium),
               ).animate().fade(delay: 500.ms),
               const SizedBox(height: 16),
 
@@ -289,23 +274,13 @@ class _ScoreHeroCard extends StatelessWidget {
               ),
               child: Text(
                 'PERFECT WEEK ✨',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.onPrimary,
-                  letterSpacing: 1.5,
-                ),
+                style: context.text.micro.copyWith(color: context.colors.onPrimary),
               ),
             )
           else
             Text(
               'Week Score',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: context.colors.textMedium,
-                letterSpacing: 1.2,
-              ),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
 
           const SizedBox(height: 12),
@@ -314,9 +289,9 @@ class _ScoreHeroCard extends StatelessWidget {
             builder: (context) {
               final intScore = score;
               Color scoreColor = context.colors.green;
-              if (intScore < 50)
+              if (intScore < 50) {
                 scoreColor = context.colors.red;
-              else if (intScore < 80)
+              } else if (intScore < 80)
                 scoreColor = context.colors.orange;
 
               if (isPerfectWeek) scoreColor = context.colors.green; // override
@@ -326,22 +301,13 @@ class _ScoreHeroCard extends StatelessWidget {
                   Text(
                     '$intScore',
                     style: AppTheme.numeric(
-                      TextStyle(
-                        fontSize: 72,
-                        fontWeight: FontWeight.w900,
-                        color: scoreColor,
-                        height: 1.0,
-                      ),
+                      context.text.metric.copyWith(color: scoreColor),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     message,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.textDark,
-                    ),
+                    style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                   ),
                 ],
               );
@@ -397,11 +363,7 @@ class _DeltaChip extends StatelessWidget {
           Text(
             '${diff.abs()} $label',
             style: AppTheme.numeric(
-              TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
+              context.text.caption.copyWith(color: color),
             ),
           ),
         ],
@@ -454,11 +416,7 @@ class _InsightsStrip extends StatelessWidget {
           Expanded(
             child: Text(
               insights.first,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: context.colors.primary,
-              ),
+              style: context.text.caption.copyWith(color: context.colors.primary),
             ),
           ),
         ],
@@ -498,13 +456,7 @@ class _DailyScoresChartCard extends ConsumerWidget {
               const SizedBox(width: 8),
               Text(
                 'DAILY SCORES',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  color: context.colors.textMedium,
-                ),
+                style: context.text.caption.copyWith(color: context.colors.textMedium),
               ),
             ],
           ),
@@ -547,11 +499,7 @@ class _DailyScoresChartCard extends ConsumerWidget {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             days[i],
-                            style: TextStyle(
-                              color: context.colors.textMedium,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: context.text.micro.copyWith(color: context.colors.textMedium),
                           ),
                         );
                       },
@@ -574,9 +522,9 @@ class _DailyScoresChartCard extends ConsumerWidget {
                   Color barColor = context.colors.border; // Future
                   if (score != null) {
                     barColor = context.colors.green;
-                    if (score < 50)
+                    if (score < 50) {
                       barColor = context.colors.red;
-                    else if (score < 80)
+                    } else if (score < 80)
                       barColor = context.colors.orange;
                   }
 
@@ -637,13 +585,7 @@ class _HabitChartCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'HABIT COMPLETION',
-                style: TextStyle(
-                  fontFamily: 'Cabinet Grotesk',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  color: context.colors.textMedium,
-                ),
+                style: context.text.caption.copyWith(color: context.colors.textMedium),
               ),
             ],
           ),
@@ -668,11 +610,7 @@ class _HabitChartCard extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             days[i],
-                            style: TextStyle(
-                              color: context.colors.textMedium,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: context.text.micro.copyWith(color: context.colors.textMedium),
                           ),
                         );
                       },
@@ -794,11 +732,7 @@ class _StatCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.caption.copyWith(color: context.colors.textMedium),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -816,12 +750,7 @@ class _StatCard extends StatelessWidget {
                     return Text(
                       display,
                       style: AppTheme.numeric(
-                        TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: context.colors.textDark,
-                          height: 1.0,
-                        ),
+                        context.text.screenTitle.copyWith(color: context.colors.textDark),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -832,12 +761,7 @@ class _StatCard extends StatelessWidget {
                 Text(
                   primaryValue ?? '',
                   style: AppTheme.numeric(
-                    TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: context.colors.textDark,
-                      height: 1.0,
-                    ),
+                    context.text.screenTitle.copyWith(color: context.colors.textDark),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -849,11 +773,7 @@ class _StatCard extends StatelessWidget {
                   child: Text(
                     trendValue!,
                     style: AppTheme.numeric(
-                      TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: trendColor ?? context.colors.textMedium,
-                      ),
+                      context.text.micro.copyWith(color: trendColor ?? context.colors.textMedium),
                     ),
                   ),
                 ),
@@ -863,7 +783,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: TextStyle(fontSize: 11, color: context.colors.textLight),
+            style: context.text.micro.copyWith(color: context.colors.textLight),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -895,8 +815,9 @@ class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
     
     try {
       Color baseColor = context.colors.green;
-      if (summary.weekScore < 50) baseColor = context.colors.red;
-      else if (summary.weekScore < 80) baseColor = context.colors.orange;
+      if (summary.weekScore < 50) {
+        baseColor = context.colors.red;
+      } else if (summary.weekScore < 80) baseColor = context.colors.orange;
       
       final layout = WeeklyShareLayout(
         format: ShareFormat.post,
@@ -969,10 +890,7 @@ class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
           },
           child: Text(
             'Share as text',
-            style: TextStyle(
-              color: context.colors.textMedium,
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
         ),
       ],

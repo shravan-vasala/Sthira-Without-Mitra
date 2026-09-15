@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../services/progress_aggregation_service.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 enum ChartTimeFormat { weekly, monthly, oneMonth, threeMonths, sixMonths, twelveMonths, allTime }
 
@@ -84,12 +85,7 @@ class SharedChartCard extends StatelessWidget {
       children: [
         Text(
           metric.title,
-          style: TextStyle(
-            fontFamily: 'Cabinet Grotesk',
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: context.colors.textDark,
-          ),
+          style: context.text.cardTitle.copyWith(color: context.colors.textDark),
         ),
         const Spacer(),
         if (metric.showKgLbToggle)
@@ -103,11 +99,7 @@ class SharedChartCard extends StatelessWidget {
               ),
               child: Text(
                 useKg ? 'KG' : 'LB',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.primary,
-                ),
+                style: context.text.micro.copyWith(color: context.colors.primary),
               ),
             ),
           ),
@@ -121,7 +113,7 @@ class SharedChartCard extends StatelessWidget {
         ? Center(
             child: Text(
               emptyMessage,
-              style: TextStyle(fontSize: 14, color: context.colors.textLight),
+              style: context.text.body.copyWith(color: context.colors.textLight),
               textAlign: TextAlign.center,
             ),
           )
@@ -178,23 +170,13 @@ class SharedChartCard extends StatelessWidget {
                           children: [
                             Text(
                               statLabels[index],
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: context.colors.textLight,
-                                letterSpacing: 1,
-                              ),
+                              style: context.text.micro.copyWith(color: context.colors.textLight),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               statValues[index],
-                              style: TextStyle(
-                                fontFamily: 'Cabinet Grotesk',
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: context.colors.textDark,
-                              ),
+                              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -259,11 +241,7 @@ class SharedChartCard extends StatelessWidget {
             show: true,
             alignment: Alignment.topRight,
             padding: const EdgeInsets.only(right: 4, bottom: 2),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: context.colors.orange,
-            ),
+            style: context.text.micro.copyWith(color: context.colors.orange),
             labelResolver: (_) {
               final t = targetValue!;
               if (_isCount && t >= 1000) {
@@ -292,11 +270,7 @@ class SharedChartCard extends StatelessWidget {
             show: true,
             alignment: Alignment.topLeft,
             padding: const EdgeInsets.only(left: 4, bottom: 2),
-            style: TextStyle(
-              fontSize: 10,
-              color: context.colors.primary,
-              fontWeight: FontWeight.bold,
-            ),
+            style: context.text.micro.copyWith(color: context.colors.primary),
             labelResolver: (_) => 'Max ${maxyData.toStringAsFixed(1)}',
           ),
         ),
@@ -312,11 +286,7 @@ class SharedChartCard extends StatelessWidget {
               show: true,
               alignment: Alignment.bottomRight,
               padding: const EdgeInsets.only(right: 4, top: 2),
-              style: TextStyle(
-                fontSize: 10,
-                color: context.colors.red,
-                fontWeight: FontWeight.bold,
-              ),
+              style: context.text.micro.copyWith(color: context.colors.red),
               labelResolver: (_) => 'Min ${minyData.toStringAsFixed(1)}',
             ),
           ),
@@ -347,8 +317,9 @@ class SharedChartCard extends StatelessWidget {
       if (date.day == 1) label = '${DateFormat('MMM').format(date)}\n$label';
     } else if (timeFormat == ChartTimeFormat.threeMonths || timeFormat == ChartTimeFormat.sixMonths) {
       bool show = false;
-      if (index == 0) show = true;
-      else if (data[index].date.month != data[index - 1].date.month) show = true;
+      if (index == 0) {
+        show = true;
+      } else if (data[index].date.month != data[index - 1].date.month) show = true;
       if (!show) return const SizedBox.shrink();
       label = DateFormat('MMM').format(date);
       if (date.month == 1) label = DateFormat('MMM\nyy').format(date);
@@ -361,7 +332,7 @@ class SharedChartCard extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Text(
         label,
-        style: TextStyle(fontSize: 10, color: context.colors.textLight),
+        style: context.text.micro.copyWith(color: context.colors.textLight),
         textAlign: TextAlign.center,
       ),
     );
@@ -384,7 +355,7 @@ class SharedChartCard extends StatelessWidget {
 
     return Text(
       label,
-      style: TextStyle(fontSize: 10, color: context.colors.textLight),
+      style: context.text.micro.copyWith(color: context.colors.textLight),
     );
   }
 
@@ -536,11 +507,7 @@ class SharedChartCard extends StatelessWidget {
               final pt = data[group.x];
               return BarTooltipItem(
                 _tooltipText(pt),
-                TextStyle(
-                  color: context.colors.card,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
+                context.text.micro.copyWith(color: context.colors.card),
               );
             },
           ),
@@ -715,11 +682,7 @@ class SharedChartCard extends StatelessWidget {
                 final pt = isTrend ? trendData![spot.x.toInt()] : data[spot.x.toInt()];
                 return LineTooltipItem(
                   '$prefix${_tooltipText(pt)}',
-                  TextStyle(
-                    color: context.colors.card,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
+                  context.text.micro.copyWith(color: context.colors.card),
                 );
               }).toList();
             },

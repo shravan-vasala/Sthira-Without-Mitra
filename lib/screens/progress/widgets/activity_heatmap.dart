@@ -5,6 +5,7 @@ import '../../../providers/app_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ActivityHeatmap extends ConsumerStatefulWidget {
   const ActivityHeatmap({super.key});
@@ -134,11 +135,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                       Text(
                         year.toString(),
                         style: AppTheme.numeric(
-                          TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: context.colors.textDark,
-                          ),
+                          context.text.cardTitle.copyWith(color: context.colors.textDark),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -188,7 +185,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     return Center(
                       child: Text(
                         'No activity yet for this year.',
-                        style: TextStyle(color: context.colors.textMedium),
+                        style: context.text.body.copyWith(color: context.colors.textMedium),
                       ),
                     );
                   }
@@ -235,7 +232,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Less', style: TextStyle(fontSize: 10, color: context.colors.textLight)),
+                  Text('Less', style: context.text.micro.copyWith(color: context.colors.textLight)),
                   const SizedBox(width: 4),
                   _buildLegendSquare(context, 0),
                   _buildLegendSquare(context, 20),
@@ -243,7 +240,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                   _buildLegendSquare(context, 70),
                   _buildLegendSquare(context, 100),
                   const SizedBox(width: 4),
-                  Text('More', style: TextStyle(fontSize: 10, color: context.colors.textLight)),
+                  Text('More', style: context.text.micro.copyWith(color: context.colors.textLight)),
                 ],
               ),
             ),
@@ -264,12 +261,12 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
           children: [
             Icon(Icons.error_outline_rounded, color: context.colors.red.withValues(alpha: 0.8), size: 32),
             const SizedBox(height: 12),
-            Text('Failed to load activity.', style: TextStyle(color: context.colors.textMedium)),
+            Text('Failed to load activity.', style: context.text.body.copyWith(color: context.colors.textMedium)),
             const SizedBox(height: 8),
             TextButton.icon(
               onPressed: () => ref.invalidate(yearlyActivityHeatmapProvider),
               icon: Icon(Icons.refresh_rounded, color: context.colors.primary),
-              label: Text('Retry', style: TextStyle(color: context.colors.primary)),
+              label: Text('Retry', style: context.text.body.copyWith(color: context.colors.primary)),
             )
           ],
         ),
@@ -312,12 +309,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
               Expanded(
                 child: Text(
                   monthName,
-                  style: TextStyle(
-                    fontFamily: 'Cabinet Grotesk',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.textDark,
-                  ),
+                  style: context.text.screenTitle.copyWith(color: context.colors.textDark),
                 ),
               ),
             ],
@@ -331,11 +323,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                 child: Text(
                   day,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: context.colors.textMedium,
-                  ),
+                  style: context.text.micro.copyWith(color: context.colors.textMedium),
                 ),
               );
             }).toList(),
@@ -432,22 +420,12 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
         children: [
           Text(
             value,
-            style: TextStyle(
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: context.colors.primary,
-              height: 1.0,
-            ),
+            style: context.text.display.copyWith(color: context.colors.primary),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: context.colors.textMedium,
-            ),
+            style: context.text.micro.copyWith(color: context.colors.textMedium),
           ),
         ],
       ),

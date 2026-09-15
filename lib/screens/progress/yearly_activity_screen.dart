@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import 'widgets/activity_heatmap.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class YearlyActivityScreen extends ConsumerWidget {
   const YearlyActivityScreen({super.key});
@@ -50,12 +51,7 @@ class YearlyActivityScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           'Consistency is key. Track habits, workouts, and nutrition to brighten your heatmap. Unrecorded days are lightly shaded, while missed goals are outlined.',
-                          style: TextStyle(
-                            color: context.colors.textDark,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            height: 1.5,
-                          ),
+                          style: context.text.body.copyWith(color: context.colors.textDark),
                         ),
                       ),
                     ],
