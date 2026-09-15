@@ -8,6 +8,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../theme/app_spacing.dart';
+import '../../widgets/settings_row.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class BackupRestoreScreen extends ConsumerStatefulWidget {
@@ -477,17 +479,20 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         children: [
           IgnorePointer(
             ignoring: _isLoading,
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.screen,
+                vertical: Spacing.section,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(Spacing.cardPad),
                     decoration: BoxDecoration(
                       color: context.colors.card,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(Radii.card),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,59 +548,92 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  Row(
-                    children: [
-                      Text(
-                        'ENCRYPT BACKUP',
-                        style: context.text.caption.copyWith(
-                          color: context.colors.primary,
-                        ),
-                      ),
-                      const Spacer(),
-                      Switch(
-                        value: _encryptBackup,
-                        onChanged: (val) {
-                          setState(() {
-                            _encryptBackup = val;
-                            if (!val) _passwordController.clear();
-                          });
-                        },
-                      ),
-                    ],
+                  const SizedBox(height: Spacing.section),
+                  SettingsRow(
+                    title: 'Encrypt Backup',
+                    subtitle: 'Protect your backup with a password',
+                    icon: Icons.lock_outline_rounded,
+                    showChevron: false,
+                    trailing: Switch(
+                      value: _encryptBackup,
+                      activeTrackColor: context.colors.primary,
+                      onChanged: (val) {
+                        setState(() {
+                          _encryptBackup = val;
+                          if (!val) _passwordController.clear();
+                        });
+                      },
+                    ),
                   ),
                   if (_encryptBackup) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: Spacing.textPair),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
-                      decoration: const InputDecoration(
+                      style: context.text.body.copyWith(
+                        color: context.colors.textDark,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Backup Password',
-                        border: OutlineInputBorder(),
+                        labelStyle: context.text.body.copyWith(
+                          color: context.colors.textMedium,
+                        ),
+                        filled: true,
+                        fillColor: context.colors.inputFill,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Radii.chip),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
                   ],
-                  const SizedBox(height: 16),
-                  _ActionCard(
+                  const SizedBox(height: Spacing.stack),
+                  SettingsRow(
                     title: 'Create Backup',
                     subtitle: 'Export a copy of all your data',
                     icon: Icons.upload_file_rounded,
                     onTap: _handleCreateBackup,
                   ),
-                  const SizedBox(height: 16),
-                  _ActionCard(
+                  const SizedBox(height: Spacing.stack),
+                  SettingsRow(
                     title: 'Restore from Backup',
                     subtitle: 'Overwrite current data with a backup',
-                    icon: Icons.restore_page_rounded,
-                    iconColor: context.colors.pinkIcon,
+                    leadingContent: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: context.colors.pinkIcon.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(Radii.chip),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.restore_page_rounded,
+                          color: context.colors.pinkIcon,
+                          size: IconSize.row,
+                        ),
+                      ),
+                    ),
                     onTap: _handleRestoreBackup,
                   ),
-                  const SizedBox(height: 16),
-                  _ActionCard(
+                  const SizedBox(height: Spacing.stack),
+                  SettingsRow(
                     title: 'Verify Backup',
                     subtitle: 'Test a backup file without restoring',
-                    icon: Icons.fact_check_rounded,
-                    iconColor: context.colors.mintIcon,
+                    leadingContent: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: context.colors.mintIcon.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(Radii.chip),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.fact_check_rounded,
+                          color: context.colors.mintIcon,
+                          size: IconSize.row,
+                        ),
+                      ),
+                    ),
                     onTap: _handleVerifyBackup,
                   ),
                 ],
@@ -613,76 +651,6 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    this.iconColor,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color? iconColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.colors.card,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: (iconColor ?? context.colors.primary).withValues(
-                  alpha: 0.1,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor ?? context.colors.primary),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: context.text.bodyStrong.copyWith(
-                      color: context.colors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: context.text.caption.copyWith(
-                      color: context.colors.textMedium,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: context.colors.textLight,
-              size: 16,
-            ),
-          ],
-        ),
       ),
     );
   }
