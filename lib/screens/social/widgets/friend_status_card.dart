@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,7 +5,7 @@ import '../../../models/friend.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
-import '../../../models/social_profile.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 
 class FriendStatusCard extends ConsumerWidget {
@@ -28,15 +27,11 @@ class FriendStatusCard extends ConsumerWidget {
               leading: _buildAvatar(null, friend.name, friend.uid, context),
               title: Text(
                 friend.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: context.colors.textDark,
-                ),
+                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
               ),
               subtitle: Text(
                 'No recent activity.',
-                style: TextStyle(color: context.colors.textMedium),
+                style: context.text.body.copyWith(color: context.colors.textMedium),
               ),
               trailing: _buildOverflowMenu(context, ref, friend),
             ),
@@ -72,11 +67,7 @@ class FriendStatusCard extends ConsumerWidget {
                           children: [
                             Text(
                               profile.name,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: context.colors.textDark,
-                              ),
+                              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
                             ),
                             if (profile.todayScore != null && !isDailyStale) ...[
                               const SizedBox(width: 8),
@@ -88,10 +79,7 @@ class FriendStatusCard extends ConsumerWidget {
                           isDailyStale
                               ? 'Last active ${daysStale > 0 ? daysStale : 1}d ago'
                               : 'Updated ${_timeAgo(profile.lastUpdatedAt)}',
-                          style: TextStyle(
-                            color: context.colors.textMedium,
-                            fontSize: 13,
-                          ),
+                          style: context.text.caption.copyWith(color: context.colors.textMedium),
                         ),
                       ],
                     ),
@@ -146,7 +134,7 @@ class FriendStatusCard extends ConsumerWidget {
           contentPadding: EdgeInsets.zero,
           title: Text(
             'Error loading profile',
-            style: TextStyle(color: context.colors.red),
+            style: context.text.body.copyWith(color: context.colors.red),
           ),
           trailing: IconButton(
             icon: Icon(Icons.refresh, color: context.colors.textMedium),
@@ -176,7 +164,7 @@ class FriendStatusCard extends ConsumerWidget {
             children: [
               Icon(Icons.delete_outline, color: context.colors.red, size: 20),
               const SizedBox(width: 12),
-              Text('Remove Friend', style: TextStyle(color: context.colors.red)),
+              Text('Remove Friend', style: context.text.body.copyWith(color: context.colors.red)),
             ],
           ),
         ),
@@ -219,11 +207,7 @@ class FriendStatusCard extends ConsumerWidget {
       backgroundColor: color,
       child: Text(
         initials,
-        style: TextStyle(
-          color: context.colors.textDark, // So it pops against the pastel
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
+        style: context.text.screenTitle.copyWith(color: context.colors.textDark),
       ),
     );
   }
@@ -235,21 +219,18 @@ class FriendStatusCard extends ConsumerWidget {
         backgroundColor: context.colors.card,
         title: Text(
           'Remove Friend',
-          style: TextStyle(
-            color: context.colors.textDark,
-            fontWeight: FontWeight.bold,
-          ),
+          style: context.text.body.copyWith(color: context.colors.textDark),
         ),
         content: Text(
           'Are you sure you want to remove ${friend.name}? They will lose access to your activity. They may still see your past stats locally until they remove you.',
-          style: TextStyle(color: context.colors.textMedium),
+          style: context.text.body.copyWith(color: context.colors.textMedium),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(color: context.colors.textMedium),
+              style: context.text.body.copyWith(color: context.colors.textMedium),
             ),
           ),
           TextButton(
@@ -268,14 +249,14 @@ class FriendStatusCard extends ConsumerWidget {
                   Navigator.of(ctx).pop();
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to remove friend. Please try again.'),
+                      content: const Text('Failed to remove friend. Please try again.'),
                       backgroundColor: context.colors.red,
                     ),
                   );
                 }
               }
             },
-            child: Text('Remove', style: TextStyle(color: context.colors.red)),
+            child: Text('Remove', style: context.text.body.copyWith(color: context.colors.red)),
           ),
         ],
       ),
@@ -328,11 +309,7 @@ class _StatBlock extends StatelessWidget {
            Text(
              '-',
              style: AppTheme.numeric(
-               TextStyle(
-                 fontWeight: FontWeight.w800,
-                 fontSize: 18,
-                 color: textColor,
-               ),
+               context.text.cardTitle.copyWith(color: textColor),
              ),
            )
         else
@@ -345,22 +322,14 @@ class _StatBlock extends StatelessWidget {
                return Text(
                  displayString,
                  style: AppTheme.numeric(
-                   TextStyle(
-                     fontWeight: FontWeight.w800,
-                     fontSize: 18,
-                     color: textColor,
-                   ),
+                   context.text.cardTitle.copyWith(color: textColor),
                  ),
                );
              },
            ),
         Text(
           label,
-          style: TextStyle(
-            color: context.colors.textMedium,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
+          style: context.text.caption.copyWith(color: context.colors.textMedium),
         ),
         if (progress != null) ...[
           const SizedBox(height: 8),
@@ -405,11 +374,7 @@ class _ScoreBadge extends StatelessWidget {
         child: Text(
           score.toString(),
           style: AppTheme.numeric(
-            TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            context.text.micro.copyWith(color: color),
           ),
         ),
       ),

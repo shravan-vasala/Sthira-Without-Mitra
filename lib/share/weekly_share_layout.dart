@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import 'share_card_exporter.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class WeeklyShareLayout extends StatelessWidget {
   final ShareFormat format;
@@ -95,23 +95,11 @@ class WeeklyShareLayout extends StatelessWidget {
                   children: [
                     Text(
                       'STHIRA',
-                      style: TextStyle(
-                        color: AppColors.dark.textMedium,
-                        fontFamily: 'Cabinet Grotesk',
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 2,
-                        fontSize: 12,
-                      ),
+                      style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
                     ),
                     Text(
                       dateRange,
-                      style: TextStyle(
-                        color: AppColors.dark.textMedium,
-                        fontFamily: 'General Sans',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        letterSpacing: 0.5,
-                      ),
+                      style: context.text.caption.copyWith(color: AppColors.dark.textMedium),
                     ),
                   ],
                 ),
@@ -122,14 +110,7 @@ class WeeklyShareLayout extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "$userName's Week",
-                    style: TextStyle(
-                      color: AppColors.dark.textDark,
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      height: 1.1,
-                      letterSpacing: -0.5,
-                    ),
+                    style: context.text.metric.copyWith(color: AppColors.dark.textDark),
                   ),
                 ),
                 
@@ -141,13 +122,7 @@ class WeeklyShareLayout extends StatelessWidget {
                     children: [
                       Text(
                         '$weekScore',
-                        style: TextStyle(
-                          color: baseColor,
-                          fontFamily: 'Cabinet Grotesk',
-                          fontSize: isStory ? 120 : 96,
-                          fontWeight: FontWeight.w900,
-                          height: 1.0,
-                        ),
+                        style: context.text.body.copyWith(color: baseColor),
                       ),
                       if (prevWeekScore != null && prevWeekScore != weekScore) ...[
                         const SizedBox(height: 12),
@@ -223,13 +198,7 @@ class WeeklyShareLayout extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Tracked with Sthira',
-                      style: TextStyle(
-                        color: AppColors.dark.textLight,
-                        fontFamily: 'General Sans',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
+                      style: context.text.caption.copyWith(color: AppColors.dark.textLight),
                     ),
                   ],
                 ),
@@ -271,12 +240,7 @@ class _DeltaChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             '${diff.abs()} pts',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'General Sans',
-              color: color,
-            ),
+            style: context.text.caption.copyWith(color: color),
           ),
         ],
       ),
@@ -303,8 +267,9 @@ class _MiniChart extends StatelessWidget {
         Color barColor = AppColors.dark.border;
         if (score != null) {
           barColor = AppColors.dark.green;
-          if (score < 50) barColor = AppColors.dark.red;
-          else if (score < 80) barColor = AppColors.dark.orange;
+          if (score < 50) {
+            barColor = AppColors.dark.red;
+          } else if (score < 80) barColor = AppColors.dark.orange;
         }
 
         return Column(
@@ -330,12 +295,7 @@ class _MiniChart extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               days[i],
-              style: TextStyle(
-                color: AppColors.dark.textMedium,
-                fontFamily: 'General Sans',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
+              style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
             ),
           ],
         );
@@ -373,23 +333,12 @@ class _WeeklyStatBox extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
-              color: AppColors.dark.textDark,
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-            ),
+            style: context.text.cardTitle.copyWith(color: AppColors.dark.textDark),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: TextStyle(
-              color: AppColors.dark.textMedium,
-              fontFamily: 'General Sans',
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
           ),
         ],
       ),

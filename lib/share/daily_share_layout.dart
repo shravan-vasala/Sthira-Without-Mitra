@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import 'share_card_exporter.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class DailyShareLayout extends StatelessWidget {
   final ShareFormat format;
@@ -94,23 +95,11 @@ class DailyShareLayout extends StatelessWidget {
                   children: [
                     Text(
                       'STHIRA',
-                      style: TextStyle(
-                        color: AppColors.dark.textMedium,
-                        fontFamily: 'Cabinet Grotesk',
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 2,
-                        fontSize: 12,
-                      ),
+                      style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
                     ),
                     Text(
                       DateFormat('MMM d').format(date),
-                      style: TextStyle(
-                        color: AppColors.dark.textMedium,
-                        fontFamily: 'General Sans',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        letterSpacing: 0.5,
-                      ),
+                      style: context.text.caption.copyWith(color: AppColors.dark.textMedium),
                     ),
                   ],
                 ),
@@ -122,14 +111,7 @@ class DailyShareLayout extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "$userName's Day",
-                    style: TextStyle(
-                      color: AppColors.dark.textDark,
-                      fontFamily: 'Cabinet Grotesk',
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      height: 1.1,
-                      letterSpacing: -0.5,
-                    ),
+                    style: context.text.metric.copyWith(color: AppColors.dark.textDark),
                   ),
                 ),
                 
@@ -150,12 +132,7 @@ class DailyShareLayout extends StatelessWidget {
                     child: Center(
                       child: Text(
                         '$score',
-                        style: TextStyle(
-                          color: baseColor,
-                          fontFamily: 'Cabinet Grotesk',
-                          fontSize: isStory ? 100 : 84,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: context.text.body.copyWith(color: baseColor),
                       ),
                     ),
                   ),
@@ -164,12 +141,7 @@ class DailyShareLayout extends StatelessWidget {
                 Center(
                   child: Text(
                     subtitle,
-                    style: TextStyle(
-                      color: AppColors.dark.textDark,
-                      fontFamily: 'General Sans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: context.text.bodyStrong.copyWith(color: AppColors.dark.textDark),
                   ),
                 ),
 
@@ -200,13 +172,7 @@ class DailyShareLayout extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Tracked with Sthira',
-                      style: TextStyle(
-                        color: AppColors.dark.textLight,
-                        fontFamily: 'General Sans',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
+                      style: context.text.caption.copyWith(color: AppColors.dark.textLight),
                     ),
                   ],
                 ),
@@ -332,24 +298,12 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: TextStyle(
-              color: AppColors.dark.textDark,
-              fontFamily: 'Cabinet Grotesk',
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
+            style: context.text.screenTitle.copyWith(color: AppColors.dark.textDark),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: TextStyle(
-              color: AppColors.dark.textMedium,
-              fontFamily: 'General Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-            ),
+            style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
           ),
         ],
       ),

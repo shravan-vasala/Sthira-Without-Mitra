@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:go_router/go_router.dart';
 import '../../providers/app_providers.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/app_text_field.dart';
@@ -11,6 +10,7 @@ import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/setup_sheets.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -103,12 +103,7 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
         children: [
           Text(
             'YOUR UNIQUE ID',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: context.colors.primary,
-              letterSpacing: 1.5,
-            ),
+            style: context.text.caption.copyWith(color: context.colors.primary),
           ),
           const SizedBox(height: 24),
           Semantics(
@@ -148,13 +143,7 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
                      Text(
                         uid,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontFamily: 'monospace',
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.w700,
-                          color: _copied ? context.colors.primary : context.colors.textDark,
-                        ),
+                        style: context.text.screenTitle.copyWith(color: _copied ? context.colors.primary : context.colors.textDark),
                      ),
                      const SizedBox(height: 24),
                      Row(
@@ -168,11 +157,7 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
                          const SizedBox(width: 8),
                          Text(
                            _copied ? 'Copied to Clipboard!' : 'Tap to Copy',
-                           style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: _copied ? context.colors.primary : context.colors.textMedium,
-                           ),
+                           style: context.text.caption.copyWith(color: _copied ? context.colors.primary : context.colors.textMedium),
                          ),
                        ],
                      ),
@@ -312,12 +297,7 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
           const SizedBox(height: 32),
           Text(
             'ENTER FRIEND ID',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: context.colors.primary,
-              letterSpacing: 1.5,
-            ),
+            style: context.text.caption.copyWith(color: context.colors.primary),
           ),
           const SizedBox(height: 16),
           AppTextField(

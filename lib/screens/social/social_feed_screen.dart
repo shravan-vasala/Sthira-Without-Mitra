@@ -6,13 +6,13 @@ import '../../providers/app_providers.dart';
 import '../../models/social_profile.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/surface_card.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/empty_state_view.dart';
 
 import '../../utils/time_utils.dart';
 import 'widgets/friend_status_card.dart';
 import 'package:flutter/services.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class SocialFeedScreen extends ConsumerStatefulWidget {
   const SocialFeedScreen({super.key});
@@ -107,7 +107,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               return SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text('Error loading requests: ${snapshot.error}', style: TextStyle(color: context.colors.red)),
+                  child: Text('Error loading requests: ${snapshot.error}', style: context.text.body.copyWith(color: context.colors.red)),
                 ),
               );
             }
@@ -122,10 +122,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                     padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
                     child: Text(
                       'Friend Requests',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.textMedium),
                     ),
                   ),
                   ListView.builder(
@@ -150,15 +147,11 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                           leading: _buildAvatar(avatarUrl, name, fromUid, context),
                           title: Text(
                             name,
-                            style: TextStyle(
-                              color: context.colors.textDark,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                            style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
                           ),
                           subtitle: Text(
                             'Wants to be friends',
-                            style: TextStyle(color: context.colors.textMedium),
+                            style: context.text.body.copyWith(color: context.colors.textMedium),
                           ),
                           trailing: isProcessing 
                             ? const Padding(
@@ -251,7 +244,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: Text('Error: $err', textAlign: TextAlign.center, style: TextStyle(color: context.colors.red)),
+                child: Text('Error: $err', textAlign: TextAlign.center, style: context.text.body.copyWith(color: context.colors.red)),
               ),
             ),
           ),
@@ -280,7 +273,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
       backgroundColor: color,
       child: Text(
         name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?',
-        style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold),
+        style: context.text.body.copyWith(color: context.colors.textDark),
       ),
     );
   }
@@ -313,8 +306,8 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     // Compute my local stats
     final myProfile = _computeMyProfile(ref, auth.uid ?? 'me');
 
-    List<SocialProfile> allProfiles = [myProfile];
-    List<Widget> loadingSkeletons = [];
+    final List<SocialProfile> allProfiles = [myProfile];
+    final List<Widget> loadingSkeletons = [];
 
     for (var f in friends) {
       final asyncProfile = ref.watch(friendProfileStreamProvider(f.uid));
@@ -379,7 +372,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       } else {
         final aSteps = getSteps(a, isWeek);
         final bSteps = getSteps(b, isWeek);
-        int cmp = bSteps.compareTo(aSteps);
+        final int cmp = bSteps.compareTo(aSteps);
         if (cmp != 0) return cmp;
         
         // Tie breaker: name (alphabetical)
@@ -468,7 +461,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
             child: ListView(
-              key: ValueKey('${_period}_${_metric}'),
+              key: ValueKey('${_period}_$_metric'),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 if (hasTop3) _PodiumView(top3: top3, myUid: myProfile.uid, period: _period, metric: _metric),
@@ -485,10 +478,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
                       'Inactive',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: context.colors.textMedium,
-                      ),
+                      style: context.text.body.copyWith(color: context.colors.textMedium),
                     ),
                   ),
                   ...inactiveProfiles.map(
@@ -585,16 +575,16 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
 
     Widget? rankWidget;
     if (rank != null) {
-      if (rank == 1)
-        rankWidget = Icon(Icons.workspace_premium, color: context.colors.gold); 
-      else if (rank == 2)
+      if (rank == 1) {
+        rankWidget = Icon(Icons.workspace_premium, color: context.colors.gold);
+      } else if (rank == 2)
         rankWidget = Icon(Icons.workspace_premium, color: context.colors.silver);
       else if (rank == 3)
         rankWidget = Icon(Icons.workspace_premium, color: context.colors.bronze);
       else
         rankWidget = SizedBox(
            width: 24, 
-           child: Center(child: Text('#$rank', style: TextStyle(fontWeight: FontWeight.bold, color: context.colors.textMedium)))
+           child: Center(child: Text('#$rank', style: context.text.body.copyWith(color: context.colors.textMedium)))
         );
     }
 
@@ -620,13 +610,9 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
         ),
         title: Text(
           isMe ? 'You' : profile.name,
-          style: TextStyle(
-            fontWeight: isMe ? FontWeight.w800 : FontWeight.bold,
-            fontSize: 16,
-            color: isInactive
+          style: context.text.bodyStrong.copyWith(color: isInactive
                 ? context.colors.textMedium.withValues(alpha: 0.5)
-                : (isMe ? context.colors.primary : context.colors.textDark),
-          ),
+                : (isMe ? context.colors.primary : context.colors.textDark)),
         ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -635,23 +621,15 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
             Text(
               primaryText,
               style: AppTheme.numeric(
-                TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                  color: isInactive
+                context.text.cardTitle.copyWith(color: isInactive
                       ? context.colors.textMedium.withValues(alpha: 0.5)
-                      : context.colors.textDark,
-                ),
+                      : context.colors.textDark),
               ),
             ),
             Text(
               secondaryMetric,
               style: AppTheme.numeric(
-                TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.textMedium,
-                ),
+                context.text.caption.copyWith(color: context.colors.textMedium),
               ),
             ),
           ],
@@ -686,12 +664,9 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
       backgroundColor: color,
       child: Text(
         name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?',
-        style: TextStyle(
-          color: isInactive
+        style: context.text.body.copyWith(color: isInactive
               ? context.colors.textMedium
-              : context.colors.textDark,
-           fontWeight: FontWeight.bold,
-        ),
+              : context.colors.textDark),
       ),
     );
   }
@@ -755,17 +730,17 @@ class _PodiumView extends ConsumerWidget {
              child: CircleAvatar(
                 backgroundColor: context.colors.inputFill,
                 backgroundImage: p.avatarUrl != null && p.avatarUrl!.startsWith('assets/') ? AssetImage(p.avatarUrl!) : null,
-                child: p.avatarUrl == null || !p.avatarUrl!.startsWith('assets/') ? Text(p.name.isNotEmpty ? p.name.substring(0,1).toUpperCase() : '?', style: TextStyle(color: context.colors.textDark, fontWeight: FontWeight.bold, fontSize: size * 0.4)) : null,
+                child: p.avatarUrl == null || !p.avatarUrl!.startsWith('assets/') ? Text(p.name.isNotEmpty ? p.name.substring(0,1).toUpperCase() : '?', style: context.text.body.copyWith(color: context.colors.textDark)) : null,
              ),
            ),
         ),
         const SizedBox(height: 8),
-        Text(isMe ? 'You' : p.name, style: TextStyle(fontWeight: FontWeight.bold, color: isMe ? context.colors.primary : context.colors.textDark), overflow: TextOverflow.ellipsis),
+        Text(isMe ? 'You' : p.name, style: context.text.body.copyWith(color: isMe ? context.colors.primary : context.colors.textDark), overflow: TextOverflow.ellipsis),
         
         (() {
           final rawVal = _getRawVal(p);
           if (rawVal == null) {
-             return Text('—', style: TextStyle(fontWeight: FontWeight.w800, color: ringColor));
+             return Text('—', style: context.text.body.copyWith(color: ringColor));
           }
           return TweenAnimationBuilder<int>(
             tween: IntTween(begin: 0, end: rawVal),
@@ -775,7 +750,7 @@ class _PodiumView extends ConsumerWidget {
               final displayStr = metric == LeaderboardMetric.score 
                   ? val.toString() 
                   : NumberFormat.compact().format(val);
-              return Text(displayStr, style: AppTheme.numeric(TextStyle(fontWeight: FontWeight.w800, color: ringColor)));
+              return Text(displayStr, style: AppTheme.numeric(context.text.body.copyWith(color: ringColor)));
             },
           );
         })(),
