@@ -23,7 +23,7 @@ void main() {
         systemInstruction: 'test instruction',
         apiKey: 'test_key',
         inactivityTimeout: const Duration(milliseconds: 50),
-        overallTimeout: const Duration(seconds: 1),
+        overallDeadline: DateTime.now().add(const Duration(seconds: 1)),
       );
 
       expect(
