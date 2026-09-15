@@ -17,7 +17,7 @@ class WorkoutCompletion {
   static bool hasMeaningfulWork(ExerciseLog log) {
     if (log.sets.isEmpty) return false;
     for (final s in log.sets) {
-       if ((s.reps ?? 0) > 0 || (s.weight ?? 0.0) > 0) return true;
+      if ((s.reps ?? 0) > 0 || (s.weight ?? 0.0) > 0) return true;
     }
     return false;
   }
@@ -30,7 +30,7 @@ class WorkoutCompletion {
         return day;
       }
     }
-    
+
     // 2. If no weekday match, maybe fallback to 'Rest'
     for (final day in plan.days) {
       if (day.dayId?.toLowerCase() == 'rest') {

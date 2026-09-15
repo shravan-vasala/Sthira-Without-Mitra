@@ -22,44 +22,82 @@ class ChartDrilldownSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final startStr = DateFormat('yyyy-MM-dd').format(bucket.startDate);
     final endStr = DateFormat('yyyy-MM-dd').format(bucket.endDate);
-    
+
     // We fetch the EXACT daily logs for the bucket's date range
     final logs = ref.watch(dailyLogsRangeProvider((startStr, endStr)));
     final mealLogs = ref.watch(dailyMealLogsRangeProvider((startStr, endStr)));
     final profile = ref.watch(profileProvider);
     final useKg = profile.useKg;
-    
+
     // Aggregate them as daily buckets (1W/1M style)
     final dailyBuckets = ProgressAggregationService.aggregate(
       logs: logs,
       mealLogs: mealLogs,
       metric: metric,
-      range: bucket.endDate.difference(bucket.startDate).inDays <= 7 ? TimeRange.weekly : TimeRange.oneMonth,
+      range: bucket.endDate.difference(bucket.startDate).inDays <= 7
+          ? TimeRange.weekly
+          : TimeRange.oneMonth,
       rangeStart: bucket.startDate,
       rangeEnd: bucket.endDate,
       today: DateTime.now(),
       heightInMeters: profile.heightInMeters,
       useKg: useKg,
     );
-    
-    final data = dailyBuckets.map((b) => ChartDataPoint(b.startDate, b.average, bucket: b)).toList();
-    
+
+    final data = dailyBuckets
+        .map((b) => ChartDataPoint(b.startDate, b.average, bucket: b))
+        .toList();
+
     ChartPlotType plotType;
     String unit = '';
     bool isCount = false;
     String title = '';
-    
+
     switch (metric) {
-      case MetricType.weight: title = 'Weight'; unit = useKg ? 'kg' : 'lb'; plotType = ChartPlotType.line; break;
-      case MetricType.steps: title = 'Steps'; unit = 'steps'; isCount = true; plotType = ChartPlotType.bar; break;
-      case MetricType.sleep: title = 'Sleep'; unit = 'h'; plotType = ChartPlotType.bar; break;
-      case MetricType.bmi: title = 'BMI'; plotType = ChartPlotType.line; break;
-      case MetricType.bodyFat: title = 'Body Fat'; unit = '%'; plotType = ChartPlotType.line; break;
-      case MetricType.calories: title = 'Calories'; unit = 'kcal'; isCount = true; plotType = ChartPlotType.bar; break;
-      case MetricType.protein: title = 'Protein'; unit = 'g'; isCount = true; plotType = ChartPlotType.bar; break;
-      case MetricType.screenTime: title = 'Screen Time'; unit = 'h'; plotType = ChartPlotType.bar; break;
+      case MetricType.weight:
+        title = 'Weight';
+        unit = useKg ? 'kg' : 'lb';
+        plotType = ChartPlotType.line;
+        break;
+      case MetricType.steps:
+        title = 'Steps';
+        unit = 'steps';
+        isCount = true;
+        plotType = ChartPlotType.bar;
+        break;
+      case MetricType.sleep:
+        title = 'Sleep';
+        unit = 'h';
+        plotType = ChartPlotType.bar;
+        break;
+      case MetricType.bmi:
+        title = 'BMI';
+        plotType = ChartPlotType.line;
+        break;
+      case MetricType.bodyFat:
+        title = 'Body Fat';
+        unit = '%';
+        plotType = ChartPlotType.line;
+        break;
+      case MetricType.calories:
+        title = 'Calories';
+        unit = 'kcal';
+        isCount = true;
+        plotType = ChartPlotType.bar;
+        break;
+      case MetricType.protein:
+        title = 'Protein';
+        unit = 'g';
+        isCount = true;
+        plotType = ChartPlotType.bar;
+        break;
+      case MetricType.screenTime:
+        title = 'Screen Time';
+        unit = 'h';
+        plotType = ChartPlotType.bar;
+        break;
     }
-    
+
     final metricSpec = MetricSpec(
       title: title,
       unit: unit,
@@ -82,7 +120,9 @@ class ChartDrilldownSheet extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               'Daily Details: ${DateFormat('MMM d').format(bucket.startDate)} - ${DateFormat('MMM d').format(bucket.endDate)}',
-              style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+              style: context.text.screenTitle.copyWith(
+                color: context.colors.textDark,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -96,7 +136,10 @@ class ChartDrilldownSheet extends ConsumerWidget {
                 useKg: useKg,
                 statLabels: const [],
                 statValues: const [],
-                timeFormat: bucket.endDate.difference(bucket.startDate).inDays <= 7 ? ChartTimeFormat.weekly : ChartTimeFormat.monthly,
+                timeFormat:
+                    bucket.endDate.difference(bucket.startDate).inDays <= 7
+                    ? ChartTimeFormat.weekly
+                    : ChartTimeFormat.monthly,
                 emptyMessage: 'No daily entries in this period.',
                 expandChart: true,
               ),

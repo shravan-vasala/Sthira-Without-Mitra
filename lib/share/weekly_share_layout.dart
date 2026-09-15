@@ -78,7 +78,7 @@ class WeeklyShareLayout extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Padding(
             padding: EdgeInsets.only(
               left: 28,
@@ -95,11 +95,15 @@ class WeeklyShareLayout extends StatelessWidget {
                   children: [
                     Text(
                       'STHIRA',
-                      style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
+                      style: context.text.micro.copyWith(
+                        color: AppColors.dark.textMedium,
+                      ),
                     ),
                     Text(
                       dateRange,
-                      style: context.text.caption.copyWith(color: AppColors.dark.textMedium),
+                      style: context.text.caption.copyWith(
+                        color: AppColors.dark.textMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -110,12 +114,14 @@ class WeeklyShareLayout extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "$userName's Week",
-                    style: context.text.metric.copyWith(color: AppColors.dark.textDark),
+                    style: context.text.metric.copyWith(
+                      color: AppColors.dark.textDark,
+                    ),
                   ),
                 ),
-                
+
                 const Spacer(),
-                
+
                 // Hero Score Block
                 Center(
                   child: Column(
@@ -124,7 +130,8 @@ class WeeklyShareLayout extends StatelessWidget {
                         '$weekScore',
                         style: context.text.body.copyWith(color: baseColor),
                       ),
-                      if (prevWeekScore != null && prevWeekScore != weekScore) ...[
+                      if (prevWeekScore != null &&
+                          prevWeekScore != weekScore) ...[
                         const SizedBox(height: 12),
                         _DeltaChip(
                           current: weekScore,
@@ -167,7 +174,9 @@ class WeeklyShareLayout extends StatelessWidget {
                       child: _WeeklyStatBox(
                         icon: Icons.directions_walk_rounded,
                         label: 'Avg Steps',
-                        value: avgSteps > 0 ? '${(avgSteps / 1000).toStringAsFixed(1)}k' : '-',
+                        value: avgSteps > 0
+                            ? '${(avgSteps / 1000).toStringAsFixed(1)}k'
+                            : '-',
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -182,7 +191,7 @@ class WeeklyShareLayout extends StatelessWidget {
                 ),
 
                 SizedBox(height: isStory ? 40 : 24),
-                
+
                 // Footer
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -198,7 +207,9 @@ class WeeklyShareLayout extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Tracked with Sthira',
-                      style: context.text.caption.copyWith(color: AppColors.dark.textLight),
+                      style: context.text.caption.copyWith(
+                        color: AppColors.dark.textLight,
+                      ),
                     ),
                   ],
                 ),
@@ -222,7 +233,7 @@ class _DeltaChip extends StatelessWidget {
     final diff = current - previous;
     final isPositive = diff > 0;
     final color = isPositive ? AppColors.dark.green : AppColors.dark.red;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -233,8 +244,10 @@ class _DeltaChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded, 
-            color: color, 
+            isPositive
+                ? Icons.arrow_upward_rounded
+                : Icons.arrow_downward_rounded,
+            color: color,
             size: 14,
           ),
           const SizedBox(width: 4),
@@ -250,26 +263,29 @@ class _DeltaChip extends StatelessWidget {
 
 class _MiniChart extends StatelessWidget {
   final List<int?> dailyScores;
-  
+
   const _MiniChart({required this.dailyScores});
 
   @override
   Widget build(BuildContext context) {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: List.generate(7, (i) {
         final score = i < dailyScores.length ? dailyScores[i] : null;
-        final heightRatio = score == null ? 0.0 : (score / 100.0).clamp(0.0, 1.0);
-        
+        final heightRatio = score == null
+            ? 0.0
+            : (score / 100.0).clamp(0.0, 1.0);
+
         Color barColor = AppColors.dark.border;
         if (score != null) {
           barColor = AppColors.dark.green;
           if (score < 50) {
             barColor = AppColors.dark.red;
-          } else if (score < 80) barColor = AppColors.dark.orange;
+          } else if (score < 80)
+            barColor = AppColors.dark.orange;
         }
 
         return Column(
@@ -295,7 +311,9 @@ class _MiniChart extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               days[i],
-              style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
+              style: context.text.micro.copyWith(
+                color: AppColors.dark.textMedium,
+              ),
             ),
           ],
         );
@@ -333,12 +351,16 @@ class _WeeklyStatBox extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: context.text.cardTitle.copyWith(color: AppColors.dark.textDark),
+            style: context.text.cardTitle.copyWith(
+              color: AppColors.dark.textDark,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
+            style: context.text.micro.copyWith(
+              color: AppColors.dark.textMedium,
+            ),
           ),
         ],
       ),

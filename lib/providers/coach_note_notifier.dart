@@ -54,7 +54,7 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
 
   Future<void> fetchNote({bool force = false, bool background = false}) async {
     if (_isFetching && !force) return;
-    
+
     final int requestId = ++_currentRequestId;
     final targetDateStr = dateStr;
 
@@ -166,24 +166,29 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       await for (final chunk in stream) {
         if (dateStr != targetDateStr) break;
         if (chunk.startsWith('__AI__')) {
-           resolvedIsAi = true;
-           continue;
+          resolvedIsAi = true;
+          continue;
         }
         if (chunk.startsWith('__LOCAL__')) {
-           resolvedIsAi = false;
-           accumulatedNote = "";
-           continue;
+          resolvedIsAi = false;
+          accumulatedNote = "";
+          continue;
         }
         accumulatedNote += chunk;
         if (!background) {
           hasYielded = true;
           state = AsyncValue.data(
-            CoachNote(date: targetDateStr, note: accumulatedNote, isAi: resolvedIsAi),
+            CoachNote(
+              date: targetDateStr,
+              note: accumulatedNote,
+              isAi: resolvedIsAi,
+            ),
           );
         }
       }
 
-      if (_currentRequestId != requestId || dateStr != targetDateStr) return; // Stale request or navigated away
+      if (_currentRequestId != requestId || dateStr != targetDateStr)
+        return; // Stale request or navigated away
 
       if (accumulatedNote.isEmpty) {
         throw Exception('Failed to generate note stream');
@@ -207,7 +212,9 @@ class CoachNoteNotifier extends AsyncNotifier<CoachNote> {
       );
     } catch (e, st) {
       if (_currentRequestId != requestId || dateStr != targetDateStr) return;
-      if (!background || !state.hasValue || state.value?.note == 'Generating...') {
+      if (!background ||
+          !state.hasValue ||
+          state.value?.note == 'Generating...') {
         // Fallback to cache on transient error
         final repo = ref.read(coachNoteRepoProvider);
         final cached = repo.getNote(targetDateStr);

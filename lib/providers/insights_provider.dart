@@ -17,36 +17,46 @@ final insightsProvider = Provider<List<Insight>>((ref) {
   final thirtyDaysAgoStr = todayKey(now.subtract(const Duration(days: 30)));
   final todayStr = todayKey(now);
   final mealLogs = mealRepo.getLogsInRange(thirtyDaysAgoStr, todayStr);
-  
+
   if (mealLogs.isNotEmpty) {
-    mealLogs.sort((a,b) => b.date.compareTo(a.date));
+    mealLogs.sort((a, b) => b.date.compareTo(a.date));
     final recentMealLog = mealLogs.first;
-    
-    final allItems = recentMealLog.customSlots.values.expand((slot) => slot.items).toList();
+
+    final allItems = recentMealLog.customSlots.values
+        .expand((slot) => slot.items)
+        .toList();
     if (allItems.isNotEmpty) {
       MealItemLog? topProteinItem;
       for (final item in allItems) {
-        if ((item.computedNutrition?.proteinG ?? 0) > (topProteinItem?.computedNutrition?.proteinG ?? 0)) {
+        if ((item.computedNutrition?.proteinG ?? 0) >
+            (topProteinItem?.computedNutrition?.proteinG ?? 0)) {
           topProteinItem = item;
         }
       }
 
       String foodName = 'your recent meals';
-      if (topProteinItem != null && topProteinItem.name != null && topProteinItem.name!.trim().isNotEmpty && topProteinItem.name!.toLowerCase() != 'unknown') {
+      if (topProteinItem != null &&
+          topProteinItem.name != null &&
+          topProteinItem.name!.trim().isNotEmpty &&
+          topProteinItem.name!.toLowerCase() != 'unknown') {
         foodName = topProteinItem.name!.trim();
       }
 
       final double totalP = recentMealLog.totalProtein;
       final double totalC = recentMealLog.totalCarbs;
 
-      String description = 'Incorporating ${foodName.toLowerCase()} provides an excellent nutritional foundation. ';
-      
+      String description =
+          'Incorporating ${foodName.toLowerCase()} provides an excellent nutritional foundation. ';
+
       if (totalP < 40) {
-        description += 'To elevate this, consider introducing an additional lean protein source to ensure steady recovery and sustained energy.';
+        description +=
+            'To elevate this, consider introducing an additional lean protein source to ensure steady recovery and sustained energy.';
       } else if (totalC > totalP * 3 && totalC > 150) {
-        description += 'Your energy intake is robust. Pairing it with a proportional increase in protein will anchor your baseline energy levels.';
+        description +=
+            'Your energy intake is robust. Pairing it with a proportional increase in protein will anchor your baseline energy levels.';
       } else {
-        description += 'Your macronutrient balance is impeccably structured. Maintaining this rhythm will yield steady, long-term results.';
+        description +=
+            'Your macronutrient balance is impeccably structured. Maintaining this rhythm will yield steady, long-term results.';
       }
 
       insights.add(
@@ -58,7 +68,7 @@ final insightsProvider = Provider<List<Insight>>((ref) {
           severity: InsightSeverity.positive,
           dateGenerated: now,
           icon: Icons.restaurant_rounded,
-        )
+        ),
       );
     } else if (mealLogs.length >= 3) {
       insights.add(
@@ -66,11 +76,12 @@ final insightsProvider = Provider<List<Insight>>((ref) {
           id: 'nutrition_consistency',
           type: InsightType.trend,
           title: 'Consistent Awareness',
-          description: 'Your daily logging builds a strong foundation. Mindful awareness of your intake is the cornerstone of steady, sustainable progress.',
+          description:
+              'Your daily logging builds a strong foundation. Mindful awareness of your intake is the cornerstone of steady, sustainable progress.',
           severity: InsightSeverity.positive,
           dateGenerated: now,
           icon: Icons.check_circle_outline_rounded,
-        )
+        ),
       );
     }
   }

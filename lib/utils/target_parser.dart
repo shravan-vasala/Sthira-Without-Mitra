@@ -7,10 +7,14 @@ class TargetParser {
     if (lowerStr.isEmpty) return 0;
 
     // Do not fabricate reps out of durations or distances.
-    if (lowerStr.contains('min') || lowerStr.contains('sec') || lowerStr.contains('km') || lowerStr.contains('mi') || lowerStr.contains('m') && !lowerStr.contains('rm')) {
+    if (lowerStr.contains('min') ||
+        lowerStr.contains('sec') ||
+        lowerStr.contains('km') ||
+        lowerStr.contains('mi') ||
+        lowerStr.contains('m') && !lowerStr.contains('rm')) {
       return 0; // Unsupported rep mapping for this schema
     }
-    
+
     // Address format: "3 x 10" or "3x10" or "3 * 10" targeting the intended trailing repetitions.
     if (lowerStr.contains('x') || lowerStr.contains('*')) {
       final parts = lowerStr.split(RegExp(r'[x\*]'));
@@ -25,13 +29,13 @@ class TargetParser {
         return int.tryParse(parts.last.trim()) ?? 0;
       }
     }
-    
+
     // Match the standard single digit / digit group
     final numMatch = RegExp(r'\d+').firstMatch(lowerStr);
     if (numMatch != null) {
       return int.parse(numMatch.group(0)!);
     }
-    
+
     return 0;
   }
 }

@@ -50,21 +50,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/home',
     refreshListenable: ref.watch(routerNotifierProvider),
     errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Text('Page Not Found'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Page Not Found'), centerTitle: true),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 64, color: Colors.grey),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.grey,
+              ),
               const SizedBox(height: 16),
               Text(
                 'This page doesn\'t exist or was removed.',
-                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.textDark,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -280,7 +283,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       canPop: isHomeTab && !canPopInner,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        
+
         if (canPopInner) {
           GoRouter.of(context).pop();
         } else if (!isHomeTab) {
@@ -346,14 +349,18 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                         timerState.exerciseName != null
                                             ? 'Resting for ${timerState.exerciseName}'
                                             : 'Resting',
-                                        style: context.text.micro.copyWith(color: Colors.white70),
+                                        style: context.text.micro.copyWith(
+                                          color: Colors.white70,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
                                         '${timerState.remainingSeconds ~/ 60}:${(timerState.remainingSeconds % 60).toString().padLeft(2, '0')}',
                                         style: AppTheme.numeric(
-                                          context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
+                                          context.text.bodyStrong.copyWith(
+                                            color: context.colors.onPrimary,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -368,7 +375,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                           .read(restTimerProvider.notifier)
                                           .addSeconds(15),
                                       style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
                                         minimumSize: const Size(48, 48),
                                         foregroundColor: context.colors.card,
                                       ),
@@ -384,7 +393,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                           .read(restTimerProvider.notifier)
                                           .addSeconds(30),
                                       style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
                                         minimumSize: const Size(48, 48),
                                         foregroundColor: context.colors.card,
                                       ),
@@ -399,9 +410,13 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                     IconButton(
                                       onPressed: () {
                                         if (timerState.isPaused) {
-                                          ref.read(restTimerProvider.notifier).resumeTimer();
+                                          ref
+                                              .read(restTimerProvider.notifier)
+                                              .resumeTimer();
                                         } else {
-                                          ref.read(restTimerProvider.notifier).pauseTimer();
+                                          ref
+                                              .read(restTimerProvider.notifier)
+                                              .pauseTimer();
                                         }
                                       },
                                       icon: Icon(
@@ -410,11 +425,15 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                             : Icons.pause_rounded,
                                       ),
                                       color: context.colors.white,
-                                      tooltip: timerState.isPaused ? 'Play' : 'Pause',
+                                      tooltip: timerState.isPaused
+                                          ? 'Play'
+                                          : 'Pause',
                                     ),
                                     IconButton(
                                       onPressed: () {
-                                        ref.read(restTimerProvider.notifier).stopTimer();
+                                        ref
+                                            .read(restTimerProvider.notifier)
+                                            .stopTimer();
                                       },
                                       icon: const Icon(Icons.close),
                                       color: context.colors.white,
@@ -527,7 +546,7 @@ class _NavBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
-    
+
     return Tooltip(
       message: label,
       child: Semantics(
@@ -538,7 +557,9 @@ class _NavBarItem extends StatelessWidget {
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
           child: AnimatedContainer(
-            duration: disableAnimations ? Duration.zero : const Duration(milliseconds: 250),
+            duration: disableAnimations
+                ? Duration.zero
+                : const Duration(milliseconds: 250),
             curve: Curves.easeOutCubic,
             padding: EdgeInsets.symmetric(
               horizontal: isSelected ? 24 : 12,

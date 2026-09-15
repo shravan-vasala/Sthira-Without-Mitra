@@ -38,7 +38,9 @@ class EmptyStateView extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+            style: context.text.cardTitle.copyWith(
+              color: context.colors.textDark,
+            ),
           ),
           const SizedBox(height: 8),
           Text(

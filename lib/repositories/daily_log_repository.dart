@@ -9,7 +9,7 @@ import '../services/health_connect_service.dart';
 class DailyLogRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
-  
+
   int _syncGeneration = 0;
   String? _attachedUid;
   final List<StreamSubscription> _syncSubscriptions = [];
@@ -52,11 +52,15 @@ class DailyLogRepository {
             final existing = getLog(entry.key);
 
             // If incoming is older than existing, skip
-            if (existing?.updatedAt != null && log.updatedAt != null && log.updatedAt!.isBefore(existing!.updatedAt!)) {
+            if (existing?.updatedAt != null &&
+                log.updatedAt != null &&
+                log.updatedAt!.isBefore(existing!.updatedAt!)) {
               continue;
             }
             final localEdit = _localEdits[entry.key];
-            if (log.updatedAt != null && localEdit != null && log.updatedAt!.isBefore(localEdit)) {
+            if (log.updatedAt != null &&
+                localEdit != null &&
+                log.updatedAt!.isBefore(localEdit)) {
               continue;
             }
 
@@ -69,8 +73,13 @@ class DailyLogRepository {
                     _attachedUid != targetUid) {
                   return;
                 }
-                final reloaded = _isar.dailyLogs.where().dateEqualTo(entry.key).findFirstSync();
-                if (reloaded?.updatedAt != null && log.updatedAt != null && log.updatedAt!.isBefore(reloaded!.updatedAt!)) {
+                final reloaded = _isar.dailyLogs
+                    .where()
+                    .dateEqualTo(entry.key)
+                    .findFirstSync();
+                if (reloaded?.updatedAt != null &&
+                    log.updatedAt != null &&
+                    log.updatedAt!.isBefore(reloaded!.updatedAt!)) {
                   return;
                 }
                 if (reloaded != null) log.id = reloaded.id;
@@ -121,35 +130,44 @@ class DailyLogRepository {
     await _isar.writeTxn(() async {
       await _isar.dailyLogs.put(updatedLog);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: 'daily_logs',
-          docId: updatedLog.date,
-          payload: jsonEncode(updatedLog.toJson()),
-          timestamp: DateTime.now(),
-        ));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'daily_logs',
+            docId: updatedLog.date,
+            payload: jsonEncode(updatedLog.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
     _updates.add(null);
   }
 
-  Future<void> _updateLogSafe(String date, DailyLog Function(DailyLog) modifier) async {
+  Future<void> _updateLogSafe(
+    String date,
+    DailyLog Function(DailyLog) modifier,
+  ) async {
     _localEdits[date] = DateTime.now();
     await _isar.writeTxn(() async {
-      final current = await _isar.dailyLogs.where().dateEqualTo(date).findFirst() ?? DailyLog(date: date);
+      final current =
+          await _isar.dailyLogs.where().dateEqualTo(date).findFirst() ??
+          DailyLog(date: date);
       final updated = modifier(current).copyWith(updatedAt: DateTime.now());
       updated.id = current.id;
-      
+
       await _isar.dailyLogs.put(updated);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: 'daily_logs',
-          docId: updated.date,
-          payload: jsonEncode(updated.toJson()),
-          timestamp: DateTime.now(),
-        ));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'daily_logs',
+            docId: updated.date,
+            payload: jsonEncode(updated.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -161,11 +179,14 @@ class DailyLogRepository {
   }
 
   Future<void> updateCheckIn(String date, String feeling, String? note) async {
-    await _updateLogSafe(date, (log) => log.copyWith(
-      dayFeeling: feeling,
-      dayNote: note,
-      checkInUpdatedAt: DateTime.now(),
-    ));
+    await _updateLogSafe(
+      date,
+      (log) => log.copyWith(
+        dayFeeling: feeling,
+        dayNote: note,
+        checkInUpdatedAt: DateTime.now(),
+      ),
+    );
   }
 
   Future<void> removeCheckIn(String date) async {
@@ -173,15 +194,24 @@ class DailyLogRepository {
   }
 
   Future<void> updateSteps(String date, int steps, {String? source}) async {
-    await _updateLogSafe(date, (log) => log.copyWith(steps: steps, stepsSource: source));
+    await _updateLogSafe(
+      date,
+      (log) => log.copyWith(steps: steps, stepsSource: source),
+    );
   }
 
   Future<void> updateScreenTime(String date, int minutes) async {
-    await _updateLogSafe(date, (log) => log.copyWith(screenTimeMinutes: minutes));
+    await _updateLogSafe(
+      date,
+      (log) => log.copyWith(screenTimeMinutes: minutes),
+    );
   }
 
   Future<void> updateSleep(String date, double? hours, {String? source}) async {
-    await _updateLogSafe(date, (log) => log.copyWith(sleepHours: hours, sleepSource: source));
+    await _updateLogSafe(
+      date,
+      (log) => log.copyWith(sleepHours: hours, sleepSource: source),
+    );
   }
 
   Future<void> updateFromHealthConnect(List<dynamic> healthDataList) async {
@@ -190,16 +220,25 @@ class DailyLogRepository {
         var updated = log;
         if (log.stepsSource != 'manual') {
           if (data.stepsResult.status == HealthStatus.success) {
-            updated = updated.copyWith(steps: data.stepsResult.data, stepsSource: 'healthConnect');
+            updated = updated.copyWith(
+              steps: data.stepsResult.data,
+              stepsSource: 'healthConnect',
+            );
           } else if (data.stepsResult.status == HealthStatus.empty) {
             updated = updated.copyWith(steps: 0, stepsSource: 'healthConnect');
           }
         }
         if (log.sleepSource != 'manual') {
           if (data.sleepResult.status == HealthStatus.success) {
-            updated = updated.copyWith(sleepHours: data.sleepResult.data, sleepSource: 'healthConnect');
+            updated = updated.copyWith(
+              sleepHours: data.sleepResult.data,
+              sleepSource: 'healthConnect',
+            );
           } else if (data.sleepResult.status == HealthStatus.empty) {
-            updated = updated.copyWith(sleepHours: 0.0, sleepSource: 'healthConnect');
+            updated = updated.copyWith(
+              sleepHours: 0.0,
+              sleepSource: 'healthConnect',
+            );
           }
         }
         return updated;
@@ -219,8 +258,15 @@ class DailyLogRepository {
     await _updateLogSafe(date, (log) => log.copyWith(bodyFat: bodyFat));
   }
 
-  Future<void> updateWorkoutStatus(String date, String dayId, String status) async {
-    await _updateLogSafe(date, (log) => log.copyWith(workoutStatus: status, workoutDayId: dayId));
+  Future<void> updateWorkoutStatus(
+    String date,
+    String dayId,
+    String status,
+  ) async {
+    await _updateLogSafe(
+      date,
+      (log) => log.copyWith(workoutStatus: status, workoutDayId: dayId),
+    );
   }
 
   List<DailyLog> getLogsInRange(String startDate, String endDate) {

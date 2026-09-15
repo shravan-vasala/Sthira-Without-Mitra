@@ -9,10 +9,13 @@ class HabitRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
 
-  Stream<void> get watchUpdates => _isar.habits.watchLazy(fireImmediately: true);
+  Stream<void> get watchUpdates =>
+      _isar.habits.watchLazy(fireImmediately: true);
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
-  Future<void> detachSync() async { _sync = null; }
+  Future<void> detachSync() async {
+    _sync = null;
+  }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -20,14 +23,19 @@ class HabitRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    final config = _isar.appConfigs.where().keyEqualTo('habits_seeded').findFirstSync();
+    final config = _isar.appConfigs
+        .where()
+        .keyEqualTo('habits_seeded')
+        .findFirstSync();
     if (config == null) {
       final defaultHabits = Habit.defaults;
       await _isar.writeTxn(() async {
         for (final habit in defaultHabits) {
           await _isar.habits.put(habit);
         }
-        await _isar.appConfigs.put(AppConfig(key: 'habits_seeded', value: 'true'));
+        await _isar.appConfigs.put(
+          AppConfig(key: 'habits_seeded', value: 'true'),
+        );
       });
     }
   }
@@ -49,7 +57,15 @@ class HabitRepository {
     await _isar.writeTxn(() async {
       await _isar.habits.put(updatedHabit);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_config', docId: updatedHabit.id, payload: jsonEncode(updatedHabit.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'habit_config',
+            docId: updatedHabit.id,
+            payload: jsonEncode(updatedHabit.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -61,7 +77,15 @@ class HabitRepository {
       await _isar.writeTxn(() async {
         await _isar.habits.delete(existing.idInternal);
         if (_isar.name != 'guest') {
-          _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_delete_/habit_config', docId: id, payload: '{}', timestamp: DateTime.now()));
+          _isar.syncQueueItems.put(
+            SyncQueueItem(
+              uid: _isar.name,
+              collection: '_delete_/habit_config',
+              docId: id,
+              payload: '{}',
+              timestamp: DateTime.now(),
+            ),
+          );
         }
       });
       _sync?.triggerFlush();
@@ -78,7 +102,15 @@ class HabitRepository {
         }
         await _isar.habits.put(h);
         if (_isar.name != 'guest') {
-          _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_config', docId: h.id, payload: jsonEncode(h.toJson()), timestamp: DateTime.now()));
+          _isar.syncQueueItems.put(
+            SyncQueueItem(
+              uid: _isar.name,
+              collection: 'habit_config',
+              docId: h.id,
+              payload: jsonEncode(h.toJson()),
+              timestamp: DateTime.now(),
+            ),
+          );
         }
       }
     });
@@ -118,24 +150,45 @@ class HabitRepository {
     await _isar.writeTxn(() async {
       await _isar.habitCompletions.put(updatedCompletion);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_completions', docId: updatedCompletion.date, payload: jsonEncode(updatedCompletion.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'habit_completions',
+            docId: updatedCompletion.date,
+            payload: jsonEncode(updatedCompletion.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
   }
 
-  Future<void> _updateCompletionSafe(String date, HabitCompletion Function(HabitCompletion) modifier) async {
+  Future<void> _updateCompletionSafe(
+    String date,
+    HabitCompletion Function(HabitCompletion) modifier,
+  ) async {
     await _isar.writeTxn(() async {
-      final current = await _isar.habitCompletions.where().dateEqualTo(date).findFirst() ?? HabitCompletion(date: date);
+      final current =
+          await _isar.habitCompletions.where().dateEqualTo(date).findFirst() ??
+          HabitCompletion(date: date);
       final updated = modifier(current);
-      
+
       // Inherit the private DB id manually because immutable models discard them during mapping
       // Although our modifier functions actually pass the whole object, so we're good mostly.
       updated.id = current.id;
-      
+
       await _isar.habitCompletions.put(updated);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'habit_completions', docId: updated.date, payload: jsonEncode(updated.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'habit_completions',
+            docId: updated.date,
+            payload: jsonEncode(updated.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -143,7 +196,10 @@ class HabitRepository {
 
   // Checkbox toggle
   Future<void> toggleCheckboxCompletion(String date, String habitId) async {
-    await _updateCompletionSafe(date, (completion) => completion.toggleCheckbox(habitId));
+    await _updateCompletionSafe(
+      date,
+      (completion) => completion.toggleCheckbox(habitId),
+    );
   }
 
   // Counter / numeric update
@@ -152,7 +208,10 @@ class HabitRepository {
     String habitId,
     double progress,
   ) async {
-    await _updateCompletionSafe(date, (completion) => completion.updateProgress(habitId, progress));
+    await _updateCompletionSafe(
+      date,
+      (completion) => completion.updateProgress(habitId, progress),
+    );
   }
 
   // Backwards compatibility for old HealthConnectService code
@@ -182,7 +241,10 @@ class HabitRepository {
     String habitId,
     String? overrideValue,
   ) async {
-    await _updateCompletionSafe(date, (completion) => completion.setOverride(habitId, overrideValue));
+    await _updateCompletionSafe(
+      date,
+      (completion) => completion.setOverride(habitId, overrideValue),
+    );
   }
 
   // ── Cloud sync helpers ──

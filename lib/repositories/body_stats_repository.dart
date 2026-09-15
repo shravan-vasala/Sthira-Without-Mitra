@@ -9,7 +9,9 @@ class BodyStatsRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
-  Future<void> detachSync() async { _sync = null; }
+  Future<void> detachSync() async {
+    _sync = null;
+  }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -27,7 +29,15 @@ class BodyStatsRepository {
     await _isar.writeTxn(() async {
       await _isar.bodyStats.put(stats);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'body_stats', docId: stats.date, payload: jsonEncode(stats.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'body_stats',
+            docId: stats.date,
+            payload: jsonEncode(stats.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();

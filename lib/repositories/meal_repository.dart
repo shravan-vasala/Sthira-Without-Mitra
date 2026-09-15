@@ -20,7 +20,8 @@ class MealRepository {
 
   String defaultPlanName = "Meal Plan";
 
-  Stream<void> get watchUpdates => _isar.dailyMealLogs.watchLazy(fireImmediately: true);
+  Stream<void> get watchUpdates =>
+      _isar.dailyMealLogs.watchLazy(fireImmediately: true);
 
   Future<void> detachSync() async {
     _syncGeneration++;
@@ -55,11 +56,15 @@ class MealRepository {
             final incomingMap = entry.value;
             DateTime? incomingUpdatedAt;
             if (incomingMap['updatedAt'] != null) {
-              incomingUpdatedAt = DateTime.tryParse(incomingMap['updatedAt'].toString());
+              incomingUpdatedAt = DateTime.tryParse(
+                incomingMap['updatedAt'].toString(),
+              );
             }
 
             final localEditTime = _localEdits[entry.key];
-            if (incomingUpdatedAt != null && localEditTime != null && incomingUpdatedAt.isBefore(localEditTime)) {
+            if (incomingUpdatedAt != null &&
+                localEditTime != null &&
+                incomingUpdatedAt.isBefore(localEditTime)) {
               continue;
             }
 
@@ -77,10 +82,16 @@ class MealRepository {
                     _attachedUid != targetUid) {
                   return;
                 }
-                final reloaded = await _isar.dailyMealLogs.where().dateEqualTo(entry.key).findFirst();
+                final reloaded = await _isar.dailyMealLogs
+                    .where()
+                    .dateEqualTo(entry.key)
+                    .findFirst();
                 if (reloaded != null && incomingUpdatedAt != null) {
-                  final reloadedUpdatedAt = DateTime.tryParse(reloaded.toJson()['updatedAt'].toString() ?? '');
-                  if (reloadedUpdatedAt != null && incomingUpdatedAt.isBefore(reloadedUpdatedAt)) {
+                  final reloadedUpdatedAt = DateTime.tryParse(
+                    reloaded.toJson()['updatedAt'].toString() ?? '',
+                  );
+                  if (reloadedUpdatedAt != null &&
+                      incomingUpdatedAt.isBefore(reloadedUpdatedAt)) {
                     return;
                   }
                 }
@@ -214,13 +225,15 @@ class MealRepository {
       final payload = log.toJson();
       payload['updatedAt'] = DateTime.now().toIso8601String();
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: 'meal_logs',
-          docId: log.date,
-          payload: jsonEncode(payload),
-          timestamp: DateTime.now(),
-        ));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'meal_logs',
+            docId: log.date,
+            payload: jsonEncode(payload),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -233,24 +246,30 @@ class MealRepository {
   ) async {
     _localEdits[date] = DateTime.now();
     await _isar.writeTxn(() async {
-      final currentLog = await _isar.dailyMealLogs.where().dateEqualTo(date).findFirst() ?? DailyMealLog(date: date);
-      final updatedSlots = Map<String, MealSlotLog>.from(currentLog.customSlots);
+      final currentLog =
+          await _isar.dailyMealLogs.where().dateEqualTo(date).findFirst() ??
+          DailyMealLog(date: date);
+      final updatedSlots = Map<String, MealSlotLog>.from(
+        currentLog.customSlots,
+      );
       updatedSlots[slotId] = slotLog;
 
       final updated = currentLog.copyWith(customSlots: updatedSlots);
       updated.id = currentLog.id;
-      
+
       await _isar.dailyMealLogs.put(updated);
       final payload = updated.toJson();
       payload['updatedAt'] = DateTime.now().toIso8601String();
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: 'meal_logs',
-          docId: updated.date,
-          payload: jsonEncode(payload),
-          timestamp: DateTime.now(),
-        ));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'meal_logs',
+            docId: updated.date,
+            payload: jsonEncode(payload),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -259,8 +278,12 @@ class MealRepository {
   Future<void> clearMealSlot(String date, String slotId) async {
     _localEdits[date] = DateTime.now();
     await _isar.writeTxn(() async {
-      final currentLog = await _isar.dailyMealLogs.where().dateEqualTo(date).findFirst() ?? DailyMealLog(date: date);
-      final updatedSlots = Map<String, MealSlotLog>.from(currentLog.customSlots);
+      final currentLog =
+          await _isar.dailyMealLogs.where().dateEqualTo(date).findFirst() ??
+          DailyMealLog(date: date);
+      final updatedSlots = Map<String, MealSlotLog>.from(
+        currentLog.customSlots,
+      );
       updatedSlots.remove(slotId);
 
       final updated = currentLog.copyWith(customSlots: updatedSlots);
@@ -270,13 +293,15 @@ class MealRepository {
       final payload = updated.toJson();
       payload['updatedAt'] = DateTime.now().toIso8601String();
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: 'meal_logs',
-          docId: updated.date,
-          payload: jsonEncode(payload),
-          timestamp: DateTime.now(),
-        ));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'meal_logs',
+            docId: updated.date,
+            payload: jsonEncode(payload),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -304,24 +329,36 @@ class MealRepository {
       if (meal is! Map<String, dynamic>) {
         throw FormatException('Meal at index $i is not an object');
       }
-      
+
       if (meal['id'] == null || meal['id'].toString().trim().isEmpty) {
         meal['id'] = const Uuid().v4();
       }
-      
+
       final nutrition = meal['nutritionTarget'];
       if (nutrition is Map) {
-        if (nutrition['calories'] == null || num.tryParse(nutrition['calories'].toString()) == null) {
-          throw FormatException('Invalid or missing calories in meal "${meal['name'] ?? 'unknown'}"');
+        if (nutrition['calories'] == null ||
+            num.tryParse(nutrition['calories'].toString()) == null) {
+          throw FormatException(
+            'Invalid or missing calories in meal "${meal['name'] ?? 'unknown'}"',
+          );
         }
-        if (nutrition['protein'] == null || num.tryParse(nutrition['protein'].toString()) == null) {
-          throw FormatException('Invalid or missing protein in meal "${meal['name'] ?? 'unknown'}"');
+        if (nutrition['protein'] == null ||
+            num.tryParse(nutrition['protein'].toString()) == null) {
+          throw FormatException(
+            'Invalid or missing protein in meal "${meal['name'] ?? 'unknown'}"',
+          );
         }
-        if (nutrition['carbs'] == null || num.tryParse(nutrition['carbs'].toString()) == null) {
-          throw FormatException('Invalid or missing carbs in meal "${meal['name'] ?? 'unknown'}"');
+        if (nutrition['carbs'] == null ||
+            num.tryParse(nutrition['carbs'].toString()) == null) {
+          throw FormatException(
+            'Invalid or missing carbs in meal "${meal['name'] ?? 'unknown'}"',
+          );
         }
-        if (nutrition['fat'] == null || num.tryParse(nutrition['fat'].toString()) == null) {
-          throw FormatException('Invalid or missing fat in meal "${meal['name'] ?? 'unknown'}"');
+        if (nutrition['fat'] == null ||
+            num.tryParse(nutrition['fat'].toString()) == null) {
+          throw FormatException(
+            'Invalid or missing fat in meal "${meal['name'] ?? 'unknown'}"',
+          );
         }
       } else if (nutrition != null) {
         throw const FormatException('"nutritionTarget" must be an object');
@@ -329,11 +366,15 @@ class MealRepository {
 
       if (meal['suggestions'] != null) {
         if (meal['suggestions'] is! List) {
-          throw FormatException('"suggestions" in meal "${meal['name'] ?? 'unknown'}" must be an array');
+          throw FormatException(
+            '"suggestions" in meal "${meal['name'] ?? 'unknown'}" must be an array',
+          );
         }
         for (final item in meal['suggestions']) {
           if (item is! String) {
-            throw FormatException('Suggestion in meal "${meal['name'] ?? 'unknown'}" is not a valid string. Found: ${item.runtimeType}');
+            throw FormatException(
+              'Suggestion in meal "${meal['name'] ?? 'unknown'}" is not a valid string. Found: ${item.runtimeType}',
+            );
           }
         }
       }
@@ -348,13 +389,15 @@ class MealRepository {
     await _isar.writeTxn(() async {
       await _isar.mealPlans.put(plan);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: 'meal_plans',
-          docId: key,
-          payload: jsonEncode(plan.toJson()),
-          timestamp: DateTime.now(),
-        ));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'meal_plans',
+            docId: key,
+            payload: jsonEncode(plan.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -364,27 +407,31 @@ class MealRepository {
     final existing = getMealPlan(oldKey);
     final map = jsonDecode(jsonStr) as Map<String, dynamic>;
     final newPlan = MealPlan.fromJson(map);
-    
+
     await _isar.writeTxn(() async {
       if (existing != null) {
         await _isar.mealPlans.delete(existing.id);
       }
       await _isar.mealPlans.put(newPlan);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: '_delete_/meal_plans',
-          docId: oldKey,
-          payload: '{}',
-          timestamp: DateTime.now(),
-        ));
-        _isar.syncQueueItems.put(SyncQueueItem(
-          uid: _isar.name,
-          collection: 'meal_plans',
-          docId: newKey,
-          payload: jsonEncode(newPlan.toJson()),
-          timestamp: DateTime.now(),
-        ));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: '_delete_/meal_plans',
+            docId: oldKey,
+            payload: '{}',
+            timestamp: DateTime.now(),
+          ),
+        );
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'meal_plans',
+            docId: newKey,
+            payload: jsonEncode(newPlan.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();

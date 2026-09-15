@@ -11,7 +11,12 @@ class AiCache {
     _isar = Isar.getInstance(Isar.instanceNames.first)!;
   }
 
-  String _hash(String prompt, String? systemInstruction, String? imageContext, String? schemaStr) {
+  String _hash(
+    String prompt,
+    String? systemInstruction,
+    String? imageContext,
+    String? schemaStr,
+  ) {
     var raw = prompt;
     if (systemInstruction != null) {
       raw += systemInstruction;
@@ -25,7 +30,12 @@ class AiCache {
     return 'ai_cache_${sha256.convert(utf8.encode(raw)).toString()}';
   }
 
-  Map<String, dynamic>? get(String prompt, String? systemInstruction, [String? imageContext, String? schemaStr]) {
+  Map<String, dynamic>? get(
+    String prompt,
+    String? systemInstruction, [
+    String? imageContext,
+    String? schemaStr,
+  ]) {
     final key = _hash(prompt, systemInstruction, imageContext, schemaStr);
     final entry = _isar.aiCacheEntrys
         .where()
@@ -93,7 +103,9 @@ class AiCache {
             .timestampLessThan(cutoff)
             .findAllSync();
         if (oldEntries.isNotEmpty) {
-          await _isar.aiCacheEntrys.deleteAll(oldEntries.map((e) => e.id).toList());
+          await _isar.aiCacheEntrys.deleteAll(
+            oldEntries.map((e) => e.id).toList(),
+          );
         }
       });
     } catch (_) {

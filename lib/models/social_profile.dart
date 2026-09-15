@@ -43,10 +43,9 @@ class SocialProfile {
       lastUpdatedAt: json['lastUpdatedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['lastUpdatedAt'] as int)
           : DateTime.now(),
-      allowedReaders:
-          (json['allowedReaders'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList(),
+      allowedReaders: (json['allowedReaders'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       todayScore: json['todayScore'] as int?,
       weekScore: json['weekScore'] as int?,
     );

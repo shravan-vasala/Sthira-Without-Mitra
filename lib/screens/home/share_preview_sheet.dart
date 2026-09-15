@@ -38,7 +38,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
           SnackBar(
             content: const Text('Failed to prepare share image'),
             backgroundColor: context.colors.red,
-          )
+          ),
         );
       }
     } finally {
@@ -60,16 +60,23 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
     final scoreData = ref.watch(dailyScoreProvider);
     final score = scoreData.totalScore;
     final selectedDate = ref.watch(selectedDateProvider);
-    
+
     final dailyLog = ref.watch(dailyLogProvider);
     final mealsLog = ref.watch(dailyMealLogProvider);
     final habitsCount = ref.watch(habitsProvider).length;
-    final habitsCompleted = ref.watch(habitCompletionsProvider).completions.values.where((c) => c == true || (c is num && c > 0)).length;
+    final habitsCompleted = ref
+        .watch(habitCompletionsProvider)
+        .completions
+        .values
+        .where((c) => c == true || (c is num && c > 0))
+        .length;
 
     final steps = dailyLog.steps ?? 0;
     final mealsKcal = mealsLog.totalCalories;
     final workoutDone = dailyLog.workoutCompleted;
-    final habitsDone = habitsCount > 0 ? '$habitsCompleted/$habitsCount' : '0/0';
+    final habitsDone = habitsCount > 0
+        ? '$habitsCompleted/$habitsCount'
+        : '0/0';
 
     final subtitle = _getSubtitle(score);
     // Base color tied to score
@@ -103,84 +110,83 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Format Toggle Chips
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _FormatChip(
+                label: 'Post 4:5',
+                isSelected: _format == ShareFormat.post,
+                onTap: () => setState(() => _format = ShareFormat.post),
+              ),
+              const SizedBox(width: 8),
+              _FormatChip(
+                label: 'Story 9:16',
+                isSelected: _format == ShareFormat.story,
+                onTap: () => setState(() => _format = ShareFormat.story),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
 
-            // Format Toggle Chips
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _FormatChip(
-                  label: 'Post 4:5',
-                  isSelected: _format == ShareFormat.post,
-                  onTap: () => setState(() => _format = ShareFormat.post),
+          // Live Preview Box bounded by constraints
+          Flexible(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.fastOutSlowIn,
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.45,
                 ),
-                const SizedBox(width: 8),
-                _FormatChip(
-                  label: 'Story 9:16',
-                  isSelected: _format == ShareFormat.story,
-                  onTap: () => setState(() => _format = ShareFormat.story),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Live Preview Box bounded by constraints
-            Flexible(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.fastOutSlowIn,
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.45,
-                  ),
-                  child: AspectRatio(
-                    aspectRatio: previewWidth / previewHeight,
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: SizedBox(
-                        width: previewWidth,
-                        height: previewHeight,
-                        child: layout,
-                      ),
+                child: AspectRatio(
+                  aspectRatio: previewWidth / previewHeight,
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: SizedBox(
+                      width: previewWidth,
+                      height: previewHeight,
+                      child: layout,
                     ),
                   ),
                 ),
               ),
             ),
+          ),
 
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.colors.primary,
-                  foregroundColor: context.colors.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  elevation: 4,
-                  shadowColor: context.colors.primary.withValues(alpha: 0.4),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.colors.primary,
+                foregroundColor: context.colors.onPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                onPressed: _isSharing ? null : () => _shareImage(layout, subtitle),
-                icon: _isSharing
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : const Icon(Icons.ios_share_rounded),
-                label: Text(
-                  _isSharing ? 'Preparing...' : 'Share Image',
-                  style: context.text.bodyStrong,
-                ),
+                elevation: 4,
+                shadowColor: context.colors.primary.withValues(alpha: 0.4),
+              ),
+              onPressed: _isSharing
+                  ? null
+                  : () => _shareImage(layout, subtitle),
+              icon: _isSharing
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.ios_share_rounded),
+              label: Text(
+                _isSharing ? 'Preparing...' : 'Share Image',
+                style: context.text.bodyStrong,
               ),
             ),
+          ),
         ],
       ),
     );
@@ -215,7 +221,11 @@ class _FormatChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: context.text.caption.copyWith(color: isSelected ? context.colors.onPrimary : context.colors.textMedium),
+          style: context.text.caption.copyWith(
+            color: isSelected
+                ? context.colors.onPrimary
+                : context.colors.textMedium,
+          ),
         ),
       ),
     );

@@ -93,7 +93,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
     ref.listen<int>(weekOffsetProvider, (prev, next) {
       if (_pageController.hasClients && !_isManualAnimate) {
         final targetPage = _basePage + next;
-        
+
         // Prevent hijacking natural PageView swipe velocities
         final currentPage = _pageController.page ?? targetPage.toDouble();
         if ((currentPage - targetPage).abs() > 0.5) {
@@ -128,7 +128,10 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                         primary: context.colors.primary,
                         surface: context.colors.card,
                         onSurface: context.colors.textDark,
-                      ), dialogTheme: DialogThemeData(backgroundColor: context.colors.card),
+                      ),
+                      dialogTheme: DialogThemeData(
+                        backgroundColor: context.colors.card,
+                      ),
                     ),
                     child: child!,
                   );
@@ -155,53 +158,53 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-              const _DailyScoreBadge(),
-              const SizedBox(width: 12),
-              IconButton(
-                tooltip: 'Previous week',
-                visualDensity: VisualDensity.compact,
-                onPressed: () {
-                  _pageController.previousPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: context.colors.border.withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
+                  const _DailyScoreBadge(),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    tooltip: 'Previous week',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: context.colors.border.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.chevron_left_rounded,
+                        color: context.colors.textDark,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                  child: Icon(
-                    Icons.chevron_left_rounded,
-                    color: context.colors.textDark,
-                    size: 20,
+                  const SizedBox(width: 8),
+                  IconButton(
+                    tooltip: 'Next week',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: context.colors.border.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.chevron_right_rounded,
+                        color: context.colors.textDark,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                tooltip: 'Next week',
-                visualDensity: VisualDensity.compact,
-                onPressed: () {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                icon: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: context.colors.border.withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    color: context.colors.textDark,
-                    size: 20,
-                  ),
-                ),
-              ),
                 ],
               ),
             ),
@@ -358,9 +361,15 @@ class _DayCircleState extends ConsumerState<_DayCircle>
     }
 
     final fullDate = DateFormat('EEEE, MMMM d').format(widget.date);
-    final relative = widget.isToday ? "Today" : (widget.isFuture ? "Future" : "");
+    final relative = widget.isToday
+        ? "Today"
+        : (widget.isFuture ? "Future" : "");
     final completion = widget.isComplete ? "Activity completed" : "No activity";
-    final label = [if (relative.isNotEmpty) relative, fullDate, completion].join(", ");
+    final label = [
+      if (relative.isNotEmpty) relative,
+      fullDate,
+      completion,
+    ].join(", ");
 
     return Semantics(
       label: label,
@@ -381,68 +390,73 @@ class _DayCircleState extends ConsumerState<_DayCircle>
         behavior: HitTestBehavior.opaque,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            dayName.toUpperCase(),
-            style: context.text.micro.copyWith(color: context.colors.textLight),
-          ),
-          const SizedBox(height: 8),
-          ScaleTransition(
-            scale: _scaleAnim,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: widget.isSelected
-                    ? context.colors.primary
-                    : Colors.transparent,
+          children: [
+            Text(
+              dayName.toUpperCase(),
+              style: context.text.micro.copyWith(
+                color: context.colors.textLight,
               ),
-              child: Center(
-                child: Text(
-                  dayNum,
-                  style: context.text.body.copyWith(color: widget.isSelected
-                        ? context.colors.onPrimary
-                        : (widget.isToday
-                              ? context.colors.primary
-                              : context.colors.textDark)),
+            ),
+            const SizedBox(height: 8),
+            ScaleTransition(
+              scale: _scaleAnim,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.isSelected
+                      ? context.colors.primary
+                      : Colors.transparent,
+                ),
+                child: Center(
+                  child: Text(
+                    dayNum,
+                    style: context.text.body.copyWith(
+                      color: widget.isSelected
+                          ? context.colors.onPrimary
+                          : (widget.isToday
+                                ? context.colors.primary
+                                : context.colors.textDark),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 6),
-          // Activity dot (hidden on rest days)
-          SizedBox(
-            width: 8,
-            height: 8,
-            child: dotColor == null
-                ? null
-                : Center(
-                    child: Container(
-                      width: 5,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: dotColor,
-                        boxShadow: (dotColor == context.colors.green)
-                            ? [
-                                BoxShadow(
-                                  color: context.colors.green.withValues(
-                                    alpha: 0.4,
+            const SizedBox(height: 6),
+            // Activity dot (hidden on rest days)
+            SizedBox(
+              width: 8,
+              height: 8,
+              child: dotColor == null
+                  ? null
+                  : Center(
+                      child: Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: dotColor,
+                          boxShadow: (dotColor == context.colors.green)
+                              ? [
+                                  BoxShadow(
+                                    color: context.colors.green.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                    blurRadius: 4,
+                                    spreadRadius: 1,
                                   ),
-                                  blurRadius: 4,
-                                  spreadRadius: 1,
-                                ),
-                              ]
-                            : null,
+                                ]
+                              : null,
+                        ),
                       ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 
@@ -513,58 +527,61 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
       borderColor = context.colors.primary.withValues(alpha: 0.3);
     }
 
-    final semanticsLabel = isFuture ? 'Future date score' : 'Daily score: $score';
+    final semanticsLabel = isFuture
+        ? 'Future date score'
+        : 'Daily score: $score';
 
     return Semantics(
       label: semanticsLabel,
       button: !isFuture,
       excludeSemantics: true,
       child: GestureDetector(
-      onTap: isFuture
-          ? null
-          : () {
-              showAppBottomSheet(
-                context: context,
-                builder: (ctx) => const DailyScoreSheet(),
-              );
-            },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          gradient: gradientColors == null
-              ? null
-              : LinearGradient(
-                  colors: gradientColors,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-          color: gradientColors == null
-              ? context.colors.border.withValues(alpha: 0.5)
-              : null,
-          borderRadius: BorderRadius.circular(20),
-          // Sthira: No borders! Let the soft gradient fill float the pill.
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(iconData, size: 16, color: iconColor),
-            const SizedBox(width: 4),
-            TweenAnimationBuilder<int>(
-              tween: IntTween(begin: 0, end: isFuture ? 0 : score),
-              duration: MediaQuery.disableAnimationsOf(context)
-                  ? Duration.zero
-                  : const Duration(milliseconds: 1500),
-              curve: Curves.easeOutExpo,
-              builder: (context, value, child) {
-                return Text(
-                  isFuture ? '--' : value.toString(),
-                  style: context.text.body.copyWith(color: textColor),
+        onTap: isFuture
+            ? null
+            : () {
+                showAppBottomSheet(
+                  context: context,
+                  builder: (ctx) => const DailyScoreSheet(),
                 );
               },
-            ),
-          ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: gradientColors == null
+                ? null
+                : LinearGradient(
+                    colors: gradientColors,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+            color: gradientColors == null
+                ? context.colors.border.withValues(alpha: 0.5)
+                : null,
+            borderRadius: BorderRadius.circular(20),
+            // Sthira: No borders! Let the soft gradient fill float the pill.
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(iconData, size: 16, color: iconColor),
+              const SizedBox(width: 4),
+              TweenAnimationBuilder<int>(
+                tween: IntTween(begin: 0, end: isFuture ? 0 : score),
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 1500),
+                curve: Curves.easeOutExpo,
+                builder: (context, value, child) {
+                  return Text(
+                    isFuture ? '--' : value.toString(),
+                    style: context.text.body.copyWith(color: textColor),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }

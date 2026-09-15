@@ -31,13 +31,13 @@ class UserFoodLog {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': originalName,
-        'kcal': baseNutrition.kcal,
-        'protein_g': baseNutrition.proteinG,
-        'carbs_g': baseNutrition.carbsG,
-        'fat_g': baseNutrition.fatG,
-        'is_per_100g': isPer100g,
-        if (servingGrams != null) 'serving_grams': servingGrams,
-        if (provenance != null) 'provenance': provenance,
-      };
+    'name': originalName,
+    'kcal': baseNutrition.kcal,
+    'protein_g': baseNutrition.proteinG,
+    'carbs_g': baseNutrition.carbsG,
+    'fat_g': baseNutrition.fatG,
+    'is_per_100g': isPer100g,
+    if (servingGrams != null) 'serving_grams': servingGrams,
+    if (provenance != null) 'provenance': provenance,
+  };
 }

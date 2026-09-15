@@ -54,12 +54,12 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     final macros = _calculatedMacros;
     return AppSheet(
       title: 'Visual Plate Calculator',
-      subtitle: 'Values are rough educational examples for a standard 500g plate. For accurate meal tracking and precise nutrition, please log your actual food.',
+      subtitle:
+          'Values are rough educational examples for a standard 500g plate. For accurate meal tracking and precise nutrition, please log your actual food.',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-
           _buildSlider(
             title: 'Protein (Meat, Eggs, Dal)',
             color: context.colors.primary,
@@ -117,11 +117,12 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _macroItem('Calories', "${macros['calories']!.toInt()}", isGiant: true),
                 _macroItem(
-                  'Protein',
-                  "${macros['protein']!.toInt()}g",
+                  'Calories',
+                  "${macros['calories']!.toInt()}",
+                  isGiant: true,
                 ),
+                _macroItem('Protein', "${macros['protein']!.toInt()}g"),
                 _macroItem('Carbs', "${macros['carbs']!.toInt()}g"),
                 _macroItem('Fat', "${macros['fat']!.toInt()}g"),
               ],
@@ -139,14 +140,17 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     bool fat = false,
   }) {
     for (int i = 0; i < 5; i++) {
-      final double total = proteinPercent + carbsPercent + vegPercent + fatPercent;
+      final double total =
+          proteinPercent + carbsPercent + vegPercent + fatPercent;
       final double diff = 100.0 - total;
-      
+
       if (diff.abs() < 0.1) break;
 
       int absorbCount = 0;
-      if (!protein && (diff > 0 ? proteinPercent < 100 : proteinPercent > 0)) absorbCount++;
-      if (!carbs && (diff > 0 ? carbsPercent < 100 : carbsPercent > 0)) absorbCount++;
+      if (!protein && (diff > 0 ? proteinPercent < 100 : proteinPercent > 0))
+        absorbCount++;
+      if (!carbs && (diff > 0 ? carbsPercent < 100 : carbsPercent > 0))
+        absorbCount++;
       if (!veg && (diff > 0 ? vegPercent < 100 : vegPercent > 0)) absorbCount++;
       if (!fat && (diff > 0 ? fatPercent < 100 : fatPercent > 0)) absorbCount++;
 
@@ -191,7 +195,9 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             children: [
               Text(
                 title,
-                style: context.text.body.copyWith(color: context.colors.textDark),
+                style: context.text.body.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               Text(
                 '${value.toInt()}%',
@@ -235,11 +241,21 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             if (isGiant)
               Text(
                 '~',
-                style: AppTheme.numeric(context.text.screenTitle.copyWith(color: context.colors.primary.withValues(alpha: 0.5))),
+                style: AppTheme.numeric(
+                  context.text.screenTitle.copyWith(
+                    color: context.colors.primary.withValues(alpha: 0.5),
+                  ),
+                ),
               ),
             Text(
               value,
-              style: AppTheme.numeric(context.text.body.copyWith(color: isGiant ? context.colors.primary : context.colors.textDark)),
+              style: AppTheme.numeric(
+                context.text.body.copyWith(
+                  color: isGiant
+                      ? context.colors.primary
+                      : context.colors.textDark,
+                ),
+              ),
             ),
           ],
         ),

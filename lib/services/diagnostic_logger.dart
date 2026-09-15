@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/app_providers.dart';
 
-final diagnosticLoggerProvider = ChangeNotifierProvider<DiagnosticLogger>((ref) {
+final diagnosticLoggerProvider = ChangeNotifierProvider<DiagnosticLogger>((
+  ref,
+) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return DiagnosticLogger(prefs);
 });
@@ -27,25 +29,26 @@ class DiagnosticLog {
   });
 
   Map<String, dynamic> toJson() => {
-        'ts': timestamp.toIso8601String(),
-        'lvl': level,
-        'msg': message,
-        if (error != null) 'err': error,
-        if (stackTrace != null) 'stack': stackTrace,
-      };
+    'ts': timestamp.toIso8601String(),
+    'lvl': level,
+    'msg': message,
+    if (error != null) 'err': error,
+    if (stackTrace != null) 'stack': stackTrace,
+  };
 
   factory DiagnosticLog.fromJson(Map<String, dynamic> json) => DiagnosticLog(
-        timestamp: DateTime.parse(json['ts']),
-        level: json['lvl'],
-        message: json['msg'],
-        error: json['err'],
-        stackTrace: json['stack'],
-      );
+    timestamp: DateTime.parse(json['ts']),
+    level: json['lvl'],
+    message: json['msg'],
+    error: json['err'],
+    stackTrace: json['stack'],
+  );
 }
 
 class DiagnosticLogger extends ChangeNotifier {
   static const int _maxLogs = 100;
-  static const int _maxBytesPerField = 4096; // Guard against massive arbitrary payloads crashing JSON
+  static const int _maxBytesPerField =
+      4096; // Guard against massive arbitrary payloads crashing JSON
   static const String _prefsKey = 'diagnostic_ring_buffer';
 
   final SharedPreferences _prefs;
@@ -87,7 +90,7 @@ class DiagnosticLogger extends ChangeNotifier {
       final str = jsonEncode(_logs.map((e) => e.toJson()).toList());
       // Serialize check preventing overlapping clears mid-flight rendering
       if (gen == _persistGeneration) {
-         _prefs.setString(_prefsKey, str);
+        _prefs.setString(_prefsKey, str);
       }
     } catch (e) {
       debugPrint('DiagnosticLogger failed saving preferences: $e');
@@ -96,17 +99,28 @@ class DiagnosticLogger extends ChangeNotifier {
 
   String _sanitize(String content) {
     var safe = content;
-    safe = safe.replaceAll(RegExp(r'AIza[0-9A-Za-z-_]{35}'), '[REDACTED_API_KEY]');
+    safe = safe.replaceAll(
+      RegExp(r'AIza[0-9A-Za-z-_]{35}'),
+      '[REDACTED_API_KEY]',
+    );
     // Scrub secret query parameters (e.g. ?token=..., &key=...)
-    safe = safe.replaceAll(RegExp(r'([?&])(?:key|token|auth|password|secret|credential)=[^&\s"]+'), r'$1[REDACTED_PARAM]');
+    safe = safe.replaceAll(
+      RegExp(r'([?&])(?:key|token|auth|password|secret|credential)=[^&\s"]+'),
+      r'$1[REDACTED_PARAM]',
+    );
     // Limit bounds explicitly restricting extreme runaway strings structurally
     if (safe.length > _maxBytesPerField) {
-       safe = '${safe.substring(0, _maxBytesPerField)}...[TRUNCATED]';
+      safe = '${safe.substring(0, _maxBytesPerField)}...[TRUNCATED]';
     }
     return safe;
   }
 
-  void _addLog(String level, String message, [dynamic error, StackTrace? stack]) {
+  void _addLog(
+    String level,
+    String message, [
+    dynamic error,
+    StackTrace? stack,
+  ]) {
     final log = DiagnosticLog(
       timestamp: DateTime.now(),
       level: level,
@@ -124,25 +138,29 @@ class DiagnosticLogger extends ChangeNotifier {
 
     // Persist synchronously for best-effort boundaries gracefully bounded!
     _saveToPrefs();
-    
+
     // Also echo to console in debug mode
     if (kDebugMode) {
-      print('[$level] ${log.message} ${log.error != null ? '\nError: ${log.error}' : ''}');
+      print(
+        '[$level] ${log.message} ${log.error != null ? '\nError: ${log.error}' : ''}',
+      );
     }
   }
 
   void info(String message) => _addLog('INFO', message);
-  void warning(String message, [dynamic error, StackTrace? stack]) => _addLog('WARN', message, error, stack);
-  void error(String message, [dynamic error, StackTrace? stack]) => _addLog('ERROR', message, error, stack);
-  
+  void warning(String message, [dynamic error, StackTrace? stack]) =>
+      _addLog('WARN', message, error, stack);
+  void error(String message, [dynamic error, StackTrace? stack]) =>
+      _addLog('ERROR', message, error, stack);
+
   List<DiagnosticLog> getLogs() => _logs.toList();
-  
+
   void clear() {
     _persistGeneration++;
     _logs.clear();
     notifyListeners();
     try {
-       _prefs.remove(_prefsKey);
+      _prefs.remove(_prefsKey);
     } catch (_) {}
   }
 }

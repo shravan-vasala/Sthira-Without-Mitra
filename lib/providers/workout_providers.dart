@@ -17,7 +17,10 @@ final workoutDayProvider = Provider.family<WorkoutDay?, String>((ref, dayId) {
   return ref.watch(workoutRepoProvider).getWorkoutDay(dayId);
 });
 
-final resolvedWorkoutDayProvider = Provider.family<WorkoutDay?, DateTime>((ref, date) {
+final resolvedWorkoutDayProvider = Provider.family<WorkoutDay?, DateTime>((
+  ref,
+  date,
+) {
   final plan = ref.watch(workoutPlanProvider);
   if (plan == null) return null;
   return WorkoutCompletion.resolveWorkoutDay(plan, date);

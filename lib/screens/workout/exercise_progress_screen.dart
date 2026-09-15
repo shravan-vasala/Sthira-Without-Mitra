@@ -8,7 +8,6 @@ import '../../models/exercise_log.dart';
 import '../../models/exercise_pr.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
-
 class ExerciseProgressScreen extends ConsumerWidget {
   const ExerciseProgressScreen({super.key, required this.exerciseName});
 
@@ -19,7 +18,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logs = ref.watch(exerciseHistoryProvider(exerciseName));
-    
+
     final profile = ref.watch(profileProvider);
     final useKg = profile.useKg;
     final unitLabel = useKg ? 'kg' : 'lb';
@@ -52,20 +51,22 @@ class ExerciseProgressScreen extends ConsumerWidget {
     for (var log in sortedLogs) {
       try {
         final parsedDate = DateTime.parse(log.date);
-        final dateStr = "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
-        
+        final dateStr =
+            "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+
         final weight = log.maxWeight * weightMultiplier;
         final vol = log.totalVolume * weightMultiplier;
-        
+
         if (!weight.isFinite || !vol.isFinite) {
           malformedCount++;
           continue;
         }
 
-        if (!dailyMaxWeight.containsKey(dateStr) || weight > dailyMaxWeight[dateStr]!) {
+        if (!dailyMaxWeight.containsKey(dateStr) ||
+            weight > dailyMaxWeight[dateStr]!) {
           dailyMaxWeight[dateStr] = weight;
         }
-        
+
         dailyTotalVolume[dateStr] = (dailyTotalVolume[dateStr] ?? 0.0) + vol;
       } catch (_) {
         malformedCount++;
@@ -73,9 +74,11 @@ class ExerciseProgressScreen extends ConsumerWidget {
     }
 
     // Prepare Max Weight Data and Stats
-    final List<ChartDataPoint> maxWeightData = dailyMaxWeight.entries
-        .map((e) => ChartDataPoint(DateTime.parse(e.key), e.value))
-        .toList()..sort((a, b) => a.date.compareTo(b.date));
+    final List<ChartDataPoint> maxWeightData =
+        dailyMaxWeight.entries
+            .map((e) => ChartDataPoint(DateTime.parse(e.key), e.value))
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
 
     List<String> maxWeightStats = [];
     if (maxWeightData.isNotEmpty) {
@@ -91,9 +94,11 @@ class ExerciseProgressScreen extends ConsumerWidget {
     }
 
     // Prepare Total Volume Data and Stats
-    final List<ChartDataPoint> totalVolumeData = dailyTotalVolume.entries
-        .map((e) => ChartDataPoint(DateTime.parse(e.key), e.value))
-        .toList()..sort((a, b) => a.date.compareTo(b.date));
+    final List<ChartDataPoint> totalVolumeData =
+        dailyTotalVolume.entries
+            .map((e) => ChartDataPoint(DateTime.parse(e.key), e.value))
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
 
     List<String> totalVolumeStats = [];
     if (totalVolumeData.isNotEmpty) {
@@ -117,10 +122,12 @@ class ExerciseProgressScreen extends ConsumerWidget {
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
         title: Text(displayTitle),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: sortedLogs.isEmpty
           ? Center(
@@ -135,12 +142,16 @@ class ExerciseProgressScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     'No data logged yet',
-                    style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
+                    style: context.text.bodyStrong.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Log exercise data to see your progress',
-                    style: context.text.caption.copyWith(color: context.colors.textLight),
+                    style: context.text.caption.copyWith(
+                      color: context.colors.textLight,
+                    ),
                   ),
                 ],
               ),
@@ -166,7 +177,11 @@ class ExerciseProgressScreen extends ConsumerWidget {
                         const SizedBox(height: 20),
                       ],
                       SharedChartCard(
-                        metric: MetricSpec(title: 'Max Weight', unit: unitLabel, isCount: false),
+                        metric: MetricSpec(
+                          title: 'Max Weight',
+                          unit: unitLabel,
+                          isCount: false,
+                        ),
                         data: maxWeightData,
                         statLabels: const ['BEST', 'LAST', 'AVERAGE'],
                         statValues: maxWeightStats,
@@ -177,7 +192,11 @@ class ExerciseProgressScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       SharedChartCard(
-                        metric: MetricSpec(title: 'Total Volume', unit: '$unitLabel (load×reps)', isCount: false),
+                        metric: MetricSpec(
+                          title: 'Total Volume',
+                          unit: '$unitLabel (load×reps)',
+                          isCount: false,
+                        ),
                         data: totalVolumeData,
                         statLabels: const ['BEST', 'LAST', 'AVERAGE'],
                         statValues: totalVolumeStats,
@@ -189,21 +208,28 @@ class ExerciseProgressScreen extends ConsumerWidget {
                       const SizedBox(height: 20),
                       if (malformedCount > 0) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: context.colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             'Skipped $malformedCount malformed historic logs to keep charts accurate.',
-                            style: context.text.caption.copyWith(color: context.colors.red),
+                            style: context.text.caption.copyWith(
+                              color: context.colors.red,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 20),
                       ],
                       Text(
                         'HISTORY',
-                        style: context.text.micro.copyWith(color: context.colors.textLight),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.textLight,
+                        ),
                       ),
                       const SizedBox(height: 12),
                     ]),
@@ -232,7 +258,11 @@ class _PrSummary extends StatelessWidget {
   final ExercisePr pr;
   final String unitLabel;
   final double weightMultiplier;
-  const _PrSummary({required this.pr, required this.unitLabel, required this.weightMultiplier});
+  const _PrSummary({
+    required this.pr,
+    required this.unitLabel,
+    required this.weightMultiplier,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -240,9 +270,7 @@ class _PrSummary extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colors.goldMuted,
-        border: Border.all(
-          color: context.colors.gold.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: context.colors.gold.withValues(alpha: 0.5)),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -275,15 +303,25 @@ class _PrSummary extends StatelessWidget {
               'Bodyweight × ${pr.maxWeightReps}',
               context,
             ),
-          if (pr.maxReps > 0 && (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
+          if (pr.maxReps > 0 &&
+              (pr.maxWeight == 0 || pr.maxReps > pr.maxWeightReps))
             _buildPrRow(
               'Max Reps',
               '${pr.maxReps} reps @ ${pr.maxRepsWeight > 0 ? (pr.maxRepsWeight * weightMultiplier).toStringAsFixed(1) + unitLabel : "BW"}',
               context,
             ),
           if (pr.estimated1RM > 0)
-            _buildPrRow('Est. 1RM', '${(pr.estimated1RM * weightMultiplier).toStringAsFixed(1)}$unitLabel', context),
-          if (pr.maxVolume > 0) _buildPrRow('Max Volume', '${(pr.maxVolume * weightMultiplier).toStringAsFixed(1)}$unitLabel', context),
+            _buildPrRow(
+              'Est. 1RM',
+              '${(pr.estimated1RM * weightMultiplier).toStringAsFixed(1)}$unitLabel',
+              context,
+            ),
+          if (pr.maxVolume > 0)
+            _buildPrRow(
+              'Max Volume',
+              '${(pr.maxVolume * weightMultiplier).toStringAsFixed(1)}$unitLabel',
+              context,
+            ),
         ],
       ),
     );
@@ -310,7 +348,11 @@ class _PrSummary extends StatelessWidget {
 }
 
 class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.log, required this.unitLabel, required this.weightMultiplier});
+  const _HistoryCard({
+    required this.log,
+    required this.unitLabel,
+    required this.weightMultiplier,
+  });
 
   final ExerciseLog log;
   final String unitLabel;
@@ -336,21 +378,29 @@ class _HistoryCard extends StatelessWidget {
               children: [
                 Text(
                   formattedDate,
-                  style: context.text.body.copyWith(color: context.colors.textDark),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textDark,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  log.sets.map((s) {
-                    final w = s.weight ?? 0.0;
-                    if (w > 0) {
-                      final strWeight = (w * weightMultiplier) == (w * weightMultiplier).toInt() 
-                          ? (w * weightMultiplier).toInt().toString() 
-                          : (w * weightMultiplier).toStringAsFixed(1);
-                      return '${s.reps}×$strWeight$unitLabel';
-                    }
-                    return '${s.reps}×BW';
-                  }).join(' | '),
-                  style: context.text.micro.copyWith(color: context.colors.textMedium),
+                  log.sets
+                      .map((s) {
+                        final w = s.weight ?? 0.0;
+                        if (w > 0) {
+                          final strWeight =
+                              (w * weightMultiplier) ==
+                                  (w * weightMultiplier).toInt()
+                              ? (w * weightMultiplier).toInt().toString()
+                              : (w * weightMultiplier).toStringAsFixed(1);
+                          return '${s.reps}×$strWeight$unitLabel';
+                        }
+                        return '${s.reps}×BW';
+                      })
+                      .join(' | '),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ],
             ),
@@ -360,11 +410,15 @@ class _HistoryCard extends StatelessWidget {
             children: [
               Text(
                 '${(log.totalVolume * weightMultiplier).toStringAsFixed(0)} $unitLabel',
-                style: context.text.bodyStrong.copyWith(color: context.colors.primary),
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.primary,
+                ),
               ),
               Text(
                 'load × reps',
-                style: context.text.micro.copyWith(color: context.colors.textLight),
+                style: context.text.micro.copyWith(
+                  color: context.colors.textLight,
+                ),
               ),
             ],
           ),

@@ -15,7 +15,12 @@ import '../../../utils/format_units.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ExerciseCard extends ConsumerWidget {
-  const ExerciseCard({super.key, required this.exercise, required this.dayId, this.highlight = false});
+  const ExerciseCard({
+    super.key,
+    required this.exercise,
+    required this.dayId,
+    this.highlight = false,
+  });
 
   final Exercise exercise;
   final String dayId;
@@ -29,13 +34,20 @@ class ExerciseCard extends ConsumerWidget {
     final profile = ref.watch(profileProvider);
     final useKg = profile.useKg;
     final dateStr = ref.watch(dateStringProvider);
-    final log = logRepo.getLog(dateStr, exercise.instanceId ?? exercise.name ?? '');
+    final log = logRepo.getLog(
+      dateStr,
+      exercise.instanceId ?? exercise.name ?? '',
+    );
     final isCompleted = log != null;
-    
+
     final selectedDate = ref.watch(selectedDateProvider);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final isFuture = DateTime(selectedDate.year, selectedDate.month, selectedDate.day).isAfter(today);
+    final isFuture = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    ).isAfter(today);
 
     String? loggedText;
     if (log != null && log.sets.isNotEmpty) {
@@ -116,7 +128,9 @@ class ExerciseCard extends ConsumerWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   'Search YT',
-                                  style: context.text.micro.copyWith(color: context.colors.primary),
+                                  style: context.text.micro.copyWith(
+                                    color: context.colors.primary,
+                                  ),
                                 ),
                               ],
                             )
@@ -187,7 +201,9 @@ class ExerciseCard extends ConsumerWidget {
                     children: [
                       Text(
                         exercise.displayName ?? exercise.name ?? '',
-                        style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                        style: context.text.bodyStrong.copyWith(
+                          color: context.colors.textDark,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Wrap(
@@ -198,27 +214,48 @@ class ExerciseCard extends ConsumerWidget {
                           Text(
                             '${exercise.repsDisplay} Reps',
                             style: AppTheme.numeric(
-                              context.text.caption.copyWith(color: context.colors.primary),
+                              context.text.caption.copyWith(
+                                color: context.colors.primary,
+                              ),
                             ),
                           ),
                           if (exercise.weightKg != null) ...[
-                            Text('•', style: context.text.micro.copyWith(color: context.colors.border)),
+                            Text(
+                              '•',
+                              style: context.text.micro.copyWith(
+                                color: context.colors.border,
+                              ),
+                            ),
                             Text(
                               '${convertFromKg(profile, exercise.weightKg!).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ${useKg ? 'kg' : 'lb'}',
                               style: AppTheme.numeric(
-                                context.text.caption.copyWith(color: context.colors.primary),
+                                context.text.caption.copyWith(
+                                  color: context.colors.primary,
+                                ),
                               ),
                             ),
                           ],
                           if (exercise.sideInfo != 'None') ...[
-                            Text('•', style: context.text.micro.copyWith(color: context.colors.border)),
+                            Text(
+                              '•',
+                              style: context.text.micro.copyWith(
+                                color: context.colors.border,
+                              ),
+                            ),
                             Text(
                               exercise.sideInfo ?? '',
-                              style: context.text.micro.copyWith(color: context.colors.mintIcon),
+                              style: context.text.micro.copyWith(
+                                color: context.colors.mintIcon,
+                              ),
                             ),
                           ],
                           if (pr != null) ...[
-                            Text('•', style: context.text.micro.copyWith(color: context.colors.border)),
+                            Text(
+                              '•',
+                              style: context.text.micro.copyWith(
+                                color: context.colors.border,
+                              ),
+                            ),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -233,7 +270,9 @@ class ExerciseCard extends ConsumerWidget {
                                       ? '${convertFromKg(profile, pr.maxWeight).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}${useKg ? 'kg' : 'lb'}'
                                       : '${pr.maxReps} reps',
                                   style: AppTheme.numeric(
-                                    context.text.micro.copyWith(color: const Color(0xFFB8860B)),
+                                    context.text.micro.copyWith(
+                                      color: const Color(0xFFB8860B),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -245,7 +284,9 @@ class ExerciseCard extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Text(
                           loggedText,
-                          style: context.text.micro.copyWith(color: context.colors.green),
+                          style: context.text.micro.copyWith(
+                            color: context.colors.green,
+                          ),
                         ),
                       ],
                     ],
@@ -258,12 +299,14 @@ class ExerciseCard extends ConsumerWidget {
                       'Mark ${exercise.displayName ?? exercise.name ?? ''} as ${isCompleted ? 'incomplete' : 'complete'}',
                   button: true,
                   child: GestureDetector(
-                    onTap: isFuture ? null : () {
-                      showAppBottomSheet(
-                        context: context,
-                        builder: (_) => LogDataDialog(exercise: exercise),
-                      );
-                    },
+                    onTap: isFuture
+                        ? null
+                        : () {
+                            showAppBottomSheet(
+                              context: context,
+                              builder: (_) => LogDataDialog(exercise: exercise),
+                            );
+                          },
                     child: SizedBox(
                       width: 48,
                       height: 48,
@@ -276,7 +319,9 @@ class ExerciseCard extends ConsumerWidget {
                             shape: BoxShape.circle,
                             color: isCompleted
                                 ? context.colors.green
-                                : context.colors.textLight.withValues(alpha: 0.15),
+                                : context.colors.textLight.withValues(
+                                    alpha: 0.15,
+                                  ),
                           ),
                           child: isCompleted
                               ? TweenAnimationBuilder<double>(
@@ -328,7 +373,9 @@ class ExerciseCard extends ConsumerWidget {
                       child: Text(
                         // ignore: dead_null_aware_expression
                         exercise.note ?? '',
-                        style: context.text.caption.copyWith(color: context.colors.textMedium),
+                        style: context.text.caption.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                     ),
                   ],
@@ -359,7 +406,9 @@ class ExerciseCard extends ConsumerWidget {
                   label: 'Progress',
                   icon: Icons.bar_chart_rounded,
                   onTap: () {
-                    context.push('/exercise-progress?name=${Uri.encodeComponent(exercise.name ?? '')}');
+                    context.push(
+                      '/exercise-progress?name=${Uri.encodeComponent(exercise.name ?? '')}',
+                    );
                   },
                 ),
               ],
@@ -387,7 +436,10 @@ class ExerciseCard extends ConsumerWidget {
     String msg = 'Logged ${exercise.name}';
     if (prResult.hasAnyNewPr) {
       if (prResult.isNewMaxWeight) {
-        final w = convertFromKg(profile, prResult.newPr.maxWeight).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+        final w = convertFromKg(
+          profile,
+          prResult.newPr.maxWeight,
+        ).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
         msg = 'New PR! $w${useKg ? 'kg' : 'lb'}';
       } else if (prResult.isNewMaxReps) {
         msg = 'New PR! ${prResult.newPr.maxReps} reps';
@@ -438,10 +490,7 @@ class _MinimalAction extends StatelessWidget {
           children: [
             Icon(icon, size: 16, color: baseColor),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: context.text.caption.copyWith(color: baseColor),
-            ),
+            Text(label, style: context.text.caption.copyWith(color: baseColor)),
           ],
         ),
       ),

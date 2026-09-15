@@ -99,7 +99,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
         int maxStreak = 0;
 
         final startDate = DateTime(year, 1, 1);
-        final isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        final isLeapYear =
+            (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
         final daysInYear = isLeapYear ? 366 : 365;
 
         for (int i = 0; i < daysInYear; i++) {
@@ -126,8 +127,12 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                   Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.chevron_left_rounded, color: context.colors.textDark),
-                        onPressed: () => ref.read(selectedYearProvider.notifier).state--,
+                        icon: Icon(
+                          Icons.chevron_left_rounded,
+                          color: context.colors.textDark,
+                        ),
+                        onPressed: () =>
+                            ref.read(selectedYearProvider.notifier).state--,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
@@ -135,7 +140,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                       Text(
                         year.toString(),
                         style: AppTheme.numeric(
-                          context.text.cardTitle.copyWith(color: context.colors.textDark),
+                          context.text.cardTitle.copyWith(
+                            color: context.colors.textDark,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -148,7 +155,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                               : context.colors.textLight,
                         ),
                         onPressed: year < DateTime.now().year
-                            ? () => ref.read(selectedYearProvider.notifier).state++
+                            ? () => ref
+                                  .read(selectedYearProvider.notifier)
+                                  .state++
                             : null,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -164,14 +173,20 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                 builder: (context, constraints) {
                   final bool isWide = constraints.maxWidth > 500;
                   final int crossAxisCount = isWide ? 2 : 1;
-                  final double cardWidth = (constraints.maxWidth - 40 - (16 * (crossAxisCount - 1))) / crossAxisCount;
-                  
+                  final double cardWidth =
+                      (constraints.maxWidth -
+                          40 -
+                          (16 * (crossAxisCount - 1))) /
+                      crossAxisCount;
+
                   final innerPadding = 12.0;
                   final availableGridWidth = cardWidth - (innerPadding * 2);
-                  final double cellSize = (availableGridWidth / 8.2).floorToDouble();
-                  final estimatedHeight = 20.0 + 16.0 + 12.0 + 8.0 + (6 * (cellSize + 3.0)) + 24.0;
+                  final double cellSize = (availableGridWidth / 8.2)
+                      .floorToDouble();
+                  final estimatedHeight =
+                      20.0 + 16.0 + 12.0 + 8.0 + (6 * (cellSize + 3.0)) + 24.0;
                   final aspectRatio = cardWidth / estimatedHeight;
-                  
+
                   final int monthsToShow;
                   if (year == DateTime.now().year) {
                     monthsToShow = DateTime.now().month;
@@ -180,12 +195,14 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                   } else {
                     monthsToShow = 0;
                   }
-                  
+
                   if (monthsToShow == 0) {
                     return Center(
                       child: Text(
                         'No activity yet for this year.',
-                        style: context.text.body.copyWith(color: context.colors.textMedium),
+                        style: context.text.body.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                     );
                   }
@@ -205,10 +222,17 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     ),
                     itemBuilder: (context, index) {
                       final month = index + 1;
-                      return _buildMonthCard(context, year, month, heatmapData, cardWidth, _monthKeys[index]);
+                      return _buildMonthCard(
+                        context,
+                        year,
+                        month,
+                        heatmapData,
+                        cardWidth,
+                        _monthKeys[index],
+                      );
                     },
                   );
-                }
+                },
               ),
             ),
             const SizedBox(height: 24),
@@ -217,11 +241,19 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildStatCard(context, 'Active Days', '$activeDays'),
+                    child: _buildStatCard(
+                      context,
+                      'Active Days',
+                      '$activeDays',
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildStatCard(context, 'Longest Streak', '$maxStreak'),
+                    child: _buildStatCard(
+                      context,
+                      'Longest Streak',
+                      '$maxStreak',
+                    ),
                   ),
                 ],
               ),
@@ -232,7 +264,12 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Less', style: context.text.micro.copyWith(color: context.colors.textLight)),
+                  Text(
+                    'Less',
+                    style: context.text.micro.copyWith(
+                      color: context.colors.textLight,
+                    ),
+                  ),
                   const SizedBox(width: 4),
                   _buildLegendSquare(context, 0),
                   _buildLegendSquare(context, 20),
@@ -240,7 +277,12 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                   _buildLegendSquare(context, 70),
                   _buildLegendSquare(context, 100),
                   const SizedBox(width: 4),
-                  Text('More', style: context.text.micro.copyWith(color: context.colors.textLight)),
+                  Text(
+                    'More',
+                    style: context.text.micro.copyWith(
+                      color: context.colors.textLight,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -259,34 +301,55 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline_rounded, color: context.colors.red.withValues(alpha: 0.8), size: 32),
+            Icon(
+              Icons.error_outline_rounded,
+              color: context.colors.red.withValues(alpha: 0.8),
+              size: 32,
+            ),
             const SizedBox(height: 12),
-            Text('Failed to load activity.', style: context.text.body.copyWith(color: context.colors.textMedium)),
+            Text(
+              'Failed to load activity.',
+              style: context.text.body.copyWith(
+                color: context.colors.textMedium,
+              ),
+            ),
             const SizedBox(height: 8),
             TextButton.icon(
               onPressed: () => ref.invalidate(yearlyActivityHeatmapProvider),
               icon: Icon(Icons.refresh_rounded, color: context.colors.primary),
-              label: Text('Retry', style: context.text.body.copyWith(color: context.colors.primary)),
-            )
+              label: Text(
+                'Retry',
+                style: context.text.body.copyWith(
+                  color: context.colors.primary,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMonthCard(BuildContext context, int year, int month, Map<DateTime, int> heatmapData, double width, GlobalKey key) {
+  Widget _buildMonthCard(
+    BuildContext context,
+    int year,
+    int month,
+    Map<DateTime, int> heatmapData,
+    double width,
+    GlobalKey key,
+  ) {
     final firstDayOfMonth = DateTime(year, month, 1);
     final daysInMonth = DateUtils.getDaysInMonth(year, month);
-    
+
     // Monday-anchored start of week
     // DateTime.monday == 1 ... DateTime.sunday == 7
     final startWeekday = (firstDayOfMonth.weekday - DateTime.monday) % 7;
-    
+
     final totalCells = daysInMonth + startWeekday;
     final totalRows = (totalCells / 7).ceil();
 
     final monthName = DateFormat('MMM').format(firstDayOfMonth).toLowerCase();
-    
+
     // Calculate cell size organically
     final innerPadding = 12.0;
     final availableGridWidth = width - (innerPadding * 2);
@@ -294,10 +357,10 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
 
     return Container(
       key: key,
-      width: width, 
+      width: width,
       padding: EdgeInsets.all(innerPadding),
       decoration: BoxDecoration(
-        color: context.colors.card, 
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -309,7 +372,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
               Expanded(
                 child: Text(
                   monthName,
-                  style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+                  style: context.text.screenTitle.copyWith(
+                    color: context.colors.textDark,
+                  ),
                 ),
               ),
             ],
@@ -323,7 +388,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                 child: Text(
                   day,
                   textAlign: TextAlign.center,
-                  style: context.text.micro.copyWith(color: context.colors.textMedium),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               );
             }).toList(),
@@ -343,48 +410,60 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                       return SizedBox(width: cellSize, height: cellSize);
                     }
 
-                  final currentDate = DateTime(year, month, dayOffset + 1);
-                  final score = heatmapData[currentDate] ?? 0;
-                  
-                  String tooltipMsg;
-                  if (score == -1) {
-                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nFuture';
-                  } else if (score == -2) {
-                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nNo activity recorded';
-                  } else if (score == 0) {
-                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\n0% (Missed goals)';
-                  } else {
-                    tooltipMsg = '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score%';
-                  }
+                    final currentDate = DateTime(year, month, dayOffset + 1);
+                    final score = heatmapData[currentDate] ?? 0;
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: GestureDetector(
-                      onTap: score == -1 ? null : () {
-                        ref.read(selectedDateProvider.notifier).state = currentDate;
-                        context.go('/home');
-                      },
-                      child: Semantics(
-                        label: tooltipMsg,
-                        button: score != -1,
-                        child: Tooltip(
-                          message: tooltipMsg,
-                          child: Container(
-                            width: cellSize,
-                            height: cellSize,
-                            decoration: BoxDecoration(
-                              color: _getColorForScore(context, score),
-                              borderRadius: BorderRadius.circular(4),
-                              border: score == 0 
-                                  ? Border.all(color: context.colors.red.withValues(alpha: 0.3), width: 1)
-                                  : null,
+                    String tooltipMsg;
+                    if (score == -1) {
+                      tooltipMsg =
+                          '${DateFormat('MMM dd, yyyy').format(currentDate)}\nFuture';
+                    } else if (score == -2) {
+                      tooltipMsg =
+                          '${DateFormat('MMM dd, yyyy').format(currentDate)}\nNo activity recorded';
+                    } else if (score == 0) {
+                      tooltipMsg =
+                          '${DateFormat('MMM dd, yyyy').format(currentDate)}\n0% (Missed goals)';
+                    } else {
+                      tooltipMsg =
+                          '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score%';
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 3),
+                      child: GestureDetector(
+                        onTap: score == -1
+                            ? null
+                            : () {
+                                ref.read(selectedDateProvider.notifier).state =
+                                    currentDate;
+                                context.go('/home');
+                              },
+                        child: Semantics(
+                          label: tooltipMsg,
+                          button: score != -1,
+                          child: Tooltip(
+                            message: tooltipMsg,
+                            child: Container(
+                              width: cellSize,
+                              height: cellSize,
+                              decoration: BoxDecoration(
+                                color: _getColorForScore(context, score),
+                                borderRadius: BorderRadius.circular(4),
+                                border: score == 0
+                                    ? Border.all(
+                                        color: context.colors.red.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        width: 1,
+                                      )
+                                    : null,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
                 ),
               );
             }),
@@ -402,8 +481,11 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
       decoration: BoxDecoration(
         color: _getColorForScore(context, score),
         borderRadius: BorderRadius.circular(2),
-        border: score == 0 
-            ? Border.all(color: context.colors.red.withValues(alpha: 0.3), width: 1)
+        border: score == 0
+            ? Border.all(
+                color: context.colors.red.withValues(alpha: 0.3),
+                width: 1,
+              )
             : null,
       ),
     );
@@ -425,7 +507,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
           const SizedBox(height: 4),
           Text(
             title,
-            style: context.text.micro.copyWith(color: context.colors.textMedium),
+            style: context.text.micro.copyWith(
+              color: context.colors.textMedium,
+            ),
           ),
         ],
       ),

@@ -43,7 +43,13 @@ class BadgeRepository {
           for (final entry in data.entries) {
             if (currentGen != _syncGeneration) return;
             final b = Badge.fromJson(entry.value);
-            await _mergeCloudBadgeSafe(b, () => currentGen == _syncGeneration && sync.currentUid == targetUid && _attachedUid == targetUid);
+            await _mergeCloudBadgeSafe(
+              b,
+              () =>
+                  currentGen == _syncGeneration &&
+                  sync.currentUid == targetUid &&
+                  _attachedUid == targetUid,
+            );
           }
         }),
       );
@@ -122,52 +128,70 @@ class BadgeRepository {
 
   Future<void> saveBadge(Badge badge) async {
     await _isar.writeTxn(() async {
-      final existing = await _isar.badges.where().idEqualTo(badge.id).findFirst();
+      final existing = await _isar.badges
+          .where()
+          .idEqualTo(badge.id)
+          .findFirst();
       if (existing != null) {
         badge.idInternal = existing.idInternal;
       }
       await _isar.badges.put(badge);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'badges', docId: badge.id, payload: jsonEncode(badge.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'badges',
+            docId: badge.id,
+            payload: jsonEncode(badge.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
 
     _sync?.triggerFlush();
   }
 
-  Future<void> _mergeCloudBadgeSafe(Badge cloudBadge, [bool Function()? isValidContext]) async {
+  Future<void> _mergeCloudBadgeSafe(
+    Badge cloudBadge, [
+    bool Function()? isValidContext,
+  ]) async {
     await _isar.writeTxn(() async {
       if (isValidContext != null && !isValidContext()) return;
-      
-      final existing = await _isar.badges.where().idEqualTo(cloudBadge.id).findFirst();
-      
+
+      final existing = await _isar.badges
+          .where()
+          .idEqualTo(cloudBadge.id)
+          .findFirst();
+
       if (existing == null) {
         await _isar.badges.put(cloudBadge);
         return;
       }
-      
+
       int newProgress = existing.currentProgress;
       if (cloudBadge.currentProgress > existing.currentProgress) {
         newProgress = cloudBadge.currentProgress;
       }
-      
+
       DateTime? newUnlockedAt = existing.unlockedAt;
       if (cloudBadge.unlockedAt != null) {
-        if (newUnlockedAt == null || cloudBadge.unlockedAt!.isBefore(newUnlockedAt)) {
+        if (newUnlockedAt == null ||
+            cloudBadge.unlockedAt!.isBefore(newUnlockedAt)) {
           newUnlockedAt = cloudBadge.unlockedAt;
         }
       }
-      
+
       final updated = existing.copyWith(
         currentProgress: newProgress,
         unlockedAt: newUnlockedAt,
       );
-      
-      if (updated.currentProgress == existing.currentProgress && 
+
+      if (updated.currentProgress == existing.currentProgress &&
           updated.unlockedAt == existing.unlockedAt) {
         return;
       }
-      
+
       updated.idInternal = existing.idInternal;
       await _isar.badges.put(updated);
     });

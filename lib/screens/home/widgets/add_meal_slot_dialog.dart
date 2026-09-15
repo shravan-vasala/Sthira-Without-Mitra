@@ -20,7 +20,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
   bool _addToEveryDay = false;
   bool _isSaving = false;
   String? _errorText;
-  
+
   String? _establishedId;
   late String _capturedTargetDate;
   bool _profileSaveCompleted = false;
@@ -39,7 +39,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
 
   Future<void> _submit() async {
     if (_isSaving) return;
-    
+
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) {
       setState(() => _errorText = 'Name cannot be blank');
@@ -49,29 +49,38 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       setState(() => _errorText = 'Name is too long');
       return;
     }
-    
+
     final nameLower = name.toLowerCase();
-    
+
     // Only check for duplicates if we haven't established an ID yet
     if (_establishedId == null) {
       final profile = ref.read(profileProvider);
-      final isProfileDuplicate = profile.customMealSlots.any((slot) => (slot['name'] as String?)?.toLowerCase() == nameLower);
-      
+      final isProfileDuplicate = profile.customMealSlots.any(
+        (slot) => (slot['name'] as String?)?.toLowerCase() == nameLower,
+      );
+
       final dailyLog = ref.read(dailyMealLogProvider);
-      final isDailyDuplicate = dailyLog.customSlots.values.any((slot) => slot.name?.toLowerCase() == nameLower) ?? false;
-      
+      final isDailyDuplicate =
+          dailyLog.customSlots.values.any(
+            (slot) => slot.name?.toLowerCase() == nameLower,
+          ) ??
+          false;
+
       if (isProfileDuplicate || isDailyDuplicate) {
-        setState(() => _errorText = 'A meal slot with this name already exists');
+        setState(
+          () => _errorText = 'A meal slot with this name already exists',
+        );
         return;
       }
     }
-    
+
     setState(() {
       _errorText = null;
       _isSaving = true;
     });
 
-    _establishedId ??= '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch}';
+    _establishedId ??=
+        '${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_${DateTime.now().millisecondsSinceEpoch}';
 
     try {
       if (_addToEveryDay && !_profileSaveCompleted) {
@@ -100,7 +109,13 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
         totalFat: 0,
       );
 
-      await ref.read(dailyMealLogProvider.notifier).saveMealSlot(_establishedId!, slotLog, targetDate: _capturedTargetDate);
+      await ref
+          .read(dailyMealLogProvider.notifier)
+          .saveMealSlot(
+            _establishedId!,
+            slotLog,
+            targetDate: _capturedTargetDate,
+          );
 
       if (mounted) {
         Navigator.pop(context);
@@ -120,10 +135,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
     return AlertDialog(
       backgroundColor: context.colors.scaffoldBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: const Text(
-        'Add Meal Slot',
-        style: context.text.screenTitle,
-      ),
+      title: const Text('Add Meal Slot', style: context.text.screenTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -147,7 +159,9 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
             const SizedBox(height: 16),
             Text(
               'Choose an icon',
-              style: context.text.eyebrow.copyWith(color: context.colors.textMedium),
+              style: context.text.eyebrow.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -191,7 +205,9 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
                 Expanded(
                   child: Text(
                     'Add to every day?',
-                    style: context.text.body.copyWith(color: context.colors.textDark),
+                    style: context.text.body.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   ),
                 ),
               ],
@@ -200,7 +216,9 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
               padding: const EdgeInsets.only(left: 8.0, top: 4.0),
               child: Text(
                 'If enabled, this slot will appear every day. Otherwise, just for ${DateFormat('MMM d').format(DateTime.parse(_capturedTargetDate))}.',
-                style: context.text.micro.copyWith(color: context.colors.textMedium),
+                style: context.text.micro.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
             ),
           ],

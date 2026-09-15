@@ -28,48 +28,50 @@
 library;
 
 abstract class Gap {
-  static const double x2  = 2;   // optical nudge ONLY — baseline correction
-  static const double x4  = 4;   // inside a text pair (title -> its subtitle)
-  static const double x8  = 8;   // icon -> label, chip internals
-  static const double x12 = 12;  // card -> card in a group; section header -> content
-  static const double x16 = 16;  // blocks inside a single card
-  static const double x20 = 20;  // screen inset
-  static const double x24 = 24;  // section -> section
-  static const double x32 = 32;  // major break (around a hero, after last section)
-  static const double x40 = 40;  // page top / bottom breathing room
+  static const double x2 = 2; // optical nudge ONLY — baseline correction
+  static const double x4 = 4; // inside a text pair (title -> its subtitle)
+  static const double x8 = 8; // icon -> label, chip internals
+  static const double x12 =
+      12; // card -> card in a group; section header -> content
+  static const double x16 = 16; // blocks inside a single card
+  static const double x20 = 20; // screen inset
+  static const double x24 = 24; // section -> section
+  static const double x32 =
+      32; // major break (around a hero, after last section)
+  static const double x40 = 40; // page top / bottom breathing room
 }
 
 /// Semantic aliases. Prefer these at call sites — they document intent
 /// and make a later scale change safe.
 abstract class Spacing {
-  static const double textPair     = Gap.x4;   // title -> its own subtitle
-  static const double inline       = Gap.x8;   // leading icon -> label
-  static const double stack        = Gap.x12;  // sibling cards; header -> content
-  static const double block        = Gap.x16;  // groups inside one card
-  static const double section      = Gap.x24;  // between sections
-  static const double major        = Gap.x32;  // hero separation
+  static const double textPair = Gap.x4; // title -> its own subtitle
+  static const double inline = Gap.x8; // leading icon -> label
+  static const double stack = Gap.x12; // sibling cards; header -> content
+  static const double block = Gap.x16; // groups inside one card
+  static const double section = Gap.x24; // between sections
+  static const double major = Gap.x32; // hero separation
 
-  static const double screen       = 20;       // horizontal page inset — ALWAYS
-  static const double cardPad      = 20;       // standard card internal padding
-  static const double cardPadTight = 16;       // dense/nested cards, grid tiles ONLY
-  static const double sheetPadH    = 24;       // sheet horizontal inset
+  static const double screen = 20; // horizontal page inset — ALWAYS
+  static const double cardPad = 20; // standard card internal padding
+  static const double cardPadTight = 16; // dense/nested cards, grid tiles ONLY
+  static const double sheetPadH = 24; // sheet horizontal inset
 }
 
 /// Corner radii. Six values. No others.
 abstract class Radii {
-  static const double sheet   = 24;  // bottom sheets
-  static const double card    = 20;  // SurfaceCard, tiles
-  static const double control = 16;  // buttons, text fields
-  static const double chip    = 12;  // chips, small containers, icon tiles
-  static const double micro   = 6;   // macro pills, tiny tags
+  static const double sheet = 24; // bottom sheets
+  static const double card = 20; // SurfaceCard, tiles
+  static const double control = 16; // buttons, text fields
+  static const double chip = 12; // chips, small containers, icon tiles
+  static const double micro = 6; // macro pills, tiny tags
   // Fully round: use StadiumBorder or BorderRadius.circular(999).
   // Never a magic 40 / 100.
 }
 
 /// Icon sizes. Four values.
 abstract class IconSize {
-  static const double inline = 16;  // trailing chevrons, inline metadata icons
-  static const double row    = 20;  // list-row leading icons, button icons
-  static const double nav    = 24;  // AppBar, bottom nav
-  static const double hero   = 40;  // empty states, large decorative marks
+  static const double inline = 16; // trailing chevrons, inline metadata icons
+  static const double row = 20; // list-row leading icons, button icons
+  static const double nav = 24; // AppBar, bottom nav
+  static const double hero = 40; // empty states, large decorative marks
 }

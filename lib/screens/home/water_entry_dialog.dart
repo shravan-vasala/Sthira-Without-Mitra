@@ -100,8 +100,6 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-
-
           // Progress Display
           if (!isFuture) ...[
             Row(
@@ -113,18 +111,26 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                   children: [
                     Text(
                       '$_currentAmount ml',
-                      style: context.text.display.copyWith(color: isGoalReached ? context.colors.green : context.colors.primary),
+                      style: context.text.display.copyWith(
+                        color: isGoalReached
+                            ? context.colors.green
+                            : context.colors.primary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     if (hasTarget)
                       Text(
                         'Goal: ${targetInMl.toInt()} ml',
-                        style: context.text.body.copyWith(color: context.colors.textMedium),
+                        style: context.text.body.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       )
                     else
                       Text(
                         'No goal set',
-                        style: context.text.body.copyWith(color: context.colors.textMedium),
+                        style: context.text.body.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                   ],
                 ),
@@ -139,7 +145,9 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       const SizedBox(width: 4),
                       Text(
                         'Goal reached',
-                        style: context.text.caption.copyWith(color: context.colors.green),
+                        style: context.text.caption.copyWith(
+                          color: context.colors.green,
+                        ),
                       ),
                     ],
                   ),
@@ -157,9 +165,13 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     child: LinearProgressIndicator(
                       value: value,
                       minHeight: 8,
-                      backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                      backgroundColor: context.colors.primary.withValues(
+                        alpha: 0.1,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isGoalReached ? context.colors.green : context.colors.primary,
+                        isGoalReached
+                            ? context.colors.green
+                            : context.colors.primary,
                       ),
                     ),
                   );
@@ -186,7 +198,9 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                   Expanded(
                     child: Text(
                       'You cannot log water for future dates.',
-                      style: context.text.caption.copyWith(color: context.colors.textDark),
+                      style: context.text.caption.copyWith(
+                        color: context.colors.textDark,
+                      ),
                     ),
                   ),
                 ],
@@ -195,7 +209,9 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
           else ...[
             Text(
               'Total (ml)',
-              style: context.text.eyebrow.copyWith(color: context.colors.textMedium),
+              style: context.text.eyebrow.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -205,13 +221,17 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                     controller: _controller,
                     keyboardType: TextInputType.number,
                     enabled: !_isSaving,
-                    style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+                    style: context.text.screenTitle.copyWith(
+                      color: context.colors.textDark,
+                    ),
                     onChanged: _onTextChanged,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: context.colors.inputFill,
                       suffixText: 'ml',
-                      suffixStyle: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
+                      suffixStyle: context.text.bodyStrong.copyWith(
+                        color: context.colors.textMedium,
+                      ),
                     ),
                   ),
                 ),
@@ -233,10 +253,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text(
-                      '+ 250ml',
-                      style: context.text.body,
-                    ),
+                    child: const Text('+ 250ml', style: context.text.body),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -253,10 +270,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text(
-                      '+ 500ml',
-                      style: context.text.body,
-                    ),
+                    child: const Text('+ 500ml', style: context.text.body),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -273,10 +287,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text(
-                      '+ 1L',
-                      style: context.text.body,
-                    ),
+                    child: const Text('+ 1L', style: context.text.body),
                   ),
                 ),
               ],
@@ -292,8 +303,11 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                           : () async {
                               setState(() => _isSaving = true);
                               try {
-                                await ref.read(dailyLogProvider.notifier).clearWaterForDate(_pinnedDateStr);
-                                if (context.mounted) Navigator.of(context).pop();
+                                await ref
+                                    .read(dailyLogProvider.notifier)
+                                    .clearWaterForDate(_pinnedDateStr);
+                                if (context.mounted)
+                                  Navigator.of(context).pop();
                               } catch (e) {
                                 setState(() => _isSaving = false);
                               }
@@ -326,10 +340,15 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         if (_currentAmount > 0) {
                           await ref
                               .read(dailyLogProvider.notifier)
-                              .updateWaterForDate(_pinnedDateStr, _currentAmount);
+                              .updateWaterForDate(
+                                _pinnedDateStr,
+                                _currentAmount,
+                              );
                         } else {
                           // Clear water if saved with 0
-                          await ref.read(dailyLogProvider.notifier).clearWaterForDate(_pinnedDateStr);
+                          await ref
+                              .read(dailyLogProvider.notifier)
+                              .clearWaterForDate(_pinnedDateStr);
                         }
 
                         if (context.mounted) Navigator.of(context).pop();

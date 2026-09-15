@@ -37,23 +37,28 @@ class CoachService {
     final coachLabel = coachName.trim().isEmpty ? 'Coach' : coachName.trim();
 
     final hasManualKey = apiKey != null && apiKey!.isNotEmpty;
-    final hasLogs = steps > 0 || sleep > 0 || calories > 0 || habitsDone > 0 || workoutsDone > 0;
+    final hasLogs =
+        steps > 0 ||
+        sleep > 0 ||
+        calories > 0 ||
+        habitsDone > 0 ||
+        workoutsDone > 0;
 
     if (!hasManualKey || !hasLogs) {
       if (!(cancellationToken?.isCancelled ?? false)) {
         yield '__LOCAL__';
         yield _generateTemplatedNote(
-        userName,
-        steps,
-        sleep,
-        habitsDone,
-        habitsTotal,
-        calories,
-        workoutsDone,
-        workoutsTotal,
-        isRestDay,
-        daysSinceLastWorkout,
-      );
+          userName,
+          steps,
+          sleep,
+          habitsDone,
+          habitsTotal,
+          calories,
+          workoutsDone,
+          workoutsTotal,
+          isRestDay,
+          daysSinceLastWorkout,
+        );
       }
       return;
     }

@@ -3,7 +3,6 @@ import 'app_providers.dart';
 import '../models/meal_plan.dart';
 import '../models/daily_meal_log.dart';
 
-
 final mealPlanProvider = Provider<MealPlan?>((ref) {
   final repo = ref.watch(mealRepoProvider);
   final profile = ref.watch(profileProvider);
@@ -31,7 +30,11 @@ class DailyMealLogNotifier extends Notifier<DailyMealLog> {
     return repo.getDailyLog(date);
   }
 
-  Future<void> saveMealSlot(String slotName, MealSlotLog slotLog, {String? targetDate}) async {
+  Future<void> saveMealSlot(
+    String slotName,
+    MealSlotLog slotLog, {
+    String? targetDate,
+  }) async {
     final repo = ref.read(mealRepoProvider);
     final String date = targetDate ?? ref.read(dateStringProvider);
     await repo.saveMealSlot(date, slotName, slotLog);

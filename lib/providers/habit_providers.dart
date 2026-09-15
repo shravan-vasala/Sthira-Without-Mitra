@@ -10,7 +10,9 @@ final habitsProvider = Provider<List<Habit>>((ref) {
   final date = DateTime.parse(dateStr);
   final weekday = date.weekday;
 
-  return habits.where((h) => h.activeDays == null || h.activeDays!.contains(weekday)).toList();
+  return habits
+      .where((h) => h.activeDays == null || h.activeDays!.contains(weekday))
+      .toList();
 });
 
 class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
@@ -47,10 +49,14 @@ class HabitCompletionsNotifier extends Notifier<HabitCompletion> {
     await setOverrideForDate(date, habitId, overrideValue);
   }
 
-  Future<void> setOverrideForDate(String date, String habitId, String? overrideValue) async {
+  Future<void> setOverrideForDate(
+    String date,
+    String habitId,
+    String? overrideValue,
+  ) async {
     final repo = ref.read(habitRepoProvider);
     await repo.setOverride(date, habitId, overrideValue);
-    
+
     final currentDate = ref.read(dateStringProvider);
     if (date == currentDate) {
       state = repo.getCompletions(date);

@@ -13,7 +13,6 @@ import '../../widgets/primary_button.dart';
 import '../../theme/layout_insets.dart';
 import '../../theme/app_spacing.dart';
 
-
 import '../../utils/target_parser.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
@@ -38,16 +37,21 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     _repsControllers = List.generate(setCount, (i) {
       return TextEditingController(
         // ignore: dead_code, dead_null_aware_expression
-        text: TargetParser.parseRepTarget(widget.exercise.repsDisplay ?? '').toString(),
+        text: TargetParser.parseRepTarget(
+          widget.exercise.repsDisplay ?? '',
+        ).toString(),
       );
     });
     final profile = ref.read(profileProvider);
     _weightControllers = List.generate(setCount, (i) {
       final planned = widget.exercise.weightKg;
       return TextEditingController(
-        text: planned != null && planned > 0 
-          ? convertFromKg(profile, planned).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '') 
-          : '',
+        text: planned != null && planned > 0
+            ? convertFromKg(
+                profile,
+                planned,
+              ).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')
+            : '',
       );
     });
 
@@ -58,7 +62,10 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
     final dateStr = ref.read(dateStringProvider);
     final repo = ref.read(exerciseLogRepoProvider);
     final profile = ref.read(profileProvider);
-    final existing = repo.getLog(dateStr, widget.exercise.instanceId ?? widget.exercise.name ?? '');
+    final existing = repo.getLog(
+      dateStr,
+      widget.exercise.instanceId ?? widget.exercise.name ?? '',
+    );
 
     if (existing != null) {
       for (
@@ -69,11 +76,17 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
         _repsControllers[i].text = (existing.sets[i].reps ?? 0).toString();
         final w = existing.sets[i].weight ?? 0.0;
         _weightControllers[i].text = w > 0
-            ? convertFromKg(profile, w).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')
+            ? convertFromKg(
+                profile,
+                w,
+              ).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')
             : '';
       }
     } else {
-      _lastLog = repo.getLastLog(widget.exercise.name ?? '', beforeDate: dateStr);
+      _lastLog = repo.getLastLog(
+        widget.exercise.name ?? '',
+        beforeDate: dateStr,
+      );
       if (_lastLog != null) {
         for (
           int i = 0;
@@ -82,7 +95,10 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
         ) {
           final w = _lastLog!.sets[i].weight ?? 0.0;
           if (w > 0) {
-            _weightControllers[i].text = convertFromKg(profile, w).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+            _weightControllers[i].text = convertFromKg(
+              profile,
+              w,
+            ).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
           }
           final r = _lastLog!.sets[i].reps ?? 0;
           if (r > 0) {
@@ -157,7 +173,9 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                 child: Text(
                   'Reps',
                   textAlign: TextAlign.center,
-                  style: context.text.micro.copyWith(color: context.colors.textLight),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textLight,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -165,7 +183,9 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                 child: Text(
                   'Weight (${ref.watch(profileProvider).useKg ? 'kg' : 'lb'})',
                   textAlign: TextAlign.center,
-                  style: context.text.micro.copyWith(color: context.colors.textLight),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textLight,
+                  ),
                 ),
               ),
             ],
@@ -181,7 +201,9 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                     child: Text(
                       'Set ${i + 1}',
                       style: AppTheme.numeric(
-                        context.text.body.copyWith(color: context.colors.textDark),
+                        context.text.body.copyWith(
+                          color: context.colors.textDark,
+                        ),
                       ),
                     ),
                   ),
@@ -236,7 +258,8 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
             child: PrimaryButton(label: 'Save Log', onPressed: _save),
           ),
           SizedBox(
-            height: MediaQuery.viewInsetsOf(context).bottom +
+            height:
+                MediaQuery.viewInsetsOf(context).bottom +
                 MediaQuery.paddingOf(context).bottom,
           ),
         ],
@@ -247,23 +270,28 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
   Future<void> _save() async {
     final sets = <SetLog>[];
     final profile = ref.read(profileProvider);
-    
+
     for (int i = 0; i < widget.exercise.setCount; i++) {
       final reps = int.tryParse(_repsControllers[i].text);
       final weightRaw = double.tryParse(_weightControllers[i].text);
-      
+
       if (reps == null || reps <= 0) continue;
       if (weightRaw == null || weightRaw < 0) continue;
-      
+
       final weightKg = convertToKg(profile, weightRaw);
-      sets.add(SetLog(setNumber: sets.length + 1, reps: reps, weight: weightKg));
+      sets.add(
+        SetLog(setNumber: sets.length + 1, reps: reps, weight: weightKg),
+      );
     }
 
     final repo = ref.read(exerciseLogRepoProvider);
     final dateStr = ref.read(dateStringProvider);
 
     if (sets.isEmpty) {
-      await repo.deleteLog(dateStr, widget.exercise.instanceId ?? widget.exercise.name ?? '');
+      await repo.deleteLog(
+        dateStr,
+        widget.exercise.instanceId ?? widget.exercise.name ?? '',
+      );
     } else {
       final newLog = ExerciseLog(
         date: dateStr,
@@ -273,7 +301,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
       );
       await repo.saveLog(newLog);
     }
-    
+
     ref.read(exerciseLogsUpdateProvider.notifier).state++;
 
     final prResult = await checkAndSavePr(
@@ -309,7 +337,6 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
         msg = 'New 1RM PR!';
       }
     }
-
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -377,12 +404,16 @@ class _StepperField extends StatelessWidget {
               keyboardType: TextInputType.numberWithOptions(decimal: isWeight),
               textAlign: TextAlign.center,
               style: AppTheme.numeric(
-                context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                context.text.bodyStrong.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               decoration: InputDecoration(
                 isDense: true,
                 hintText: hint,
-                hintStyle: context.text.body.copyWith(color: context.colors.textLight),
+                hintStyle: context.text.body.copyWith(
+                  color: context.colors.textLight,
+                ),
                 border: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 enabledBorder: InputBorder.none,

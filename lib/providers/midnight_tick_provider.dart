@@ -22,7 +22,7 @@ class MidnightTickNotifier extends Notifier<void> {
 
   void _scheduleMidnightTick() {
     _timer?.cancel();
-    
+
     final now = DateTime.now();
     // Next midnight
     final nextMidnight = DateTime(now.year, now.month, now.day + 1);
@@ -33,7 +33,7 @@ class MidnightTickNotifier extends Notifier<void> {
       // Midnight has struck while app is open!
       // Invalidate the selected date provider to force a refresh of today
       ref.invalidate(selectedDateProvider);
-      
+
       // Reschedule for the next day
       _scheduleMidnightTick();
     });

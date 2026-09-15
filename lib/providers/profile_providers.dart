@@ -7,7 +7,6 @@ final latestBodyStatsProvider = Provider<BodyStats?>((ref) {
   return ref.watch(bodyStatsRepoProvider).getLatestStats();
 });
 
-
 class ProfileNotifier extends Notifier<UserProfile> {
   @override
   UserProfile build() {
@@ -29,7 +28,6 @@ class ProfileNotifier extends Notifier<UserProfile> {
     final repo = ref.read(profileRepoProvider);
     await repo.saveProfile(profile);
   }
-
 
   Future<void> toggleUnit() async {
     state = state.copyWith(useKg: !state.useKg);

@@ -57,10 +57,7 @@ class ShareCardExporter {
         top: -9999,
         width: logicalWidth,
         height: logicalHeight,
-        child: Material(
-          type: MaterialType.transparency,
-          child: captureWidget,
-        ),
+        child: Material(type: MaterialType.transparency, child: captureWidget),
       ),
     );
 
@@ -68,11 +65,13 @@ class ShareCardExporter {
 
     try {
       RenderRepaintBoundary? boundary;
-      
+
       // Poll until the boundary is fully painted or timeout (max 2 seconds)
       for (int i = 0; i < 40; i++) {
         await Future.delayed(const Duration(milliseconds: 50));
-        boundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+        boundary =
+            boundaryKey.currentContext?.findRenderObject()
+                as RenderRepaintBoundary?;
         if (boundary != null && !boundary.debugNeedsPaint) {
           break;
         }
@@ -93,11 +92,13 @@ class ShareCardExporter {
 
       final tempDir = await getTemporaryDirectory();
       // Ensure unique filename
-      final file = await File('${tempDir.path}/${fileName}_${DateTime.now().millisecondsSinceEpoch}.png').create();
+      final file = await File(
+        '${tempDir.path}/${fileName}_${DateTime.now().millisecondsSinceEpoch}.png',
+      ).create();
       await file.writeAsBytes(pngBytes);
 
       final xFile = XFile(file.path, mimeType: 'image/png');
-      
+
       // ignore: deprecated_member_use
       final result = await Share.shareXFiles([xFile], text: text);
       return result.status == ShareResultStatus.success;
@@ -117,7 +118,9 @@ class ShareCardExporter {
     double pixelRatio = 3.0,
   }) async {
     try {
-      final defaultBoundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final defaultBoundary =
+          boundaryKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (defaultBoundary == null) return;
 
       final image = await defaultBoundary.toImage(pixelRatio: pixelRatio);
@@ -131,7 +134,7 @@ class ShareCardExporter {
       await file.writeAsBytes(pngBytes);
 
       final xFile = XFile(file.path, mimeType: 'image/png');
-      
+
       // ignore: deprecated_member_use
       await Share.shareXFiles([xFile], text: text);
     } catch (e) {

@@ -13,10 +13,10 @@ class YearlyActivityScreen extends ConsumerWidget {
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
         title: const Text('Yearly Activity'),
-        leading: Navigator.of(context).canPop()
+        leading: Navigator.canPop(context)
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_rounded),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Navigator.pop(context),
               )
             : null,
       ),
@@ -51,7 +51,9 @@ class YearlyActivityScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           'Consistency is key. Track habits, workouts, and nutrition to brighten your heatmap. Unrecorded days are lightly shaded, while missed goals are outlined.',
-                          style: context.text.body.copyWith(color: context.colors.textDark),
+                          style: context.text.body.copyWith(
+                            color: context.colors.textDark,
+                          ),
                         ),
                       ),
                     ],

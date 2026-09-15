@@ -48,8 +48,7 @@ class HabitsCard extends ConsumerWidget {
                 progress: getHabitProgress(habits[i], completions, dailyLog),
               ),
             ),
-            if (i < habits.length - 1)
-              const SizedBox(height: 2),
+            if (i < habits.length - 1) const SizedBox(height: 2),
           ],
           if (habits.isEmpty)
             const EmptyStateView(
@@ -124,9 +123,11 @@ class _HabitItem extends ConsumerWidget {
                         children: [
                           Text(
                             habit.name,
-                            style: context.text.body.copyWith(color: isCompleted
+                            style: context.text.body.copyWith(
+                              color: isCompleted
                                   ? context.colors.textLight
-                                  : context.colors.textDark),
+                                  : context.colors.textDark,
+                            ),
                           ),
                           if (habit.type == HabitType.checkbox &&
                               habit.unit.isNotEmpty &&
@@ -135,7 +136,9 @@ class _HabitItem extends ConsumerWidget {
                               padding: const EdgeInsets.only(top: 2),
                               child: Text(
                                 'Goal: ${habit.target == habit.target.roundToDouble() ? habit.target.toInt() : habit.target} ${habit.unit}',
-                                style: context.text.micro.copyWith(color: context.colors.textMedium),
+                                style: context.text.micro.copyWith(
+                                  color: context.colors.textMedium,
+                                ),
                               ),
                             ),
                           Row(
@@ -162,7 +165,9 @@ class _HabitItem extends ConsumerWidget {
                                     ),
                                     child: Text(
                                       _formatProgress(),
-                                      style: context.text.micro.copyWith(color: context.colors.textMedium),
+                                      style: context.text.micro.copyWith(
+                                        color: context.colors.textMedium,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -196,7 +201,9 @@ class _HabitItem extends ConsumerWidget {
                                           const SizedBox(width: 2),
                                           Text(
                                             '$streak Day Streak',
-                                            style: context.text.micro.copyWith(color: context.colors.orange),
+                                            style: context.text.micro.copyWith(
+                                              color: context.colors.orange,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -277,7 +284,6 @@ class _HabitItem extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-
     if (direction == DismissDirection.startToEnd) {
       // Swipe Right -> Complete
       if (habit.type == HabitType.counter) {
@@ -435,7 +441,7 @@ class _HabitItem extends ConsumerWidget {
     ref
         .read(habitCompletionsProvider.notifier)
         .setOverride(habit.id, newOverride);
-        
+
     _showUndo(context, message, () {
       ref
           .read(habitCompletionsProvider.notifier)
@@ -454,7 +460,8 @@ class _HabitItem extends ConsumerWidget {
       return;
     }
 
-    if (habit.type != HabitType.autoSteps && habit.type != HabitType.autoSleep) {
+    if (habit.type != HabitType.autoSteps &&
+        habit.type != HabitType.autoSleep) {
       return;
     }
 
@@ -578,7 +585,9 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
               ? context.colors.green
               : (widget.isFuture
                     ? context.colors.textLight.withValues(alpha: 0.1)
-                    : context.colors.textLight.withValues(alpha: 0.15)), // Soft alpha fill instead of border
+                    : context.colors.textLight.withValues(
+                        alpha: 0.15,
+                      )), // Soft alpha fill instead of border
           boxShadow: widget.isCompleted
               ? [
                   BoxShadow(

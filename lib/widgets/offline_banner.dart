@@ -23,7 +23,9 @@ class OfflineBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: context.text.caption.copyWith(color: context.colors.orange),
+              style: context.text.caption.copyWith(
+                color: context.colors.orange,
+              ),
             ),
           ),
         ],

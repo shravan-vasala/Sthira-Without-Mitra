@@ -58,7 +58,12 @@ class AvatarPickerSheet extends StatelessWidget {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          border: isSelected ? Border.all(color: context.colors.primary, width: 2) : null,
+                          border: isSelected
+                              ? Border.all(
+                                  color: context.colors.primary,
+                                  width: 2,
+                                )
+                              : null,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
@@ -91,7 +96,7 @@ class AvatarPickerSheet extends StatelessWidget {
             },
           ),
           const SizedBox(height: 32),
-          
+
           // Remove Avatar Action
           Semantics(
             button: true,
@@ -100,10 +105,15 @@ class AvatarPickerSheet extends StatelessWidget {
               onTap: () => Navigator.of(context).pop('DELETE'),
               borderRadius: BorderRadius.circular(16),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 24,
+                ),
                 child: Text(
                   'Remove Avatar',
-                  style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
+                  style: context.text.bodyStrong.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ),
             ),
@@ -113,4 +123,3 @@ class AvatarPickerSheet extends StatelessWidget {
     );
   }
 }
-

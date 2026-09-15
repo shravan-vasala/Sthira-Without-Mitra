@@ -104,7 +104,6 @@ class DailyStatsSnapshot {
             day,
             hasLog,
           );
-
         }
       }
     } else {

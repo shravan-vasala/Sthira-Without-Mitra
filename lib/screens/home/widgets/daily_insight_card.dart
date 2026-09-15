@@ -36,49 +36,55 @@ class DailyInsightCard extends ConsumerWidget {
     };
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SurfaceCard(
-        color: context.colors.card,
-        border: null, // Sthira: No borders!
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SurfaceCard(
+            color: context.colors.card,
+            border: null, // Sthira: No borders!
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(insight.icon, color: iconColor, size: 18),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(insight.icon, color: iconColor, size: 18),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        insight.type == InsightType.trend ? 'TREND' : 'INSIGHT',
+                        style: context.text.micro.copyWith(
+                          color: context.colors.textMedium,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    insight.type == InsightType.trend ? 'TREND' : 'INSIGHT',
-                    style: context.text.micro.copyWith(color: context.colors.textMedium),
+                const SizedBox(height: 12),
+                Text(
+                  insight.title,
+                  style: context.text.bodyStrong.copyWith(
+                    color: context.colors.textDark,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  insight.description,
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              insight.title,
-              style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              insight.description,
-              style: context.text.caption.copyWith(color: context.colors.textMedium),
-            ),
-          ],
-        ),
-      ),
-    )
-    .animate()
-    .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-    .slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOut);
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+        .slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOut);
   }
 }

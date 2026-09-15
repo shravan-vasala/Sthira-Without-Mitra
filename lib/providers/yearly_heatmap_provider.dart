@@ -42,7 +42,7 @@ final yearlyActivityHeatmapProvider =
         }
 
         final date = startDate.add(Duration(days: i));
-        
+
         final today = startOfDay();
         if (startOfDay(date).isAfter(today)) {
           result[date] = -1;
@@ -54,9 +54,10 @@ final yearlyActivityHeatmapProvider =
         final rawDailyLog = dailyLogRepo.getLog(dateStr);
         final mealLog = mealRepo.getDailyLog(dateStr);
 
-        final bool isUnrecorded = rawDailyLog == null &&
-                                  completions.completions.isEmpty &&
-                                  mealLog.loggedSlotsCount == 0;
+        final bool isUnrecorded =
+            rawDailyLog == null &&
+            completions.completions.isEmpty &&
+            mealLog.loggedSlotsCount == 0;
 
         if (isUnrecorded) {
           result[date] = -2;

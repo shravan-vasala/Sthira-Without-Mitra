@@ -42,7 +42,11 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await updateStepsForDate(state.date, steps, source: source);
   }
 
-  Future<void> updateStepsForDate(String date, int steps, {String? source}) async {
+  Future<void> updateStepsForDate(
+    String date,
+    int steps, {
+    String? source,
+  }) async {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.updateSteps(date, steps, source: source ?? 'manual');
     if (state.date == date) {
@@ -66,7 +70,11 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     await updateSleepForDate(state.date, hours, source: source);
   }
 
-  Future<void> updateSleepForDate(String date, double hours, {String? source}) async {
+  Future<void> updateSleepForDate(
+    String date,
+    double hours, {
+    String? source,
+  }) async {
     final repo = ref.read(dailyLogRepoProvider);
     await repo.updateSleep(date, hours, source: source ?? 'manual');
     if (state.date == date) {
@@ -106,7 +114,7 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     for (final habit in allHabits.where((h) => h.type == HabitType.autoSleep)) {
       final current = habitRepo.getCompletions(date).completions[habit.id];
       if (current != true) {
-         await habitRepo.setCompletion(date, habit.id, false);
+        await habitRepo.setCompletion(date, habit.id, false);
       }
     }
     if (state.date == date) {
@@ -152,13 +160,16 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     final waterHabit = allHabits.where((h) => h.id == 'water').firstOrNull;
     if (waterHabit != null) {
       double targetInMl = waterHabit.target.toDouble();
-      if (waterHabit.unit.toLowerCase() == 'l' || waterHabit.unit.toLowerCase() == 'liters') {
+      if (waterHabit.unit.toLowerCase() == 'l' ||
+          waterHabit.unit.toLowerCase() == 'liters') {
         targetInMl *= 1000;
       }
       if (waterMl >= targetInMl) {
         await habitRepo.setCompletion(date, waterHabit.id, true);
       } else {
-        final current = habitRepo.getCompletions(date).completions[waterHabit.id];
+        final current = habitRepo
+            .getCompletions(date)
+            .completions[waterHabit.id];
         if (current != true) {
           await habitRepo.setCompletion(date, waterHabit.id, false);
         }
@@ -182,7 +193,10 @@ class DailyLogNotifier extends Notifier<DailyLog> {
     }
 
     final habitRepo = ref.read(habitRepoProvider);
-    final waterHabit = habitRepo.getHabits().where((h) => h.id == 'water').firstOrNull;
+    final waterHabit = habitRepo
+        .getHabits()
+        .where((h) => h.id == 'water')
+        .firstOrNull;
     if (waterHabit != null) {
       final current = habitRepo.getCompletions(date).completions[waterHabit.id];
       if (current != true) {

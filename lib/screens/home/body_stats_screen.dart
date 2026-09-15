@@ -51,7 +51,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
       _fillControllers(stats);
       return;
     }
-    
+
     final latest = ref.read(bodyStatsRepoProvider).getLatestStats();
     if (latest != null) {
       _isPrefilled = true;
@@ -85,7 +85,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
       final currentVal = _controllers[f]!.text.trim();
       // If any field has been changed by the user, return true.
       if (prefillVal != currentVal && (prefillVal != '' || currentVal != '')) {
-         return true;
+        return true;
       }
     }
     return false;
@@ -141,7 +141,9 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                   )
                 : Text(
                     _isEditing ? 'Save' : 'Edit',
-                    style: context.text.body.copyWith(color: context.colors.primary),
+                    style: context.text.body.copyWith(
+                      color: context.colors.primary,
+                    ),
                   ),
           ),
         ],
@@ -157,14 +159,18 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
               children: [
                 Text(
                   'ALL MEASUREMENTS FOR ${DateFormat('MMM d, yyyy').format(DateTime.parse(_pinnedDateStr)).toUpperCase()}',
-                  style: context.text.caption.copyWith(color: context.colors.primary),
+                  style: context.text.caption.copyWith(
+                    color: context.colors.primary,
+                  ),
                 ),
                 if (_isPrefilled && _prefillDate != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
                       'Prefilled from ${DateFormat('MMM d').format(DateTime.parse(_prefillDate!))} measurement',
-                      style: context.text.micro.copyWith(color: context.colors.textMedium),
+                      style: context.text.micro.copyWith(
+                        color: context.colors.textMedium,
+                      ),
                     ),
                   ),
               ],
@@ -177,10 +183,11 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
               return Wrap(
                 spacing: 12,
                 runSpacing: 12,
-                children: _fields.map((f) => SizedBox(
-                  width: itemWidth,
-                  child: _buildField(f),
-                )).toList(),
+                children: _fields
+                    .map(
+                      (f) => SizedBox(width: itemWidth, child: _buildField(f)),
+                    )
+                    .toList(),
               );
             },
           ),
@@ -202,7 +209,9 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
         children: [
           Text(
             field,
-            style: context.text.caption.copyWith(color: context.colors.textMedium),
+            style: context.text.caption.copyWith(
+              color: context.colors.textMedium,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -214,8 +223,12 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                     Expanded(
                       child: TextField(
                         controller: _controllers[field],
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: context.text.screenTitle.copyWith(color: context.colors.primary),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        style: context.text.screenTitle.copyWith(
+                          color: context.colors.primary,
+                        ),
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           border: InputBorder.none,
@@ -229,7 +242,9 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
                         'cm',
-                        style: context.text.micro.copyWith(color: context.colors.textMedium),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                     ),
                   ],
@@ -238,15 +253,23 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      _controllers[field]!.text.isEmpty ? '--' : _controllers[field]!.text,
-                      style: context.text.screenTitle.copyWith(color: _controllers[field]!.text.isEmpty ? context.colors.textLight : context.colors.textDark),
+                      _controllers[field]!.text.isEmpty
+                          ? '--'
+                          : _controllers[field]!.text,
+                      style: context.text.screenTitle.copyWith(
+                        color: _controllers[field]!.text.isEmpty
+                            ? context.colors.textLight
+                            : context.colors.textDark,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
                         'cm',
-                        style: context.text.micro.copyWith(color: context.colors.textMedium),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                     ),
                   ],
@@ -260,22 +283,22 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
     setState(() => _isSaving = true);
     try {
       final date = _pinnedDateStr;
-      
+
       // Prevent silent duplication of prefill logic
       if (_isPrefilled && _prefillDate != date) {
-         final latest = ref.read(bodyStatsRepoProvider).getLatestStats();
-         if (!_hasMutatedFields(latest)) {
-            // Nothing was mutated, cancel save
-            if (mounted) {
-              setState(() {
-                _isEditing = false;
-                _isSaving = false;
-              });
-            }
-            return;
-         }
+        final latest = ref.read(bodyStatsRepoProvider).getLatestStats();
+        if (!_hasMutatedFields(latest)) {
+          // Nothing was mutated, cancel save
+          if (mounted) {
+            setState(() {
+              _isEditing = false;
+              _isSaving = false;
+            });
+          }
+          return;
+        }
       }
-      
+
       final stats = BodyStats(
         date: date,
         waist: double.tryParse(_controllers['Waist']!.text),

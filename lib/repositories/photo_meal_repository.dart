@@ -36,7 +36,7 @@ class PhotoMealRepository {
     final ext = sourcePhotoPath.contains('.')
         ? sourcePhotoPath.split('.').last
         : 'jpg';
-    
+
     final relPath = '${date}_${timestampMs}_$uuidStr.$ext';
     final destPath = kIsWeb ? sourcePhotoPath : '$_baseDir/$relPath';
 
@@ -67,7 +67,9 @@ class PhotoMealRepository {
       });
     } catch (e) {
       if (copiedFile != null && await copiedFile.exists()) {
-        try { await copiedFile.delete(); } catch(_) {}
+        try {
+          await copiedFile.delete();
+        } catch (_) {}
       }
       rethrow;
     }
@@ -79,7 +81,8 @@ class PhotoMealRepository {
       throw ArgumentError('Path traversal detected');
     }
     if (kIsWeb) return storedPath;
-    if (storedPath.startsWith('/')) { // legacy absolute path
+    if (storedPath.startsWith('/')) {
+      // legacy absolute path
       if (storedPath.contains('trufit_meal_photos/')) {
         final rel = storedPath.split('trufit_meal_photos/').last;
         return '$_baseDir/$rel';
@@ -111,7 +114,9 @@ class PhotoMealRepository {
       if (!kIsWeb) {
         final file = File(getAbsolutePath(log.photoPath));
         if (await file.exists()) {
-          try { await file.delete(); } catch(_) {}
+          try {
+            await file.delete();
+          } catch (_) {}
         }
       }
     }

@@ -93,9 +93,12 @@ class TargetCalculator {
     );
   }
 
-  /// Adjust calories up/down while maintaining the absolute protein target 
+  /// Adjust calories up/down while maintaining the absolute protein target
   /// and assigning the remainder between carbs and fat.
-  static TargetMacros rebalanceForCalories(int newCalories, TargetMacros originalBase) {
+  static TargetMacros rebalanceForCalories(
+    int newCalories,
+    TargetMacros originalBase,
+  ) {
     if (newCalories < 1200) newCalories = 1200;
 
     // Keep protein fixed
@@ -107,7 +110,7 @@ class TargetCalculator {
     if (remainingCalories < 0) {
       // Infeasible: protein alone exceeds the targeted calories!
       // Scale protein down heavily so it fits.
-      protein = (newCalories * 0.4) / 4; 
+      protein = (newCalories * 0.4) / 4;
       remainingCalories = newCalories - (protein * 4);
     }
 

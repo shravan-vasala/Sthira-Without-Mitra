@@ -8,11 +8,7 @@ class CredentialState {
   final String? key;
   final String? errorMessage;
 
-  const CredentialState({
-    required this.status,
-    this.key,
-    this.errorMessage,
-  });
+  const CredentialState({required this.status, this.key, this.errorMessage});
 
   CredentialState copyWith({
     CredentialStatus? status,
@@ -39,12 +35,23 @@ class CredentialNotifier extends Notifier<CredentialState> {
       final repo = ref.read(profileRepoProvider);
       final key = await repo.getSecureGeminiKey();
       if (key != null && key.isNotEmpty) {
-        state = state.copyWith(status: CredentialStatus.present, key: key, errorMessage: null);
+        state = state.copyWith(
+          status: CredentialStatus.present,
+          key: key,
+          errorMessage: null,
+        );
       } else {
-        state = state.copyWith(status: CredentialStatus.removed, key: null, errorMessage: null);
+        state = state.copyWith(
+          status: CredentialStatus.removed,
+          key: null,
+          errorMessage: null,
+        );
       }
     } catch (e) {
-      state = state.copyWith(status: CredentialStatus.error, errorMessage: e.toString());
+      state = state.copyWith(
+        status: CredentialStatus.error,
+        errorMessage: e.toString(),
+      );
     }
   }
 
@@ -58,10 +65,17 @@ class CredentialNotifier extends Notifier<CredentialState> {
     try {
       final repo = ref.read(profileRepoProvider);
       await repo.saveSecureGeminiKey(cleanKey);
-      state = state.copyWith(status: CredentialStatus.present, key: cleanKey, errorMessage: null);
+      state = state.copyWith(
+        status: CredentialStatus.present,
+        key: cleanKey,
+        errorMessage: null,
+      );
     } catch (e) {
       // Must not silently erase working key if replacement save failed (as per Prompt 01)
-      state = state.copyWith(status: CredentialStatus.error, errorMessage: 'Failed to securely save API key.');
+      state = state.copyWith(
+        status: CredentialStatus.error,
+        errorMessage: 'Failed to securely save API key.',
+      );
       throw Exception('Failed to securely save API key.');
     }
   }
@@ -73,12 +87,16 @@ class CredentialNotifier extends Notifier<CredentialState> {
       // Direct construction — copyWith can't null-out key due to `key ?? this.key`
       state = const CredentialState(status: CredentialStatus.removed);
     } catch (e) {
-      state = state.copyWith(status: CredentialStatus.error, errorMessage: 'Failed to clear API key.');
+      state = state.copyWith(
+        status: CredentialStatus.error,
+        errorMessage: 'Failed to clear API key.',
+      );
       throw Exception('Failed to clear API key.');
     }
   }
 }
 
-final credentialProvider = NotifierProvider<CredentialNotifier, CredentialState>(
-  CredentialNotifier.new,
-);
+final credentialProvider =
+    NotifierProvider<CredentialNotifier, CredentialState>(
+      CredentialNotifier.new,
+    );

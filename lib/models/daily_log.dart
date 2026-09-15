@@ -19,7 +19,7 @@ class DailyLog {
   final int? waterMl;
   final int? screenTimeMinutes;
   final DateTime? updatedAt;
-  
+
   // Daily check-in
   final String? dayFeeling;
   final String? dayNote;
@@ -55,7 +55,8 @@ class DailyLog {
       sleepHours: (json['sleepHours'] as num?)?.toDouble(),
       sleepSource: json['sleepSource'] as String?,
       bodyFat: (json['bodyFat'] as num?)?.toDouble(),
-      workoutStatus: json['workoutStatus'] as String? ?? 
+      workoutStatus:
+          json['workoutStatus'] as String? ??
           ((json['workoutCompleted'] as bool? ?? false) ? 'completed' : null),
       workoutDayId: json['workoutDayId'] as String?,
       waterMl: json['waterMl'] as int?,
@@ -86,7 +87,8 @@ class DailyLog {
     if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
     if (dayFeeling != null) 'dayFeeling': dayFeeling,
     if (dayNote != null) 'dayNote': dayNote,
-    if (checkInUpdatedAt != null) 'checkInUpdatedAt': checkInUpdatedAt!.toIso8601String(),
+    if (checkInUpdatedAt != null)
+      'checkInUpdatedAt': checkInUpdatedAt!.toIso8601String(),
   };
 
   DailyLog copyWith({

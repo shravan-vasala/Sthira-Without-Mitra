@@ -13,14 +13,17 @@ class JourneyStatsStrip extends ConsumerWidget {
     // Collect stats
     final logRepo = ref.watch(dailyLogRepoProvider);
     final badgeRepo = ref.watch(badgeRepoProvider);
-    
+
     final allLogs = logRepo.getAllLogs();
     final mealRepo = ref.watch(mealRepoProvider);
     final allMealLogs = mealRepo.getAllLogs();
-    final earnedBadges = badgeRepo.getAllBadges().where((b) => b.isUnlocked).length;
+    final earnedBadges = badgeRepo
+        .getAllBadges()
+        .where((b) => b.isUnlocked)
+        .length;
 
     int totalWorkouts = 0;
-    
+
     final activeDates = <String>{};
     for (final log in allLogs) {
       if (log.workoutCompleted == true) {
@@ -42,12 +45,12 @@ class JourneyStatsStrip extends ConsumerWidget {
       final sortedDates = activeDates.toList()..sort();
       firstTrackedDate = DateTime.tryParse(sortedDates.first);
     }
-    
+
     // Calculate streak
     int currentStreak = 0;
     final today = DateTime.now();
     final todayStr = DateFormat('yyyy-MM-dd').format(today);
-    
+
     bool streakActive = true;
     DateTime ptr = today;
 
@@ -61,9 +64,9 @@ class JourneyStatsStrip extends ConsumerWidget {
         } else {
           // If we are checking today and it's empty, streak might still be maintained by yesterday
           if (dateStr == todayStr) {
-             ptr = ptr.subtract(const Duration(days: 1));
+            ptr = ptr.subtract(const Duration(days: 1));
           } else {
-             streakActive = false;
+            streakActive = false;
           }
         }
       }
@@ -77,17 +80,49 @@ class JourneyStatsStrip extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Expanded(child: _StatCard(title: 'Streak', value: currentStreak, unit: 'Days', icon: Icons.local_fire_department_rounded, color: context.colors.orange)),
+            Expanded(
+              child: _StatCard(
+                title: 'Streak',
+                value: currentStreak,
+                unit: 'Days',
+                icon: Icons.local_fire_department_rounded,
+                color: context.colors.orange,
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(title: 'Workouts', value: totalWorkouts, unit: 'Total', icon: Icons.fitness_center_rounded, color: context.colors.primary)),
+            Expanded(
+              child: _StatCard(
+                title: 'Workouts',
+                value: totalWorkouts,
+                unit: 'Total',
+                icon: Icons.fitness_center_rounded,
+                color: context.colors.primary,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _StatCard(title: 'Tracked', value: daysTracked, unit: 'Days', icon: Icons.calendar_month_rounded, color: context.colors.mint)),
+            Expanded(
+              child: _StatCard(
+                title: 'Tracked',
+                value: daysTracked,
+                unit: 'Days',
+                icon: Icons.calendar_month_rounded,
+                color: context.colors.mint,
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(title: 'Badges', value: earnedBadges, unit: 'Earned', icon: Icons.military_tech_rounded, color: context.colors.pink)),
+            Expanded(
+              child: _StatCard(
+                title: 'Badges',
+                value: earnedBadges,
+                unit: 'Earned',
+                icon: Icons.military_tech_rounded,
+                color: context.colors.pink,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -121,10 +156,14 @@ class _StatCard extends StatelessWidget {
     // Mimic the faded appearance in the screenshot for lower-tier stats when zero
     final bool isZero = value == 0;
     final bool isTopTier = title == 'Streak' || title == 'Workouts';
-    final Color effectiveColor = (!isTopTier && isZero) ? color.withValues(alpha: 0.3) : color;
+    final Color effectiveColor = (!isTopTier && isZero)
+        ? color.withValues(alpha: 0.3)
+        : color;
 
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
-    final duration = disableAnimations ? Duration.zero : const Duration(milliseconds: 1200);
+    final duration = disableAnimations
+        ? Duration.zero
+        : const Duration(milliseconds: 1200);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -156,7 +195,9 @@ class _StatCard extends StatelessWidget {
                 builder: (context, val, _) {
                   return Text(
                     val.toString(),
-                    style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+                    style: context.text.screenTitle.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   );
                 },
               ),
@@ -165,7 +206,9 @@ class _StatCard extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
                   unit,
-                  style: context.text.micro.copyWith(color: context.colors.textMedium),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ),
             ],

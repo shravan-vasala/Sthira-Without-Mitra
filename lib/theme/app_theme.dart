@@ -55,12 +55,34 @@ class AppTheme {
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
         ),
-        backgroundColor: AppColorsLight().scaffoldBg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: text.screenTitle.copyWith(color: AppColorsLight().textDark),
-        iconTheme: IconThemeData(color: AppColorsLight().textDark),
+        toolbarHeight: 64,
+        titleSpacing: Spacing.screen,
+        titleTextStyle: text.screenTitle.copyWith(
+          color: AppColorsLight().textDark,
+        ),
+        iconTheme: IconThemeData(
+          size: IconSize.nav,
+          color: AppColorsLight().textDark,
+        ),
+        actionsIconTheme: IconThemeData(
+          size: IconSize.nav,
+          color: AppColorsLight().textDark,
+        ),
+      ),
+      tabBarTheme: TabBarTheme(
+        labelStyle: text.bodyStrong,
+        unselectedLabelStyle: text.body.copyWith(
+          color: AppColorsLight().textMedium,
+        ),
+        indicatorColor: AppColorsLight().primary,
+        dividerColor: Colors.transparent,
+        tabAlignment: TabAlignment.fill,
+        labelColor: AppColorsLight().textDark,
+        unselectedLabelColor: AppColorsLight().textMedium,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColorsLight().white,
@@ -159,8 +181,12 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsLight().card,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: text.screenTitle.copyWith(color: AppColorsLight().textDark),
-        contentTextStyle: text.body.copyWith(color: AppColorsLight().textMedium),
+        titleTextStyle: text.screenTitle.copyWith(
+          color: AppColorsLight().textDark,
+        ),
+        contentTextStyle: text.body.copyWith(
+          color: AppColorsLight().textMedium,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       dropdownMenuTheme: DropdownMenuThemeData(
@@ -171,8 +197,12 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: text.bodyStrong.copyWith(color: AppColorsLight().textDark),
-        subtitleTextStyle: text.caption.copyWith(color: AppColorsLight().textMedium),
+        titleTextStyle: text.bodyStrong.copyWith(
+          color: AppColorsLight().textDark,
+        ),
+        subtitleTextStyle: text.caption.copyWith(
+          color: AppColorsLight().textMedium,
+        ),
         iconColor: AppColorsLight().textMedium,
       ),
       canvasColor: AppColorsLight().card,
@@ -228,12 +258,34 @@ class AppTheme {
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
         ),
-        backgroundColor: AppColorsDark().scaffoldBg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: text.screenTitle.copyWith(color: AppColorsDark().textDark),
-        iconTheme: IconThemeData(color: AppColorsDark().textDark),
+        toolbarHeight: 64,
+        titleSpacing: Spacing.screen,
+        titleTextStyle: text.screenTitle.copyWith(
+          color: AppColorsDark().textDark,
+        ),
+        iconTheme: IconThemeData(
+          size: IconSize.nav,
+          color: AppColorsDark().textDark,
+        ),
+        actionsIconTheme: IconThemeData(
+          size: IconSize.nav,
+          color: AppColorsDark().textDark,
+        ),
+      ),
+      tabBarTheme: TabBarTheme(
+        labelStyle: text.bodyStrong,
+        unselectedLabelStyle: text.body.copyWith(
+          color: AppColorsDark().textMedium,
+        ),
+        indicatorColor: AppColorsDark().primary,
+        dividerColor: Colors.transparent,
+        tabAlignment: TabAlignment.fill,
+        labelColor: AppColorsDark().textDark,
+        unselectedLabelColor: AppColorsDark().textMedium,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColorsDark().card,
@@ -311,7 +363,9 @@ class AppTheme {
         ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: text.body.copyWith(color: AppColorsDark().textMedium),
-        floatingLabelStyle: text.body.copyWith(color: AppColorsDark().primaryLight),
+        floatingLabelStyle: text.body.copyWith(
+          color: AppColorsDark().primaryLight,
+        ),
         hintStyle: text.body.copyWith(color: AppColorsDark().textLight),
       ),
       dividerTheme: DividerThemeData(
@@ -332,7 +386,9 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsDark().card,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: text.screenTitle.copyWith(color: AppColorsDark().textDark),
+        titleTextStyle: text.screenTitle.copyWith(
+          color: AppColorsDark().textDark,
+        ),
         contentTextStyle: text.body.copyWith(color: AppColorsDark().textMedium),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
@@ -344,8 +400,12 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: text.bodyStrong.copyWith(color: AppColorsDark().textDark),
-        subtitleTextStyle: text.caption.copyWith(color: AppColorsDark().textMedium),
+        titleTextStyle: text.bodyStrong.copyWith(
+          color: AppColorsDark().textDark,
+        ),
+        subtitleTextStyle: text.caption.copyWith(
+          color: AppColorsDark().textMedium,
+        ),
         iconColor: AppColorsDark().textMedium,
       ),
       canvasColor: AppColorsDark().card,
@@ -390,9 +450,6 @@ class AppTheme {
       labelLarge: bodyStrong,
       labelMedium: caption,
       labelSmall: micro,
-    ).apply(
-      bodyColor: textDark,
-      displayColor: textDark,
-    );
+    ).apply(bodyColor: textDark, displayColor: textDark);
   }
 }

@@ -27,7 +27,7 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
     ref.listen(progressPhotosStreamProvider, (prev, next) {
       if (state.photosEnabled) queueSync();
     });
-    
+
     // Listen to daily logs to cancel/skip completed tasks
     ref.listen(dailyLogsUpdateProvider, (prev, next) {
       if (state.habitsEnabled || state.mealsEnabled) queueSync();
@@ -60,7 +60,8 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
   }
 
   Future<void> updateConfig(ReminderConfig newConfig) async {
-    final isEnabling = (newConfig.habitsEnabled && !state.habitsEnabled) ||
+    final isEnabling =
+        (newConfig.habitsEnabled && !state.habitsEnabled) ||
         (newConfig.workoutsEnabled && !state.workoutsEnabled) ||
         (newConfig.mealsEnabled && !state.mealsEnabled) ||
         (newConfig.backupEnabled && !state.backupEnabled) ||
@@ -86,11 +87,12 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
 
   bool _isWithinQuietHours(TimeOfDay time) {
     if (!state.quietHoursEnabled) return false;
-    
+
     final tMin = time.hour * 60 + time.minute;
-    final startMin = state.quietHoursStart.hour * 60 + state.quietHoursStart.minute;
+    final startMin =
+        state.quietHoursStart.hour * 60 + state.quietHoursStart.minute;
     final endMin = state.quietHoursEnd.hour * 60 + state.quietHoursEnd.minute;
-    
+
     if (startMin < endMin) {
       return tMin >= startMin && tMin < endMin;
     } else {
@@ -124,42 +126,59 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
   }
 
   Future<void> _syncNotifications() async {
-
     final profile = ref.read(profileProvider);
     final userName = profile.name.isNotEmpty ? profile.name : 'there';
-    
+
     final now = DateTime.now();
-    
+
     final dailyLogRepo = ref.read(dailyLogRepoProvider);
     final habitRepo = ref.read(habitRepoProvider);
     final mealRepo = ref.read(mealRepoProvider);
-    
+
     // Check habits
     await _notificationService.cancelHabits();
     if (state.habitsEnabled && !_isWithinQuietHours(state.habitTime)) {
       final activeHabits = habitRepo.getHabits().length;
-      
+
       for (int i = 0; i < 7; i++) {
         final date = now.add(Duration(days: i));
         final dateStr = DateFormat('yyyy-MM-dd').format(date);
         final payload = _buildPayload('habit', dateStr);
-        
+
         if (_isSkipped(payload)) continue;
 
         // Skip if habits are done
         bool allDone = false;
         if (activeHabits > 0) {
-           final completions = habitRepo.getCompletions(dateStr);
-           final completedCount = completions.completions.values.where((v) => v == true || v == 'done').length;
-           final maxScore = habitRepo.getHabits().fold<double>(0.0, (sum, h) => sum + (h.type == HabitType.counter ? h.target : 1.0));
-           final currentScore = completions.completions.values.fold<double>(0.0, (sum, val) => sum + (val is num ? val.toDouble() : (val == true || val == 'done' ? 1.0 : 0.0)));
-           if (currentScore >= maxScore && maxScore > 0) allDone = true;
+          final completions = habitRepo.getCompletions(dateStr);
+          final completedCount = completions.completions.values
+              .where((v) => v == true || v == 'done')
+              .length;
+          final maxScore = habitRepo.getHabits().fold<double>(
+            0.0,
+            (sum, h) => sum + (h.type == HabitType.counter ? h.target : 1.0),
+          );
+          final currentScore = completions.completions.values.fold<double>(
+            0.0,
+            (sum, val) =>
+                sum +
+                (val is num
+                    ? val.toDouble()
+                    : (val == true || val == 'done' ? 1.0 : 0.0)),
+          );
+          if (currentScore >= maxScore && maxScore > 0) allDone = true;
         }
         if (allDone) continue;
 
-        final baseScheduled = DateTime(date.year, date.month, date.day, state.habitTime.hour, state.habitTime.minute);
+        final baseScheduled = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          state.habitTime.hour,
+          state.habitTime.minute,
+        );
         final scheduled = _applySnooze(baseScheduled, payload);
-        
+
         if (scheduled.isAfter(now)) {
           await _notificationService.scheduleAbsolute(
             id: 1000 + i,
@@ -178,12 +197,19 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
       for (int i = 0; i < 7; i++) {
         final date = now.add(Duration(days: i));
         final dateStr = DateFormat('yyyy-MM-dd').format(date);
-        
+
         // Lunch
         if (!_isWithinQuietHours(state.lunchTime)) {
           final payload = _buildPayload('lunch', dateStr);
-          if (!_isSkipped(payload) && !mealRepo.isMealLogged(dateStr, 'lunch')) {
-            final baseScheduled = DateTime(date.year, date.month, date.day, state.lunchTime.hour, state.lunchTime.minute);
+          if (!_isSkipped(payload) &&
+              !mealRepo.isMealLogged(dateStr, 'lunch')) {
+            final baseScheduled = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              state.lunchTime.hour,
+              state.lunchTime.minute,
+            );
             final scheduled = _applySnooze(baseScheduled, payload);
 
             if (scheduled.isAfter(now)) {
@@ -197,12 +223,19 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
             }
           }
         }
-        
+
         // Dinner
         if (!_isWithinQuietHours(state.dinnerTime)) {
           final payload = _buildPayload('dinner', dateStr);
-          if (!_isSkipped(payload) && !mealRepo.isMealLogged(dateStr, 'dinner')) {
-            final baseScheduled = DateTime(date.year, date.month, date.day, state.dinnerTime.hour, state.dinnerTime.minute);
+          if (!_isSkipped(payload) &&
+              !mealRepo.isMealLogged(dateStr, 'dinner')) {
+            final baseScheduled = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              state.dinnerTime.hour,
+              state.dinnerTime.minute,
+            );
             final scheduled = _applySnooze(baseScheduled, payload);
 
             if (scheduled.isAfter(now)) {
@@ -225,22 +258,34 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
       final workoutPlan = ref.read(workoutPlanProvider);
       if (workoutPlan != null) {
         final activeDays = workoutPlan.days
-            .where((d) => d.sections.isNotEmpty && d.dayId != 'Rest' && d.weekday != null)
+            .where(
+              (d) =>
+                  d.sections.isNotEmpty &&
+                  d.dayId != 'Rest' &&
+                  d.weekday != null,
+            )
             .map((d) => d.weekday!)
             .toList();
-            
+
         for (int i = 0; i < 7; i++) {
           final date = now.add(Duration(days: i));
           if (activeDays.contains(date.weekday)) {
             final dateStr = DateFormat('yyyy-MM-dd').format(date);
             final payload = _buildPayload('workout', dateStr);
-            
+
             if (_isSkipped(payload)) continue;
 
             final workoutStatus = dailyLogRepo.getLog(dateStr)?.workoutStatus;
-            if (workoutStatus == 'completed' || workoutStatus == 'skipped') continue;
+            if (workoutStatus == 'completed' || workoutStatus == 'skipped')
+              continue;
 
-            final baseScheduled = DateTime(date.year, date.month, date.day, state.workoutTime.hour, state.workoutTime.minute);
+            final baseScheduled = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              state.workoutTime.hour,
+              state.workoutTime.minute,
+            );
             final scheduled = _applySnooze(baseScheduled, payload);
 
             if (scheduled.isAfter(now)) {
@@ -248,7 +293,8 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
               await _notificationService.scheduleAbsolute(
                 id: 3000 + i,
                 title: 'Workout Scheduled',
-                body: 'Your workout is scheduled for $timeStr. Ready when you are.',
+                body:
+                    'Your workout is scheduled for $timeStr. Ready when you are.',
                 scheduledDate: scheduled,
                 addSnooze: true,
                 addSkip: true,
@@ -264,11 +310,21 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
     await _notificationService.cancelBackup();
     if (state.backupEnabled && !_isWithinQuietHours(state.backupTime)) {
       // Find next occurrence
-      DateTime scheduled = DateTime(now.year, now.month, now.day, state.backupTime.hour, state.backupTime.minute);
-      while (scheduled.weekday != state.backupDayOfWeek || scheduled.isBefore(now)) {
+      DateTime scheduled = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        state.backupTime.hour,
+        state.backupTime.minute,
+      );
+      while (scheduled.weekday != state.backupDayOfWeek ||
+          scheduled.isBefore(now)) {
         scheduled = scheduled.add(const Duration(days: 1));
       }
-      final payload = _buildPayload('backup', DateFormat('yyyy-MM-dd').format(scheduled));
+      final payload = _buildPayload(
+        'backup',
+        DateFormat('yyyy-MM-dd').format(scheduled),
+      );
       if (!_isSkipped(payload)) {
         final finalScheduled = _applySnooze(scheduled, payload);
         await _notificationService.scheduleAbsolute(
@@ -294,18 +350,31 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
           lastPhotoDate = DateTime.parse(allPhotos.first.date);
         } catch (_) {}
       }
-      
-      final bool needsNudge = lastPhotoDate == null || now.difference(lastPhotoDate).inDays >= 14;
+
+      final bool needsNudge =
+          lastPhotoDate == null || now.difference(lastPhotoDate).inDays >= 14;
       if (needsNudge) {
-        final payload = _buildPayload('photo', DateFormat('yyyy-MM-dd').format(now));
+        final payload = _buildPayload(
+          'photo',
+          DateFormat('yyyy-MM-dd').format(now),
+        );
         if (!_isSkipped(payload)) {
-          final scheduled = DateTime(now.year, now.month, now.day, state.photoTime.hour, state.photoTime.minute);
-          final finalScheduled = scheduled.isBefore(now) ? scheduled.add(const Duration(days: 1)) : scheduled;
+          final scheduled = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            state.photoTime.hour,
+            state.photoTime.minute,
+          );
+          final finalScheduled = scheduled.isBefore(now)
+              ? scheduled.add(const Duration(days: 1))
+              : scheduled;
           final finalSnoozed = _applySnooze(finalScheduled, payload);
           await _notificationService.scheduleAbsolute(
             id: 5000,
             title: 'Progress Photo',
-            body: 'It\'s been a while. Take a quick photo to track your progress.',
+            body:
+                'It\'s been a while. Take a quick photo to track your progress.',
             scheduledDate: finalSnoozed,
             payload: payload,
           );
@@ -317,11 +386,11 @@ class RemindersNotifier extends Notifier<ReminderConfig> {
   Future<void> initializeNotifications() async {
     await queueSync();
   }
-  
+
   Future<void> clearOnSignOut() async {
-     await _notificationService.cancelAll();
-     await _prefs.remove('skipped_reminders');
-     state = ReminderConfig();
+    await _notificationService.cancelAll();
+    await _prefs.remove('skipped_reminders');
+    state = ReminderConfig();
   }
 }
 

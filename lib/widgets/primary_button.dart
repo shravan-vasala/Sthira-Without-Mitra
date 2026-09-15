@@ -45,17 +45,25 @@ class _PrimaryButtonState extends State<PrimaryButton> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(widget.icon, size: 20, color: widget.iconColor ?? context.colors.onPrimary),
+                    Icon(
+                      widget.icon,
+                      size: 20,
+                      color: widget.iconColor ?? context.colors.onPrimary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       widget.label,
-                      style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
+                      style: context.text.bodyStrong.copyWith(
+                        color: context.colors.onPrimary,
+                      ),
                     ),
                   ],
                 )
               : Text(
                   widget.label,
-                  style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary),
+                  style: context.text.bodyStrong.copyWith(
+                    color: context.colors.onPrimary,
+                  ),
                 ));
 
     final btn = SizedBox(
@@ -79,15 +87,24 @@ class _PrimaryButtonState extends State<PrimaryButton> {
     );
 
     return GestureDetector(
-      onTapDown: widget.isLoading || widget.onPressed == null ? null : (_) => setState(() => _isPressed = true),
+      onTapDown: widget.isLoading || widget.onPressed == null
+          ? null
+          : (_) => setState(() => _isPressed = true),
       onTapUp: (_) => setState(() => _isPressed = false),
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(
         scale: _isPressed ? 0.97 : 1.0,
-        duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 150),
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
         child: widget.isLoading && !MediaQuery.disableAnimationsOf(context)
-            ? btn.animate(onPlay: (c) => c.repeat()).shimmer(duration: 1500.ms, color: Colors.white.withValues(alpha: 0.2))
+            ? btn
+                  .animate(onPlay: (c) => c.repeat())
+                  .shimmer(
+                    duration: 1500.ms,
+                    color: Colors.white.withValues(alpha: 0.2),
+                  )
             : btn,
       ),
     );
@@ -118,7 +135,9 @@ class _CompactButtonState extends State<CompactButton> {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = context.text.caption.copyWith(fontWeight: FontWeight.w700);
+    final textStyle = context.text.caption.copyWith(
+      fontWeight: FontWeight.w700,
+    );
 
     final child = widget.icon != null
         ? Row(
@@ -169,7 +188,9 @@ class _CompactButtonState extends State<CompactButton> {
     );
 
     return GestureDetector(
-      onTapDown: widget.onPressed == null ? null : (_) => setState(() => _isPressed = true),
+      onTapDown: widget.onPressed == null
+          ? null
+          : (_) => setState(() => _isPressed = true),
       onTapUp: (_) => setState(() => _isPressed = false),
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(

@@ -8,7 +8,6 @@ import '../../widgets/primary_button.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class StepsEntryDialog extends ConsumerStatefulWidget {
-
   const StepsEntryDialog({super.key});
 
   @override
@@ -46,16 +45,32 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
   Widget build(BuildContext context) {
     final selectedDateStr = ref.watch(dateStringProvider);
     final selectedDate = DateTime.parse(selectedDateStr);
-    final isToday = DateTime.now().year == selectedDate.year &&
+    final isToday =
+        DateTime.now().year == selectedDate.year &&
         DateTime.now().month == selectedDate.month &&
         DateTime.now().day == selectedDate.day;
 
-    final monthStr = const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][selectedDate.month - 1];
+    final monthStr = const [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ][selectedDate.month - 1];
     final dateFormatted = '${selectedDate.day} $monthStr';
 
     return AppSheet(
       title: 'Log Steps',
-      subtitle: isToday ? 'Enter your step count for today' : 'Enter your step count for $dateFormatted',
+      subtitle: isToday
+          ? 'Enter your step count for today'
+          : 'Enter your step count for $dateFormatted',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -65,7 +80,9 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
             controller: _controller,
             keyboardType: TextInputType.number,
             autofocus: true,
-            style: context.text.display.copyWith(color: context.colors.textDark),
+            style: context.text.display.copyWith(
+              color: context.colors.textDark,
+            ),
             textAlign: TextAlign.center,
             onChanged: (_) {
               if (_errorText != null) {
@@ -76,9 +93,13 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               filled: true,
               fillColor: context.colors.inputFill,
               hintText: '0',
-              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
+              hintStyle: context.text.display.copyWith(
+                color: context.colors.textLight,
+              ),
               suffixText: 'steps',
-              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
+              suffixStyle: context.text.cardTitle.copyWith(
+                color: context.colors.textMedium,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
@@ -107,12 +128,18 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.health_and_safety, size: 16, color: context.colors.primary),
+                  Icon(
+                    Icons.health_and_safety,
+                    size: 16,
+                    color: context.colors.primary,
+                  ),
                   const SizedBox(width: 4),
                   Flexible(
                     child: Text(
                       'Synced from Health Connect. Manual saves will override sync for this day.',
-                      style: context.text.micro.copyWith(color: context.colors.textMedium),
+                      style: context.text.micro.copyWith(
+                        color: context.colors.textMedium,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -125,7 +152,9 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
             onPressed: () async {
               if (_controller.text.trim().isEmpty) {
                 Haptics.toggle();
-                await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
+                await ref
+                    .read(dailyLogProvider.notifier)
+                    .clearStepsForDate(_pinnedDateStr);
                 if (mounted) Navigator.of(context).pop();
                 return;
               }
@@ -133,11 +162,15 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               final steps = int.tryParse(_controller.text);
               if (steps != null && steps >= 0) {
                 Haptics.toggle();
-                await ref.read(dailyLogProvider.notifier).updateStepsForDate(_pinnedDateStr, steps);
+                await ref
+                    .read(dailyLogProvider.notifier)
+                    .updateStepsForDate(_pinnedDateStr, steps);
                 if (mounted) Navigator.of(context).pop();
               } else {
                 Haptics.error();
-                setState(() => _errorText = 'Please enter a valid number (≥ 0)');
+                setState(
+                  () => _errorText = 'Please enter a valid number (≥ 0)',
+                );
               }
             },
           ),
@@ -146,7 +179,9 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
             Center(
               child: TextButton(
                 onPressed: () async {
-                  await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
+                  await ref
+                      .read(dailyLogProvider.notifier)
+                      .clearStepsForDate(_pinnedDateStr);
                   if (mounted) Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(

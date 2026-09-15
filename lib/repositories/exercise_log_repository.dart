@@ -9,10 +9,13 @@ class ExerciseLogRepository {
   late Isar _isar;
   ICloudSyncService? _sync;
 
-  Stream<void> get watchUpdates => _isar.exerciseLogs.watchLazy(fireImmediately: true);
+  Stream<void> get watchUpdates =>
+      _isar.exerciseLogs.watchLazy(fireImmediately: true);
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
-  Future<void> detachSync() async { _sync = null; }
+  Future<void> detachSync() async {
+    _sync = null;
+  }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -31,7 +34,15 @@ class ExerciseLogRepository {
     await _isar.writeTxn(() async {
       await _isar.exercisePrs.put(pr);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'exercise_prs', docId: pr.exerciseName, payload: jsonEncode(pr.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'exercise_prs',
+            docId: pr.exerciseName,
+            payload: jsonEncode(pr.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -52,7 +63,15 @@ class ExerciseLogRepository {
     await _isar.writeTxn(() async {
       await _isar.exerciseLogs.put(log);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'exercise_logs', docId: log.key, payload: jsonEncode(log.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'exercise_logs',
+            docId: log.key,
+            payload: jsonEncode(log.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -64,7 +83,15 @@ class ExerciseLogRepository {
       await _isar.writeTxn(() async {
         await _isar.exerciseLogs.delete(existing.id);
         if (_isar.name != 'guest') {
-          _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_delete_/exercise_logs', docId: existing.key, payload: '{}', timestamp: DateTime.now()));
+          _isar.syncQueueItems.put(
+            SyncQueueItem(
+              uid: _isar.name,
+              collection: '_delete_/exercise_logs',
+              docId: existing.key,
+              payload: '{}',
+              timestamp: DateTime.now(),
+            ),
+          );
         }
       });
       _sync?.triggerFlush();
@@ -74,14 +101,14 @@ class ExerciseLogRepository {
   bool hasLog(String date, String instanceId) {
     final log = getLog(date, instanceId);
     if (log == null) return false;
-    
+
     // We cannot easily import WorkoutCompletion here due to potential circular dependencies,
-    // so we duplicate the meaningful work check or we assume log.sets.isNotEmpty is meaningful 
+    // so we duplicate the meaningful work check or we assume log.sets.isNotEmpty is meaningful
     // IF we trust the saver to delete bad logs.
     // However, the rule states to verify it here.
     if (log.sets.isEmpty) return false;
     for (final s in log.sets) {
-       if ((s.reps ?? 0) > 0 || (s.weight ?? 0.0) > 0) return true;
+      if ((s.reps ?? 0) > 0 || (s.weight ?? 0.0) > 0) return true;
     }
     return false;
   }

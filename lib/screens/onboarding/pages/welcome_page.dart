@@ -12,14 +12,17 @@ class WelcomePage extends StatefulWidget {
   State<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStateMixin {
+class _WelcomePageState extends State<WelcomePage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
 
   @override
   void initState() {
     super.initState();
     _staggerController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1200));
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
   }
 
   @override
@@ -27,7 +30,8 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
     super.didChangeDependencies();
     if (MediaQuery.disableAnimationsOf(context)) {
       _staggerController.value = 1.0;
-    } else if (!_staggerController.isAnimating && _staggerController.value == 0) {
+    } else if (!_staggerController.isAnimating &&
+        _staggerController.value == 0) {
       _staggerController.forward();
     }
   }
@@ -52,13 +56,17 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
               Text(
                 '2:47',
                 textAlign: TextAlign.center,
-                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+                style: context.text.screenTitle.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
                 textAlign: TextAlign.center,
-                style: context.text.body.copyWith(color: context.colors.textMedium),
+                style: context.text.body.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
               const SizedBox(height: 24),
               Padding(
@@ -66,7 +74,9 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 child: Text(
                   "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
                   textAlign: TextAlign.center,
-                  style: context.text.screenTitle.copyWith(color: context.colors.textDark.withValues(alpha: 0.85)),
+                  style: context.text.screenTitle.copyWith(
+                    color: context.colors.textDark.withValues(alpha: 0.85),
+                  ),
                 ),
               ),
             ],
@@ -103,17 +113,16 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 fit: BoxFit.contain,
               );
               if (!MediaQuery.disableAnimationsOf(context)) {
-                logo = logo.animate(onPlay: (controller) => controller.repeat()).shimmer(
-                  duration: 4.seconds,
-                  color: Colors.white.withValues(alpha: 0.1),
-                );
+                logo = logo
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(
+                      duration: 4.seconds,
+                      color: Colors.white.withValues(alpha: 0.1),
+                    );
               }
               return Opacity(
                 opacity: fade,
-                child: Transform.scale(
-                  scale: scale,
-                  child: logo,
-                ),
+                child: Transform.scale(scale: scale, child: logo),
               );
             },
           ),
@@ -141,18 +150,24 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                       children: [
                         Text(
                           'स्थिर',
-                          style: context.text.screenTitle.copyWith(color: const Color(0xFFE29B65)),
+                          style: context.text.screenTitle.copyWith(
+                            color: const Color(0xFFE29B65),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             '•',
-                            style: context.text.bodyStrong.copyWith(color: Colors.white.withValues(alpha: 0.3)),
+                            style: context.text.bodyStrong.copyWith(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
                           ),
                         ),
                         Text(
                           'steady, every day',
-                          style: context.text.bodyStrong.copyWith(color: Colors.white.withValues(alpha: 0.7)),
+                          style: context.text.bodyStrong.copyWith(
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
                         ),
                       ],
                     ),
@@ -162,7 +177,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
             },
           ),
           const SizedBox(height: 48),
-          
+
           // Pillars
           _buildAnimPill(
             delayIdx: 0,
@@ -184,7 +199,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
           ),
 
           const Spacer(),
-          
+
           // 2:47 Easter Egg
           AnimatedBuilder(
             animation: _staggerController,
@@ -202,7 +217,9 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
                       '2:47',
-                      style: context.text.bodyStrong.copyWith(color: const Color(0xFFE29B65).withValues(alpha: 0.8)),
+                      style: context.text.bodyStrong.copyWith(
+                        color: const Color(0xFFE29B65).withValues(alpha: 0.8),
+                      ),
                     ),
                   ),
                 ),
@@ -218,10 +235,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                 parent: _staggerController,
                 curve: const Interval(0.8, 1.0, curve: Curves.easeIn),
               ).value;
-              return Opacity(
-                opacity: fade,
-                child: const _DedicationLine(),
-              );
+              return Opacity(opacity: fade, child: const _DedicationLine());
             },
           ),
           const SizedBox(height: 24),
@@ -258,16 +272,25 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
               child: Builder(
                 builder: (context) {
                   Widget card = SurfaceCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: context.colors.primary.withValues(alpha: 0.1),
+                            color: context.colors.primary.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(icon, color: context.colors.primary, size: 20),
+                          child: Icon(
+                            icon,
+                            color: context.colors.primary,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -276,12 +299,16 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                             children: [
                               Text(
                                 title,
-                                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                                style: context.text.bodyStrong.copyWith(
+                                  color: context.colors.textDark,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 subtitle,
-                                style: context.text.caption.copyWith(color: context.colors.textMedium),
+                                style: context.text.caption.copyWith(
+                                  color: context.colors.textMedium,
+                                ),
                               ),
                             ],
                           ),
@@ -290,13 +317,16 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
                     ),
                   );
                   if (!MediaQuery.disableAnimationsOf(context)) {
-                    card = card.animate(
-                      delay: (start * 1000 + 1000).ms, 
-                      onPlay: (controller) => controller.repeat(reverse: false),
-                    ).shimmer(
-                      duration: 3.seconds,
-                      color: Colors.white.withValues(alpha: 0.05),
-                    );
+                    card = card
+                        .animate(
+                          delay: (start * 1000 + 1000).ms,
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: false),
+                        )
+                        .shimmer(
+                          duration: 3.seconds,
+                          color: Colors.white.withValues(alpha: 0.05),
+                        );
                   }
                   return card;
                 },
@@ -319,7 +349,9 @@ class _DedicationLine extends StatelessWidget {
       children: [
         Text(
           'Made with ',
-          style: context.text.caption.copyWith(color: Colors.white.withValues(alpha: 0.4)),
+          style: context.text.caption.copyWith(
+            color: Colors.white.withValues(alpha: 0.4),
+          ),
         ),
         Icon(
           Icons.favorite_rounded,
@@ -328,7 +360,9 @@ class _DedicationLine extends StatelessWidget {
         ),
         Text(
           ' for Bodamma',
-          style: context.text.caption.copyWith(color: Colors.white.withValues(alpha: 0.4)),
+          style: context.text.caption.copyWith(
+            color: Colors.white.withValues(alpha: 0.4),
+          ),
         ),
       ],
     );
@@ -339,13 +373,18 @@ class CompletionScreen extends StatefulWidget {
   final String name;
   final VoidCallback onComplete;
 
-  const CompletionScreen({super.key, required this.name, required this.onComplete});
+  const CompletionScreen({
+    super.key,
+    required this.name,
+    required this.onComplete,
+  });
 
   @override
   State<CompletionScreen> createState() => _CompletionScreenState();
 }
 
-class _CompletionScreenState extends State<CompletionScreen> with SingleTickerProviderStateMixin {
+class _CompletionScreenState extends State<CompletionScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _fadeController;
 
   bool _sequenceStarted = false;
@@ -354,9 +393,11 @@ class _CompletionScreenState extends State<CompletionScreen> with SingleTickerPr
   void initState() {
     super.initState();
     _fadeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1000));
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

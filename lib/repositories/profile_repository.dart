@@ -12,7 +12,9 @@ class ProfileRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
-  Future<void> detachSync() async { _sync = null; }
+  Future<void> detachSync() async {
+    _sync = null;
+  }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -56,7 +58,15 @@ class ProfileRepository {
     await _isar.writeTxn(() async {
       await _isar.userProfiles.put(profile);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_profile_', docId: 'profile', payload: jsonEncode(profile.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: '_profile_',
+            docId: 'profile',
+            payload: jsonEncode(profile.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();

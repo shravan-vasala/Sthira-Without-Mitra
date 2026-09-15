@@ -34,7 +34,10 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> sync({bool isManualRefresh = false, String? explicitTargetDate}) async {
+  Future<void> sync({
+    bool isManualRefresh = false,
+    String? explicitTargetDate,
+  }) async {
     if (_isSyncing) return;
     _isSyncing = true;
     state = true;
@@ -56,21 +59,21 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
       // Sync Screen Time
       if (ref.read(profileProvider).screenTimeEnabled) {
         final currentUid = ref.read(authServiceProvider).uid;
-        
+
         final screenTimeResult = await ref
             .read(screenTimeServiceProvider)
             .getScreenTimeForToday();
-            
+
         // Check cancellation/ownership pre-write
-        if (currentUid != null && currentUid == ref.read(authServiceProvider).uid) {
-          if (screenTimeResult.status == 'success' && 
-              screenTimeResult.measuredDate != null && 
+        if (currentUid != null &&
+            currentUid == ref.read(authServiceProvider).uid) {
+          if (screenTimeResult.status == 'success' &&
+              screenTimeResult.measuredDate != null &&
               screenTimeResult.minutes != null) {
-                
             // Discard overlapping local-drift; Use authoritative native boundaries
             await dailyLogRepo.updateScreenTime(
-                screenTimeResult.measuredDate!, 
-                screenTimeResult.minutes!,
+              screenTimeResult.measuredDate!,
+              screenTimeResult.minutes!,
             );
           }
         }
@@ -90,12 +93,17 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
         if (todayData != null) {
           await dailyLogRepo.updateFromHealthConnect([todayData]);
           await prefs.setBool('hc_connected', true);
-          await prefs.setString('last_hc_today_sync_time', now.toIso8601String());
+          await prefs.setString(
+            'last_hc_today_sync_time',
+            now.toIso8601String(),
+          );
           ref.read(stepsSourceProvider.notifier).state =
               StepsSource.healthConnect;
         }
 
-        if ((todayData != null && todayData.stepsResult.status != HealthStatus.error) || everConnected) {
+        if ((todayData != null &&
+                todayData.stepsResult.status != HealthStatus.error) ||
+            everConnected) {
           // Heavier historical sync — manual pull or every 15 minutes
           final shouldFullSync =
               isManualRefresh ||
@@ -116,19 +124,24 @@ class SyncController extends Notifier<bool> with WidgetsBindingObserver {
             }
             await prefs.setString('last_hc_sync_time', now.toIso8601String());
           }
-          
+
           if (explicitTargetDate != null && isManualRefresh) {
             final explicitDateObj = DateTime.tryParse(explicitTargetDate);
             if (explicitDateObj != null) {
               final diffDays = now.difference(explicitDateObj).inDays.abs();
               if (diffDays > 7 && diffDays <= 90) {
-                 final steps = await hcService.getStepsForDate(explicitDateObj);
-                 final sleep = await hcService.getSleepForDate(explicitDateObj);
-                 if (steps.status != HealthStatus.error || sleep.status != HealthStatus.error) {
-                    await dailyLogRepo.updateFromHealthConnect([
-                      HealthDailyData(dateStr: explicitTargetDate, stepsResult: steps, sleepResult: sleep)
-                    ]);
-                 }
+                final steps = await hcService.getStepsForDate(explicitDateObj);
+                final sleep = await hcService.getSleepForDate(explicitDateObj);
+                if (steps.status != HealthStatus.error ||
+                    sleep.status != HealthStatus.error) {
+                  await dailyLogRepo.updateFromHealthConnect([
+                    HealthDailyData(
+                      dateStr: explicitTargetDate,
+                      stepsResult: steps,
+                      sleepResult: sleep,
+                    ),
+                  ]);
+                }
               }
             }
           }

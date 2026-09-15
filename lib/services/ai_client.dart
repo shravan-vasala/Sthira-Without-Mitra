@@ -17,7 +17,17 @@ class CancellationToken {
   }
 }
 
-enum AiErrorCause { invalidKey, offline, notFound, rateLimited, overloaded, parse, timeout, cancelled, unknown }
+enum AiErrorCause {
+  invalidKey,
+  offline,
+  notFound,
+  rateLimited,
+  overloaded,
+  parse,
+  timeout,
+  cancelled,
+  unknown,
+}
 
 class AiException implements Exception {
   final String message;
@@ -28,23 +38,38 @@ class AiException implements Exception {
 }
 
 AiErrorCause classifyAiError(String errorString) {
-  if (errorString.contains('API_KEY_INVALID') || errorString.contains('API key not valid') || errorString.contains('disabled') || errorString.contains('has not been used in project') || errorString.contains('deactivated') || errorString.contains('SERVICE_DISABLED')) {
+  if (errorString.contains('API_KEY_INVALID') ||
+      errorString.contains('API key not valid') ||
+      errorString.contains('disabled') ||
+      errorString.contains('has not been used in project') ||
+      errorString.contains('deactivated') ||
+      errorString.contains('SERVICE_DISABLED')) {
     return AiErrorCause.invalidKey;
-  } else if (errorString.contains('PERMISSION_DENIED') || errorString.contains('403') || errorString.contains('forbidden')) {
+  } else if (errorString.contains('PERMISSION_DENIED') ||
+      errorString.contains('403') ||
+      errorString.contains('forbidden')) {
     // 403 could be restricted key. It's an invalid key effectively.
     return AiErrorCause.invalidKey;
-  } else if (errorString.contains('SocketException') || errorString.contains('Failed host lookup')) {
+  } else if (errorString.contains('SocketException') ||
+      errorString.contains('Failed host lookup')) {
     return AiErrorCause.offline;
-  } else if (errorString.contains('429') || errorString.contains('quota') || errorString.contains('RESOURCE_EXHAUSTED')) {
+  } else if (errorString.contains('429') ||
+      errorString.contains('quota') ||
+      errorString.contains('RESOURCE_EXHAUSTED')) {
     // Treat quota exhaust as rate limited, though technically it might be a daily quota.
     return AiErrorCause.rateLimited;
   } else if (errorString.contains('404') || errorString.contains('not found')) {
     return AiErrorCause.notFound;
-  } else if (errorString.contains('503') || errorString.contains('UNAVAILABLE') || errorString.contains('overloaded')) {
+  } else if (errorString.contains('503') ||
+      errorString.contains('UNAVAILABLE') ||
+      errorString.contains('overloaded')) {
     return AiErrorCause.overloaded;
-  } else if (errorString.contains('FormatException') || errorString.contains('json') || errorString.contains('parse')) {
+  } else if (errorString.contains('FormatException') ||
+      errorString.contains('json') ||
+      errorString.contains('parse')) {
     return AiErrorCause.parse;
-  } else if (errorString.contains('TimeoutException') || errorString.contains('Timeout')) {
+  } else if (errorString.contains('TimeoutException') ||
+      errorString.contains('Timeout')) {
     return AiErrorCause.timeout;
   } else if (errorString.contains('cancelled')) {
     return AiErrorCause.cancelled;
@@ -60,7 +85,8 @@ class AiClientCircuitBreaker {
 
   bool get isOpen {
     if (consecutiveFailures >= maxFailures) {
-      if (lastFailureTime != null && DateTime.now().difference(lastFailureTime!) > resetTimeout) {
+      if (lastFailureTime != null &&
+          DateTime.now().difference(lastFailureTime!) > resetTimeout) {
         // Half-open state
         consecutiveFailures = 0;
         return false;
@@ -85,7 +111,7 @@ class AiClient {
   final AiCache? cache;
   final AiClientCircuitBreaker _visionCircuitBreaker = AiClientCircuitBreaker();
   final AiClientCircuitBreaker _textCircuitBreaker = AiClientCircuitBreaker();
-  
+
   static const visionModelsToTry = [
     'gemini-3.7-flash',
     'gemini-3.6-flash',
@@ -109,7 +135,8 @@ class AiClient {
     String? mimeType,
     Duration timeout,
     Map<String, dynamic>? responseSchema,
-  })? mockCallModel;
+  })?
+  mockCallModel;
 
   @visibleForTesting
   Stream<String?> Function({
@@ -117,7 +144,8 @@ class AiClient {
     required String prompt,
     required String systemInstruction,
     String? apiKey,
-  })? mockCallModelStream;
+  })?
+  mockCallModelStream;
 
   AiClient({this.cache, this.mockCallModel, this.mockCallModelStream});
 
@@ -127,7 +155,7 @@ class AiClient {
     _cachedApiKey = null;
   }
 
-    Future<Map<String, dynamic>?> generateJson({
+  Future<Map<String, dynamic>?> generateJson({
     required String prompt,
     required String systemInstruction,
     List<Uint8List>? imageBytesList,
@@ -139,7 +167,10 @@ class AiClient {
     DateTime? overallDeadline,
   }) async {
     if (apiKey.isEmpty) {
-      throw AiException('API Key is required. Add it in Profile -> AI Settings.', cause: AiErrorCause.invalidKey);
+      throw AiException(
+        'API Key is required. Add it in Profile -> AI Settings.',
+        cause: AiErrorCause.invalidKey,
+      );
     }
 
     final fullOpSw = Stopwatch()..start();
@@ -152,7 +183,10 @@ class AiClient {
       final prepSw = Stopwatch()..start();
       final b = BytesBuilder();
       for (var imageBytes in imageBytesList) {
-        final processed = await ImagePreprocessor.processImage(imageBytes, mimeType ?? 'image/jpeg');
+        final processed = await ImagePreprocessor.processImage(
+          imageBytes,
+          mimeType ?? 'image/jpeg',
+        );
         processedImages.add(processed.$1);
         actualMimeType = processed.$2;
         b.add(processed.$1);
@@ -163,47 +197,68 @@ class AiClient {
     }
 
     if (cache != null && !skipCache) {
-      final cachedResult = cache!.get(prompt, systemInstruction, imageContext, responseSchema?.toString());
+      final cachedResult = cache!.get(
+        prompt,
+        systemInstruction,
+        imageContext,
+        responseSchema?.toString(),
+      );
       if (cachedResult != null) return cachedResult;
     }
 
     final isVision = imageBytesList != null && imageBytesList.isNotEmpty;
     final breaker = isVision ? _visionCircuitBreaker : _textCircuitBreaker;
-    
+
     if (breaker.isOpen) {
-      throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
+      throw AiException(
+        'Our AI is taking a quick breather to handle traffic. Give it about a minute.',
+        cause: AiErrorCause.rateLimited,
+      );
     }
-    
+
     if (cancellationToken?.isCancelled ?? false) {
-      throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+      throw AiException(
+        'Operation was cancelled.',
+        cause: AiErrorCause.cancelled,
+      );
     }
 
     final modelsToUse = isVision ? visionModelsToTry : textModelsToTry;
     // We expect the cancellationToken to carry its own deadline logic if needed, but we give a sensible max here
-    final computedDeadline = overallDeadline ?? DateTime.now().add(Duration(seconds: isVision ? 30 : 20));
+    final computedDeadline =
+        overallDeadline ??
+        DateTime.now().add(Duration(seconds: isVision ? 30 : 20));
     final perAttemptTimeout = Duration(seconds: isVision ? 20 : 15);
-    
+
     AiErrorCause? lastCause;
     String lastErrorMsg = '';
 
     for (int i = 0; i < modelsToUse.length; i++) {
-        if (DateTime.now().isAfter(computedDeadline)) break;
+      if (DateTime.now().isAfter(computedDeadline)) break;
       final modelName = modelsToUse[i];
-      final int maxRetries = 1; // max 2 attempts total per model for transient errors
+      final int maxRetries =
+          1; // max 2 attempts total per model for transient errors
       int attempt = 0;
-      
+
       while (attempt <= maxRetries) {
         if (cancellationToken?.isCancelled ?? false) {
-          throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+          throw AiException(
+            'Operation was cancelled.',
+            cause: AiErrorCause.cancelled,
+          );
         }
         if (DateTime.now().isAfter(computedDeadline)) break;
         final remaining = computedDeadline.difference(DateTime.now());
-        final attemptTimeout = remaining < perAttemptTimeout ? remaining : perAttemptTimeout;
+        final attemptTimeout = remaining < perAttemptTimeout
+            ? remaining
+            : perAttemptTimeout;
 
         final sw = Stopwatch()..start();
         try {
-          debugPrint('AiClient: Trying model: $modelName (attempt ${attempt + 1})...');
-          
+          debugPrint(
+            'AiClient: Trying model: $modelName (attempt ${attempt + 1})...',
+          );
+
           final waitFuture = _callModel(
             modelName: modelName,
             prompt: prompt,
@@ -214,14 +269,17 @@ class AiClient {
             timeout: attemptTimeout,
             responseSchema: responseSchema,
           );
-          
+
           // Poll cancellation while waiting
           String? response;
           bool localCancel = false;
           while (true) {
             final test = await Future.any([
               waitFuture,
-              Future.delayed(const Duration(milliseconds: 500), () => 'CANCEL_POLL')
+              Future.delayed(
+                const Duration(milliseconds: 500),
+                () => 'CANCEL_POLL',
+              ),
             ]);
             if (cancellationToken?.isCancelled ?? false) {
               localCancel = true;
@@ -233,54 +291,79 @@ class AiClient {
             }
           }
           if (localCancel) {
-            throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+            throw AiException(
+              'Operation was cancelled.',
+              cause: AiErrorCause.cancelled,
+            );
           }
           sw.stop();
-          
-          if (response == null || response.isEmpty) throw AiException("Empty response", cause: AiErrorCause.unknown);
-          
+
+          if (response == null || response.isEmpty)
+            throw AiException("Empty response", cause: AiErrorCause.unknown);
+
           final json = _parseJson(response);
           if (i > 0) json['modelUsed'] = modelName;
-          
+
           AiLogger.log(
-            purpose: isVision ? 'scan plate (vision)' : 'scan description', 
-            model: modelName, 
-            durationMs: sw.elapsedMilliseconds, 
+            purpose: isVision ? 'scan plate (vision)' : 'scan description',
+            model: modelName,
+            durationMs: sw.elapsedMilliseconds,
             preprocessMs: preprocessMs,
-            outcome: 'success'
+            outcome: 'success',
           );
-          
+
           breaker.recordSuccess();
-          if (cache != null) await cache!.set(prompt, systemInstruction, json, imageContext, responseSchema?.toString());
+          if (cache != null)
+            await cache!.set(
+              prompt,
+              systemInstruction,
+              json,
+              imageContext,
+              responseSchema?.toString(),
+            );
           return json;
-          
         } catch (e) {
           sw.stop();
           final errStr = e.toString();
-          final cause = (e is AiException && e.cause != null) ? e.cause! : classifyAiError(errStr);
+          final cause = (e is AiException && e.cause != null)
+              ? e.cause!
+              : classifyAiError(errStr);
           lastCause = cause;
           lastErrorMsg = errStr;
-          
+
           AiLogger.log(
-            purpose: 'AI error fallback', 
-            model: modelName, 
-            durationMs: sw.elapsedMilliseconds, 
+            purpose: 'AI error fallback',
+            model: modelName,
+            durationMs: sw.elapsedMilliseconds,
             preprocessMs: preprocessMs,
-            outcome: cause.toString()
+            outcome: cause.toString(),
           );
-          
+
           if (cause == AiErrorCause.invalidKey) {
-            throw AiException('This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.', cause: cause);
+            throw AiException(
+              'This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.',
+              cause: cause,
+            );
           } else if (cause == AiErrorCause.offline) {
-            throw AiException('You seem to be offline. Please check your internet connection.', cause: cause);
+            throw AiException(
+              'You seem to be offline. Please check your internet connection.',
+              cause: cause,
+            );
           } else if (cause == AiErrorCause.parse) {
-            throw AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause);
+            throw AiException(
+              'AI returned an invalid format. Please try again.\nDetails: $errStr',
+              cause: cause,
+            );
           } else if (cause == AiErrorCause.notFound) {
             break; // Next model
-          } else if (cause == AiErrorCause.rateLimited || cause == AiErrorCause.overloaded) {
+          } else if (cause == AiErrorCause.rateLimited ||
+              cause == AiErrorCause.overloaded) {
             if (attempt < maxRetries) {
               final delay = attempt == 0 ? 1 : 2;
-              if (DateTime.now().add(Duration(seconds: delay)).isAfter(computedDeadline)) break;
+              if (DateTime.now()
+                  .add(Duration(seconds: delay))
+                  .isAfter(computedDeadline))
+                break;
               if (cancellationToken?.isCancelled ?? false) break;
               await Future.delayed(Duration(seconds: delay));
               if (cancellationToken?.isCancelled ?? false) break;
@@ -298,24 +381,34 @@ class AiClient {
     }
 
     if (cancellationToken?.isCancelled ?? false) {
-      throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled);
+      throw AiException(
+        'Operation was cancelled.',
+        cause: AiErrorCause.cancelled,
+      );
     }
-    
+
     if (DateTime.now().isAfter(computedDeadline)) {
-      throw AiException('The AI is taking too long right now. Please try again.', cause: AiErrorCause.timeout);
+      throw AiException(
+        'The AI is taking too long right now. Please try again.',
+        cause: AiErrorCause.timeout,
+      );
     }
-    
-    if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
+
+    if (lastCause == AiErrorCause.rateLimited ||
+        lastCause == AiErrorCause.overloaded) {
       breaker.recordFailure();
     }
-    
+
     String reason = 'unknown error';
     if (lastCause == AiErrorCause.rateLimited) reason = 'rate limited';
     if (lastCause == AiErrorCause.overloaded) reason = 'model overloaded';
     if (lastCause == AiErrorCause.timeout) reason = 'timed out';
     if (lastCause == AiErrorCause.parse) reason = 'parsing failed';
-    
-    throw AiException('Couldn\'t analyze right now. Try again in a minute.', cause: lastCause);
+
+    throw AiException(
+      'Couldn\'t analyze right now. Try again in a minute.',
+      cause: lastCause,
+    );
   }
 
   Future<String?> _callModel({
@@ -328,59 +421,58 @@ class AiClient {
     Duration timeout = const Duration(seconds: 30),
     Map<String, dynamic>? responseSchema,
   }) async {
-      if (mockCallModel != null) {
-        return mockCallModel!(
-          modelName: modelName,
-          prompt: prompt,
-          systemInstruction: systemInstruction,
-          apiKey: apiKey,
-          imageBytesList: imageBytesList,
-          mimeType: mimeType,
-          timeout: timeout,
-          responseSchema: responseSchema,
-        );
-      }
-      if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('API Key is required.');
-      }
-      
-      if (_cachedApiKey != apiKey || _cachedClient == null) {
-        _cachedClient?.close();
-        _cachedClient = GoogleAIClient(
-          config: GoogleAIConfig.googleAI(
-            authProvider: ApiKeyProvider(apiKey),
-          ),
-        );
-        _cachedApiKey = apiKey;
-      }
-
-      final request = GenerateContentRequest(
-        systemInstruction: systemInstruction != null ? Content.text(systemInstruction) : null,
-        generationConfig: GenerationConfig(
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema,
-          temperature: 0.1,
-        ),
-        contents: [
-          if (imageBytesList != null && imageBytesList.isNotEmpty)
-            Content.user([
-              TextPart(prompt),
-              for (var imageBytes in imageBytesList)
-                Part.bytes(imageBytes, mimeType ?? 'image/jpeg'),
-            ])
-          else
-            Content.text(prompt)
-        ],
+    if (mockCallModel != null) {
+      return mockCallModel!(
+        modelName: modelName,
+        prompt: prompt,
+        systemInstruction: systemInstruction,
+        apiKey: apiKey,
+        imageBytesList: imageBytesList,
+        mimeType: mimeType,
+        timeout: timeout,
+        responseSchema: responseSchema,
       );
+    }
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('API Key is required.');
+    }
 
-      final response = await _cachedClient!.models.generateContent(
-        model: modelName,
-        request: request,
-      ).timeout(timeout);
-      return response.text;
+    if (_cachedApiKey != apiKey || _cachedClient == null) {
+      _cachedClient?.close();
+      _cachedClient = GoogleAIClient(
+        config: GoogleAIConfig.googleAI(authProvider: ApiKeyProvider(apiKey)),
+      );
+      _cachedApiKey = apiKey;
+    }
+
+    final request = GenerateContentRequest(
+      systemInstruction: systemInstruction != null
+          ? Content.text(systemInstruction)
+          : null,
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema,
+        temperature: 0.1,
+      ),
+      contents: [
+        if (imageBytesList != null && imageBytesList.isNotEmpty)
+          Content.user([
+            TextPart(prompt),
+            for (var imageBytes in imageBytesList)
+              Part.bytes(imageBytes, mimeType ?? 'image/jpeg'),
+          ])
+        else
+          Content.text(prompt),
+      ],
+    );
+
+    final response = await _cachedClient!.models
+        .generateContent(model: modelName, request: request)
+        .timeout(timeout);
+    return response.text;
   }
 
-    Stream<String> generateTextStream({
+  Stream<String> generateTextStream({
     required String prompt,
     required String systemInstruction,
     String? apiKey,
@@ -389,7 +481,10 @@ class AiClient {
     DateTime? overallDeadline,
   }) {
     if (_textCircuitBreaker.isOpen) {
-      throw AiException('Our AI is taking a quick breather to handle traffic. Give it about a minute.', cause: AiErrorCause.rateLimited);
+      throw AiException(
+        'Our AI is taking a quick breather to handle traffic. Give it about a minute.',
+        cause: AiErrorCause.rateLimited,
+      );
     }
 
     late StreamController<String> controller;
@@ -412,14 +507,23 @@ class AiClient {
     Future<void> tryNextModel() async {
       await currentSub?.cancel();
       currentSub = null;
-      if (isCancelled || controller.isClosed || (cancellationToken?.isCancelled ?? false)) return;
+      if (isCancelled ||
+          controller.isClosed ||
+          (cancellationToken?.isCancelled ?? false))
+        return;
 
       if (modelIndex >= textModelsToTry.length) {
-        if (lastCause == AiErrorCause.rateLimited || lastCause == AiErrorCause.overloaded) {
+        if (lastCause == AiErrorCause.rateLimited ||
+            lastCause == AiErrorCause.overloaded) {
           _textCircuitBreaker.recordFailure();
         }
         if (!controller.isClosed) {
-          controller.addError(AiException('Failed to generate response. Please try again later.', cause: lastCause));
+          controller.addError(
+            AiException(
+              'Failed to generate response. Please try again later.',
+              cause: lastCause,
+            ),
+          );
           controller.close();
         }
         return;
@@ -433,13 +537,24 @@ class AiClient {
 
       void resetInactivityTimer() {
         inactivityTimer?.cancel();
-        if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+        if (isCancelled ||
+            controller.isClosed ||
+            currentAttemptIndex != (modelIndex - 1))
+          return;
         inactivityTimer = Timer(inactivityTimeout, () {
-          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+          if (isCancelled ||
+              controller.isClosed ||
+              currentAttemptIndex != (modelIndex - 1))
+            return;
           if (yieldedAny) {
             cleanup();
             if (!controller.isClosed) {
-              controller.addError(AiException('Stream failed midway. Please try again.', cause: AiErrorCause.timeout));
+              controller.addError(
+                AiException(
+                  'Stream failed midway. Please try again.',
+                  cause: AiErrorCause.timeout,
+                ),
+              );
               controller.close();
             }
           } else {
@@ -461,13 +576,16 @@ class AiClient {
 
         final thisAttemptSub = stream.listen(null);
         currentSub = thisAttemptSub;
-        
+
         thisAttemptSub.onData((chunk) {
-          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+          if (isCancelled ||
+              controller.isClosed ||
+              currentAttemptIndex != (modelIndex - 1))
+            return;
           if (cancellationToken?.isCancelled ?? false) {
-             cleanup();
-             if (!controller.isClosed) controller.close();
-             return;
+            cleanup();
+            if (!controller.isClosed) controller.close();
+            return;
           }
           if (chunk != null && chunk.isNotEmpty) {
             firstTokenMs ??= sw.elapsedMilliseconds;
@@ -476,12 +594,17 @@ class AiClient {
             controller.add(chunk);
           }
         });
-        
+
         thisAttemptSub.onError((e) {
-          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+          if (isCancelled ||
+              controller.isClosed ||
+              currentAttemptIndex != (modelIndex - 1))
+            return;
           sw.stop();
           final errStr = e.toString();
-          final cause = (e is AiException && e.cause != null) ? e.cause! : classifyAiError(errStr);
+          final cause = (e is AiException && e.cause != null)
+              ? e.cause!
+              : classifyAiError(errStr);
           lastCause = cause;
 
           AiLogger.log(
@@ -495,40 +618,68 @@ class AiClient {
           if (yieldedAny) {
             cleanup();
             if (!controller.isClosed) {
-              controller.addError(AiException('Stream failed midway. Please try again.', cause: cause));
+              controller.addError(
+                AiException(
+                  'Stream failed midway. Please try again.',
+                  cause: cause,
+                ),
+              );
               controller.close();
             }
           } else if (cause == AiErrorCause.parse) {
             cleanup();
             if (!controller.isClosed) {
-              controller.addError(AiException('AI returned an invalid format. Please try again.\nDetails: $errStr', cause: cause));
+              controller.addError(
+                AiException(
+                  'AI returned an invalid format. Please try again.\nDetails: $errStr',
+                  cause: cause,
+                ),
+              );
               controller.close();
             }
           } else if (cause == AiErrorCause.invalidKey) {
             cleanup();
             if (!controller.isClosed) {
-              controller.addError(AiException('This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.', cause: cause));
+              controller.addError(
+                AiException(
+                  'This API key is invalid, disabled, or restricted. Please check Google AI Studio and ensure no IP or app restrictions are applied.',
+                  cause: cause,
+                ),
+              );
               controller.close();
             }
           } else if (cause == AiErrorCause.offline) {
             cleanup();
             if (!controller.isClosed) {
-              controller.addError(AiException('You seem to be offline. Please check your internet connection.', cause: cause));
+              controller.addError(
+                AiException(
+                  'You seem to be offline. Please check your internet connection.',
+                  cause: cause,
+                ),
+              );
               controller.close();
             }
           } else if (cause == AiErrorCause.timeout) {
             cleanup();
             if (!controller.isClosed) {
-              controller.addError(AiException('AI stream timed out.', cause: AiErrorCause.timeout));
+              controller.addError(
+                AiException(
+                  'AI stream timed out.',
+                  cause: AiErrorCause.timeout,
+                ),
+              );
               controller.close();
             }
           } else {
             tryNextModel();
           }
         });
-        
+
         thisAttemptSub.onDone(() {
-          if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
+          if (isCancelled ||
+              controller.isClosed ||
+              currentAttemptIndex != (modelIndex - 1))
+            return;
           if (!yieldedAny) {
             tryNextModel();
             return;
@@ -546,8 +697,13 @@ class AiClient {
           if (!controller.isClosed) controller.close();
         });
       } catch (e) {
-        if (isCancelled || controller.isClosed || currentAttemptIndex != (modelIndex - 1)) return;
-        final cause = (e is AiException && e.cause != null) ? e.cause! : classifyAiError(e.toString());
+        if (isCancelled ||
+            controller.isClosed ||
+            currentAttemptIndex != (modelIndex - 1))
+          return;
+        final cause = (e is AiException && e.cause != null)
+            ? e.cause!
+            : classifyAiError(e.toString());
         lastCause = cause;
         tryNextModel();
       }
@@ -558,15 +714,25 @@ class AiClient {
         if (overallDeadline != null) {
           final remaining = overallDeadline.difference(DateTime.now());
           if (remaining.isNegative) {
-             controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
-             controller.close();
-             return;
+            controller.addError(
+              AiException(
+                'Operation deadline exceeded.',
+                cause: AiErrorCause.timeout,
+              ),
+            );
+            controller.close();
+            return;
           }
           overallTimer = Timer(remaining, () {
             if (isCancelled || controller.isClosed) return;
             cleanup();
             if (!controller.isClosed) {
-              controller.addError(AiException('Operation deadline exceeded.', cause: AiErrorCause.timeout));
+              controller.addError(
+                AiException(
+                  'Operation deadline exceeded.',
+                  cause: AiErrorCause.timeout,
+                ),
+              );
               controller.close();
             }
           });
@@ -588,53 +754,54 @@ class AiClient {
     required String systemInstruction,
     String? apiKey,
   }) {
-      if (mockCallModelStream != null) {
-        return mockCallModelStream!(
-          modelName: modelName,
-          prompt: prompt,
-          systemInstruction: systemInstruction,
-          apiKey: apiKey,
-        );
-      }
-      if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('API Key is required.');
-      }
-      
-      if (_cachedApiKey != apiKey || _cachedClient == null) {
-        _cachedClient?.close();
-        _cachedClient = GoogleAIClient(
-          config: GoogleAIConfig.googleAI(
-            authProvider: ApiKeyProvider(apiKey),
-          ),
-        );
-        _cachedApiKey = apiKey;
-      }
-
-      final request = GenerateContentRequest(
-        systemInstruction: Content.text(systemInstruction),
-        generationConfig: const GenerationConfig(
-          responseMimeType: 'text/plain',
-        ),
-        contents: [Content.text(prompt)],
+    if (mockCallModelStream != null) {
+      return mockCallModelStream!(
+        modelName: modelName,
+        prompt: prompt,
+        systemInstruction: systemInstruction,
+        apiKey: apiKey,
       );
+    }
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('API Key is required.');
+    }
 
-      final responseStream = _cachedClient!.models.streamGenerateContent(
-        model: modelName,
-        request: request,
+    if (_cachedApiKey != apiKey || _cachedClient == null) {
+      _cachedClient?.close();
+      _cachedClient = GoogleAIClient(
+        config: GoogleAIConfig.googleAI(authProvider: ApiKeyProvider(apiKey)),
       );
-      
-      return responseStream
-          .map((response) => response.text)
-          .where((text) => text != null && text.isNotEmpty);
+      _cachedApiKey = apiKey;
+    }
+
+    final request = GenerateContentRequest(
+      systemInstruction: Content.text(systemInstruction),
+      generationConfig: const GenerationConfig(responseMimeType: 'text/plain'),
+      contents: [Content.text(prompt)],
+    );
+
+    final responseStream = _cachedClient!.models.streamGenerateContent(
+      model: modelName,
+      request: request,
+    );
+
+    return responseStream
+        .map((response) => response.text)
+        .where((text) => text != null && text.isNotEmpty);
   }
 
   Map<String, dynamic> _parseJson(String text) {
     try {
-      final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
+      final cleaned = text
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
       return jsonDecode(cleaned) as Map<String, dynamic>;
     } catch (e) {
-      throw AiException('Something went wrong parsing the response. Please try again.', cause: AiErrorCause.parse);
+      throw AiException(
+        'Something went wrong parsing the response. Please try again.',
+        cause: AiErrorCause.parse,
+      );
     }
   }
 }
-

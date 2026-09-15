@@ -40,7 +40,7 @@ class FoodNutrition {
     required bool isPer100g,
     double? servingGrams,
   }) {
-    if ((consumedGrams == null || consumedGrams <= 0) && 
+    if ((consumedGrams == null || consumedGrams <= 0) &&
         (consumedServings == null || consumedServings <= 0)) {
       return FoodNutrition();
     }
@@ -55,7 +55,9 @@ class FoodNutrition {
           multiplier = (consumedServings * servingGrams) / 100.0;
         } else {
           // Cannot convert safely from servings to 100g basis without a defined serving mass.
-          throw const FormatException('Missing serving_grams for per-100g conversion.');
+          throw const FormatException(
+            'Missing serving_grams for per-100g conversion.',
+          );
         }
       }
     } else {
@@ -67,7 +69,9 @@ class FoodNutrition {
           multiplier = consumedGrams / servingGrams;
         } else {
           // Cannot convert safely from grams to per-serving basis without a defined serving mass.
-          throw const FormatException('Missing serving_grams for per-serving conversion.');
+          throw const FormatException(
+            'Missing serving_grams for per-serving conversion.',
+          );
         }
       }
     }

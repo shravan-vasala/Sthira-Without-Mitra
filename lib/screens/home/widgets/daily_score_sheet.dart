@@ -30,7 +30,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
             padding: const EdgeInsets.symmetric(vertical: 32.0),
             child: Text(
               'Data not available for future dates.',
-              style: context.text.bodyStrong.copyWith(color: context.colors.textLight),
+              style: context.text.bodyStrong.copyWith(
+                color: context.colors.textLight,
+              ),
             ),
           ),
         ),
@@ -78,15 +80,19 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                     Text(
                       '$intScore',
                       style: AppTheme.numeric(
-                        context.text.metric.copyWith(color: intScore == scoreData.totalMax.toInt()
+                        context.text.metric.copyWith(
+                          color: intScore == scoreData.totalMax.toInt()
                               ? context.colors.green
-                              : animColor),
+                              : animColor,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'of ${scoreData.totalMax.toInt()}',
-                      style: context.text.body.copyWith(color: context.colors.textMedium),
+                      style: context.text.body.copyWith(
+                        color: context.colors.textMedium,
+                      ),
                     ),
                   ],
                 );
@@ -96,7 +102,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
 
           Builder(
             builder: (context) {
-              final showComparison = scoreData.yesterdayScore != null && (scoreData.totalScore - scoreData.yesterdayScore!) != 0;
+              final showComparison =
+                  scoreData.yesterdayScore != null &&
+                  (scoreData.totalScore - scoreData.yesterdayScore!) != 0;
               final showAverage = scoreData.sevenDayAverage != null;
 
               if (!showComparison && !showAverage) {
@@ -120,7 +128,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                         Text(
                           '7-day avg ${scoreData.sevenDayAverage}',
                           style: AppTheme.numeric(
-                            context.text.caption.copyWith(color: context.colors.textMedium),
+                            context.text.caption.copyWith(
+                              color: context.colors.textMedium,
+                            ),
                           ),
                         ),
                     ],
@@ -131,10 +141,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
             },
           ),
 
-          const SectionHeader(
-            'Score breakdown',
-            horizontalPadding: 0,
-          ),
+          const SectionHeader('Score breakdown', horizontalPadding: 0),
           const SizedBox(height: 12),
 
           // 2.3 Breakdown as progress bars (Staggered)
@@ -208,7 +215,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   Expanded(
                     child: Text(
                       'No categories scheduled today.',
-                      style: context.text.body.copyWith(color: context.colors.textDark),
+                      style: context.text.body.copyWith(
+                        color: context.colors.textDark,
+                      ),
                     ),
                   ),
                 ],
@@ -216,7 +225,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
             ).animate().fade(delay: 340.ms),
           ]
           // 2.4 Perfect day state (retained)
-          else if (scoreData.remainingLabels.isEmpty && scoreData.totalScore == scoreData.totalMax && scoreData.totalMax > 0) ...[
+          else if (scoreData.remainingLabels.isEmpty &&
+              scoreData.totalScore == scoreData.totalMax &&
+              scoreData.totalMax > 0) ...[
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(16),
@@ -235,7 +246,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   Expanded(
                     child: Text(
                       'Perfect day — everything done ✨',
-                      style: context.text.body.copyWith(color: context.colors.green),
+                      style: context.text.body.copyWith(
+                        color: context.colors.green,
+                      ),
                     ),
                   ),
                 ],
@@ -252,14 +265,18 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               tilePadding: EdgeInsets.zero,
               title: Text(
                 'How scoring works',
-                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: Text(
                     'Score is weighted proportionally based on scheduled categories (Habits up to 50, Workouts up to 30, Meals up to 20).',
-                    style: context.text.caption.copyWith(color: context.colors.textMedium),
+                    style: context.text.caption.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                     textAlign: TextAlign.start,
                   ),
                 ),
@@ -351,11 +368,13 @@ class _AnimatedProgressBarRow extends StatelessWidget {
     } else if (max <= 0) {
       statusText = 'Not configured';
     } else {
-      statusText = '${score == score.toInt() ? score.toInt().toString() : score.toStringAsFixed(1)} / ${max.toStringAsFixed(0)}';
+      statusText =
+          '${score == score.toInt() ? score.toInt().toString() : score.toStringAsFixed(1)} / ${max.toStringAsFixed(0)}';
     }
 
     return Semantics(
-      label: '$label category. $statusText. ${onTap != null ? 'Double tap to open' : ''}',
+      label:
+          '$label category. $statusText. ${onTap != null ? 'Double tap to open' : ''}',
       button: onTap != null,
       child: Material(
         color: Colors.transparent,
@@ -387,7 +406,9 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                           children: [
                             Text(
                               label,
-                              style: context.text.body.copyWith(color: context.colors.textDark),
+                              style: context.text.body.copyWith(
+                                color: context.colors.textDark,
+                              ),
                             ),
                             Row(
                               children: [
@@ -402,7 +423,9 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                                 Text(
                                   statusText,
                                   style: AppTheme.numeric(
-                                    context.text.caption.copyWith(color: context.colors.textMedium),
+                                    context.text.caption.copyWith(
+                                      color: context.colors.textMedium,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -411,7 +434,10 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0, end: isRestDay ? 1.0 : fraction),
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: isRestDay ? 1.0 : fraction,
+                          ),
                           duration: MediaQuery.disableAnimationsOf(context)
                               ? Duration.zero
                               : const Duration(milliseconds: 1000),
@@ -421,9 +447,8 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                               borderRadius: BorderRadius.circular(2),
                               child: LinearProgressIndicator(
                                 value: val,
-                                backgroundColor: context.colors.primary.withValues(
-                                  alpha: 0.12,
-                                ),
+                                backgroundColor: context.colors.primary
+                                    .withValues(alpha: 0.12),
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   isRestDay ? context.colors.green : color,
                                 ),

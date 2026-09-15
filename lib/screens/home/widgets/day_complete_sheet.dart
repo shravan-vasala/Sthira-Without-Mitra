@@ -61,7 +61,8 @@ class DayCompleteSheet extends ConsumerWidget {
 
     return AppSheet(
       title: 'Day complete, $greetName',
-      subtitle: 'Habits, meals, and workout are done. Score ${score.totalScore} — nice consistency.',
+      subtitle:
+          'Habits, meals, and workout are done. Score ${score.totalScore} — nice consistency.',
       scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -73,23 +74,20 @@ class DayCompleteSheet extends ConsumerWidget {
               color: context.colors.green.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.check_rounded,
-              color: context.colors.green,
-              size: 36,
-            )
-                .animate(
-                  onPlay: (controller) =>
-                      MediaQuery.disableAnimationsOf(context)
+            child:
+                Icon(Icons.check_rounded, color: context.colors.green, size: 36)
+                    .animate(
+                      onPlay: (controller) =>
+                          MediaQuery.disableAnimationsOf(context)
                           ? controller.stop()
                           : null,
-                )
-                .scale(
-                  duration: 400.ms,
-                  curve: Curves.easeOutBack,
-                  begin: const Offset(0.5, 0.5),
-                  end: const Offset(1.0, 1.0),
-                ),
+                    )
+                    .scale(
+                      duration: 400.ms,
+                      curve: Curves.easeOutBack,
+                      begin: const Offset(0.5, 0.5),
+                      end: const Offset(1.0, 1.0),
+                    ),
           ),
 
           PrimaryButton(

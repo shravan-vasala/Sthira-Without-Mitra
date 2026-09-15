@@ -78,7 +78,7 @@ class DailyShareLayout extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Padding(
             padding: EdgeInsets.only(
               left: 28,
@@ -95,11 +95,15 @@ class DailyShareLayout extends StatelessWidget {
                   children: [
                     Text(
                       'STHIRA',
-                      style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
+                      style: context.text.micro.copyWith(
+                        color: AppColors.dark.textMedium,
+                      ),
                     ),
                     Text(
                       DateFormat('MMM d').format(date),
-                      style: context.text.caption.copyWith(color: AppColors.dark.textMedium),
+                      style: context.text.caption.copyWith(
+                        color: AppColors.dark.textMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -111,12 +115,14 @@ class DailyShareLayout extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "$userName's Day",
-                    style: context.text.metric.copyWith(color: AppColors.dark.textDark),
+                    style: context.text.metric.copyWith(
+                      color: AppColors.dark.textDark,
+                    ),
                   ),
                 ),
-                
+
                 const Spacer(),
-                
+
                 // Hero Score
                 Center(
                   child: Container(
@@ -141,7 +147,9 @@ class DailyShareLayout extends StatelessWidget {
                 Center(
                   child: Text(
                     subtitle,
-                    style: context.text.bodyStrong.copyWith(color: AppColors.dark.textDark),
+                    style: context.text.bodyStrong.copyWith(
+                      color: AppColors.dark.textDark,
+                    ),
                   ),
                 ),
 
@@ -156,7 +164,7 @@ class DailyShareLayout extends StatelessWidget {
                 ),
 
                 SizedBox(height: isStory ? 40 : 24),
-                
+
                 // Footer
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -172,7 +180,9 @@ class DailyShareLayout extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Tracked with Sthira',
-                      style: context.text.caption.copyWith(color: AppColors.dark.textLight),
+                      style: context.text.caption.copyWith(
+                        color: AppColors.dark.textLight,
+                      ),
                     ),
                   ],
                 ),
@@ -202,48 +212,67 @@ class _StatsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     // Only show valid targets
     final List<Widget> cards = [];
-    
+
     if (steps > 0) {
-      cards.add(_StatCard(
-        icon: Icons.directions_walk_rounded,
-        label: 'Steps',
-        value: NumberFormat.decimalPattern().format(steps),
-      ));
+      cards.add(
+        _StatCard(
+          icon: Icons.directions_walk_rounded,
+          label: 'Steps',
+          value: NumberFormat.decimalPattern().format(steps),
+        ),
+      );
     }
     if (mealsKcal > 0) {
-      cards.add(_StatCard(
-        icon: Icons.restaurant_rounded,
-        label: 'Meals',
-        value: '$mealsKcal kcal',
-      ));
+      cards.add(
+        _StatCard(
+          icon: Icons.restaurant_rounded,
+          label: 'Meals',
+          value: '$mealsKcal kcal',
+        ),
+      );
     }
     if (workoutDone) {
-      cards.add(const _StatCard(
-        icon: Icons.fitness_center_rounded,
-        label: 'Workout',
-        value: 'Done',
-      ));
+      cards.add(
+        const _StatCard(
+          icon: Icons.fitness_center_rounded,
+          label: 'Workout',
+          value: 'Done',
+        ),
+      );
     }
-    cards.add(_StatCard(
-      icon: Icons.checklist_rounded,
-      label: 'Habits',
-      value: habitsDone,
-    ));
+    cards.add(
+      _StatCard(
+        icon: Icons.checklist_rounded,
+        label: 'Habits',
+        value: habitsDone,
+      ),
+    );
 
     // Reflow depending on count
     if (cards.length <= 2) {
       return Row(
-        children: cards.map((c) => Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6), child: c))).toList(),
+        children: cards
+            .map(
+              (c) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: c,
+                ),
+              ),
+            )
+            .toList(),
       );
     }
-    
+
     return Column(
       children: [
         Row(
           children: [
             Expanded(child: cards[0]),
             const SizedBox(width: 12),
-            Expanded(child: cards.length > 1 ? cards[1] : const SizedBox.shrink()),
+            Expanded(
+              child: cards.length > 1 ? cards[1] : const SizedBox.shrink(),
+            ),
           ],
         ),
         if (cards.length > 2) ...[
@@ -252,10 +281,12 @@ class _StatsGrid extends StatelessWidget {
             children: [
               Expanded(child: cards[2]),
               const SizedBox(width: 12),
-              Expanded(child: cards.length > 3 ? cards[3] : const SizedBox.shrink()),
+              Expanded(
+                child: cards.length > 3 ? cards[3] : const SizedBox.shrink(),
+              ),
             ],
           ),
-        ]
+        ],
       ],
     );
   }
@@ -298,12 +329,16 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: context.text.screenTitle.copyWith(color: AppColors.dark.textDark),
+            style: context.text.screenTitle.copyWith(
+              color: AppColors.dark.textDark,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: context.text.micro.copyWith(color: AppColors.dark.textMedium),
+            style: context.text.micro.copyWith(
+              color: AppColors.dark.textMedium,
+            ),
           ),
         ],
       ),

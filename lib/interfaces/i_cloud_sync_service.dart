@@ -18,7 +18,12 @@ abstract class ICloudSyncService {
   void syncProfile(Map<String, dynamic> data);
   Future<void> pushProfileNow(Map<String, dynamic> data);
 
-  void queueSyncInTxn(Isar isar, String collection, String docId, Map<String, dynamic> data);
+  void queueSyncInTxn(
+    Isar isar,
+    String collection,
+    String docId,
+    Map<String, dynamic> data,
+  );
   void queueDeleteInTxn(Isar isar, String collection, String docId);
   void queueProfileInTxn(Isar isar, Map<String, dynamic> data);
   void triggerFlush();

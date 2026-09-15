@@ -70,13 +70,16 @@ class ScreenTimeService {
     if (!Platform.isAndroid) {
       return ScreenTimeResult(status: 'unsupported');
     }
-    
+
     try {
       final resultMap = await _channel.invokeMethod('getScreenTime');
       if (resultMap is Map) {
-         return ScreenTimeResult.fromJson(resultMap);
+        return ScreenTimeResult.fromJson(resultMap);
       }
-      return ScreenTimeResult(status: 'failed', error: 'Invalid response format');
+      return ScreenTimeResult(
+        status: 'failed',
+        error: 'Invalid response format',
+      );
     } on PlatformException catch (e) {
       if (e.code == 'PERMISSION_DENIED') {
         debugPrint('Screen time permission denied.');

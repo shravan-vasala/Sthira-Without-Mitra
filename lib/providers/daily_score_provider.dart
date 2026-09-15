@@ -122,7 +122,9 @@ class DailyScore {
 
     // 2. Workouts (Max 30)
     double workoutsScore = 0;
-    final double workoutsMax = (stats.workoutsTotal > 0 || stats.isRestDay) ? 30.0 : 0.0;
+    final double workoutsMax = (stats.workoutsTotal > 0 || stats.isRestDay)
+        ? 30.0
+        : 0.0;
     if (stats.isRestDay) {
       workoutsScore = workoutsMax;
     } else if (stats.workoutsTotal > 0) {
@@ -133,7 +135,8 @@ class DailyScore {
     double mealsScore = 0;
     final double mealsMax = stats.mealsTotal > 0 ? 20.0 : 0.0;
     if (stats.mealsTotal > 0) {
-      final double completionScore = (stats.mealsLogged / stats.mealsTotal) * 14.0;
+      final double completionScore =
+          (stats.mealsLogged / stats.mealsTotal) * 14.0;
       double accuracyScore = 0;
 
       // Accuracy bonus only applies if they logged something
@@ -324,15 +327,23 @@ final todayScoreProvider = Provider<DailyScore>((ref) {
   final mealPlan = ref.watch(mealPlanProvider);
   // Need today's meal log explicitly
   final mealLogs = ref.watch(dailyMealLogsRangeProvider((dateStr, dateStr)));
-  final mealLog = mealLogs.isNotEmpty ? mealLogs.first : DailyMealLog(date: dateStr);
+  final mealLog = mealLogs.isNotEmpty
+      ? mealLogs.first
+      : DailyMealLog(date: dateStr);
 
   final profile = ref.watch(profileProvider);
   final targetWeight = profile.targetWeight ?? 0.0;
   final targetCalories = profile.targetCalories;
 
-  final sevenDaysAgoStr = DateFormat('yyyy-MM-dd').format(date.subtract(const Duration(days: 7)));
-  final allDailyLogs = ref.watch(dailyLogsRangeProvider((sevenDaysAgoStr, dateStr)));
-  final allMealLogs = ref.watch(dailyMealLogsRangeProvider((sevenDaysAgoStr, dateStr)));
+  final sevenDaysAgoStr = DateFormat(
+    'yyyy-MM-dd',
+  ).format(date.subtract(const Duration(days: 7)));
+  final allDailyLogs = ref.watch(
+    dailyLogsRangeProvider((sevenDaysAgoStr, dateStr)),
+  );
+  final allMealLogs = ref.watch(
+    dailyMealLogsRangeProvider((sevenDaysAgoStr, dateStr)),
+  );
 
   int? sevenDayAverage;
   int sum = 0;
@@ -343,10 +354,17 @@ final todayScoreProvider = Provider<DailyScore>((ref) {
     final hasDailyLog = allDailyLogs.any((l) => l.date == dStr);
     final hasMealLog = allMealLogs.any((l) => l.date == dStr);
     final completions = ref.read(habitRepoProvider).getCompletions(dStr);
-    if (!hasDailyLog && !hasMealLog && completions.completions.isEmpty) continue;
+    if (!hasDailyLog && !hasMealLog && completions.completions.isEmpty)
+      continue;
 
-    final log = allDailyLogs.firstWhere((l) => l.date == dStr, orElse: () => DailyLog(date: dStr));
-    final mLog = allMealLogs.firstWhere((l) => l.date == dStr, orElse: () => DailyMealLog(date: dStr));
+    final log = allDailyLogs.firstWhere(
+      (l) => l.date == dStr,
+      orElse: () => DailyLog(date: dStr),
+    );
+    final mLog = allMealLogs.firstWhere(
+      (l) => l.date == dStr,
+      orElse: () => DailyMealLog(date: dStr),
+    );
 
     final s = DailyScore.calculate(
       date: pastDate,
@@ -386,4 +404,3 @@ final todayScoreProvider = Provider<DailyScore>((ref) {
 
   return todayScore.copyWithContext(sevenDayAverage: sevenDayAverage);
 });
-

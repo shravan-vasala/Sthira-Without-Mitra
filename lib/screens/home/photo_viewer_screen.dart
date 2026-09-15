@@ -41,7 +41,9 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
   void initState() {
     super.initState();
     _photos = List.from(widget.photos);
-    _currentIndex = _photos.isEmpty ? 0 : widget.initialIndex.clamp(0, _photos.length - 1);
+    _currentIndex = _photos.isEmpty
+        ? 0
+        : widget.initialIndex.clamp(0, _photos.length - 1);
     _pageController = PageController(initialPage: _currentIndex);
   }
 
@@ -53,7 +55,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
 
   void _deleteCurrentPhoto() {
     if (_isDeleting) return;
-    
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -65,46 +67,51 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: _isDeleting ? null : () async {
-              Navigator.pop(ctx);
-              if (!mounted) return;
-              
-              setState(() => _isDeleting = true);
-              final item = _photos[_currentIndex];
+            onPressed: _isDeleting
+                ? null
+                : () async {
+                    Navigator.pop(ctx);
+                    if (!mounted) return;
 
-              try {
-                await ref
-                    .read(mediaRepoProvider)
-                    .deletePhoto(item.date, item.path);
-              } catch (e) {
-                if (mounted) {
-                  setState(() => _isDeleting = false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to delete photo: $e')),
-                  );
-                }
-                return;
-              }
+                    setState(() => _isDeleting = true);
+                    final item = _photos[_currentIndex];
 
-              if (!mounted) return;
+                    try {
+                      await ref
+                          .read(mediaRepoProvider)
+                          .deletePhoto(item.date, item.path);
+                    } catch (e) {
+                      if (mounted) {
+                        setState(() => _isDeleting = false);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to delete photo: $e')),
+                        );
+                      }
+                      return;
+                    }
 
-              final updatedPhotos = List<PhotoItem>.from(_photos)
-                ..removeWhere((p) => p.path == item.path);
+                    if (!mounted) return;
 
-              if (updatedPhotos.isEmpty) {
-                Navigator.pop(context);
-              } else {
-                setState(() {
-                  _photos = updatedPhotos;
-                  _isDeleting = false;
-                  if (_currentIndex >= _photos.length) {
-                    _currentIndex = _photos.length - 1;
-                  }
-                });
-                _pageController.jumpToPage(_currentIndex);
-              }
-            },
-            child: Text('Delete', style: context.text.body.copyWith(color: context.colors.red)),
+                    final updatedPhotos = List<PhotoItem>.from(_photos)
+                      ..removeWhere((p) => p.path == item.path);
+
+                    if (updatedPhotos.isEmpty) {
+                      Navigator.pop(context);
+                    } else {
+                      setState(() {
+                        _photos = updatedPhotos;
+                        _isDeleting = false;
+                        if (_currentIndex >= _photos.length) {
+                          _currentIndex = _photos.length - 1;
+                        }
+                      });
+                      _pageController.jumpToPage(_currentIndex);
+                    }
+                  },
+            child: Text(
+              'Delete',
+              style: context.text.body.copyWith(color: context.colors.red),
+            ),
           ),
         ],
       ),
@@ -160,7 +167,9 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
               onDismissed: (_) => Navigator.pop(context),
               child: PageView.builder(
                 controller: _pageController,
-                physics: _isZoomed ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
+                physics: _isZoomed
+                    ? const NeverScrollableScrollPhysics()
+                    : const BouncingScrollPhysics(),
                 onPageChanged: (idx) => setState(() => _currentIndex = idx),
                 itemCount: _photos.length,
                 itemBuilder: (context, index) {
@@ -209,7 +218,9 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                       Expanded(
                         child: Text(
                           titleText,
-                          style: context.text.bodyStrong.copyWith(color: Colors.white),
+                          style: context.text.bodyStrong.copyWith(
+                            color: Colors.white,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -331,14 +342,24 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
                 ? Image.network(
                     widget.photoPath,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48),
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.broken_image_rounded,
+                      color: Colors.white54,
+                      size: 48,
+                    ),
                   )
                 : Image.file(
-                    File(ref.read(mediaRepoProvider).getAbsolutePath(widget.photoPath)),
+                    File(
+                      ref
+                          .read(mediaRepoProvider)
+                          .getAbsolutePath(widget.photoPath),
+                    ),
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48),
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.broken_image_rounded,
+                      color: Colors.white54,
+                      size: 48,
+                    ),
                   ),
           ),
         ),

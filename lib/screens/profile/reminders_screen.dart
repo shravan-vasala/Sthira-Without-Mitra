@@ -51,14 +51,13 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text(
-          'Reminders',
-          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        title: const Text('Reminders'),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -79,17 +78,22 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       _buildTimeSelector(
                         label: 'Start Time',
                         time: config.quietHoursStart,
-                        onTap: () => _pickTime(context, config.quietHoursStart, (t) {
-                          ref
-                              .read(remindersProvider.notifier)
-                              .updateConfig(config.copyWith(quietHoursStart: t));
-                        }),
+                        onTap: () =>
+                            _pickTime(context, config.quietHoursStart, (t) {
+                              ref
+                                  .read(remindersProvider.notifier)
+                                  .updateConfig(
+                                    config.copyWith(quietHoursStart: t),
+                                  );
+                            }),
                       ),
                       const SizedBox(height: 16),
                       _buildTimeSelector(
                         label: 'End Time',
                         time: config.quietHoursEnd,
-                        onTap: () => _pickTime(context, config.quietHoursEnd, (t) {
+                        onTap: () => _pickTime(context, config.quietHoursEnd, (
+                          t,
+                        ) {
                           ref
                               .read(remindersProvider.notifier)
                               .updateConfig(config.copyWith(quietHoursEnd: t));
@@ -114,7 +118,8 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                 ? _buildTimeSelector(
                     label: 'Time',
                     time: config.habitTime,
-                    previewText: 'Hey! Time to log your daily habits and keep your streak alive.',
+                    previewText:
+                        'Hey! Time to log your daily habits and keep your streak alive.',
                     onTap: () => _pickTime(context, config.habitTime, (t) {
                       ref
                           .read(remindersProvider.notifier)
@@ -138,7 +143,8 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                 ? _buildTimeSelector(
                     label: 'Time',
                     time: config.workoutTime,
-                    previewText: 'Time to crush today\'s workout! Are you ready?',
+                    previewText:
+                        'Time to crush today\'s workout! Are you ready?',
                     onTap: () => _pickTime(context, config.workoutTime, (t) {
                       ref
                           .read(remindersProvider.notifier)
@@ -164,7 +170,8 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       _buildTimeSelector(
                         label: 'Lunch Time',
                         time: config.lunchTime,
-                        previewText: 'Time to log your lunch! Let\'s see what you had.',
+                        previewText:
+                            'Time to log your lunch! Let\'s see what you had.',
                         onTap: () => _pickTime(context, config.lunchTime, (t) {
                           ref
                               .read(remindersProvider.notifier)
@@ -205,7 +212,9 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                         children: [
                           Text(
                             'Day of Week',
-                            style: context.text.body.copyWith(color: context.colors.textDark),
+                            style: context.text.body.copyWith(
+                              color: context.colors.textDark,
+                            ),
                           ),
                           DropdownButton<int>(
                             value: config.backupDayOfWeek,
@@ -260,7 +269,8 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       _buildTimeSelector(
                         label: 'Time',
                         time: config.backupTime,
-                        previewText: 'Time for your weekly data backup. Keep your progress safe!',
+                        previewText:
+                            'Time for your weekly data backup. Keep your progress safe!',
                         onTap: () => _pickTime(context, config.backupTime, (t) {
                           ref
                               .read(remindersProvider.notifier)
@@ -322,12 +332,16 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   children: [
                     Text(
                       title,
-                      style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                      style: context.text.bodyStrong.copyWith(
+                        color: context.colors.textDark,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: context.text.caption.copyWith(color: context.colors.textMedium),
+                      style: context.text.caption.copyWith(
+                        color: context.colors.textMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -339,10 +353,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
               ),
             ],
           ),
-          if (child != null) ...[
-            const SizedBox(height: 16),
-            child,
-          ],
+          if (child != null) ...[const SizedBox(height: 16), child],
         ],
       ),
     );
@@ -366,17 +377,24 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
               children: [
                 Text(
                   label,
-                  style: context.text.body.copyWith(color: context.colors.textDark),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textDark,
+                  ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     _formatTime(time),
-                    style: context.text.body.copyWith(color: context.colors.primary),
+                    style: context.text.body.copyWith(
+                      color: context.colors.primary,
+                    ),
                   ),
                 ),
               ],
@@ -390,13 +408,19 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Icon(Icons.notifications_active_outlined, size: 12, color: context.colors.textLight),
+                child: Icon(
+                  Icons.notifications_active_outlined,
+                  size: 12,
+                  color: context.colors.textLight,
+                ),
               ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   '"$previewText"',
-                  style: context.text.micro.copyWith(color: context.colors.textLight),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textLight,
+                  ),
                 ),
               ),
             ],

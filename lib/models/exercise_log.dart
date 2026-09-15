@@ -6,11 +6,7 @@ part 'exercise_log.g.dart';
 class ExerciseLog {
   Id id = Isar.autoIncrement;
 
-  @Index(
-    composite: [CompositeIndex('instanceId')],
-    unique: true,
-    replace: true,
-  )
+  @Index(composite: [CompositeIndex('instanceId')], unique: true, replace: true)
   final String date;
   final String instanceId;
   final String exerciseName;
@@ -26,7 +22,8 @@ class ExerciseLog {
   factory ExerciseLog.fromJson(Map<String, dynamic> json) {
     return ExerciseLog(
       date: json['date'] as String,
-      instanceId: json['instanceId'] as String? ?? json['exerciseName'] as String,
+      instanceId:
+          json['instanceId'] as String? ?? json['exerciseName'] as String,
       exerciseName: json['exerciseName'] as String,
       sets:
           (json['sets'] as List?)

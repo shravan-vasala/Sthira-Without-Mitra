@@ -63,18 +63,24 @@ class BackupService {
 
   /// Creates a zipped backup in the application documents directory containing
   /// Isar JSON and the media directory. Returns the local path.
-  Future<String?> createBackup({String? password, bool includeMedia = true}) async {
+  Future<String?> createBackup({
+    String? password,
+    bool includeMedia = true,
+  }) async {
     if (kIsWeb) {
       debugPrint('BackupService: Web backup not supported yet.');
       return null;
     }
 
     try {
-      final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+      final isar = Isar.instanceNames.isNotEmpty
+          ? Isar.getInstance(Isar.instanceNames.first)
+          : null;
       if (isar == null) throw Exception('Isar instance not found.');
 
       final appDir = await getApplicationDocumentsDirectory();
-      final stagingName = 'backup_staging_${DateTime.now().millisecondsSinceEpoch}';
+      final stagingName =
+          'backup_staging_${DateTime.now().millisecondsSinceEpoch}';
       final backupStagingDir = Directory('${appDir.path}/$stagingName');
       if (await backupStagingDir.exists()) {
         await backupStagingDir.delete(recursive: true);
@@ -82,92 +88,111 @@ class BackupService {
       await backupStagingDir.create(recursive: true);
 
       try {
+        final dataFile = File('${backupStagingDir.path}/data.json');
+        final manifestFile = File('${backupStagingDir.path}/manifest.json');
 
-      final dataFile = File('${backupStagingDir.path}/data.json');
-      final manifestFile = File('${backupStagingDir.path}/manifest.json');
+        final dataMap = <String, dynamic>{};
 
-      final dataMap = <String, dynamic>{};
-      
-      // Dump collections we care about
-      dataMap['userProfiles'] = isar.userProfiles.where().exportJsonSync();
-      dataMap['dailyLogs'] = isar.dailyLogs.where().exportJsonSync();
-      dataMap['habits'] = isar.habits.where().exportJsonSync();
-      dataMap['mealPlans'] = isar.mealPlans.where().exportJsonSync();
-      dataMap['badges'] = isar.badges.where().exportJsonSync();
-      dataMap['scannedMealLogs'] = isar.scannedMealLogs.where().exportJsonSync();
-      dataMap['progressPhotos'] = isar.progressPhotos.where().exportJsonSync();
-      dataMap['exerciseLogs'] = isar.exerciseLogs.where().exportJsonSync();
-      dataMap['exercisePrs'] = isar.exercisePrs.where().exportJsonSync();
-      dataMap['workoutPlans'] = isar.workoutPlans.where().exportJsonSync();
-      dataMap['workoutSessions'] = isar.workoutSessions.where().exportJsonSync();
-      dataMap['coachNotes'] = isar.coachNotes.where().exportJsonSync();
-      dataMap['bodyStats'] = isar.bodyStats.where().exportJsonSync();
-      dataMap['dailyMealLogs'] = isar.dailyMealLogs.where().exportJsonSync();
-      dataMap['habitCompletions'] = isar.habitCompletions.where().exportJsonSync();
-      dataMap['userFoodLogs'] = isar.userFoodLogs.where().exportJsonSync();
+        // Dump collections we care about
+        dataMap['userProfiles'] = isar.userProfiles.where().exportJsonSync();
+        dataMap['dailyLogs'] = isar.dailyLogs.where().exportJsonSync();
+        dataMap['habits'] = isar.habits.where().exportJsonSync();
+        dataMap['mealPlans'] = isar.mealPlans.where().exportJsonSync();
+        dataMap['badges'] = isar.badges.where().exportJsonSync();
+        dataMap['scannedMealLogs'] = isar.scannedMealLogs
+            .where()
+            .exportJsonSync();
+        dataMap['progressPhotos'] = isar.progressPhotos
+            .where()
+            .exportJsonSync();
+        dataMap['exerciseLogs'] = isar.exerciseLogs.where().exportJsonSync();
+        dataMap['exercisePrs'] = isar.exercisePrs.where().exportJsonSync();
+        dataMap['workoutPlans'] = isar.workoutPlans.where().exportJsonSync();
+        dataMap['workoutSessions'] = isar.workoutSessions
+            .where()
+            .exportJsonSync();
+        dataMap['coachNotes'] = isar.coachNotes.where().exportJsonSync();
+        dataMap['bodyStats'] = isar.bodyStats.where().exportJsonSync();
+        dataMap['dailyMealLogs'] = isar.dailyMealLogs.where().exportJsonSync();
+        dataMap['habitCompletions'] = isar.habitCompletions
+            .where()
+            .exportJsonSync();
+        dataMap['userFoodLogs'] = isar.userFoodLogs.where().exportJsonSync();
 
-      int recordCount = 0;
-      for (final collection in dataMap.values) {
-        if (collection is List) recordCount += collection.length;
-      }
+        int recordCount = 0;
+        for (final collection in dataMap.values) {
+          if (collection is List) recordCount += collection.length;
+        }
 
-      await dataFile.writeAsString(jsonEncode(dataMap));
+        await dataFile.writeAsString(jsonEncode(dataMap));
 
-      final manifest = {
-        'schemaVersion': SchemaMigrationService.currentSchemaVersion,
-        'appVersion': 'Sthira V1', // Stub for now, can be read from package_info
-        'createdAt': DateTime.now().toIso8601String(),
-        'totalEntries': recordCount,
-        'uid': _auth.uid,
-      };
-      await manifestFile.writeAsString(jsonEncode(manifest));
+        final manifest = {
+          'schemaVersion': SchemaMigrationService.currentSchemaVersion,
+          'appVersion':
+              'Sthira V1', // Stub for now, can be read from package_info
+          'createdAt': DateTime.now().toIso8601String(),
+          'totalEntries': recordCount,
+          'uid': _auth.uid,
+        };
+        await manifestFile.writeAsString(jsonEncode(manifest));
 
-      final encoder = ZipFileEncoder();
-      final zipPath = '${backupStagingDir.path}/temp_backup.zip';
-      encoder.create(zipPath);
+        final encoder = ZipFileEncoder();
+        final zipPath = '${backupStagingDir.path}/temp_backup.zip';
+        encoder.create(zipPath);
 
-      encoder.addFile(manifestFile);
-      encoder.addFile(dataFile);
+        encoder.addFile(manifestFile);
+        encoder.addFile(dataFile);
 
-      if (includeMedia) {
-        final mediaDirs = [
-          'sthira_media',
-          'trufit_media',
-          'trufit_meal_photos',
-          'trufit_profile_photos',
-          'profile_photos',
-        ];
+        if (includeMedia) {
+          final mediaDirs = [
+            'sthira_media',
+            'trufit_media',
+            'trufit_meal_photos',
+            'trufit_profile_photos',
+            'profile_photos',
+          ];
 
-        for (final dirName in mediaDirs) {
-          final targetMedia = Directory('${appDir.path}/$dirName');
-          if (await targetMedia.exists()) {
-            encoder.addDirectory(targetMedia, includeDirName: true);
+          for (final dirName in mediaDirs) {
+            final targetMedia = Directory('${appDir.path}/$dirName');
+            if (await targetMedia.exists()) {
+              encoder.addDirectory(targetMedia, includeDirName: true);
+            }
+          }
+
+          final rootFiles = appDir.listSync().whereType<File>();
+          for (final file in rootFiles) {
+            final name = file.path
+                .split(Platform.pathSeparator)
+                .last
+                .toLowerCase();
+            if (name.endsWith('.jpg') ||
+                name.endsWith('.jpeg') ||
+                name.endsWith('.png') ||
+                name.endsWith('.webp') ||
+                name.endsWith('.gif')) {
+              encoder.addFile(file);
+            }
           }
         }
-        
-        final rootFiles = appDir.listSync().whereType<File>();
-        for (final file in rootFiles) {
-          final name = file.path.split(Platform.pathSeparator).last.toLowerCase();
-          if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.gif')) {
-            encoder.addFile(file);
-          }
+
+        encoder.close();
+
+        final finalZipPath =
+            '${appDir.path}/sthira_backup_${DateTime.now().millisecondsSinceEpoch}.zip';
+
+        if (password != null && password.isNotEmpty) {
+          final zipFile = File(zipPath);
+          final zipBytes = await zipFile.readAsBytes();
+          final encryptedZip = BackupEncryptionService.encryptBytes(
+            zipBytes,
+            password,
+          );
+          await File(finalZipPath).writeAsBytes(encryptedZip);
+        } else {
+          await File(zipPath).copy(finalZipPath);
         }
-      }
 
-      encoder.close();
-
-      final finalZipPath = '${appDir.path}/sthira_backup_${DateTime.now().millisecondsSinceEpoch}.zip';
-
-      if (password != null && password.isNotEmpty) {
-        final zipFile = File(zipPath);
-        final zipBytes = await zipFile.readAsBytes();
-        final encryptedZip = BackupEncryptionService.encryptBytes(zipBytes, password);
-        await File(finalZipPath).writeAsBytes(encryptedZip);
-      } else {
-        await File(zipPath).copy(finalZipPath);
-      }
-
-      return finalZipPath;
+        return finalZipPath;
       } finally {
         if (await backupStagingDir.exists()) {
           await backupStagingDir.delete(recursive: true);
@@ -179,42 +204,84 @@ class BackupService {
     }
   }
 
-  Future<BackupVerificationResult> verifyBackup(String zipPath, {String? password}) async {
+  Future<BackupVerificationResult> verifyBackup(
+    String zipPath, {
+    String? password,
+  }) async {
     try {
       final file = File(zipPath);
       if (!await file.exists()) {
-        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, errorMessage: 'File not found');
+        return BackupVerificationResult(
+          isValid: false,
+          totalEntries: 0,
+          photoCount: 0,
+          errorMessage: 'File not found',
+        );
       }
-      
+
       Uint8List bytes = file.readAsBytesSync();
       bool isEncrypted = false;
-      
+
       final format = BackupEncryptionService.detectFormat(bytes);
 
       if (format == BackupFormat.unknownVersion) {
-        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Unsupported backup format version.');
+        return BackupVerificationResult(
+          isValid: false,
+          totalEntries: 0,
+          photoCount: 0,
+          isEncrypted: true,
+          errorMessage: 'Unsupported backup format version.',
+        );
       } else if (format == BackupFormat.v2) {
         isEncrypted = true;
         if (password == null || password.isEmpty) {
-          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Password required');
+          return BackupVerificationResult(
+            isValid: false,
+            totalEntries: 0,
+            photoCount: 0,
+            isEncrypted: true,
+            errorMessage: 'Password required',
+          );
         }
         try {
           bytes = BackupEncryptionService.decryptV2(bytes, password);
         } catch (e) {
-          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Incorrect password or corrupted file');
+          return BackupVerificationResult(
+            isValid: false,
+            totalEntries: 0,
+            photoCount: 0,
+            isEncrypted: true,
+            errorMessage: 'Incorrect password or corrupted file',
+          );
         }
       } else if (format == BackupFormat.v1legacy) {
         isEncrypted = true;
         if (password == null || password.isEmpty) {
-          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Password required for legacy backup');
+          return BackupVerificationResult(
+            isValid: false,
+            totalEntries: 0,
+            photoCount: 0,
+            isEncrypted: true,
+            errorMessage: 'Password required for legacy backup',
+          );
         }
         try {
           bytes = BackupEncryptionService.decryptV1(bytes, password);
-          if (bytes.length < 4 || bytes[0] != 80 || bytes[1] != 75 || bytes[2] != 3 || bytes[3] != 4) {
-             throw Exception('Header check failed');
+          if (bytes.length < 4 ||
+              bytes[0] != 80 ||
+              bytes[1] != 75 ||
+              bytes[2] != 3 ||
+              bytes[3] != 4) {
+            throw Exception('Header check failed');
           }
         } catch (e) {
-          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: true, errorMessage: 'Incorrect legacy password or corrupted file');
+          return BackupVerificationResult(
+            isValid: false,
+            totalEntries: 0,
+            photoCount: 0,
+            isEncrypted: true,
+            errorMessage: 'Incorrect legacy password or corrupted file',
+          );
         }
       }
 
@@ -229,26 +296,44 @@ class BackupService {
           manifestFile = archiveFile;
         } else if (archiveFile.name == 'data.json') {
           dataFile = archiveFile;
-        } else if (archiveFile.name.toLowerCase().endsWith('.jpg') || 
-                   archiveFile.name.toLowerCase().endsWith('.jpeg') || 
-                   archiveFile.name.toLowerCase().endsWith('.png') ||
-                   archiveFile.name.toLowerCase().endsWith('.webp') ||
-                   archiveFile.name.toLowerCase().endsWith('.gif')) {
+        } else if (archiveFile.name.toLowerCase().endsWith('.jpg') ||
+            archiveFile.name.toLowerCase().endsWith('.jpeg') ||
+            archiveFile.name.toLowerCase().endsWith('.png') ||
+            archiveFile.name.toLowerCase().endsWith('.webp') ||
+            archiveFile.name.toLowerCase().endsWith('.gif')) {
           photoCount++;
         }
       }
 
       if (manifestFile == null) {
-        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid backup format (no manifest.json)');
+        return BackupVerificationResult(
+          isValid: false,
+          totalEntries: 0,
+          photoCount: 0,
+          isEncrypted: isEncrypted,
+          errorMessage: 'Invalid backup format (no manifest.json)',
+        );
       }
       if (dataFile == null) {
-        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid backup format (no data.json)');
+        return BackupVerificationResult(
+          isValid: false,
+          totalEntries: 0,
+          photoCount: 0,
+          isEncrypted: isEncrypted,
+          errorMessage: 'Invalid backup format (no data.json)',
+        );
       }
 
       final content = utf8.decode(manifestFile.content as List<int>);
       final map = jsonDecode(content);
       if (map is! Map<String, dynamic>) {
-        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid manifest format (not a JSON object)');
+        return BackupVerificationResult(
+          isValid: false,
+          totalEntries: 0,
+          photoCount: 0,
+          isEncrypted: isEncrypted,
+          errorMessage: 'Invalid manifest format (not a JSON object)',
+        );
       }
 
       // Check data.json parses to Map<String, dynamic>
@@ -256,13 +341,31 @@ class BackupService {
         final dataContent = utf8.decode(dataFile.content as List<int>);
         final dataMap = jsonDecode(dataContent);
         if (dataMap is! Map<String, dynamic>) {
-          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid data format (not a JSON object)');
+          return BackupVerificationResult(
+            isValid: false,
+            totalEntries: 0,
+            photoCount: 0,
+            isEncrypted: isEncrypted,
+            errorMessage: 'Invalid data format (not a JSON object)',
+          );
         }
         if (dataMap.isEmpty) {
-          return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Invalid data format (empty object string)');
+          return BackupVerificationResult(
+            isValid: false,
+            totalEntries: 0,
+            photoCount: 0,
+            isEncrypted: isEncrypted,
+            errorMessage: 'Invalid data format (empty object string)',
+          );
         }
       } catch (_) {
-        return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, isEncrypted: isEncrypted, errorMessage: 'Corrupted data.json file');
+        return BackupVerificationResult(
+          isValid: false,
+          totalEntries: 0,
+          photoCount: 0,
+          isEncrypted: isEncrypted,
+          errorMessage: 'Corrupted data.json file',
+        );
       }
 
       final uid = map['uid'] as String?;
@@ -282,23 +385,35 @@ class BackupService {
         errorMessage: warningMsg,
       );
     } catch (e) {
-      return BackupVerificationResult(isValid: false, totalEntries: 0, photoCount: 0, errorMessage: e.toString());
+      return BackupVerificationResult(
+        isValid: false,
+        totalEntries: 0,
+        photoCount: 0,
+        errorMessage: e.toString(),
+      );
     }
   }
 
-  Future<BackupRestoreResult> restoreBackup(String zipPath, {String? password}) async {
+  Future<BackupRestoreResult> restoreBackup(
+    String zipPath, {
+    String? password,
+  }) async {
     if (kIsWeb) return BackupRestoreResult(success: false);
-    
+
     final appDir = await getApplicationDocumentsDirectory();
-    final stagingDir = Directory('${appDir.path}/restore_staging_${DateTime.now().millisecondsSinceEpoch}');
-    
+    final stagingDir = Directory(
+      '${appDir.path}/restore_staging_${DateTime.now().millisecondsSinceEpoch}',
+    );
+
     try {
       await stagingDir.create();
-      final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+      final isar = Isar.instanceNames.isNotEmpty
+          ? Isar.getInstance(Isar.instanceNames.first)
+          : null;
       if (isar == null) throw Exception('Isar instance not found.');
 
       Uint8List bytes = File(zipPath).readAsBytesSync();
-      
+
       final format = BackupEncryptionService.detectFormat(bytes);
 
       if (format == BackupFormat.unknownVersion) {
@@ -314,65 +429,86 @@ class BackupService {
         }
         try {
           bytes = BackupEncryptionService.decryptV1(bytes, password);
-          if (bytes.length < 4 || bytes[0] != 80 || bytes[1] != 75 || bytes[2] != 3 || bytes[3] != 4) {
-             throw Exception('Invalid zip structure');
+          if (bytes.length < 4 ||
+              bytes[0] != 80 ||
+              bytes[1] != 75 ||
+              bytes[2] != 3 ||
+              bytes[3] != 4) {
+            throw Exception('Invalid zip structure');
           }
-        } catch(e) {
+        } catch (e) {
           throw Exception('Incorrect legacy password or corrupted file');
         }
       }
 
       final archive = ZipDecoder().decodeBytes(bytes);
-      
+
       ArchiveFile? dataFile;
       ArchiveFile? manifestFile;
-      
+
       // Locate files
       for (final file in archive) {
         if (file.name == 'manifest.json') manifestFile = file;
         if (file.name == 'data.json') dataFile = file;
       }
-      
+
       if (dataFile == null) {
         throw Exception('data.json missing from backup');
       }
-      
+
       final dataContent = utf8.decode(dataFile.content as List<int>);
       final rawData = jsonDecode(dataContent) as Map<String, dynamic>;
 
       int manifestSchema = 1;
       if (manifestFile != null) {
-         final manifestContent = utf8.decode(manifestFile.content as List<int>);
-         final manifestData = jsonDecode(manifestContent) as Map<String, dynamic>;
-         manifestSchema = manifestData['schemaVersion'] ?? 1;
+        final manifestContent = utf8.decode(manifestFile.content as List<int>);
+        final manifestData =
+            jsonDecode(manifestContent) as Map<String, dynamic>;
+        manifestSchema = manifestData['schemaVersion'] ?? 1;
       }
 
-      final migratedData = SchemaMigrationService.runMigrationsForRestore(rawData, manifestSchema);
+      final migratedData = SchemaMigrationService.runMigrationsForRestore(
+        rawData,
+        manifestSchema,
+      );
 
       // 1. Extract photos to staging
       final stagedPhotos = <String, String>{};
       for (final file in archive) {
         final name = file.name.toLowerCase();
-        if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp') || name.endsWith('.gif')) {
-           final normalized = file.name.replaceAll('\\', '/');
-           final segments = normalized.split('/').where((s) => s.isNotEmpty && s != '.').toList();
-           if (segments.contains('..')) {
-             continue; // reject path traversal
-           }
-           final safePath = segments.join('/');
-           String targetPath = '${appDir.path}/$safePath';
-           
-           // Legacy fallback
-           if (!safePath.startsWith('trufit_') && !safePath.startsWith('sthira_') && !safePath.startsWith('profile_') && !safePath.contains('/')) {
-             targetPath = '${appDir.path}/trufit_media/$safePath';
-           }
+        if (name.endsWith('.jpg') ||
+            name.endsWith('.jpeg') ||
+            name.endsWith('.png') ||
+            name.endsWith('.webp') ||
+            name.endsWith('.gif')) {
+          final normalized = file.name.replaceAll('\\', '/');
+          final segments = normalized
+              .split('/')
+              .where((s) => s.isNotEmpty && s != '.')
+              .toList();
+          if (segments.contains('..')) {
+            continue; // reject path traversal
+          }
+          final safePath = segments.join('/');
+          String targetPath = '${appDir.path}/$safePath';
 
-           final stagingFileName = '${DateTime.now().microsecondsSinceEpoch}_$safePath'.replaceAll('/', '_').replaceAll('\\', '_');
-           final stagingPath = '${stagingDir.path}/$stagingFileName';
-           
-           final extractedFile = File(stagingPath);
-           extractedFile.writeAsBytesSync(file.content as List<int>);
-           stagedPhotos[targetPath] = stagingPath;
+          // Legacy fallback
+          if (!safePath.startsWith('trufit_') &&
+              !safePath.startsWith('sthira_') &&
+              !safePath.startsWith('profile_') &&
+              !safePath.contains('/')) {
+            targetPath = '${appDir.path}/trufit_media/$safePath';
+          }
+
+          final stagingFileName =
+              '${DateTime.now().microsecondsSinceEpoch}_$safePath'
+                  .replaceAll('/', '_')
+                  .replaceAll('\\', '_');
+          final stagingPath = '${stagingDir.path}/$stagingFileName';
+
+          final extractedFile = File(stagingPath);
+          extractedFile.writeAsBytesSync(file.content as List<int>);
+          stagedPhotos[targetPath] = stagingPath;
         }
       }
 
@@ -383,42 +519,62 @@ class BackupService {
         final savedConfig = isar.appConfigs.where().exportJsonSync();
 
         await isar.clear();
-        
+
         isar.syncQueueItems.importJsonSync(savedQueue);
         isar.appConfigs.importJsonSync(savedConfig);
 
-        
-        if (migratedData['userProfiles'] != null) isar.userProfiles.importJsonSync(migratedData['userProfiles']);
-        if (migratedData['dailyLogs'] != null) isar.dailyLogs.importJsonSync(migratedData['dailyLogs']);
-        if (migratedData['habits'] != null) isar.habits.importJsonSync(migratedData['habits']);
-        if (migratedData['mealPlans'] != null) isar.mealPlans.importJsonSync(migratedData['mealPlans']);
-        if (migratedData['badges'] != null) isar.badges.importJsonSync(migratedData['badges']);
-        if (migratedData['scannedMealLogs'] != null) isar.scannedMealLogs.importJsonSync(migratedData['scannedMealLogs']);
-        if (migratedData['progressPhotos'] != null) isar.progressPhotos.importJsonSync(migratedData['progressPhotos']);
-        if (migratedData['exerciseLogs'] != null) isar.exerciseLogs.importJsonSync(migratedData['exerciseLogs']);
-        if (migratedData['exercisePrs'] != null) isar.exercisePrs.importJsonSync(migratedData['exercisePrs']);
-        if (migratedData['workoutPlans'] != null) isar.workoutPlans.importJsonSync(migratedData['workoutPlans']);
-        if (migratedData['workoutSessions'] != null) isar.workoutSessions.importJsonSync(migratedData['workoutSessions']);
-        if (migratedData['coachNotes'] != null) isar.coachNotes.importJsonSync(migratedData['coachNotes']);
-        if (migratedData['bodyStats'] != null) isar.bodyStats.importJsonSync(migratedData['bodyStats']);
-        if (migratedData['dailyMealLogs'] != null) isar.dailyMealLogs.importJsonSync(migratedData['dailyMealLogs']);
-        if (migratedData['habitCompletions'] != null) isar.habitCompletions.importJsonSync(migratedData['habitCompletions']);
-        if (migratedData['userFoodLogs'] != null) isar.userFoodLogs.importJsonSync(migratedData['userFoodLogs']);
+        if (migratedData['userProfiles'] != null)
+          isar.userProfiles.importJsonSync(migratedData['userProfiles']);
+        if (migratedData['dailyLogs'] != null)
+          isar.dailyLogs.importJsonSync(migratedData['dailyLogs']);
+        if (migratedData['habits'] != null)
+          isar.habits.importJsonSync(migratedData['habits']);
+        if (migratedData['mealPlans'] != null)
+          isar.mealPlans.importJsonSync(migratedData['mealPlans']);
+        if (migratedData['badges'] != null)
+          isar.badges.importJsonSync(migratedData['badges']);
+        if (migratedData['scannedMealLogs'] != null)
+          isar.scannedMealLogs.importJsonSync(migratedData['scannedMealLogs']);
+        if (migratedData['progressPhotos'] != null)
+          isar.progressPhotos.importJsonSync(migratedData['progressPhotos']);
+        if (migratedData['exerciseLogs'] != null)
+          isar.exerciseLogs.importJsonSync(migratedData['exerciseLogs']);
+        if (migratedData['exercisePrs'] != null)
+          isar.exercisePrs.importJsonSync(migratedData['exercisePrs']);
+        if (migratedData['workoutPlans'] != null)
+          isar.workoutPlans.importJsonSync(migratedData['workoutPlans']);
+        if (migratedData['workoutSessions'] != null)
+          isar.workoutSessions.importJsonSync(migratedData['workoutSessions']);
+        if (migratedData['coachNotes'] != null)
+          isar.coachNotes.importJsonSync(migratedData['coachNotes']);
+        if (migratedData['bodyStats'] != null)
+          isar.bodyStats.importJsonSync(migratedData['bodyStats']);
+        if (migratedData['dailyMealLogs'] != null)
+          isar.dailyMealLogs.importJsonSync(migratedData['dailyMealLogs']);
+        if (migratedData['habitCompletions'] != null)
+          isar.habitCompletions.importJsonSync(
+            migratedData['habitCompletions'],
+          );
+        if (migratedData['userFoodLogs'] != null)
+          isar.userFoodLogs.importJsonSync(migratedData['userFoodLogs']);
       });
 
       // 3. Move photos from staging to target
       int failedPhotos = 0;
       for (final entry in stagedPhotos.entries) {
         try {
-           final targetFile = File(entry.key);
-           targetFile.parent.createSync(recursive: true);
-           File(entry.value).copySync(targetFile.path);
+          final targetFile = File(entry.key);
+          targetFile.parent.createSync(recursive: true);
+          File(entry.value).copySync(targetFile.path);
         } catch (_) {
-           failedPhotos++;
+          failedPhotos++;
         }
       }
 
-      return BackupRestoreResult(success: true, failedPhotosCount: failedPhotos);
+      return BackupRestoreResult(
+        success: true,
+        failedPhotosCount: failedPhotos,
+      );
     } catch (e) {
       debugPrint('Restore failed: $e');
       return BackupRestoreResult(success: false);
@@ -431,40 +587,55 @@ class BackupService {
 
   Future<void> autoBackup() async {
     if (kIsWeb) return;
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastAutoDateStr = prefs.getString('last_auto_backup_date');
       if (lastAutoDateStr != null) {
         final lastDate = DateTime.tryParse(lastAutoDateStr);
-        if (lastDate != null && DateTime.now().difference(lastDate).inDays < 7) {
-           return; // wait for 7 days
+        if (lastDate != null &&
+            DateTime.now().difference(lastDate).inDays < 7) {
+          return; // wait for 7 days
         }
       }
 
       final appDir = await getApplicationDocumentsDirectory();
       final backupDir = Directory('${appDir.path}/auto_backups');
       if (!await backupDir.exists()) await backupDir.create(recursive: true);
-      
+
       final zipPath = await createBackup(includeMedia: false);
       if (zipPath != null) {
-         final zipFile = File(zipPath);
-         final destFile = File('${backupDir.path}/auto_backup_${DateTime.now().millisecondsSinceEpoch}.zip');
-         await zipFile.copy(destFile.path);
-         await zipFile.delete();
-         
-         await prefs.setString('last_auto_backup_date', DateTime.now().toIso8601String());
-         await prefs.setString('last_auto_backup_display', DateFormat('MMM dd, yyyy').format(DateTime.now()));
+        final zipFile = File(zipPath);
+        final destFile = File(
+          '${backupDir.path}/auto_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
+        );
+        await zipFile.copy(destFile.path);
+        await zipFile.delete();
+
+        await prefs.setString(
+          'last_auto_backup_date',
+          DateTime.now().toIso8601String(),
+        );
+        await prefs.setString(
+          'last_auto_backup_display',
+          DateFormat('MMM dd, yyyy').format(DateTime.now()),
+        );
       }
 
       // Cleanup to keep only recent max logs
-      final files = backupDir.listSync().whereType<File>().where((f) => f.path.endsWith('.zip')).toList();
+      final files = backupDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.zip'))
+          .toList();
       if (files.length > _maxAutoBackups) {
-         files.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
-         final toDelete = files.sublist(0, files.length - _maxAutoBackups);
-         for (var f in toDelete) {
-           await f.delete();
-         }
+        files.sort(
+          (a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()),
+        );
+        final toDelete = files.sublist(0, files.length - _maxAutoBackups);
+        for (var f in toDelete) {
+          await f.delete();
+        }
       }
     } catch (e) {
       debugPrint('Auto backup failed: $e');

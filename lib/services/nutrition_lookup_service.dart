@@ -34,7 +34,9 @@ class NutritionLookupService {
     final queryStr = queryTokens.join(' ');
 
     // 0. Check UserFoodLog (Personalized Local DB) first (Exact match)
-    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+    final isar = Isar.instanceNames.isNotEmpty
+        ? Isar.getInstance(Isar.instanceNames.first)
+        : null;
     if (isar != null) {
       final userFood = isar.userFoodLogs
           .where()
@@ -76,8 +78,8 @@ class NutritionLookupService {
   NutritionLookupResult _mapToResult(Map<String, dynamic> item) {
     final per100g = item['per100g'] as Map<String, dynamic>?;
     final perServing = item['perServing'] as Map<String, dynamic>?;
-    
-    // nutrition_table.json generator uses 'per100g' specifically. 
+
+    // nutrition_table.json generator uses 'per100g' specifically.
     final isPer100g = per100g != null;
     final nutSource = per100g ?? perServing ?? {};
 
@@ -91,7 +93,8 @@ class NutritionLookupService {
         fatG: (nutSource['fat_g'] as num?)?.toDouble() ?? 0.0,
       ),
       isPer100g: isPer100g,
-      servingGrams: (item['defaultPortionG'] as num?)?.toDouble(), // Default serving grams in JSON
+      servingGrams: (item['defaultPortionG'] as num?)
+          ?.toDouble(), // Default serving grams in JSON
       baseQuantityUnit: item['base_quantity_unit'] as String?,
       provenance: 'database',
     );

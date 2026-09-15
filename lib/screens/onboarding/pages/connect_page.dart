@@ -15,7 +15,8 @@ class ConnectPage extends ConsumerStatefulWidget {
   ConsumerState<ConnectPage> createState() => _ConnectPageState();
 }
 
-class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProviderStateMixin {
+class _ConnectPageState extends ConsumerState<ConnectPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
   bool _healthConnected = false;
 
@@ -23,7 +24,9 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
   void initState() {
     super.initState();
     _staggerController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _staggerController.forward();
     _checkHealthStatus();
   }
@@ -73,7 +76,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
           },
           child: child,
         );
-      }
+      },
     );
   }
 
@@ -81,11 +84,12 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
   Widget build(BuildContext context) {
     // Current statuses
     final cred = ref.watch(credentialProvider);
-    final hasGemini = cred.status == CredentialStatus.present && (cred.key ?? '').isNotEmpty;
-    
+    final hasGemini =
+        cred.status == CredentialStatus.present && (cred.key ?? '').isNotEmpty;
+
     final cloudConnected = ref.watch(isSignedInProvider);
     final syncState = ref.watch(cloudSyncControllerProvider);
-    
+
     String cloudStatusText = 'Local-only';
     if (cloudConnected) {
       if (syncState == CloudSyncState.syncing) {
@@ -96,7 +100,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
         cloudStatusText = 'Connected';
       }
     }
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -122,7 +126,9 @@ class _ConnectPageState extends ConsumerState<ConnectPage> with SingleTickerProv
                 Text(
                   'Optional — you can do any of this later in Settings.',
                   textAlign: TextAlign.center,
-                  style: context.text.body.copyWith(color: context.colors.textMedium),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ],
             ),
@@ -230,19 +236,25 @@ class _IntegrationRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                    style: context.text.bodyStrong.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: context.text.caption.copyWith(color: context.colors.textMedium),
+                    style: context.text.caption.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             AnimatedSwitcher(
-              duration: disableAnim ? Duration.zero : const Duration(milliseconds: 400),
+              duration: disableAnim
+                  ? Duration.zero
+                  : const Duration(milliseconds: 400),
               switchInCurve: Curves.easeOutBack,
               switchOutCurve: Curves.easeIn,
               transitionBuilder: (child, animation) {
@@ -263,14 +275,23 @@ class _IntegrationRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: statusActive ? context.colors.primary.withValues(alpha: 0.15) : context.colors.inputFill,
+                      color: statusActive
+                          ? context.colors.primary.withValues(alpha: 0.15)
+                          : context.colors.inputFill,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       statusText,
-                      style: context.text.micro.copyWith(color: statusActive ? context.colors.primary : context.colors.textMedium),
+                      style: context.text.micro.copyWith(
+                        color: statusActive
+                            ? context.colors.primary
+                            : context.colors.textMedium,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -290,7 +311,9 @@ class _IntegrationRow extends StatelessWidget {
                         ],
                         Text(
                           statusActive ? 'Edit' : 'Set up',
-                          style: context.text.body.copyWith(color: context.colors.primary),
+                          style: context.text.body.copyWith(
+                            color: context.colors.primary,
+                          ),
                         ),
                       ],
                     ),

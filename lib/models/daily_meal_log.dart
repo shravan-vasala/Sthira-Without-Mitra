@@ -173,13 +173,13 @@ class MealItemLog {
 
   // The explicitly computed final totals (optional if unresolved)
   FoodNutrition? computedNutrition;
-  
+
   // The base reference nutrition used for calculation
   FoodNutrition? baseNutrition;
 
   bool resolved;
   String? provenance; // 'verified', 'estimated', 'yours'
-  
+
   // Metadata about the base nutrition basis
   bool isPer100g;
   double? servingGrams;
@@ -203,7 +203,9 @@ class MealItemLog {
     // Migration: If computedNutrition is missing, reconstruct it from old fields
     FoodNutrition? compNut;
     if (json['computedNutrition'] != null) {
-      compNut = FoodNutrition.fromJson(json['computedNutrition'] as Map<String, dynamic>);
+      compNut = FoodNutrition.fromJson(
+        json['computedNutrition'] as Map<String, dynamic>,
+      );
     } else if (json['calories'] != null) {
       // Legacy fallback
       compNut = FoodNutrition(
@@ -216,7 +218,9 @@ class MealItemLog {
 
     FoodNutrition? baseNut;
     if (json['baseNutrition'] != null) {
-      baseNut = FoodNutrition.fromJson(json['baseNutrition'] as Map<String, dynamic>);
+      baseNut = FoodNutrition.fromJson(
+        json['baseNutrition'] as Map<String, dynamic>,
+      );
     }
 
     return MealItemLog(
@@ -235,20 +239,21 @@ class MealItemLog {
   Map<String, dynamic> toJson() => {
     'name': name,
     'portion': portion,
-    if (computedNutrition != null) 'computedNutrition': computedNutrition!.toJson(),
+    if (computedNutrition != null)
+      'computedNutrition': computedNutrition!.toJson(),
     if (baseNutrition != null) 'baseNutrition': baseNutrition!.toJson(),
     'resolved': resolved,
     if (provenance != null) 'provenance': provenance,
     'is_per_100g': isPer100g,
     if (servingGrams != null) 'serving_grams': servingGrams,
     if (consumedGrams != null) 'consumed_grams': consumedGrams,
-    
+
     // Write legacy fields for backward compatibility during rollback/migration
     if (computedNutrition != null) ...{
       'calories': computedNutrition!.kcal.round(),
       'protein_g': computedNutrition!.proteinG,
       'carbs_g': computedNutrition!.carbsG,
       'fat_g': computedNutrition!.fatG,
-    }
+    },
   };
 }

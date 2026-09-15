@@ -122,18 +122,25 @@ Portion estimation guidelines:
           'type': 'OBJECT',
           'properties': {
             'name': {'type': 'STRING', 'description': 'Name of the dish'},
-            'portion': {'type': 'STRING', 'description': 'Estimated portion size (e.g. 1 bowl, 2 pieces)'},
-            'estimated_grams': {'type': 'NUMBER', 'description': 'Estimated weight in grams'},
+            'portion': {
+              'type': 'STRING',
+              'description': 'Estimated portion size (e.g. 1 bowl, 2 pieces)',
+            },
+            'estimated_grams': {
+              'type': 'NUMBER',
+              'description': 'Estimated weight in grams',
+            },
             'estimated_nutrition_if_unknown': {
               'type': 'OBJECT',
-              'description': 'Only provide if the dish is rare or complex. Guess the macros per 100g.',
+              'description':
+                  'Only provide if the dish is rare or complex. Guess the macros per 100g.',
               'properties': {
                 'kcal': {'type': 'NUMBER'},
                 'protein_g': {'type': 'NUMBER'},
                 'carbs_g': {'type': 'NUMBER'},
-                'fat_g': {'type': 'NUMBER'}
-              }
-            }
+                'fat_g': {'type': 'NUMBER'},
+              },
+            },
           },
           'required': ['name', 'portion', 'estimated_grams'],
         },
@@ -183,7 +190,10 @@ $_jsonShape
 
   /// Estimate macros from a free-text description of what was eaten at home.
   @override
-  Future<Map<String, dynamic>?> analyzeFoodText(String description, [CancellationToken? cancellationToken]) async {
+  Future<Map<String, dynamic>?> analyzeFoodText(
+    String description, [
+    CancellationToken? cancellationToken,
+  ]) async {
     final deadline = DateTime.now().add(const Duration(seconds: 20));
     final trimmed = description.trim();
     if (trimmed.isEmpty) {
@@ -203,7 +213,10 @@ $_jsonShape
             jsonDecode(cached.cachedResponseJson) as Map<String, dynamic>;
         if (!decoded.containsKey('total')) {
           // Legacy cached raw data lacking totals — process it
-          return await _processAiResponse(decoded, cancellationToken: cancellationToken);
+          return await _processAiResponse(
+            decoded,
+            cancellationToken: cancellationToken,
+          );
         }
         return decoded;
       } catch (_) {
@@ -215,95 +228,119 @@ $_jsonShape
     bool isFullyLocal = true;
     final List<Map<String, dynamic>> localItems = [];
     final List<String> unresolvedParts = [];
-    
-    final splitParts = normalizedQuery.split(RegExp(r'\+|\b(and)\b|,')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+
+    final splitParts = normalizedQuery
+        .split(RegExp(r'\+|\b(and)\b|,'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     await nutritionLookup.load();
-    
+
     for (var part in splitParts) {
-      final match = RegExp(r'^(\d+(?:\.\d+)?)\s*(g|grams?|ml|bowl|cup|plate|piece|idlis?|dosas?|chapatis?|rotis?|tbsp|tsp)?\s*(.*)$', caseSensitive: false).firstMatch(part);
+      final match = RegExp(
+        r'^(\d+(?:\.\d+)?)\s*(g|grams?|ml|bowl|cup|plate|piece|idlis?|dosas?|chapatis?|rotis?|tbsp|tsp)?\s*(.*)$',
+        caseSensitive: false,
+      ).firstMatch(part);
       String queryName = part;
       double quantity = 1.0;
       String? parsedUnit;
-      
+
       if (match != null) {
         quantity = double.tryParse(match.group(1) ?? '1') ?? 1.0;
         parsedUnit = match.group(2)?.toLowerCase();
         final possibleName = match.group(3)?.trim() ?? '';
         if (possibleName.isNotEmpty) {
-           queryName = possibleName;
+          queryName = possibleName;
         } else if (match.group(2) != null) {
-           queryName = match.group(2)!;
+          queryName = match.group(2)!;
         }
       }
-      
+
       if (queryName.endsWith('s') && !queryName.endsWith('ss')) {
         queryName = queryName.substring(0, queryName.length - 1);
       }
-      
+
       final localMatch = nutritionLookup.match(queryName);
       if (localMatch != null) {
-         try {
-           final isPer100g = localMatch.isPer100g;
-           final userServing = localMatch.servingGrams;
-           final userProv = localMatch.provenance;
-           
-           double? explicitGrams;
-           double? explicitServings;
-           double defGrams = userServing ?? 100.0;
-           
-           if (parsedUnit == 'g' || parsedUnit == 'gram' || parsedUnit == 'grams' || parsedUnit == 'ml') {
-             explicitGrams = quantity;
-             defGrams = quantity;
-             quantity = 1.0;
-           } else {
-             explicitServings = quantity;
-             if (parsedUnit == 'cup') {
-               defGrams = 240.0;
-             } else if (parsedUnit == 'bowl') defGrams = 250.0;
-             else if (parsedUnit == 'tbsp') defGrams = 15.0;
-             else if (parsedUnit == 'tsp') defGrams = 5.0;
-             else if (!isPer100g && userServing != null) defGrams = userServing;
-           }
-           
-           final double totalGrams = explicitGrams ?? (defGrams * (explicitServings ?? 1.0));
-           
-           final computed = FoodNutrition.compute(
-             consumedGrams: explicitGrams,
-             consumedServings: explicitServings,
-             baseNutrition: localMatch.baseNutrition,
-             isPer100g: isPer100g,
-             servingGrams: (parsedUnit != null && ['cup','bowl','tbsp','tsp'].contains(parsedUnit)) ? defGrams : localMatch.servingGrams,
-           );
-           
-           localItems.add({
-             "name": localMatch.name,
-             "portion": explicitGrams != null ? "${explicitGrams}g" : "$quantity (${defGrams}g)",
-             "estimated_grams": totalGrams,
-             "calories": computed.kcal.round(),
-             "protein_g": double.parse(computed.proteinG.toStringAsFixed(1)),
-             "carbs_g": double.parse(computed.carbsG.toStringAsFixed(1)),
-             "fat_g": double.parse(computed.fatG.toStringAsFixed(1)),
-             "resolved": true,
-             "provenance": userProv ?? "database",
-             "is_per_100g": isPer100g,
-             "serving_grams": defGrams,
-             "baseNutrition": localMatch.baseNutrition.toJson(),
-             "computedNutrition": computed.toJson(),
-           });
-         } catch (e) {
-           isFullyLocal = false;
-           unresolvedParts.add(part);
-         }
+        try {
+          final isPer100g = localMatch.isPer100g;
+          final userServing = localMatch.servingGrams;
+          final userProv = localMatch.provenance;
+
+          double? explicitGrams;
+          double? explicitServings;
+          double defGrams = userServing ?? 100.0;
+
+          if (parsedUnit == 'g' ||
+              parsedUnit == 'gram' ||
+              parsedUnit == 'grams' ||
+              parsedUnit == 'ml') {
+            explicitGrams = quantity;
+            defGrams = quantity;
+            quantity = 1.0;
+          } else {
+            explicitServings = quantity;
+            if (parsedUnit == 'cup') {
+              defGrams = 240.0;
+            } else if (parsedUnit == 'bowl')
+              defGrams = 250.0;
+            else if (parsedUnit == 'tbsp')
+              defGrams = 15.0;
+            else if (parsedUnit == 'tsp')
+              defGrams = 5.0;
+            else if (!isPer100g && userServing != null)
+              defGrams = userServing;
+          }
+
+          final double totalGrams =
+              explicitGrams ?? (defGrams * (explicitServings ?? 1.0));
+
+          final computed = FoodNutrition.compute(
+            consumedGrams: explicitGrams,
+            consumedServings: explicitServings,
+            baseNutrition: localMatch.baseNutrition,
+            isPer100g: isPer100g,
+            servingGrams:
+                (parsedUnit != null &&
+                    ['cup', 'bowl', 'tbsp', 'tsp'].contains(parsedUnit))
+                ? defGrams
+                : localMatch.servingGrams,
+          );
+
+          localItems.add({
+            "name": localMatch.name,
+            "portion": explicitGrams != null
+                ? "${explicitGrams}g"
+                : "$quantity (${defGrams}g)",
+            "estimated_grams": totalGrams,
+            "calories": computed.kcal.round(),
+            "protein_g": double.parse(computed.proteinG.toStringAsFixed(1)),
+            "carbs_g": double.parse(computed.carbsG.toStringAsFixed(1)),
+            "fat_g": double.parse(computed.fatG.toStringAsFixed(1)),
+            "resolved": true,
+            "provenance": userProv ?? "database",
+            "is_per_100g": isPer100g,
+            "serving_grams": defGrams,
+            "baseNutrition": localMatch.baseNutrition.toJson(),
+            "computedNutrition": computed.toJson(),
+          });
+        } catch (e) {
+          isFullyLocal = false;
+          unresolvedParts.add(part);
+        }
       } else {
-         isFullyLocal = false;
-         unresolvedParts.add(part);
+        isFullyLocal = false;
+        unresolvedParts.add(part);
       }
     }
-    
+
     if (isFullyLocal && localItems.isNotEmpty) {
       double tCal = 0, tP = 0, tC = 0, tF = 0;
       for (var item in localItems) {
-         tCal += item['calories']; tP += item['protein_g']; tC += item['carbs_g']; tF += item['fat_g'];
+        tCal += item['calories'];
+        tP += item['protein_g'];
+        tC += item['carbs_g'];
+        tF += item['fat_g'];
       }
       return {
         "items": localItems,
@@ -312,8 +349,8 @@ $_jsonShape
           "calories": tCal.round(),
           "protein_g": double.parse(tP.toStringAsFixed(1)),
           "carbs_g": double.parse(tC.toStringAsFixed(1)),
-          "fat_g": double.parse(tF.toStringAsFixed(1))
-        }
+          "fat_g": double.parse(tF.toStringAsFixed(1)),
+        },
       };
     }
 
@@ -341,49 +378,56 @@ $_jsonShape
     );
 
     // Merge AI response with Local items
-    final aiParsed = await _processAiResponse(response, cancellationToken: cancellationToken);
+    final aiParsed = await _processAiResponse(
+      response,
+      cancellationToken: cancellationToken,
+    );
     if (aiParsed != null && localItems.isNotEmpty) {
-       final allItems = [...localItems, ...(aiParsed['items'] ?? [])];
-       double tCal = 0, tP = 0, tC = 0, tF = 0;
-       int unresolvedCount = 0;
-       for (var item in allItems) {
-          tCal += item['calories'] ?? 0;
-          tP += item['protein_g'] ?? 0;
-          tC += item['carbs_g'] ?? 0;
-          tF += item['fat_g'] ?? 0;
-          if (item['resolved'] == false) unresolvedCount++;
-       }
-       aiParsed['items'] = allItems;
-       aiParsed['total'] = {
-          "calories": tCal.round(),
-          "protein_g": double.parse(tP.toStringAsFixed(1)),
-          "carbs_g": double.parse(tC.toStringAsFixed(1)),
-          "fat_g": double.parse(tF.toStringAsFixed(1)),
-          if (unresolvedCount > 0) 'unresolved_count': unresolvedCount,
-       };
-       // Store the final merged result
-       if (!(cancellationToken?.isCancelled ?? false)) {
-         await isar.writeTxn(() async {
-           await isar.foodSearchCaches.put(
-             FoodSearchCache(
-               normalizedQuery: normalizedQuery,
-               cachedResponseJson: jsonEncode(aiParsed), timestamp: DateTime.now(), schemaVersion: '1',
-             ),
-           );
-         });
-       }
-       return aiParsed;
+      final allItems = [...localItems, ...(aiParsed['items'] ?? [])];
+      double tCal = 0, tP = 0, tC = 0, tF = 0;
+      int unresolvedCount = 0;
+      for (var item in allItems) {
+        tCal += item['calories'] ?? 0;
+        tP += item['protein_g'] ?? 0;
+        tC += item['carbs_g'] ?? 0;
+        tF += item['fat_g'] ?? 0;
+        if (item['resolved'] == false) unresolvedCount++;
+      }
+      aiParsed['items'] = allItems;
+      aiParsed['total'] = {
+        "calories": tCal.round(),
+        "protein_g": double.parse(tP.toStringAsFixed(1)),
+        "carbs_g": double.parse(tC.toStringAsFixed(1)),
+        "fat_g": double.parse(tF.toStringAsFixed(1)),
+        if (unresolvedCount > 0) 'unresolved_count': unresolvedCount,
+      };
+      // Store the final merged result
+      if (!(cancellationToken?.isCancelled ?? false)) {
+        await isar.writeTxn(() async {
+          await isar.foodSearchCaches.put(
+            FoodSearchCache(
+              normalizedQuery: normalizedQuery,
+              cachedResponseJson: jsonEncode(aiParsed),
+              timestamp: DateTime.now(),
+              schemaVersion: '1',
+            ),
+          );
+        });
+      }
+      return aiParsed;
     }
 
     if (aiParsed != null && !(cancellationToken?.isCancelled ?? false)) {
       await isar.writeTxn(() async {
-         await isar.foodSearchCaches.put(
-           FoodSearchCache(
-             normalizedQuery: normalizedQuery,
-             cachedResponseJson: jsonEncode(aiParsed), timestamp: DateTime.now(), schemaVersion: '1',
-           ),
-         );
-       });
+        await isar.foodSearchCaches.put(
+          FoodSearchCache(
+            normalizedQuery: normalizedQuery,
+            cachedResponseJson: jsonEncode(aiParsed),
+            timestamp: DateTime.now(),
+            schemaVersion: '1',
+          ),
+        );
+      });
     }
 
     return aiParsed;
@@ -434,7 +478,10 @@ $_jsonShape
           );
           if (baseNut.kcal == 0) {
             // validate math if AI hallucinates 0 kcal but gives macros
-            baseNut.kcal = (baseNut.proteinG * 4) + (baseNut.carbsG * 4) + (baseNut.fatG * 9);
+            baseNut.kcal =
+                (baseNut.proteinG * 4) +
+                (baseNut.carbsG * 4) +
+                (baseNut.fatG * 9);
           }
           isPer100g = true;
           servingGrams = null;
@@ -447,7 +494,8 @@ $_jsonShape
       }
 
       final computed = FoodNutrition.compute(
-        consumedGrams: grams, // AI currently only outputs grams or assumes grams
+        consumedGrams:
+            grams, // AI currently only outputs grams or assumes grams
         baseNutrition: baseNut,
         isPer100g: isPer100g,
         servingGrams: servingGrams,
@@ -474,7 +522,9 @@ $_jsonShape
       }
     }
 
-    final unresolvedCount = items.where((i) => i is Map && i['resolved'] == false).length;
+    final unresolvedCount = items
+        .where((i) => i is Map && i['resolved'] == false)
+        .length;
 
     aiResponse['total'] = {
       'calories': totalCal.round(),
@@ -517,7 +567,12 @@ $_jsonShape
     final bucketedProtein = (remainingProtein ~/ 10) * 10;
     final bucketedCarbs = (remainingCarbs ~/ 10) * 10;
     final bucketedFat = (remainingFat ~/ 5) * 5;
-    final historyHash = previousMeals != null ? sha256.convert(utf8.encode(previousMeals.join())).toString().substring(0, 8) : 'none';
+    final historyHash = previousMeals != null
+        ? sha256
+              .convert(utf8.encode(previousMeals.join()))
+              .toString()
+              .substring(0, 8)
+        : 'none';
     final ml = mealsLeft ?? 1;
 
     final dateStr = targetDate ?? todayKey();
@@ -645,54 +700,78 @@ Do NOT use JSON.
 
     final deadline = DateTime.now().add(const Duration(seconds: 30));
     AiErrorCause? lastCause;
-    
+
     try {
       for (String modelName in AiClient.textModelsToTry) {
         if (DateTime.now().isAfter(deadline)) break;
-        
+
         try {
           final remaining = deadline.difference(DateTime.now());
-          final attemptTimeout = remaining < const Duration(seconds: 10) 
-              ? remaining 
+          final attemptTimeout = remaining < const Duration(seconds: 10)
+              ? remaining
               : const Duration(seconds: 10);
-          
-          await client.models.generateContent(
-            model: modelName,
-            request: GenerateContentRequest(
-              contents: [Content.text('ping')],
-              generationConfig: const GenerationConfig(maxOutputTokens: 10),
-            ),
-          ).timeout(attemptTimeout);
-          
+
+          await client.models
+              .generateContent(
+                model: modelName,
+                request: GenerateContentRequest(
+                  contents: [Content.text('ping')],
+                  generationConfig: const GenerationConfig(maxOutputTokens: 10),
+                ),
+              )
+              .timeout(attemptTimeout);
+
           return; // Success!
         } catch (e) {
           lastCause = classifyAiError(e.toString());
-          
+
           switch (lastCause) {
             case AiErrorCause.invalidKey:
-              throw AiException('This key cannot access the requested Gemini service.', cause: lastCause);
+              throw AiException(
+                'This key cannot access the requested Gemini service.',
+                cause: lastCause,
+              );
             case AiErrorCause.offline:
-              throw AiException('Couldn\'t reach Gemini. Check your connection and try again.', cause: lastCause);
+              throw AiException(
+                'Couldn\'t reach Gemini. Check your connection and try again.',
+                cause: lastCause,
+              );
             case AiErrorCause.rateLimited:
-              throw AiException('Gemini quota or rate limit reached. Check usage or try later.', cause: lastCause);
+              throw AiException(
+                'Gemini quota or rate limit reached. Check usage or try later.',
+                cause: lastCause,
+              );
             case AiErrorCause.notFound:
               continue; // Try next model
             case AiErrorCause.timeout:
             case AiErrorCause.overloaded:
               continue; // Bounded transient loop
             default:
-              throw AiException('Couldn\'t verify the key. Please try again.', cause: lastCause);
+              throw AiException(
+                'Couldn\'t verify the key. Please try again.',
+                cause: lastCause,
+              );
           }
         }
       }
-      
-      if (lastCause == AiErrorCause.timeout || DateTime.now().isAfter(deadline)) {
-        throw AiException('Verification timed out. Please try again.', cause: AiErrorCause.timeout);
+
+      if (lastCause == AiErrorCause.timeout ||
+          DateTime.now().isAfter(deadline)) {
+        throw AiException(
+          'Verification timed out. Please try again.',
+          cause: AiErrorCause.timeout,
+        );
       } else if (lastCause == AiErrorCause.notFound) {
-        throw AiException('Model unavailable or unsupported for the requested API operation.', cause: AiErrorCause.notFound);
+        throw AiException(
+          'Model unavailable or unsupported for the requested API operation.',
+          cause: AiErrorCause.notFound,
+        );
       }
-      
-      throw AiException('Couldn\'t verify the key. Please try again.', cause: lastCause ?? AiErrorCause.unknown);
+
+      throw AiException(
+        'Couldn\'t verify the key. Please try again.',
+        cause: lastCause ?? AiErrorCause.unknown,
+      );
     } finally {
       client.close();
     }

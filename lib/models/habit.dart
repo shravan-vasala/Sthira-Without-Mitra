@@ -70,7 +70,9 @@ class Habit {
         (e) => e.name == json['goalDirection'],
         orElse: () => GoalDirection.atLeast,
       ),
-      activeDays: (json['activeDays'] as List<dynamic>?)?.map((e) => e as int).toList(),
+      activeDays: (json['activeDays'] as List<dynamic>?)
+          ?.map((e) => e as int)
+          .toList(),
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : null,

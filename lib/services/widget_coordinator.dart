@@ -39,13 +39,15 @@ class WidgetCoordinator {
     _subs.add(mealRepo.watchUpdates.listen((_) => _scheduleUpdate()));
     _subs.add(habitRepo.watchUpdates.listen((_) => _scheduleUpdate()));
     _subs.add(exerciseLogRepo.watchUpdates.listen((_) => _scheduleUpdate()));
-    _subs.add(authService.authStateChanges.listen((user) {
-      if (user == null) {
-        _clearWidgetData();
-      } else {
-        _scheduleUpdate();
-      }
-    }));
+    _subs.add(
+      authService.authStateChanges.listen((user) {
+        if (user == null) {
+          _clearWidgetData();
+        } else {
+          _scheduleUpdate();
+        }
+      }),
+    );
   }
 
   Future<void> _clearWidgetData() async {
@@ -73,10 +75,10 @@ class WidgetCoordinator {
   Future<void> _pushSnapshot(int generation) async {
     try {
       if (generation != _updateGeneration) return;
-      
+
       final now = DateTime.now();
       final todayStr = DateFormat('yyyy-MM-dd').format(now);
-      
+
       final profile = _ref.read(profileProvider);
       final dailyLogRepo = _ref.read(dailyLogRepoProvider);
       final mealRepo = _ref.read(mealRepoProvider);
@@ -88,13 +90,13 @@ class WidgetCoordinator {
 
       // --- 1. Steps ---
       final steps = log?.steps;
-      
+
       // Real step goal derived from habit configuration
       final habits = habitRepo.getHabits();
       final stepHabit = habits.cast<Habit?>().firstWhere(
-            (h) => h?.type == HabitType.autoSteps,
-            orElse: () => null,
-          );
+        (h) => h?.type == HabitType.autoSteps,
+        orElse: () => null,
+      );
       final stepGoal = stepHabit?.target.toInt() ?? 0;
 
       // --- 2. Meals ---
@@ -107,7 +109,7 @@ class WidgetCoordinator {
       final int mealsLogged = mealLog.customSlots.values
           .where((slot) => slot.items.isNotEmpty || slot.photoPath != null)
           .length;
-      
+
       int totalMeals = mealPlan?.meals.length ?? 4;
       // Add extra custom slots to the total if the user added more today
       final int extraSlots = mealLog.customSlots.keys.where((id) {
@@ -127,7 +129,8 @@ class WidgetCoordinator {
       // We only care about habits scheduled for today
       final dayOfWeek = now.weekday; // 1=Mon, 7=Sun
       final activeHabitsForToday = habits.where((h) {
-        if (h.createdAt.isAfter(now) && DateFormat('yyyy-MM-dd').format(h.createdAt) != todayStr) {
+        if (h.createdAt.isAfter(now) &&
+            DateFormat('yyyy-MM-dd').format(h.createdAt) != todayStr) {
           return false;
         }
         return h.activeDays?.contains(dayOfWeek) ?? true;
@@ -135,7 +138,11 @@ class WidgetCoordinator {
 
       final completions = habitRepo.getCompletions(todayStr);
       final int habitsDone = activeHabitsForToday.where((h) {
-        return isHabitCompleted(h, completions, log ?? DailyLog(date: todayStr));
+        return isHabitCompleted(
+          h,
+          completions,
+          log ?? DailyLog(date: todayStr),
+        );
       }).length;
       final int totalHabits = activeHabitsForToday.length;
 
@@ -143,18 +150,18 @@ class WidgetCoordinator {
       final activePlan = workoutRepo.getActivePlan(
         preferredKey: profile.activeWorkoutPlan,
       );
-      
+
       bool isRest = false;
       String workoutTitle = "No Plan";
       String workoutStatus = "Tap to view";
-      
+
       if (log?.workoutCompleted == true) {
         workoutTitle = "Workout Done";
         workoutStatus = "Great job!";
       } else if (activePlan != null) {
         final workoutDay = WorkoutCompletion.resolveWorkoutDay(activePlan, now);
         isRest = WorkoutCompletion.isRestDay(workoutDay, now);
-        
+
         if (isRest) {
           workoutTitle = "Rest Day";
           workoutStatus = "Recovery";
@@ -178,30 +185,33 @@ class WidgetCoordinator {
       final snapshot = {
         'date': todayStr,
         'updatedAt': DateFormat('HH:mm').format(now),
-        
+
         'steps': steps,
         'stepGoal': stepGoal > 0 ? stepGoal : null,
-        
+
         'mealsLogged': mealsLogged,
         'totalMeals': totalMeals > 0 ? totalMeals : 0,
-        
+
         'habitsDone': habitsDone,
         'totalHabits': totalHabits,
-        
+
         'energy': mealsLogged > 0 ? (totalCal > 0 ? totalCal : 0) : null,
-        'protein': mealsLogged > 0 ? (totalProtein > 0 ? totalProtein : 0) : null,
-        
+        'protein': mealsLogged > 0
+            ? (totalProtein > 0 ? totalProtein : 0)
+            : null,
+
         'isRest': isRest,
         'workoutTitle': workoutTitle,
         'workoutStatus': workoutStatus,
       };
 
       if (generation != _updateGeneration) return;
-      await HomeWidget.saveWidgetData<String>('widget_data', jsonEncode(snapshot));
-      if (generation != _updateGeneration) return;
-      await HomeWidget.updateWidget(
-        androidName: 'TrufitWidgetProvider',
+      await HomeWidget.saveWidgetData<String>(
+        'widget_data',
+        jsonEncode(snapshot),
       );
+      if (generation != _updateGeneration) return;
+      await HomeWidget.updateWidget(androidName: 'TrufitWidgetProvider');
     } catch (e) {
       debugPrint('WidgetCoordinator error: $e');
     }

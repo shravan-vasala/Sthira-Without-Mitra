@@ -20,10 +20,7 @@ class InsightsCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeader(
-          'Insights',
-          icon: Icons.lightbulb_outline_rounded,
-        ),
+        const SectionHeader('Insights', icon: Icons.lightbulb_outline_rounded),
         SizedBox(
           height: 150,
           child: ListView.separated(
@@ -82,7 +79,9 @@ class InsightsCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   insight.type == InsightType.trend ? 'Trend' : 'Correlation',
-                  style: context.text.micro.copyWith(color: context.colors.textLight),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textLight,
+                  ),
                 ),
               ),
             ],
@@ -90,7 +89,9 @@ class InsightsCard extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(
             insight.title,
-            style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+            style: context.text.bodyStrong.copyWith(
+              color: context.colors.textDark,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -98,7 +99,9 @@ class InsightsCard extends ConsumerWidget {
           Expanded(
             child: Text(
               insight.description,
-              style: context.text.caption.copyWith(color: context.colors.textMedium),
+              style: context.text.caption.copyWith(
+                color: context.colors.textMedium,
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),

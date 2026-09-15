@@ -41,7 +41,9 @@ class AppTextField extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: Spacing.inline, left: 4),
             child: Text(
               labelText,
-              style: context.text.eyebrow.copyWith(color: context.colors.textMedium),
+              style: context.text.eyebrow.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ),
         TextField(
@@ -51,11 +53,15 @@ class AppTextField extends StatelessWidget {
           textCapitalization: capitalization,
           obscureText: obscureText,
           textAlign: centerText ? TextAlign.center : TextAlign.left,
-          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+          style: context.text.bodyStrong.copyWith(
+            color: context.colors.textDark,
+          ),
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: context.text.bodyStrong.copyWith(color: context.colors.textLight),
+            hintStyle: context.text.bodyStrong.copyWith(
+              color: context.colors.textLight,
+            ),
             prefixIcon: prefixIcon != null
                 ? Icon(prefixIcon, color: context.colors.textMedium)
                 : null,
@@ -68,4 +74,3 @@ class AppTextField extends StatelessWidget {
     );
   }
 }
-

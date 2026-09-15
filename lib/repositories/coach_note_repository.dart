@@ -9,7 +9,9 @@ class CoachNoteRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
-  Future<void> detachSync() async { _sync = null; }
+  Future<void> detachSync() async {
+    _sync = null;
+  }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -27,7 +29,15 @@ class CoachNoteRepository {
     await _isar.writeTxn(() async {
       await _isar.coachNotes.put(note);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'coach_notes', docId: note.date, payload: jsonEncode(note.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'coach_notes',
+            docId: note.date,
+            payload: jsonEncode(note.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();

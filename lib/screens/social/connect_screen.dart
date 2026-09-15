@@ -40,6 +40,12 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connect with Friends'),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -87,8 +93,8 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
               label: 'Sign In',
               onPressed: () {
                 showAppBottomSheet(
-                   context: context,
-                   builder: (ctx) => const CloudSyncSheet(),
+                  context: context,
+                  builder: (ctx) => const CloudSyncSheet(),
                 );
               },
             ),
@@ -111,62 +117,95 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
             label: 'Copy ID to clipboard',
             child: GestureDetector(
               onTap: () async {
-                 HapticFeedback.lightImpact();
-                 try {
-                   await Clipboard.setData(ClipboardData(text: uid));
-                   if (!mounted) return;
-                   setState(() => _copied = true);
-                   Future.delayed(const Duration(seconds: 2), () {
-                     if (mounted) setState(() => _copied = false);
-                   });
-                 } catch (e) {
-                   if (mounted) {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                       SnackBar(
-                         content: const Text('Failed to copy ID to clipboard.'),
-                         backgroundColor: context.colors.red,
-                       ),
-                     );
-                   }
-                 }
+                HapticFeedback.lightImpact();
+                try {
+                  await Clipboard.setData(ClipboardData(text: uid));
+                  if (!mounted) return;
+                  setState(() => _copied = true);
+                  Future.delayed(const Duration(seconds: 2), () {
+                    if (mounted) setState(() => _copied = false);
+                  });
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Failed to copy ID to clipboard.'),
+                        backgroundColor: context.colors.red,
+                      ),
+                    );
+                  }
+                }
               },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 32),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                decoration: BoxDecoration(
-                   color: _copied ? context.colors.primary.withValues(alpha: 0.1) : context.colors.card,
-                   borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                     Text(
-                        uid,
-                        textAlign: TextAlign.center,
-                        style: context.text.screenTitle.copyWith(color: _copied ? context.colors.primary : context.colors.textDark),
-                     ),
-                     const SizedBox(height: 24),
-                     Row(
-                       mainAxisSize: MainAxisSize.min,
-                       children: [
-                         Icon(
-                            _copied ? Icons.check_circle_rounded : Icons.copy_rounded, 
-                            color: _copied ? context.colors.primary : context.colors.textMedium, 
-                            size: 18,
-                         ),
-                         const SizedBox(width: 8),
-                         Text(
-                           _copied ? 'Copied to Clipboard!' : 'Tap to Copy',
-                           style: context.text.caption.copyWith(color: _copied ? context.colors.primary : context.colors.textMedium),
-                         ),
-                       ],
-                     ),
-                  ],
-                ),
-              ).animate(target: _copied ? 1 : 0)
-               .scaleXY(end: 0.95, duration: 150.ms, curve: Curves.easeOut)
-               .then().scaleXY(end: 1.0, duration: 250.ms, curve: Curves.easeOutBack)
-               .tint(color: context.colors.primary.withValues(alpha: 0.1), duration: 200.ms),
+              child:
+                  Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 32),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 32,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _copied
+                              ? context.colors.primary.withValues(alpha: 0.1)
+                              : context.colors.card,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              uid,
+                              textAlign: TextAlign.center,
+                              style: context.text.screenTitle.copyWith(
+                                color: _copied
+                                    ? context.colors.primary
+                                    : context.colors.textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _copied
+                                      ? Icons.check_circle_rounded
+                                      : Icons.copy_rounded,
+                                  color: _copied
+                                      ? context.colors.primary
+                                      : context.colors.textMedium,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _copied
+                                      ? 'Copied to Clipboard!'
+                                      : 'Tap to Copy',
+                                  style: context.text.caption.copyWith(
+                                    color: _copied
+                                        ? context.colors.primary
+                                        : context.colors.textMedium,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                      .animate(target: _copied ? 1 : 0)
+                      .scaleXY(
+                        end: 0.95,
+                        duration: 150.ms,
+                        curve: Curves.easeOut,
+                      )
+                      .then()
+                      .scaleXY(
+                        end: 1.0,
+                        duration: 250.ms,
+                        curve: Curves.easeOutBack,
+                      )
+                      .tint(
+                        color: context.colors.primary.withValues(alpha: 0.1),
+                        duration: 200.ms,
+                      ),
             ),
           ),
           const SizedBox(height: 32),
@@ -202,7 +241,7 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
 
   void _submit() async {
     if (_isProcessing) return;
-    
+
     final code = _controller.text.trim();
     if (code.isEmpty) return;
 
@@ -222,7 +261,9 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('That code doesn\'t look quite right. Give it another try.'),
+              content: const Text(
+                'That code doesn\'t look quite right. Give it another try.',
+              ),
               backgroundColor: context.colors.red,
             ),
           );
@@ -260,11 +301,7 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Friend request sent successfully!',
-            ),
-          ),
+          const SnackBar(content: Text('Friend request sent successfully!')),
         );
         Navigator.of(context).pop();
       }
@@ -272,9 +309,9 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-             content: const Text('Something went wrong. Let\'s try that again.'),
-             backgroundColor: context.colors.red,
-             behavior: SnackBarBehavior.floating,
+            content: const Text('Something went wrong. Let\'s try that again.'),
+            backgroundColor: context.colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -301,17 +338,17 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
           ),
           const SizedBox(height: 16),
           AppTextField(
-             controller: _controller,
-             labelText: 'User ID',
-             hintText: 'Paste ID here...',
-             prefixIcon: Icons.badge_rounded,
+            controller: _controller,
+            labelText: 'User ID',
+            hintText: 'Paste ID here...',
+            prefixIcon: Icons.badge_rounded,
           ),
           const SizedBox(height: 32),
           PrimaryButton(
-             label: _isProcessing ? 'Sending...' : 'Send Request',
-             icon: Icons.send_rounded,
-             isLoading: _isProcessing,
-             onPressed: _submit,
+            label: _isProcessing ? 'Sending...' : 'Send Request',
+            icon: Icons.send_rounded,
+            isLoading: _isProcessing,
+            onPressed: _submit,
           ),
         ],
       ),

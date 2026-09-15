@@ -130,10 +130,10 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
               type: MaterialType.transparency,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child:
-                      Container(
+                child:
+                    BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                          child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 12,
@@ -144,103 +144,120 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                               ),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
-                              BoxShadow(
-                                color: context.colors.gold.withValues(
-                                  alpha: 0.15,
+                                BoxShadow(
+                                  color: context.colors.gold.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  blurRadius: 24,
+                                  spreadRadius: 4,
                                 ),
-                                blurRadius: 24,
-                                spreadRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                        width: 52,
-                                        height: 52,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: RadialGradient(
-                                            colors: [
-                                              context.colors.goldMuted,
-                                              context.colors.gold,
-                                            ],
-                                            radius: 0.8,
-                                          ),
-                                          border: Border.all(
-                                            color: context.colors.gold,
-                                            width: 2,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: context.colors.gold
-                                                  .withValues(alpha: 0.4),
-                                              blurRadius: 8,
-                                            ),
-                                          ],
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          _currentBadge!.iconEmoji,
-                                          style: context.text.screenTitle,
-                                        ),
-                                      )
-                                      .animate(key: ValueKey(_currentBadge!.id))
-                                      .scale(
-                                        begin: const Offset(0.4, 0.4),
-                                        curve: Curves.easeOutBack,
-                                        duration: 600.ms,
-                                      ),
-                                ],
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Stack(
+                                  alignment: Alignment.center,
                                   children: [
-                                    Text(
-                                      'ACHIEVEMENT UNLOCKED',
-                                      style: context.text.micro.copyWith(color: context.colors.gold),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _currentBadge!.title,
-                                      style: context.text.cardTitle.copyWith(color: context.colors.textDark),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      _currentBadge!.description,
-                                      style: context.text.micro.copyWith(color: context.colors.textMedium),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '$unlockedCount of $totalCount unlocked',
-                                      style: context.text.micro.copyWith(color: context.colors.textLight),
-                                    ),
+                                    Container(
+                                          width: 52,
+                                          height: 52,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                context.colors.goldMuted,
+                                                context.colors.gold,
+                                              ],
+                                              radius: 0.8,
+                                            ),
+                                            border: Border.all(
+                                              color: context.colors.gold,
+                                              width: 2,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: context.colors.gold
+                                                    .withValues(alpha: 0.4),
+                                                blurRadius: 8,
+                                              ),
+                                            ],
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            _currentBadge!.iconEmoji,
+                                            style: context.text.screenTitle,
+                                          ),
+                                        )
+                                        .animate(
+                                          key: ValueKey(_currentBadge!.id),
+                                        )
+                                        .scale(
+                                          begin: const Offset(0.4, 0.4),
+                                          curve: Curves.easeOutBack,
+                                          duration: 600.ms,
+                                        ),
                                   ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'ACHIEVEMENT UNLOCKED',
+                                        style: context.text.micro.copyWith(
+                                          color: context.colors.gold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _currentBadge!.title,
+                                        style: context.text.cardTitle.copyWith(
+                                          color: context.colors.textDark,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        _currentBadge!.description,
+                                        style: context.text.micro.copyWith(
+                                          color: context.colors.textMedium,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '$unlockedCount of $totalCount unlocked',
+                                        style: context.text.micro.copyWith(
+                                          color: context.colors.textLight,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          ),
-                        ).animate(
+                        )
+                        .animate(
                           key: ValueKey('${_currentBadge!.id}_shimmer'),
-                          onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : null,
-                        ).shimmer(
-                          duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 600.ms,
+                          onPlay: MediaQuery.disableAnimationsOf(context)
+                              ? (c) => c.stop()
+                              : null,
+                        )
+                        .shimmer(
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? 0.ms
+                              : 600.ms,
                           color: Colors.white.withValues(alpha: 0.3),
                         ),
-                ),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }

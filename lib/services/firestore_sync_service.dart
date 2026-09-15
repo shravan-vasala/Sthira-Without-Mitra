@@ -41,7 +41,9 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   Stream<int> get pendingCountStream {
-    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+    final isar = Isar.instanceNames.isNotEmpty
+        ? Isar.getInstance(Isar.instanceNames.first)
+        : null;
     if (isar == null) return Stream.value(0);
     return isar.syncQueueItems
         .watchLazy(fireImmediately: true)
@@ -85,11 +87,16 @@ class FirestoreSyncService implements ICloudSyncService {
   // ──────────────────────────────────────────────
 
   @override
-  void queueSyncInTxn(Isar isar, String collection, String docId, Map<String, dynamic> data) {
+  void queueSyncInTxn(
+    Isar isar,
+    String collection,
+    String docId,
+    Map<String, dynamic> data,
+  ) {
     if (!canSync) return;
     final uid = _auth.uid;
     if (uid == null) return;
-    
+
     final item = SyncQueueItem(
       collection: collection,
       docId: docId,
@@ -105,7 +112,7 @@ class FirestoreSyncService implements ICloudSyncService {
     if (!canSync) return;
     final uid = _auth.uid;
     if (uid == null) return;
-    
+
     final item = SyncQueueItem(
       collection: '_delete_/$collection',
       docId: docId,
@@ -145,7 +152,9 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   void syncToCloud(String collection, String docId, Map<String, dynamic> data) {
-    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+    final isar = Isar.instanceNames.isNotEmpty
+        ? Isar.getInstance(Isar.instanceNames.first)
+        : null;
     if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
         queueSyncInTxn(isar, collection, docId, data);
@@ -156,7 +165,9 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   void deleteFromCloud(String collection, String docId) {
-    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+    final isar = Isar.instanceNames.isNotEmpty
+        ? Isar.getInstance(Isar.instanceNames.first)
+        : null;
     if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
         queueDeleteInTxn(isar, collection, docId);
@@ -167,7 +178,9 @@ class FirestoreSyncService implements ICloudSyncService {
 
   @override
   void syncProfile(Map<String, dynamic> data) {
-    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+    final isar = Isar.instanceNames.isNotEmpty
+        ? Isar.getInstance(Isar.instanceNames.first)
+        : null;
     if (isar != null && _auth.uid != null) {
       isar.writeTxnSync(() {
         queueProfileInTxn(isar, data);
@@ -181,7 +194,7 @@ class FirestoreSyncService implements ICloudSyncService {
     if (!canSync) return;
     final doc = _userDoc;
     if (doc == null) return;
-    
+
     await doc.set({
       'profile': data,
       'lastSyncedAt': FieldValue.serverTimestamp(),
@@ -195,34 +208,41 @@ class FirestoreSyncService implements ICloudSyncService {
     _isFlushing = true;
     try {
       while (true) {
-        final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+        final isar = Isar.instanceNames.isNotEmpty
+            ? Isar.getInstance(Isar.instanceNames.first)
+            : null;
         if (isar == null) break;
 
         final currentUserUid = _auth.uid;
         if (currentUserUid == null) break;
 
-        final items = isar.syncQueueItems.where().sortByTimestamp().findAllSync()
-            .where((item) => item.uid == currentUserUid).toList();
-        
+        final items = isar.syncQueueItems
+            .where()
+            .sortByTimestamp()
+            .findAllSync()
+            .where((item) => item.uid == currentUserUid)
+            .toList();
+
         if (items.isEmpty) break;
 
         // Fold identity by canonical target, tracking all superseded item IDs
         final Map<String, SyncQueueItem> deduped = {};
         final Map<String, List<Id>> supersededIdsMap = {};
-        
+
         for (final item in items) {
-          final collectionSegment = item.collection.startsWith('_delete_/') 
-              ? item.collection.substring(9) 
+          final collectionSegment = item.collection.startsWith('_delete_/')
+              ? item.collection.substring(9)
               : item.collection;
           final key = '${item.uid}/$collectionSegment/${item.docId}';
           deduped[key] = item;
           supersededIdsMap.putIfAbsent(key, () => []).add(item.id);
         }
 
-        final successfulIds = <Id>[]; // These are the exact IDs representing the canonical ops
+        final successfulIds =
+            <Id>[]; // These are the exact IDs representing the canonical ops
         final supersededIdsToDelete = <Id>[];
         final ops = deduped.values.toList();
-        
+
         // Bounded batch limits (Firestore allows 500)
         for (int i = 0; i < ops.length; i += 450) {
           final batch = _db.batch();
@@ -232,10 +252,12 @@ class FirestoreSyncService implements ICloudSyncService {
 
           for (final item in chunk) {
             final isDelete = item.collection.startsWith('_delete_/');
-            final actualCollection = isDelete ? item.collection.substring(9) : item.collection;
+            final actualCollection = isDelete
+                ? item.collection.substring(9)
+                : item.collection;
             final key = '${item.uid}/$actualCollection/${item.docId}';
             final allIdsForKey = supersededIdsMap[key] ?? [];
-            
+
             if (isDelete) {
               final ref = _subcollection(actualCollection);
               if (ref != null) {
@@ -248,11 +270,16 @@ class FirestoreSyncService implements ICloudSyncService {
               if (doc != null) {
                 try {
                   final data = jsonDecode(item.payload) as Map<String, dynamic>;
-                  batch.set(doc, {'profile': data, 'lastSyncedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+                  batch.set(doc, {
+                    'profile': data,
+                    'lastSyncedAt': FieldValue.serverTimestamp(),
+                  }, SetOptions(merge: true));
                   chunkIds.add(item.id);
                   chunkSupersededIds.addAll(allIdsForKey);
                 } catch (_) {
-                  debugPrint('FirestoreSync: Quarantined malformed profile payload ID ${item.id}');
+                  debugPrint(
+                    'FirestoreSync: Quarantined malformed profile payload ID ${item.id}',
+                  );
                 }
               }
             } else {
@@ -264,7 +291,9 @@ class FirestoreSyncService implements ICloudSyncService {
                   chunkIds.add(item.id);
                   chunkSupersededIds.addAll(allIdsForKey);
                 } catch (_) {
-                  debugPrint('FirestoreSync: Quarantined malformed payload ID ${item.id} in collection ${item.collection}');
+                  debugPrint(
+                    'FirestoreSync: Quarantined malformed payload ID ${item.id} in collection ${item.collection}',
+                  );
                 }
               }
             }
@@ -289,7 +318,9 @@ class FirestoreSyncService implements ICloudSyncService {
 
         if (supersededIdsToDelete.isNotEmpty) {
           await isar.writeTxn(() async {
-            await isar.syncQueueItems.deleteAll(supersededIdsToDelete); // Clears canonical AND older intents
+            await isar.syncQueueItems.deleteAll(
+              supersededIdsToDelete,
+            ); // Clears canonical AND older intents
           });
         }
       }
@@ -438,6 +469,6 @@ class FirestoreSyncService implements ICloudSyncService {
     } catch (e) {
       debugPrint('FirestoreSync: Error bulk syncing $collection: $e');
       rethrow;
+    }
   }
-}
 }

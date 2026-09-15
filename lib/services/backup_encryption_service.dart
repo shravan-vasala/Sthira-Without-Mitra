@@ -7,12 +7,7 @@ import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/digests/sha256.dart';
 import 'package:pointycastle/key_derivators/api.dart';
 
-enum BackupFormat {
-  unencrypted,
-  v2,
-  v1legacy,
-  unknownVersion
-}
+enum BackupFormat { unencrypted, v2, v1legacy, unknownVersion }
 
 class BackupEncryptionService {
   static const _magic = [84, 70, 66, 75]; // 'TFBK'
@@ -44,23 +39,26 @@ class BackupEncryptionService {
   }
 
   static BackupFormat detectFormat(Uint8List data) {
-    if (data.length > 4 && 
+    if (data.length > 4 &&
         data[0] == _magic[0] &&
         data[1] == _magic[1] &&
         data[2] == _magic[2] &&
         data[3] == _magic[3]) {
-      
       if (data.length > 4 && data[4] == _version) {
         return BackupFormat.v2;
       }
       return BackupFormat.unknownVersion;
     }
-    
+
     // Check for ZIP magic 'PK\x03\x04' -> [80, 75, 3, 4]
-    if (data.length > 4 && data[0] == 80 && data[1] == 75 && data[2] == 3 && data[3] == 4) {
+    if (data.length > 4 &&
+        data[0] == 80 &&
+        data[1] == 75 &&
+        data[2] == 3 &&
+        data[3] == 4) {
       return BackupFormat.unencrypted;
     }
-    
+
     // If not TFBK and not plaintext zip, it's possibly headerless v1
     return BackupFormat.v1legacy;
   }

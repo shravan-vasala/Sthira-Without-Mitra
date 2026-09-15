@@ -95,11 +95,17 @@ class DailyShareCard extends ConsumerWidget {
                   children: [
                     Text(
                       'STHIRA',
-                      style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.8)),
+                      style: context.text.micro.copyWith(
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
                     ),
-                      Text(
-                        DateFormat('MMM d').format(DateTime.parse(ref.watch(dateStringProvider))),
-                        style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.8)),
+                    Text(
+                      DateFormat(
+                        'MMM d',
+                      ).format(DateTime.parse(ref.watch(dateStringProvider))),
+                      style: context.text.micro.copyWith(
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
                     ),
                   ],
                 ),
@@ -112,7 +118,9 @@ class DailyShareCard extends ConsumerWidget {
                 const SizedBox(height: 6),
                 Text(
                   _getSubtitle(score.totalScore),
-                  style: context.text.bodyStrong.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+                  style: context.text.bodyStrong.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
                 ),
 
                 const Spacer(),
@@ -225,7 +233,9 @@ class _StatBox extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.8)),
+            style: context.text.micro.copyWith(
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
           ),
         ],
       ),

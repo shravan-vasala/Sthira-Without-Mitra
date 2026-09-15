@@ -25,7 +25,6 @@ import 'widgets/coach_notes_card.dart';
 import 'widgets/daily_insight_card.dart';
 import 'widgets/day_complete_sheet.dart';
 
-
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -75,11 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen<int>(stepsStreakProvider, (prev, next) {
       if (next > 5 && (prev == null || prev <= 5)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '$next-day steps goal streak unlocked.',
-            ),
-          ),
+          SnackBar(content: Text('$next-day steps goal streak unlocked.')),
         );
       }
     });
@@ -87,11 +82,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen<int>(mealStreakProvider, (prev, next) {
       if (next == 3 && (prev == null || prev < 3)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              '3-day meal tracking streak achieved.',
-            ),
-          ),
+          const SnackBar(content: Text('3-day meal tracking streak achieved.')),
         );
       }
     });
@@ -104,126 +95,135 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             bottom: false,
             child: RefreshIndicator(
               color: context.colors.primary,
-            onRefresh: () => ref
-                .read(syncControllerProvider.notifier)
-                .sync(isManualRefresh: true),
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                        child: _HomeGreetingTitle(),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // 2. Week calendar + score
-                      const StaggeredFadeIn(key: ValueKey('calendar_strip'), index: 1, child: WeekCalendarStrip()),
-                      const SizedBox(height: 24),
-
-                      // 3. Workout (primary daily action)
-                      if (plan != null && plan.days.isNotEmpty) ...[
-                        StaggeredFadeIn(key: const ValueKey('workouts_section'), index: 2, child: _WorkoutsSection(plan: plan)),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // 4. Habits
-                      StaggeredFadeIn(
-                        key: const ValueKey('habits_section'),
-                        index: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            KeyedSubtree(
-                              key: _habitsKey,
-                              child: const SectionHeader(
-                                'Habits',
-                                trailing: _HabitsEditButton(),
-                                countLabel: _HabitsCountLabel(),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            const HabitsCard(),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // 5. Meals
-                      StaggeredFadeIn(
-                        key: const ValueKey('meals_section'),
-                        index: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            KeyedSubtree(
-                              key: _mealsKey,
-                              child: const SectionHeader('Meals'),
-                            ),
-                            const SizedBox(height: 12),
-                            const MealsCard(),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // 6. Daily progress metrics
-                      StaggeredFadeIn(
-                        key: const ValueKey('progress_section'),
-                        index: 5,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            KeyedSubtree(
-                              key: _progressKey,
-                              child: const SectionHeader(
-                                'Daily progress',
-                                icon: Icons.show_chart_rounded,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            const DailyProgressGrid(),
-                            const SizedBox(height: 12),
-                            const _WeeklySummaryLink(),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      // 7. Secondary Coach/Insight
-                      if (hasInsight)
-                        const StaggeredFadeIn(
-                          key: ValueKey('insight_card'),
-                          index: 6,
-                          child: DailyInsightCard(),
-                        )
-                      else
-                        const StaggeredFadeIn(
-                          key: ValueKey('coach_notes_card'),
-                          index: 6,
-                          child: CoachNotesCard(),
-                        ),
-
-                      // Explicit bottom clearance for floating nav constraints
-                      const SizedBox(height: 100),
-                    ],
-                  ),
+              onRefresh: () => ref
+                  .read(syncControllerProvider.notifier)
+                  .sync(isManualRefresh: true),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
                 ),
-              ],
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 8,
+                          ),
+                          child: _HomeGreetingTitle(),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // 2. Week calendar + score
+                        const StaggeredFadeIn(
+                          key: ValueKey('calendar_strip'),
+                          index: 1,
+                          child: WeekCalendarStrip(),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // 3. Workout (primary daily action)
+                        if (plan != null && plan.days.isNotEmpty) ...[
+                          StaggeredFadeIn(
+                            key: const ValueKey('workouts_section'),
+                            index: 2,
+                            child: _WorkoutsSection(plan: plan),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
+                        // 4. Habits
+                        StaggeredFadeIn(
+                          key: const ValueKey('habits_section'),
+                          index: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              KeyedSubtree(
+                                key: _habitsKey,
+                                child: const SectionHeader(
+                                  'Habits',
+                                  trailing: _HabitsEditButton(),
+                                  countLabel: _HabitsCountLabel(),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              const HabitsCard(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // 5. Meals
+                        StaggeredFadeIn(
+                          key: const ValueKey('meals_section'),
+                          index: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              KeyedSubtree(
+                                key: _mealsKey,
+                                child: const SectionHeader('Meals'),
+                              ),
+                              const SizedBox(height: 12),
+                              const MealsCard(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // 6. Daily progress metrics
+                        StaggeredFadeIn(
+                          key: const ValueKey('progress_section'),
+                          index: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              KeyedSubtree(
+                                key: _progressKey,
+                                child: const SectionHeader(
+                                  'Daily progress',
+                                  icon: Icons.show_chart_rounded,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              const DailyProgressGrid(),
+                              const SizedBox(height: 12),
+                              const _WeeklySummaryLink(),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // 7. Secondary Coach/Insight
+                        if (hasInsight)
+                          const StaggeredFadeIn(
+                            key: ValueKey('insight_card'),
+                            index: 6,
+                            child: DailyInsightCard(),
+                          )
+                        else
+                          const StaggeredFadeIn(
+                            key: ValueKey('coach_notes_card'),
+                            index: 6,
+                            child: CoachNotesCard(),
+                          ),
+
+                        // Explicit bottom clearance for floating nav constraints
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          ),
         ),
 
-        const Align(
-          alignment: Alignment.topCenter,
-        ),
+        const Align(alignment: Alignment.topCenter),
       ],
     );
   }
@@ -256,9 +256,14 @@ class _StaggeredFadeInState extends State<StaggeredFadeIn> {
     return _played
         ? widget.child
         : widget.child
-            .animate(delay: (widget.index * 60).ms)
-            .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-            .slideY(begin: 0.08, end: 0, duration: 400.ms, curve: Curves.easeOut);
+              .animate(delay: (widget.index * 60).ms)
+              .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+              .slideY(
+                begin: 0.08,
+                end: 0,
+                duration: 400.ms,
+                curve: Curves.easeOut,
+              );
   }
 }
 
@@ -288,7 +293,9 @@ class _HomeGreetingTitle extends ConsumerWidget {
         if (name.isEmpty)
           Text(
             _timeGreeting(),
-            style: context.text.screenTitle.copyWith(color: context.colors.textMedium),
+            style: context.text.screenTitle.copyWith(
+              color: context.colors.textMedium,
+            ),
           )
         else
           Text.rich(
@@ -296,11 +303,15 @@ class _HomeGreetingTitle extends ConsumerWidget {
               children: [
                 TextSpan(
                   text: '${_timeGreeting()}, ',
-                  style: context.text.screenTitle.copyWith(color: context.colors.textMedium),
+                  style: context.text.screenTitle.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
                 TextSpan(
                   text: name,
-                  style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+                  style: context.text.screenTitle.copyWith(
+                    color: context.colors.textDark,
+                  ),
                 ),
               ],
             ),
@@ -323,18 +334,27 @@ class _HomeGreetingTitle extends ConsumerWidget {
                   ref.read(weekOffsetProvider.notifier).state = 0;
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_today_rounded, size: 12, color: context.colors.primary),
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 12,
+                        color: context.colors.primary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Return to Today',
-                        style: context.text.micro.copyWith(color: context.colors.primary),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -378,7 +398,9 @@ class _WeeklySummaryLink extends StatelessWidget {
               Expanded(
                 child: Text(
                   "This week's summary",
-                  style: context.text.body.copyWith(color: context.colors.textDark),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textDark,
+                  ),
                 ),
               ),
               Icon(
@@ -510,9 +532,11 @@ class _WorkoutsSection extends ConsumerWidget {
         if (exercisesLogged == 0) {
           subtitle = '${sec.exercises.length} exercises · Ready to start';
         } else if (exercisesLogged == sec.exercises.length) {
-          subtitle = '${sec.exercises.length}/${sec.exercises.length} logged · View workout';
+          subtitle =
+              '${sec.exercises.length}/${sec.exercises.length} logged · View workout';
         } else {
-          subtitle = 'Continue · $exercisesLogged/${sec.exercises.length} logged · Next: $firstUnlogged';
+          subtitle =
+              'Continue · $exercisesLogged/${sec.exercises.length} logged · Next: $firstUnlogged';
         }
 
         cards.add(
@@ -525,11 +549,11 @@ class _WorkoutsSection extends ConsumerWidget {
             isRest: false,
             heroTag: 'workout-${day.dayId}-section-$i',
             onTap: () {
-               String route = '/home/workout/${day.dayId}?section=$i';
-               if (firstUnloggedIndex != -1 && exercisesLogged > 0) {
-                 route += '&jumpTo=$firstUnloggedIndex';
-               }
-               context.go(route);
+              String route = '/home/workout/${day.dayId}?section=$i';
+              if (firstUnloggedIndex != -1 && exercisesLogged > 0) {
+                route += '&jumpTo=$firstUnloggedIndex';
+              }
+              context.go(route);
             },
           ),
         );
@@ -545,14 +569,18 @@ class _WorkoutsSection extends ConsumerWidget {
           'Workouts',
           countLabel: Text(
             '($completedCount/$total)',
-            style: context.text.body.copyWith(color: context.colors.primary.withValues(alpha: 0.8)),
+            style: context.text.body.copyWith(
+              color: context.colors.primary.withValues(alpha: 0.8),
+            ),
           ),
           trailing: phaseProgress.isPhaseActive
               ? Row(
                   children: [
                     Text(
                       'Week ${phaseProgress.currentWeek} of ${phaseProgress.totalWeeks}',
-                      style: context.text.micro.copyWith(color: context.colors.primary),
+                      style: context.text.micro.copyWith(
+                        color: context.colors.primary,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     SizedBox(
@@ -612,19 +640,25 @@ class _WorkoutsSection extends ConsumerWidget {
                         color: Colors.transparent,
                         child: Text(
                           title,
-                          style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                          style: context.text.cardTitle.copyWith(
+                            color: context.colors.textDark,
+                          ),
                         ),
                       ),
                     )
                   else
                     Text(
                       title,
-                      style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                      style: context.text.cardTitle.copyWith(
+                        color: context.colors.textDark,
+                      ),
                     ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: context.text.micro.copyWith(color: context.colors.textMedium),
+                    style: context.text.micro.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                   ),
                 ],
               ),

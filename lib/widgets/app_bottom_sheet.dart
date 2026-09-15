@@ -63,13 +63,17 @@ class AppSheet extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             title!,
-            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+            style: context.text.screenTitle.copyWith(
+              color: context.colors.textDark,
+            ),
           ),
           if (subtitle != null) ...[
             const SizedBox(height: Spacing.inline),
             Text(
               subtitle!,
-              style: context.text.caption.copyWith(color: context.colors.textMedium),
+              style: context.text.caption.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ],
           const SizedBox(height: 20),
@@ -78,9 +82,7 @@ class AppSheet extends StatelessWidget {
         if (draggable)
           Expanded(child: child)
         else if (scrollable)
-          Flexible(
-            child: SingleChildScrollView(child: child),
-          )
+          Flexible(child: SingleChildScrollView(child: child))
         else
           child,
       ],
@@ -99,16 +101,24 @@ class AppSheet extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: Container(
-              constraints: draggable ? null : BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * maxHeightFactor,
-              ),
+              constraints: draggable
+                  ? null
+                  : BoxConstraints(
+                      maxHeight:
+                          MediaQuery.of(context).size.height * maxHeightFactor,
+                    ),
               decoration: BoxDecoration(
                 color: context.colors.card.withValues(alpha: 0.85),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(Radii.sheet),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(Spacing.sheetPadH, Gap.x16, Spacing.sheetPadH, Spacing.section),
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.sheetPadH,
+                Gap.x16,
+                Spacing.sheetPadH,
+                Spacing.section,
+              ),
               child: content,
             ),
           ),

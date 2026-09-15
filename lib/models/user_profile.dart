@@ -271,13 +271,17 @@ class UserProfile {
       coachName: coachName ?? this.coachName,
       photoPath: clearPhoto ? null : (photoPath ?? this.photoPath),
       height: clearHeight ? null : (height ?? this.height),
-      targetWeight: clearTargetWeight ? null : (targetWeight ?? this.targetWeight),
+      targetWeight: clearTargetWeight
+          ? null
+          : (targetWeight ?? this.targetWeight),
       useKg: useKg ?? this.useKg,
       targetCalories: targetCalories ?? this.targetCalories,
       activeWorkoutPlan: activeWorkoutPlan ?? this.activeWorkoutPlan,
       activeMealPlan: activeMealPlan ?? this.activeMealPlan,
       primaryGoal: primaryGoal ?? this.primaryGoal,
-      currentWeight: clearCurrentWeight ? null : (currentWeight ?? this.currentWeight),
+      currentWeight: clearCurrentWeight
+          ? null
+          : (currentWeight ?? this.currentWeight),
       age: age ?? this.age,
       gender: gender ?? this.gender,
       customHabits: customHabits ?? this.customHabits,

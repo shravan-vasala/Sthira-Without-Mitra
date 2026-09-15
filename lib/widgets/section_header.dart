@@ -57,11 +57,11 @@ class SectionHeader extends StatelessWidget {
             Icon(icon, color: context.colors.primary, size: IconSize.inline),
             const SizedBox(width: Spacing.inline),
           ],
-          Text(
-            title,
-            style: context.text.sectionLabel,
-          ),
-          if (countLabel != null) ...[const SizedBox(width: Spacing.inline), countLabel!],
+          Text(title, style: context.text.sectionLabel),
+          if (countLabel != null) ...[
+            const SizedBox(width: Spacing.inline),
+            countLabel!,
+          ],
           const Spacer(),
           if (t != null) t,
         ],

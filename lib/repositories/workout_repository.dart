@@ -13,7 +13,9 @@ class WorkoutRepository {
   ICloudSyncService? _sync;
 
   void attachSync(ICloudSyncService sync) => _sync = sync;
-  Future<void> detachSync() async { _sync = null; }
+  Future<void> detachSync() async {
+    _sync = null;
+  }
 
   Future<void> init(Isar isar) async {
     _isar = isar;
@@ -70,7 +72,15 @@ class WorkoutRepository {
     await _isar.writeTxn(() async {
       await _isar.workoutPlans.put(plan);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'workout_plans', docId: key, payload: jsonEncode(plan.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'workout_plans',
+            docId: key,
+            payload: jsonEncode(plan.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -80,15 +90,31 @@ class WorkoutRepository {
     final existing = getPlan(oldKey);
     final map = jsonDecode(jsonStr) as Map<String, dynamic>;
     final newPlan = WorkoutPlan.fromJson(map);
-    
+
     await _isar.writeTxn(() async {
       if (existing != null) {
         await _isar.workoutPlans.delete(existing.id);
       }
       await _isar.workoutPlans.put(newPlan);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: '_delete_/workout_plans', docId: oldKey, payload: '{}', timestamp: DateTime.now()));
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'workout_plans', docId: newKey, payload: jsonEncode(newPlan.toJson()), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: '_delete_/workout_plans',
+            docId: oldKey,
+            payload: '{}',
+            timestamp: DateTime.now(),
+          ),
+        );
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'workout_plans',
+            docId: newKey,
+            payload: jsonEncode(newPlan.toJson()),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();
@@ -151,20 +177,26 @@ class WorkoutRepository {
               }
               final reps = ex['reps'];
               final duration = ex['durationSeconds'];
-              if ((reps == null || (reps is List && reps.isEmpty)) && (duration == null || duration <= 0)) {
-                throw FormatException('Exercise "$name" is missing "reps" or valid "durationSeconds"');
+              if ((reps == null || (reps is List && reps.isEmpty)) &&
+                  (duration == null || duration <= 0)) {
+                throw FormatException(
+                  'Exercise "$name" is missing "reps" or valid "durationSeconds"',
+                );
               }
 
               final yt = ex['youtubeUrl']?.toString() ?? '';
               if (yt.isNotEmpty) {
-                if (!yt.contains('youtube.com/watch') && !yt.contains('youtu.be') && !yt.contains('youtube.com/shorts')) {
+                if (!yt.contains('youtube.com/watch') &&
+                    !yt.contains('youtu.be') &&
+                    !yt.contains('youtube.com/shorts')) {
                   throw FormatException(
                     'Invalid YouTube URL format for exercise "$name". Use youtube.com/watch, youtu.be, or shorts',
                   );
                 }
               }
-              
-              if (ex['instanceId'] == null || ex['instanceId'].toString().trim().isEmpty) {
+
+              if (ex['instanceId'] == null ||
+                  ex['instanceId'].toString().trim().isEmpty) {
                 ex['instanceId'] = const Uuid().v4();
               }
             }
@@ -176,7 +208,11 @@ class WorkoutRepository {
     await savePlan(key, plan);
   }
 
-  Future<void> finishWorkout(String date, String dayId, {String status = 'completed'}) async {
+  Future<void> finishWorkout(
+    String date,
+    String dayId, {
+    String status = 'completed',
+  }) async {
     final key = '${date}_$dayId';
     final existingSession = _isar.workoutSessions
         .where()
@@ -200,7 +236,15 @@ class WorkoutRepository {
     await _isar.writeTxn(() async {
       await _isar.workoutSessions.put(newSession);
       if (_isar.name != 'guest') {
-        _isar.syncQueueItems.put(SyncQueueItem(uid: _isar.name, collection: 'workout_sessions', docId: key, payload: jsonEncode(data), timestamp: DateTime.now()));
+        _isar.syncQueueItems.put(
+          SyncQueueItem(
+            uid: _isar.name,
+            collection: 'workout_sessions',
+            docId: key,
+            payload: jsonEncode(data),
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
     _sync?.triggerFlush();

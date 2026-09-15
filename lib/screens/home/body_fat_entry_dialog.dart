@@ -78,7 +78,9 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
             enabled: !_isSaving,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
-            style: context.text.display.copyWith(color: context.colors.textDark),
+            style: context.text.display.copyWith(
+              color: context.colors.textDark,
+            ),
             textAlign: TextAlign.center,
             cursorColor: context.colors.primary,
             decoration: InputDecoration(
@@ -86,9 +88,13 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               fillColor: context.colors.inputFill,
               errorText: _errorText,
               hintText: '0.0',
-              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
+              hintStyle: context.text.display.copyWith(
+                color: context.colors.textLight,
+              ),
               suffixText: '%',
-              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
+              suffixStyle: context.text.cardTitle.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -102,7 +108,9 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                 setState(() => _isSaving = true);
                 Haptics.toggle();
                 try {
-                  await ref.read(dailyLogProvider.notifier).updateBodyFatForDate(_pinnedDateStr, bf);
+                  await ref
+                      .read(dailyLogProvider.notifier)
+                      .updateBodyFatForDate(_pinnedDateStr, bf);
                   if (mounted) Navigator.of(context).pop();
                 } catch (e) {
                   setState(() {
@@ -112,7 +120,10 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                 }
               } else {
                 Haptics.error();
-                setState(() => _errorText = 'Please enter a valid percentage (0.1-100)');
+                setState(
+                  () =>
+                      _errorText = 'Please enter a valid percentage (0.1-100)',
+                );
               }
             },
           ),
@@ -122,7 +133,9 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               child: Center(
                 child: Text(
                   'Prefilled from a previous measurement',
-                  style: context.text.caption.copyWith(color: context.colors.textMedium),
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ),
             ),
@@ -135,7 +148,9 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                     : () async {
                         setState(() => _isSaving = true);
                         try {
-                          await ref.read(dailyLogProvider.notifier).clearBodyFatForDate(_pinnedDateStr);
+                          await ref
+                              .read(dailyLogProvider.notifier)
+                              .clearBodyFatForDate(_pinnedDateStr);
                           if (context.mounted) Navigator.of(context).pop();
                         } catch (_) {
                           setState(() {
@@ -143,9 +158,17 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                             _errorText = 'Failed to clear. Try again.';
                           });
                         }
-                     },
-                style: TextButton.styleFrom(foregroundColor: context.colors.red),
-                child: _isSaving ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Clear'),
+                      },
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.red,
+                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Clear'),
               ),
             ),
           ],

@@ -21,7 +21,7 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   // Build sets (copying weight from last log if needed)
   final lastLog = repo.getLastLog(exercise.name ?? '', beforeDate: dateStr);
   final List<SetLog> sets = [];
-  
+
   if (reps > 0) {
     for (int i = 0; i < exercise.setCount; i++) {
       double weight = exercise.weightKg ?? 0.0;
@@ -49,7 +49,11 @@ Future<PrUpdateResult> saveExerciseAsPlanned({
   await repo.saveLog(newLog);
   ref.read(exerciseLogsUpdateProvider.notifier).state++;
 
-  return await checkAndSavePr(ref: ref, exerciseName: exercise.name ?? '', sets: sets);
+  return await checkAndSavePr(
+    ref: ref,
+    exerciseName: exercise.name ?? '',
+    sets: sets,
+  );
 }
 
 Future<PrUpdateResult> checkAndSavePr({
@@ -72,17 +76,17 @@ Future<PrUpdateResult> checkAndSavePr({
     for (final s in log.sets) {
       final w = s.weight ?? 0.0;
       final r = s.reps ?? 0;
-      
+
       if (w > calcMaxWeight || (w == calcMaxWeight && r > calcMaxWeightReps)) {
         calcMaxWeight = w;
         calcMaxWeightReps = r;
       }
-      
+
       if (r > calcMaxReps || (r == calcMaxReps && w > calcMaxRepsWeight)) {
         calcMaxReps = r;
         calcMaxRepsWeight = w;
       }
-      
+
       logVolume += (w * r);
       final oneRM = w * (1 + (r / 30));
       if (oneRM > calcEstimated1RM) calcEstimated1RM = oneRM;

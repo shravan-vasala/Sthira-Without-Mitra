@@ -32,7 +32,8 @@ class YourPlanPage extends StatefulWidget {
   State<YourPlanPage> createState() => _YourPlanPageState();
 }
 
-class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderStateMixin {
+class _YourPlanPageState extends State<YourPlanPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
   late double _currentCalories;
   TargetMacros? _macroPreview;
@@ -42,7 +43,9 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
     super.initState();
     _currentCalories = widget.initialCalories;
     _staggerController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _staggerController.forward();
     _updateMacroPreview();
     if (!widget.isManuallyEdited) {
@@ -66,7 +69,8 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
   @override
   void didUpdateWidget(YourPlanPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.heightCm != oldWidget.heightCm || widget.weightKg != oldWidget.weightKg) {
+    if (widget.heightCm != oldWidget.heightCm ||
+        widget.weightKg != oldWidget.weightKg) {
       _updateMacroPreview();
       if (!widget.isManuallyEdited) {
         _suggestMacros();
@@ -131,7 +135,7 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
           },
           child: child,
         );
-      }
+      },
     );
   }
 
@@ -175,7 +179,9 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
               children: [
                 Text(
                   '${_currentCalories.round()} kcal',
-                  style: context.text.metric.copyWith(color: context.colors.primary),
+                  style: context.text.metric.copyWith(
+                    color: context.colors.primary,
+                  ),
                 ),
                 if (_macroPreview != null)
                   Padding(
@@ -183,8 +189,12 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     child: ActionChip(
                       label: const Text('Suggest for me'),
                       avatar: const Icon(Icons.auto_awesome_rounded, size: 16),
-                      backgroundColor: context.colors.primary.withValues(alpha: 0.15),
-                      labelStyle: context.text.body.copyWith(color: context.colors.primary),
+                      backgroundColor: context.colors.primary.withValues(
+                        alpha: 0.15,
+                      ),
+                      labelStyle: context.text.body.copyWith(
+                        color: context.colors.primary,
+                      ),
                       side: BorderSide.none,
                       onPressed: _suggestMacros,
                     ),
@@ -220,7 +230,10 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _MacroChip(value: dynamicMacros.proteinG, label: 'P'),
+                            _MacroChip(
+                              value: dynamicMacros.proteinG,
+                              label: 'P',
+                            ),
                             const SizedBox(width: 8),
                             _MacroChip(value: dynamicMacros.carbsG, label: 'C'),
                             const SizedBox(width: 8),
@@ -235,16 +248,18 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                             if (widget.weightKg == null) defaults.add('Weight');
                             defaults.add('Age');
                             defaults.add('Sex');
-                            
+
                             if (defaults.isEmpty) {
                               return const SizedBox();
                             }
                             return Text(
                               'Estimate uses default ${defaults.join(', ')}',
-                              style: context.text.micro.copyWith(color: Colors.white.withValues(alpha: 0.5)),
+                              style: context.text.micro.copyWith(
+                                color: Colors.white.withValues(alpha: 0.5),
+                              ),
                               textAlign: TextAlign.center,
                             );
-                          }
+                          },
                         ),
                       ],
                     ),
@@ -259,7 +274,9 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
               children: [
                 Text(
                   'Select Habits',
-                  style: context.text.cardTitle.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+                  style: context.text.cardTitle.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ...Habit.defaults.map((habit) {
@@ -278,9 +295,11 @@ class _YourPlanPageState extends State<YourPlanPage> with SingleTickerProviderSt
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       'Please select at least one habit to track.',
-                      style: context.text.body.copyWith(color: context.colors.red),
+                      style: context.text.body.copyWith(
+                        color: context.colors.red,
+                      ),
                     ),
-                  )
+                  ),
               ],
             ),
           ),
@@ -327,13 +346,15 @@ class _HabitTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disableAnim = MediaQuery.disableAnimationsOf(context);
-    
+
     Widget tile = AnimatedContainer(
       duration: disableAnim ? Duration.zero : const Duration(milliseconds: 200),
       curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       decoration: BoxDecoration(
-        color: selected ? context.colors.primary.withValues(alpha: 0.15) : context.colors.inputFill,
+        color: selected
+            ? context.colors.primary.withValues(alpha: 0.15)
+            : context.colors.inputFill,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -341,37 +362,49 @@ class _HabitTile extends StatelessWidget {
           Icon(
             HabitIcons.resolve(habit.icon),
             size: 24,
-            color: selected ? context.colors.primary : context.colors.textMedium,
+            color: selected
+                ? context.colors.primary
+                : context.colors.textMedium,
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               habit.name,
-              style: context.text.bodyStrong.copyWith(color: selected ? Colors.white : context.colors.textDark),
+              style: context.text.bodyStrong.copyWith(
+                color: selected ? Colors.white : context.colors.textDark,
+              ),
             ),
           ),
           if (selected)
-            Icon(Icons.check_circle_rounded, color: context.colors.primary, size: 24),
+            Icon(
+              Icons.check_circle_rounded,
+              color: context.colors.primary,
+              size: 24,
+            ),
         ],
       ),
     );
 
     if (!disableAnim) {
-      tile = tile.animate(target: selected ? 1 : 0)
-       .scale(
-         begin: const Offset(1, 1), 
-         end: const Offset(0.97, 0.97), 
-         duration: 100.ms, 
-         curve: Curves.easeOutCubic,
-       )
-       .then()
-       .scale(
-         begin: const Offset(0.97, 0.97), 
-         end: const Offset(1, 1), 
-         duration: 200.ms, 
-         curve: Curves.easeOutBack,
-       )
-       .shimmer(duration: 500.ms, color: Colors.white.withValues(alpha: 0.2));
+      tile = tile
+          .animate(target: selected ? 1 : 0)
+          .scale(
+            begin: const Offset(1, 1),
+            end: const Offset(0.97, 0.97),
+            duration: 100.ms,
+            curve: Curves.easeOutCubic,
+          )
+          .then()
+          .scale(
+            begin: const Offset(0.97, 0.97),
+            end: const Offset(1, 1),
+            duration: 200.ms,
+            curve: Curves.easeOutBack,
+          )
+          .shimmer(
+            duration: 500.ms,
+            color: Colors.white.withValues(alpha: 0.2),
+          );
     }
 
     return GestureDetector(

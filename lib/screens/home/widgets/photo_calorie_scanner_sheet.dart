@@ -122,7 +122,7 @@ class _PhotoCalorieScannerSheetState
     super.initState();
     _initialDate = ref.read(dateStringProvider);
     _initialUid = ref.read(authServiceProvider).uid ?? '';
-    
+
     _describeMode = widget.isManualEntry;
     if (_describeMode) {
       // Stay on describe form until she estimates or adds items herself.
@@ -165,7 +165,9 @@ class _PhotoCalorieScannerSheetState
           carbsG: (m['carbs_g'] as num?)?.toDouble() ?? 0.0,
           fatG: (m['fat_g'] as num?)?.toDouble() ?? 0.0,
         ),
-        baseNutrition: m['baseNutrition'] != null ? FoodNutrition.fromJson(m['baseNutrition']) : null,
+        baseNutrition: m['baseNutrition'] != null
+            ? FoodNutrition.fromJson(m['baseNutrition'])
+            : null,
         isPer100g: m['is_per_100g'] as bool? ?? false,
         servingGrams: (m['serving_grams'] as num?)?.toDouble(),
         consumedGrams: (m['estimated_grams'] as num?)?.toDouble(),
@@ -215,18 +217,22 @@ class _PhotoCalorieScannerSheetState
     return MealItemLog(
       name: src.name,
       portion: src.portion,
-      computedNutrition: src.computedNutrition != null ? FoodNutrition(
-        kcal: src.computedNutrition!.kcal,
-        proteinG: src.computedNutrition!.proteinG,
-        carbsG: src.computedNutrition!.carbsG,
-        fatG: src.computedNutrition!.fatG,
-      ) : null,
-      baseNutrition: src.baseNutrition != null ? FoodNutrition(
-        kcal: src.baseNutrition!.kcal,
-        proteinG: src.baseNutrition!.proteinG,
-        carbsG: src.baseNutrition!.carbsG,
-        fatG: src.baseNutrition!.fatG,
-      ) : null,
+      computedNutrition: src.computedNutrition != null
+          ? FoodNutrition(
+              kcal: src.computedNutrition!.kcal,
+              proteinG: src.computedNutrition!.proteinG,
+              carbsG: src.computedNutrition!.carbsG,
+              fatG: src.computedNutrition!.fatG,
+            )
+          : null,
+      baseNutrition: src.baseNutrition != null
+          ? FoodNutrition(
+              kcal: src.baseNutrition!.kcal,
+              proteinG: src.baseNutrition!.proteinG,
+              carbsG: src.baseNutrition!.carbsG,
+              fatG: src.baseNutrition!.fatG,
+            )
+          : null,
       resolved: src.resolved,
       provenance: src.provenance,
       isPer100g: src.isPer100g,
@@ -346,7 +352,10 @@ class _PhotoCalorieScannerSheetState
       if (result != null) {
         _applyResult(result);
       } else {
-        _showError('AI could not estimate from that description.', currentToken);
+        _showError(
+          'AI could not estimate from that description.',
+          currentToken,
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -437,7 +446,12 @@ class _PhotoCalorieScannerSheetState
             MealItemLog(
               name: 'Unknown Dish',
               portion: '1 serving',
-              computedNutrition: FoodNutrition(kcal: 0, proteinG: 0, carbsG: 0, fatG: 0),
+              computedNutrition: FoodNutrition(
+                kcal: 0,
+                proteinG: 0,
+                carbsG: 0,
+                fatG: 0,
+              ),
             ),
           ];
         }
@@ -447,7 +461,8 @@ class _PhotoCalorieScannerSheetState
         _itemScales[i] = 1.0;
       }
     });
-    if (_items.length == 1 && (_items.first.computedNutrition?.kcal ?? 0) == 0) {
+    if (_items.length == 1 &&
+        (_items.first.computedNutrition?.kcal ?? 0) == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _editItem(0));
     }
   }
@@ -459,7 +474,7 @@ class _PhotoCalorieScannerSheetState
 
     setState(() {
       _items.removeAt(index);
-      
+
       for (int i = index; i < _items.length; i++) {
         _baseItems[i] = _baseItems[i + 1]!;
         _itemScales[i] = _itemScales[i + 1]!;
@@ -481,7 +496,7 @@ class _PhotoCalorieScannerSheetState
           onPressed: () {
             setState(() {
               _items.insert(index, removedItem);
-              
+
               for (int i = _items.length - 1; i > index; i--) {
                 _baseItems[i] = _baseItems[i - 1]!;
                 _itemScales[i] = _itemScales[i - 1]!;
@@ -499,17 +514,32 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _editItem(int? index) {
-    final item = index != null ? _items[index] : MealItemLog(
-      name: 'New Item',
-      portion: '1 serving',
-      computedNutrition: FoodNutrition(kcal: 0, proteinG: 0, carbsG: 0, fatG: 0),
-    );
+    final item = index != null
+        ? _items[index]
+        : MealItemLog(
+            name: 'New Item',
+            portion: '1 serving',
+            computedNutrition: FoodNutrition(
+              kcal: 0,
+              proteinG: 0,
+              carbsG: 0,
+              fatG: 0,
+            ),
+          );
     final nameCtrl = TextEditingController(text: item.name);
     final portionCtrl = TextEditingController(text: item.portion);
-    final calsCtrl = TextEditingController(text: item.computedNutrition?.kcal.round().toString() ?? '0');
-    final pCtrl = TextEditingController(text: item.computedNutrition?.proteinG.toString() ?? '0.0');
-    final cCtrl = TextEditingController(text: item.computedNutrition?.carbsG.toString() ?? '0.0');
-    final fCtrl = TextEditingController(text: item.computedNutrition?.fatG.toString() ?? '0.0');
+    final calsCtrl = TextEditingController(
+      text: item.computedNutrition?.kcal.round().toString() ?? '0',
+    );
+    final pCtrl = TextEditingController(
+      text: item.computedNutrition?.proteinG.toString() ?? '0.0',
+    );
+    final cCtrl = TextEditingController(
+      text: item.computedNutrition?.carbsG.toString() ?? '0.0',
+    );
+    final fCtrl = TextEditingController(
+      text: item.computedNutrition?.fatG.toString() ?? '0.0',
+    );
 
     showDialog(
       context: context,
@@ -528,7 +558,9 @@ class _PhotoCalorieScannerSheetState
                 controller: nameCtrl,
                 decoration: InputDecoration(
                   labelText: 'Name',
-                  labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
+                  labelStyle: context.text.body.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.colors.primary),
                   ),
@@ -539,7 +571,9 @@ class _PhotoCalorieScannerSheetState
                 controller: portionCtrl,
                 decoration: InputDecoration(
                   labelText: 'Portion',
-                  labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
+                  labelStyle: context.text.body.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.colors.primary),
                   ),
@@ -551,7 +585,9 @@ class _PhotoCalorieScannerSheetState
                 style: context.text.body,
                 decoration: InputDecoration(
                   labelText: 'Calories',
-                  labelStyle: context.text.body.copyWith(color: context.colors.textMedium),
+                  labelStyle: context.text.body.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: context.colors.primary),
                   ),
@@ -567,7 +603,9 @@ class _PhotoCalorieScannerSheetState
                       style: context.text.body,
                       decoration: InputDecoration(
                         labelText: 'Pro(g)',
-                        labelStyle: context.text.caption.copyWith(color: context.colors.textMedium),
+                        labelStyle: context.text.caption.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
                           vertical: 8,
@@ -586,7 +624,9 @@ class _PhotoCalorieScannerSheetState
                       style: context.text.body,
                       decoration: InputDecoration(
                         labelText: 'Carb(g)',
-                        labelStyle: context.text.caption.copyWith(color: context.colors.textMedium),
+                        labelStyle: context.text.caption.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
                           vertical: 8,
@@ -605,7 +645,9 @@ class _PhotoCalorieScannerSheetState
                       style: context.text.body,
                       decoration: InputDecoration(
                         labelText: 'Fat(g)',
-                        labelStyle: context.text.caption.copyWith(color: context.colors.textMedium),
+                        labelStyle: context.text.caption.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 0,
                           vertical: 8,
@@ -634,9 +676,18 @@ class _PhotoCalorieScannerSheetState
             onPressed: () {
               setState(() {
                 final cVal = (int.tryParse(calsCtrl.text) ?? 0).clamp(0, 9999);
-                final pVal = (double.tryParse(pCtrl.text) ?? 0.0).clamp(0.0, 999.9);
-                final carbsVal = (double.tryParse(cCtrl.text) ?? 0.0).clamp(0.0, 999.9);
-                final fVal = (double.tryParse(fCtrl.text) ?? 0.0).clamp(0.0, 999.9);
+                final pVal = (double.tryParse(pCtrl.text) ?? 0.0).clamp(
+                  0.0,
+                  999.9,
+                );
+                final carbsVal = (double.tryParse(cCtrl.text) ?? 0.0).clamp(
+                  0.0,
+                  999.9,
+                );
+                final fVal = (double.tryParse(fCtrl.text) ?? 0.0).clamp(
+                  0.0,
+                  999.9,
+                );
 
                 final newItem = MealItemLog(
                   name: nameCtrl.text,
@@ -654,7 +705,7 @@ class _PhotoCalorieScannerSheetState
                   resolved: true,
                 );
                 newItem.provenance = 'yours';
-                
+
                 if (index != null) {
                   _items[index] = newItem;
                   _baseItems[index] = _cloneItem(newItem);
@@ -664,7 +715,7 @@ class _PhotoCalorieScannerSheetState
                   _baseItems[_items.length - 1] = _cloneItem(newItem);
                   _itemScales[_items.length - 1] = 1.0;
                 }
-                
+
                 _recalculateTotals();
               });
               Navigator.pop(ctx);
@@ -695,8 +746,10 @@ class _PhotoCalorieScannerSheetState
       final base = _baseItems[index]!;
       FoodNutrition? newComputed;
       bool newResolved = base.resolved;
-      final newConsumedGrams = base.consumedGrams != null ? (base.consumedGrams! * scale) : null;
-      
+      final newConsumedGrams = base.consumedGrams != null
+          ? (base.consumedGrams! * scale)
+          : null;
+
       if (base.baseNutrition != null && newConsumedGrams != null) {
         try {
           newComputed = FoodNutrition.compute(
@@ -712,9 +765,19 @@ class _PhotoCalorieScannerSheetState
       } else {
         newComputed = FoodNutrition(
           kcal: ((base.computedNutrition?.kcal ?? 0) * scale).roundToDouble(),
-          proteinG: double.parse(((base.computedNutrition?.proteinG ?? 0.0) * scale).toStringAsFixed(1)),
-          carbsG: double.parse(((base.computedNutrition?.carbsG ?? 0.0) * scale).toStringAsFixed(1)),
-          fatG: double.parse(((base.computedNutrition?.fatG ?? 0.0) * scale).toStringAsFixed(1)),
+          proteinG: double.parse(
+            ((base.computedNutrition?.proteinG ?? 0.0) * scale).toStringAsFixed(
+              1,
+            ),
+          ),
+          carbsG: double.parse(
+            ((base.computedNutrition?.carbsG ?? 0.0) * scale).toStringAsFixed(
+              1,
+            ),
+          ),
+          fatG: double.parse(
+            ((base.computedNutrition?.fatG ?? 0.0) * scale).toStringAsFixed(1),
+          ),
         );
       }
 
@@ -765,7 +828,10 @@ class _PhotoCalorieScannerSheetState
         if (!kIsWeb) {
           final mediaRepo = ref.read(mediaRepoProvider);
           for (int i = 0; i < _selectedImages.length; i++) {
-            final relPath = await mediaRepo.saveMediaFile(_selectedImages[i].path, 'meal_photos');
+            final relPath = await mediaRepo.saveMediaFile(
+              _selectedImages[i].path,
+              'meal_photos',
+            );
             finalPhotoPaths.add(relPath);
           }
           fallbackPhotoPath = finalPhotoPaths.first;
@@ -778,59 +844,75 @@ class _PhotoCalorieScannerSheetState
       final slotLog = MealSlotLog(
         name: widget.slotDisplayName,
         photoPath: fallbackPhotoPath ?? widget.appendToLog?.photoPath,
-        photoPaths: [...(widget.appendToLog?.photoPaths ?? []), ...finalPhotoPaths],
+        photoPaths: [
+          ...(widget.appendToLog?.photoPaths ?? []),
+          ...finalPhotoPaths,
+        ],
         items: _items,
-      totalCalories: _totalCalories,
-      totalProtein: _totalProtein,
-      totalCarbs: _totalCarbs,
-      totalFat: _totalFat,
-      confidence: _confidence ?? widget.appendToLog?.confidence,
-    );
-    
-    // Personal Portion Memory: Ensure 'yours' and 'ai_estimate' modifications are written back to the local brain
-    try {
-      final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
-      if (isar != null) {
-        for (var i in _items) {
-          if ((i.provenance == 'yours' || i.provenance == 'ai_estimate') && (i.computedNutrition?.kcal ?? 0) > 0) {
-            final normalized = i.name?.toLowerCase().trim();
-            if (normalized != null && normalized.isNotEmpty) {
-              await isar.writeTxn(() async {
-                if (i.provenance == 'yours') {
-                  // If it already exists, overwrite it so prioritizing her latest manual portion
-                  await isar.userFoodLogs.filter().normalizedNameEqualTo(normalized).deleteAll();
-                } else if (i.provenance == 'ai_estimate') {
-                  // AI estimates only save if missing.
-                  final count = await isar.userFoodLogs.filter().normalizedNameEqualTo(normalized).count();
-                  if (count > 0) return;
-                }
-                await isar.userFoodLogs.put(
-                  UserFoodLog(
-                    normalizedName: normalized,
-                    originalName: i.name!,
-                    baseNutrition: i.computedNutrition ?? FoodNutrition(),
-                    isPer100g: false,
-                    servingGrams: i.consumedGrams,
-                    provenance: i.provenance,
-                    addedAt: DateTime.now(),
-                  )
-                );
-              });
+        totalCalories: _totalCalories,
+        totalProtein: _totalProtein,
+        totalCarbs: _totalCarbs,
+        totalFat: _totalFat,
+        confidence: _confidence ?? widget.appendToLog?.confidence,
+      );
+
+      // Personal Portion Memory: Ensure 'yours' and 'ai_estimate' modifications are written back to the local brain
+      try {
+        final isar = Isar.instanceNames.isNotEmpty
+            ? Isar.getInstance(Isar.instanceNames.first)
+            : null;
+        if (isar != null) {
+          for (var i in _items) {
+            if ((i.provenance == 'yours' || i.provenance == 'ai_estimate') &&
+                (i.computedNutrition?.kcal ?? 0) > 0) {
+              final normalized = i.name?.toLowerCase().trim();
+              if (normalized != null && normalized.isNotEmpty) {
+                await isar.writeTxn(() async {
+                  if (i.provenance == 'yours') {
+                    // If it already exists, overwrite it so prioritizing her latest manual portion
+                    await isar.userFoodLogs
+                        .filter()
+                        .normalizedNameEqualTo(normalized)
+                        .deleteAll();
+                  } else if (i.provenance == 'ai_estimate') {
+                    // AI estimates only save if missing.
+                    final count = await isar.userFoodLogs
+                        .filter()
+                        .normalizedNameEqualTo(normalized)
+                        .count();
+                    if (count > 0) return;
+                  }
+                  await isar.userFoodLogs.put(
+                    UserFoodLog(
+                      normalizedName: normalized,
+                      originalName: i.name!,
+                      baseNutrition: i.computedNutrition ?? FoodNutrition(),
+                      isPer100g: false,
+                      servingGrams: i.consumedGrams,
+                      provenance: i.provenance,
+                      addedAt: DateTime.now(),
+                    ),
+                  );
+                });
+              }
             }
           }
         }
+      } catch (_) {
+        // silently fail portion memory if db throws
       }
-    } catch (_) {
-       // silently fail portion memory if db throws
-    }
 
       final currentDate = ref.read(dateStringProvider);
       final currentUid = ref.read(authServiceProvider).uid ?? '';
-      
+
       if (currentDate != _initialDate || currentUid != _initialUid) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Date or account changed. Cannot save into stale log.')),
+            const SnackBar(
+              content: Text(
+                'Date or account changed. Cannot save into stale log.',
+              ),
+            ),
           );
         }
         setState(() => _isSavingMeal = false);
@@ -914,12 +996,16 @@ class _PhotoCalorieScannerSheetState
                   const SizedBox(height: 16),
                   Text(
                     'Snap what you ate',
-                    style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                    style: context.text.cardTitle.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Best for home-cooked plates',
-                    style: context.text.caption.copyWith(color: context.colors.textMedium),
+                    style: context.text.caption.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -931,16 +1017,31 @@ class _PhotoCalorieScannerSheetState
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
-                              color: context.colors.primary.withValues(alpha: 0.1),
+                              color: context.colors.primary.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: context.colors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
+                              ),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.camera_rounded, size: 18, color: context.colors.primary),
+                                Icon(
+                                  Icons.camera_rounded,
+                                  size: 18,
+                                  color: context.colors.primary,
+                                ),
                                 const SizedBox(width: 8),
-                                Text('Camera', style: context.text.body.copyWith(color: context.colors.primary)),
+                                Text(
+                                  'Camera',
+                                  style: context.text.body.copyWith(
+                                    color: context.colors.primary,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -961,9 +1062,18 @@ class _PhotoCalorieScannerSheetState
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.photo_library_rounded, size: 18, color: context.colors.textDark),
+                                Icon(
+                                  Icons.photo_library_rounded,
+                                  size: 18,
+                                  color: context.colors.textDark,
+                                ),
                                 const SizedBox(width: 8),
-                                Text('Gallery', style: context.text.body.copyWith(color: context.colors.textDark)),
+                                Text(
+                                  'Gallery',
+                                  style: context.text.body.copyWith(
+                                    color: context.colors.textDark,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -975,7 +1085,7 @@ class _PhotoCalorieScannerSheetState
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Minimalist Tile for secondary action
             InkWell(
               onTap: _switchToDescribe,
@@ -984,21 +1094,31 @@ class _PhotoCalorieScannerSheetState
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    Icon(Icons.notes_rounded, color: context.colors.textDark, size: 20),
+                    Icon(
+                      Icons.notes_rounded,
+                      color: context.colors.textDark,
+                      size: 20,
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
                         'Or describe in text',
-                        style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                        style: context.text.bodyStrong.copyWith(
+                          color: context.colors.textDark,
+                        ),
                       ),
                     ),
-                    Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: context.colors.textMedium,
+                      size: 16,
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Minimalist Tile for manual macros
             InkWell(
               onTap: _enterManualItems,
@@ -1007,15 +1127,25 @@ class _PhotoCalorieScannerSheetState
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    Icon(Icons.edit_note_rounded, color: context.colors.textDark, size: 20),
+                    Icon(
+                      Icons.edit_note_rounded,
+                      color: context.colors.textDark,
+                      size: 20,
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
                         'Enter macros yourself',
-                        style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                        style: context.text.bodyStrong.copyWith(
+                          color: context.colors.textDark,
+                        ),
                       ),
                     ),
-                    Icon(Icons.chevron_right_rounded, color: context.colors.textMedium, size: 16),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: context.colors.textMedium,
+                      size: 16,
+                    ),
                   ],
                 ),
               ),
@@ -1034,7 +1164,7 @@ class _PhotoCalorieScannerSheetState
                   _describeMode = false;
                   _isAnalyzing = false;
                   _analysisComplete = true;
-                  _errorMessage = null; 
+                  _errorMessage = null;
                   final item = MealItemLog(
                     name: food.originalName,
                     portion: '1 serving',
@@ -1047,7 +1177,7 @@ class _PhotoCalorieScannerSheetState
                     resolved: true,
                   );
                   item.provenance = 'verified'; // It's from Personal memory
-                  
+
                   if (_items.isEmpty) {
                     if (widget.appendToLog != null) {
                       _items = List.from(widget.appendToLog!.items);
@@ -1102,7 +1232,9 @@ class _PhotoCalorieScannerSheetState
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: context.colors.orange.withValues(alpha: 0.1),
-                border: Border.all(color: context.colors.orange.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: context.colors.orange.withValues(alpha: 0.3),
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -1115,13 +1247,17 @@ class _PhotoCalorieScannerSheetState
                   const SizedBox(height: 8),
                   Text(
                     'AI Service Offline',
-                    style: context.text.bodyStrong.copyWith(color: context.colors.orange),
+                    style: context.text.bodyStrong.copyWith(
+                      color: context.colors.orange,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'The AI system is temporarily overwhelmed or unavailable. Please log your macros manually for now.',
                     textAlign: TextAlign.center,
-                    style: context.text.caption.copyWith(color: context.colors.orange),
+                    style: context.text.caption.copyWith(
+                      color: context.colors.orange,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -1162,7 +1298,9 @@ class _PhotoCalorieScannerSheetState
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: context.text.body.copyWith(color: context.colors.textDark),
+                          style: context.text.body.copyWith(
+                            color: context.colors.textDark,
+                          ),
                         ),
                       ),
                     ],
@@ -1177,14 +1315,18 @@ class _PhotoCalorieScannerSheetState
                       child: ExpansionTile(
                         title: Text(
                           'Details',
-                          style: context.text.caption.copyWith(color: context.colors.red),
+                          style: context.text.caption.copyWith(
+                            color: context.colors.red,
+                          ),
                         ),
                         tilePadding: EdgeInsets.zero,
                         childrenPadding: const EdgeInsets.only(bottom: 8),
                         children: [
                           Text(
                             _techErrorMsg!,
-                            style: context.text.micro.copyWith(color: context.colors.textMedium),
+                            style: context.text.micro.copyWith(
+                              color: context.colors.textMedium,
+                            ),
                           ),
                         ],
                       ),
@@ -1282,7 +1424,9 @@ class _PhotoCalorieScannerSheetState
                                   Text(
                                     'Add angle\n(Max 3)',
                                     textAlign: TextAlign.center,
-                                    style: context.text.micro.copyWith(color: context.colors.primary),
+                                    style: context.text.micro.copyWith(
+                                      color: context.colors.primary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1324,7 +1468,8 @@ class _PhotoCalorieScannerSheetState
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
-                                        color: context.colors.textDark.withValues(alpha: 0.54),
+                                        color: context.colors.textDark
+                                            .withValues(alpha: 0.54),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
@@ -1369,11 +1514,13 @@ class _PhotoCalorieScannerSheetState
                               _elapsedSeconds < 2
                                   ? 'Preparing image...'
                                   : _elapsedSeconds < 6
-                                      ? 'AI is analyzing your meal...'
-                                      : _elapsedSeconds < 12
-                                          ? 'Looking up nutrition details...'
-                                          : 'Still working — big plates take a moment...',
-                              style: context.text.caption.copyWith(color: context.colors.textDark),
+                                  ? 'AI is analyzing your meal...'
+                                  : _elapsedSeconds < 12
+                                  ? 'Looking up nutrition details...'
+                                  : 'Still working — big plates take a moment...',
+                              style: context.text.caption.copyWith(
+                                color: context.colors.textDark,
+                              ),
                               maxLines: 2,
                             ),
                           ),
@@ -1395,7 +1542,9 @@ class _PhotoCalorieScannerSheetState
               const SizedBox(height: 16),
               Text(
                 'Optional hint',
-                style: context.text.body.copyWith(color: context.colors.textDark),
+                style: context.text.body.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               const SizedBox(height: 6),
               TextField(
@@ -1424,12 +1573,15 @@ class _PhotoCalorieScannerSheetState
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: _confidence == 'low' 
-                          ? context.colors.red.withValues(alpha: 0.1) 
-                          : _confidence == 'medium' 
-                            ? context.colors.orange.withValues(alpha: 0.1) 
+                        color: _confidence == 'low'
+                            ? context.colors.red.withValues(alpha: 0.1)
+                            : _confidence == 'medium'
+                            ? context.colors.orange.withValues(alpha: 0.1)
                             : context.colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -1441,21 +1593,23 @@ class _PhotoCalorieScannerSheetState
                             height: 6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: _confidence == 'low' 
-                                ? context.colors.red 
-                                : _confidence == 'medium' 
-                                  ? context.colors.orange 
+                              color: _confidence == 'low'
+                                  ? context.colors.red
+                                  : _confidence == 'medium'
+                                  ? context.colors.orange
                                   : context.colors.green,
                             ),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             '${_confidence![0].toUpperCase()}${_confidence!.substring(1)} confidence',
-                            style: context.text.micro.copyWith(color: _confidence == 'low' 
-                                ? context.colors.red 
-                                : _confidence == 'medium' 
-                                  ? context.colors.orange 
-                                  : context.colors.green),
+                            style: context.text.micro.copyWith(
+                              color: _confidence == 'low'
+                                  ? context.colors.red
+                                  : _confidence == 'medium'
+                                  ? context.colors.orange
+                                  : context.colors.green,
+                            ),
                           ),
                         ],
                       ),
@@ -1467,69 +1621,81 @@ class _PhotoCalorieScannerSheetState
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _items.length,
-                separatorBuilder: (_, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final item = _items[index];
-                  final isResolved = item.resolved;
-                  final scale = _itemScales[index] ?? 1.0;
+              separatorBuilder: (_, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final item = _items[index];
+                final isResolved = item.resolved;
+                final scale = _itemScales[index] ?? 1.0;
 
-                  return Dismissible(
-                    key: ValueKey('${item.name}_$index'),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20),
-                      decoration: BoxDecoration(
-                        color: context.colors.red,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(
-                        Icons.delete_outline_rounded,
-                        color: context.colors.onPrimary,
-                      ),
+                return Dismissible(
+                  key: ValueKey('${item.name}_$index'),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    decoration: BoxDecoration(
+                      color: context.colors.red,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    onDismissed: (_) => _removeItem(index),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: isResolved 
-                             ? Colors.transparent 
-                             : context.colors.orange.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border: isResolved 
-                             ? null 
-                             : Border.all(
-                                color: context.colors.orange.withValues(alpha: 0.4),
-                                width: 1,
-                                style: BorderStyle.solid, // Should ideally be dashed, but sticking to standard border
+                    child: Icon(
+                      Icons.delete_outline_rounded,
+                      color: context.colors.onPrimary,
+                    ),
+                  ),
+                  onDismissed: (_) => _removeItem(index),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isResolved
+                          ? Colors.transparent
+                          : context.colors.orange.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: isResolved
+                          ? null
+                          : Border.all(
+                              color: context.colors.orange.withValues(
+                                alpha: 0.4,
                               ),
-                      ),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          children: [
-                            if (isResolved) ...[
-                              Container(
-                                width: 4,
-                                margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
-                                  color: _getDominantMacroColor(item, context),
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
+                              width: 1,
+                              style: BorderStyle
+                                  .solid, // Should ideally be dashed, but sticking to standard border
+                            ),
+                    ),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          if (isResolved) ...[
+                            Container(
+                              width: 4,
+                              margin: const EdgeInsets.only(right: 12),
+                              decoration: BoxDecoration(
+                                color: _getDominantMacroColor(item, context),
+                                borderRadius: BorderRadius.circular(2),
                               ),
-                            ],
-                            Expanded(
+                            ),
+                          ],
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   item.name ?? 'Unknown',
-                                  style: context.text.bodyStrong.copyWith(color: isResolved ? context.colors.textDark : context.colors.orange),
+                                  style: context.text.bodyStrong.copyWith(
+                                    color: isResolved
+                                        ? context.colors.textDark
+                                        : context.colors.orange,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
-                                  if (isResolved) ...[
+                                if (isResolved) ...[
                                   Text(
                                     '${item.portion} • ${item.computedNutrition?.kcal.round() ?? 0} kcal',
-                                    style: context.text.caption.copyWith(color: context.colors.primary),
+                                    style: context.text.caption.copyWith(
+                                      color: context.colors.primary,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
                                   Wrap(
@@ -1559,17 +1725,37 @@ class _PhotoCalorieScannerSheetState
                                   const SizedBox(height: 12),
                                   Row(
                                     children: [
-                                      _buildPortionChip(context, index, 0.5, '½', scale),
+                                      _buildPortionChip(
+                                        context,
+                                        index,
+                                        0.5,
+                                        '½',
+                                        scale,
+                                      ),
                                       const SizedBox(width: 6),
-                                      _buildPortionChip(context, index, 1.0, '1×', scale),
+                                      _buildPortionChip(
+                                        context,
+                                        index,
+                                        1.0,
+                                        '1×',
+                                        scale,
+                                      ),
                                       const SizedBox(width: 6),
-                                      _buildPortionChip(context, index, 1.5, '1½', scale),
+                                      _buildPortionChip(
+                                        context,
+                                        index,
+                                        1.5,
+                                        '1½',
+                                        scale,
+                                      ),
                                     ],
                                   ),
                                 ] else ...[
                                   Text(
                                     'Couldn\'t estimate — tap edit to fix',
-                                    style: context.text.caption.copyWith(color: context.colors.textMedium),
+                                    style: context.text.caption.copyWith(
+                                      color: context.colors.textMedium,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -1579,7 +1765,9 @@ class _PhotoCalorieScannerSheetState
                             icon: Icon(
                               Icons.edit_rounded,
                               size: 20,
-                              color: isResolved ? context.colors.textMedium : context.colors.orange,
+                              color: isResolved
+                                  ? context.colors.textMedium
+                                  : context.colors.orange,
                             ),
                             onPressed: () => _editItem(index),
                           ),
@@ -1588,8 +1776,8 @@ class _PhotoCalorieScannerSheetState
                     ),
                   ),
                 );
-                },
-              ),
+              },
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -1609,9 +1797,9 @@ class _PhotoCalorieScannerSheetState
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _unresolvedCount > 0 
-                           ? context.colors.orange.withValues(alpha: 0.1) 
-                           : context.colors.primary.withValues(alpha: 0.08),
+                      color: _unresolvedCount > 0
+                          ? context.colors.orange.withValues(alpha: 0.1)
+                          : context.colors.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -1621,19 +1809,28 @@ class _PhotoCalorieScannerSheetState
                           children: [
                             Text(
                               'TOTAL',
-                              style: context.text.micro.copyWith(color: _unresolvedCount > 0 ? context.colors.orange : context.colors.primary),
+                              style: context.text.micro.copyWith(
+                                color: _unresolvedCount > 0
+                                    ? context.colors.orange
+                                    : context.colors.primary,
+                              ),
                             ),
                             if (_unresolvedCount > 0) ...[
                               const Spacer(),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: context.colors.orange,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   '+$_unresolvedCount to review',
-                                  style: context.text.micro.copyWith(color: context.colors.onPrimary),
+                                  style: context.text.micro.copyWith(
+                                    color: context.colors.onPrimary,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1642,7 +1839,9 @@ class _PhotoCalorieScannerSheetState
                         const SizedBox(height: 2),
                         Text(
                           '$_totalCalories kcal',
-                          style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                          style: context.text.cardTitle.copyWith(
+                            color: context.colors.textDark,
+                          ),
                         ),
                       ],
                     ),
@@ -1688,7 +1887,13 @@ class _PhotoCalorieScannerSheetState
     );
   }
 
-  Widget _buildPortionChip(BuildContext context, int itemIndex, double scaleValue, String label, double currentScale) {
+  Widget _buildPortionChip(
+    BuildContext context,
+    int itemIndex,
+    double scaleValue,
+    String label,
+    double currentScale,
+  ) {
     final isSelected = currentScale == scaleValue;
     return GestureDetector(
       onTap: () => _setPortionScale(itemIndex, scaleValue),
@@ -1696,15 +1901,23 @@ class _PhotoCalorieScannerSheetState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? context.colors.primary.withValues(alpha: 0.15) : context.colors.inputFill,
+          color: isSelected
+              ? context.colors.primary.withValues(alpha: 0.15)
+              : context.colors.inputFill,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? context.colors.primary.withValues(alpha: 0.5) : context.colors.border.withValues(alpha: 0.5),
+            color: isSelected
+                ? context.colors.primary.withValues(alpha: 0.5)
+                : context.colors.border.withValues(alpha: 0.5),
           ),
         ),
         child: Text(
           label,
-          style: context.text.micro.copyWith(color: isSelected ? context.colors.primary : context.colors.textMedium),
+          style: context.text.micro.copyWith(
+            color: isSelected
+                ? context.colors.primary
+                : context.colors.textMedium,
+          ),
         ),
       ),
     );
@@ -1714,7 +1927,7 @@ class _PhotoCalorieScannerSheetState
     final pCal = (item.computedNutrition?.proteinG ?? 0) * 4;
     final cCal = (item.computedNutrition?.carbsG ?? 0) * 4;
     final fCal = (item.computedNutrition?.fatG ?? 0) * 9;
-    
+
     if (pCal >= cCal && pCal >= fCal) return context.colors.green;
     if (cCal >= pCal && cCal >= fCal) return context.colors.orange;
     return context.colors.primary;
@@ -1742,7 +1955,9 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
   }
 
   void _setupSubscription() {
-    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+    final isar = Isar.instanceNames.isNotEmpty
+        ? Isar.getInstance(Isar.instanceNames.first)
+        : null;
     if (isar != null) {
       _subscription = isar.userFoodLogs.watchLazy().listen((_) {
         _loadMyFoods();
@@ -1757,11 +1972,17 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
   }
 
   Future<void> _loadMyFoods() async {
-    final isar = Isar.instanceNames.isNotEmpty ? Isar.getInstance(Isar.instanceNames.first) : null;
+    final isar = Isar.instanceNames.isNotEmpty
+        ? Isar.getInstance(Isar.instanceNames.first)
+        : null;
     if (isar == null) return;
-    
+
     // Sort by most recently added/edited for "Recent" effect
-    final foods = await isar.userFoodLogs.where().sortByAddedAtDesc().limit(10).findAll();
+    final foods = await isar.userFoodLogs
+        .where()
+        .sortByAddedAtDesc()
+        .limit(10)
+        .findAll();
     if (mounted) {
       setState(() {
         _myFoods = foods;
@@ -1800,17 +2021,23 @@ class _MyFoodsScrollerState extends State<_MyFoodsScroller> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.history_rounded, size: 14, color: context.colors.primary),
-                      const SizedBox(width: 6),
-                      Text(
-                        food.originalName,
-                        style: context.text.caption.copyWith(color: context.colors.primary),
-                      ),
-                    ],
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.history_rounded,
+                          size: 14,
+                          color: context.colors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          food.originalName,
+                          style: context.text.caption.copyWith(
+                            color: context.colors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 ),
               );
             },

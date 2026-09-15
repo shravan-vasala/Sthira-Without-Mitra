@@ -67,7 +67,7 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     final selectedDateStr = ref.watch(dateStringProvider);
     final selectedDate = DateTime.parse(selectedDateStr);
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
-    
+
     final profile = ref.watch(profileProvider);
     final unit = profile.useKg ? 'kg' : 'lbs';
 
@@ -82,7 +82,9 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             controller: _controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
-            style: context.text.display.copyWith(color: context.colors.textDark),
+            style: context.text.display.copyWith(
+              color: context.colors.textDark,
+            ),
             textAlign: TextAlign.center,
             cursorColor: context.colors.primary,
             onChanged: (_) {
@@ -94,9 +96,13 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               filled: true,
               fillColor: context.colors.inputFill,
               hintText: '0.0',
-              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
+              hintStyle: context.text.display.copyWith(
+                color: context.colors.textLight,
+              ),
               suffixText: unit,
-              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
+              suffixStyle: context.text.cardTitle.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ),
           if (_isPastValue && _pastValueDateStr != null && _errorText == null)
@@ -104,7 +110,9 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
-                style: context.text.body.copyWith(color: context.colors.textMedium),
+                style: context.text.body.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
             ),
           if (_errorText != null)
@@ -120,11 +128,15 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
             label: 'Save Weight',
             onPressed: () async {
               final weightDisplay = double.tryParse(_controller.text);
-              if (weightDisplay != null && weightDisplay > 0 && weightDisplay.isFinite) {
+              if (weightDisplay != null &&
+                  weightDisplay > 0 &&
+                  weightDisplay.isFinite) {
                 final weightKg = convertToKg(profile, weightDisplay);
                 if (weightKg < 500) {
                   Haptics.toggle();
-                  await ref.read(dailyLogProvider.notifier).updateWeightForDate(_pinnedDateStr, weightKg);
+                  await ref
+                      .read(dailyLogProvider.notifier)
+                      .updateWeightForDate(_pinnedDateStr, weightKg);
                   if (mounted) Navigator.of(context).pop();
                 } else {
                   Haptics.error();

@@ -8,7 +8,15 @@ import '../../../theme/layout_insets.dart';
 import '../../../services/progress_aggregation_service.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
-enum ChartTimeFormat { weekly, monthly, oneMonth, threeMonths, sixMonths, twelveMonths, allTime }
+enum ChartTimeFormat {
+  weekly,
+  monthly,
+  oneMonth,
+  threeMonths,
+  sixMonths,
+  twelveMonths,
+  allTime,
+}
 
 class ChartDataPoint {
   final DateTime date;
@@ -73,7 +81,10 @@ class SharedChartCard extends StatelessWidget {
 
   bool get _isCount => metric.isCount;
 
-  bool get _useBars => metric.plotType == ChartPlotType.bar && (timeFormat == ChartTimeFormat.weekly || timeFormat == ChartTimeFormat.oneMonth);
+  bool get _useBars =>
+      metric.plotType == ChartPlotType.bar &&
+      (timeFormat == ChartTimeFormat.weekly ||
+          timeFormat == ChartTimeFormat.oneMonth);
 
   String _unitSuffix() {
     if (metric.showKgLbToggle) return useKg ? ' kg' : ' lb';
@@ -85,7 +96,9 @@ class SharedChartCard extends StatelessWidget {
       children: [
         Text(
           metric.title,
-          style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+          style: context.text.cardTitle.copyWith(
+            color: context.colors.textDark,
+          ),
         ),
         const Spacer(),
         if (metric.showKgLbToggle)
@@ -99,7 +112,9 @@ class SharedChartCard extends StatelessWidget {
               ),
               child: Text(
                 useKg ? 'KG' : 'LB',
-                style: context.text.micro.copyWith(color: context.colors.primary),
+                style: context.text.micro.copyWith(
+                  color: context.colors.primary,
+                ),
               ),
             ),
           ),
@@ -109,11 +124,14 @@ class SharedChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget chartArea = (data.isEmpty && (trendData == null || trendData!.isEmpty))
+    Widget chartArea =
+        (data.isEmpty && (trendData == null || trendData!.isEmpty))
         ? Center(
             child: Text(
               emptyMessage,
-              style: context.text.body.copyWith(color: context.colors.textLight),
+              style: context.text.body.copyWith(
+                color: context.colors.textLight,
+              ),
               textAlign: TextAlign.center,
             ),
           )
@@ -170,13 +188,17 @@ class SharedChartCard extends StatelessWidget {
                           children: [
                             Text(
                               statLabels[index],
-                              style: context.text.micro.copyWith(color: context.colors.textLight),
+                              style: context.text.micro.copyWith(
+                                color: context.colors.textLight,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               statValues[index],
-                              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                              style: context.text.cardTitle.copyWith(
+                                color: context.colors.textDark,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -311,15 +333,22 @@ class SharedChartCard extends StatelessWidget {
       label = DateFormat('E').format(date);
     } else if (timeFormat == ChartTimeFormat.oneMonth) {
       final lastDay = DateTime(date.year, date.month + 1, 0).day;
-      final show = date.day == 1 || date.day == 8 || date.day == 15 || date.day == 22 || date.day == lastDay;
+      final show =
+          date.day == 1 ||
+          date.day == 8 ||
+          date.day == 15 ||
+          date.day == 22 ||
+          date.day == lastDay;
       if (!show) return const SizedBox.shrink();
       label = date.day.toString();
       if (date.day == 1) label = '${DateFormat('MMM').format(date)}\n$label';
-    } else if (timeFormat == ChartTimeFormat.threeMonths || timeFormat == ChartTimeFormat.sixMonths) {
+    } else if (timeFormat == ChartTimeFormat.threeMonths ||
+        timeFormat == ChartTimeFormat.sixMonths) {
       bool show = false;
       if (index == 0) {
         show = true;
-      } else if (data[index].date.month != data[index - 1].date.month) show = true;
+      } else if (data[index].date.month != data[index - 1].date.month)
+        show = true;
       if (!show) return const SizedBox.shrink();
       label = DateFormat('MMM').format(date);
       if (date.month == 1) label = DateFormat('MMM\nyy').format(date);
@@ -384,29 +413,33 @@ class SharedChartCard extends StatelessWidget {
   String _tooltipText(ChartDataPoint point) {
     final date = point.date;
     final value = point.value ?? 0.0;
-    
+
     String dateStr;
     String extra = '';
-    
-    if (point.bucket != null && timeFormat != ChartTimeFormat.weekly && timeFormat != ChartTimeFormat.monthly) {
+
+    if (point.bucket != null &&
+        timeFormat != ChartTimeFormat.weekly &&
+        timeFormat != ChartTimeFormat.monthly) {
       final b = point.bucket!;
-      if (timeFormat == ChartTimeFormat.allTime) { 
+      if (timeFormat == ChartTimeFormat.allTime) {
         dateStr = DateFormat('MMM yyyy').format(b.startDate);
-      } else { 
+      } else {
         final endFmt = b.startDate.month == b.endDate.month ? 'd' : 'MMM d';
-        dateStr = '${DateFormat('MMM d').format(b.startDate)} - ${DateFormat(endFmt).format(b.endDate)}';
+        dateStr =
+            '${DateFormat('MMM d').format(b.startDate)} - ${DateFormat(endFmt).format(b.endDate)}';
       }
-      
+
       if (b.isPartial) dateStr += ' (Partial)';
-      
+
       extra += '\nCoverage: ${b.validDaysCount}/${b.eligibleDaysCount} days';
       if (b.min != null && b.max != null) {
-         extra += '\nMin: ${b.min!.toStringAsFixed(1)} | Max: ${b.max!.toStringAsFixed(1)}';
+        extra +=
+            '\nMin: ${b.min!.toStringAsFixed(1)} | Max: ${b.max!.toStringAsFixed(1)}';
       }
     } else {
       dateStr = DateFormat('EEE, d MMM yyyy').format(date);
     }
-    
+
     final valStr = value.toStringAsFixed(_isCount ? 0 : 1);
     final unit = _unitSuffix();
     if (targetValue != null) {
@@ -489,11 +522,15 @@ class SharedChartCard extends StatelessWidget {
                 Haptics.tap();
               }
               if (event is FlTapUpEvent && onPointTap != null) {
-                final pt = _getPointForOffset(response.spot!.touchedBarGroup.x.toDouble());
+                final pt = _getPointForOffset(
+                  response.spot!.touchedBarGroup.x.toDouble(),
+                );
                 if (pt != null) onPointTap!(pt);
               }
               if (event is FlLongPressEnd && onPointLongPress != null) {
-                final pt = _getPointForOffset(response.spot!.touchedBarGroup.x.toDouble());
+                final pt = _getPointForOffset(
+                  response.spot!.touchedBarGroup.x.toDouble(),
+                );
                 if (pt != null) onPointLongPress!(pt);
               }
             }
@@ -531,7 +568,7 @@ class SharedChartCard extends StatelessWidget {
     if (currentSegment.isNotEmpty) {
       segments.add(currentSegment);
     }
-    
+
     final spots = segments.expand((s) => s).toList();
     final validVals = spots.map((s) => s.y);
     final (minY, maxY) = validVals.isEmpty ? (0.0, 10.0) : _yRange(validVals);
@@ -548,15 +585,13 @@ class SharedChartCard extends StatelessWidget {
       for (final segment in segments)
         LineChartBarData(
           spots: segment,
-          isCurved: timeFormat == ChartTimeFormat.sixMonths 
-              ? false 
+          isCurved: timeFormat == ChartTimeFormat.sixMonths
+              ? false
               : (useCurve && segment.length > 2),
           curveSmoothness: spots.length > 31 ? 0.40 : 0.25,
-          preventCurveOverShooting: true, 
+          preventCurveOverShooting: true,
           color: hasTrend ? primary.withValues(alpha: 0.2) : primary,
-          barWidth: hasTrend 
-              ? 0.0 
-              : 2.0, 
+          barWidth: hasTrend ? 0.0 : 2.0,
           isStrokeCapRound: true,
           dotData: FlDotData(
             show: true,
@@ -569,7 +604,8 @@ class SharedChartCard extends StatelessWidget {
               return showDots || segment.length == 1;
             },
             getDotPainter: (spot, percent, bar, index) {
-              if (timeFormat == ChartTimeFormat.sixMonths && (spot.y == dataMinY || spot.y == dataMaxY)) {
+              if (timeFormat == ChartTimeFormat.sixMonths &&
+                  (spot.y == dataMinY || spot.y == dataMaxY)) {
                 final isMax = spot.y == dataMaxY;
                 return FlDotCirclePainter(
                   radius: 4.5,
@@ -613,7 +649,12 @@ class SharedChartCard extends StatelessWidget {
         ),
       if (hasTrend)
         LineChartBarData(
-          spots: trendData!.asMap().entries.where((e) => e.value.value != null).map((e) => FlSpot(e.key.toDouble(), e.value.value!)).toList(),
+          spots: trendData!
+              .asMap()
+              .entries
+              .where((e) => e.value.value != null)
+              .map((e) => FlSpot(e.key.toDouble(), e.value.value!))
+              .toList(),
           isCurved: true,
           curveSmoothness: 0.3,
           color: primary,
@@ -625,10 +666,7 @@ class SharedChartCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                primary.withValues(alpha: 0.3),
-                Colors.transparent,
-              ],
+              colors: [primary.withValues(alpha: 0.3), Colors.transparent],
             ),
           ),
         ),
@@ -679,7 +717,9 @@ class SharedChartCard extends StatelessWidget {
               return touchedSpots.map((spot) {
                 final isTrend = spot.barIndex == segments.length;
                 final prefix = isTrend ? '7-Day Trend\n' : 'Measured\n';
-                final pt = isTrend ? trendData![spot.x.toInt()] : data[spot.x.toInt()];
+                final pt = isTrend
+                    ? trendData![spot.x.toInt()]
+                    : data[spot.x.toInt()];
                 return LineTooltipItem(
                   '$prefix${_tooltipText(pt)}',
                   context.text.micro.copyWith(color: context.colors.card),

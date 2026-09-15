@@ -56,24 +56,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
+      appBar: AppBar(title: const Text('My Profile')),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
           child: Column(
             children: [
-              // Massive Heading
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24, top: 12),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    'My Profile',
-                    style: context.text.display.copyWith(color: context.colors.textDark),
-                  ),
-                ),
-              ),
-
               // Profile header
               Container(
                 width: double.infinity,
@@ -89,23 +78,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onTap: () async {
                         final result = await showAppBottomSheet<String>(
                           context: context,
-                          builder: (_) => AvatarPickerSheet(currentAvatar: profile.photoPath),
+                          builder: (_) => AvatarPickerSheet(
+                            currentAvatar: profile.photoPath,
+                          ),
                         );
                         if (result != null) {
                           try {
                             if (result == 'DELETE') {
-                              await ref.read(profileProvider.notifier).updateProfile(
+                              await ref
+                                  .read(profileProvider.notifier)
+                                  .updateProfile(
                                     profile.copyWith(clearPhoto: true),
                                   );
                             } else {
-                              await ref.read(profileProvider.notifier).updateProfile(
+                              await ref
+                                  .read(profileProvider.notifier)
+                                  .updateProfile(
                                     profile.copyWith(photoPath: result),
                                   );
                             }
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Failed to update avatar: $e')),
+                                SnackBar(
+                                  content: Text('Failed to update avatar: $e'),
+                                ),
                               );
                             }
                           }
@@ -145,28 +142,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 12),
                     Text(
                       profile.name,
-                      style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+                      style: context.text.screenTitle.copyWith(
+                        color: context.colors.textDark,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Height: ${profile.height?.toStringAsFixed(0) ?? "Not set"} cm',
-                      style: context.text.body.copyWith(color: context.colors.textMedium),
+                      style: context.text.body.copyWith(
+                        color: context.colors.textMedium,
+                      ),
                     ),
                     if (profile.targetWeight != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         'Target: ${(profile.useKg ? profile.targetWeight! : profile.targetWeight! * 2.20462).toStringAsFixed(1)} ${profile.weightUnit}',
-                        style: context.text.body.copyWith(color: context.colors.textMedium),
+                        style: context.text.body.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                     ],
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Journey Stats Strip
               const JourneyStatsStrip(),
-              
+
               const SizedBox(height: 24),
 
               // Cloud Sync
@@ -190,7 +193,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 icon: Icons.auto_awesome_rounded,
                 title: 'AI Settings',
                 subtitle: 'Coach name & Gemini API key',
-                onTap: () => showAppBottomSheet(context: context, builder: (_) => const AiSetupSheet()),
+                onTap: () => showAppBottomSheet(
+                  context: context,
+                  builder: (_) => const AiSetupSheet(),
+                ),
               ),
               _MenuCard(
                 icon: Icons.history_rounded,
@@ -326,7 +332,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     '2:47',
-                    style: context.text.bodyStrong.copyWith(color: const Color(0xFFE29B65).withValues(alpha: 0.8)),
+                    style: context.text.bodyStrong.copyWith(
+                      color: const Color(0xFFE29B65).withValues(alpha: 0.8),
+                    ),
                   ),
                 ),
               ),
@@ -350,7 +358,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Text(
                           'Made with ',
-                          style: context.text.micro.copyWith(color: context.colors.primary),
+                          style: context.text.micro.copyWith(
+                            color: context.colors.primary,
+                          ),
                         ),
                         Icon(
                           Icons.eco_rounded,
@@ -359,7 +369,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         Text(
                           ' for Bodamma',
-                          style: context.text.micro.copyWith(color: context.colors.primary),
+                          style: context.text.micro.copyWith(
+                            color: context.colors.primary,
+                          ),
                         ),
                       ],
                     ),
@@ -367,7 +379,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       const SizedBox(height: 4),
                       Text(
                         _appVersion,
-                        style: context.text.micro.copyWith(color: context.colors.textLight.withValues(alpha: 0.6)),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.textLight.withValues(
+                            alpha: 0.6,
+                          ),
+                        ),
                       ),
                     ],
                   ],
@@ -395,13 +411,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Text(
                 '2:47',
                 textAlign: TextAlign.center,
-                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+                style: context.text.screenTitle.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
                 textAlign: TextAlign.center,
-                style: context.text.body.copyWith(color: context.colors.textMedium),
+                style: context.text.body.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
               const SizedBox(height: 24),
               Padding(
@@ -409,7 +429,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Text(
                   "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
                   textAlign: TextAlign.center,
-                  style: context.text.screenTitle.copyWith(color: context.colors.textDark.withValues(alpha: 0.85)),
+                  style: context.text.screenTitle.copyWith(
+                    color: context.colors.textDark.withValues(alpha: 0.85),
+                  ),
                 ),
               ),
             ],
@@ -441,7 +463,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         backgroundColor: context.colors.card,
         title: Text(
           'Enable Screen Time',
-          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+          style: context.text.screenTitle.copyWith(
+            color: context.colors.textDark,
+          ),
         ),
         content: Text(
           'Sthira can read your daily screen time to help you build better habits. '
@@ -454,7 +478,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Cancel',
-              style: context.text.body.copyWith(color: context.colors.textLight),
+              style: context.text.body.copyWith(
+                color: context.colors.textLight,
+              ),
             ),
           ),
           TextButton(
@@ -500,7 +526,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     subtitle: Text(
                       isKg ? 'Metric system' : 'Imperial system',
-                      style: context.text.caption.copyWith(color: colors.textMedium),
+                      style: context.text.caption.copyWith(
+                        color: colors.textMedium,
+                      ),
                     ),
                     trailing: Icon(
                       selected
@@ -513,7 +541,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         await ref.read(profileProvider.notifier).toggleUnit();
                         if (ctx.mounted) {
                           ScaffoldMessenger.of(ctx).showSnackBar(
-                            const SnackBar(content: Text('Unit preference updated')),
+                            const SnackBar(
+                              content: Text('Unit preference updated'),
+                            ),
                           );
                         }
                       }
@@ -590,7 +620,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     subtitle: Text(
                       subtitle(mode),
-                      style: context.text.caption.copyWith(color: colors.textMedium),
+                      style: context.text.caption.copyWith(
+                        color: colors.textMedium,
+                      ),
                     ),
                     trailing: Icon(
                       selected
@@ -605,7 +637,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             .setThemeMode(mode);
                         if (ctx.mounted) {
                           ScaffoldMessenger.of(ctx).showSnackBar(
-                            const SnackBar(content: Text('Theme preference updated')),
+                            const SnackBar(
+                              content: Text('Theme preference updated'),
+                            ),
                           );
                         }
                       }
@@ -696,7 +730,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (result.isSuccess && result.filePath != null) {
         try {
           // ignore: deprecated_member_use
-          await Share.shareXFiles([XFile(result.filePath!)], text: 'Sthira Data Export');
+          await Share.shareXFiles([
+            XFile(result.filePath!),
+          ], text: 'Sthira Data Export');
         } catch (shareErr) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -731,7 +767,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: name.isNotEmpty
           ? Text(
               name[0].toUpperCase(),
-              style: context.text.display.copyWith(color: context.colors.primary),
+              style: context.text.display.copyWith(
+                color: context.colors.primary,
+              ),
             )
           : Icon(Icons.person, size: 40, color: context.colors.primary),
     );
@@ -752,7 +790,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
     final userEmail = ref.watch(userEmailProvider);
     final syncState = ref.watch(cloudSyncControllerProvider);
     final isSyncing = syncState == CloudSyncState.syncing;
-    final errorMessage = ref.read(cloudSyncControllerProvider.notifier).errorMessage;
+    final errorMessage = ref
+        .read(cloudSyncControllerProvider.notifier)
+        .errorMessage;
 
     final pendingCountAsync = ref.watch(syncPendingCountProvider);
     final pendingCount = pendingCountAsync.value ?? 0;
@@ -772,7 +812,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
               const SizedBox(width: 8),
               Text(
                 'Cloud Sync',
-                style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                style: context.text.cardTitle.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               const Spacer(),
               if (isSignedIn)
@@ -787,7 +829,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   ),
                   child: Text(
                     'Active',
-                    style: context.text.micro.copyWith(color: context.colors.green),
+                    style: context.text.micro.copyWith(
+                      color: context.colors.green,
+                    ),
                   ),
                 ),
             ],
@@ -797,17 +841,25 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
             isSignedIn
                 ? 'Your text data is securely synced as $userEmail. Photos are NOT cloud-synced.'
                 : 'Sign in to sync your text data across devices. Photos are NOT cloud-synced.',
-            style: context.text.caption.copyWith(color: context.colors.textMedium),
+            style: context.text.caption.copyWith(
+              color: context.colors.textMedium,
+            ),
           ),
           if (isSignedIn && pendingCount > 0 && !isSyncing) ...[
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.sync_problem_rounded, color: context.colors.warning, size: 16),
+                Icon(
+                  Icons.sync_problem_rounded,
+                  color: context.colors.warning,
+                  size: 16,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   '$pendingCount pending edits not yet synced',
-                  style: context.text.caption.copyWith(color: context.colors.warning),
+                  style: context.text.caption.copyWith(
+                    color: context.colors.warning,
+                  ),
                 ),
               ],
             ),
@@ -832,7 +884,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                   const SizedBox(height: 8),
                   Text(
                     'Syncing data...',
-                    style: context.text.micro.copyWith(color: context.colors.primary),
+                    style: context.text.micro.copyWith(
+                      color: context.colors.primary,
+                    ),
                   ),
                 ],
               ),
@@ -841,7 +895,9 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => ref.read(cloudSyncControllerProvider.notifier).signInAndSync(),
+                onPressed: () => ref
+                    .read(cloudSyncControllerProvider.notifier)
+                    .signInAndSync(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
@@ -859,17 +915,25 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: pendingCount == 0 ? null : () async {
-                      try {
-                        await ref.read(firestoreSyncServiceProvider).flushNow();
-                      } catch (e) {
-                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sync failed: $e')));
-                      }
-                    },
+                    onPressed: pendingCount == 0
+                        ? null
+                        : () async {
+                            try {
+                              await ref
+                                  .read(firestoreSyncServiceProvider)
+                                  .flushNow();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Sync failed: $e')),
+                              );
+                            }
+                          },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
                       side: BorderSide(
-                        color: pendingCount > 0 ? context.colors.primary : context.colors.primary.withValues(alpha: 0.2),
+                        color: pendingCount > 0
+                            ? context.colors.primary
+                            : context.colors.primary.withValues(alpha: 0.2),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -877,7 +941,11 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                       ),
                     ),
                     icon: const Icon(Icons.sync),
-                    label: Text(pendingCount > 0 ? 'Sync $pendingCount Edits' : 'Up to date'),
+                    label: Text(
+                      pendingCount > 0
+                          ? 'Sync $pendingCount Edits'
+                          : 'Up to date',
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -888,11 +956,37 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           backgroundColor: context.colors.card,
-                          title: Text('Unsynced Changes', style: context.text.body.copyWith(color: context.colors.textDark)),
-                          content: Text('You have $pendingCount unsynced edits. Signing out now means they will stay locally but won\'t be in the cloud. Proceed?', style: context.text.body.copyWith(color: context.colors.textMedium)),
+                          title: Text(
+                            'Unsynced Changes',
+                            style: context.text.body.copyWith(
+                              color: context.colors.textDark,
+                            ),
+                          ),
+                          content: Text(
+                            'You have $pendingCount unsynced edits. Signing out now means they will stay locally but won\'t be in the cloud. Proceed?',
+                            style: context.text.body.copyWith(
+                              color: context.colors.textMedium,
+                            ),
+                          ),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: context.text.body.copyWith(color: context.colors.textLight))),
-                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out Anyway', style: context.text.body.copyWith(color: context.colors.red))),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: Text(
+                                'Cancel',
+                                style: context.text.body.copyWith(
+                                  color: context.colors.textLight,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: Text(
+                                'Sign Out Anyway',
+                                style: context.text.body.copyWith(
+                                  color: context.colors.red,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -902,11 +996,37 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           backgroundColor: context.colors.card,
-                          title: Text('Sign Out', style: context.text.body.copyWith(color: context.colors.textDark)),
-                          content: Text('Are you sure you want to sign out?', style: context.text.body.copyWith(color: context.colors.textMedium)),
+                          title: Text(
+                            'Sign Out',
+                            style: context.text.body.copyWith(
+                              color: context.colors.textDark,
+                            ),
+                          ),
+                          content: Text(
+                            'Are you sure you want to sign out?',
+                            style: context.text.body.copyWith(
+                              color: context.colors.textMedium,
+                            ),
+                          ),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: context.text.body.copyWith(color: context.colors.textLight))),
-                            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Sign Out', style: context.text.body.copyWith(color: context.colors.red))),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: Text(
+                                'Cancel',
+                                style: context.text.body.copyWith(
+                                  color: context.colors.textLight,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: Text(
+                                'Sign Out',
+                                style: context.text.body.copyWith(
+                                  color: context.colors.red,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -980,38 +1100,46 @@ class _MenuCard extends StatelessWidget {
             color: context.colors.card,
             borderRadius: BorderRadius.circular(24),
           ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: context.colors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(14),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: context.colors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: context.colors.primary, size: 22),
               ),
-              child: Icon(icon, color: context.colors.primary, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: context.text.micro.copyWith(color: context.colors.textMedium),
-                  ),
-                ],
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: context.text.bodyStrong.copyWith(
+                        color: context.colors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: context.text.micro.copyWith(
+                        color: context.colors.textMedium,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: context.colors.textLight, size: 16),
-          ],
+              Icon(
+                Icons.chevron_right_rounded,
+                color: context.colors.textLight,
+                size: 16,
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -1055,11 +1183,15 @@ class _SettingsSwitch extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+          style: context.text.bodyStrong.copyWith(
+            color: context.colors.textDark,
+          ),
         ),
         subtitle: Text(
           subtitle,
-          style: context.text.caption.copyWith(color: context.colors.textMedium),
+          style: context.text.caption.copyWith(
+            color: context.colors.textMedium,
+          ),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kCardRadius),
@@ -1164,7 +1296,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
 
       if (croppedFile != null) {
         final mediaRepo = ref.read(mediaRepoProvider);
-        final relativePath = await mediaRepo.saveMediaFile(croppedFile.path, 'profile_photos');
+        final relativePath = await mediaRepo.saveMediaFile(
+          croppedFile.path,
+          'profile_photos',
+        );
 
         setState(() {
           _localPhotoPath = relativePath;
@@ -1174,7 +1309,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
         // Clean up abandoned temp crops
         File(croppedFile.path).delete().ignore();
       }
-      
+
       File(pickedFile.path).delete().ignore();
     } catch (e) {
       if (mounted) {
@@ -1222,7 +1357,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 Navigator.pop(ctx);
                 final selectedAvatar = await showAppBottomSheet<String>(
                   context: context,
-                  builder: (_) => AvatarPickerSheet(currentAvatar: _localPhotoPath ?? ref.read(profileProvider).photoPath),
+                  builder: (_) => AvatarPickerSheet(
+                    currentAvatar:
+                        _localPhotoPath ?? ref.read(profileProvider).photoPath,
+                  ),
                 );
                 if (selectedAvatar == 'DELETE') {
                   setState(() {
@@ -1270,221 +1408,292 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Center(
-              child: GestureDetector(
-                onTap: _showPickerOptions,
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: context.colors.insetSurface,
-                      ),
-                      child: ClipOval(
-                        child: _localPhotoPath != null && !_clearPhoto
-                            ? (_localPhotoPath!.startsWith('assets/')
-                                  ? Image.asset(
-                                      _localPhotoPath!,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.file(
-                                      File(ref.read(mediaRepoProvider).getAbsolutePath(_localPhotoPath!)),
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                    ))
-                            : Center(
-                                child: nameController.text.isNotEmpty
-                                    ? Text(
-                                        nameController.text[0].toUpperCase(),
-                                        style: context.text.display.copyWith(color: context.colors.primary),
-                                      )
-                                    : Icon(
-                                        Icons.person,
-                                        size: 40,
+          Center(
+            child: GestureDetector(
+              onTap: _showPickerOptions,
+              child: Stack(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.colors.insetSurface,
+                    ),
+                    child: ClipOval(
+                      child: _localPhotoPath != null && !_clearPhoto
+                          ? (_localPhotoPath!.startsWith('assets/')
+                                ? Image.asset(
+                                    _localPhotoPath!,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    File(
+                                      ref
+                                          .read(mediaRepoProvider)
+                                          .getAbsolutePath(_localPhotoPath!),
+                                    ),
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  ))
+                          : Center(
+                              child: nameController.text.isNotEmpty
+                                  ? Text(
+                                      nameController.text[0].toUpperCase(),
+                                      style: context.text.display.copyWith(
                                         color: context.colors.primary,
                                       ),
-                              ),
+                                    )
+                                  : Icon(
+                                      Icons.person,
+                                      size: 40,
+                                      color: context.colors.primary,
+                                    ),
+                            ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: context.colors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: context.colors.onPrimary,
+                        size: 14,
                       ),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: context.colors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.camera_alt,
-                          color: context.colors.onPrimary,
-                          size: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
-            _ProfileTextField(
-              label: 'Name',
-              controller: nameController,
-              prefixIcon: Icons.person_rounded,
-              onChanged: (v) => setState(() {}),
+          ),
+          const SizedBox(height: 24),
+          _ProfileTextField(
+            label: 'Name',
+            controller: nameController,
+            prefixIcon: Icons.person_rounded,
+            onChanged: (v) => setState(() {}),
+          ),
+          const SizedBox(height: 16),
+          _ProfileTextField(
+            label: 'Coach name',
+            controller: coachNameController,
+            prefixIcon: Icons.sports_rounded,
+          ),
+          const SizedBox(height: 16),
+          _ProfileTextField(
+            label: 'Height (cm)',
+            controller: heightController,
+            prefixIcon: Icons.height_rounded,
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
+          _ProfileTextField(
+            label: profile.useKg ? 'Target Weight (kg)' : 'Target Weight (lb)',
+            controller: targetController,
+            prefixIcon: Icons.flag_rounded,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          const SizedBox(height: 16),
+          _ProfileTextField(
+            label: 'Target Daily Calories',
+            controller: caloriesController,
+            prefixIcon: Icons.restaurant_rounded,
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Daily macros (g)',
+            style: context.text.caption.copyWith(
+              color: context.colors.textMedium,
             ),
-            const SizedBox(height: 16),
-            _ProfileTextField(
-              label: 'Coach name',
-              controller: coachNameController,
-              prefixIcon: Icons.sports_rounded,
-            ),
-            const SizedBox(height: 16),
-            _ProfileTextField(
-              label: 'Height (cm)',
-              controller: heightController,
-              prefixIcon: Icons.height_rounded,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            _ProfileTextField(
-              label: profile.useKg ? 'Target Weight (kg)' : 'Target Weight (lb)',
-              controller: targetController,
-              prefixIcon: Icons.flag_rounded,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _ProfileTextField(
+                  label: 'Protein',
+                  controller: proteinController,
+                  prefixIcon: Icons.fitness_center_rounded,
+                  keyboardType: TextInputType.number,
+                  compact: true,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            _ProfileTextField(
-              label: 'Target Daily Calories',
-              controller: caloriesController,
-              prefixIcon: Icons.restaurant_rounded,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Daily macros (g)',
-              style: context.text.caption.copyWith(color: context.colors.textMedium),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _ProfileTextField(
-                    label: 'Protein',
-                    controller: proteinController,
-                    prefixIcon: Icons.fitness_center_rounded,
-                    keyboardType: TextInputType.number,
-                    compact: true,
-                  ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProfileTextField(
+                  label: 'Carbs',
+                  controller: carbsController,
+                  prefixIcon: Icons.breakfast_dining_rounded,
+                  keyboardType: TextInputType.number,
+                  compact: true,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _ProfileTextField(
-                    label: 'Carbs',
-                    controller: carbsController,
-                    prefixIcon: Icons.breakfast_dining_rounded,
-                    keyboardType: TextInputType.number,
-                    compact: true,
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ProfileTextField(
+                  label: 'Fat',
+                  controller: fatController,
+                  prefixIcon: Icons.water_drop_rounded,
+                  keyboardType: TextInputType.number,
+                  compact: true,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _ProfileTextField(
-                    label: 'Fat',
-                    controller: fatController,
-                    prefixIcon: Icons.water_drop_rounded,
-                    keyboardType: TextInputType.number,
-                    compact: true,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            PrimaryButton(
-              label: _isSaving ? 'Saving...' : 'Save',
-              onPressed: _isSaving ? () {} : () async {
-                setState(() => _isSaving = true);
-                try {
-                  final heightText = heightController.text.trim();
-                final targetText = targetController.text.trim();
-                final calText = caloriesController.text.trim();
-                final proText = proteinController.text.trim();
-                final carText = carbsController.text.trim();
-                final fatText = fatController.text.trim();
+              ),
+            ],
+          ),
+          const SizedBox(height: 28),
+          PrimaryButton(
+            label: _isSaving ? 'Saving...' : 'Save',
+            onPressed: _isSaving
+                ? () {}
+                : () async {
+                    setState(() => _isSaving = true);
+                    try {
+                      final heightText = heightController.text.trim();
+                      final targetText = targetController.text.trim();
+                      final calText = caloriesController.text.trim();
+                      final proText = proteinController.text.trim();
+                      final carText = carbsController.text.trim();
+                      final fatText = fatController.text.trim();
 
-                final parsedHeight = heightText.isEmpty ? null : double.tryParse(heightText);
-                final parsedTarget = targetText.isEmpty ? null : double.tryParse(targetText);
-                final parsedCal = calText.isEmpty ? null : int.tryParse(calText);
-                final parsedPro = proText.isEmpty ? null : int.tryParse(proText);
-                final parsedCar = carText.isEmpty ? null : int.tryParse(carText);
-                final parsedFat = fatText.isEmpty ? null : int.tryParse(fatText);
+                      final parsedHeight = heightText.isEmpty
+                          ? null
+                          : double.tryParse(heightText);
+                      final parsedTarget = targetText.isEmpty
+                          ? null
+                          : double.tryParse(targetText);
+                      final parsedCal = calText.isEmpty
+                          ? null
+                          : int.tryParse(calText);
+                      final parsedPro = proText.isEmpty
+                          ? null
+                          : int.tryParse(proText);
+                      final parsedCar = carText.isEmpty
+                          ? null
+                          : int.tryParse(carText);
+                      final parsedFat = fatText.isEmpty
+                          ? null
+                          : int.tryParse(fatText);
 
-                if (heightText.isNotEmpty && (parsedHeight == null || parsedHeight <= 0 || parsedHeight > 300)) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid height (1-300)')));
-                  return;
-                }
-                if (targetText.isNotEmpty && (parsedTarget == null || parsedTarget <= 0 || parsedTarget > 500)) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid target weight (1-500)')));
-                  return;
-                }
-                if (parsedCal == null || parsedCal <= 0 || parsedCal > 15000) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid daily calorie target (1-15000)')));
-                  return;
-                }
-                if (parsedPro == null || parsedPro < 0 || parsedPro > 1000 || parsedCar == null || parsedCar < 0 || parsedCar > 1000 || parsedFat == null || parsedFat < 0 || parsedFat > 1000) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter valid macro targets (0-1000)')));
-                  return;
-                }
+                      if (heightText.isNotEmpty &&
+                          (parsedHeight == null ||
+                              parsedHeight <= 0 ||
+                              parsedHeight > 300)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter a valid height (1-300)',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (targetText.isNotEmpty &&
+                          (parsedTarget == null ||
+                              parsedTarget <= 0 ||
+                              parsedTarget > 500)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter a valid target weight (1-500)',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (parsedCal == null ||
+                          parsedCal <= 0 ||
+                          parsedCal > 15000) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter a valid daily calorie target (1-15000)',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      if (parsedPro == null ||
+                          parsedPro < 0 ||
+                          parsedPro > 1000 ||
+                          parsedCar == null ||
+                          parsedCar < 0 ||
+                          parsedCar > 1000 ||
+                          parsedFat == null ||
+                          parsedFat < 0 ||
+                          parsedFat > 1000) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter valid macro targets (0-1000)',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
 
-                double? finalTargetKg = parsedTarget;
-                if (finalTargetKg != null && !profile.useKg) {
-                  finalTargetKg = finalTargetKg / 2.20462;
-                }
+                      double? finalTargetKg = parsedTarget;
+                      if (finalTargetKg != null && !profile.useKg) {
+                        finalTargetKg = finalTargetKg / 2.20462;
+                      }
 
-                final updated = profile.copyWith(
-                  name: nameController.text,
-                  coachName: coachNameController.text.trim(),
-                  height: parsedHeight,
-                  clearHeight: heightText.isEmpty,
-                  targetWeight: finalTargetKg,
-                  clearTargetWeight: targetText.isEmpty,
-                  targetCalories: parsedCal,
-                  targetProteinG: parsedPro,
-                  targetCarbsG: parsedCar,
-                  targetFatG: parsedFat,
-                  photoPath: _localPhotoPath,
-                  clearPhoto: _clearPhoto,
-                );
+                      final updated = profile.copyWith(
+                        name: nameController.text,
+                        coachName: coachNameController.text.trim(),
+                        height: parsedHeight,
+                        clearHeight: heightText.isEmpty,
+                        targetWeight: finalTargetKg,
+                        clearTargetWeight: targetText.isEmpty,
+                        targetCalories: parsedCal,
+                        targetProteinG: parsedPro,
+                        targetCarbsG: parsedCar,
+                        targetFatG: parsedFat,
+                        photoPath: _localPhotoPath,
+                        clearPhoto: _clearPhoto,
+                      );
 
-                await ref.read(profileProvider.notifier).updateProfile(updated);
+                      await ref
+                          .read(profileProvider.notifier)
+                          .updateProfile(updated);
 
-                if (_clearPhoto || (_localPhotoPath != profile.photoPath)) {
-                  if (profile.photoPath != null && !profile.photoPath!.startsWith('assets/')) {
-                    final oldFile = File(ref.read(mediaRepoProvider).getAbsolutePath(profile.photoPath!));
-                    if (oldFile.existsSync()) oldFile.deleteSync();
-                  }
-                }
+                      if (_clearPhoto ||
+                          (_localPhotoPath != profile.photoPath)) {
+                        if (profile.photoPath != null &&
+                            !profile.photoPath!.startsWith('assets/')) {
+                          final oldFile = File(
+                            ref
+                                .read(mediaRepoProvider)
+                                .getAbsolutePath(profile.photoPath!),
+                          );
+                          if (oldFile.existsSync()) oldFile.deleteSync();
+                        }
+                      }
 
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              } catch (e) {
-                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-              } finally {
-                if (mounted) setState(() => _isSaving = false);
-              }
-            },
-            ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
-          ],
-        ),
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    } catch (e) {
+                      if (mounted)
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    } finally {
+                      if (mounted) setState(() => _isSaving = false);
+                    }
+                  },
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+        ],
+      ),
     );
   }
 }
@@ -1513,14 +1722,18 @@ class _ProfileTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: context.text.caption.copyWith(color: context.colors.textMedium),
+          style: context.text.caption.copyWith(
+            color: context.colors.textMedium,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           onChanged: onChanged,
-          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+          style: context.text.bodyStrong.copyWith(
+            color: context.colors.textDark,
+          ),
           decoration: InputDecoration(
             filled: true,
             fillColor: context.colors.inputFill,
@@ -1569,7 +1782,11 @@ class _AiActivitySheet extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Logs are kept locally on your device for diagnostic purposes (up to 20 recent requests).',
-                style: context.text.caption.copyWith(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey),
+                style: context.text.caption.copyWith(
+                  color:
+                      Theme.of(context).textTheme.bodySmall?.color ??
+                      Colors.grey,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1588,7 +1805,10 @@ class _AiActivitySheet extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
               'Logs are kept locally on your device for diagnostic purposes (up to 20 recent requests).',
-              style: context.text.caption.copyWith(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey),
+              style: context.text.caption.copyWith(
+                color:
+                    Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+              ),
             ),
           ),
           ListView.separated(
@@ -1601,7 +1821,9 @@ class _AiActivitySheet extends StatelessWidget {
               return ListTile(
                 title: Text(
                   '${log.purpose} • ${log.model}',
-                  style: context.text.body.copyWith(color: Theme.of(context).primaryColor),
+                  style: context.text.body.copyWith(
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
                 subtitle: Text(
                   'Outcome: ${log.outcome}\n${log.timestamp.toString().substring(11, 16)}',
@@ -1703,43 +1925,42 @@ class _DiagnosticsTestSheetState extends State<_DiagnosticsTestSheet> {
             ),
           if (_isTesting) const LinearProgressIndicator(),
           const SizedBox(height: 16),
-          ..._results.entries
-              .map(
-                (e) => Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  color: Colors.transparent,
-                  child: Row(
-                    children: [
-                      Text(
-                        e.value['status'],
-                        style: context.text.cardTitle.copyWith(color: e.value['status'] == '✓'
-                              ? Colors.green
-                              : Colors.red),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              e.key,
-                              style: context.text.body,
-                            ),
-                            if (e.value['error'] != null)
-                              Text(
-                                e.value['error'],
-                                style: context.text.micro.copyWith(color: Colors.red),
-                              ),
-                          ],
-                        ),
-                      ),
-                      Text('${e.value['latency']} ms'),
-                    ],
+          ..._results.entries.map(
+            (e) => Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              color: Colors.transparent,
+              child: Row(
+                children: [
+                  Text(
+                    e.value['status'],
+                    style: context.text.cardTitle.copyWith(
+                      color: e.value['status'] == '✓'
+                          ? Colors.green
+                          : Colors.red,
+                    ),
                   ),
-                ),
-              )
-              ,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(e.key, style: context.text.body),
+                        if (e.value['error'] != null)
+                          Text(
+                            e.value['error'],
+                            style: context.text.micro.copyWith(
+                              color: Colors.red,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Text('${e.value['latency']} ms'),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1768,7 +1989,9 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
               children: [
                 Text(
                   '${logs.length} logs in ring buffer',
-                  style: context.text.body.copyWith(color: context.colors.textMedium),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
                 Row(
                   children: [
@@ -1776,10 +1999,14 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                       onPressed: () async {
                         final sb = StringBuffer();
                         sb.writeln('=== Sthira Diagnostic Logs ===');
-                        sb.writeln('Generated: ${DateTime.now().toIso8601String()}');
+                        sb.writeln(
+                          'Generated: ${DateTime.now().toIso8601String()}',
+                        );
                         sb.writeln('==============================\n');
                         for (final log in logs) {
-                          sb.writeln('[${log.level}] ${log.timestamp.toIso8601String()}');
+                          sb.writeln(
+                            '[${log.level}] ${log.timestamp.toIso8601String()}',
+                          );
                           sb.writeln(log.message);
                           if (log.error != null) {
                             sb.writeln('Error: ${log.error}');
@@ -1789,7 +2016,10 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                           }
                           sb.writeln('---');
                         }
-                        await Share.share(sb.toString(), subject: 'Sthira Diagnostics');
+                        await Share.share(
+                          sb.toString(),
+                          subject: 'Sthira Diagnostics',
+                        );
                       },
                       icon: const Icon(Icons.ios_share_rounded),
                       tooltip: 'Export Logs',
@@ -1804,14 +2034,18 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
                               'Clear Diagnostics',
                               style: context.text.body,
                             ),
-                            content: const Text('Are you sure? This will only clear your local diagnostic logs. It will not erase your actual app data or tracked habits.'),
+                            content: const Text(
+                              'Are you sure? This will only clear your local diagnostic logs. It will not erase your actual app data or tracked habits.',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
                                 child: const Text('Cancel'),
                               ),
                               TextButton(
-                                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.red,
+                                ),
                                 onPressed: () {
                                   logger.clear();
                                   Navigator.pop(context); // close dialog
@@ -1887,7 +2121,9 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
               Expanded(
                 child: Text(
                   log.timestamp.toString().substring(0, 19),
-                  style: context.text.micro.copyWith(color: context.colors.textLight),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textLight,
+                  ),
                 ),
               ),
             ],
@@ -1895,7 +2131,9 @@ class _SystemDiagnosticsSheet extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             log.message,
-            style: context.text.caption.copyWith(color: context.colors.textDark),
+            style: context.text.caption.copyWith(
+              color: context.colors.textDark,
+            ),
           ),
           if (log.error != null) ...[
             const SizedBox(height: 4),

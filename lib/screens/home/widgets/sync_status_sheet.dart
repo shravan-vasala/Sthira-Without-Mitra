@@ -92,10 +92,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
           if (pendingCount > 0)
             Container(
               margin: const EdgeInsets.only(bottom: 24),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: context.colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
@@ -111,7 +108,9 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                   Expanded(
                     child: Text(
                       '$pendingCount items pending cloud sync',
-                      style: context.text.body.copyWith(color: context.colors.orange),
+                      style: context.text.body.copyWith(
+                        color: context.colors.orange,
+                      ),
                     ),
                   ),
                 ],
@@ -131,7 +130,9 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                 const SizedBox(height: 8),
                 Text(
                   'Steps Today',
-                  style: context.text.bodyStrong.copyWith(color: context.colors.textMedium),
+                  style: context.text.bodyStrong.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ],
             ),
@@ -141,23 +142,39 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
           // Diagnostics
           Text(
             'Diagnostics',
-            style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+            style: context.text.cardTitle.copyWith(
+              color: context.colors.textDark,
+            ),
           ),
           const SizedBox(height: 16),
-          
+
           if (_checking)
-             const Center(
-               child: Padding(
-                 padding: EdgeInsets.all(24),
-                 child: CircularProgressIndicator(),
-               ),
-             )
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            )
           else ...[
             _DiagnosticRow(label: 'Source', value: sourceText),
-            _DiagnosticRow(label: 'Permissions', value: _isAvailable ? (_authorized ? 'Granted' : 'Missing/Denied') : 'Unavailable'),
-            _DiagnosticRow(label: 'Last Successful Read', value: _formatTime(_lastSuccess)),
-            _DiagnosticRow(label: 'Last Attempted Read', value: _formatTime(_lastAttempt)),
-            _DiagnosticRow(label: '90-Day Backfill', value: _backfillDone ? 'Complete' : 'Pending'),
+            _DiagnosticRow(
+              label: 'Permissions',
+              value: _isAvailable
+                  ? (_authorized ? 'Granted' : 'Missing/Denied')
+                  : 'Unavailable',
+            ),
+            _DiagnosticRow(
+              label: 'Last Successful Read',
+              value: _formatTime(_lastSuccess),
+            ),
+            _DiagnosticRow(
+              label: 'Last Attempted Read',
+              value: _formatTime(_lastAttempt),
+            ),
+            _DiagnosticRow(
+              label: '90-Day Backfill',
+              value: _backfillDone ? 'Complete' : 'Pending',
+            ),
           ],
 
           if (_errorMessage != null) ...[
@@ -171,7 +188,8 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                       final hcService = ref.read(healthConnectServiceProvider);
                       if (_errorAction == 'Install Health Connect') {
                         setState(
-                          () => _errorMessage = 'Please install Health Connect from the Play Store.',
+                          () => _errorMessage =
+                              'Please install Health Connect from the Play Store.',
                         );
                       } else if (_errorAction == 'Grant Permission') {
                         await hcService.requestPermission();
@@ -182,67 +200,70 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
                   : null,
             ),
           ],
-          
+
           const SizedBox(height: 32),
           PrimaryButton(
             label: 'Refresh Now',
             isLoading: _checking,
             onPressed: () async {
-                setState(() {
-                  _errorMessage = null;
-                  _checking = true;
-                });
-                
-                final hcService = ref.read(healthConnectServiceProvider);
-                final prefs = ref.read(sharedPreferencesProvider);
-                final selectedDate = ref.read(dateStringProvider);
+              setState(() {
+                _errorMessage = null;
+                _checking = true;
+              });
 
-                try {
-                  final isAvail = await hcService.isAvailable();
-                  if (!isAvail) {
-                    setState(() {
-                      _errorMessage = 'Health Connect is not available on this device.';
-                      _errorAction = 'Install Health Connect';
-                      _checking = false;
-                    });
-                    return;
-                  }
-                  
-                  await prefs.setString(
-                    'last_hc_sync_attempt',
-                    DateTime.now().toIso8601String(),
-                  );
+              final hcService = ref.read(healthConnectServiceProvider);
+              final prefs = ref.read(sharedPreferencesProvider);
+              final selectedDate = ref.read(dateStringProvider);
 
-                  var canSync = await hcService.isAuthorized();
-                  if (!canSync) {
-                    canSync = await hcService.canReadSteps();
-                  }
-
-                  if (!canSync) {
-                    setState(() {
-                      _errorMessage = 'Missing permissions to read steps.';
-                      _errorAction = 'Grant Permission';
-                      _checking = false;
-                    });
-                    await _loadStatus();
-                    return;
-                  }
-
-                  await ref.read(syncControllerProvider.notifier).sync(
-                    isManualRefresh: true,
-                    explicitTargetDate: selectedDate,
-                  );
-                  
-                  if (context.mounted) Navigator.of(context).pop();
-                } catch (e) {
+              try {
+                final isAvail = await hcService.isAvailable();
+                if (!isAvail) {
                   setState(() {
-                    _errorMessage = 'An unexpected error occurred during sync.';
-                    _errorAction = null;
+                    _errorMessage =
+                        'Health Connect is not available on this device.';
+                    _errorAction = 'Install Health Connect';
+                    _checking = false;
+                  });
+                  return;
+                }
+
+                await prefs.setString(
+                  'last_hc_sync_attempt',
+                  DateTime.now().toIso8601String(),
+                );
+
+                var canSync = await hcService.isAuthorized();
+                if (!canSync) {
+                  canSync = await hcService.canReadSteps();
+                }
+
+                if (!canSync) {
+                  setState(() {
+                    _errorMessage = 'Missing permissions to read steps.';
+                    _errorAction = 'Grant Permission';
                     _checking = false;
                   });
                   await _loadStatus();
+                  return;
                 }
-              },
+
+                await ref
+                    .read(syncControllerProvider.notifier)
+                    .sync(
+                      isManualRefresh: true,
+                      explicitTargetDate: selectedDate,
+                    );
+
+                if (context.mounted) Navigator.of(context).pop();
+              } catch (e) {
+                setState(() {
+                  _errorMessage = 'An unexpected error occurred during sync.';
+                  _errorAction = null;
+                  _checking = false;
+                });
+                await _loadStatus();
+              }
+            },
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -263,7 +284,9 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
               ),
               child: Text(
                 'Log Manually Instead',
-                style: context.text.bodyStrong.copyWith(color: context.colors.primary),
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.primary,
+                ),
               ),
             ),
           ),
@@ -290,7 +313,9 @@ class _DiagnosticRow extends StatelessWidget {
             flex: 2,
             child: Text(
               label,
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.body.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ),
           const SizedBox(width: 8),

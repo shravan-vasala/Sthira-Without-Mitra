@@ -53,18 +53,18 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
         final savedStart = DateTime.parse(savedStartStr);
         final elapsed = DateTime.now().difference(savedStart).inSeconds;
         final int restoredRemaining = savedRem - elapsed;
-        
+
         if (restoredRemaining <= 0) {
-           _remainingSeconds = 0;
-           _completeTimer();
+          _remainingSeconds = 0;
+          _completeTimer();
         } else {
-           setState(() {
-             _remainingSeconds = restoredRemaining;
-             _isRunning = true;
-             _lastStartTime = savedStart;
-             _secondsPassedThisSession = elapsed;
-             _resumeInternalTimer();
-           });
+          setState(() {
+            _remainingSeconds = restoredRemaining;
+            _isRunning = true;
+            _lastStartTime = savedStart;
+            _secondsPassedThisSession = elapsed;
+            _resumeInternalTimer();
+          });
         }
       }
     });
@@ -101,15 +101,15 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (!mounted) return;
       if (_lastStartTime == null) return;
-      
+
       final now = DateTime.now();
       final elapsed = now.difference(_lastStartTime!).inSeconds;
-      
+
       if (elapsed > _secondsPassedThisSession) {
         setState(() {
           final diff = elapsed - _secondsPassedThisSession;
           _secondsPassedThisSession = elapsed;
-          
+
           if (_remainingSeconds - diff > 0) {
             _remainingSeconds -= diff;
           } else {
@@ -154,7 +154,9 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     // but the framework is in place (restTimerSound).
 
     // Mark habit as completed explicitly rather than toggling, on the exact original date
-    ref.read(habitCompletionsProvider.notifier).setOverrideForDate(_initialDateStr, widget.habit.id, 'done');
+    ref
+        .read(habitCompletionsProvider.notifier)
+        .setOverrideForDate(_initialDateStr, widget.habit.id, 'done');
 
     // Close the dialog automatically after a brief delay
     Future.delayed(const Duration(seconds: 1), () {
@@ -183,7 +185,6 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-
           Center(
             child: SizedBox(
               width: 200,
@@ -208,7 +209,9 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                   Center(
                     child: Text(
                       _formatTime(_remainingSeconds),
-                      style: context.text.metric.copyWith(color: context.colors.textDark),
+                      style: context.text.metric.copyWith(
+                        color: context.colors.textDark,
+                      ),
                     ),
                   ),
                 ],
@@ -244,10 +247,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: Text(
-                      'Reset',
-                      style: context.text.body,
-                    ),
+                    child: Text('Reset', style: context.text.body),
                   ),
                 ),
               if (_remainingSeconds < _totalSeconds &&

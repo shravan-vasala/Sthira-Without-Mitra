@@ -56,9 +56,11 @@ class RestTimerLabel extends ConsumerWidget {
                       ? 'Resting for $display'
                       : 'Rest for $display after set',
                   style: AppTheme.numeric(
-                    context.text.micro.copyWith(color: isActive
+                    context.text.micro.copyWith(
+                      color: isActive
                           ? context.colors.orange
-                          : context.colors.textLight),
+                          : context.colors.textLight,
+                    ),
                   ),
                 ),
               ],

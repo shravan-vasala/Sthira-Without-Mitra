@@ -7,7 +7,6 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
-
 class FriendStatusCard extends ConsumerWidget {
   final Friend friend;
 
@@ -27,11 +26,15 @@ class FriendStatusCard extends ConsumerWidget {
               leading: _buildAvatar(null, friend.name, friend.uid, context),
               title: Text(
                 friend.name,
-                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
               subtitle: Text(
                 'No recent activity.',
-                style: context.text.body.copyWith(color: context.colors.textMedium),
+                style: context.text.body.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
               trailing: _buildOverflowMenu(context, ref, friend),
             ),
@@ -40,7 +43,8 @@ class FriendStatusCard extends ConsumerWidget {
 
         final now = DateTime.now();
         final daysStale = diffInDays(profile.lastUpdatedAt, now);
-        final isDailyStale = profile.lastUpdatedAt.day != now.day || daysStale > 0;
+        final isDailyStale =
+            profile.lastUpdatedAt.day != now.day || daysStale > 0;
         final isWeeklyStale = daysStale >= 7;
 
         final Color iconColor = isDailyStale
@@ -57,7 +61,12 @@ class FriendStatusCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                   _buildAvatar(profile.avatarUrl, profile.name, profile.uid, context),
+                  _buildAvatar(
+                    profile.avatarUrl,
+                    profile.name,
+                    profile.uid,
+                    context,
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -67,19 +76,27 @@ class FriendStatusCard extends ConsumerWidget {
                           children: [
                             Text(
                               profile.name,
-                              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                              style: context.text.cardTitle.copyWith(
+                                color: context.colors.textDark,
+                              ),
                             ),
-                            if (profile.todayScore != null && !isDailyStale) ...[
+                            if (profile.todayScore != null &&
+                                !isDailyStale) ...[
                               const SizedBox(width: 8),
-                              _ScoreBadge(score: profile.todayScore!, isStale: isDailyStale),
-                            ]
+                              _ScoreBadge(
+                                score: profile.todayScore!,
+                                isStale: isDailyStale,
+                              ),
+                            ],
                           ],
                         ),
                         Text(
                           isDailyStale
                               ? 'Last active ${daysStale > 0 ? daysStale : 1}d ago'
                               : 'Updated ${_timeAgo(profile.lastUpdatedAt)}',
-                          style: context.text.caption.copyWith(color: context.colors.textMedium),
+                          style: context.text.caption.copyWith(
+                            color: context.colors.textMedium,
+                          ),
                         ),
                       ],
                     ),
@@ -107,7 +124,9 @@ class FriendStatusCard extends ConsumerWidget {
                     label: 'Workouts',
                     color: iconColor,
                     textColor: textColor,
-                    progress: isDailyStale ? 0 : (profile.todayWorkouts >= 1 ? 1.0 : 0.0),
+                    progress: isDailyStale
+                        ? 0
+                        : (profile.todayWorkouts >= 1 ? 1.0 : 0.0),
                   ),
                   _StatBlock(
                     icon: Icons.local_fire_department,
@@ -138,14 +157,19 @@ class FriendStatusCard extends ConsumerWidget {
           ),
           trailing: IconButton(
             icon: Icon(Icons.refresh, color: context.colors.textMedium),
-            onPressed: () => ref.invalidate(friendProfileStreamProvider(friend.uid)),
+            onPressed: () =>
+                ref.invalidate(friendProfileStreamProvider(friend.uid)),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildOverflowMenu(BuildContext context, WidgetRef ref, Friend friend) {
+  Widget _buildOverflowMenu(
+    BuildContext context,
+    WidgetRef ref,
+    Friend friend,
+  ) {
     return PopupMenuButton<String>(
       icon: Icon(
         Icons.more_vert,
@@ -164,7 +188,10 @@ class FriendStatusCard extends ConsumerWidget {
             children: [
               Icon(Icons.delete_outline, color: context.colors.red, size: 20),
               const SizedBox(width: 12),
-              Text('Remove Friend', style: context.text.body.copyWith(color: context.colors.red)),
+              Text(
+                'Remove Friend',
+                style: context.text.body.copyWith(color: context.colors.red),
+              ),
             ],
           ),
         ),
@@ -180,7 +207,12 @@ class FriendStatusCard extends ConsumerWidget {
     ).difference(DateTime(a.year, a.month, a.day)).inDays;
   }
 
-  Widget _buildAvatar(String? avatarUrl, String name, String uid, BuildContext context) {
+  Widget _buildAvatar(
+    String? avatarUrl,
+    String name,
+    String uid,
+    BuildContext context,
+  ) {
     if (avatarUrl != null && avatarUrl.startsWith('assets/')) {
       return CircleAvatar(
         radius: 24,
@@ -199,7 +231,9 @@ class FriendStatusCard extends ConsumerWidget {
       const Color(0xFFB5A5AA).withValues(alpha: 0.3), // Muted Sage
     ];
     final color = pastelColors[hash % pastelColors.length];
-    final textColor = color.withValues(alpha: 1.0); // Make it fully opaque for text
+    final textColor = color.withValues(
+      alpha: 1.0,
+    ); // Make it fully opaque for text
 
     final initials = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?';
     return CircleAvatar(
@@ -207,7 +241,9 @@ class FriendStatusCard extends ConsumerWidget {
       backgroundColor: color,
       child: Text(
         initials,
-        style: context.text.screenTitle.copyWith(color: context.colors.textDark),
+        style: context.text.screenTitle.copyWith(
+          color: context.colors.textDark,
+        ),
       ),
     );
   }
@@ -230,7 +266,9 @@ class FriendStatusCard extends ConsumerWidget {
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
               'Cancel',
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.body.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ),
           TextButton(
@@ -249,14 +287,19 @@ class FriendStatusCard extends ConsumerWidget {
                   Navigator.of(ctx).pop();
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: const Text('Failed to remove friend. Please try again.'),
+                      content: const Text(
+                        'Failed to remove friend. Please try again.',
+                      ),
                       backgroundColor: context.colors.red,
                     ),
                   );
                 }
               }
             },
-            child: Text('Remove', style: context.text.body.copyWith(color: context.colors.red)),
+            child: Text(
+              'Remove',
+              style: context.text.body.copyWith(color: context.colors.red),
+            ),
           ),
         ],
       ),
@@ -268,9 +311,9 @@ class FriendStatusCard extends ConsumerWidget {
     final diff = now.difference(date);
     if (diff.inDays == 0) {
       if (diff.inHours > 0) {
-         if (date.hour < 12) return 'this morning';
-         if (date.hour < 17) return 'this afternoon';
-         return 'this evening';
+        if (date.hour < 12) return 'this morning';
+        if (date.hour < 17) return 'this afternoon';
+        return 'this evening';
       }
       if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
       return 'Just now';
@@ -306,30 +349,34 @@ class _StatBlock extends StatelessWidget {
         Icon(icon, color: color, size: 28),
         const SizedBox(height: 4),
         if (rawValue == null)
-           Text(
-             '-',
-             style: AppTheme.numeric(
-               context.text.cardTitle.copyWith(color: textColor),
-             ),
-           )
+          Text(
+            '-',
+            style: AppTheme.numeric(
+              context.text.cardTitle.copyWith(color: textColor),
+            ),
+          )
         else
-           TweenAnimationBuilder<int>(
-             tween: IntTween(begin: 0, end: rawValue!),
-             duration: const Duration(milliseconds: 1000),
-             curve: Curves.easeOutQuart,
-             builder: (context, val, child) {
-               final displayString = useDecimalFormat ? NumberFormat.decimalPattern().format(val) : val.toString();
-               return Text(
-                 displayString,
-                 style: AppTheme.numeric(
-                   context.text.cardTitle.copyWith(color: textColor),
-                 ),
-               );
-             },
-           ),
+          TweenAnimationBuilder<int>(
+            tween: IntTween(begin: 0, end: rawValue!),
+            duration: const Duration(milliseconds: 1000),
+            curve: Curves.easeOutQuart,
+            builder: (context, val, child) {
+              final displayString = useDecimalFormat
+                  ? NumberFormat.decimalPattern().format(val)
+                  : val.toString();
+              return Text(
+                displayString,
+                style: AppTheme.numeric(
+                  context.text.cardTitle.copyWith(color: textColor),
+                ),
+              );
+            },
+          ),
         Text(
           label,
-          style: context.text.caption.copyWith(color: context.colors.textMedium),
+          style: context.text.caption.copyWith(
+            color: context.colors.textMedium,
+          ),
         ),
         if (progress != null) ...[
           const SizedBox(height: 8),
@@ -349,8 +396,8 @@ class _StatBlock extends StatelessWidget {
                 );
               },
             ),
-          )
-        ]
+          ),
+        ],
       ],
     );
   }
@@ -363,7 +410,9 @@ class _ScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isStale ? context.colors.textMedium.withValues(alpha: 0.5) : context.colors.primary;
+    final color = isStale
+        ? context.colors.textMedium.withValues(alpha: 0.5)
+        : context.colors.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -373,9 +422,7 @@ class _ScoreBadge extends StatelessWidget {
       child: Center(
         child: Text(
           score.toString(),
-          style: AppTheme.numeric(
-            context.text.micro.copyWith(color: color),
-          ),
+          style: AppTheme.numeric(context.text.micro.copyWith(color: color)),
         ),
       ),
     );

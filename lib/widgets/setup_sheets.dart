@@ -46,7 +46,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
   Future<void> _save() async {
     final key = _geminiController.text.trim();
     final coach = _coachController.text.trim();
-    
+
     final currentToken = ++_attemptToken;
 
     if (key.isNotEmpty) {
@@ -56,16 +56,22 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
       });
       try {
         await ref.read(geminiFoodServiceProvider).verifyApiKey(key);
-        
+
         // Late cancellation check before finalizing persistence:
-        if (!mounted || currentToken != _attemptToken || _geminiController.text.trim() != key) return;
-        
+        if (!mounted ||
+            currentToken != _attemptToken ||
+            _geminiController.text.trim() != key)
+          return;
+
         await ref.read(credentialProvider.notifier).saveKey(key);
       } catch (e) {
         if (mounted && currentToken == _attemptToken) {
           setState(() {
             _isVerifying = false;
-            _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('AiException: ', '');
+            _errorMessage = e
+                .toString()
+                .replaceAll('Exception: ', '')
+                .replaceAll('AiException: ', '');
           });
         }
         return;
@@ -81,25 +87,31 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
         if (mounted && currentToken == _attemptToken) {
           setState(() {
             _isVerifying = false;
-            _errorMessage = e.toString().replaceAll('Exception: ', '').replaceAll('AiException: ', '');
+            _errorMessage = e
+                .toString()
+                .replaceAll('Exception: ', '')
+                .replaceAll('AiException: ', '');
           });
         }
         return;
       }
     }
-    
+
     if (!mounted || currentToken != _attemptToken) return;
-    
+
     final current = ref.read(profileProvider);
-    await ref.read(profileProvider.notifier).updateProfile(
-      current.copyWith(coachName: coach),
-    );
+    await ref
+        .read(profileProvider.notifier)
+        .updateProfile(current.copyWith(coachName: coach));
 
     if (mounted) {
       setState(() => _isSuccess = true);
-      final disableAnimations = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+      final disableAnimations =
+          MediaQuery.maybeOf(context)?.disableAnimations ?? false;
       if (!disableAnimations) {
-        await Future.delayed(const Duration(milliseconds: 600)); // Shorter delay
+        await Future.delayed(
+          const Duration(milliseconds: 600),
+        ); // Shorter delay
       }
       if (mounted) Navigator.pop(context, true);
     }
@@ -117,7 +129,8 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
     return AppSheet(
       title: 'AI & Coach Settings',
       scrollable: true,
-      subtitle: 'Set your coach\'s name. Food scanning and coach features use your Gemini API key.',
+      subtitle:
+          'Set your coach\'s name. Food scanning and coach features use your Gemini API key.',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,7 +151,9 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
             prefixIcon: Icons.key_rounded,
             suffixIcon: IconButton(
               icon: Icon(
-                _obscureKey ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                _obscureKey
+                    ? Icons.visibility_off_rounded
+                    : Icons.visibility_rounded,
                 color: context.colors.textMedium,
               ),
               onPressed: () => setState(() => _obscureKey = !_obscureKey),
@@ -154,12 +169,18 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline_rounded, color: context.colors.red, size: 20),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: context.colors.red,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage,
-                      style: context.text.caption.copyWith(color: context.colors.red),
+                      style: context.text.caption.copyWith(
+                        color: context.colors.red,
+                      ),
                     ),
                   ),
                 ],
@@ -170,24 +191,37 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
-              onPressed: () => _launchUrl('https://aistudio.google.com/app/apikey'),
-              icon: Icon(Icons.open_in_new_rounded, size: 16, color: context.colors.primary),
+              onPressed: () =>
+                  _launchUrl('https://aistudio.google.com/app/apikey'),
+              icon: Icon(
+                Icons.open_in_new_rounded,
+                size: 16,
+                color: context.colors.primary,
+              ),
               label: Text(
                 'Get Gemini API Key',
-                style: context.text.body.copyWith(color: context.colors.primary),
+                style: context.text.body.copyWith(
+                  color: context.colors.primary,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 32),
           PrimaryButton(
-            onPressed: _isSuccess ? () {} : (_isVerifying ? null : _save),
-            label: _isSuccess ? 'Saved!' : (_isVerifying ? 'Verifying...' : 'Save Changes'),
-            isLoading: _isVerifying,
-            icon: _isSuccess ? Icons.check_circle_rounded : Icons.check_rounded,
-            iconColor: _isSuccess ? const Color(0xFF4CAF50) : null,
-          ).animate(target: _isSuccess ? 1 : 0)
-           .scaleXY(end: 1.05, duration: 200.ms, curve: Curves.easeOutBack)
-           .then(delay: 200.ms).scaleXY(end: 1.0, duration: 150.ms),
+                onPressed: _isSuccess ? () {} : (_isVerifying ? null : _save),
+                label: _isSuccess
+                    ? 'Saved!'
+                    : (_isVerifying ? 'Verifying...' : 'Save Changes'),
+                isLoading: _isVerifying,
+                icon: _isSuccess
+                    ? Icons.check_circle_rounded
+                    : Icons.check_rounded,
+                iconColor: _isSuccess ? const Color(0xFF4CAF50) : null,
+              )
+              .animate(target: _isSuccess ? 1 : 0)
+              .scaleXY(end: 1.05, duration: 200.ms, curve: Curves.easeOutBack)
+              .then(delay: 200.ms)
+              .scaleXY(end: 1.0, duration: 150.ms),
         ],
       ),
     );
@@ -212,7 +246,7 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
     });
     try {
       final hcService = ref.read(healthConnectServiceProvider);
-      
+
       final available = await hcService.isAvailable();
       if (!available) {
         if (mounted) {
@@ -224,7 +258,7 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
       }
 
       await hcService.requestPermission();
-      
+
       // Re-read effective status (Android process death workaround)
       final authorized = await hcService.isAuthorized();
       final hasData = await hcService.canReadSteps();
@@ -263,11 +297,7 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(
-            Icons.favorite_rounded,
-            size: 64,
-            color: context.colors.primary,
-          ),
+          Icon(Icons.favorite_rounded, size: 64, color: context.colors.primary),
           const SizedBox(height: 32),
           PrimaryButton(
             onPressed: _connecting ? null : _connect,
@@ -280,7 +310,11 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
             Text(
               _status,
               textAlign: TextAlign.center,
-              style: context.text.body.copyWith(color: _status.contains('Connected') ? context.colors.primary : context.colors.red),
+              style: context.text.body.copyWith(
+                color: _status.contains('Connected')
+                    ? context.colors.primary
+                    : context.colors.red,
+              ),
             ),
             if (!_status.contains('Connected')) ...[
               const SizedBox(height: 16),
@@ -314,7 +348,9 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
     final syncState = ref.watch(cloudSyncControllerProvider);
     final isSyncing = syncState == CloudSyncState.syncing;
     final isSuccess = syncState == CloudSyncState.success;
-    final errorMessage = ref.read(cloudSyncControllerProvider.notifier).errorMessage;
+    final errorMessage = ref
+        .read(cloudSyncControllerProvider.notifier)
+        .errorMessage;
 
     ref.listen(cloudSyncControllerProvider, (prev, next) {
       if (next == CloudSyncState.success) {
@@ -325,7 +361,8 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
     });
     return AppSheet(
       title: 'Cloud Backup',
-      subtitle: 'Securely sync your progress across devices and never lose a day.',
+      subtitle:
+          'Securely sync your progress across devices and never lose a day.',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -337,8 +374,16 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
           ),
           const SizedBox(height: 32),
           PrimaryButton(
-            onPressed: isSyncing || isSuccess ? null : () => ref.read(cloudSyncControllerProvider.notifier).signInAndSync(),
-            label: isSyncing ? 'Syncing...' : isSuccess ? 'Synced!' : 'Enable Cloud Sync',
+            onPressed: isSyncing || isSuccess
+                ? null
+                : () => ref
+                      .read(cloudSyncControllerProvider.notifier)
+                      .signInAndSync(),
+            label: isSyncing
+                ? 'Syncing...'
+                : isSuccess
+                ? 'Synced!'
+                : 'Enable Cloud Sync',
             isLoading: isSyncing,
             icon: isSuccess ? Icons.check_circle : Icons.cloud_upload_rounded,
           ),

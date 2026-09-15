@@ -151,7 +151,9 @@ final friendRepoProvider = Provider<FriendRepository>((ref) {
 });
 final friendsListStreamProvider = StreamProvider<List<Friend>>((ref) {
   final repo = ref.watch(friendRepoProvider);
-  return repo.isar.friends.where().sortByAddedAtDesc().watch(fireImmediately: true);
+  return repo.isar.friends.where().sortByAddedAtDesc().watch(
+    fireImmediately: true,
+  );
 });
 final healthConnectServiceProvider = Provider<HealthConnectService>((ref) {
   throw UnimplementedError('Must be overridden in main');
@@ -189,7 +191,7 @@ final socialPushControllerProvider = Provider<void>((ref) {
       final fromUid = p['fromUid'] as String?;
       if (fromUid != null) {
         // We know they accepted our request, add them to our allowedReaders
-          // We know they accepted our request, add them to our allowedReaders
+        // We know they accepted our request, add them to our allowedReaders
         // Actually, the sender side of acceptance:
         // When I send request, they accept -> they add me to their allowed readers, and create an acceptance marker for me.
         // I see the marker -> I add them to my allowed readers, local friend DB, and delete the marker.
@@ -203,7 +205,7 @@ final socialPushControllerProvider = Provider<void>((ref) {
               );
             }
           });
-          
+
           await syncService.processPendingAcceptance(fromUid);
         } catch (e) {
           debugPrint('Error processing pending acceptance: $e');
@@ -291,13 +293,12 @@ final nutritionLookupServiceProvider = Provider<NutritionLookupService>((ref) {
   return NutritionLookupService();
 });
 
-
 enum CloudSyncState { idle, syncing, success, error }
 
 final cloudSyncControllerProvider =
     NotifierProvider<CloudSyncController, CloudSyncState>(
-  CloudSyncController.new,
-);
+      CloudSyncController.new,
+    );
 
 class CloudSyncController extends Notifier<CloudSyncState> {
   String? errorMessage;
@@ -319,7 +320,7 @@ class CloudSyncController extends Notifier<CloudSyncState> {
       }
 
       final syncService = ref.read(firestoreSyncServiceProvider);
-      
+
       // Detach all before transition
       await ref.read(workoutRepoProvider).detachSync();
       await ref.read(mealRepoProvider).detachSync();
@@ -333,7 +334,7 @@ class CloudSyncController extends Notifier<CloudSyncState> {
 
       // Switch scope
       final newIsar = await AppDatabaseManager.openDatabaseForUser(user.uid);
-      
+
       // Re-initialize
       await Future.wait([
         ref.read(workoutRepoProvider).init(newIsar),
@@ -383,12 +384,16 @@ class CloudSyncController extends Notifier<CloudSyncState> {
 
         final mealPlans = await syncService.pullCollection('meal_plans');
         await ref.read(mealRepoProvider).importPlansFromCloud(mealPlans);
-        
+
         final habitConfig = await syncService.pullCollection('habit_config');
         await ref.read(habitRepoProvider).importConfigFromCloud(habitConfig);
 
-        final habitCompletions = await syncService.pullCollection('habit_completions');
-        await ref.read(habitRepoProvider).importCompletionsFromCloud(habitCompletions);
+        final habitCompletions = await syncService.pullCollection(
+          'habit_completions',
+        );
+        await ref
+            .read(habitRepoProvider)
+            .importCompletionsFromCloud(habitCompletions);
 
         final exLogs = await syncService.pullCollection('exercise_logs');
         await ref.read(exerciseLogRepoProvider).importLogsFromCloud(exLogs);
@@ -440,20 +445,20 @@ class CloudSyncController extends Notifier<CloudSyncState> {
           ref.read(mealRepoProvider).exportPlansForCloud(),
         );
         await syncService.bulkSync(
-           'exercise_logs',
-           ref.read(exerciseLogRepoProvider).exportLogsForCloud(),
+          'exercise_logs',
+          ref.read(exerciseLogRepoProvider).exportLogsForCloud(),
         );
         await syncService.bulkSync(
-           'exercise_prs',
-           ref.read(exerciseLogRepoProvider).exportPrsForCloud(),
+          'exercise_prs',
+          ref.read(exerciseLogRepoProvider).exportPrsForCloud(),
         );
         await syncService.bulkSync(
-           'coach_notes',
-           ref.read(coachNoteRepoProvider).exportNotesForCloud(),
+          'coach_notes',
+          ref.read(coachNoteRepoProvider).exportNotesForCloud(),
         );
         await syncService.bulkSync(
-           'badges',
-           ref.read(badgeRepoProvider).exportForCloud(),
+          'badges',
+          ref.read(badgeRepoProvider).exportForCloud(),
         );
       }
       state = CloudSyncState.success;
@@ -475,10 +480,7 @@ final geminiFoodServiceProvider = Provider<IAiFoodService>((ref) {
 
 final coachServiceProvider = Provider<CoachService>((ref) {
   final key = ref.watch(credentialProvider.select((s) => s.key));
-  return CoachService(
-    apiKey: key,
-    aiClient: ref.watch(aiClientProvider),
-  );
+  return CoachService(apiKey: key, aiClient: ref.watch(aiClientProvider));
 });
 
 final stepsSourceProvider = StateProvider<StepsSource>(

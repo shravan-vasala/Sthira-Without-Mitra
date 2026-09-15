@@ -37,15 +37,19 @@ class MealDetailScreen extends ConsumerWidget {
     final planName = "${profile.name}'s ${mealPlan?.planName ?? 'Meal Plan'}";
 
     final targetCalories = profile.targetCalories;
-    final isOverTarget = targetCalories > 0 && dailyLog.totalCalories > targetCalories;
+    final isOverTarget =
+        targetCalories > 0 && dailyLog.totalCalories > targetCalories;
     final progressRatio = targetCalories > 0
         ? (dailyLog.totalCalories / targetCalories).clamp(0.0, 1.0)
         : (dailyLog.totalCalories > 0 ? 1.0 : 0.0);
 
     final pinnedDateStr = ref.watch(dateStringProvider);
     final pinnedDate = DateTime.parse(pinnedDateStr);
-    final isToday = pinnedDateStr == DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final titleText = isToday ? "Today's meals" : "${DateFormat('MMM d, yyyy').format(pinnedDate)} meals";
+    final isToday =
+        pinnedDateStr == DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final titleText = isToday
+        ? "Today's meals"
+        : "${DateFormat('MMM d, yyyy').format(pinnedDate)} meals";
 
     final List<({String id, String name, String emoji})> slotsToDisplay = [];
     final recurringIds = <String>{};
@@ -81,7 +85,9 @@ class MealDetailScreen extends ConsumerWidget {
             Text(titleText),
             Text(
               planName,
-              style: context.text.caption.copyWith(color: context.colors.textMedium),
+              style: context.text.caption.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ],
         ),
@@ -122,16 +128,24 @@ class MealDetailScreen extends ConsumerWidget {
             final s = slotsToDisplay[index - 1];
             final shouldAnimate = !MediaQuery.disableAnimationsOf(context);
             return _MealSlotCard(
-              key: ValueKey(s.id),
-              slotId: s.id,
-              slotName: s.name,
-              slotEmoji: s.emoji,
-              slotLog: dailyLog.customSlots[s.id],
-              plannedMeal: MealPlanComplete.plannedForSlot(mealPlan, s.id),
-            )
-            .animate()
-            .fadeIn(duration: shouldAnimate ? 400.ms : 0.ms, curve: Curves.easeOut)
-            .slideY(begin: 0.05, end: 0, duration: shouldAnimate ? 400.ms : 0.ms, curve: Curves.easeOut);
+                  key: ValueKey(s.id),
+                  slotId: s.id,
+                  slotName: s.name,
+                  slotEmoji: s.emoji,
+                  slotLog: dailyLog.customSlots[s.id],
+                  plannedMeal: MealPlanComplete.plannedForSlot(mealPlan, s.id),
+                )
+                .animate()
+                .fadeIn(
+                  duration: shouldAnimate ? 400.ms : 0.ms,
+                  curve: Curves.easeOut,
+                )
+                .slideY(
+                  begin: 0.05,
+                  end: 0,
+                  duration: shouldAnimate ? 400.ms : 0.ms,
+                  curve: Curves.easeOut,
+                );
           } else if (index == slotsToDisplay.length + 1) {
             final unloggedSlots = slotsToDisplay.where((s) {
               final slotLog = dailyLog.customSlots[s.id];
@@ -241,7 +255,9 @@ class _CalorieHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = isOverTarget ? context.colors.orange : context.colors.primary;
+    final accent = isOverTarget
+        ? context.colors.orange
+        : context.colors.primary;
     final shouldAnimate = !MediaQuery.disableAnimationsOf(context);
 
     return Padding(
@@ -254,13 +270,20 @@ class _CalorieHeader extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               TweenAnimationBuilder<int>(
-                tween: IntTween(begin: shouldAnimate ? 0 : eaten.toInt(), end: eaten.toInt()),
-                duration: shouldAnimate ? const Duration(milliseconds: 400) : Duration.zero,
+                tween: IntTween(
+                  begin: shouldAnimate ? 0 : eaten.toInt(),
+                  end: eaten.toInt(),
+                ),
+                duration: shouldAnimate
+                    ? const Duration(milliseconds: 400)
+                    : Duration.zero,
                 curve: Curves.easeOutQuart,
                 builder: (context, val, child) {
                   return Text(
                     '$val',
-                    style: context.text.metric.copyWith(color: context.colors.textDark),
+                    style: context.text.metric.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   );
                 },
               ),
@@ -268,17 +291,23 @@ class _CalorieHeader extends StatelessWidget {
               if (target == 0)
                 Text(
                   ' kcal',
-                  style: context.text.body.copyWith(color: context.colors.textMedium),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 )
               else if (isOverTarget)
                 Text(
                   '+${(eaten - target).toInt()} over target',
-                  style: context.text.body.copyWith(color: context.colors.orange),
+                  style: context.text.body.copyWith(
+                    color: context.colors.orange,
+                  ),
                 )
               else
                 Text(
                   '/ ${target.toInt()} kcal',
-                  style: context.text.body.copyWith(color: context.colors.textMedium),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
             ],
           ),
@@ -389,7 +418,9 @@ class _MacroBar extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: context.text.micro.copyWith(color: context.colors.textMedium),
+                style: context.text.micro.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
             ),
             if (target == 0)
@@ -459,14 +490,17 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
     final repo = ref.read(mealRepoProvider);
     final targetDateStr = ref.read(dateStringProvider);
-    
+
     // Check if current day's same slot is empty
     final targetLog = repo.getDailyLog(targetDateStr);
     String targetSlotId = widget.slotId;
-    
-    if (targetLog.customSlots[targetSlotId] != null && targetLog.customSlots[targetSlotId]!.items.isNotEmpty) {
+
+    if (targetLog.customSlots[targetSlotId] != null &&
+        targetLog.customSlots[targetSlotId]!.items.isNotEmpty) {
       final profile = ref.read(profileProvider);
-      final recurringIds = profile.customMealSlots.map((s) => s['id'] as String).toList();
+      final recurringIds = profile.customMealSlots
+          .map((s) => s['id'] as String)
+          .toList();
       String? nextEmpty;
       for (final id in recurringIds) {
         final slot = targetLog.customSlots[id];
@@ -482,7 +516,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
         targetSlotId = 'repeated_${DateTime.now().millisecondsSinceEpoch}';
       }
     }
-    
+
     final newItems = oldLog.items.map((i) {
       return MealItemLog(
         name: i.name,
@@ -521,10 +555,12 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       totalFat: oldLog.totalFat,
       photoPath: oldLog.photoPath,
     );
-    
+
     await repo.saveMealSlot(targetDateStr, targetSlotId, newSlotLog);
-    ref.read(dailyMealLogProvider.notifier).state = repo.getDailyLog(ref.read(dateStringProvider));
-    
+    ref.read(dailyMealLogProvider.notifier).state = repo.getDailyLog(
+      ref.read(dateStringProvider),
+    );
+
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -568,16 +604,24 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                         children: [
                           Text(
                             widget.slotName,
-                            style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                            style: context.text.cardTitle.copyWith(
+                              color: context.colors.textDark,
+                            ),
                           ),
                           if (_hasLog)
                             TweenAnimationBuilder<double>(
                               key: ValueKey(slotLog!.totalCalories),
-                              tween: Tween(begin: shouldAnimate ? 0.0 : 1.0, end: 1.0),
-                              duration: shouldAnimate ? const Duration(milliseconds: 400) : Duration.zero,
+                              tween: Tween(
+                                begin: shouldAnimate ? 0.0 : 1.0,
+                                end: 1.0,
+                              ),
+                              duration: shouldAnimate
+                                  ? const Duration(milliseconds: 400)
+                                  : Duration.zero,
                               curve: Curves.easeOutCubic,
                               builder: (context, val, _) {
-                                final cal = (slotLog.totalCalories * val).toInt();
+                                final cal = (slotLog.totalCalories * val)
+                                    .toInt();
                                 final p = (slotLog.totalProtein * val).toInt();
                                 final c = (slotLog.totalCarbs * val).toInt();
                                 final f = (slotLog.totalFat * val).toInt();
@@ -587,30 +631,58 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                     children: [
                                       TextSpan(
                                         text: '$cal kcal',
-                                        style: context.text.body.copyWith(color: context.colors.primary),
+                                        style: context.text.body.copyWith(
+                                          color: context.colors.primary,
+                                        ),
                                       ),
                                       const TextSpan(text: '   '),
-                                      TextSpan(text: 'P: ', style: context.text.micro.copyWith(color: context.colors.green.withValues(alpha: 0.9))),
+                                      TextSpan(
+                                        text: 'P: ',
+                                        style: context.text.micro.copyWith(
+                                          color: context.colors.green
+                                              .withValues(alpha: 0.9),
+                                        ),
+                                      ),
                                       TextSpan(text: '${p}g   '),
-                                      TextSpan(text: 'C: ', style: context.text.micro.copyWith(color: context.colors.orange.withValues(alpha: 0.9))),
+                                      TextSpan(
+                                        text: 'C: ',
+                                        style: context.text.micro.copyWith(
+                                          color: context.colors.orange
+                                              .withValues(alpha: 0.9),
+                                        ),
+                                      ),
                                       TextSpan(text: '${c}g   '),
-                                      TextSpan(text: 'F: ', style: context.text.micro.copyWith(color: context.colors.primary.withValues(alpha: 0.9))),
+                                      TextSpan(
+                                        text: 'F: ',
+                                        style: context.text.micro.copyWith(
+                                          color: context.colors.primary
+                                              .withValues(alpha: 0.9),
+                                        ),
+                                      ),
                                       TextSpan(text: '${f}g'),
                                     ],
                                   ),
-                                  style: AppTheme.numeric(context.text.caption.copyWith(color: context.colors.textMedium)),
+                                  style: AppTheme.numeric(
+                                    context.text.caption.copyWith(
+                                      color: context.colors.textMedium,
+                                    ),
+                                  ),
                                 );
                               },
                             )
                           else if (planned != null && planned.calories > 0)
                             Text(
                               'Target ~${planned.calories} kcal',
-                              style: context.text.caption.copyWith(color: context.colors.textMedium),
+                              style: context.text.caption.copyWith(
+                                color: context.colors.textMedium,
+                              ),
                             )
                           else
                             Text(
                               'Tap to log',
-                              style: context.text.caption.copyWith(color: context.colors.textMedium),
+                              style: context.text.caption.copyWith(
+                                color: context.colors.textMedium,
+                              ),
                             ),
                         ],
                       ),
@@ -618,13 +690,22 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                     if (_hasLog)
                       TweenAnimationBuilder<double>(
                         key: const ValueKey('check'),
-                        tween: Tween(begin: shouldAnimate ? 0.0 : 1.0, end: 1.0),
-                        duration: shouldAnimate ? const Duration(milliseconds: 400) : Duration.zero,
+                        tween: Tween(
+                          begin: shouldAnimate ? 0.0 : 1.0,
+                          end: 1.0,
+                        ),
+                        duration: shouldAnimate
+                            ? const Duration(milliseconds: 400)
+                            : Duration.zero,
                         curve: Curves.elasticOut,
                         builder: (context, val, child) {
                           return Transform.scale(
                             scale: val,
-                            child: Icon(Icons.check_circle_rounded, color: context.colors.green, size: 20),
+                            child: Icon(
+                              Icons.check_circle_rounded,
+                              color: context.colors.green,
+                              size: 20,
+                            ),
                           );
                         },
                       ),
@@ -643,7 +724,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                       children: [
                         if (_hasLog) ...[
                           const SizedBox(height: 20),
-                          
+
                           // Logged Items
                           if (slotLog!.photoPath != null) ...[
                             GestureDetector(
@@ -651,22 +732,42 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 showDialog(
                                   context: context,
                                   builder: (context) => Dialog(
-                                    backgroundColor: context.colors.card.withValues(alpha: 0),
+                                    backgroundColor: context.colors.card
+                                        .withValues(alpha: 0),
                                     insetPadding: EdgeInsets.zero,
                                     child: Stack(
                                       alignment: Alignment.center,
                                       children: [
                                         InteractiveViewer(
                                           child: kIsWeb
-                                            ? Image.network(slotLog.photoPath!)
-                                            : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(slotLog.photoPath!))),
+                                              ? Image.network(
+                                                  slotLog.photoPath!,
+                                                )
+                                              : Image.file(
+                                                  File(
+                                                    ref
+                                                        .read(mediaRepoProvider)
+                                                        .getAbsolutePath(
+                                                          slotLog.photoPath!,
+                                                        ),
+                                                  ),
+                                                ),
                                         ),
                                         Positioned(
-                                          top: MediaQuery.paddingOf(context).top + 16,
+                                          top:
+                                              MediaQuery.paddingOf(
+                                                context,
+                                              ).top +
+                                              16,
                                           right: 16,
                                           child: IconButton(
-                                            icon: Icon(Icons.close_rounded, color: context.colors.onPrimary, size: 32),
-                                            onPressed: () => Navigator.of(context).pop(),
+                                            icon: Icon(
+                                              Icons.close_rounded,
+                                              color: context.colors.onPrimary,
+                                              size: 32,
+                                            ),
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
                                           ),
                                         ),
                                       ],
@@ -684,7 +785,13 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                         fit: BoxFit.cover,
                                       )
                                     : Image.file(
-                                        File(ref.read(mediaRepoProvider).getAbsolutePath(slotLog.photoPath!)),
+                                        File(
+                                          ref
+                                              .read(mediaRepoProvider)
+                                              .getAbsolutePath(
+                                                slotLog.photoPath!,
+                                              ),
+                                        ),
                                         width: double.infinity,
                                         height: 120,
                                         fit: BoxFit.cover,
@@ -693,36 +800,47 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                             ),
                             const SizedBox(height: 12),
                           ],
-                            if (slotLog.items.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 8),
-                                child: Text.rich(
-                                  TextSpan(
-                                    children: slotLog.items.asMap().entries.expand((entry) {
-                                      final isLast = entry.key == slotLog.items.length - 1;
+                          if (slotLog.items.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4, bottom: 8),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: slotLog.items.asMap().entries.expand(
+                                    (entry) {
+                                      final isLast =
+                                          entry.key == slotLog.items.length - 1;
                                       final item = entry.value;
                                       return <InlineSpan>[
                                         TextSpan(
-                                          text: '• ${item.portion} ${item.name} ',
-                                          style: context.text.caption.copyWith(color: context.colors.textMedium),
+                                          text:
+                                              '• ${item.portion} ${item.name} ',
+                                          style: context.text.caption.copyWith(
+                                            color: context.colors.textMedium,
+                                          ),
                                         ),
                                         if (item.provenance != null)
                                           WidgetSpan(
-                                            alignment: PlaceholderAlignment.middle,
+                                            alignment:
+                                                PlaceholderAlignment.middle,
                                             child: Padding(
-                                              padding: EdgeInsets.only(right: isLast ? 0 : 12),
-                                              child: _ProvenanceBadge(provenance: item.provenance),
+                                              padding: EdgeInsets.only(
+                                                right: isLast ? 0 : 12,
+                                              ),
+                                              child: _ProvenanceBadge(
+                                                provenance: item.provenance,
+                                              ),
                                             ),
                                           )
                                         else if (!isLast)
                                           const TextSpan(text: '   '),
                                       ];
-                                    }).toList(),
-                                  ),
+                                    },
+                                  ).toList(),
                                 ),
                               ),
-                          
-                            const SizedBox(height: 12),
+                            ),
+
+                          const SizedBox(height: 12),
                           Row(
                             children: [
                               TextButton.icon(
@@ -730,24 +848,42 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                   foregroundColor: context.colors.primary,
                                   padding: EdgeInsets.zero,
                                   minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
-                                onPressed: () => _openScanner(context, false, append: true),
-                                icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
-                                label: const Text('Add Serving', style: context.text.caption),
+                                onPressed: () =>
+                                    _openScanner(context, false, append: true),
+                                icon: const Icon(
+                                  Icons.add_circle_outline_rounded,
+                                  size: 16,
+                                ),
+                                label: const Text(
+                                  'Add Serving',
+                                  style: context.text.caption,
+                                ),
                               ),
                               const SizedBox(width: 20),
-                              if (ref.watch(dateStringProvider) != DateFormat('yyyy-MM-dd').format(DateTime.now()))
+                              if (ref.watch(dateStringProvider) !=
+                                  DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(DateTime.now()))
                                 TextButton.icon(
                                   style: TextButton.styleFrom(
                                     foregroundColor: context.colors.textMedium,
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: _repeatMeal,
-                                  icon: const Icon(Icons.copy_rounded, size: 16),
-                                  label: const Text('Repeat', style: context.text.caption),
+                                  icon: const Icon(
+                                    Icons.copy_rounded,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    'Repeat',
+                                    style: context.text.caption,
+                                  ),
                                 )
                               else
                                 TextButton.icon(
@@ -755,33 +891,63 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                     foregroundColor: context.colors.textMedium,
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: () => _openScanner(context, false),
-                                  icon: const Icon(Icons.refresh_rounded, size: 16),
-                                  label: const Text('Replace', style: context.text.caption),
+                                  icon: const Icon(
+                                    Icons.refresh_rounded,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    'Replace',
+                                    style: context.text.caption,
+                                  ),
                                 ),
                               const Spacer(),
                               IconButton(
-                                icon: Icon(Icons.delete_outline_rounded, color: context.colors.textMedium, size: 20),
+                                icon: Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: context.colors.textMedium,
+                                  size: 20,
+                                ),
                                 constraints: const BoxConstraints(),
                                 padding: EdgeInsets.zero,
                                 onPressed: () {
-                                  final targetDateStr = ref.read(dateStringProvider);
+                                  final targetDateStr = ref.read(
+                                    dateStringProvider,
+                                  );
                                   final oldLog = widget.slotLog;
-                                  ref.read(dailyMealLogProvider.notifier).clearMealSlot(widget.slotId, targetDate: targetDateStr);
-                                  
-                                  ScaffoldMessenger.of(context).clearSnackBars();
+                                  ref
+                                      .read(dailyMealLogProvider.notifier)
+                                      .clearMealSlot(
+                                        widget.slotId,
+                                        targetDate: targetDateStr,
+                                      );
+
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).clearSnackBars();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('${widget.slotName} removed'),
+                                      content: Text(
+                                        '${widget.slotName} removed',
+                                      ),
                                       behavior: SnackBarBehavior.floating,
                                       action: SnackBarAction(
                                         label: 'Undo',
                                         textColor: context.colors.primary,
                                         onPressed: () {
                                           if (oldLog != null) {
-                                            ref.read(dailyMealLogProvider.notifier).saveMealSlot(widget.slotId, oldLog, targetDate: targetDateStr);
+                                            ref
+                                                .read(
+                                                  dailyMealLogProvider.notifier,
+                                                )
+                                                .saveMealSlot(
+                                                  widget.slotId,
+                                                  oldLog,
+                                                  targetDate: targetDateStr,
+                                                );
                                           }
                                         },
                                       ),
@@ -793,54 +959,77 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                             ],
                           ),
                         ] else ...[
-                           // NOT logged actions 
-                           const SizedBox(height: 24),
-                           
-                           Row(
-                             children: [
-                               Expanded(
-                                 child: ElevatedButton.icon(
-                                   style: ElevatedButton.styleFrom(
-                                     backgroundColor: context.colors.primary,
-                                     foregroundColor: context.colors.onPrimary,
-                                     elevation: 0,
-                                     padding: const EdgeInsets.symmetric(vertical: 14),
-                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                   ),
-                                   onPressed: () => _openScanner(context, false),
-                                   icon: const Icon(Icons.camera_alt_outlined, size: 18),
-                                   label: const Text('Take photo', style: context.text.body),
-                                 ),
-                               ),
-                               const SizedBox(width: 12),
-                               Expanded(
-                                 child: OutlinedButton.icon(
-                                   style: OutlinedButton.styleFrom(
-                                     foregroundColor: context.colors.primary,
-                                     backgroundColor: context.colors.primary.withValues(alpha: 0.12),
-                                     side: BorderSide.none,
-                                     padding: const EdgeInsets.symmetric(vertical: 14),
-                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                   ),
-                                   onPressed: () => _openScanner(context, true),
-                                   icon: const Icon(Icons.notes_rounded, size: 18),
-                                   label: const Text('Describe', style: context.text.body),
-                                 ),
-                               ),
-                             ],
-                           ),
-                           if (planned != null) ...[
-                             const SizedBox(height: 20),
-                             Center(
-                               child: InkWell(
-                                 onTap: () => _toggleCompletedAsPlanned(planned),
-                                 child: Text(
-                                   'Or mark completed as planned',
-                                   style: context.text.caption.copyWith(color: context.colors.textMedium),
-                                 ),
-                               ),
-                             ),
-                           ],
+                          // NOT logged actions
+                          const SizedBox(height: 24),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: context.colors.primary,
+                                    foregroundColor: context.colors.onPrimary,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: () => _openScanner(context, false),
+                                  icon: const Icon(
+                                    Icons.camera_alt_outlined,
+                                    size: 18,
+                                  ),
+                                  label: const Text(
+                                    'Take photo',
+                                    style: context.text.body,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: context.colors.primary,
+                                    backgroundColor: context.colors.primary
+                                        .withValues(alpha: 0.12),
+                                    side: BorderSide.none,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: () => _openScanner(context, true),
+                                  icon: const Icon(
+                                    Icons.notes_rounded,
+                                    size: 18,
+                                  ),
+                                  label: const Text(
+                                    'Describe',
+                                    style: context.text.body,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (planned != null) ...[
+                            const SizedBox(height: 20),
+                            Center(
+                              child: InkWell(
+                                onTap: () => _toggleCompletedAsPlanned(planned),
+                                child: Text(
+                                  'Or mark completed as planned',
+                                  style: context.text.caption.copyWith(
+                                    color: context.colors.textMedium,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ],
                     ),
@@ -849,7 +1038,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
                 // Suggestions
                 if (planned != null && planned.suggestions.isNotEmpty)
-                  _buildSuggestions(context, planned)
+                  _buildSuggestions(context, planned),
               ],
             ),
           ),
@@ -866,24 +1055,32 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
         children: [
           GestureDetector(
             onTap: () {
-               setState(() => _showSuggestions = !_showSuggestions);
-               Haptics.tap();
+              setState(() => _showSuggestions = !_showSuggestions);
+              Haptics.tap();
             },
             behavior: HitTestBehavior.opaque,
             child: Row(
               children: [
-                 Icon(Icons.lightbulb_outline_rounded, size: 16, color: context.colors.primary),
-                 const SizedBox(width: 8),
-                 Text(
-                   'Suggestions',
-                   style: context.text.body.copyWith(color: context.colors.textDark),
-                 ),
-                 const Spacer(),
-                 Icon(
-                   _showSuggestions ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                   color: context.colors.textMedium,
-                   size: 20,
-                 ),
+                Icon(
+                  Icons.lightbulb_outline_rounded,
+                  size: 16,
+                  color: context.colors.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Suggestions',
+                  style: context.text.body.copyWith(
+                    color: context.colors.textDark,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  _showSuggestions
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                  color: context.colors.textMedium,
+                  size: 20,
+                ),
               ],
             ),
           ),
@@ -909,14 +1106,16 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                     Expanded(
                       child: Text(
                         suggestion,
-                        style: context.text.caption.copyWith(color: context.colors.textMedium),
+                        style: context.text.caption.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                     ),
                   ],
                 ),
               );
             }),
-          ]
+          ],
         ],
       ),
     );
@@ -924,10 +1123,10 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
   Future<void> _toggleCompletedAsPlanned(Meal planned) async {
     if (_isSaving) return;
-    
+
     final targetDateStr = ref.read(dateStringProvider);
     final notifier = ref.read(dailyMealLogProvider.notifier);
-    
+
     if (_isPlannedComplete) {
       setState(() => _isSaving = true);
       try {
@@ -964,7 +1163,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       );
       if (confirm != true) return;
     }
-    
+
     if (!mounted) return;
 
     setState(() => _isSaving = true);
@@ -978,13 +1177,15 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       );
 
       Haptics.toggle();
-      await notifier.saveMealSlot(widget.slotId, log, targetDate: targetDateStr);
+      await notifier.saveMealSlot(
+        widget.slotId,
+        log,
+        targetDate: targetDateStr,
+      );
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
   }
-
-
 
   void _openScanner(
     BuildContext context,
@@ -1011,9 +1212,11 @@ class _ProvenanceBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     IconData iconData;
     Color color;
-    final validProvenance = (provenance != null && provenance!.isNotEmpty) ? provenance! : 'unknown';
+    final validProvenance = (provenance != null && provenance!.isNotEmpty)
+        ? provenance!
+        : 'unknown';
     String label = validProvenance;
-    
+
     switch (validProvenance) {
       case 'verified':
         iconData = Icons.verified_outlined;
@@ -1069,19 +1272,23 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
     String title, desc;
     IconData headerIcon;
     Color headerColor;
-    
-    final validProvenance = (provenance != null && provenance!.isNotEmpty) ? provenance! : 'unknown';
+
+    final validProvenance = (provenance != null && provenance!.isNotEmpty)
+        ? provenance!
+        : 'unknown';
 
     if (validProvenance == 'verified') {
       title = 'Verified Local Food';
       headerIcon = Icons.verified_outlined;
       headerColor = context.colors.textMedium;
-      desc = 'This item was matched against your personal food database. The base macros are exact, but the consumed portion may vary.';
+      desc =
+          'This item was matched against your personal food database. The base macros are exact, but the consumed portion may vary.';
     } else if (validProvenance == 'estimated') {
       title = 'AI Estimated';
       headerIcon = Icons.auto_awesome_rounded;
       headerColor = context.colors.primary.withValues(alpha: 0.8);
-      desc = 'Gemini estimated the macros for this food based on its nutritional profile. The values are an AI approximation and not exact.';
+      desc =
+          'Gemini estimated the macros for this food based on its nutritional profile. The values are an AI approximation and not exact.';
     } else if (validProvenance == 'yours') {
       title = 'Yours';
       headerIcon = Icons.edit_outlined;

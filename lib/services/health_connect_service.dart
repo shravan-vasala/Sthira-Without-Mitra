@@ -97,7 +97,9 @@ class HealthConnectService {
       final now = DateTime.now();
       final midnight = DateTime(now.year, now.month, now.day);
       final steps = await _health.getTotalStepsInInterval(midnight, now);
-      return steps != null ? HealthReadResult.success(steps) : HealthReadResult.empty();
+      return steps != null
+          ? HealthReadResult.success(steps)
+          : HealthReadResult.empty();
     } catch (_) {
       return HealthReadResult.error();
     }
@@ -113,7 +115,9 @@ class HealthConnectService {
         end = now;
       }
       final steps = await _health.getTotalStepsInInterval(start, end);
-      return steps != null ? HealthReadResult.success(steps) : HealthReadResult.empty();
+      return steps != null
+          ? HealthReadResult.success(steps)
+          : HealthReadResult.empty();
     } catch (_) {
       return HealthReadResult.error();
     }
@@ -154,9 +158,12 @@ class HealthConnectService {
 
       for (final data in healthData) {
         // Clip date within the current 24-hour search boundary correctly
-        final actualStart = data.dateFrom.isBefore(start) ? start : data.dateFrom;
+        final actualStart = data.dateFrom.isBefore(start)
+            ? start
+            : data.dateFrom;
         final actualEnd = data.dateTo.isAfter(end) ? end : data.dateTo;
-        if (actualStart.isAfter(actualEnd) || actualStart.isAtSameMomentAs(actualEnd)) {
+        if (actualStart.isAfter(actualEnd) ||
+            actualStart.isAtSameMomentAs(actualEnd)) {
           continue;
         }
 
@@ -181,7 +188,9 @@ class HealthConnectService {
         totalMinutes += currentEnd.difference(currentStart).inMinutes;
       }
 
-      return HealthReadResult.success(double.parse((totalMinutes / 60).toStringAsFixed(1)));
+      return HealthReadResult.success(
+        double.parse((totalMinutes / 60).toStringAsFixed(1)),
+      );
     } catch (_) {
       return HealthReadResult.error();
     }
@@ -222,8 +231,15 @@ class HealthConnectService {
       final steps = await getStepsForDate(date);
       final sleep = await getSleepForDate(date);
 
-      if (steps.status != HealthStatus.error || sleep.status != HealthStatus.error) {
-        results.add(HealthDailyData(dateStr: dateStr, stepsResult: steps, sleepResult: sleep));
+      if (steps.status != HealthStatus.error ||
+          sleep.status != HealthStatus.error) {
+        results.add(
+          HealthDailyData(
+            dateStr: dateStr,
+            stepsResult: steps,
+            sleepResult: sleep,
+          ),
+        );
       }
     }
 
@@ -250,8 +266,15 @@ class HealthConnectService {
       final steps = await getStepsForDate(date);
       final sleep = await getSleepForDate(date);
 
-      if (steps.status != HealthStatus.error || sleep.status != HealthStatus.error) {
-        results.add(HealthDailyData(dateStr: dateStr, stepsResult: steps, sleepResult: sleep));
+      if (steps.status != HealthStatus.error ||
+          sleep.status != HealthStatus.error) {
+        results.add(
+          HealthDailyData(
+            dateStr: dateStr,
+            stepsResult: steps,
+            sleepResult: sleep,
+          ),
+        );
       }
     }
 
@@ -263,9 +286,14 @@ class HealthConnectService {
     final dateStr = DateFormat('yyyy-MM-dd').format(now);
     final steps = await getTodaySteps();
     final sleep = await getSleepForDate(now);
-    
-    if (steps.status != HealthStatus.error || sleep.status != HealthStatus.error) {
-      return HealthDailyData(dateStr: dateStr, stepsResult: steps, sleepResult: sleep);
+
+    if (steps.status != HealthStatus.error ||
+        sleep.status != HealthStatus.error) {
+      return HealthDailyData(
+        dateStr: dateStr,
+        stepsResult: steps,
+        sleepResult: sleep,
+      );
     }
     return null;
   }
@@ -293,4 +321,3 @@ class HealthDailyData {
     required this.sleepResult,
   });
 }
-

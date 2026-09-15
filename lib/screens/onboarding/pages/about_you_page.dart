@@ -33,7 +33,8 @@ class AboutYouPage extends StatefulWidget {
   State<AboutYouPage> createState() => _AboutYouPageState();
 }
 
-class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderStateMixin {
+class _AboutYouPageState extends State<AboutYouPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
   String _nameError = '';
   String _heightError = '';
@@ -43,7 +44,9 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _staggerController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _staggerController.forward();
 
     widget.nameController.addListener(_validateInputs);
@@ -63,7 +66,8 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
   @override
   void didUpdateWidget(AboutYouPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.useKg != widget.useKg || oldWidget.showErrors != widget.showErrors) {
+    if (oldWidget.useKg != widget.useKg ||
+        oldWidget.showErrors != widget.showErrors) {
       _validateInputs();
     }
   }
@@ -100,7 +104,9 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
       }
     }
 
-    if (nError != _nameError || hError != _heightError || wError != _weightError) {
+    if (nError != _nameError ||
+        hError != _heightError ||
+        wError != _weightError) {
       setState(() {
         _nameError = nError;
         _heightError = hError;
@@ -180,7 +186,9 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                     padding: const EdgeInsets.only(top: 8.0, left: 4),
                     child: Text(
                       _nameError,
-                      style: context.text.caption.copyWith(color: context.colors.red),
+                      style: context.text.caption.copyWith(
+                        color: context.colors.red,
+                      ),
                     ),
                   ),
               ],
@@ -203,7 +211,9 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                   padding: const EdgeInsets.only(top: 8.0, left: 4),
                   child: Text(
                     'What should your AI coach call itself?',
-                    style: context.text.caption.copyWith(color: context.colors.textMedium),
+                    style: context.text.caption.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                   ),
                 ),
               ],
@@ -231,7 +241,9 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                           padding: const EdgeInsets.only(top: 8.0, left: 4),
                           child: Text(
                             _heightError,
-                            style: context.text.caption.copyWith(color: context.colors.red),
+                            style: context.text.caption.copyWith(
+                              color: context.colors.red,
+                            ),
                           ),
                         ),
                     ],
@@ -254,7 +266,9 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                           padding: const EdgeInsets.only(top: 8.0, left: 4),
                           child: Text(
                             _weightError,
-                            style: context.text.caption.copyWith(color: context.colors.red),
+                            style: context.text.caption.copyWith(
+                              color: context.colors.red,
+                            ),
                           ),
                         ),
                     ],
@@ -271,7 +285,10 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                 onTap: widget.onToggleUnit,
                 behavior: HitTestBehavior.opaque,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(100),
@@ -279,11 +296,17 @@ class _AboutYouPageState extends State<AboutYouPage> with SingleTickerProviderSt
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.swap_horiz_rounded, color: context.colors.primary, size: 16),
+                      Icon(
+                        Icons.swap_horiz_rounded,
+                        color: context.colors.primary,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Switch to ${widget.useKg ? 'Pounds' : 'Kilograms'}',
-                        style: context.text.caption.copyWith(color: context.colors.primary),
+                        style: context.text.caption.copyWith(
+                          color: context.colors.primary,
+                        ),
                       ),
                     ],
                   ),

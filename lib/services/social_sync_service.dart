@@ -87,11 +87,13 @@ class SocialSyncService {
         .collection('requests')
         .where('accepted', isEqualTo: false)
         .snapshots()
-        .map((snap) => snap.docs.map((doc) {
-              final data = doc.data();
-              data['fromUid'] = doc.id; // Force doc id to prevent payload forgery
-              return data;
-            }).toList());
+        .map(
+          (snap) => snap.docs.map((doc) {
+            final data = doc.data();
+            data['fromUid'] = doc.id; // Force doc id to prevent payload forgery
+            return data;
+          }).toList(),
+        );
   }
 
   Future<List<Map<String, dynamic>>> getPendingAcceptances() async {
@@ -140,7 +142,7 @@ class SocialSyncService {
           .collection('requests')
           .doc(currentUid);
       batch.set(theirRequestRef, {
-        'fromUid': currentUid, 
+        'fromUid': currentUid,
         'accepted': true,
         'acceptedAt': FieldValue.serverTimestamp(),
       });

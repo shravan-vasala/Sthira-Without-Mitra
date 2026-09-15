@@ -10,7 +10,10 @@ abstract class IAiFoodService {
     CancellationToken? cancellationToken,
   ]);
 
-  Future<Map<String, dynamic>?> analyzeFoodText(String description, [CancellationToken? cancellationToken]);
+  Future<Map<String, dynamic>?> analyzeFoodText(
+    String description, [
+    CancellationToken? cancellationToken,
+  ]);
 
   Stream<String> suggestMealStream({
     required int remainingCalories,

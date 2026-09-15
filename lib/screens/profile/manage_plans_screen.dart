@@ -23,14 +23,13 @@ class ManagePlansScreen extends ConsumerWidget {
         backgroundColor: context.colors.scaffoldBg,
         appBar: AppBar(
           title: const Text('Manage Plans'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          bottom: TabBar(
-            labelColor: context.colors.primary,
-            unselectedLabelColor: context.colors.textMedium,
-            indicatorColor: context.colors.primary,
+          leading: Navigator.canPop(context)
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_rounded),
+                  onPressed: () => Navigator.pop(context),
+                )
+              : null,
+          bottom: const TabBar(
             isScrollable: true,
             tabs: [
               const Tab(text: 'Workout Plans'),
@@ -53,7 +52,9 @@ class ManagePlansScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Active Workout',
-                          style: context.text.micro.copyWith(color: context.colors.textMedium),
+                          style: context.text.micro.copyWith(
+                            color: context.colors.textMedium,
+                          ),
                         ),
                         DropdownButton<String>(
                           value: profile.activeWorkoutPlan,
@@ -67,10 +68,7 @@ class ManagePlansScreen extends ConsumerWidget {
                               .map(
                                 (k) => DropdownMenuItem(
                                   value: k,
-                                  child: Text(
-                                    k,
-                                    style: context.text.body,
-                                  ),
+                                  child: Text(k, style: context.text.body),
                                 ),
                               )
                               .toList(),
@@ -103,7 +101,9 @@ class ManagePlansScreen extends ConsumerWidget {
                             ),
                             child: Text(
                               'Reset phase progress',
-                              style: context.text.micro.copyWith(color: context.colors.red),
+                              style: context.text.micro.copyWith(
+                                color: context.colors.red,
+                              ),
                             ),
                           ),
                       ],
@@ -116,7 +116,9 @@ class ManagePlansScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Active Meals',
-                          style: context.text.micro.copyWith(color: context.colors.textMedium),
+                          style: context.text.micro.copyWith(
+                            color: context.colors.textMedium,
+                          ),
                         ),
                         DropdownButton<String>(
                           value: profile.activeMealPlan,
@@ -130,10 +132,7 @@ class ManagePlansScreen extends ConsumerWidget {
                               .map(
                                 (k) => DropdownMenuItem(
                                   value: k,
-                                  child: Text(
-                                    k,
-                                    style: context.text.body,
-                                  ),
+                                  child: Text(k, style: context.text.body),
                                 ),
                               )
                               .toList(),
@@ -164,7 +163,9 @@ class ManagePlansScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'Daily Targets',
-                        style: context.text.micro.copyWith(color: context.colors.textMedium),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.textMedium,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -258,9 +259,9 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
       profile.customMealSlots,
     );
     updatedSlots.removeWhere((s) => s['id'] == slot['id']);
-    await ref.read(profileProvider.notifier).updateProfile(
-      profile.copyWith(customMealSlots: updatedSlots),
-    );
+    await ref
+        .read(profileProvider.notifier)
+        .updateProfile(profile.copyWith(customMealSlots: updatedSlots));
   }
 
   void _editSlot(Map<String, dynamic> slot, int index) {
@@ -321,23 +322,25 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
               builder: (context, value, child) {
                 final isValid = value.text.trim().isNotEmpty;
                 return ElevatedButton(
-                  onPressed: isValid ? () async {
-                    final profile = ref.read(profileProvider);
-                    final updatedSlots = List<Map<String, dynamic>>.from(
-                      profile.customMealSlots,
-                    );
-                    updatedSlots[index] = {
-                      ...slot,
-                      'name': nameCtrl.text.trim(),
-                      'emoji': selectedEmoji,
-                    };
-                    await ref
-                        .read(profileProvider.notifier)
-                        .updateProfile(
-                          profile.copyWith(customMealSlots: updatedSlots),
-                        );
-                    if (context.mounted) Navigator.pop(ctx);
-                  } : null,
+                  onPressed: isValid
+                      ? () async {
+                          final profile = ref.read(profileProvider);
+                          final updatedSlots = List<Map<String, dynamic>>.from(
+                            profile.customMealSlots,
+                          );
+                          updatedSlots[index] = {
+                            ...slot,
+                            'name': nameCtrl.text.trim(),
+                            'emoji': selectedEmoji,
+                          };
+                          await ref
+                              .read(profileProvider.notifier)
+                              .updateProfile(
+                                profile.copyWith(customMealSlots: updatedSlots),
+                              );
+                          if (context.mounted) Navigator.pop(ctx);
+                        }
+                      : null,
                   child: const Text('Save'),
                 );
               },
@@ -370,10 +373,7 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
               size: 24,
               color: context.colors.primary,
             ),
-            title: Text(
-              slot['name'] as String,
-              style: context.text.body,
-            ),
+            title: Text(slot['name'] as String, style: context.text.body),
             subtitle: Text(
               isDefault ? 'Default Slot' : 'Custom Recurring Slot',
             ),
@@ -410,7 +410,9 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
                               },
                               child: Text(
                                 'Delete',
-                                style: context.text.body.copyWith(color: context.colors.red),
+                                style: context.text.body.copyWith(
+                                  color: context.colors.red,
+                                ),
                               ),
                             ),
                           ],
@@ -511,7 +513,9 @@ class _PlanEditorState extends State<_PlanEditor> {
                             context: context,
                             builder: (ctx) => AlertDialog(
                               title: const Text('Unsaved Changes'),
-                              content: const Text('You have unsaved changes. Are you sure you want to discard them?'),
+                              content: const Text(
+                                'You have unsaved changes. Are you sure you want to discard them?',
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx, false),
@@ -519,7 +523,12 @@ class _PlanEditorState extends State<_PlanEditor> {
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx, true),
-                                  child: Text('Discard', style: context.text.body.copyWith(color: context.colors.red)),
+                                  child: Text(
+                                    'Discard',
+                                    style: context.text.body.copyWith(
+                                      color: context.colors.red,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -563,7 +572,9 @@ class _PlanEditorState extends State<_PlanEditor> {
                 controller: _controller,
                 maxLines: null,
                 expands: true,
-                style: context.text.micro.copyWith(color: context.colors.textDark),
+                style: context.text.micro.copyWith(
+                  color: context.colors.textDark,
+                ),
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.all(16),
                   border: InputBorder.none,
@@ -582,13 +593,15 @@ class _PlanEditorState extends State<_PlanEditor> {
     try {
       final decoded = jsonDecode(_controller.text);
       final newPlanName = decoded['planName']?.toString();
-      
+
       if (newPlanName != null && newPlanName != _selectedKey) {
         final confirmRename = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Rename Plan?'),
-            content: Text('You changed the plan name from "$_selectedKey" to "$newPlanName". Do you want to save it as a new plan or rename it?\n\n(Renaming will delete "$_selectedKey")'),
+            content: Text(
+              'You changed the plan name from "$_selectedKey" to "$newPlanName". Do you want to save it as a new plan or rename it?\n\n(Renaming will delete "$_selectedKey")',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, null),
@@ -605,31 +618,47 @@ class _PlanEditorState extends State<_PlanEditor> {
             ],
           ),
         );
-        
+
         if (confirmRename == null) return;
-        
+
         if (confirmRename == true) {
           // Rename logic
           if (widget.type == 'workout') {
-            final repo = ProviderScope.containerOf(context).read(workoutRepoProvider);
+            final repo = ProviderScope.containerOf(
+              context,
+            ).read(workoutRepoProvider);
             await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
-            
-            final profileNotifier = ProviderScope.containerOf(context).read(profileProvider.notifier);
-            final profile = ProviderScope.containerOf(context).read(profileProvider);
+
+            final profileNotifier = ProviderScope.containerOf(
+              context,
+            ).read(profileProvider.notifier);
+            final profile = ProviderScope.containerOf(
+              context,
+            ).read(profileProvider);
             if (profile.activeWorkoutPlan == _selectedKey) {
-              profileNotifier.updateProfile(profile.copyWith(activeWorkoutPlan: newPlanName));
+              profileNotifier.updateProfile(
+                profile.copyWith(activeWorkoutPlan: newPlanName),
+              );
             }
           } else if (widget.type == 'meal') {
-            final repo = ProviderScope.containerOf(context).read(mealRepoProvider);
+            final repo = ProviderScope.containerOf(
+              context,
+            ).read(mealRepoProvider);
             await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
-            
-            final profileNotifier = ProviderScope.containerOf(context).read(profileProvider.notifier);
-            final profile = ProviderScope.containerOf(context).read(profileProvider);
+
+            final profileNotifier = ProviderScope.containerOf(
+              context,
+            ).read(profileProvider.notifier);
+            final profile = ProviderScope.containerOf(
+              context,
+            ).read(profileProvider);
             if (profile.activeMealPlan == _selectedKey) {
-              profileNotifier.updateProfile(profile.copyWith(activeMealPlan: newPlanName));
+              profileNotifier.updateProfile(
+                profile.copyWith(activeMealPlan: newPlanName),
+              );
             }
           }
-          
+
           setState(() {
             _selectedKey = newPlanName;
           });
@@ -643,7 +672,7 @@ class _PlanEditorState extends State<_PlanEditor> {
       } else {
         await widget.saveJson(_selectedKey!, _controller.text);
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

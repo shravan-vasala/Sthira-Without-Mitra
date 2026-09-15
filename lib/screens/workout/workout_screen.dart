@@ -14,6 +14,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../widgets/primary_button.dart';
 import '../../utils/workout_formatting.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({
     super.key,
@@ -91,18 +92,24 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       (sum, s) =>
           sum +
           s.exercises
-              .where((e) => logRepo.hasLog(dateStr, e.instanceId ?? e.name ?? ''))
+              .where(
+                (e) => logRepo.hasLog(dateStr, e.instanceId ?? e.name ?? ''),
+              )
               .length,
     );
 
     final isFinished = ref
         .watch(workoutRepoProvider)
         .isWorkoutFinished(dateStr, widget.dayId);
-        
+
     final selectedDate = ref.watch(selectedDateProvider);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final selectedDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    final selectedDay = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    );
     final isFuture = selectedDay.isAfter(today);
 
     // Determine which sections to display
@@ -116,7 +123,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
     // Title: use section name when filtered, day label when showing all
     final String appBarTitle = isFiltered
-        ? formatSectionTitle(workoutDay.sections[_activeSectionIndex!].title, _activeSectionIndex!)
+        ? formatSectionTitle(
+            workoutDay.sections[_activeSectionIndex!].title,
+            _activeSectionIndex!,
+          )
         : workoutDay.label ?? workoutDay.dayId ?? '';
 
     // Progress counts for current view
@@ -125,90 +135,89 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         : totalExercises;
     final viewCompleted = isFiltered
         ? workoutDay.sections[_activeSectionIndex!].exercises
-              .where((e) => logRepo.hasLog(dateStr, e.instanceId ?? e.name ?? ''))
+              .where(
+                (e) => logRepo.hasLog(dateStr, e.instanceId ?? e.name ?? ''),
+              )
               .length
         : completedExercises;
 
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.sectionIndex != null)
+              Hero(
+                tag: 'workout-${widget.dayId}-section-${widget.sectionIndex}',
+                child: Material(
+                  color: Colors.transparent,
+                  child: Text(appBarTitle),
+                ),
+              )
+            else
+              Text(appBarTitle),
+            TweenAnimationBuilder<int>(
+              tween: IntTween(begin: 0, end: viewCompleted),
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutQuart,
+              builder: (context, value, child) {
+                return Text(
+                  '$value/$viewExercises exercises done',
+                  style: AppTheme.numeric(
+                    context.text.caption.copyWith(
+                      color: context.colors.textMedium,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+        actions: [
+          if (isFinished)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(right: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colors.greenLight,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: context.colors.green,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Done',
+                      style: context.text.caption.copyWith(
+                        color: context.colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ──────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_rounded),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (widget.sectionIndex != null)
-                          Hero(
-                            tag:
-                                'workout-${widget.dayId}-section-${widget.sectionIndex}',
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Text(
-                                appBarTitle,
-                                style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-                              ),
-                            ),
-                          )
-                        else
-                          Text(
-                            appBarTitle,
-                            style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-                          ),
-                          TweenAnimationBuilder<int>(
-                            tween: IntTween(begin: 0, end: viewCompleted),
-                            duration: const Duration(milliseconds: 600),
-                            curve: Curves.easeOutQuart,
-                            builder: (context, value, child) {
-                              return Text(
-                                '$value/$viewExercises exercises done',
-                                style: AppTheme.numeric(
-                                  context.text.caption.copyWith(color: context.colors.textMedium),
-                                ),
-                              );
-                            }
-                          ),
-                      ],
-                    ),
-                  ),
-                  if (isFinished)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: context.colors.greenLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: context.colors.green,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Done',
-                            style: context.text.caption.copyWith(color: context.colors.green),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
             const SizedBox(height: 12),
 
             // ── Progress bar (always total day progress) ─────────────────
@@ -240,7 +249,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     Text(
                       'Day total: $completedExercises/$totalExercises',
                       style: AppTheme.numeric(
-                        context.text.micro.copyWith(color: context.colors.textLight),
+                        context.text.micro.copyWith(
+                          color: context.colors.textLight,
+                        ),
                       ),
                     ),
                   ],
@@ -258,11 +269,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     horizontal: 16,
                     vertical: 10,
                   ),
-                    decoration: BoxDecoration(
-                      color: context.colors.insetSurface,
-                      borderRadius: BorderRadius.circular(14),
-                      // Sthira: No borders! Let floating backgrounds separate space
-                    ),
+                  decoration: BoxDecoration(
+                    color: context.colors.insetSurface,
+                    borderRadius: BorderRadius.circular(14),
+                    // Sthira: No borders! Let floating backgrounds separate space
+                  ),
                   child: Row(
                     children: [
                       Icon(
@@ -273,12 +284,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       const SizedBox(width: 8),
                       Text(
                         'Showing: ${formatSectionTitle(workoutDay.sections[_activeSectionIndex!].title, _activeSectionIndex!)}',
-                        style: context.text.caption.copyWith(color: context.colors.primary),
+                        style: context.text.caption.copyWith(
+                          color: context.colors.primary,
+                        ),
                       ),
                       const Spacer(),
                       Text(
                         'Show all →',
-                        style: context.text.micro.copyWith(color: context.colors.primary),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -302,7 +317,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         section: section,
                         sectionIndex: sectionIndex,
                         dayId: widget.dayId,
-                        jumpToIndex: (widget.sectionIndex == sectionIndex) ? widget.jumpToIndex : null,
+                        jumpToIndex: (widget.sectionIndex == sectionIndex)
+                            ? widget.jumpToIndex
+                            : null,
                       )
                       .animate(delay: (listIndex * 100).ms)
                       .fadeIn(duration: 400.ms, curve: Curves.easeOut)
@@ -327,13 +344,15 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 child: PrimaryButton(
                   label: 'Finish Workout',
                   icon: Icons.emoji_events_rounded,
-                  onPressed: isFuture ? null : () => _finishWorkout(
-                    context,
-                    ref,
-                    widget.dayId,
-                    completedExercises,
-                    totalExercises,
-                  ),
+                  onPressed: isFuture
+                      ? null
+                      : () => _finishWorkout(
+                          context,
+                          ref,
+                          widget.dayId,
+                          completedExercises,
+                          totalExercises,
+                        ),
                 ),
               ),
           ],
@@ -384,7 +403,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               Navigator.of(ctx).pop();
               await _persistWorkoutFinished(ref, dayId, status: 'partial');
               if (context.mounted) {
-                _executeFinish(context, ref, dayId, completed, total, isPartial: true);
+                _executeFinish(
+                  context,
+                  ref,
+                  dayId,
+                  completed,
+                  total,
+                  isPartial: true,
+                );
               }
             },
             child: const Text('Finish early'),
@@ -426,22 +452,36 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
 
-  Future<void> _persistWorkoutFinished(WidgetRef ref, String dayId, {String status = 'completed'}) async {
+  Future<void> _persistWorkoutFinished(
+    WidgetRef ref,
+    String dayId, {
+    String status = 'completed',
+  }) async {
     final dateStr = ref.read(dateStringProvider);
-    await ref.read(workoutRepoProvider).finishWorkout(dateStr, dayId, status: status);
-    await ref.read(dailyLogProvider.notifier).updateWorkoutStatus(dayId, status);
+    await ref
+        .read(workoutRepoProvider)
+        .finishWorkout(dateStr, dayId, status: status);
+    await ref
+        .read(dailyLogProvider.notifier)
+        .updateWorkoutStatus(dayId, status);
   }
 
   void _executeFinish(
-      BuildContext context, WidgetRef ref, String dayId, int completed, int total, {bool isPartial = false}) async {
+    BuildContext context,
+    WidgetRef ref,
+    String dayId,
+    int completed,
+    int total, {
+    bool isPartial = false,
+  }) async {
     if (!isPartial) {
       await _persistWorkoutFinished(ref, dayId, status: 'completed');
     }
     Haptics.toggle();
 
     final name = ref.read(profileProvider).name.trim();
-    final title = isPartial 
-        ? '$completed of $total exercises done!' 
+    final title = isPartial
+        ? '$completed of $total exercises done!'
         : (name.isEmpty ? 'Workout complete!' : 'Nice work, $name!');
 
     showDialog(
@@ -451,7 +491,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         alignment: Alignment.center,
         children: [
           Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
             backgroundColor: context.colors.card,
             child: Padding(
               padding: const EdgeInsets.all(32),
@@ -461,7 +503,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFD700).withValues(alpha: 0.12), // gold
+                      color: const Color(
+                        0xFFFFD700,
+                      ).withValues(alpha: 0.12), // gold
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -474,7 +518,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   Text(
                     title,
                     style: AppTheme.numeric(
-                      context.text.screenTitle.copyWith(color: context.colors.textDark),
+                      context.text.screenTitle.copyWith(
+                        color: context.colors.textDark,
+                      ),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -482,14 +528,18 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   Text(
                     '$completed / $total exercises completed.',
                     style: AppTheme.numeric(
-                      context.text.bodyStrong.copyWith(color: context.colors.primary),
+                      context.text.bodyStrong.copyWith(
+                        color: context.colors.primary,
+                      ),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Session saved. Head home to finish habits and meals if you have any left.',
-                    style: context.text.body.copyWith(color: context.colors.textMedium),
+                    style: context.text.body.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
@@ -509,9 +559,13 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
 
-  Widget _buildRestTimerBar(BuildContext context, WidgetRef ref, RestTimerState state) {
+  Widget _buildRestTimerBar(
+    BuildContext context,
+    WidgetRef ref,
+    RestTimerState state,
+  ) {
     if (!state.isActive) return const SizedBox.shrink();
-    
+
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -524,7 +578,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             color: context.colors.primary.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Row(
@@ -537,15 +591,21 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 width: 44,
                 height: 44,
                 child: CircularProgressIndicator(
-                  value: (state.remainingSeconds % 60) / 60, // visual only, assumes mostly < 2 mins
+                  value:
+                      (state.remainingSeconds % 60) /
+                      60, // visual only, assumes mostly < 2 mins
                   strokeWidth: 4,
-                  backgroundColor: context.colors.primary.withValues(alpha: 0.2),
+                  backgroundColor: context.colors.primary.withValues(
+                    alpha: 0.2,
+                  ),
                   valueColor: AlwaysStoppedAnimation(context.colors.primary),
                 ),
               ),
               Text(
                 '${state.remainingSeconds}',
-                style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.textDark,
+                ),
               ),
             ],
           ),
@@ -557,11 +617,15 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               children: [
                 Text(
                   'Resting',
-                  style: context.text.micro.copyWith(color: context.colors.textMedium),
+                  style: context.text.micro.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
                 Text(
                   state.exerciseName ?? 'Rest Timer',
-                  style: context.text.body.copyWith(color: context.colors.textDark),
+                  style: context.text.body.copyWith(
+                    color: context.colors.textDark,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -574,13 +638,19 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             children: [
               IconButton(
                 padding: EdgeInsets.zero,
-                icon: Icon(Icons.exposure_plus_1, color: context.colors.primary), // 30s roughly
-                onPressed: () => ref.read(restTimerProvider.notifier).addSeconds(30),
+                icon: Icon(
+                  Icons.exposure_plus_1,
+                  color: context.colors.primary,
+                ), // 30s roughly
+                onPressed: () =>
+                    ref.read(restTimerProvider.notifier).addSeconds(30),
               ),
               IconButton(
                 padding: EdgeInsets.zero,
                 icon: Icon(
-                  state.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded, 
+                  state.isPaused
+                      ? Icons.play_arrow_rounded
+                      : Icons.pause_rounded,
                   color: context.colors.primary,
                 ),
                 onPressed: () {
@@ -593,8 +663,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               ),
               IconButton(
                 padding: EdgeInsets.zero,
-                icon: Icon(Icons.skip_next_rounded, color: context.colors.textDark),
-                onPressed: () => ref.read(restTimerProvider.notifier).stopTimer(),
+                icon: Icon(
+                  Icons.skip_next_rounded,
+                  color: context.colors.textDark,
+                ),
+                onPressed: () =>
+                    ref.read(restTimerProvider.notifier).stopTimer(),
               ),
             ],
           ),
@@ -656,7 +730,9 @@ class _SectionWidgetState extends State<_SectionWidget> {
             horizontalPadding: 4,
             countLabel: Text(
               '${widget.section.exercises.length} exercises',
-              style: context.text.micro.copyWith(color: context.colors.textMedium),
+              style: context.text.micro.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -665,7 +741,9 @@ class _SectionWidgetState extends State<_SectionWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text(
                 'No exercises in this section.',
-                style: context.text.body.copyWith(color: context.colors.textMedium),
+                style: context.text.body.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
             )
           else
@@ -686,7 +764,7 @@ class _SectionWidgetState extends State<_SectionWidget> {
               return Container(
                 key: (widget.jumpToIndex == exerciseIndex) ? _jumpKey : null,
                 child: ExerciseCard(
-                  exercise: exercise, 
+                  exercise: exercise,
                   dayId: widget.dayId,
                   highlight: widget.jumpToIndex == exerciseIndex,
                 ),

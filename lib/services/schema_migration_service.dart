@@ -23,7 +23,6 @@ class SchemaMigrationService {
     // we bypass legacy local Hive migrations. Data is pulled from Firestore on sign-in.
 
     await isar.writeTxn(() async {
-
       await isar.appConfigs.put(
         AppConfig(key: _versionKey, value: currentSchemaVersion.toString()),
       );

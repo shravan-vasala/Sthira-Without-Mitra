@@ -35,11 +35,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _coachNameController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
-  
+
   final _nameFocus = FocusNode();
   final _heightFocus = FocusNode();
   final _weightFocus = FocusNode();
-  
+
   bool _useKg = true;
 
   double _targetCalories = 1250;
@@ -53,17 +53,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final profile = ref.read(profileProvider);
     _nameController.text = profile.name;
     _coachNameController.text = profile.coachName;
-    if (profile.height != null) _heightController.text = profile.height.toString();
+    if (profile.height != null)
+      _heightController.text = profile.height.toString();
     _useKg = profile.useKg;
     if (profile.currentWeight != null) {
-      final double displayW = _useKg ? profile.currentWeight! : profile.currentWeight! * 2.20462;
-      _weightController.text = displayW.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+      final double displayW = _useKg
+          ? profile.currentWeight!
+          : profile.currentWeight! * 2.20462;
+      _weightController.text = displayW
+          .toStringAsFixed(1)
+          .replaceAll(RegExp(r'\.0$'), '');
     }
     if (profile.targetCalories > 0) {
       _targetCalories = profile.targetCalories.toDouble();
       _isCaloriesManuallyEdited = true;
     }
-    
+
     final currentHabits = ref.read(habitRepoProvider).getHabits();
     if (currentHabits.isNotEmpty) {
       _selectedHabitIds.clear();
@@ -110,7 +115,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (_currentPage == 2) {
         if (_selectedHabitIds.isEmpty) return;
       }
-      
+
       if (_currentPage < _totalPages - 1) {
         HapticFeedback.selectionClick();
         _pageController.nextPage(
@@ -120,7 +125,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       } else {
         await _commitAllToDb();
         await ref.read(onboardingCompletedProvider.notifier).commitLocalSetup();
-        
+
         if (!mounted) return;
         HapticFeedback.lightImpact();
         setState(() {
@@ -154,7 +159,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       FocusScope.of(context).requestFocus(_nameFocus);
       return false;
     }
-    
+
     final hText = _heightController.text;
     if (hText.isNotEmpty) {
       final h = double.tryParse(hText);
@@ -194,25 +199,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
 
     final current = ref.read(profileProvider);
-    await ref.read(profileProvider.notifier).updateProfile(
-      current.copyWith(
-        name: _nameController.text.trim(),
-        coachName: _coachNameController.text.trim(),
-        height: finalHeight,
-        clearHeight: hText.isEmpty,
-        currentWeight: finalWeight,
-        clearCurrentWeight: wText.isEmpty,
-        useKg: _useKg,
-        targetCalories: _targetCalories.round(),
-        targetProteinG: _targetMacros?.proteinG,
-        targetCarbsG: _targetMacros?.carbsG,
-        targetFatG: _targetMacros?.fatG,
-      ),
-    );
+    await ref
+        .read(profileProvider.notifier)
+        .updateProfile(
+          current.copyWith(
+            name: _nameController.text.trim(),
+            coachName: _coachNameController.text.trim(),
+            height: finalHeight,
+            clearHeight: hText.isEmpty,
+            currentWeight: finalWeight,
+            clearCurrentWeight: wText.isEmpty,
+            useKg: _useKg,
+            targetCalories: _targetCalories.round(),
+            targetProteinG: _targetMacros?.proteinG,
+            targetCarbsG: _targetMacros?.carbsG,
+            targetFatG: _targetMacros?.fatG,
+          ),
+        );
 
     final habitRepo = ref.read(habitRepoProvider);
     final currentHabits = habitRepo.getHabits();
-    
+
     for (final defHabit in Habit.defaults) {
       final isSelected = _selectedHabitIds.contains(defHabit.id);
       final exists = currentHabits.any((h) => h.id == defHabit.id);
@@ -239,95 +246,102 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         canPop: _currentPage == 0,
         onPopInvokedWithResult: (didPop, result) {
           if (!didPop && !_isSaving) {
-             _goBack();
+            _goBack();
           }
         },
         child: Stack(
           children: [
             SthiraAuraBackground(currentPage: _currentPage),
             SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (i) => setState(() => _currentPage = i),
-                    children: [
-                      const WelcomePage(),
-                      AboutYouPage(
-                        nameController: _nameController,
-                        coachController: _coachNameController,
-                        heightController: _heightController,
-                        weightController: _weightController,
-                        nameFocus: _nameFocus,
-                        heightFocus: _heightFocus,
-                        weightFocus: _weightFocus,
-                        useKg: _useKg,
-                        showErrors: _showErrors,
-                        onToggleUnit: () {
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            final wText = _weightController.text;
-                            if (wText.isNotEmpty) {
-                              final w = double.tryParse(wText);
-                              if (w != null) {
-                                if (_useKg) {
-                                  _weightController.text = (w * 2.20462).round().toString();
-                                } else {
-                                  _weightController.text = (w / 2.20462).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+              child: Column(
+                children: [
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (i) => setState(() => _currentPage = i),
+                      children: [
+                        const WelcomePage(),
+                        AboutYouPage(
+                          nameController: _nameController,
+                          coachController: _coachNameController,
+                          heightController: _heightController,
+                          weightController: _weightController,
+                          nameFocus: _nameFocus,
+                          heightFocus: _heightFocus,
+                          weightFocus: _weightFocus,
+                          useKg: _useKg,
+                          showErrors: _showErrors,
+                          onToggleUnit: () {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              final wText = _weightController.text;
+                              if (wText.isNotEmpty) {
+                                final w = double.tryParse(wText);
+                                if (w != null) {
+                                  if (_useKg) {
+                                    _weightController.text = (w * 2.20462)
+                                        .round()
+                                        .toString();
+                                  } else {
+                                    _weightController.text = (w / 2.20462)
+                                        .toStringAsFixed(1)
+                                        .replaceAll(RegExp(r'\.0$'), '');
+                                  }
                                 }
                               }
-                            }
-                            _useKg = !_useKg;
-                          });
-                        },
-                      ),
-                      YourPlanPage(
-                        initialCalories: _targetCalories,
-                        heightCm: double.tryParse(_heightController.text),
-                        weightKg: double.tryParse(_weightController.text) != null
-                            ? (_useKg
-                                ? double.parse(_weightController.text)
-                                : double.parse(_weightController.text) / 2.20462)
-                            : null,
-                        selectedHabitIds: _selectedHabitIds,
-                        isManuallyEdited: _isCaloriesManuallyEdited,
-                        onCaloriesChanged: (v, manual) {
-                          _targetCalories = v;
-                          _isCaloriesManuallyEdited = manual;
-                        },
-                        onMacrosChanged: (m) => _targetMacros = m,
-                        onHabitToggled: (id, selected) {
-                          HapticFeedback.selectionClick();
-                          setState(() {
-                            if (selected) {
-                              if (!_selectedHabitIds.contains(id)) _selectedHabitIds.add(id);
-                            } else {
-                              if (_selectedHabitIds.length > 1) {
-                                _selectedHabitIds.remove(id);
+                              _useKg = !_useKg;
+                            });
+                          },
+                        ),
+                        YourPlanPage(
+                          initialCalories: _targetCalories,
+                          heightCm: double.tryParse(_heightController.text),
+                          weightKg:
+                              double.tryParse(_weightController.text) != null
+                              ? (_useKg
+                                    ? double.parse(_weightController.text)
+                                    : double.parse(_weightController.text) /
+                                          2.20462)
+                              : null,
+                          selectedHabitIds: _selectedHabitIds,
+                          isManuallyEdited: _isCaloriesManuallyEdited,
+                          onCaloriesChanged: (v, manual) {
+                            _targetCalories = v;
+                            _isCaloriesManuallyEdited = manual;
+                          },
+                          onMacrosChanged: (m) => _targetMacros = m,
+                          onHabitToggled: (id, selected) {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              if (selected) {
+                                if (!_selectedHabitIds.contains(id))
+                                  _selectedHabitIds.add(id);
+                              } else {
+                                if (_selectedHabitIds.length > 1) {
+                                  _selectedHabitIds.remove(id);
+                                }
                               }
-                            }
-                          });
-                        },
-                      ),
-                      const ConnectPage(),
-                    ],
+                            });
+                          },
+                        ),
+                        const ConnectPage(),
+                      ],
+                    ),
                   ),
-                ),
-                _NavButtons(
-                  currentPage: _currentPage,
-                  totalPages: _totalPages,
-                  canGoNext: _canGoNext(),
-                  isSaving: _isSaving,
-                  onNext: _goNext,
-                  onBack: _goBack,
-                ),
-              ],
+                  _NavButtons(
+                    currentPage: _currentPage,
+                    totalPages: _totalPages,
+                    canGoNext: _canGoNext(),
+                    isSaving: _isSaving,
+                    onNext: _goNext,
+                    onBack: _goBack,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -380,7 +394,9 @@ class _NavButtons extends StatelessWidget {
                 width: active ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: active || completed ? context.colors.primary : Colors.white.withValues(alpha: 0.2),
+                  color: active || completed
+                      ? context.colors.primary
+                      : Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -399,21 +415,31 @@ class _NavButtons extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: context.colors.onPrimary.withValues(alpha: 0.05),
                     ),
-                    child: Icon(Icons.arrow_back_rounded, color: context.colors.onPrimary.withValues(alpha: 0.7)),
+                    child: Icon(
+                      Icons.arrow_back_rounded,
+                      color: context.colors.onPrimary.withValues(alpha: 0.7),
+                    ),
                   ),
                 )
               else
                 const SizedBox(width: 48), // spacer placeholder for first page
-                
+
               ElevatedButton(
                 onPressed: canGoNext ? onNext : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.colors.primary,
                   foregroundColor: context.colors.onPrimary,
-                  disabledBackgroundColor: context.colors.primary.withValues(alpha: 0.3),
-                  disabledForegroundColor: context.colors.onPrimary.withValues(alpha: 0.5),
+                  disabledBackgroundColor: context.colors.primary.withValues(
+                    alpha: 0.3,
+                  ),
+                  disabledForegroundColor: context.colors.onPrimary.withValues(
+                    alpha: 0.5,
+                  ),
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(kButtonRadius),
                   ),
@@ -422,11 +448,18 @@ class _NavButtons extends StatelessWidget {
                     ? SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: context.colors.onPrimary),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: context.colors.onPrimary,
+                        ),
                       )
                     : Text(
                         _isLastPage ? 'Start my journey' : 'Next',
-                        style: context.text.bodyStrong.copyWith(color: canGoNext ? context.colors.onPrimary : context.colors.onPrimary.withValues(alpha: 0.5)),
+                        style: context.text.bodyStrong.copyWith(
+                          color: canGoNext
+                              ? context.colors.onPrimary
+                              : context.colors.onPrimary.withValues(alpha: 0.5),
+                        ),
                       ),
               ),
             ],

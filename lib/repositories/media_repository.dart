@@ -28,7 +28,9 @@ class MediaRepository {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final uuidStr = const Uuid().v4();
     final extension = sourcePath.split('.').last.toLowerCase();
-    final ext = ['jpg', 'jpeg', 'png', 'webp'].contains(extension) ? extension : 'jpg';
+    final ext = ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
+        ? extension
+        : 'jpg';
     final relPath = '$category/${category}_${timestamp}_$uuidStr.$ext';
     final destPath = kIsWeb ? sourcePath : '$_baseDir/$relPath';
 
@@ -54,7 +56,9 @@ class MediaRepository {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final uuidStr = const Uuid().v4();
     final relPath = 'progress_photos/${date}_${timestamp}_$uuidStr.jpg';
-    final destPath = kIsWeb ? 'web_photo_${date}_${timestamp}_$uuidStr.jpg' : '$_baseDir/$relPath';
+    final destPath = kIsWeb
+        ? 'web_photo_${date}_${timestamp}_$uuidStr.jpg'
+        : '$_baseDir/$relPath';
 
     File? copiedFile;
     if (!kIsWeb) {
@@ -76,7 +80,9 @@ class MediaRepository {
       });
     } catch (e) {
       if (copiedFile != null && await copiedFile.exists()) {
-        try { await copiedFile.delete(); } catch(_) {}
+        try {
+          await copiedFile.delete();
+        } catch (_) {}
       }
       rethrow;
     }
@@ -110,14 +116,16 @@ class MediaRepository {
       weight: weight,
       note: note,
     );
-    
+
     try {
       await _isar.writeTxn(() async {
         await _isar.progressPhotos.put(meta);
       });
     } catch (e) {
       if (copiedFile != null && await copiedFile.exists()) {
-        try { await copiedFile.delete(); } catch (_) {}
+        try {
+          await copiedFile.delete();
+        } catch (_) {}
       }
       rethrow;
     }
@@ -130,7 +138,8 @@ class MediaRepository {
       throw ArgumentError('Path traversal detected');
     }
     if (kIsWeb) return storedPath;
-    if (storedPath.startsWith('/')) { // legacy absolute path
+    if (storedPath.startsWith('/')) {
+      // legacy absolute path
       if (storedPath.contains('trufit_media/')) {
         final rel = storedPath.split('trufit_media/').last;
         return '$_baseDir/$rel';
@@ -200,7 +209,9 @@ class MediaRepository {
     if (!kIsWeb) {
       final file = File(getAbsolutePath(photoPath));
       if (await file.exists()) {
-        try { await file.delete(); } catch (_) {}
+        try {
+          await file.delete();
+        } catch (_) {}
       }
     }
   }

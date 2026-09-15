@@ -14,7 +14,7 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
-      
+
   final actionStream = StreamController<NotificationResponse>.broadcast();
 
   bool _initialized = false;
@@ -58,10 +58,13 @@ class NotificationService {
       _initialized = result ?? false;
 
       // Handle App Launch explicitly for Prompt 01 fix
-      final details = await _notificationsPlugin.getNotificationAppLaunchDetails();
-      if (details != null && details.didNotificationLaunchApp && details.notificationResponse != null) {
-         // Emit via Future microtask to ensure router is ready
-         Future.microtask(() => actionStream.add(details.notificationResponse!));
+      final details = await _notificationsPlugin
+          .getNotificationAppLaunchDetails();
+      if (details != null &&
+          details.didNotificationLaunchApp &&
+          details.notificationResponse != null) {
+        // Emit via Future microtask to ensure router is ready
+        Future.microtask(() => actionStream.add(details.notificationResponse!));
       }
     } catch (e) {
       debugPrint('Failed to initialize local notifications: $e');
@@ -69,27 +72,36 @@ class NotificationService {
   }
 
   void _onNotificationResponse(NotificationResponse response) {
-    debugPrint('Notification Action received: ${response.actionId} with payload: ${response.payload}');
+    debugPrint(
+      'Notification Action received: ${response.actionId} with payload: ${response.payload}',
+    );
     actionStream.add(response);
   }
 
   Future<bool> requestPermissions() async {
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+        _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
 
     if (androidImplementation != null) {
-      final bool? granted = await androidImplementation.requestNotificationsPermission();
+      final bool? granted = await androidImplementation
+          .requestNotificationsPermission();
       // Do not bind inexact routine permissions to exact alarms.
-      return granted ?? false; 
+      return granted ?? false;
     }
     return false;
   }
-  
+
   Future<bool> requestExactAlarmPermission() async {
-    final androidImplementation = _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (androidImplementation != null) {
-      final bool? exactGranted = await androidImplementation.requestExactAlarmsPermission();
+      final bool? exactGranted = await androidImplementation
+          .requestExactAlarmsPermission();
       return exactGranted ?? false;
     }
     return false;
@@ -110,17 +122,22 @@ class NotificationService {
 
   /// Cancels habits (1000-1031)
   Future<void> cancelHabits() => cancelRange(1000, 1031);
+
   /// Cancels meals (2000-2031 lunch, 2100-2131 dinner)
   Future<void> cancelMeals() async {
     await cancelRange(2000, 2031);
     await cancelRange(2100, 2131);
   }
+
   /// Cancels workouts (3000-3031)
   Future<void> cancelWorkouts() => cancelRange(3000, 3031);
+
   /// Cancels backups (4000)
   Future<void> cancelBackup() => cancelRange(4000, 4000);
+
   /// Cancels photos (5000)
   Future<void> cancelPhotos() => cancelRange(5000, 5000);
+
   /// Cancels body fat (6000)
   Future<void> cancelBodyFat() => cancelRange(6000, 6000);
 
@@ -141,10 +158,22 @@ class NotificationService {
 
     final actions = <AndroidNotificationAction>[];
     if (addSnooze) {
-      actions.add(const AndroidNotificationAction('snooze', 'Snooze', showsUserInterface: true));
+      actions.add(
+        const AndroidNotificationAction(
+          'snooze',
+          'Snooze',
+          showsUserInterface: true,
+        ),
+      );
     }
     if (addSkip) {
-      actions.add(const AndroidNotificationAction('skip', 'Skip Today', showsUserInterface: true));
+      actions.add(
+        const AndroidNotificationAction(
+          'skip',
+          'Skip Today',
+          showsUserInterface: true,
+        ),
+      );
     }
 
     await _notificationsPlugin.zonedSchedule(
@@ -163,7 +192,8 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       payload: payload,
     );
   }
@@ -216,8 +246,6 @@ class NotificationService {
       // Ignore
     }
   }
-
-
 }
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {

@@ -32,14 +32,13 @@ class WeeklySummaryScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text(
-          'Weekly Progress',
-          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: context.colors.textDark),
+        title: const Text('Weekly Progress'),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -50,7 +49,9 @@ class WeeklySummaryScreen extends ConsumerWidget {
             children: [
               Text(
                 titleText,
-                style: context.text.body.copyWith(color: context.colors.textMedium),
+                style: context.text.body.copyWith(
+                  color: context.colors.textMedium,
+                ),
                 textAlign: TextAlign.center,
               ).animate().fade().slideY(begin: -0.2),
 
@@ -275,13 +276,17 @@ class _ScoreHeroCard extends StatelessWidget {
               ),
               child: Text(
                 'PERFECT WEEK ✨',
-                style: context.text.micro.copyWith(color: context.colors.onPrimary),
+                style: context.text.micro.copyWith(
+                  color: context.colors.onPrimary,
+                ),
               ),
             )
           else
             Text(
               'Week Score',
-              style: context.text.body.copyWith(color: context.colors.textMedium),
+              style: context.text.body.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
 
           const SizedBox(height: 12),
@@ -308,7 +313,9 @@ class _ScoreHeroCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     message,
-                    style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                    style: context.text.cardTitle.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   ),
                 ],
               );
@@ -417,7 +424,9 @@ class _InsightsStrip extends StatelessWidget {
           Expanded(
             child: Text(
               insights.first,
-              style: context.text.caption.copyWith(color: context.colors.primary),
+              style: context.text.caption.copyWith(
+                color: context.colors.primary,
+              ),
             ),
           ),
         ],
@@ -457,7 +466,9 @@ class _DailyScoresChartCard extends ConsumerWidget {
               const SizedBox(width: 8),
               Text(
                 'DAILY SCORES',
-                style: context.text.caption.copyWith(color: context.colors.textMedium),
+                style: context.text.caption.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
             ],
           ),
@@ -500,7 +511,9 @@ class _DailyScoresChartCard extends ConsumerWidget {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             days[i],
-                            style: context.text.micro.copyWith(color: context.colors.textMedium),
+                            style: context.text.micro.copyWith(
+                              color: context.colors.textMedium,
+                            ),
                           ),
                         );
                       },
@@ -561,7 +574,11 @@ class _HabitChartCard extends StatelessWidget {
   final List<double> rates;
   final List<int> totals;
   final DateTime startOfWeek;
-  const _HabitChartCard({required this.rates, required this.totals, required this.startOfWeek});
+  const _HabitChartCard({
+    required this.rates,
+    required this.totals,
+    required this.startOfWeek,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -586,7 +603,9 @@ class _HabitChartCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'HABIT COMPLETION',
-                style: context.text.caption.copyWith(color: context.colors.textMedium),
+                style: context.text.caption.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
             ],
           ),
@@ -611,7 +630,9 @@ class _HabitChartCard extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             days[i],
-                            style: context.text.micro.copyWith(color: context.colors.textMedium),
+                            style: context.text.micro.copyWith(
+                              color: context.colors.textMedium,
+                            ),
                           ),
                         );
                       },
@@ -631,13 +652,19 @@ class _HabitChartCard extends StatelessWidget {
                 borderData: FlBorderData(show: false),
                 barGroups: List.generate(7, (i) {
                   final d = startOfWeek.add(Duration(days: i));
-                  final isFuture = d.isAfter(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+                  final isFuture = d.isAfter(
+                    DateTime(
+                      DateTime.now().year,
+                      DateTime.now().month,
+                      DateTime.now().day,
+                    ),
+                  );
                   final isUnscheduled = totals[i] == 0;
-                  
-                  final barColor = (isFuture || isUnscheduled) 
-                      ? context.colors.border 
+
+                  final barColor = (isFuture || isUnscheduled)
+                      ? context.colors.border
                       : context.colors.primary;
-                      
+
                   final backColor = (isFuture || isUnscheduled)
                       ? context.colors.border.withValues(alpha: 0.1)
                       : context.colors.primary.withValues(alpha: 0.1);
@@ -733,7 +760,9 @@ class _StatCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: context.text.caption.copyWith(color: context.colors.textMedium),
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -744,14 +773,17 @@ class _StatCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (numericValue != null) 
+              if (numericValue != null)
                 Builder(
                   builder: (context) {
-                    final display = '${numericValue!.toStringAsFixed(decimals)}${unit ?? ''}';
+                    final display =
+                        '${numericValue!.toStringAsFixed(decimals)}${unit ?? ''}';
                     return Text(
                       display,
                       style: AppTheme.numeric(
-                        context.text.screenTitle.copyWith(color: context.colors.textDark),
+                        context.text.screenTitle.copyWith(
+                          color: context.colors.textDark,
+                        ),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -762,7 +794,9 @@ class _StatCard extends StatelessWidget {
                 Text(
                   primaryValue ?? '',
                   style: AppTheme.numeric(
-                    context.text.screenTitle.copyWith(color: context.colors.textDark),
+                    context.text.screenTitle.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -774,7 +808,9 @@ class _StatCard extends StatelessWidget {
                   child: Text(
                     trendValue!,
                     style: AppTheme.numeric(
-                      context.text.micro.copyWith(color: trendColor ?? context.colors.textMedium),
+                      context.text.micro.copyWith(
+                        color: trendColor ?? context.colors.textMedium,
+                      ),
                     ),
                   ),
                 ),
@@ -798,28 +834,32 @@ class _WeeklyShareSection extends ConsumerStatefulWidget {
   final WeeklySummary summary;
   final String titleText;
 
-  const _WeeklyShareSection({
-    required this.summary,
-    required this.titleText,
-  });
+  const _WeeklyShareSection({required this.summary, required this.titleText});
 
   @override
-  ConsumerState<_WeeklyShareSection> createState() => _WeeklyShareSectionState();
+  ConsumerState<_WeeklyShareSection> createState() =>
+      _WeeklyShareSectionState();
 }
 
 class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
   bool _isSharing = false;
 
-  void _shareImage(BuildContext context, WeeklySummary summary, String title, String name) async {
+  void _shareImage(
+    BuildContext context,
+    WeeklySummary summary,
+    String title,
+    String name,
+  ) async {
     if (_isSharing) return;
     setState(() => _isSharing = true);
-    
+
     try {
       Color baseColor = context.colors.green;
       if (summary.weekScore < 50) {
         baseColor = context.colors.red;
-      } else if (summary.weekScore < 80) baseColor = context.colors.orange;
-      
+      } else if (summary.weekScore < 80)
+        baseColor = context.colors.orange;
+
       final layout = WeeklyShareLayout(
         format: ShareFormat.post,
         userName: name,
@@ -854,12 +894,19 @@ class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
   @override
   Widget build(BuildContext context) {
     final name = ref.watch(profileProvider).name;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton.icon(
-          onPressed: _isSharing ? null : () => _shareImage(context, widget.summary, widget.titleText, name),
+          onPressed: _isSharing
+              ? null
+              : () => _shareImage(
+                  context,
+                  widget.summary,
+                  widget.titleText,
+                  name,
+                ),
           icon: _isSharing
               ? const SizedBox(
                   width: 20,

@@ -334,35 +334,41 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
         return;
       }
 
-      final warningText = (verify.errorMessage != null) ? '\n\n${verify.errorMessage}' : '';
+      final warningText = (verify.errorMessage != null)
+          ? '\n\n${verify.errorMessage}'
+          : '';
 
-      final shouldRestore = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Restore Backup?'),
-          content: Text(
-            'App Version: ${verify.appVersion}\n'
-            'Created At: ${verify.createdAt != 'Unknown' ? DateFormat('MMM dd, yyyy · HH:mm').format(DateTime.parse(verify.createdAt)) : 'Unknown'}\n'
-            'Entries: ${verify.totalEntries}\n'
-            'Photos: ${verify.photoCount}\n\n'
-            'WARNING: Restoring will completely overwrite all your current data. A pre-restore safety backup will be created in your app documents directory.'
-            '$warningText',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(
-                'Restore',
-                style: context.text.body.copyWith(color: context.colors.red),
+      final shouldRestore =
+          await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Restore Backup?'),
+              content: Text(
+                'App Version: ${verify.appVersion}\n'
+                'Created At: ${verify.createdAt != 'Unknown' ? DateFormat('MMM dd, yyyy · HH:mm').format(DateTime.parse(verify.createdAt)) : 'Unknown'}\n'
+                'Entries: ${verify.totalEntries}\n'
+                'Photos: ${verify.photoCount}\n\n'
+                'WARNING: Restoring will completely overwrite all your current data. A pre-restore safety backup will be created in your app documents directory.'
+                '$warningText',
               ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(
+                    'Restore',
+                    style: context.text.body.copyWith(
+                      color: context.colors.red,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ) ?? false;
+          ) ??
+          false;
 
       if (!shouldRestore) {
         if (mounted) setState(() => _isLoading = false);
@@ -376,7 +382,9 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
       await syncService.pauseAndDrainSync();
 
       try {
-        await backupService.createBackup(includeMedia: true); // Pre-restore safety backup
+        await backupService.createBackup(
+          includeMedia: true,
+        ); // Pre-restore safety backup
 
         final result = await backupService.restoreBackup(
           path,
@@ -398,9 +406,11 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                 result.failedPhotosCount > 0
                     ? 'Restore Complete (with errors)'
                     : 'Restore Complete 🎉',
-                style: context.text.body.copyWith(color: result.failedPhotosCount > 0
+                style: context.text.body.copyWith(
+                  color: result.failedPhotosCount > 0
                       ? context.colors.orange
-                      : context.colors.green),
+                      : context.colors.green,
+                ),
               ),
               content: Text(
                 result.failedPhotosCount > 0
@@ -408,11 +418,11 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                     : 'Restore complete. Your data has been loaded.',
               ),
               actions: [
-                 TextButton(
-                   onPressed: () => Navigator.pop(ctx),
-                   child: const Text('OK'),
-                 )
-              ]
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('OK'),
+                ),
+              ],
             ),
           );
         } else {
@@ -455,11 +465,13 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: Text(
-          'Backup & Restore',
-          style: context.text.screenTitle.copyWith(color: context.colors.textDark),
-        ),
-        backgroundColor: context.colors.scaffoldBg,
+        title: const Text('Backup & Restore'),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: Stack(
         children: [
@@ -484,7 +496,9 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                           children: [
                             Text(
                               'Last Backup',
-                              style: context.text.body.copyWith(color: context.colors.textMedium),
+                              style: context.text.body.copyWith(
+                                color: context.colors.textMedium,
+                              ),
                             ),
                             if (_isLastBackupEncrypted) ...[
                               const SizedBox(width: 4),
@@ -499,24 +513,32 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                         const SizedBox(height: 8),
                         Text(
                           _lastBackupDate,
-                          style: context.text.cardTitle.copyWith(color: context.colors.primary),
+                          style: context.text.cardTitle.copyWith(
+                            color: context.colors.primary,
+                          ),
                         ),
                         if (_lastBackupSize.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
                             _lastBackupSize,
-                            style: context.text.micro.copyWith(color: context.colors.textMedium),
+                            style: context.text.micro.copyWith(
+                              color: context.colors.textMedium,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 20),
                         Text(
                           'Last Auto-Backup (Weekly)',
-                          style: context.text.body.copyWith(color: context.colors.textMedium),
+                          style: context.text.body.copyWith(
+                            color: context.colors.textMedium,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _lastAutoBackupDate,
-                          style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                          style: context.text.bodyStrong.copyWith(
+                            color: context.colors.textDark,
+                          ),
                         ),
                       ],
                     ),
@@ -526,7 +548,9 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                     children: [
                       Text(
                         'ENCRYPT BACKUP',
-                        style: context.text.caption.copyWith(color: context.colors.primary),
+                        style: context.text.caption.copyWith(
+                          color: context.colors.primary,
+                        ),
                       ),
                       const Spacer(),
                       Switch(
@@ -638,17 +662,25 @@ class _ActionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: context.text.bodyStrong.copyWith(color: context.colors.textDark),
+                    style: context.text.bodyStrong.copyWith(
+                      color: context.colors.textDark,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: context.text.caption.copyWith(color: context.colors.textMedium),
+                    style: context.text.caption.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: context.colors.textLight, size: 16),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: context.colors.textLight,
+              size: 16,
+            ),
           ],
         ),
       ),

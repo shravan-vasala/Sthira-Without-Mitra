@@ -50,7 +50,10 @@ class MealsCard extends ConsumerWidget {
     final isFuture = selectedDate.isAfter(today);
     final isToday = selectedDate.isAtSameMomentAs(today);
 
-    final int totalMeals = MealCompletion.calculateTotalMeals(profile, dailyLog);
+    final int totalMeals = MealCompletion.calculateTotalMeals(
+      profile,
+      dailyLog,
+    );
 
     final slots = <({String id, String name, String emoji})>[];
     for (final s in profile.customMealSlots) {
@@ -91,13 +94,19 @@ class MealsCard extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isToday ? "Today's Meals" : (isFuture ? "Upcoming Meals" : "Meals"),
-                              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                              isToday
+                                  ? "Today's Meals"
+                                  : (isFuture ? "Upcoming Meals" : "Meals"),
+                              style: context.text.cardTitle.copyWith(
+                                color: context.colors.textDark,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               planName,
-                              style: context.text.caption.copyWith(color: context.colors.textMedium),
+                              style: context.text.caption.copyWith(
+                                color: context.colors.textMedium,
+                              ),
                             ),
                           ],
                         ),
@@ -114,9 +123,13 @@ class MealsCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: progress,
-                      backgroundColor: context.colors.primary.withValues(alpha: 0.12),
+                      backgroundColor: context.colors.primary.withValues(
+                        alpha: 0.12,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isOverTarget ? context.colors.orange : context.colors.green,
+                        isOverTarget
+                            ? context.colors.orange
+                            : context.colors.green,
                       ),
                       minHeight: 6,
                     ),
@@ -124,7 +137,9 @@ class MealsCard extends ConsumerWidget {
                   const SizedBox(height: 10),
                   TweenAnimationBuilder<int>(
                     tween: IntTween(begin: 0, end: completedCal),
-                    duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1400),
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 1400),
                     curve: Curves.easeOutQuart,
                     builder: (context, val, child) {
                       return Text(
@@ -137,40 +152,42 @@ class MealsCard extends ConsumerWidget {
                               context.text.body,
                         ),
                       );
-                    }
+                    },
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       _MacroPill(
-                            label: 'P',
-                            value: dailyLog.totalProtein,
-                            color: context.colors.green,
-                          ),
+                        label: 'P',
+                        value: dailyLog.totalProtein,
+                        color: context.colors.green,
+                      ),
                       const SizedBox(width: 6),
                       _MacroPill(
-                            label: 'C',
-                            value: dailyLog.totalCarbs,
-                            color: context.colors.orange,
-                          ),
+                        label: 'C',
+                        value: dailyLog.totalCarbs,
+                        color: context.colors.orange,
+                      ),
                       const SizedBox(width: 6),
                       _MacroPill(
-                            label: 'F',
-                            value: dailyLog.totalFat,
-                            color: context.colors.primary,
-                          ),
+                        label: 'F',
+                        value: dailyLog.totalFat,
+                        color: context.colors.primary,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Text(
                     isFuture || isToday
                         ? (isOverTarget
-                            ? '${completedCal - totalCal} kcal above target'
-                            : '${totalCal - completedCal} kcal remaining · ${(profile.targetProteinG - dailyLog.totalProtein).clamp(0, 999).toStringAsFixed(0)}g protein to target')
+                              ? '${completedCal - totalCal} kcal above target'
+                              : '${totalCal - completedCal} kcal remaining · ${(profile.targetProteinG - dailyLog.totalProtein).clamp(0, 999).toStringAsFixed(0)}g protein to target')
                         : (isOverTarget
-                            ? '${completedCal - totalCal} kcal above target'
-                            : 'Below target by ${totalCal - completedCal} kcal'),
-                    style: context.text.micro.copyWith(color: context.colors.textMedium),
+                              ? '${completedCal - totalCal} kcal above target'
+                              : 'Below target by ${totalCal - completedCal} kcal'),
+                    style: context.text.micro.copyWith(
+                      color: context.colors.textMedium,
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -198,22 +215,24 @@ class _MacroPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15), // Bumped alpha slightly after removing border
+        color: color.withValues(
+          alpha: 0.15,
+        ), // Bumped alpha slightly after removing border
         borderRadius: BorderRadius.circular(6),
         // Sthira: Borders eradicated
       ),
       child: TweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0, end: value),
-        duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1400),
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 1400),
         curve: Curves.easeOutQuart,
         builder: (context, val, child) {
           return Text(
             '$label: ${val.toStringAsFixed(0)}g',
-            style: AppTheme.numeric(
-              context.text.micro.copyWith(color: color),
-            ),
+            style: AppTheme.numeric(context.text.micro.copyWith(color: color)),
           );
-        }
+        },
       ),
     );
   }

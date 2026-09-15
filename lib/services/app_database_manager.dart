@@ -52,7 +52,7 @@ class AppDatabaseManager {
   static Future<Isar> openDatabaseForUser(String? uid) async {
     final rootDir = await getApplicationDocumentsDirectory();
     final isarName = uid ?? 'guest';
-    
+
     final existing = Isar.getInstance(isarName);
     if (existing != null && existing.isOpen) {
       return existing;
@@ -62,19 +62,21 @@ class AppDatabaseManager {
     if (!targetDir.existsSync()) {
       targetDir.createSync(recursive: true);
     }
-    
+
     final oldDbPath = '${rootDir.path}/default.isar';
     final oldLockPath = '${rootDir.path}/default.lock';
     final targetDbPath = '${targetDir.path}/$isarName.isar';
 
     if (!File(targetDbPath).existsSync() && File(oldDbPath).existsSync()) {
-      debugPrint('AppDatabaseManager: Migrating legacy root database to scoped directory for $isarName...');
+      debugPrint(
+        'AppDatabaseManager: Migrating legacy root database to scoped directory for $isarName...',
+      );
       File(oldDbPath).copySync(targetDbPath);
       if (File(oldLockPath).existsSync()) {
         File(oldLockPath).copySync('${targetDir.path}/$isarName.lock');
       }
     }
-    
+
     try {
       return await Isar.open(
         schemas,
