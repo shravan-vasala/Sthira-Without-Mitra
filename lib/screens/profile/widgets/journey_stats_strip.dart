@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
+import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class JourneyStatsStrip extends ConsumerWidget {
@@ -89,7 +90,7 @@ class JourneyStatsStrip extends ConsumerWidget {
                 color: context.colors.orange,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: Spacing.stack),
             Expanded(
               child: _StatCard(
                 title: 'Workouts',
@@ -101,7 +102,7 @@ class JourneyStatsStrip extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: Spacing.stack),
         Row(
           children: [
             Expanded(
@@ -113,7 +114,7 @@ class JourneyStatsStrip extends ConsumerWidget {
                 color: context.colors.mint,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: Spacing.stack),
             Expanded(
               child: _StatCard(
                 title: 'Badges',
@@ -125,7 +126,7 @@ class JourneyStatsStrip extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.block),
         Text(
           'Member since $memberSinceStr',
           style: context.text.micro.copyWith(color: context.colors.textMedium),
@@ -166,10 +167,10 @@ class _StatCard extends StatelessWidget {
         : const Duration(milliseconds: 1200);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(Spacing.cardPadTight),
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

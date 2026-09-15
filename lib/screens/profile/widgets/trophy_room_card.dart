@@ -8,6 +8,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../models/badge.dart';
 import '../../../share/share_card_exporter.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/surface_card.dart';
@@ -21,7 +22,6 @@ class TrophyRoomCard extends ConsumerWidget {
     final badges = ref.watch(badgesProvider);
     if (badges.isEmpty) return const SizedBox.shrink();
 
-    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final unlocked = badges.where((b) => b.isUnlocked).length;
 
     // Sorting
@@ -43,56 +43,54 @@ class TrophyRoomCard extends ConsumerWidget {
       return progB.compareTo(progA);
     });
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 12),
-            child: TweenAnimationBuilder<int>(
-              tween: IntTween(begin: 0, end: unlocked),
-              duration: MediaQuery.disableAnimationsOf(context)
-                  ? Duration.zero
-                  : const Duration(milliseconds: 600),
-              curve: Curves.easeOutExpo,
-              builder: (context, val, child) {
-                return Text(
-                  'TROPHY ROOM ($val/${badges.length})',
-                  style: context.text.caption.copyWith(
-                    color: context.colors.primary,
-                  ),
-                );
-              },
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: Spacing.stack),
+          child: TweenAnimationBuilder<int>(
+            tween: IntTween(begin: 0, end: unlocked),
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 600),
+            curve: Curves.easeOutExpo,
+            builder: (context, val, child) {
+              return Text(
+                'TROPHY ROOM ($val/${badges.length})',
+                style: context.text.caption.copyWith(
+                  color: context.colors.primary,
+                ),
+              );
+            },
           ),
-          SurfaceCard(
-            padding: const EdgeInsets.all(16),
-            color: context.colors.card,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Wrap(
-                  spacing: 8,
-                  runSpacing: 24,
-                  children: sortedBadges.map((badge) {
-                    final itemWidth = (constraints.maxWidth - 16) / 3;
-                    return _BadgeItem(badge: badge, width: itemWidth);
-                  }).toList(),
-                );
-              },
+        ),
+        SurfaceCard(
+          padding: const EdgeInsets.all(Spacing.cardPad),
+          color: context.colors.card,
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: Spacing.inline,
+              mainAxisSpacing: Spacing.section,
+              childAspectRatio: 0.70,
             ),
+            itemCount: sortedBadges.length,
+            itemBuilder: (context, index) {
+              return _BadgeItem(badge: sortedBadges[index]);
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
 class _BadgeItem extends StatelessWidget {
   final Badge badge;
-  final double width;
 
-  const _BadgeItem({required this.badge, required this.width});
+  const _BadgeItem({required this.badge});
 
   static void showDetailSheet(BuildContext context, Badge badge) {
     HapticFeedback.lightImpact();
@@ -259,7 +257,6 @@ class _BadgeItem extends StatelessWidget {
       onTap: () => showDetailSheet(context, badge),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: width,
         decoration: const BoxDecoration(color: Colors.transparent),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Column(
