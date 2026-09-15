@@ -29,7 +29,7 @@ class RestTimerLabel extends ConsumerWidget {
         : '$displaySeconds sec';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Expanded(

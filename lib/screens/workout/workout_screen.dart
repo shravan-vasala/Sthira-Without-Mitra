@@ -12,6 +12,7 @@ import 'widgets/exercise_card.dart';
 import 'widgets/rest_timer_label.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../widgets/primary_button.dart';
+import '../../theme/app_spacing.dart';
 import '../../utils/workout_formatting.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
@@ -144,6 +145,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
+        centerTitle: false,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -153,11 +155,21 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 tag: 'workout-${widget.dayId}-section-${widget.sectionIndex}',
                 child: Material(
                   color: Colors.transparent,
-                  child: Text(appBarTitle),
+                  child: Text(
+                    appBarTitle,
+                    style: context.text.screenTitle.copyWith(
+                      color: context.colors.textDark,
+                    ),
+                  ),
                 ),
               )
             else
-              Text(appBarTitle),
+              Text(
+                appBarTitle,
+                style: context.text.screenTitle.copyWith(
+                  color: context.colors.textDark,
+                ),
+              ),
             TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: viewCompleted),
               duration: const Duration(milliseconds: 600),
@@ -187,12 +199,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               child: Container(
                 margin: const EdgeInsets.only(right: 20),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+                  horizontal: Spacing.stack,
+                  vertical: Spacing.inline,
                 ),
                 decoration: BoxDecoration(
                   color: context.colors.greenLight,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Radii.chip),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -216,15 +228,15 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+          child: Column(
+            children: [
+              const SizedBox(height: Spacing.stack),
 
-            // ── Progress bar (always total day progress) ─────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
+              // ── Progress bar (always total day progress) ─────────────────
+              ClipRRect(
+                borderRadius: BorderRadius.circular(Radii.micro),
                 child: LinearProgressIndicator(
                   value: totalExercises > 0
                       ? completedExercises / totalExercises
@@ -238,12 +250,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   minHeight: 6,
                 ),
               ),
-            ),
-            const SizedBox(height: 4),
-            if (totalExercises > 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
+              if (totalExercises > 0) ...[
+                const SizedBox(height: Spacing.textPair),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
@@ -256,22 +265,22 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     ),
                   ],
                 ),
-              ),
-            const SizedBox(height: 12),
+              ],
+              const SizedBox(height: Spacing.stack),
 
-            // ── "Show all sections" banner when filtered ─────────────────
+              // ── "Show all sections" banner when filtered ─────────────────
             if (isFiltered)
               GestureDetector(
                 onTap: () => setState(() => _activeSectionIndex = null),
                 child: Container(
-                  margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                  margin: const EdgeInsets.only(bottom: Spacing.stack),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+                    horizontal: Spacing.block,
+                    vertical: Spacing.stack,
                   ),
                   decoration: BoxDecoration(
                     color: context.colors.insetSurface,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(Radii.control),
                     // Sthira: No borders! Let floating backgrounds separate space
                   ),
                   child: Row(
@@ -305,7 +314,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               child: ListView.builder(
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.zero,
                 itemCount: sectionsToShow.length,
                 itemBuilder: (context, listIndex) {
                   // Map back to original section index for consistency
@@ -340,7 +349,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             // ── Finish Workout Button ─────────────────────────────────────
             if (!isFinished)
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                padding: const EdgeInsets.only(top: Spacing.stack, bottom: Spacing.block),
                 child: PrimaryButton(
                   label: 'Finish Workout',
                   icon: Icons.emoji_events_rounded,
@@ -492,16 +501,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         children: [
           Dialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(Radii.sheet),
             ),
             backgroundColor: context.colors.card,
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(Spacing.major),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(Spacing.block),
                     decoration: BoxDecoration(
                       color: const Color(
                         0xFFFFD700,
@@ -567,11 +576,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     if (!state.isActive) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.only(bottom: Spacing.block),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.block,
+        vertical: Spacing.stack,
+      ),
       decoration: BoxDecoration(
         color: context.colors.insetSurface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Radii.card),
         // Sthira: No borders! Use shadow for elevation
         boxShadow: [
           BoxShadow(
@@ -720,14 +732,14 @@ class _SectionWidgetState extends State<_SectionWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: Spacing.major),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Sticky-style section header
           SectionHeader(
             formatSectionTitle(widget.section.title, widget.sectionIndex),
-            horizontalPadding: 4,
+            horizontalPadding: 0,
             countLabel: Text(
               '${widget.section.exercises.length} exercises',
               style: context.text.micro.copyWith(
@@ -735,10 +747,10 @@ class _SectionWidgetState extends State<_SectionWidget> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           if (widget.section.exercises.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: Spacing.block),
               child: Text(
                 'No exercises in this section.',
                 style: context.text.body.copyWith(
@@ -770,7 +782,6 @@ class _SectionWidgetState extends State<_SectionWidget> {
                 ),
               );
             }),
-          const SizedBox(height: 8),
         ],
       ),
     );

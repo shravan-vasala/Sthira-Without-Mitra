@@ -7,6 +7,7 @@ import '../../providers/app_providers.dart';
 import '../../models/exercise_log.dart';
 import '../../models/exercise_pr.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_spacing.dart';
 
 class ExerciseProgressScreen extends ConsumerWidget {
   const ExerciseProgressScreen({super.key, required this.exerciseName});
@@ -156,12 +157,15 @@ class ExerciseProgressScreen extends ConsumerWidget {
                 ],
               ),
             )
-          : CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
-                  sliver: SliverList(
+          : Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.screen,
+                vertical: Spacing.section,
+              ),
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverList(
                     delegate: SliverChildListDelegate([
                       if (ref
                               .watch(exerciseLogRepoProvider)
@@ -174,7 +178,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                           unitLabel: unitLabel,
                           weightMultiplier: weightMultiplier,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: Spacing.section),
                       ],
                       SharedChartCard(
                         metric: MetricSpec(
@@ -190,7 +194,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                         endDate: endDate,
                         emptyMessage: 'No data logged yet',
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: Spacing.section),
                       SharedChartCard(
                         metric: MetricSpec(
                           title: 'Total Volume',
@@ -205,7 +209,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                         endDate: endDate,
                         emptyMessage: 'No data logged yet',
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: Spacing.section),
                       if (malformedCount > 0) ...[
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -223,21 +227,19 @@ class ExerciseProgressScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: Spacing.section),
                       ],
                       Text(
                         'HISTORY',
-                        style: context.text.micro.copyWith(
+                        style: context.text.eyebrow.copyWith(
                           color: context.colors.textLight,
                         ),
                       ),
-                      const SizedBox(height: 12),
+
+                      const SizedBox(height: Spacing.stack),
                     ]),
                   ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverList(
+                  SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return _HistoryCard(
                         log: sortedLogs[sortedLogs.length - 1 - index],
@@ -246,9 +248,8 @@ class ExerciseProgressScreen extends ConsumerWidget {
                       );
                     }, childCount: sortedLogs.length),
                   ),
-                ),
-                const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
-              ],
+                ],
+              ),
             ),
     );
   }
@@ -267,11 +268,10 @@ class _PrSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(Spacing.cardPadTight),
       decoration: BoxDecoration(
         color: context.colors.goldMuted,
-        border: Border.all(color: context.colors.gold.withValues(alpha: 0.5)),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,11 +285,11 @@ class _PrSummary extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'PERSONAL RECORDS',
-                style: context.text.body.copyWith(color: context.colors.gold),
+                style: context.text.eyebrow.copyWith(color: context.colors.gold),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           if (pr.maxWeight > 0)
             _buildPrRow(
               'Max Weight',
@@ -363,11 +363,11 @@ class _HistoryCard extends StatelessWidget {
       'dd MMM yyyy',
     ).format(DateTime.parse(log.date));
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: Spacing.inline),
+      padding: const EdgeInsets.all(Spacing.cardPadTight),
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Row(
         children: [
@@ -413,6 +413,7 @@ class _HistoryCard extends StatelessWidget {
                   color: context.colors.primary,
                 ),
               ),
+              const SizedBox(height: Spacing.textPair),
               Text(
                 'load × reps',
                 style: context.text.micro.copyWith(

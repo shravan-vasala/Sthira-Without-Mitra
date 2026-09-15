@@ -13,6 +13,7 @@ import '../../../theme/app_theme.dart';
 import '../log_data_dialog.dart';
 import '../../../utils/format_units.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_spacing.dart';
 
 class ExerciseCard extends ConsumerWidget {
   const ExerciseCard({
@@ -64,16 +65,14 @@ class ExerciseCard extends ConsumerWidget {
     }
 
     return SurfaceCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.zero,
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(Spacing.cardPadTight),
       elevation: SurfaceCardElevation.home,
       color: highlight ? context.colors.primary.withValues(alpha: 0.05) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
+          Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // YouTube Thumbnail
@@ -111,7 +110,7 @@ class ExerciseCard extends ConsumerWidget {
                       height: 68,
                       decoration: BoxDecoration(
                         color: context.colors.insetSurface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Radii.chip),
                       ),
                       child:
                           (exercise.youtubeVideoId == null ||
@@ -134,7 +133,7 @@ class ExerciseCard extends ConsumerWidget {
                               ],
                             )
                           : ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Radii.chip),
                               child: Stack(
                                 fit: StackFit.expand,
                                 children: [
@@ -191,7 +190,7 @@ class ExerciseCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: Spacing.stack),
 
                 // Exercise info
                 Expanded(
@@ -207,8 +206,8 @@ class ExerciseCard extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 8,
-                        runSpacing: 4,
+                        spacing: Spacing.inline,
+                        runSpacing: Spacing.textPair,
                         children: [
                           Text(
                             '${exercise.repsDisplay} Reps',
@@ -280,7 +279,7 @@ class ExerciseCard extends ConsumerWidget {
                         ],
                       ),
                       if (loggedText != null) ...[
-                        const SizedBox(height: 6),
+                        const SizedBox(height: Spacing.textPair),
                         Text(
                           loggedText,
                           style: context.text.micro.copyWith(
@@ -346,7 +345,6 @@ class ExerciseCard extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
 
           // Coach note
           if (exercise.note.isNotEmpty)
@@ -383,14 +381,12 @@ class ExerciseCard extends ConsumerWidget {
             ),
 
           // Button row
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
-            child: Wrap(
-              spacing: 24,
-              runSpacing: 12,
-              children: [
-                if (!isCompleted)
-                  _MinimalAction(
+          Wrap(
+            spacing: Spacing.inline,
+            runSpacing: Spacing.textPair,
+            children: [
+              if (!isCompleted)
+                _MinimalAction(
                     label: 'As planned',
                     icon: Icons.check_circle_outline_rounded,
                     onTap: () => _logAsPlanned(context, ref),
@@ -410,8 +406,7 @@ class ExerciseCard extends ConsumerWidget {
                     );
                   },
                 ),
-              ],
-            ),
+            ],
           ),
         ],
       ),

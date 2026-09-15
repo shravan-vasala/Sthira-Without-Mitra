@@ -173,8 +173,8 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                 child: Text(
                   'Reps',
                   textAlign: TextAlign.center,
-                  style: context.text.micro.copyWith(
-                    color: context.colors.textLight,
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
                   ),
                 ),
               ),
@@ -183,17 +183,17 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
                 child: Text(
                   'Weight (${ref.watch(profileProvider).useKg ? 'kg' : 'lb'})',
                   textAlign: TextAlign.center,
-                  style: context.text.micro.copyWith(
-                    color: context.colors.textLight,
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: Spacing.stack),
           ...List.generate(widget.exercise.setCount, (i) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: Spacing.stack),
               child: Row(
                 children: [
                   SizedBox(
@@ -234,7 +234,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
               ),
             );
           }),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           SizedBox(
             width: double.infinity,
             height: kPrimaryButtonHeight,
@@ -382,7 +382,7 @@ class _StepperField extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.inputFill,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(Radii.control),
       ),
       child: Row(
         children: [
@@ -409,7 +409,7 @@ class _StepperField extends StatelessWidget {
                 ),
               ),
               decoration: InputDecoration(
-                isDense: true,
+                isDense: false,
                 hintText: hint,
                 hintStyle: context.text.body.copyWith(
                   color: context.colors.textLight,
@@ -417,7 +417,7 @@ class _StepperField extends StatelessWidget {
                 border: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 enabledBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
             ),
           ),
