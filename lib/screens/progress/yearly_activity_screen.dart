@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import 'widgets/activity_heatmap.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
@@ -12,7 +13,13 @@ class YearlyActivityScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
-        title: const Text('Yearly Activity'),
+        centerTitle: false,
+        title: Text(
+          'Yearly Activity',
+          style: context.text.screenTitle.copyWith(
+            color: context.colors.textDark,
+          ),
+        ),
         leading: Navigator.canPop(context)
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_rounded),
@@ -22,22 +29,23 @@ class YearlyActivityScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.screen,
+            vertical: Spacing.section,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Display the heatmap
               const Expanded(child: ActivityHeatmap()),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: Spacing.major),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: context.colors.insetSurface,
-                    borderRadius: BorderRadius.circular(20),
+              Container(
+                padding: const EdgeInsets.all(Spacing.cardPad),
+                decoration: BoxDecoration(
+                  color: context.colors.card,
+                  borderRadius: BorderRadius.circular(Radii.card),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +66,6 @@ class YearlyActivityScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-              ),
             ],
           ),
         ),

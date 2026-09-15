@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
@@ -119,10 +120,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
@@ -164,9 +163,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     ],
                   ),
                 ],
-              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.block),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -211,7 +209,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     controller: _scrollController,
                     scrollDirection: Axis.vertical,
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.zero,
                     itemCount: monthsToShow,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
@@ -234,11 +232,9 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                 },
               ),
             ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
+            const SizedBox(height: Spacing.section),
+            Row(
+              children: [
                   Expanded(
                     child: _buildStatCard(
                       context,
@@ -255,27 +251,24 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     ),
                   ),
                 ],
-              ),
             ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+            const SizedBox(height: Spacing.block),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                   Text(
                     'Less',
                     style: context.text.micro.copyWith(
                       color: context.colors.textLight,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   _buildLegendSquare(context, 0),
                   _buildLegendSquare(context, 20),
                   _buildLegendSquare(context, 45),
                   _buildLegendSquare(context, 70),
                   _buildLegendSquare(context, 100),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   Text(
                     'More',
                     style: context.text.micro.copyWith(
@@ -283,9 +276,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                     ),
                   ),
                 ],
-              ),
             ),
-            const SizedBox(height: 20),
           ],
         );
       },
@@ -350,7 +341,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
     final monthName = DateFormat('MMM').format(firstDayOfMonth).toLowerCase();
 
     // Calculate cell size organically
-    final innerPadding = 12.0;
+    final innerPadding = Spacing.cardPadTight;
     final availableGridWidth = width - (innerPadding * 2);
     final double cellSize = (availableGridWidth / 8.2).floorToDouble();
 
@@ -360,7 +351,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
       padding: EdgeInsets.all(innerPadding),
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,10 +418,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                           '${DateFormat('MMM dd, yyyy').format(currentDate)}\nScore: $score%';
                     }
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 3),
-                      child: GestureDetector(
-                        onTap: score == -1
+                    return GestureDetector(
+                      onTap: score == -1
                             ? null
                             : () {
                                 ref.read(selectedDateProvider.notifier).state =
@@ -460,9 +449,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
                 ),
               );
             }),
@@ -492,10 +480,10 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
 
   Widget _buildStatCard(BuildContext context, String title, String value) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      padding: const EdgeInsets.all(Spacing.cardPadTight),
       decoration: BoxDecoration(
         color: context.colors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Column(
         children: [

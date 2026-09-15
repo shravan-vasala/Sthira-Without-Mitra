@@ -12,6 +12,8 @@ import '../../providers/weekly_summary_provider.dart';
 import '../../providers/app_providers.dart';
 import '../../share/share_card_exporter.dart';
 import '../../share/weekly_share_layout.dart';
+import '../../../widgets/primary_button.dart';
+import '../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class WeeklySummaryScreen extends ConsumerWidget {
@@ -55,7 +57,9 @@ class WeeklySummaryScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ).animate().fade().slideY(begin: -0.2),
 
-              const SizedBox(height: 32),
+              ).animate().fade().slideY(begin: -0.2),
+
+              const SizedBox(height: Spacing.major),
 
               // 3.1 Animated Score Card Hero
               _ScoreHeroCard(
@@ -67,12 +71,12 @@ class WeeklySummaryScreen extends ConsumerWidget {
                   .fade(delay: 100.ms)
                   .scale(begin: const Offset(0.95, 0.95)),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: Spacing.major),
 
               // 3.4 Insights Strip
               _InsightsStrip(summary: summary).animate().fade(delay: 200.ms),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: Spacing.section),
 
               // 3.2 Daily Scores Chart
               _DailyScoresChartCard(
@@ -80,23 +84,23 @@ class WeeklySummaryScreen extends ConsumerWidget {
                 startOfWeek: startOfWeek,
               ).animate().fade(delay: 300.ms).slideY(begin: 0.1),
 
-              const SizedBox(height: 16),
-
               // Secondary Habit Chart
-              if (summary.habitCompletionRate > 0)
+              if (summary.habitCompletionRate > 0) ...[
+                const SizedBox(height: Spacing.section),
                 _HabitChartCard(
                   rates: summary.dailyHabitRates,
                   totals: summary.dailyHabitsTotal,
                   startOfWeek: startOfWeek,
                 ).animate().fade(delay: 400.ms).slideY(begin: 0.1),
+              ],
 
-              const SizedBox(height: 32),
+              const SizedBox(height: Spacing.section),
 
               const SectionHeader(
                 'STATS OVERVIEW',
                 horizontalPadding: 0,
               ).animate().fade(delay: 500.ms),
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.section),
 
               // 3.3 Grid Stats with Trend Deltas
               GridView.count(
@@ -184,13 +188,13 @@ class WeeklySummaryScreen extends ConsumerWidget {
                         .fade(delay: 600.ms)
                         .scale(begin: const Offset(0.9, 0.9)),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: Spacing.section),
               // Share Section
               _WeeklyShareSection(
                 summary: summary,
                 titleText: titleText,
               ).animate().fade(delay: 800.ms),
-              const SizedBox(height: 40),
+              const SizedBox(height: Spacing.section),
             ],
           ),
         ),
@@ -263,7 +267,7 @@ class _ScoreHeroCard extends StatelessWidget {
     final isPerfectWeek = elapsedDays > 0 && daysOver80 == elapsedDays;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      padding: const EdgeInsets.all(Spacing.cardPad),
       child: Column(
         children: [
           if (isPerfectWeek)
@@ -272,7 +276,7 @@ class _ScoreHeroCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: context.colors.green,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Radii.chip),
               ),
               child: Text(
                 'PERFECT WEEK ✨',
@@ -362,7 +366,7 @@ class _DeltaChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Radii.control),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -411,7 +415,7 @@ class _InsightsStrip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: context.colors.lavender.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Radii.chip),
       ),
       child: Row(
         children: [
@@ -448,10 +452,10 @@ class _DailyScoresChartCard extends ConsumerWidget {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(Spacing.cardPad),
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,7 +465,7 @@ class _DailyScoresChartCard extends ConsumerWidget {
               Icon(
                 Icons.insights_rounded,
                 color: context.colors.textDark,
-                size: 20,
+                size: IconSize.inline,
               ),
               const SizedBox(width: 8),
               Text(
@@ -472,7 +476,7 @@ class _DailyScoresChartCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
           SizedBox(
             height: 140,
             child: BarChart(
@@ -550,7 +554,7 @@ class _DailyScoresChartCard extends ConsumerWidget {
                         color: barColor,
                         width: 16,
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(6),
+                          top: Radius.circular(Radii.micro),
                         ),
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
@@ -585,10 +589,10 @@ class _HabitChartCard extends StatelessWidget {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(Spacing.cardPad),
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -598,7 +602,7 @@ class _HabitChartCard extends StatelessWidget {
               Icon(
                 Icons.bar_chart_rounded,
                 color: context.colors.primary,
-                size: 16,
+                size: IconSize.inline,
               ),
               const SizedBox(width: 8),
               Text(
@@ -609,7 +613,7 @@ class _HabitChartCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           SizedBox(
             height: 80,
             child: BarChart(
@@ -677,7 +681,7 @@ class _HabitChartCard extends StatelessWidget {
                         color: barColor,
                         width: 10,
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(3),
+                          top: Radius.circular(Radii.micro),
                         ),
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
@@ -738,10 +742,10 @@ class _StatCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(Spacing.cardPadTight),
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -752,7 +756,7 @@ class _StatCard extends StatelessWidget {
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: context.colors.lavender,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(Radii.micro),
                 ),
                 child: Icon(icon, size: 16, color: context.colors.primary),
               ),
@@ -898,36 +902,16 @@ class _WeeklyShareSectionState extends ConsumerState<_WeeklyShareSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElevatedButton.icon(
-          onPressed: _isSharing
-              ? null
-              : () => _shareImage(
-                  context,
-                  widget.summary,
-                  widget.titleText,
-                  name,
-                ),
-          icon: _isSharing
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Icon(Icons.ios_share_rounded),
-          label: Text(_isSharing ? 'Generating...' : 'Share Summary Image'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.colors.primary,
-            foregroundColor: context.colors.onPrimary,
-            elevation: 4,
-            shadowColor: context.colors.primary.withValues(alpha: 0.4),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+        PrimaryButton(
+          onPressed: () => _shareImage(
+            context,
+            widget.summary,
+            widget.titleText,
+            name,
           ),
+          isLoading: _isSharing,
+          icon: Icons.ios_share_rounded,
+          label: _isSharing ? 'Generating...' : 'Share Summary Image',
         ),
         const SizedBox(height: 12),
         TextButton(

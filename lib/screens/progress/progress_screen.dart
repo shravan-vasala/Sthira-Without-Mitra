@@ -8,10 +8,10 @@ import '../../providers/app_providers.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user_profile.dart';
 import 'widgets/shared_chart_card.dart';
-import '../home/weight_entry_dialog.dart';
 import '../home/steps_entry_dialog.dart';
 import '../home/sleep_entry_dialog.dart';
 import '../home/body_fat_entry_dialog.dart';
+import '../../theme/app_spacing.dart';
 import 'widgets/chart_drilldown_sheet.dart';
 import '../../providers/progress_chart_provider.dart';
 import '../../services/progress_aggregation_service.dart';
@@ -387,7 +387,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         .toList();
     if (validData.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32),
+        padding: const EdgeInsets.symmetric(vertical: Spacing.section),
         child: Text(
           'No recorded data for this period.',
           style: context.text.body.copyWith(color: context.colors.textMedium),
@@ -418,7 +418,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       final totalFormatted = NumberFormat('#,###').format(totalSteps.toInt());
 
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: Spacing.section),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -459,7 +459,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final latestLabel = isMacroBucket ? 'latest avg' : 'latest';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: Spacing.section),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -515,61 +515,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           style: context.text.micro.copyWith(color: context.colors.textLight),
         ),
       ],
-    );
-  }
-
-  Widget _buildRectStat(
-    String label,
-    String value,
-    String unit,
-    Color iconColor,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.assessment_rounded, color: iconColor, size: 18),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                value,
-                style: context.text.screenTitle.copyWith(
-                  color: context.colors.textDark,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                unit,
-                style: context.text.body.copyWith(
-                  color: context.colors.textLight,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: context.text.caption.copyWith(
-              color: context.colors.textLight,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -669,25 +614,22 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 const SizedBox(width: 6),
                 Text(
                   unitText,
-                  style: context.text.screenTitle.copyWith(
+                  style: context.text.cardTitle.copyWith(
                     color: context.colors.textMedium,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              subtitleText,
-              textAlign: TextAlign.center,
-              style: context.text.body.copyWith(
-                color: context.colors.textMedium,
-              ),
+          const SizedBox(height: Spacing.stack),
+          Text(
+            subtitleText,
+            textAlign: TextAlign.center,
+            style: context.text.body.copyWith(
+              color: context.colors.textMedium,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
         ],
 
         // Date Pill Navigation
@@ -710,7 +652,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: Spacing.section),
 
         Expanded(
           child: GestureDetector(
@@ -765,7 +707,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 _selectedRange == TimeRange.sixMonths ||
                 _selectedRange == TimeRange.twelveMonths))
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: Spacing.stack),
             child: ElevatedButton.icon(
               onPressed: () {
                 Haptics.tap();
@@ -854,9 +796,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 350),
-          switchInCurve: Curves.easeOut,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
           transitionBuilder: (child, animation) {
             return FadeTransition(opacity: animation, child: child);
@@ -865,6 +809,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             key: ValueKey('$_selectedMetric-$_selectedRange'),
             child: _buildChart(data, useKg, profile, startDate, endDate),
           ),
+        ),
         ),
       ),
     );
