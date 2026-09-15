@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/reminders_provider.dart';
+import '../../theme/app_spacing.dart';
+import '../../widgets/settings_row.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class RemindersScreen extends ConsumerStatefulWidget {
@@ -60,7 +62,10 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             : null,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Spacing.screen,
+          vertical: Spacing.section,
+        ),
         children: [
           _buildSectionHeader('GLOBAL SETTINGS'),
           _buildToggleCard(
@@ -87,7 +92,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                                   );
                             }),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: Spacing.stack),
                       _buildTimeSelector(
                         label: 'End Time',
                         time: config.quietHoursEnd,
@@ -103,7 +108,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           _buildSectionHeader('DAILY HABITS'),
           _buildToggleCard(
             title: 'Habit Reminder',
@@ -128,7 +133,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           _buildSectionHeader('WORKOUTS'),
           _buildToggleCard(
             title: 'Workout Reminder',
@@ -153,7 +158,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           _buildSectionHeader('MEALS'),
           _buildToggleCard(
             title: 'Meal Logging Nudge',
@@ -178,7 +183,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                               .updateConfig(config.copyWith(lunchTime: t));
                         }),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: Spacing.stack),
                       _buildTimeSelector(
                         label: 'Dinner Time',
                         time: config.dinnerTime,
@@ -193,7 +198,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           _buildSectionHeader('DATA BACKUP'),
           _buildToggleCard(
             title: 'Weekly Backup Reminder',
@@ -265,7 +270,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: Spacing.inline),
                       _buildTimeSelector(
                         label: 'Time',
                         time: config.backupTime,
@@ -281,7 +286,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   )
                 : null,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           _buildSectionHeader('BODY COMPOSITION'),
           _buildToggleCard(
             title: 'Body Fat Reminder',
@@ -300,7 +305,10 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      padding: const EdgeInsets.only(
+        bottom: Spacing.inline,
+        left: Spacing.textPair,
+      ),
       child: Text(
         title,
         style: context.text.caption.copyWith(color: context.colors.primary),
@@ -318,42 +326,30 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Radii.card),
       ),
-      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: context.text.bodyStrong.copyWith(
-                        color: context.colors.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: context.text.caption.copyWith(
-                        color: context.colors.textMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Switch(
-                value: value,
-                onChanged: onChanged,
-                activeThumbColor: context.colors.primary,
-              ),
-            ],
+          SettingsRow(
+            title: title,
+            subtitle: subtitle,
+            backgroundColor: Colors.transparent,
+            showChevron: false,
+            trailing: Switch(
+              value: value,
+              onChanged: onChanged,
+              activeTrackColor: context.colors.primary,
+            ),
           ),
-          if (child != null) ...[const SizedBox(height: 16), child],
+          if (child != null)
+            Padding(
+              padding: const EdgeInsets.only(
+                left: Spacing.cardPad,
+                right: Spacing.cardPad,
+                bottom: Spacing.cardPad,
+              ),
+              child: child,
+            ),
         ],
       ),
     );
@@ -383,12 +379,12 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
+                    horizontal: Spacing.stack,
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     color: context.colors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(Radii.chip),
                   ),
                   child: Text(
                     _formatTime(time),
