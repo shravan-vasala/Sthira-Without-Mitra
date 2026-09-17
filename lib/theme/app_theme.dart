@@ -20,6 +20,10 @@ class AppTheme {
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColorsLight().scaffoldBg,
       primaryColor: AppColorsLight().primary,
+      iconTheme: IconThemeData(
+        size: IconSize.nav,
+        color: AppColorsLight().textDark,
+      ),
       colorScheme: ColorScheme.light(
         primary: AppColorsLight().primary,
         secondary: AppColorsLight().indigo,
@@ -227,6 +231,10 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColorsDark().scaffoldBg,
       primaryColor: AppColorsDark().primary,
+      iconTheme: IconThemeData(
+        size: IconSize.nav,
+        color: colors.textDark,
+      ),
 
       colorScheme: ColorScheme.dark(
         primary: AppColorsDark().primary,
