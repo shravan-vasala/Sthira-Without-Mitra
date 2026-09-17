@@ -4,6 +4,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import 'widgets/activity_heatmap.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 class YearlyActivityScreen extends ConsumerWidget {
   const YearlyActivityScreen({super.key});
@@ -29,9 +30,11 @@ class YearlyActivityScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.screen,
-            vertical: Spacing.section,
+          padding: const EdgeInsets.fromLTRB(
+            Spacing.screen,
+            Spacing.section,
+            Spacing.screen,
+            kShellScrollBottomPadding,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

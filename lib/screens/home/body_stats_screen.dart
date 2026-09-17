@@ -6,6 +6,7 @@ import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 import '../../models/body_stats.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 class BodyStatsScreen extends ConsumerStatefulWidget {
   const BodyStatsScreen({super.key});
@@ -151,7 +152,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, kShellScrollBottomPadding),
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 16),

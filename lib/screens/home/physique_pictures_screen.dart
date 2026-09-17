@@ -192,7 +192,7 @@ class _PhysiquePicturesScreenState
       floatingActionButton: rawPhotos.isEmpty
           ? null
           : Padding(
-              padding: const EdgeInsets.only(bottom: kFloatingNavClearance),
+              padding: const EdgeInsets.only(bottom: kShellScrollBottomPadding),
               child: FloatingActionButton.extended(
                 onPressed: _addPhoto,
                 backgroundColor: context.colors.primary,
@@ -296,7 +296,7 @@ class _PhysiquePicturesScreenState
                   )
                 : ListView.builder(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, kShellScrollBottomPadding),
                     itemCount: allPhotos.length,
                     itemBuilder: (context, index) {
                       final entry = allPhotos[index];

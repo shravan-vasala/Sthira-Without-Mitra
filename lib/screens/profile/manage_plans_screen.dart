@@ -7,6 +7,7 @@ import '../../utils/meal_icons.dart';
 import '../../utils/target_calculator.dart';
 import '../../theme/app_spacing.dart';
 import '../../widgets/settings_row.dart';
+import '../../theme/layout_insets.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class ManagePlansScreen extends ConsumerWidget {
@@ -365,9 +366,11 @@ class _MealSlotsEditorState extends ConsumerState<_MealSlotsEditor> {
     final slots = profile.customMealSlots;
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.screen,
-        vertical: Spacing.section,
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.screen,
+        Spacing.section,
+        Spacing.screen,
+        kShellScrollBottomPadding,
       ),
       itemCount: slots.length,
       itemBuilder: (context, index) {

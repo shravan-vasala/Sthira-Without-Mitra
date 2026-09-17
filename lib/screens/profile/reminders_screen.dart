@@ -5,6 +5,7 @@ import '../../providers/reminders_provider.dart';
 import '../../theme/app_spacing.dart';
 import '../../widgets/settings_row.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 class RemindersScreen extends ConsumerStatefulWidget {
   const RemindersScreen({super.key});
@@ -62,9 +63,11 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
             : null,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.screen,
-          vertical: Spacing.section,
+        padding: const EdgeInsets.fromLTRB(
+          Spacing.screen,
+          Spacing.section,
+          Spacing.screen,
+          kShellScrollBottomPadding,
         ),
         children: [
           _buildSectionHeader('GLOBAL SETTINGS'),

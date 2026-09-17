@@ -15,6 +15,7 @@ import '../../widgets/primary_button.dart';
 import '../../theme/app_spacing.dart';
 import '../../utils/workout_formatting.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({
@@ -314,7 +315,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               child: ListView.builder(
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.zero,
+                padding: const EdgeInsets.only(bottom: kShellScrollBottomPadding),
                 itemCount: sectionsToShow.length,
                 itemBuilder: (context, listIndex) {
                   // Map back to original section index for consistency

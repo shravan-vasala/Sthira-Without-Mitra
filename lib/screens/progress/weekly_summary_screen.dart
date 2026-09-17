@@ -15,6 +15,7 @@ import '../../share/weekly_share_layout.dart';
 import '../../../widgets/primary_button.dart';
 import '../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 class WeeklySummaryScreen extends ConsumerWidget {
   const WeeklySummaryScreen({super.key});
@@ -45,7 +46,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, kShellScrollBottomPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

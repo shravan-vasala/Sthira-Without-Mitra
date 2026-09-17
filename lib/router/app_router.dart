@@ -25,6 +25,8 @@ import '../screens/social/social_feed_screen.dart';
 import '../screens/social/connect_screen.dart';
 import '../services/haptics.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../theme/layout_insets.dart';
+
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -293,6 +295,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       child: Stack(
         children: [
           Scaffold(
+            extendBody: true,
             body: Builder(
               builder: (innerContext) {
                 return MediaQuery(
@@ -308,7 +311,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                       navigationShell,
                       if (timerState.isActive)
                         Positioned(
-                          bottom: 16,
+                          bottom: kShellScrollBottomPadding,
                           left: 20,
                           right: 20,
                           child: Container(
@@ -481,6 +484,7 @@ class _CustomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
+        // Deliberate 32px pill separation to distinguish it distinctly from card boundaries.
         padding: const EdgeInsets.only(left: 32, right: 32, bottom: 16, top: 0),
         child: Container(
           height: 64,

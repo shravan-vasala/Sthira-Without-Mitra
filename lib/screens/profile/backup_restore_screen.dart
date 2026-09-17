@@ -11,6 +11,7 @@ import '../../providers/app_providers.dart';
 import '../../theme/app_spacing.dart';
 import '../../widgets/settings_row.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 class BackupRestoreScreen extends ConsumerStatefulWidget {
   const BackupRestoreScreen({super.key});
@@ -480,9 +481,11 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
           IgnorePointer(
             ignoring: _isLoading,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.screen,
-                vertical: Spacing.section,
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.screen,
+                Spacing.section,
+                Spacing.screen,
+                kShellScrollBottomPadding,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

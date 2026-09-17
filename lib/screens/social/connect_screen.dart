@@ -12,6 +12,7 @@ import '../../widgets/empty_state_view.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/setup_sheets.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -325,7 +326,12 @@ class _EnterIdTabState extends ConsumerState<_EnterIdTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(Spacing.screen),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.screen,
+        Spacing.screen,
+        Spacing.screen,
+        kShellScrollBottomPadding,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

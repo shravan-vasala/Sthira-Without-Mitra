@@ -16,6 +16,7 @@ import 'widgets/chart_drilldown_sheet.dart';
 import '../../providers/progress_chart_provider.dart';
 import '../../services/progress_aggregation_service.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/layout_insets.dart';
 
 enum MetricType {
   weight,
@@ -797,7 +798,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       body: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+          padding: const EdgeInsets.fromLTRB(
+            Spacing.screen,
+            0,
+            Spacing.screen,
+            kShellScrollBottomPadding,
+          ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 350),
             switchInCurve: Curves.easeOut,

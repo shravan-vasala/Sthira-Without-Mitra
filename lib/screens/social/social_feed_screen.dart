@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../providers/app_providers.dart';
+import '../../theme/layout_insets.dart';
 import '../../models/social_profile.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
@@ -288,7 +289,12 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               );
             }
             return SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.screen,
+                0,
+                Spacing.screen,
+                kShellScrollBottomPadding,
+              ),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   return Padding(
@@ -529,7 +535,12 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
             duration: const Duration(milliseconds: 400),
             child: ListView(
               key: ValueKey('${_period}_$_metric'),
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.screen,
+                0,
+                Spacing.screen,
+                kShellScrollBottomPadding,
+              ),
               children: [
                 if (hasTop3)
                   _PodiumView(

@@ -17,6 +17,7 @@ import 'widgets/trophy_room_card.dart';
 import 'widgets/journey_stats_strip.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/gita_verse_sheet.dart';
+import '../../theme/layout_insets.dart';
 import '../../providers/badge_engine_provider.dart';
 import '../../providers/credential_provider.dart';
 import '../../providers/reminders_provider.dart';
@@ -64,9 +65,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.screen,
-            vertical: Spacing.section,
+          padding: const EdgeInsets.fromLTRB(
+            Spacing.screen,
+            Spacing.section,
+            Spacing.screen,
+            kShellScrollBottomPadding,
           ),
           child: Column(
             children: [
