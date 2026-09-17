@@ -6,8 +6,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../models/habit.dart';
 import '../../../providers/app_providers.dart';
-import '../../../widgets/app_bottom_sheet.dart';
-import '../../../widgets/primary_button.dart';
+import '../../../widgets/numeric_entry_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class TimerEntryDialog extends ConsumerStatefulWidget {
@@ -176,110 +175,68 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
   @override
   Widget build(BuildContext context) {
     // ignore: unused_local_variable
-    final progress = _remainingSeconds / _totalSeconds;
-
-    return AppSheet(
+    return NumericEntrySheet(
       title: widget.habit.name,
       subtitle: 'Closing this sheet will cancel the timer',
-      scrollable: true,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: SizedBox(
-              width: 200,
-              height: 200,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return CircularProgressIndicator(
-                        value: _animationController.value,
-                        strokeWidth: 12,
-                        backgroundColor: context.colors.border,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          context.colors.primary,
-                        ),
-                        strokeCap: StrokeCap.round,
-                      );
-                    },
-                  ),
-                  Center(
-                    child: Text(
-                      _formatTime(_remainingSeconds),
-                      style: context.text.metric.copyWith(
-                        color: context.colors.textDark,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: Spacing.section),
-
-          Row(
+      autofocus: false,
+      customField: Center(
+        child: SizedBox(
+          width: 200,
+          height: 200,
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              if (_remainingSeconds < _totalSeconds &&
-                  !_isRunning &&
-                  _remainingSeconds > 0)
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        _remainingSeconds = _totalSeconds;
-                        _animationController.value = 1.0;
-                      });
-                      final prefs = ref.read(sharedPreferencesProvider);
-                      prefs.remove('timer_start_${widget.habit.id}');
-                      prefs.remove('timer_rem_${widget.habit.id}');
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      foregroundColor: context.colors.red,
-                      side: BorderSide(
-                        color: context.colors.red.withValues(alpha: 0.5),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Radii.control),
-                      ),
+              AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return CircularProgressIndicator(
+                    value: _animationController.value,
+                    strokeWidth: 12,
+                    backgroundColor: context.colors.border,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      context.colors.primary,
                     ),
-                    child: Text('Reset', style: context.text.bodyStrong),
+                    strokeCap: StrokeCap.round,
+                  );
+                },
+              ),
+              Center(
+                child: Text(
+                  _formatTime(_remainingSeconds),
+                  style: context.text.metric.copyWith(
+                    color: context.colors.textDark,
+                    fontFamily: 'Cabinet Grotesk',
                   ),
-                ),
-              if (_remainingSeconds < _totalSeconds &&
-                  !_isRunning &&
-                  _remainingSeconds > 0)
-                const SizedBox(width: 16),
-
-              Expanded(
-                flex: 2,
-                child: PrimaryButton(
-                  label: _remainingSeconds == 0
-                      ? 'Done'
-                      : (_isRunning
-                            ? 'Pause'
-                            : (_remainingSeconds == _totalSeconds
-                                  ? 'Start'
-                                  : 'Resume')),
-                  onPressed: _remainingSeconds == 0
-                      ? () => Navigator.of(context).pop()
-                      : (_isRunning ? _pauseTimer : _startTimer),
-                  icon: _remainingSeconds == 0
-                      ? Icons.check_circle_rounded
-                      : (_isRunning
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded),
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
+      onClear: (_remainingSeconds < _totalSeconds && !_isRunning && _remainingSeconds > 0) ? () {
+        setState(() {
+          _remainingSeconds = _totalSeconds;
+          _animationController.value = 1.0;
+        });
+        final prefs = ref.read(sharedPreferencesProvider);
+        prefs.remove('timer_start_${widget.habit.id}');
+        prefs.remove('timer_rem_${widget.habit.id}');
+      } : null,
+      saveLabel: _remainingSeconds == 0
+          ? 'Done'
+          : (_isRunning
+                ? 'Pause'
+                : (_remainingSeconds == _totalSeconds
+                      ? 'Start'
+                      : 'Resume')),
+      saveIcon: _remainingSeconds == 0
+          ? Icons.check_circle_rounded
+          : (_isRunning
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded),
+      onSave: _remainingSeconds == 0
+          ? () => Navigator.of(context).pop()
+          : (_isRunning ? _pauseTimer : _startTimer),
     );
   }
 }

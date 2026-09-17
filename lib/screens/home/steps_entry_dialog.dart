@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
-import '../../widgets/app_bottom_sheet.dart';
-import '../../widgets/primary_button.dart';
+import '../../widgets/numeric_entry_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class StepsEntryDialog extends ConsumerStatefulWidget {
@@ -67,121 +66,64 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
     ][selectedDate.month - 1];
     final dateFormatted = '${selectedDate.day} $monthStr';
 
-    return AppSheet(
+    return NumericEntrySheet(
       title: 'Log Steps',
       subtitle: isToday
           ? 'Enter your step count for today'
           : 'Enter your step count for $dateFormatted',
-      scrollable: true,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      controller: _controller,
+      suffixText: 'steps',
+      hintText: '0',
+      errorText: _errorText,
+      autofocus: true,
+      onChanged: (_) {
+        if (_errorText != null) {
+          setState(() => _errorText = null);
+        }
+      },
+      extraContentBuilder: _isHealthConnect ? (context, _) => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextField(
-            controller: _controller,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            style: context.text.display.copyWith(
-              color: context.colors.textDark,
-            ),
-            textAlign: TextAlign.center,
-            onChanged: (_) {
-              if (_errorText != null) {
-                setState(() => _errorText = null);
-              }
-            },
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: context.colors.inputFill,
-              hintText: '0',
-              hintStyle: context.text.display.copyWith(
-                color: context.colors.textLight,
-              ),
-              suffixText: 'steps',
-              suffixStyle: context.text.cardTitle.copyWith(
+          Icon(
+            Icons.health_and_safety_rounded,
+            size: 16,
+            color: context.colors.primary,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              'Synced from Health Connect. Manual saves will override sync for this day.',
+              style: context.text.micro.copyWith(
                 color: context.colors.textMedium,
               ),
-              errorText: _errorText,
-              errorStyle: context.text.caption.copyWith(color: context.colors.red),
+              textAlign: TextAlign.center,
             ),
           ),
-          if (_isHealthConnect)
-            Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.health_and_safety_rounded,
-                    size: 16,
-                    color: context.colors.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      'Synced from Health Connect. Manual saves will override sync for this day.',
-                      style: context.text.micro.copyWith(
-                        color: context.colors.textMedium,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const SizedBox(height: Spacing.section),
-          PrimaryButton(
-            label: 'Save Steps',
-            onPressed: () async {
-              if (_controller.text.trim().isEmpty) {
-                Haptics.toggle();
-                await ref
-                    .read(dailyLogProvider.notifier)
-                    .clearStepsForDate(_pinnedDateStr);
-                if (mounted) Navigator.of(context).pop();
-                return;
-              }
-
-              final steps = int.tryParse(_controller.text);
-              if (steps != null && steps >= 0) {
-                Haptics.toggle();
-                await ref
-                    .read(dailyLogProvider.notifier)
-                    .updateStepsForDate(_pinnedDateStr, steps);
-                if (mounted) Navigator.of(context).pop();
-              } else {
-                Haptics.error();
-                setState(
-                  () => _errorText = 'Please enter a valid number (≥ 0)',
-                );
-              }
-            },
-          ),
-          if (_hasExistingEntry) ...[
-            const SizedBox(height: Spacing.stack),
-            Center(
-              child: TextButton(
-                onPressed: () async {
-                  await ref
-                      .read(dailyLogProvider.notifier)
-                      .clearStepsForDate(_pinnedDateStr);
-                  if (mounted) Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.red,
-                  minimumSize: const Size(44, 44),
-                ),
-                child: Text(
-                  'Clear entry',
-                  style: context.text.bodyStrong.copyWith(
-                    color: context.colors.red,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
-      ),
+      ) : null,
+      saveLabel: 'Save Steps',
+      onSave: () async {
+        if (_controller.text.trim().isEmpty) {
+          Haptics.toggle();
+          await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
+          if (mounted) Navigator.of(context).pop();
+          return;
+        }
+
+        final steps = int.tryParse(_controller.text);
+        if (steps != null && steps >= 0) {
+          Haptics.toggle();
+          await ref.read(dailyLogProvider.notifier).updateStepsForDate(_pinnedDateStr, steps);
+          if (mounted) Navigator.of(context).pop();
+        } else {
+          Haptics.error();
+          setState(() => _errorText = 'Please enter a valid number (≥ 0)');
+        }
+      },
+      onClear: _hasExistingEntry ? () async {
+        await ref.read(dailyLogProvider.notifier).clearStepsForDate(_pinnedDateStr);
+        if (mounted) Navigator.of(context).pop();
+      } : null,
     );
   }
 }

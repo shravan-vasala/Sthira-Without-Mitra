@@ -187,10 +187,6 @@ class MealDetailScreen extends ConsumerWidget {
                         alpha: 0.12,
                       ),
                       side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),
@@ -213,10 +209,6 @@ class MealDetailScreen extends ConsumerWidget {
                         alpha: 0.12,
                       ),
                       side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),
@@ -847,8 +839,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 style: TextButton.styleFrom(
                                   foregroundColor: context.colors.primary,
                                   minimumSize: const Size(44, 44),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
                                 onPressed: () =>
                                     _openScanner(context, false, append: true),
@@ -870,8 +860,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                   style: TextButton.styleFrom(
                                     foregroundColor: context.colors.textMedium,
                                     minimumSize: const Size(44, 44),
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: _repeatMeal,
                                   icon: const Icon(
@@ -888,8 +876,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                   style: TextButton.styleFrom(
                                     foregroundColor: context.colors.textMedium,
                                     minimumSize: const Size(44, 44),
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: () => _openScanner(context, false),
                                   icon: const Icon(
@@ -908,8 +894,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                   color: context.colors.textMedium,
                                   size: 20,
                                 ),
-                                constraints: const BoxConstraints(),
-                                padding: EdgeInsets.zero,
                                 onPressed: () {
                                   final targetDateStr = ref.read(
                                     dateStringProvider,
@@ -1105,11 +1089,6 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: context.colors.card,
-          surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(Radii.sheet),
-          ),
           title: const Text('Overwrite Meal?'),
           content: const Text(
             'This will remove your scanned photos and macros and replace them with the planned meal. Are you sure?',

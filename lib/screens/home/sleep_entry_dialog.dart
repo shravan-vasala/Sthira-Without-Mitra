@@ -6,8 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 
-import '../../widgets/app_bottom_sheet.dart';
-import '../../widgets/primary_button.dart';
+import '../../widgets/numeric_entry_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class SleepEntryDialog extends ConsumerStatefulWidget {
@@ -108,43 +107,48 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
     final nightBeforeFormatted = DateFormat('EEE, d MMM').format(selectedDate.subtract(const Duration(days: 1)));
 
-    return AppSheet(
+    return NumericEntrySheet(
       title: 'Log Sleep',
       subtitle: 'Logging sleep for the night of $nightBeforeFormatted\n(Waking up on $dateFormatted)',
-      scrollable: true,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      controller: _controller,
+      suffixText: 'hrs',
+      hintText: '0.0',
+      errorText: _errorText,
+      autofocus: true,
+      onChanged: (_) {
+        if (_errorText != null) {
+          setState(() => _errorText = null);
+        }
+        setState(() {
+          _bedtime = null;
+          _waketime = null;
+        });
+      },
+      saveLabel: isFuture ? 'Cannot log for future date' : 'Save Sleep',
+      onSave: isFuture
+          ? null
+          : () async {
+              final sleepHours = double.tryParse(_controller.text);
+              if (sleepHours != null && sleepHours >= 0 && sleepHours <= 24) {
+                Haptics.toggle();
+                await ref.read(dailyLogProvider.notifier).updateSleepForDate(_pinnedDateStr, sleepHours);
+                if (mounted) Navigator.of(context).pop();
+              } else {
+                Haptics.error();
+                setState(() {
+                  _errorText = 'Please enter a value between 0 and 24 hours.';
+                });
+              }
+            },
+      onClear: _hasExistingEntry
+          ? () async {
+              await ref.read(dailyLogProvider.notifier).clearSleepForDate(_pinnedDateStr);
+              if (mounted) Navigator.of(context).pop();
+            }
+          : null,
+      extraContentBuilder: (context, _) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: _controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: context.text.display.copyWith(color: context.colors.textDark),
-            textAlign: TextAlign.center,
-            autofocus: true,
-            enabled: !isFuture,
-            onChanged: (_) {
-              if (_errorText != null) {
-                setState(() => _errorText = null);
-              }
-              // Clear time pickers to show manual entry takes precedence
-              setState(() {
-                _bedtime = null;
-                _waketime = null;
-              });
-            },
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: context.colors.inputFill,
-              hintText: '0.0',
-              hintStyle: context.text.display.copyWith(color: context.colors.textLight),
-              suffixText: 'hrs',
-              suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
-              errorText: _errorText,
-              errorStyle: context.text.caption.copyWith(color: context.colors.red),
-            ),
-          ),
-          const SizedBox(height: Spacing.section),
           Text(
             'Or calculate automatically from times:',
             style: context.text.body.copyWith(color: context.colors.textMedium),
@@ -169,49 +173,6 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          PrimaryButton(
-            label: isFuture ? 'Cannot log for future date' : 'Save Sleep',
-            onPressed: isFuture
-                ? null
-                : () async {
-                    final sleepHours = double.tryParse(_controller.text);
-                    if (sleepHours != null &&
-                        sleepHours >= 0 &&
-                        sleepHours <= 24) {
-                      Haptics.toggle();
-                      await ref.read(dailyLogProvider.notifier).updateSleepForDate(_pinnedDateStr, sleepHours);
-                      if (mounted) Navigator.of(context).pop();
-                    } else {
-                      Haptics.error();
-                      setState(() {
-                        _errorText = 'Please enter a value between 0 and 24 hours.';
-                      });
-                    }
-                  },
-          ),
-          ),
-          if (_hasExistingEntry) ...[
-            const SizedBox(height: Spacing.stack),
-            Center(
-              child: TextButton(
-                onPressed: () async {
-                  await ref.read(dailyLogProvider.notifier).clearSleepForDate(_pinnedDateStr);
-                  if (mounted) Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.red,
-                  minimumSize: const Size(44, 44),
-                ),
-                child: Text(
-                  'Clear entry',
-                  style: context.text.bodyStrong.copyWith(
-                    color: context.colors.red,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

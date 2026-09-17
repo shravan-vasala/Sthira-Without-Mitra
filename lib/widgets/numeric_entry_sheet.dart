@@ -1,0 +1,160 @@
+import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
+import '../theme/layout_insets.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'app_bottom_sheet.dart';
+import 'primary_button.dart';
+
+class NumericEntrySheet extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final String suffixText;
+  final String? hintText;
+  final String? errorText;
+  final String saveLabel;
+  final IconData? saveIcon;
+  final VoidCallback? onSave;
+  final VoidCallback? onClear;
+  final TextEditingController? controller;
+  final Widget Function(BuildContext, TextEditingController?)? extraContentBuilder;
+  final Widget Function(BuildContext)? topExtraContentBuilder;
+  final Widget Function(BuildContext)? bottomExtraContentBuilder;
+  final Widget? customField; // Used for Timer countdown
+  final bool autofocus;
+  final bool enabled;
+  final ValueChanged<String>? onChanged;
+  
+  const NumericEntrySheet({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.suffixText = '',
+    this.hintText,
+    this.errorText,
+    required this.saveLabel,
+    this.saveIcon,
+    this.onSave,
+    this.onClear,
+    this.controller,
+    this.extraContentBuilder,
+    this.topExtraContentBuilder,
+    this.bottomExtraContentBuilder,
+    this.customField,
+    this.autofocus = true,
+    this.enabled = true,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSheet(
+      title: title,
+      subtitle: subtitle,
+      scrollable: true,
+      titleAction: onClear != null
+          ? TextButton(
+              onPressed: onClear,
+              style: TextButton.styleFrom(
+                foregroundColor: context.colors.red,
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(Radii.control),
+                ),
+              ),
+              child: Text(
+                'Clear',
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.red,
+                ),
+              ),
+            )
+          : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: Spacing.section), // Gap to input
+          
+          if (topExtraContentBuilder != null) ...[
+            topExtraContentBuilder!(context),
+            const SizedBox(height: Spacing.section),
+          ],
+          
+          if (customField != null)
+            customField!
+          else if (controller != null)
+            TextField(
+              controller: controller,
+              autofocus: autofocus,
+              enabled: enabled,
+              onChanged: onChanged,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              textAlign: TextAlign.center,
+              style: context.text.display.copyWith(
+                color: context.colors.textDark,
+                fontFamily: 'Cabinet Grotesk',
+              ),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: context.colors.inputFill,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                hintText: hintText,
+                hintStyle: context.text.display.copyWith(
+                  color: context.colors.textLight,
+                  fontFamily: 'Cabinet Grotesk',
+                ),
+                suffixText: suffixText.isNotEmpty ? suffixText : null,
+                suffixStyle: context.text.cardTitle.copyWith(
+                  color: context.colors.textMedium,
+                  fontFamily: 'General Sans', // explicit fallback for suffix
+                ),
+                errorText: errorText,
+                errorStyle: context.text.caption.copyWith(color: context.colors.red),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(Radii.control),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(Radii.control),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(Radii.control),
+                  borderSide: BorderSide(color: context.colors.primary, width: 1.5),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(Radii.control),
+                  borderSide: BorderSide(color: context.colors.red, width: 1.5),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(Radii.control),
+                  borderSide: BorderSide(color: context.colors.red, width: 1.5),
+                ),
+              ),
+            ),
+
+          if (extraContentBuilder != null) ...[
+            // Any custom widgets (like _TimePickerCard, Quick add trio, pre-fill notes)
+            const SizedBox(height: Spacing.section),
+            extraContentBuilder!(context, controller),
+          ],
+          
+          const SizedBox(height: Spacing.section), // Gap to CTA
+          PrimaryButton(
+            label: saveLabel,
+            icon: saveIcon,
+            onPressed: onSave,
+            height: 52, // From implementation plan: CTA 52dp
+          ),
+
+          if (bottomExtraContentBuilder != null) ...[
+            const SizedBox(height: Spacing.stack),
+            bottomExtraContentBuilder!(context),
+          ],
+        ],
+      ),
+    );
+  }
+}

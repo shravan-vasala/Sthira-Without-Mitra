@@ -7,8 +7,7 @@ import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 
 import '../../utils/format_units.dart';
-import '../../widgets/app_bottom_sheet.dart';
-import '../../widgets/primary_button.dart';
+import '../../widgets/numeric_entry_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class WeightEntryDialog extends ConsumerStatefulWidget {
@@ -72,89 +71,43 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
     final profile = ref.watch(profileProvider);
     final unit = profile.useKg ? 'kg' : 'lbs';
 
-    return AppSheet(
-      scrollable: true,
+    return NumericEntrySheet(
       title: 'Log Body Weight',
       subtitle: 'Enter your weight for $dateFormatted',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            autofocus: true,
-            style: context.text.display.copyWith(
-              color: context.colors.textDark,
-            ),
-            textAlign: TextAlign.center,
-            cursorColor: context.colors.primary,
-            onChanged: (_) {
-              if (_errorText != null) {
-                setState(() => _errorText = null);
-              }
-            },
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: context.colors.inputFill,
-              hintText: '0.0',
-              hintStyle: context.text.display.copyWith(
-                color: context.colors.textLight,
-              ),
-              suffixText: unit,
-              suffixStyle: context.text.cardTitle.copyWith(
-                color: context.colors.textMedium,
-              ),
-            ),
-          ),
-          if (_isPastValue && _pastValueDateStr != null && _errorText == null)
-            Padding(
-              padding: const EdgeInsets.only(top: Spacing.inline),
-              child: Center(
-                child: Text(
-                  'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
-                  style: context.text.caption.copyWith(
-                    color: context.colors.textMedium,
-                  ),
-                ),
-              ),
-            ),
-          if (_errorText != null)
-            Padding(
-              padding: const EdgeInsets.only(top: Spacing.inline),
-              child: Center(
-                child: Text(
-                  _errorText!,
-                  style: context.text.caption.copyWith(color: context.colors.red),
-                ),
-              ),
-            ),
-          const SizedBox(height: Spacing.section),
-          PrimaryButton(
-            label: 'Save Weight',
-            onPressed: () async {
-              final weightDisplay = double.tryParse(_controller.text);
-              if (weightDisplay != null &&
-                  weightDisplay > 0 &&
-                  weightDisplay.isFinite) {
-                final weightKg = convertToKg(profile, weightDisplay);
-                if (weightKg < 500) {
-                  Haptics.toggle();
-                  await ref
-                      .read(dailyLogProvider.notifier)
-                      .updateWeightForDate(_pinnedDateStr, weightKg);
-                  if (mounted) Navigator.of(context).pop();
-                } else {
-                  Haptics.error();
-                  setState(() => _errorText = 'Value too high');
-                }
-              } else {
-                Haptics.error();
-                setState(() => _errorText = 'Please enter a valid weight');
-              }
-            },
-          ),
-        ],
-      ),
+      controller: _controller,
+      suffixText: unit,
+      hintText: '0.0',
+      errorText: _errorText,
+      autofocus: true,
+      onChanged: (_) {
+        if (_errorText != null) {
+          setState(() => _errorText = null);
+        }
+      },
+      topExtraContentBuilder: (_isPastValue && _pastValueDateStr != null && _errorText == null) ? (context) => Center(
+        child: Text(
+          'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
+          style: context.text.caption.copyWith(color: context.colors.textMedium),
+        ),
+      ) : null,
+      saveLabel: 'Save Weight',
+      onSave: () async {
+        final weightDisplay = double.tryParse(_controller.text);
+        if (weightDisplay != null && weightDisplay > 0 && weightDisplay.isFinite) {
+          final weightKg = convertToKg(profile, weightDisplay);
+          if (weightKg < 500) {
+            Haptics.toggle();
+            await ref.read(dailyLogProvider.notifier).updateWeightForDate(_pinnedDateStr, weightKg);
+            if (mounted) Navigator.of(context).pop();
+          } else {
+            Haptics.error();
+            setState(() => _errorText = 'Value too high');
+          }
+        } else {
+          Haptics.error();
+          setState(() => _errorText = 'Please enter a valid weight');
+        }
+      },
     );
   }
 }

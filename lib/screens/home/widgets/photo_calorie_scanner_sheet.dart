@@ -544,8 +544,6 @@ class _PhotoCalorieScannerSheetState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: context.colors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Edit Item',
           style: context.text.body.copyWith(color: context.colors.textDark),

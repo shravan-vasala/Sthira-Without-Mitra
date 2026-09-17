@@ -5,9 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
-import '../../widgets/app_bottom_sheet.dart';
-import '../../widgets/primary_button.dart';
-import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../widgets/numeric_entry_sheet.dart';
 
 class BodyFatEntryDialog extends ConsumerStatefulWidget {
   const BodyFatEntryDialog({super.key});
@@ -65,134 +63,56 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
     final selectedDate = DateTime.parse(selectedDateStr);
     final dateFormatted = DateFormat('EEE, d MMM').format(selectedDate);
 
-    return AppSheet(
+    return NumericEntrySheet(
       title: 'Log Body Fat',
       subtitle: 'Enter your body fat percentage for $dateFormatted',
-      scrollable: true,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: _controller,
-            enabled: !_isSaving,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            autofocus: true,
-            style: context.text.display.copyWith(
-              color: context.colors.textDark,
-            ),
-            textAlign: TextAlign.center,
-            cursorColor: context.colors.primary,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: context.colors.inputFill,
-              errorText: _errorText,
-              errorStyle: context.text.caption.copyWith(color: context.colors.red),
-              hintText: '0.0',
-              hintStyle: context.text.display.copyWith(
-                color: context.colors.textLight,
-              ),
-              suffixText: '%',
-              suffixStyle: context.text.cardTitle.copyWith(
-                color: context.colors.textMedium,
-              ),
-            ),
+      controller: _controller,
+      enabled: !_isSaving,
+      autofocus: true,
+      suffixText: '%',
+      hintText: '0.0',
+      errorText: _errorText,
+      bottomExtraContentBuilder: _isPrefill ? (context) => Center(
+        child: Text(
+          'Prefilled from a previous measurement',
+          style: context.text.caption.copyWith(
+            color: context.colors.textMedium,
           ),
-          if (_isPastValue && _pastValueDateStr != null && _errorText == null)
-            Padding(
-              padding: const EdgeInsets.only(top: Spacing.inline),
-              child: Center(
-                child: Text(
-                  'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
-                  style: context.text.caption.copyWith(
-                    color: context.colors.textMedium,
-                  ),
-                ),
-              ),
-            ),
-          if (_isPrefill)
-            Padding(
-              padding: const EdgeInsets.only(top: Spacing.inline),
-              child: Center(
-                child: Text(
-                  'Prefilled from a previous measurement',
-                  style: context.text.caption.copyWith(
-                    color: context.colors.textMedium,
-                  ),
-                ),
-              ),
-            ),
-          const SizedBox(height: Spacing.section),
-          PrimaryButton(
-            label: 'Save Body Fat',
-            isLoading: _isSaving,
-            onPressed: () async {
-              if (_isSaving) return;
-              final bf = double.tryParse(_controller.text);
-              if (bf != null && bf > 0 && bf <= 100) {
-                setState(() => _isSaving = true);
-                Haptics.toggle();
-                try {
-                  await ref
-                      .read(dailyLogProvider.notifier)
-                      .updateBodyFatForDate(_pinnedDateStr, bf);
-                  if (mounted) Navigator.of(context).pop();
-                } catch (e) {
-                  setState(() {
-                    _isSaving = false;
-                    _errorText = 'Failed to save. Try again.';
-                  });
-                }
-              } else {
-                Haptics.error();
-                setState(
-                  () =>
-                      _errorText = 'Please enter a valid percentage (0.1-100)',
-                );
-              }
-            },
-          ),
-          if (_isExistingEntry) ...[
-            const SizedBox(height: Spacing.stack),
-            Center(
-              child: TextButton(
-                onPressed: _isSaving
-                    ? null
-                    : () async {
-                        setState(() => _isSaving = true);
-                        try {
-                          await ref
-                              .read(dailyLogProvider.notifier)
-                              .clearBodyFatForDate(_pinnedDateStr);
-                          if (context.mounted) Navigator.of(context).pop();
-                        } catch (_) {
-                          setState(() {
-                            _isSaving = false;
-                            _errorText = 'Failed to clear. Try again.';
-                          });
-                        }
-                      },
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.red,
-                  minimumSize: const Size(44, 44),
-                ),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(
-                        'Clear entry',
-                        style: context.text.bodyStrong.copyWith(
-                          color: context.colors.red,
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ],
-      ),
+        ),
+      ) : null,
+      saveLabel: 'Save Body Fat',
+      onSave: () async {
+        if (_isSaving) return;
+        final bf = double.tryParse(_controller.text);
+        if (bf != null && bf > 0 && bf <= 100) {
+          setState(() => _isSaving = true);
+          Haptics.toggle();
+          try {
+            await ref.read(dailyLogProvider.notifier).updateBodyFatForDate(_pinnedDateStr, bf);
+            if (mounted) Navigator.of(context).pop();
+          } catch (e) {
+            setState(() {
+              _isSaving = false;
+              _errorText = 'Failed to save. Try again.';
+            });
+          }
+        } else {
+          Haptics.error();
+          setState(() => _errorText = 'Please enter a valid percentage (0.1-100)');
+        }
+      },
+      onClear: _isExistingEntry ? () async {
+        setState(() => _isSaving = true);
+        try {
+          await ref.read(dailyLogProvider.notifier).clearBodyFatForDate(_pinnedDateStr);
+          if (context.mounted) Navigator.of(context).pop();
+        } catch (_) {
+          setState(() {
+            _isSaving = false;
+            _errorText = 'Failed to clear. Try again.';
+          });
+        }
+      } : null,
     );
   }
 }
