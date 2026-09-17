@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
@@ -105,9 +106,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             },
           ),
 
-          const SizedBox(height: 30),
-
-          Container(
+          const SizedBox(height: Spacing.section),          Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: context.colors.scaffoldBg,
@@ -186,7 +185,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     required Function(double) onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: Spacing.stack),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -232,7 +231,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
           title,
           style: context.text.micro.copyWith(color: context.colors.textLight),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: Spacing.textPair),
         Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -250,16 +249,14 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             Text(
               value,
               style: AppTheme.numeric(
-                context.text.body.copyWith(
-                  color: isGiant
-                      ? context.colors.primary
-                      : context.colors.textDark,
-                ),
+                isGiant
+                    ? context.text.screenTitle.copyWith(color: context.colors.primary)
+                    : context.text.cardTitle.copyWith(color: context.colors.textDark),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: Gap.x2),
         Text(
           'Example',
           style: context.text.micro.copyWith(color: context.colors.textMedium),

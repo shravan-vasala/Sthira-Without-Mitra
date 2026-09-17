@@ -72,8 +72,9 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                 Color animColor = context.colors.green;
                 if (currentPercentage < 50) {
                   animColor = context.colors.red;
-                } else if (currentPercentage < 80)
+                } else if (currentPercentage < 80) {
                   animColor = context.colors.orange;
+                }
 
                 return Column(
                   children: [

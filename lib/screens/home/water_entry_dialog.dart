@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 
 import '../../widgets/app_bottom_sheet.dart';
@@ -207,37 +208,30 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
               ),
             )
           else ...[
-            Text(
-              'Total (ml)',
-              style: context.text.eyebrow.copyWith(
-                color: context.colors.textMedium,
+            TextField(
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              enabled: !_isSaving,
+              style: context.text.display.copyWith(
+                color: context.colors.textDark,
+              ),
+              textAlign: TextAlign.center,
+              onChanged: _onTextChanged,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: context.colors.inputFill,
+                hintText: '0',
+                hintStyle: context.text.display.copyWith(
+                  color: context.colors.textLight,
+                ),
+                suffixText: 'ml',
+                suffixStyle: context.text.cardTitle.copyWith(
+                  color: context.colors.textMedium,
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    keyboardType: TextInputType.number,
-                    enabled: !_isSaving,
-                    style: context.text.screenTitle.copyWith(
-                      color: context.colors.textDark,
-                    ),
-                    onChanged: _onTextChanged,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: context.colors.inputFill,
-                      suffixText: 'ml',
-                      suffixStyle: context.text.bodyStrong.copyWith(
-                        color: context.colors.textMedium,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.block),
             Row(
               children: [
                 Expanded(
@@ -249,14 +243,14 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         color: context.colors.primary.withValues(alpha: 0.5),
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Radii.control),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('+ 250ml', style: context.text.body),
+                    child: Text('+ 250ml', style: context.text.bodyStrong),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: Spacing.inline),
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _isSaving ? null : () => _addAmount(500),
@@ -266,14 +260,14 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         color: context.colors.primary.withValues(alpha: 0.5),
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Radii.control),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('+ 500ml', style: context.text.body),
+                    child: Text('+ 500ml', style: context.text.bodyStrong),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: Spacing.inline),
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _isSaving ? null : () => _addAmount(1000),
@@ -283,82 +277,76 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                         color: context.colors.primary.withValues(alpha: 0.5),
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Radii.control),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('+ 1L', style: context.text.body),
+                    child: Text('+ 1L', style: context.text.bodyStrong),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                if (_hasExistingEntry) ...[
-                  Expanded(
-                    child: TextButton(
-                      onPressed: _isSaving
-                          ? null
-                          : () async {
-                              setState(() => _isSaving = true);
-                              try {
-                                await ref
-                                    .read(dailyLogProvider.notifier)
-                                    .clearWaterForDate(_pinnedDateStr);
-                                if (context.mounted)
-                                  Navigator.of(context).pop();
-                              } catch (e) {
-                                setState(() => _isSaving = false);
-                              }
-                            },
-                      style: TextButton.styleFrom(
-                        foregroundColor: context.colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        'Clear',
-                        style: context.text.bodyStrong,
-                      ),
+            const SizedBox(height: Spacing.section),
+            if (_hasExistingEntry) ...[
+              Center(
+                child: TextButton(
+                  onPressed: _isSaving
+                      ? null
+                      : () async {
+                          setState(() => _isSaving = true);
+                          try {
+                            await ref
+                                .read(dailyLogProvider.notifier)
+                                .clearWaterForDate(_pinnedDateStr);
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          } catch (e) {
+                            setState(() => _isSaving = false);
+                          }
+                        },
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.colors.red,
+                    minimumSize: const Size(44, 44),
+                  ),
+                  child: Text(
+                    'Clear entry',
+                    style: context.text.bodyStrong.copyWith(
+                      color: context.colors.red,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                ],
-                Expanded(
-                  flex: 2,
-                  child: PrimaryButton(
-                    label: 'Save Intake',
-                    isLoading: _isSaving,
-                    onPressed: () async {
-                      if (_isSaving) return;
-                      setState(() => _isSaving = true);
-
-                      try {
-                        if (_currentAmount > 0) {
-                          await ref
-                              .read(dailyLogProvider.notifier)
-                              .updateWaterForDate(
-                                _pinnedDateStr,
-                                _currentAmount,
-                              );
-                        } else {
-                          // Clear water if saved with 0
-                          await ref
-                              .read(dailyLogProvider.notifier)
-                              .clearWaterForDate(_pinnedDateStr);
-                        }
-
-                        if (context.mounted) Navigator.of(context).pop();
-                      } catch (e) {
-                        setState(() => _isSaving = false);
-                      }
-                    },
-                  ),
                 ),
-              ],
+              ),
+              const SizedBox(height: Spacing.stack),
+            ],
+            PrimaryButton(
+              label: 'Save Intake',
+              isLoading: _isSaving,
+              onPressed: () async {
+                if (_isSaving) return;
+                setState(() => _isSaving = true);
+
+                try {
+                  if (_currentAmount > 0) {
+                    await ref
+                        .read(dailyLogProvider.notifier)
+                        .updateWaterForDate(
+                          _pinnedDateStr,
+                          _currentAmount,
+                        );
+                  } else {
+                    await ref
+                        .read(dailyLogProvider.notifier)
+                        .clearWaterForDate(_pinnedDateStr);
+                  }
+
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                } catch (e) {
+                  setState(() => _isSaving = false);
+                }
+              },
             ),
           ],
         ],

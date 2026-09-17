@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import 'app_bottom_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
@@ -95,25 +96,20 @@ class AvatarPickerSheet extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
 
           // Remove Avatar Action
-          Semantics(
-            button: true,
-            label: 'Remove Avatar',
-            child: InkWell(
-              onTap: () => Navigator.of(context).pop('DELETE'),
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 24,
-                ),
-                child: Text(
-                  'Remove Avatar',
-                  style: context.text.bodyStrong.copyWith(
-                    color: context.colors.textMedium,
-                  ),
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop('DELETE'),
+              style: TextButton.styleFrom(
+                foregroundColor: context.colors.textMedium,
+                minimumSize: const Size(44, 44),
+              ),
+              child: Text(
+                'Remove Avatar',
+                style: context.text.bodyStrong.copyWith(
+                  color: context.colors.textMedium,
                 ),
               ),
             ),

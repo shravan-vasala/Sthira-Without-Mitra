@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../theme/layout_insets.dart';
 import '../../providers/app_providers.dart';
 import '../../models/daily_meal_log.dart';
@@ -845,8 +846,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                               TextButton.icon(
                                 style: TextButton.styleFrom(
                                   foregroundColor: context.colors.primary,
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
+                                  minimumSize: const Size(44, 44),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                 ),
@@ -854,14 +854,14 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                     _openScanner(context, false, append: true),
                                 icon: const Icon(
                                   Icons.add_circle_outline_rounded,
-                                  size: 16,
+                                  size: IconSize.inline,
                                 ),
-                                label: const Text(
+                                label: Text(
                                   'Add Serving',
                                   style: context.text.caption,
                                 ),
                               ),
-                              const SizedBox(width: 20),
+                              const SizedBox(width: Spacing.block),
                               if (ref.watch(dateStringProvider) !=
                                   DateFormat(
                                     'yyyy-MM-dd',
@@ -869,17 +869,16 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 TextButton.icon(
                                   style: TextButton.styleFrom(
                                     foregroundColor: context.colors.textMedium,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
+                                    minimumSize: const Size(44, 44),
                                     tapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: _repeatMeal,
                                   icon: const Icon(
                                     Icons.copy_rounded,
-                                    size: 16,
+                                    size: IconSize.inline,
                                   ),
-                                  label: const Text(
+                                  label: Text(
                                     'Repeat',
                                     style: context.text.caption,
                                   ),
@@ -888,17 +887,16 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 TextButton.icon(
                                   style: TextButton.styleFrom(
                                     foregroundColor: context.colors.textMedium,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
+                                    minimumSize: const Size(44, 44),
                                     tapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   onPressed: () => _openScanner(context, false),
                                   icon: const Icon(
                                     Icons.refresh_rounded,
-                                    size: 16,
+                                    size: IconSize.inline,
                                   ),
-                                  label: const Text(
+                                  label: Text(
                                     'Replace',
                                     style: context.text.caption,
                                   ),
@@ -964,53 +962,19 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           Row(
                             children: [
                               Expanded(
-                                child: ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: context.colors.primary,
-                                    foregroundColor: context.colors.onPrimary,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
+                                child: CompactButton(
+                                  label: 'Take photo',
+                                  icon: Icons.camera_alt_outlined,
+                                  filled: true,
                                   onPressed: () => _openScanner(context, false),
-                                  icon: const Icon(
-                                    Icons.camera_alt_outlined,
-                                    size: 18,
-                                  ),
-                                  label: const Text(
-                                    'Take photo',
-                                    style: context.text.body,
-                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: Spacing.stack),
                               Expanded(
-                                child: OutlinedButton.icon(
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: context.colors.primary,
-                                    backgroundColor: context.colors.primary
-                                        .withValues(alpha: 0.12),
-                                    side: BorderSide.none,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
+                                child: CompactButton(
+                                  label: 'Describe',
+                                  icon: Icons.notes_rounded,
                                   onPressed: () => _openScanner(context, true),
-                                  icon: const Icon(
-                                    Icons.notes_rounded,
-                                    size: 18,
-                                  ),
-                                  label: const Text(
-                                    'Describe',
-                                    style: context.text.body,
-                                  ),
                                 ),
                               ),
                             ],
@@ -1141,6 +1105,11 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
+          backgroundColor: context.colors.card,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Radii.sheet),
+          ),
           title: const Text('Overwrite Meal?'),
           content: const Text(
             'This will remove your scanned photos and macros and replace them with the planned meal. Are you sure?',

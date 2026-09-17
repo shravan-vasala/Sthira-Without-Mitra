@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
@@ -172,9 +173,9 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
         children: [
           Text(
             'POSE (REQUIRED)',
-            style: context.text.caption.copyWith(color: context.colors.primary),
+            style: context.text.eyebrow,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.inline),
           Row(
             children: [
               Expanded(
@@ -210,11 +211,9 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
           if (_pickedImage == null) ...[
             Text(
               'SOURCE',
-              style: context.text.caption.copyWith(
-                color: context.colors.primary,
-              ),
+              style: context.text.eyebrow,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.inline),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -336,6 +335,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
                           onPressed: () => setState(() => _pickedImage = null),
                           style: TextButton.styleFrom(
                             alignment: Alignment.centerLeft,
+                            minimumSize: const Size(44, 44),
                           ),
                           child: Text(
                             'Retake',
@@ -385,7 +385,7 @@ class _AddProgressPhotoSheetState extends ConsumerState<AddProgressPhotoSheet> {
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
             onPressed: (_pickedImage != null && !_isSaving) ? _savePhoto : null,
             label: _isSaving ? 'Saving...' : 'Save Progress Photo',

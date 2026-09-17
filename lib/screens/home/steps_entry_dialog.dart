@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
@@ -100,28 +101,10 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
               suffixStyle: context.text.cardTitle.copyWith(
                 color: context.colors.textMedium,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
+              errorText: _errorText,
+              errorStyle: context.text.caption.copyWith(color: context.colors.red),
             ),
           ),
-          if (_errorText != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                _errorText!,
-                style: context.text.body.copyWith(color: context.colors.red),
-              ),
-            ),
           if (_isHealthConnect)
             Padding(
               padding: const EdgeInsets.only(top: 16.0),
@@ -146,7 +129,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
                 ],
               ),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
             label: 'Save Steps',
             onPressed: () async {
@@ -175,7 +158,7 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
             },
           ),
           if (_hasExistingEntry) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.stack),
             Center(
               child: TextButton(
                 onPressed: () async {
@@ -185,9 +168,15 @@ class _StepsEntryDialogState extends ConsumerState<StepsEntryDialog> {
                   if (mounted) Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor: context.colors.pinkIcon,
+                  foregroundColor: context.colors.red,
+                  minimumSize: const Size(44, 44),
                 ),
-                child: const Text('Clear entry'),
+                child: Text(
+                  'Clear entry',
+                  style: context.text.bodyStrong.copyWith(
+                    color: context.colors.red,
+                  ),
+                ),
               ),
             ),
           ],

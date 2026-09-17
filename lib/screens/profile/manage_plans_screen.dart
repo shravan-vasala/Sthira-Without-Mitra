@@ -56,10 +56,11 @@ class ManagePlansScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Active Workout',
-                          style: context.text.micro.copyWith(
+                          style: context.text.eyebrow.copyWith(
                             color: context.colors.textMedium,
                           ),
                         ),
+                        const SizedBox(height: Spacing.textPair),
                         DropdownButton<String>(
                           value: profile.activeWorkoutPlan,
                           isExpanded: true,
@@ -120,10 +121,11 @@ class ManagePlansScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Active Meals',
-                          style: context.text.micro.copyWith(
+                          style: context.text.eyebrow.copyWith(
                             color: context.colors.textMedium,
                           ),
                         ),
+                        const SizedBox(height: Spacing.textPair),
                         DropdownButton<String>(
                           value: profile.activeMealPlan,
                           isExpanded: true,
@@ -157,10 +159,9 @@ class ManagePlansScreen extends ConsumerWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.only(
-                left: Spacing.screen,
-                right: Spacing.screen,
-                bottom: Spacing.stack,
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.screen,
+                vertical: Spacing.stack,
               ),
               color: context.colors.card,
               child: Row(
@@ -171,11 +172,11 @@ class ManagePlansScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'Daily Targets',
-                        style: context.text.micro.copyWith(
+                        style: context.text.eyebrow.copyWith(
                           color: context.colors.textMedium,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: Spacing.textPair),
                       Text(
                         '${profile.targetCalories} kcal (P:${profile.targetProteinG} C:${profile.targetCarbsG} F:${profile.targetFatG})',
                         style: context.text.body,
@@ -505,7 +506,10 @@ class _PlanEditorState extends State<_PlanEditor> {
       children: [
         // Plan selector
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(
+            vertical: Spacing.stack,
+            horizontal: Spacing.screen,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -513,7 +517,7 @@ class _PlanEditorState extends State<_PlanEditor> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: context.colors.lavender,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(Radii.control),
                   ),
                   child: DropdownButton<String>(
                     value: _selectedKey,
@@ -582,11 +586,12 @@ class _PlanEditorState extends State<_PlanEditor> {
         // JSON editor
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.fromLTRB(
+                Spacing.screen, 0, Spacing.screen, Spacing.screen),
             child: Container(
               decoration: BoxDecoration(
                 color: context.colors.card,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(Radii.card),
               ),
               child: TextField(
                 controller: _controller,

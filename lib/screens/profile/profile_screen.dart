@@ -16,6 +16,7 @@ import '../../widgets/primary_button.dart';
 import 'widgets/trophy_room_card.dart';
 import 'widgets/journey_stats_strip.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/badge_engine_provider.dart';
 import '../../providers/credential_provider.dart';
 import '../../providers/reminders_provider.dart';
 import '../../services/screen_time_service.dart';
@@ -180,8 +181,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const _CloudSyncCard(),
               const SizedBox(height: Spacing.stack),
 
-              const TrophyRoomCard(),
-              const SizedBox(height: Spacing.stack),
+              if (ref.watch(badgesProvider).isNotEmpty) ...[
+                const TrophyRoomCard(),
+                const SizedBox(height: Spacing.stack),
+              ],
 
               // Menu items
               SettingsRow(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../models/habit.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
@@ -219,7 +220,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: Spacing.section),
 
           Row(
             children: [
@@ -244,10 +245,10 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
                         color: context.colors.red.withValues(alpha: 0.5),
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(Radii.control),
                       ),
                     ),
-                    child: Text('Reset', style: context.text.body),
+                    child: Text('Reset', style: context.text.bodyStrong),
                   ),
                 ),
               if (_remainingSeconds < _totalSeconds &&

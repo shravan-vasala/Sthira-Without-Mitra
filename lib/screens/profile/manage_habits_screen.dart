@@ -449,14 +449,14 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               ),
             ),
             if (_isWaterHabit) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.inline),
               Text(
                 'Daily water goal',
-                style: context.text.body.copyWith(
+                style: context.text.eyebrow.copyWith(
                   color: context.colors.textMedium,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.inline),
               Text(
                 'Tap once on Home to mark it done. Change how much you aim for below.',
                 style: context.text.caption.copyWith(
@@ -464,7 +464,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.block),
             Text(
               'Icon',
               style: context.text.eyebrow.copyWith(
@@ -537,8 +537,8 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                     });
                   },
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: 44,
+                    height: 44,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected
@@ -641,7 +641,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
               ),
             ],
             if (_showGoalFields) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.block),
               Row(
                 children: [
                   Expanded(
@@ -670,7 +670,7 @@ class _HabitEditorDialogState extends ConsumerState<_HabitEditorDialog> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: Spacing.stack),
                   Expanded(
                     child: TextField(
                       controller: _unitCtrl,

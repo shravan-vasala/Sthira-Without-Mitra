@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../providers/app_providers.dart';
 import '../../../models/habit.dart';
 import '../../../router/app_router.dart';
@@ -161,7 +162,7 @@ class PastDaySummarySheet extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
 
             // Rows
             Padding(
@@ -188,7 +189,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                       parentContext.go('/home/workout/$currentWorkoutDayId');
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: Spacing.stack),
 
                   // Meals Row
                   _SummaryRow(
@@ -229,7 +230,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                       parentContext.go('/home/meals');
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: Spacing.stack),
 
                   // Habits Row
                   _SummaryRow(
@@ -313,7 +314,7 @@ class PastDaySummarySheet extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: Spacing.major),
 
             // Action Button
             Padding(

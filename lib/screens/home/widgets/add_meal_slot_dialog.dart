@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../providers/app_providers.dart';
 import '../../../models/daily_meal_log.dart';
 import '../../../utils/meal_icons.dart';
@@ -133,8 +134,9 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: context.colors.scaffoldBg,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: context.colors.card,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.sheet)),
       title: const Text('Add Meal Slot', style: context.text.screenTitle),
       content: SingleChildScrollView(
         child: Column(

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
@@ -72,7 +73,6 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 24),
           TextField(
             controller: _controller,
             enabled: !_isSaving,
@@ -87,6 +87,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               filled: true,
               fillColor: context.colors.inputFill,
               errorText: _errorText,
+              errorStyle: context.text.caption.copyWith(color: context.colors.red),
               hintText: '0.0',
               hintStyle: context.text.display.copyWith(
                 color: context.colors.textLight,
@@ -97,7 +98,31 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          if (_isPastValue && _pastValueDateStr != null && _errorText == null)
+            Padding(
+              padding: const EdgeInsets.only(top: Spacing.inline),
+              child: Center(
+                child: Text(
+                  'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
+                  ),
+                ),
+              ),
+            ),
+          if (_isPrefill)
+            Padding(
+              padding: const EdgeInsets.only(top: Spacing.inline),
+              child: Center(
+                child: Text(
+                  'Prefilled from a previous measurement',
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
             label: 'Save Body Fat',
             isLoading: _isSaving,
@@ -127,20 +152,8 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
               }
             },
           ),
-          if (_isPrefill)
-            Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Center(
-                child: Text(
-                  'Prefilled from a previous measurement',
-                  style: context.text.caption.copyWith(
-                    color: context.colors.textMedium,
-                  ),
-                ),
-              ),
-            ),
           if (_isExistingEntry) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.stack),
             Center(
               child: TextButton(
                 onPressed: _isSaving
@@ -161,6 +174,7 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                       },
                 style: TextButton.styleFrom(
                   foregroundColor: context.colors.red,
+                  minimumSize: const Size(44, 44),
                 ),
                 child: _isSaving
                     ? const SizedBox(
@@ -168,7 +182,12 @@ class _BodyFatEntryDialogState extends ConsumerState<BodyFatEntryDialog> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Clear'),
+                    : Text(
+                        'Clear entry',
+                        style: context.text.bodyStrong.copyWith(
+                          color: context.colors.red,
+                        ),
+                      ),
               ),
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../services/haptics.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 
 import '../../utils/format_units.dart';
@@ -107,23 +108,27 @@ class _WeightEntryDialogState extends ConsumerState<WeightEntryDialog> {
           ),
           if (_isPastValue && _pastValueDateStr != null && _errorText == null)
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
-                style: context.text.body.copyWith(
-                  color: context.colors.textMedium,
+              padding: const EdgeInsets.only(top: Spacing.inline),
+              child: Center(
+                child: Text(
+                  'Recent from ${DateFormat('MMM d').format(DateTime.parse(_pastValueDateStr!))}',
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMedium,
+                  ),
                 ),
               ),
             ),
           if (_errorText != null)
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                _errorText!,
-                style: context.text.body.copyWith(color: context.colors.red),
+              padding: const EdgeInsets.only(top: Spacing.inline),
+              child: Center(
+                child: Text(
+                  _errorText!,
+                  style: context.text.caption.copyWith(color: context.colors.red),
+                ),
               ),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
             label: 'Save Weight',
             onPressed: () async {

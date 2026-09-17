@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 import '../../models/body_stats.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
@@ -159,9 +160,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
               children: [
                 Text(
                   'ALL MEASUREMENTS FOR ${DateFormat('MMM d, yyyy').format(DateTime.parse(_pinnedDateStr)).toUpperCase()}',
-                  style: context.text.caption.copyWith(
-                    color: context.colors.primary,
-                  ),
+                  style: context.text.eyebrow,
                 ),
                 if (_isPrefilled && _prefillDate != null)
                   Padding(
@@ -181,8 +180,8 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
               final width = constraints.maxWidth;
               final itemWidth = (width - 12) / 2;
               return Wrap(
-                spacing: 12,
-                runSpacing: 12,
+                spacing: Spacing.stack,
+                runSpacing: Spacing.stack,
                 children: _fields
                     .map(
                       (f) => SizedBox(width: itemWidth, child: _buildField(f)),
@@ -215,7 +214,7 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.inline),
           _isEditing
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.end,

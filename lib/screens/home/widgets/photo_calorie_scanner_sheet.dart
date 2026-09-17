@@ -1038,7 +1038,7 @@ class _PhotoCalorieScannerSheetState
                                 const SizedBox(width: 8),
                                 Text(
                                   'Camera',
-                                  style: context.text.body.copyWith(
+                                  style: context.text.bodyStrong.copyWith(
                                     color: context.colors.primary,
                                   ),
                                 ),
@@ -1070,7 +1070,7 @@ class _PhotoCalorieScannerSheetState
                                 const SizedBox(width: 8),
                                 Text(
                                   'Gallery',
-                                  style: context.text.body.copyWith(
+                                  style: context.text.bodyStrong.copyWith(
                                     color: context.colors.textDark,
                                   ),
                                 ),

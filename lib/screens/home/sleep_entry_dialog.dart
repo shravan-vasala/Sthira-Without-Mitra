@@ -3,6 +3,7 @@ import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
 
 import '../../widgets/app_bottom_sheet.dart';
@@ -120,6 +121,7 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: context.text.display.copyWith(color: context.colors.textDark),
             textAlign: TextAlign.center,
+            autofocus: true,
             enabled: !isFuture,
             onChanged: (_) {
               if (_errorText != null) {
@@ -134,41 +136,20 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
             decoration: InputDecoration(
               filled: true,
               fillColor: context.colors.inputFill,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
               hintText: '0.0',
               hintStyle: context.text.display.copyWith(color: context.colors.textLight),
               suffixText: 'hrs',
               suffixStyle: context.text.cardTitle.copyWith(color: context.colors.textMedium),
+              errorText: _errorText,
+              errorStyle: context.text.caption.copyWith(color: context.colors.red),
             ),
           ),
-          if (_errorText != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  _errorText!,
-                  style: context.text.body.copyWith(color: context.colors.red),
-                ),
-              ),
-            ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.section),
           Text(
             'Or calculate automatically from times:',
             style: context.text.body.copyWith(color: context.colors.textMedium),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           Row(
             children: [
               Expanded(
@@ -208,10 +189,10 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                       });
                     }
                   },
-                  },
+          ),
           ),
           if (_hasExistingEntry) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.stack),
             Center(
               child: TextButton(
                 onPressed: () async {
@@ -219,9 +200,15 @@ class _SleepEntryDialogState extends ConsumerState<SleepEntryDialog> {
                   if (mounted) Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor: context.colors.pinkIcon,
+                  foregroundColor: context.colors.red,
+                  minimumSize: const Size(44, 44),
                 ),
-                child: const Text('Clear entry'),
+                child: Text(
+                  'Clear entry',
+                  style: context.text.bodyStrong.copyWith(
+                    color: context.colors.red,
+                  ),
+                ),
               ),
             ),
           ],

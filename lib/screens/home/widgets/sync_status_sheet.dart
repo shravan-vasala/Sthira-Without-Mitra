@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
 import '../../../theme/app_theme.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/health_connect_service.dart';
@@ -141,12 +142,10 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
 
           // Diagnostics
           Text(
-            'Diagnostics',
-            style: context.text.cardTitle.copyWith(
-              color: context.colors.textDark,
-            ),
+            'DIAGNOSTICS',
+            style: context.text.eyebrow,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: Spacing.block),
 
           if (_checking)
             const Center(
@@ -201,7 +200,7 @@ class _SyncStatusSheetState extends ConsumerState<SyncStatusSheet> {
             ),
           ],
 
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
             label: 'Refresh Now',
             isLoading: _checking,

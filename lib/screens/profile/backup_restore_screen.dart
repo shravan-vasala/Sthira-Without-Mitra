@@ -518,7 +518,7 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
                         const SizedBox(height: 8),
                         Text(
                           _lastBackupDate,
-                          style: context.text.cardTitle.copyWith(
+                          style: context.text.bodyStrong.copyWith(
                             color: context.colors.primary,
                           ),
                         ),

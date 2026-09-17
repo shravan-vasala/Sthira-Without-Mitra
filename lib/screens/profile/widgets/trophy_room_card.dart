@@ -57,7 +57,7 @@ class TrophyRoomCard extends ConsumerWidget {
             builder: (context, val, child) {
               return Text(
                 'TROPHY ROOM ($val/${badges.length})',
-                style: context.text.caption.copyWith(
+                style: context.text.eyebrow.copyWith(
                   color: context.colors.primary,
                 ),
               );
@@ -65,6 +65,7 @@ class TrophyRoomCard extends ConsumerWidget {
           ),
         ),
         SurfaceCard(
+          margin: EdgeInsets.zero,
           padding: const EdgeInsets.all(Spacing.cardPad),
           color: context.colors.card,
           child: GridView.builder(
@@ -140,7 +141,7 @@ class _BadgeItem extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'HOW TO EARN:',
-                    style: context.text.micro.copyWith(
+                    style: context.text.eyebrow.copyWith(
                       color: context.colors.textLight,
                     ),
                   ),
@@ -238,8 +239,8 @@ class _BadgeItem extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             SizedBox(
-              width: 56,
-              height: 56,
+              width: 52,
+              height: 52,
               child: CircularProgressIndicator(
                 value: progressFrac,
                 strokeWidth: 2,

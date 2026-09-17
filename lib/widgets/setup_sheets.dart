@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import '../providers/app_providers.dart';
 import '../providers/credential_provider.dart';
 import 'app_bottom_sheet.dart';
@@ -60,8 +61,9 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
         // Late cancellation check before finalizing persistence:
         if (!mounted ||
             currentToken != _attemptToken ||
-            _geminiController.text.trim() != key)
+            _geminiController.text.trim() != key) {
           return;
+        }
 
         await ref.read(credentialProvider.notifier).saveKey(key);
       } catch (e) {
@@ -142,7 +144,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
             capitalization: TextCapitalization.words,
             prefixIcon: Icons.sports_rounded,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: Spacing.block),
           AppTextField(
             controller: _geminiController,
             labelText: 'Gemini API Key',
@@ -206,7 +208,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
                 onPressed: _isSuccess ? () {} : (_isVerifying ? null : _save),
                 label: _isSuccess
@@ -293,12 +295,13 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
     return AppSheet(
       title: 'Health Connect',
       subtitle: 'Automatically sync steps and sleep data from other apps.',
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Icon(Icons.favorite_rounded, size: 64, color: context.colors.primary),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
             onPressed: _connecting ? null : _connect,
             label: _connecting ? 'Connecting...' : 'Connect Now',
@@ -363,6 +366,7 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
       title: 'Cloud Backup',
       subtitle:
           'Securely sync your progress across devices and never lose a day.',
+      scrollable: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -372,7 +376,7 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
             size: 64,
             color: context.colors.primary,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
           PrimaryButton(
             onPressed: isSyncing || isSuccess
                 ? null
