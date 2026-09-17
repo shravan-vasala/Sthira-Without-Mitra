@@ -32,11 +32,3 @@ const double kPrimaryButtonHeight = 52;
 /// Compact row action height (Photo / Describe / Adjust).
 const double kCompactButtonHeight = 40;
 
-EdgeInsets shellScrollPadding(BuildContext context, {double horizontal = 0}) {
-  return EdgeInsets.fromLTRB(
-    horizontal,
-    0,
-    horizontal,
-    kShellScrollBottomPadding,
-  );
-}

@@ -1,3 +1,6 @@
+// TODO: Flagged for relocation! This file currently lives in home/widgets/
+// but its only consumer is `lib/screens/home/meal_detail_screen.dart`.
+// It should likely be moved to a shared location.
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

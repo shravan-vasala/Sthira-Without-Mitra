@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../theme/app_theme.dart';
-import '../../../theme/app_typography.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
@@ -74,9 +73,7 @@ class MealsCard extends ConsumerWidget {
     return Semantics(
       label:
           'Meals Card. $completedMeals of $totalMeals meals logged. $completedCal of $totalCal calories consumed.',
-      child: Column(
-        children: [
-          GestureDetector(
+      child: GestureDetector(
             onTap: () {
               Haptics.tap();
               context.go('/home/meals');
@@ -193,8 +190,6 @@ class MealsCard extends ConsumerWidget {
               ),
             ),
           ),
-        ],
-      ),
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:trufit_bodamma/providers/app_providers.dart';
-import 'package:trufit_bodamma/services/progress_aggregation_service.dart';
-import 'package:trufit_bodamma/screens/progress/progress_screen.dart';
-import 'package:trufit_bodamma/screens/progress/widgets/shared_chart_card.dart';
-import 'package:trufit_bodamma/theme/app_colors.dart';
-import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../providers/app_providers.dart';
+import '../../../services/progress_aggregation_service.dart';
+import '../progress_screen.dart';
+import 'shared_chart_card.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_typography.dart';
 
 class ChartDrilldownSheet extends ConsumerWidget {
   const ChartDrilldownSheet({

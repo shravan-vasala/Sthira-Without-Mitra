@@ -46,13 +46,6 @@ class AppTheme {
       iconTheme: IconThemeData(
         color: AppColorsLight().textDark,
       ),
-      cardTheme: CardThemeData(
-        color: AppColorsLight().card,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        shadowColor: AppColorsLight().textDark.withValues(alpha: 0.03),
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      ),
       appBarTheme: AppBarTheme(
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -84,15 +77,6 @@ class AppTheme {
         tabAlignment: TabAlignment.fill,
         labelColor: AppColorsLight().textDark,
         unselectedLabelColor: AppColorsLight().textMedium,
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: AppColorsLight().white,
-        selectedItemColor: AppColorsLight().primary,
-        unselectedItemColor: AppColorsLight().textLight,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-        selectedLabelStyle: text.micro,
-        unselectedLabelStyle: text.caption,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -243,7 +227,7 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColorsDark().scaffoldBg,
       primaryColor: AppColorsDark().primary,
-      splashFactory: InkSparkle.splashFactory,
+
       colorScheme: ColorScheme.dark(
         primary: AppColorsDark().primary,
         secondary: AppColorsDark().indigo,
@@ -269,13 +253,6 @@ class AppTheme {
       ),
       iconTheme: IconThemeData(
         color: AppColorsDark().textDark,
-      ),
-      cardTheme: CardThemeData(
-        color: AppColorsDark().card,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        shadowColor: AppColorsDark().textDark.withValues(alpha: 0.03),
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
       appBarTheme: AppBarTheme(
         systemOverlayStyle: const SystemUiOverlayStyle(
@@ -308,15 +285,6 @@ class AppTheme {
         tabAlignment: TabAlignment.fill,
         labelColor: AppColorsDark().textDark,
         unselectedLabelColor: AppColorsDark().textMedium,
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: AppColorsDark().card,
-        selectedItemColor: AppColorsDark().primary,
-        unselectedItemColor: AppColorsDark().textLight,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-        selectedLabelStyle: text.micro,
-        unselectedLabelStyle: text.caption,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
