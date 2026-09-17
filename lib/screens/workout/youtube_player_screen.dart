@@ -243,8 +243,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                           const SizedBox(height: 4),
                           Text(
                             widget.subtitle,
-                            style: context.text.body.copyWith(color: context.colors.white.withValues(
-                                alpha: 0.6),
+                            style: context.text.body.copyWith(
+                              color: context.colors.white.withValues(alpha: 0.6),
+                            ),
                           ),
                         ],
                         const SizedBox(height: 8),
@@ -252,8 +253,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                           Text(
                             'Reps: ${widget.reps}',
                             style: AppTheme.numeric(
-                              context.text.bodyStrong.copyWith(color: context.colors.white.withValues(
-                                  alpha: 0.7),
+                              context.text.bodyStrong.copyWith(
+                                color: context.colors.white.withValues(alpha: 0.7),
+                              ),
                             ),
                           ),
                         const SizedBox(height: 24),

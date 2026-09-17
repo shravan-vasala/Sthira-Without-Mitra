@@ -182,7 +182,7 @@ Future<void> main() async {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   'Fatal Error on Startup.\n\nA crash log has been saved to:\n${logFile.path}\n\nError: $e',
-                  style: context.text.bodyStrong.copyWith(color: Colors.red),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
                 ),
               ),
             ),
@@ -198,7 +198,7 @@ Future<void> main() async {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   'Fatal Error on Startup:\n\n$e',
-                  style: context.text.bodyStrong.copyWith(color: Colors.red),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
                 ),
               ),
             ),

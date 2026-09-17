@@ -549,6 +549,8 @@ $_jsonShape
   }
 
   /// Suggest a meal that fits within the remaining daily macros.
+  /// MEAL-01 BOUNDARY RULE: This feature generates helpful guesses based on remaining macros.
+  /// It MUST NOT accept or use `Meal.suggestions` (nutritionist plan guidelines) as context.
   @override
   Stream<String> suggestMealStream({
     required int remainingCalories,
@@ -670,13 +672,13 @@ Do NOT use JSON.
         prefs.setString(cacheKey, buffer.toString());
       }
     } on TimeoutException {
-      yield "Our AI is taking too long to respond. Here's a generic quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! Please verify the macros manually to ensure it fits your budget.";
+      yield "Couldn't reach the AI — try again in a moment.";
     } catch (e) {
       if (e is AiException &&
           (e.message.contains('traffic') ||
               e.message.contains('rate limited') ||
               e.message.contains('later'))) {
-        yield "Our AI is currently taking a breather. Here's a generic quick idea: Try a simple grilled chicken salad, or a bowl of dal with rice and veggies! Please verify the macros manually to ensure it fits your budget.";
+        yield "Couldn't reach the AI — try again in a moment.";
       } else {
         rethrow;
       }

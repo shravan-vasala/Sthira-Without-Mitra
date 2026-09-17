@@ -47,9 +47,6 @@ class AppTheme {
           TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
         },
       ),
-      iconTheme: IconThemeData(
-        color: AppColorsLight().textDark,
-      ),
       appBarTheme: AppBarTheme(
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -71,7 +68,7 @@ class AppTheme {
           color: AppColorsLight().textDark,
         ),
       ),
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelStyle: text.bodyStrong,
         unselectedLabelStyle: text.body.copyWith(
           color: AppColorsLight().textMedium,
@@ -259,9 +256,6 @@ class AppTheme {
           TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
         },
       ),
-      iconTheme: IconThemeData(
-        color: AppColorsDark().textDark,
-      ),
       appBarTheme: AppBarTheme(
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -283,7 +277,7 @@ class AppTheme {
           color: AppColorsDark().textDark,
         ),
       ),
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelStyle: text.bodyStrong,
         unselectedLabelStyle: text.body.copyWith(
           color: AppColorsDark().textMedium,

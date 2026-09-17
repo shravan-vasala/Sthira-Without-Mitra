@@ -491,6 +491,18 @@ class _PlanEditorState extends State<_PlanEditor> {
     }
   }
 
+  bool get _isSeed {
+    if (_selectedKey == null) return false;
+    final jsonStr = widget.getRawJson(_selectedKey!);
+    if (jsonStr == null) return false;
+    try {
+      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+      return map['source'] == 'seed';
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -572,21 +584,57 @@ class _PlanEditorState extends State<_PlanEditor> {
                 ),
               ),
               const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: _save,
-                icon: const Icon(Icons.save_rounded, size: 18),
-                label: const Text('Save'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+              if (_isSeed)
+                ElevatedButton.icon(
+                  onPressed: _forkAndEdit,
+                  icon: const Icon(Icons.fork_right_rounded, size: 18),
+                  label: const Text('Fork to Edit'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colors.primaryDark,
+                    foregroundColor: context.colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                )
+              else
+                ElevatedButton.icon(
+                  onPressed: _save,
+                  icon: const Icon(Icons.save_rounded, size: 18),
+                  label: const Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
-        // JSON editor
+        if (_isSeed)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: const EdgeInsets.symmetric(horizontal: Spacing.screen).copyWith(bottom: 12),
+            decoration: BoxDecoration(
+              color: context.colors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(Radii.control),
+              border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.verified_user_rounded, color: context.colors.primary, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "This is an expert protocol and cannot be modified directly. Please fork it to make custom edits.",
+                    style: context.text.caption.copyWith(color: context.colors.primaryDark),
+                  ),
+                ),
+              ],
+            ),
+          ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -600,6 +648,7 @@ class _PlanEditorState extends State<_PlanEditor> {
                 controller: _controller,
                 maxLines: null,
                 expands: true,
+                readOnly: _isSeed,
                 style: context.text.micro.copyWith(
                   color: context.colors.textDark,
                 ),
@@ -614,6 +663,68 @@ class _PlanEditorState extends State<_PlanEditor> {
         ),
       ],
     );
+  }
+
+  Future<void> _forkAndEdit() async {
+    if (_selectedKey == null) return;
+    
+    final baseName = _selectedKey!.contains(' (Expert)') ? _selectedKey!.replaceAll(' (Expert)', '') : _selectedKey!;
+    var forkedName = '$baseName (Forked)';
+    
+    int counter = 1;
+    final keys = widget.getKeys();
+    while (keys.contains(forkedName)) {
+      forkedName = '$baseName (Forked $counter)';
+      counter++;
+    }
+
+    final confirm = await showDialog<bool>(
+       context: context,
+       builder: (ctx) => AlertDialog(
+          title: const Text('Fork Expert Plan?'),
+          content: Text('This plan was authored by an expert and is read-only.\n\nWould you like to fork it to a new plan named "$forkedName"? You can safely edit the fork.'),
+          actions: [
+             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+             ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Fork Plan')),
+          ],
+       ),
+    );
+
+    if (confirm != true) return;
+    
+    try {
+      final decoded = jsonDecode(_controller.text) as Map<String, dynamic>;
+      decoded['planName'] = forkedName;
+      decoded['source'] = 'user';
+      decoded.remove('seedVersion');
+      
+      await widget.saveJson(forkedName, jsonEncode(decoded));
+      
+      setState(() {
+        _selectedKey = forkedName;
+        _loadJson();
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully forked to "$forkedName"'),
+            backgroundColor: context.colors.green,
+            behavior: SnackBarBehavior.floating,
+          )
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error forking plan: $e'),
+            backgroundColor: context.colors.red,
+            behavior: SnackBarBehavior.floating,
+          )
+        );
+      }
+    }
   }
 
   Future<void> _save() async {

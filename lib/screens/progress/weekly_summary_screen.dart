@@ -58,8 +58,6 @@ class WeeklySummaryScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ).animate().fade().slideY(begin: -0.2),
 
-              ).animate().fade().slideY(begin: -0.2),
-
               const SizedBox(height: Spacing.major),
 
               // 3.1 Animated Score Card Hero

@@ -172,6 +172,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
 
     if (widget.remainingCalories <= 0) {
       return SurfaceCard(
+        margin: EdgeInsets.zero,
         elevation: SurfaceCardElevation.nested,
         child: Column(
           children: [
@@ -197,6 +198,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
     }
 
     return SurfaceCard(
+      margin: EdgeInsets.zero,
       elevation: SurfaceCardElevation.nested,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -11,10 +11,19 @@ class MealPlan {
   final List<Meal> meals;
   final int totalCalories;
 
+  /// 'seed' = shipped by an expert, managed by migration.
+  /// 'user' = authored or forked by the user, never touched by migration.
+  final String source;
+
+  /// Seed asset version this record was created from. Null for user plans.
+  final int? seedVersion;
+
   MealPlan({
     required this.planName,
     required this.meals,
     required this.totalCalories,
+    this.source = 'user',
+    this.seedVersion,
   });
 
   int get completedMeals => meals.where((m) => m.isCompleted).length;
@@ -31,6 +40,8 @@ class MealPlan {
       totalCalories:
           json['totalCalories'] as int? ??
           meals.fold(0, (sum, m) => sum + m.calories),
+      source: json['source'] as String? ?? 'user',
+      seedVersion: json['seedVersion'] as int?,
     );
   }
 
@@ -38,13 +49,17 @@ class MealPlan {
     'planName': planName,
     'meals': meals.map((m) => m.toJson()).toList(),
     'totalCalories': totalCalories,
+    'source': source,
+    if (seedVersion != null) 'seedVersion': seedVersion,
   };
 
-  MealPlan copyWith({String? planName, List<Meal>? meals, int? totalCalories}) {
+  MealPlan copyWith({String? planName, List<Meal>? meals, int? totalCalories, String? source, int? seedVersion}) {
     return MealPlan(
       planName: planName ?? this.planName,
       meals: meals ?? this.meals,
       totalCalories: totalCalories ?? this.totalCalories,
+      source: source ?? this.source,
+      seedVersion: seedVersion ?? this.seedVersion,
     );
   }
 }
@@ -56,6 +71,9 @@ class Meal {
   List<MealItem> items;
   int calories;
   bool isCompleted;
+
+  /// MEAL-01 BOUNDARY RULE: These are static clinical protocols authored by a nutritionist.
+  /// They must NEVER be passed into an AI prompt or paraphrased by a language model.
   List<String> suggestions;
 
   Meal({

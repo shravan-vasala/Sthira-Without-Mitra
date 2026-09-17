@@ -677,6 +677,7 @@ class _WorkoutsSection extends ConsumerWidget {
                   size: 16,
                 ),
               ),
+          ],
         ),
       );
   }

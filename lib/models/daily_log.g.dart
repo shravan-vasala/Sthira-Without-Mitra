@@ -17,19 +17,31 @@ const DailyLogSchema = CollectionSchema(
   name: r'DailyLog',
   id: -3995615497450705259,
   properties: {
-    r'bodyFat': PropertySchema(id: 0, name: r'bodyFat', type: IsarType.double),
+    r'bodyFat': PropertySchema(
+      id: 0,
+      name: r'bodyFat',
+      type: IsarType.double,
+    ),
     r'checkInUpdatedAt': PropertySchema(
       id: 1,
       name: r'checkInUpdatedAt',
       type: IsarType.dateTime,
     ),
-    r'date': PropertySchema(id: 2, name: r'date', type: IsarType.string),
+    r'date': PropertySchema(
+      id: 2,
+      name: r'date',
+      type: IsarType.string,
+    ),
     r'dayFeeling': PropertySchema(
       id: 3,
       name: r'dayFeeling',
       type: IsarType.string,
     ),
-    r'dayNote': PropertySchema(id: 4, name: r'dayNote', type: IsarType.string),
+    r'dayNote': PropertySchema(
+      id: 4,
+      name: r'dayNote',
+      type: IsarType.string,
+    ),
     r'hasAnyActivity': PropertySchema(
       id: 5,
       name: r'hasAnyActivity',
@@ -50,7 +62,11 @@ const DailyLogSchema = CollectionSchema(
       name: r'sleepSource',
       type: IsarType.string,
     ),
-    r'steps': PropertySchema(id: 9, name: r'steps', type: IsarType.long),
+    r'steps': PropertySchema(
+      id: 9,
+      name: r'steps',
+      type: IsarType.long,
+    ),
     r'stepsSource': PropertySchema(
       id: 10,
       name: r'stepsSource',
@@ -61,8 +77,16 @@ const DailyLogSchema = CollectionSchema(
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'waterMl': PropertySchema(id: 12, name: r'waterMl', type: IsarType.long),
-    r'weight': PropertySchema(id: 13, name: r'weight', type: IsarType.double),
+    r'waterMl': PropertySchema(
+      id: 12,
+      name: r'waterMl',
+      type: IsarType.long,
+    ),
+    r'weight': PropertySchema(
+      id: 13,
+      name: r'weight',
+      type: IsarType.double,
+    ),
     r'workoutCompleted': PropertySchema(
       id: 14,
       name: r'workoutCompleted',
@@ -77,7 +101,7 @@ const DailyLogSchema = CollectionSchema(
       id: 16,
       name: r'workoutStatus',
       type: IsarType.string,
-    ),
+    )
   },
   estimateSize: _dailyLogEstimateSize,
   serialize: _dailyLogSerialize,
@@ -95,9 +119,9 @@ const DailyLogSchema = CollectionSchema(
           name: r'date',
           type: IndexType.hash,
           caseSensitive: true,
-        ),
+        )
       ],
-    ),
+    )
   },
   links: {},
   embeddedSchemas: {},
@@ -328,7 +352,10 @@ extension DailyLogQueryWhereSort on QueryBuilder<DailyLog, DailyLog, QWhere> {
 extension DailyLogQueryWhere on QueryBuilder<DailyLog, DailyLog, QWhereClause> {
   QueryBuilder<DailyLog, DailyLog, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
     });
   }
 
@@ -354,10 +381,8 @@ extension DailyLogQueryWhere on QueryBuilder<DailyLog, DailyLog, QWhereClause> {
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QAfterWhereClause> idGreaterThan(
-    Id id, {
-    bool include = false,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QAfterWhereClause> idGreaterThan(Id id,
+      {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -365,10 +390,8 @@ extension DailyLogQueryWhere on QueryBuilder<DailyLog, DailyLog, QWhereClause> {
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QAfterWhereClause> idLessThan(
-    Id id, {
-    bool include = false,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QAfterWhereClause> idLessThan(Id id,
+      {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -383,65 +406,55 @@ extension DailyLogQueryWhere on QueryBuilder<DailyLog, DailyLog, QWhereClause> {
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.between(
-          lower: lowerId,
-          includeLower: includeLower,
-          upper: upperId,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterWhereClause> dateEqualTo(String date) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IndexWhereClause.equalTo(indexName: r'date', value: [date]),
-      );
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'date',
+        value: [date],
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterWhereClause> dateNotEqualTo(
-    String date,
-  ) {
+      String date) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [],
-                upper: [date],
-                includeUpper: false,
-              ),
-            )
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [date],
-                includeLower: false,
-                upper: [],
-              ),
-            );
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [],
+              upper: [date],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [date],
+              includeLower: false,
+              upper: [],
+            ));
       } else {
         return query
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [date],
-                includeLower: false,
-                upper: [],
-              ),
-            )
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'date',
-                lower: [],
-                upper: [date],
-                includeUpper: false,
-              ),
-            );
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [date],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date',
+              lower: [],
+              upper: [date],
+              includeUpper: false,
+            ));
       }
     });
   }
@@ -451,17 +464,17 @@ extension DailyLogQueryFilter
     on QueryBuilder<DailyLog, DailyLog, QFilterCondition> {
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> bodyFatIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'bodyFat'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'bodyFat',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> bodyFatIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'bodyFat'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'bodyFat',
+      ));
     });
   }
 
@@ -470,13 +483,11 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'bodyFat',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bodyFat',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -486,14 +497,12 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'bodyFat',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'bodyFat',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -503,14 +512,12 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'bodyFat',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'bodyFat',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -522,89 +529,88 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'bodyFat',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'bodyFat',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  checkInUpdatedAtIsNull() {
+      checkInUpdatedAtIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'checkInUpdatedAt'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'checkInUpdatedAt',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  checkInUpdatedAtIsNotNull() {
+      checkInUpdatedAtIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'checkInUpdatedAt'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'checkInUpdatedAt',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  checkInUpdatedAtEqualTo(DateTime? value) {
+      checkInUpdatedAtEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'checkInUpdatedAt', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'checkInUpdatedAt',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  checkInUpdatedAtGreaterThan(DateTime? value, {bool include = false}) {
+      checkInUpdatedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'checkInUpdatedAt',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'checkInUpdatedAt',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  checkInUpdatedAtLessThan(DateTime? value, {bool include = false}) {
+      checkInUpdatedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'checkInUpdatedAt',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'checkInUpdatedAt',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  checkInUpdatedAtBetween(
+      checkInUpdatedAtBetween(
     DateTime? lower,
     DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'checkInUpdatedAt',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'checkInUpdatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
@@ -613,13 +619,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -629,14 +633,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -646,14 +648,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -665,16 +665,14 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'date',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'date',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -683,13 +681,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -698,76 +694,70 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dateContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'date',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'date',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dateMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'date',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'date',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dateIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'date', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'date',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dateIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'date', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'date',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'dayFeeling'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'dayFeeling',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  dayFeelingIsNotNull() {
+      dayFeelingIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'dayFeeling'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'dayFeeling',
+      ));
     });
   }
 
@@ -776,13 +766,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'dayFeeling',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -792,14 +780,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'dayFeeling',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -809,14 +795,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'dayFeeling',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -828,16 +812,14 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'dayFeeling',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dayFeeling',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -846,13 +828,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'dayFeeling',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -861,76 +841,70 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'dayFeeling',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'dayFeeling',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dayFeeling',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'dayFeeling',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dayFeeling',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayFeelingIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'dayFeeling', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayFeeling',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  dayFeelingIsNotEmpty() {
+      dayFeelingIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'dayFeeling', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'dayFeeling',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'dayNote'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'dayNote',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'dayNote'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'dayNote',
+      ));
     });
   }
 
@@ -939,13 +913,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'dayNote',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -955,14 +927,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'dayNote',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -972,14 +942,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'dayNote',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -991,16 +959,14 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'dayNote',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dayNote',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1009,13 +975,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'dayNote',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1024,77 +988,72 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'dayNote',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'dayNote',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dayNote',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'dayNote',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dayNote',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'dayNote', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayNote',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> dayNoteIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'dayNote', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'dayNote',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> hasAnyActivityEqualTo(
-    bool value,
-  ) {
+      bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'hasAnyActivity', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hasAnyActivity',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'id', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
@@ -1103,13 +1062,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
@@ -1118,13 +1075,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
     });
   }
 
@@ -1135,105 +1090,104 @@ extension DailyLogQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'id',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  screenTimeMinutesIsNull() {
+      screenTimeMinutesIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'screenTimeMinutes'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'screenTimeMinutes',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  screenTimeMinutesIsNotNull() {
+      screenTimeMinutesIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'screenTimeMinutes'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'screenTimeMinutes',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  screenTimeMinutesEqualTo(int? value) {
+      screenTimeMinutesEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'screenTimeMinutes', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'screenTimeMinutes',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  screenTimeMinutesGreaterThan(int? value, {bool include = false}) {
+      screenTimeMinutesGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'screenTimeMinutes',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'screenTimeMinutes',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  screenTimeMinutesLessThan(int? value, {bool include = false}) {
+      screenTimeMinutesLessThan(
+    int? value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'screenTimeMinutes',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'screenTimeMinutes',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  screenTimeMinutesBetween(
+      screenTimeMinutesBetween(
     int? lower,
     int? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'screenTimeMinutes',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'screenTimeMinutes',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> sleepHoursIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'sleepHours'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'sleepHours',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  sleepHoursIsNotNull() {
+      sleepHoursIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'sleepHours'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'sleepHours',
+      ));
     });
   }
 
@@ -1242,13 +1196,11 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'sleepHours',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sleepHours',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -1258,14 +1210,12 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'sleepHours',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'sleepHours',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -1275,14 +1225,12 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'sleepHours',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'sleepHours',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -1294,33 +1242,31 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'sleepHours',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'sleepHours',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> sleepSourceIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'sleepSource'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'sleepSource',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  sleepSourceIsNotNull() {
+      sleepSourceIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'sleepSource'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'sleepSource',
+      ));
     });
   }
 
@@ -1329,31 +1275,27 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'sleepSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sleepSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  sleepSourceGreaterThan(
+      sleepSourceGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'sleepSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'sleepSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1363,14 +1305,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'sleepSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'sleepSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1382,16 +1322,14 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'sleepSource',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'sleepSource',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1400,13 +1338,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'sleepSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'sleepSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1415,86 +1351,80 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'sleepSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'sleepSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> sleepSourceContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'sleepSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'sleepSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> sleepSourceMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'sleepSource',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'sleepSource',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> sleepSourceIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'sleepSource', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sleepSource',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  sleepSourceIsNotEmpty() {
+      sleepSourceIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'sleepSource', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'sleepSource',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> stepsIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'steps'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'steps',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> stepsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'steps'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'steps',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> stepsEqualTo(
-    int? value,
-  ) {
+      int? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'steps', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'steps',
+        value: value,
+      ));
     });
   }
 
@@ -1503,13 +1433,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'steps',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'steps',
+        value: value,
+      ));
     });
   }
 
@@ -1518,13 +1446,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'steps',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'steps',
+        value: value,
+      ));
     });
   }
 
@@ -1535,32 +1461,30 @@ extension DailyLogQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'steps',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'steps',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> stepsSourceIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'stepsSource'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'stepsSource',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  stepsSourceIsNotNull() {
+      stepsSourceIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'stepsSource'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'stepsSource',
+      ));
     });
   }
 
@@ -1569,31 +1493,27 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'stepsSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'stepsSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  stepsSourceGreaterThan(
+      stepsSourceGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'stepsSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'stepsSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1603,14 +1523,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'stepsSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'stepsSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1622,16 +1540,14 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'stepsSource',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'stepsSource',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1640,13 +1556,11 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'stepsSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'stepsSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -1655,86 +1569,80 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'stepsSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'stepsSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> stepsSourceContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'stepsSource',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'stepsSource',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> stepsSourceMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'stepsSource',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'stepsSource',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> stepsSourceIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'stepsSource', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'stepsSource',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  stepsSourceIsNotEmpty() {
+      stepsSourceIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'stepsSource', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'stepsSource',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> updatedAtIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'updatedAt'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> updatedAtIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'updatedAt'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> updatedAtEqualTo(
-    DateTime? value,
-  ) {
+      DateTime? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'updatedAt', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
     });
   }
 
@@ -1743,13 +1651,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'updatedAt',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
     });
   }
 
@@ -1758,13 +1664,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'updatedAt',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
     });
   }
 
@@ -1775,41 +1679,39 @@ extension DailyLogQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'updatedAt',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> waterMlIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'waterMl'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'waterMl',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> waterMlIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'waterMl'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'waterMl',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> waterMlEqualTo(
-    int? value,
-  ) {
+      int? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'waterMl', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'waterMl',
+        value: value,
+      ));
     });
   }
 
@@ -1818,13 +1720,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'waterMl',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'waterMl',
+        value: value,
+      ));
     });
   }
 
@@ -1833,13 +1733,11 @@ extension DailyLogQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'waterMl',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'waterMl',
+        value: value,
+      ));
     });
   }
 
@@ -1850,31 +1748,29 @@ extension DailyLogQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'waterMl',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'waterMl',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> weightIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'weight'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'weight',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> weightIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'weight'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'weight',
+      ));
     });
   }
 
@@ -1883,13 +1779,11 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'weight',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'weight',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -1899,14 +1793,12 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'weight',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'weight',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -1916,14 +1808,12 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'weight',
-          value: value,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'weight',
+        value: value,
+        epsilon: epsilon,
+      ));
     });
   }
 
@@ -1935,42 +1825,41 @@ extension DailyLogQueryFilter
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'weight',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          epsilon: epsilon,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'weight',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutCompletedEqualTo(bool value) {
+      workoutCompletedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'workoutCompleted', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'workoutCompleted',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutDayIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'workoutDayId'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'workoutDayId',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutDayIdIsNotNull() {
+      workoutDayIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'workoutDayId'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'workoutDayId',
+      ));
     });
   }
 
@@ -1979,31 +1868,27 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'workoutDayId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'workoutDayId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutDayIdGreaterThan(
+      workoutDayIdGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'workoutDayId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'workoutDayId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -2013,14 +1898,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'workoutDayId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'workoutDayId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -2032,29 +1915,28 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'workoutDayId',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'workoutDayId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutDayIdStartsWith(String value, {bool caseSensitive = true}) {
+      workoutDayIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'workoutDayId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'workoutDayId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -2063,79 +1945,73 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'workoutDayId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'workoutDayId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutDayIdContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'workoutDayId',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'workoutDayId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutDayIdMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'workoutDayId',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'workoutDayId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutDayIdIsEmpty() {
+      workoutDayIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'workoutDayId', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'workoutDayId',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutDayIdIsNotEmpty() {
+      workoutDayIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'workoutDayId', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'workoutDayId',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutStatusIsNull() {
+      workoutStatusIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'workoutStatus'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'workoutStatus',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutStatusIsNotNull() {
+      workoutStatusIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'workoutStatus'),
-      );
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'workoutStatus',
+      ));
     });
   }
 
@@ -2144,31 +2020,27 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'workoutStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutStatusGreaterThan(
+      workoutStatusGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'workoutStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -2178,14 +2050,12 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'workoutStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -2197,29 +2067,28 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'workoutStatus',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'workoutStatus',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutStatusStartsWith(String value, {bool caseSensitive = true}) {
+      workoutStatusStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'workoutStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
@@ -2228,61 +2097,55 @@ extension DailyLogQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'workoutStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      String value,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'workoutStatus',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'workoutStatus',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition> workoutStatusMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
+      String pattern,
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'workoutStatus',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'workoutStatus',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutStatusIsEmpty() {
+      workoutStatusIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'workoutStatus', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'workoutStatus',
+        value: '',
+      ));
     });
   }
 
   QueryBuilder<DailyLog, DailyLog, QAfterFilterCondition>
-  workoutStatusIsNotEmpty() {
+      workoutStatusIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'workoutStatus', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'workoutStatus',
+        value: '',
+      ));
     });
   }
 }
@@ -2732,25 +2595,22 @@ extension DailyLogQueryWhereDistinct
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDate({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDate(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'date', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDayFeeling({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDayFeeling(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dayFeeling', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDayNote({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByDayNote(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'dayNote', caseSensitive: caseSensitive);
     });
@@ -2774,9 +2634,8 @@ extension DailyLogQueryWhereDistinct
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctBySleepSource({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctBySleepSource(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'sleepSource', caseSensitive: caseSensitive);
     });
@@ -2788,9 +2647,8 @@ extension DailyLogQueryWhereDistinct
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByStepsSource({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByStepsSource(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'stepsSource', caseSensitive: caseSensitive);
     });
@@ -2820,22 +2678,18 @@ extension DailyLogQueryWhereDistinct
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByWorkoutDayId({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByWorkoutDayId(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'workoutDayId', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByWorkoutStatus({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<DailyLog, DailyLog, QDistinct> distinctByWorkoutStatus(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(
-        r'workoutStatus',
-        caseSensitive: caseSensitive,
-      );
+      return query.addDistinctBy(r'workoutStatus',
+          caseSensitive: caseSensitive);
     });
   }
 }
@@ -2855,7 +2709,7 @@ extension DailyLogQueryProperty
   }
 
   QueryBuilder<DailyLog, DateTime?, QQueryOperations>
-  checkInUpdatedAtProperty() {
+      checkInUpdatedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'checkInUpdatedAt');
     });

@@ -10,7 +10,19 @@ class WorkoutPlan {
   final String planName;
   final List<WorkoutDay> days;
 
-  WorkoutPlan({required this.planName, required this.days});
+  /// 'seed' = shipped by an expert, managed by migration.
+  /// 'user' = authored or forked by the user, never touched by migration.
+  final String source;
+
+  /// Seed asset version this record was created from. Null for user plans.
+  final int? seedVersion;
+
+  WorkoutPlan({
+    required this.planName,
+    required this.days,
+    this.source = 'user',
+    this.seedVersion,
+  });
 
   factory WorkoutPlan.fromJson(Map<String, dynamic> json) {
     return WorkoutPlan(
@@ -18,13 +30,26 @@ class WorkoutPlan {
       days: (json['days'] as List)
           .map((d) => WorkoutDay.fromJson(d as Map<String, dynamic>))
           .toList(),
+      source: json['source'] as String? ?? 'user',
+      seedVersion: json['seedVersion'] as int?,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'planName': planName,
     'days': days.map((d) => d.toJson()).toList(),
+    'source': source,
+    if (seedVersion != null) 'seedVersion': seedVersion,
   };
+
+  WorkoutPlan copyWith({String? planName, List<WorkoutDay>? days, String? source, int? seedVersion}) {
+    return WorkoutPlan(
+      planName: planName ?? this.planName,
+      days: days ?? this.days,
+      source: source ?? this.source,
+      seedVersion: seedVersion ?? this.seedVersion,
+    );
+  }
 }
 
 @embedded

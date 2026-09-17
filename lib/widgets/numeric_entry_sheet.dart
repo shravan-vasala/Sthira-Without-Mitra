@@ -146,7 +146,6 @@ class NumericEntrySheet extends StatelessWidget {
             label: saveLabel,
             icon: saveIcon,
             onPressed: onSave,
-            height: 52, // From implementation plan: CTA 52dp
           ),
 
           if (bottomExtraContentBuilder != null) ...[

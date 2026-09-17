@@ -1015,7 +1015,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Suggestions',
+                  'Plan Guidelines',
                   style: context.text.body.copyWith(
                     color: context.colors.textDark,
                   ),
@@ -1177,6 +1177,11 @@ class _ProvenanceBadge extends StatelessWidget {
         iconData = Icons.edit_outlined;
         color = context.colors.textLight;
         break;
+      case 'expert_plan':
+        iconData = Icons.verified_user_rounded;
+        color = context.colors.purple;
+        label = 'nutritionist';
+        break;
       default:
         iconData = Icons.info_outline_rounded;
         color = context.colors.textLight;
@@ -1241,6 +1246,11 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
       headerIcon = Icons.edit_outlined;
       headerColor = context.colors.textLight;
       desc = 'You manually adjusted the macros or portion size for this item.';
+    } else if (validProvenance == 'expert_plan') {
+      title = 'Clinical Protocol';
+      headerIcon = Icons.verified_user_rounded;
+      headerColor = context.colors.purple;
+      desc = 'This item is a verified clinical protocol designed by an expert nutritionist. It is highly recommended.';
     } else {
       title = 'Unknown Origin';
       headerIcon = Icons.info_outline_rounded;

@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import 'share_card_exporter.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../theme/layout_insets.dart';
+import '../theme/app_spacing.dart';
 
 class DailyShareLayout extends StatelessWidget {
   final ShareFormat format;

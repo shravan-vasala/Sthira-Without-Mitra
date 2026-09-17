@@ -7,6 +7,7 @@ import '../models/workout_plan.dart';
 import '../models/workout_session.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 import '../models/sync_queue_item.dart';
+import '../utils/seed_migration_manager.dart';
 
 class WorkoutRepository {
   late Isar _isar;
@@ -23,15 +24,10 @@ class WorkoutRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    // Only seed if no plans exist at all (non-destructive policy)
-    final existingCount = _isar.workoutPlans.where().countSync();
-    if (existingCount > 0) return;
-
-    final jsonStr = await rootBundle.loadString(
+    await SeedMigrationManager.seedOrMigrateWorkouts(
+      _isar,
       'assets/data/seed_workout_plan.json',
     );
-    // Leverage the robust parser which correctly assigns stable IDs and validates the schema
-    await savePlanJson('beginner_plan', jsonStr);
   }
 
   List<WorkoutPlan> getAllPlans() {

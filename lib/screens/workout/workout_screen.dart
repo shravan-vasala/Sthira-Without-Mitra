@@ -366,9 +366,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
               ),
           ],
-        ),
-      ),
-    );
+        ), // closes Column
+      ), // closes Padding
+    ), // closes SafeArea
+  ); // closes Scaffold
   }
 
   void _finishWorkout(

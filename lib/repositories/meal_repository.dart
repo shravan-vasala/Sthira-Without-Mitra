@@ -8,6 +8,7 @@ import '../models/meal_plan.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 import '../models/sync_queue_item.dart';
 import 'package:flutter/foundation.dart';
+import '../utils/seed_migration_manager.dart';
 
 class MealRepository {
   late Isar _isar;
@@ -158,22 +159,15 @@ class MealRepository {
   }
 
   Future<void> _seedIfEmpty() async {
-    final jsonStr = await rootBundle.loadString(
+    await SeedMigrationManager.seedOrMigrateMeals(
+      _isar,
       'assets/data/seed_meal_plan.json',
     );
-    final map = jsonDecode(jsonStr) as Map<String, dynamic>;
-    final plan = MealPlan.fromJson(map);
-    defaultPlanName = plan.planName;
-
-    final existingPlan = _isar.mealPlans
-        .where()
-        .planNameEqualTo(plan.planName)
-        .findFirstSync();
-
-    if (existingPlan == null) {
-      await _isar.writeTxn(() async {
-        await _isar.mealPlans.put(plan);
-      });
+    
+    // Setup defaultPlanName referencing either the migrated seed plan or the known fallback expert plan
+    final plan = _isar.mealPlans.filter().planNameStartsWith('Meal Plan').findFirstSync();
+    if (plan != null) {
+      defaultPlanName = plan.planName;
     }
   }
 

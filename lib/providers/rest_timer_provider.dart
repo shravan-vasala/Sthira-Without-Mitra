@@ -225,8 +225,9 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
                     if (completedExercise != null)
                       Text(
                         'Time for $completedExercise',
-                        style: context.text.micro.copyWith(color: context.colors.onPrimary.withValues(
-                            alpha: 0.8),
+                        style: context.text.micro.copyWith(
+                          color: context.colors.onPrimary.withValues(alpha: 0.8),
+                        ),
                       ),
                   ],
                 ),

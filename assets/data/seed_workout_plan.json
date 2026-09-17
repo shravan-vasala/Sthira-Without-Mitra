@@ -1,5 +1,6 @@
 {
   "planName": "Phase 1 (8 Weeks)",
+  "seedVersion": 1,
   "days": [
     {
       "dayId": "monday",

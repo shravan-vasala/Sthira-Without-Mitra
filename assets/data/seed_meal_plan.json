@@ -1,5 +1,6 @@
 {
   "planName": "Meal Plan",
+  "seedVersion": 1,
   "totalCalories": 1250,
   "meals": [
     {
