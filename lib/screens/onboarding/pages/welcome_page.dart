@@ -4,6 +4,7 @@ import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../widgets/gita_verse_sheet.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -45,44 +46,7 @@ class _WelcomePageState extends State<WelcomePage>
   void _showGitaSheet(BuildContext context) {
     showAppBottomSheet(
       context: context,
-      builder: (ctx) => AppSheet(
-        scrollable: true,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                '2:47',
-                textAlign: TextAlign.center,
-                style: context.text.screenTitle.copyWith(
-                  color: context.colors.textDark,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన ।\nమా కర్మఫలహేతుర్భూర్మా తే సఙ్గోయస్త్వకర్మణి ॥',
-                textAlign: TextAlign.center,
-                style: context.text.body.copyWith(
-                  color: context.colors.textMedium,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "\"Krishna does not ask Arjuna to chase results - He asks him to master his focus. You can't control outcomes, but you can control the integrity of your effort. Do your karma, then let go.\"",
-                  textAlign: TextAlign.center,
-                  style: context.text.screenTitle.copyWith(
-                    color: context.colors.textDark.withValues(alpha: 0.85),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (ctx) => const GitaVerseSheet(),
     );
   }
 

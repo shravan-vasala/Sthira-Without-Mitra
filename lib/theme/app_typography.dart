@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// Sthira type scale. 10 tokens total.
+/// Sthira type scale. 11 tokens total.
 ///
 /// RULES FOR THIS FILE:
 /// 1. context.text.* must be the dominant path.
@@ -115,5 +115,19 @@ class AppTypography {
     letterSpacing: 0,
     height: 1.2,
     color: colors.textMedium,
+  );
+
+  /// Handwritten voice — the Gita interpretation only.
+  ///
+  /// Caveat is the app's third family and exists for exactly this. The size,
+  /// line height and 85% opacity together produce a margin-note feel; change
+  /// any of them and it reads as a styling error rather than a personal note.
+  /// Do NOT migrate this to a Cabinet Grotesk token. Do NOT add a fontWeight —
+  /// Caveat ships Regular only (pubspec.yaml:92-94).
+  TextStyle get quote => TextStyle(
+    fontFamily: 'Caveat',
+    fontSize: 22,
+    height: 1.3,
+    color: colors.textDark.withValues(alpha: 0.85),
   );
 }
