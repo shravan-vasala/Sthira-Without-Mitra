@@ -764,12 +764,17 @@ class _SectionWidgetState extends State<_SectionWidget> {
                 final exerciseIndex = index ~/ 2;
                 final exercise = widget.section.exercises[exerciseIndex];
                 if (exercise.restSecondsAfterSet > 0) {
-                  return RestTimerLabel(
-                    seconds: exercise.restSecondsAfterSet,
-                    exerciseName: exercise.name ?? '',
+                  return SizedBox(
+                    height: Spacing.stack,
+                    child: Center(
+                      child: RestTimerLabel(
+                        seconds: exercise.restSecondsAfterSet,
+                        exerciseName: exercise.name ?? '',
+                      ),
+                    ),
                   );
                 }
-                return const SizedBox(height: 4);
+                return const SizedBox(height: Spacing.stack);
               }
               final exerciseIndex = index ~/ 2;
               final exercise = widget.section.exercises[exerciseIndex];

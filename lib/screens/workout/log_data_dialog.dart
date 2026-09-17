@@ -245,7 +245,7 @@ class _LogDataDialogState extends ConsumerState<LogDataDialog> {
               },
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(kButtonRadius),
+                  borderRadius: BorderRadius.circular(Radii.control),
                 ),
               ),
               child: const Text('Log as planned'),

@@ -178,7 +178,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                           unitLabel: unitLabel,
                           weightMultiplier: weightMultiplier,
                         ),
-                        const SizedBox(height: Spacing.section),
+                        const SizedBox(height: Spacing.stack),
                       ],
                       SharedChartCard(
                         metric: MetricSpec(
@@ -194,7 +194,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                         endDate: endDate,
                         emptyMessage: 'No data logged yet',
                       ),
-                      const SizedBox(height: Spacing.section),
+                      const SizedBox(height: Spacing.stack),
                       SharedChartCard(
                         metric: MetricSpec(
                           title: 'Total Volume',
@@ -209,7 +209,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                         endDate: endDate,
                         emptyMessage: 'No data logged yet',
                       ),
-                      const SizedBox(height: Spacing.section),
+                      const SizedBox(height: Spacing.stack),
                       if (malformedCount > 0) ...[
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -227,7 +227,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: Spacing.section),
+                        const SizedBox(height: Spacing.stack),
                       ],
                       Text(
                         'HISTORY',

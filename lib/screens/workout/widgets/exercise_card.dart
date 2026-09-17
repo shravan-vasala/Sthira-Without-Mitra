@@ -477,8 +477,10 @@ class _MinimalAction extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        alignment: Alignment.center,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

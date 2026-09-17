@@ -7,6 +7,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/layout_insets.dart';
 import '../../../services/progress_aggregation_service.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_spacing.dart';
 
 enum ChartTimeFormat {
   weekly,
@@ -168,7 +169,7 @@ class SharedChartCard extends StatelessWidget {
     return Column(
       children: [
         mainContainer,
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacing.inline),
         if (statLabels.isNotEmpty && statValues.isNotEmpty)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),

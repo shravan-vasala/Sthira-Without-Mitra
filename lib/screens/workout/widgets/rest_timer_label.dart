@@ -28,8 +28,8 @@ class RestTimerLabel extends ConsumerWidget {
         ? '${displaySeconds ~/ 60} min${displaySeconds % 60 > 0 ? ' ${displaySeconds % 60} sec' : ''}'
         : '$displaySeconds sec';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    return SizedBox(
+      height: 14,
       child: Row(
         children: [
           Expanded(
