@@ -246,10 +246,11 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.screen, vertical: Spacing.stack),
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
+                      childAspectRatio: 0.75,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
                     ),
@@ -284,7 +285,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                               children: [
                                 Positioned.fill(
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(Radii.chip),
                                     child: kIsWeb
                                         ? Image.network(item.path, fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54)))
                                         : Image.file(File(ref.read(mediaRepoProvider).getAbsolutePath(item.path)), fit: BoxFit.cover, cacheWidth: 400, errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_rounded, color: Colors.white54))),
@@ -294,8 +295,15 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                                   Positioned.fill(
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: context.colors.primary, width: 3),
-                                        borderRadius: BorderRadius.circular(8),
+                                        color: context.colors.primary.withValues(alpha: 0.4),
+                                        borderRadius: BorderRadius.circular(Radii.chip),
+                                      ),
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.check_circle_rounded,
+                                          color: context.colors.onPrimary,
+                                          size: 32,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -310,7 +318,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                                           margin: const EdgeInsets.only(bottom: 2),
                                           decoration: BoxDecoration(
                                             color: Colors.black.withValues(alpha: 0.6),
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(Radii.micro),
                                           ),
                                           child: Text(
                                             item.poseTag,
@@ -627,16 +635,6 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
             // Reset transform when changing modes
             _transformController.value = Matrix4.identity();
           },
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) return Colors.white;
-              return Colors.black;
-            }),
-            iconColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) return Colors.black;
-              return Colors.white;
-            }),
-          ),
         ),
         centerTitle: true,
         actions: [

@@ -191,20 +191,17 @@ class _PhysiquePicturesScreenState
       ),
       floatingActionButton: rawPhotos.isEmpty
           ? null
-          : Padding(
-              padding: const EdgeInsets.only(bottom: kShellScrollBottomPadding),
-              child: FloatingActionButton.extended(
-                onPressed: _addPhoto,
-                backgroundColor: context.colors.primary,
-                icon: Icon(
-                  Icons.add_a_photo_rounded,
+          : FloatingActionButton.extended(
+              onPressed: _addPhoto,
+              backgroundColor: context.colors.primary,
+              icon: Icon(
+                Icons.add_a_photo_rounded,
+                color: context.colors.onPrimary,
+              ),
+              label: Text(
+                'Add photo',
+                style: context.text.body.copyWith(
                   color: context.colors.onPrimary,
-                ),
-                label: Text(
-                  'Add photo',
-                  style: context.text.body.copyWith(
-                    color: context.colors.onPrimary,
-                  ),
                 ),
               ),
             ),
@@ -276,7 +273,7 @@ class _PhysiquePicturesScreenState
                         ),
                         const SizedBox(height: 16),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
                           child: PrimaryButton(
                             label: 'Take First Photo',
                             onPressed: _openCamera,
@@ -296,7 +293,7 @@ class _PhysiquePicturesScreenState
                   )
                 : ListView.builder(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, kShellScrollBottomPadding),
+                    padding: const EdgeInsets.fromLTRB(Spacing.screen, Spacing.stack, Spacing.screen, kShellScrollBottomPadding),
                     itemCount: allPhotos.length,
                     itemBuilder: (context, index) {
                       final entry = allPhotos[index];
@@ -324,6 +321,7 @@ class _PhysiquePicturesScreenState
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 3,
+                                  childAspectRatio: 0.75,
                                   crossAxisSpacing: 8,
                                   mainAxisSpacing: 8,
                                 ),
@@ -363,7 +361,7 @@ class _PhysiquePicturesScreenState
                                         tag: photoPath,
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(
-                                            12,
+                                            Radii.chip,
                                           ),
                                           child: kIsWeb
                                               ? Image.network(
@@ -417,14 +415,14 @@ class _PhysiquePicturesScreenState
                                         left: 4,
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
+                                            horizontal: 4,
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
                                             color: context.colors.textDark
                                                 .withValues(alpha: 0.6),
                                             borderRadius: BorderRadius.circular(
-                                              6,
+                                              Radii.micro,
                                             ),
                                           ),
                                           child: Text(
@@ -441,14 +439,14 @@ class _PhysiquePicturesScreenState
                                         right: 4,
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
+                                            horizontal: 4,
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
                                             color: context.colors.primary
                                                 .withValues(alpha: 0.8),
                                             borderRadius: BorderRadius.circular(
-                                              6,
+                                              Radii.micro,
                                             ),
                                           ),
                                           child: Text(
@@ -468,7 +466,7 @@ class _PhysiquePicturesScreenState
                                             color: context.colors.primary
                                                 .withValues(alpha: 0.4),
                                             borderRadius: BorderRadius.circular(
-                                              12,
+                                              Radii.chip,
                                             ),
                                           ),
                                           child: Center(

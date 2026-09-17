@@ -6,6 +6,8 @@ import '../../share/share_card_exporter.dart';
 import '../../share/daily_share_layout.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../widgets/app_bottom_sheet.dart';
+import '../../widgets/primary_button.dart';
+import '../../theme/layout_insets.dart';
 
 class SharePreviewSheet extends ConsumerStatefulWidget {
   const SharePreviewSheet({super.key});
@@ -155,37 +157,13 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
           ),
 
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.colors.primary,
-                foregroundColor: context.colors.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                elevation: 4,
-                shadowColor: context.colors.primary.withValues(alpha: 0.4),
-              ),
-              onPressed: _isSharing
-                  ? null
-                  : () => _shareImage(layout, subtitle),
-              icon: _isSharing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Icon(Icons.ios_share_rounded),
-              label: Text(
-                _isSharing ? 'Preparing...' : 'Share Image',
-                style: context.text.bodyStrong,
-              ),
-            ),
+          PrimaryButton(
+            label: _isSharing ? 'Preparing...' : 'Share Image',
+            onPressed: _isSharing
+                ? null
+                : () => _shareImage(layout, subtitle),
+            icon: Icons.ios_share_rounded,
+            isLoading: _isSharing,
           ),
         ],
       ),
@@ -214,7 +192,7 @@ class _FormatChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : context.colors.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Radii.chip),
           border: Border.all(
             color: isSelected ? Colors.transparent : context.colors.border,
           ),

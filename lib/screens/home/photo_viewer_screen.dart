@@ -192,12 +192,6 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                 left: 0,
                 right: 0,
                 child: Container(
-                  padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top + 8,
-                    bottom: 16,
-                    left: 8,
-                    right: 8,
-                  ),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Colors.black87, Colors.transparent],
@@ -205,7 +199,14 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                       end: Alignment.bottomCenter,
                     ),
                   ),
-                  child: Row(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      child: Row(
                     children: [
                       IconButton(
                         tooltip: 'Back',
@@ -218,7 +219,7 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                       Expanded(
                         child: Text(
                           titleText,
-                          style: context.text.bodyStrong.copyWith(
+                          style: context.text.cardTitle.copyWith(
                             color: Colors.white,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -233,6 +234,8 @@ class _PhotoViewerScreenState extends ConsumerState<PhotoViewerScreen> {
                         onPressed: _deleteCurrentPhoto,
                       ),
                     ],
+                  ),
+                    ),
                   ),
                 ),
               ),
@@ -345,7 +348,7 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
                     errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.broken_image_rounded,
                       color: Colors.white54,
-                      size: 48,
+                      size: 40,
                     ),
                   )
                 : Image.file(
@@ -358,7 +361,7 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
                     errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.broken_image_rounded,
                       color: Colors.white54,
-                      size: 48,
+                      size: 40,
                     ),
                   ),
           ),

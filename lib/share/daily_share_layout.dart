@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import 'share_card_exporter.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../theme/layout_insets.dart';
 
 class DailyShareLayout extends StatelessWidget {
   final ShareFormat format;
@@ -269,18 +270,18 @@ class _StatsGrid extends StatelessWidget {
         Row(
           children: [
             Expanded(child: cards[0]),
-            const SizedBox(width: 12),
+            const SizedBox(width: Spacing.stack),
             Expanded(
               child: cards.length > 1 ? cards[1] : const SizedBox.shrink(),
             ),
           ],
         ),
         if (cards.length > 2) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           Row(
             children: [
               Expanded(child: cards[2]),
-              const SizedBox(width: 12),
+              const SizedBox(width: Spacing.stack),
               Expanded(
                 child: cards.length > 3 ? cards[3] : const SizedBox.shrink(),
               ),
@@ -309,7 +310,7 @@ class _StatCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.dark.scaffoldBg.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Radii.card),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.05),
           width: 1.0,
@@ -322,11 +323,11 @@ class _StatCard extends StatelessWidget {
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: AppColors.dark.textMedium.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(Radii.micro),
             ),
             child: Icon(icon, color: AppColors.dark.textMedium, size: 16),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.stack),
           Text(
             value,
             style: context.text.screenTitle.copyWith(
