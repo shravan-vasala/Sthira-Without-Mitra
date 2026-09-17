@@ -162,12 +162,12 @@ class _AboutYouPageState extends State<AboutYouPage>
                 const Text(
                   'About You',
                   textAlign: TextAlign.center,
-                  style: context.text.metric.copyWith(color: Colors.white),
+                  style: context.text.display.copyWith(color: context.colors.textDark),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           _buildAnimEntrance(
             1,
             Column(
@@ -314,7 +314,7 @@ class _AboutYouPageState extends State<AboutYouPage>
               ),
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
         ],
       ),
     );

@@ -106,7 +106,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 64),
+          const SizedBox(height: 32),
           _buildAnimEntrance(
             0,
             Column(
@@ -117,10 +117,10 @@ class _ConnectPageState extends ConsumerState<ConnectPage>
                   color: context.colors.primary,
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Connect',
                   textAlign: TextAlign.center,
-                  style: context.text.metric.copyWith(color: Colors.white),
+                  style: context.text.display.copyWith(color: context.colors.textDark),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -133,7 +133,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage>
               ],
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
 
           _buildAnimEntrance(
             1,
@@ -188,7 +188,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage>
               },
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -218,16 +218,16 @@ class _IntegrationRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SurfaceCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: context.colors.primary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: context.colors.primary, ),
+              child: Icon(icon, color: context.colors.primary, size: 20, ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -236,11 +236,11 @@ class _IntegrationRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: context.text.bodyStrong.copyWith(
+                    style: context.text.cardTitle.copyWith(
                       color: context.colors.textDark,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: context.text.caption.copyWith(
@@ -287,7 +287,7 @@ class _IntegrationRow extends StatelessWidget {
                     ),
                     child: Text(
                       statusText,
-                      style: context.text.micro.copyWith(
+                      style: context.text.caption.copyWith(
                         color: statusActive
                             ? context.colors.primary
                             : context.colors.textMedium,

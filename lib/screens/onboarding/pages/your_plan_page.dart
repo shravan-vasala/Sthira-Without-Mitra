@@ -153,7 +153,7 @@ class _YourPlanPageState extends State<YourPlanPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 64),
+          const SizedBox(height: 32),
           _buildAnimEntrance(
             0,
             Column(
@@ -164,15 +164,15 @@ class _YourPlanPageState extends State<YourPlanPage>
                   color: context.colors.primary,
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Your Plan',
                   textAlign: TextAlign.center,
-                  style: context.text.metric.copyWith(color: Colors.white),
+                  style: context.text.display.copyWith(color: context.colors.textDark),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
           _buildAnimEntrance(
             1,
             Column(
@@ -204,7 +204,7 @@ class _YourPlanPageState extends State<YourPlanPage>
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: context.colors.primary,
                     thumbColor: context.colors.primary,
-                    inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
+                    inactiveTrackColor: context.colors.textLight.withValues(alpha: 0.1),
                     trackHeight: 2,
                   ),
                   child: Slider(
@@ -255,7 +255,7 @@ class _YourPlanPageState extends State<YourPlanPage>
                             return Text(
                               'Estimate uses default ${defaults.join(', ')}',
                               style: context.text.micro.copyWith(
-                                color: Colors.white.withValues(alpha: 0.5),
+                                color: context.colors.textMedium.withValues(alpha: 0.5),
                               ),
                               textAlign: TextAlign.center,
                             );
@@ -267,7 +267,7 @@ class _YourPlanPageState extends State<YourPlanPage>
               ],
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
           _buildAnimEntrance(
             2,
             Column(
@@ -275,7 +275,7 @@ class _YourPlanPageState extends State<YourPlanPage>
                 Text(
                   'Select Habits',
                   style: context.text.cardTitle.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: context.colors.textDark,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -303,7 +303,7 @@ class _YourPlanPageState extends State<YourPlanPage>
               ],
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -350,27 +350,35 @@ class _HabitTile extends StatelessWidget {
     Widget tile = AnimatedContainer(
       duration: disableAnim ? Duration.zero : const Duration(milliseconds: 200),
       curve: Curves.easeOutCubic,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: selected
             ? context.colors.primary.withValues(alpha: 0.15)
-            : context.colors.inputFill,
+            : context.colors.card,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
-          Icon(
-            HabitIcons.resolve(habit.icon),
-            color: selected
-                ? context.colors.primary
-                : context.colors.textMedium,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: context.colors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              HabitIcons.resolve(habit.icon),
+              color: selected
+                  ? context.colors.primary
+                  : context.colors.textMedium,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               habit.name,
-              style: context.text.bodyStrong.copyWith(
-                color: selected ? Colors.white : context.colors.textDark,
+              style: context.text.cardTitle.copyWith(
+                color: context.colors.textDark,
               ),
             ),
           ),
@@ -401,7 +409,7 @@ class _HabitTile extends StatelessWidget {
           )
           .shimmer(
             duration: 500.ms,
-            color: Colors.white.withValues(alpha: 0.2),
+            color: context.colors.surface.withValues(alpha: 0.2),
           );
     }
 

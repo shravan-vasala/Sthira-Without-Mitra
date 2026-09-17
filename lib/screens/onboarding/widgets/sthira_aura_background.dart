@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_colors.dart';
+
 class SthiraAuraBackground extends StatelessWidget {
   final int currentPage;
 
@@ -7,28 +9,31 @@ class SthiraAuraBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryAura = Color(0xFF171F1B); // Dark Surface
-    const Color secondaryAura = Color(0xFF171F1B); // Monolithic
+    final Color primaryAura = context.colors.surface;
+    final Color secondaryAura = context.colors.surface;
+    final Color baseBg = context.colors.scaffoldBg;
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1513), // Deep Forest Black base
+        color: baseBg,
         gradient: RadialGradient(
           center: const Alignment(0, 0.2),
           radius: 1.2,
           colors: [
             primaryAura.withValues(alpha: 0.8),
             secondaryAura.withValues(alpha: 0.3),
-            const Color(0xFF0F1513),
+            baseBg,
           ],
           stops: const [0.0, 0.5, 1.0],
         ),
       ),
       child: Stack(
         children: [
-          Positioned(
-            top: -150,
-            right: -50,
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeInOut,
+            top: currentPage == 0 ? -150 : (currentPage == 1 ? -50 : (currentPage == 2 ? 100 : -100)),
+            right: currentPage == 0 ? -50 : (currentPage == 1 ? 150 : (currentPage == 2 ? -100 : 50)),
             child: Container(
               width: 350,
               height: 350,

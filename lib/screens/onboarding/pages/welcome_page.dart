@@ -106,7 +106,7 @@ class _WelcomePageState extends State<WelcomePage>
                   children: [
                     Text(
                       'Sthira',
-                      style: context.text.metric.copyWith(color: Colors.white),
+                      style: context.text.display.copyWith(color: context.colors.textDark),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -124,14 +124,14 @@ class _WelcomePageState extends State<WelcomePage>
                           child: Text(
                             '•',
                             style: context.text.bodyStrong.copyWith(
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: context.colors.textLight,
                             ),
                           ),
                         ),
                         Text(
                           'steady, every day',
                           style: context.text.bodyStrong.copyWith(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: context.colors.textMedium,
                           ),
                         ),
                       ],
@@ -163,7 +163,7 @@ class _WelcomePageState extends State<WelcomePage>
             subtitle: 'Export or encrypted backup anytime.',
           ),
 
-          const Spacer(),
+          const SizedBox(height: 32),
 
           // 2:47 Easter Egg
           AnimatedBuilder(
@@ -314,19 +314,19 @@ class _DedicationLine extends StatelessWidget {
       children: [
         Text(
           'Made with ',
-          style: context.text.caption.copyWith(
-            color: Colors.white.withValues(alpha: 0.4),
+          style: context.text.micro.copyWith(
+            color: context.colors.textLight,
           ),
         ),
         Icon(
           Icons.favorite_rounded,
           color: context.colors.primary.withValues(alpha: 0.8),
-          size: 11,
+          size: IconSize.inline,
         ),
         Text(
           ' for Bodamma',
-          style: context.text.caption.copyWith(
-            color: Colors.white.withValues(alpha: 0.4),
+          style: context.text.micro.copyWith(
+            color: context.colors.textLight,
           ),
         ),
       ],
@@ -397,7 +397,7 @@ class _CompletionScreenState extends State<CompletionScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1513),
+      backgroundColor: context.colors.scaffoldBg,
       body: AnimatedBuilder(
         animation: _fadeController,
         builder: (context, child) {
@@ -417,7 +417,7 @@ class _CompletionScreenState extends State<CompletionScreen>
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.text.display.copyWith(color: Colors.white),
+                    style: context.text.display.copyWith(color: context.colors.textDark),
                   ),
                 ),
                 const SizedBox(height: 48),

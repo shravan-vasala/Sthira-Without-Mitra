@@ -6,7 +6,10 @@ import '../../theme/layout_insets.dart';
 import '../../providers/app_providers.dart';
 import '../../models/habit.dart';
 import '../../utils/target_calculator.dart';
+import '../../theme/app_theme.dart';
 import 'widgets/sthira_aura_background.dart';
+
+import 'package:trufit_bodamma/widgets/primary_button.dart';
 
 import 'pages/welcome_page.dart';
 import 'pages/about_you_page.dart';
@@ -240,8 +243,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F1513),
+    return Theme(
+      data: AppTheme.dark,
+      child: Scaffold(
       body: PopScope(
         canPop: _currentPage == 0,
         onPopInvokedWithResult: (didPop, result) {
@@ -379,7 +383,7 @@ class _NavButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 16, 32, 48),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       child: Column(
         children: [
           Row(
@@ -423,44 +427,13 @@ class _NavButtons extends StatelessWidget {
                 )
               else
                 const SizedBox(width: 48), // spacer placeholder for first page
-
-              ElevatedButton(
-                onPressed: canGoNext ? onNext : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.colors.primary,
-                  foregroundColor: context.colors.onPrimary,
-                  disabledBackgroundColor: context.colors.primary.withValues(
-                    alpha: 0.3,
-                  ),
-                  disabledForegroundColor: context.colors.onPrimary.withValues(
-                    alpha: 0.5,
-                  ),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(kButtonRadius),
-                  ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: PrimaryButton(
+                  onPressed: canGoNext ? onNext : null,
+                  isLoading: _isLastPage && isSaving,
+                  label: _isLastPage ? 'Start my journey' : 'Next',
                 ),
-                child: _isLastPage && isSaving
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.colors.onPrimary,
-                        ),
-                      )
-                    : Text(
-                        _isLastPage ? 'Start my journey' : 'Next',
-                        style: context.text.bodyStrong.copyWith(
-                          color: canGoNext
-                              ? context.colors.onPrimary
-                              : context.colors.onPrimary.withValues(alpha: 0.5),
-                        ),
-                      ),
               ),
             ],
           ),
