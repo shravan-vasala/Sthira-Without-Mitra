@@ -89,7 +89,7 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
               title: 'Sign in Required',
               subtitle: 'You need an account to have a unique ID.',
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: Spacing.section),
             PrimaryButton(
               label: 'Sign In',
               onPressed: () {

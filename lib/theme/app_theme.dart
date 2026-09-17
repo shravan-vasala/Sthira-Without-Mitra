@@ -120,6 +120,10 @@ class AppTheme {
             }
             return AppColorsLight().textMedium;
           }),
+          side: WidgetStateProperty.all(BorderSide(color: AppColorsLight().border, width: 1)),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.control)),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -340,6 +344,10 @@ class AppTheme {
             }
             return AppColorsDark().textMedium;
           }),
+          side: WidgetStateProperty.all(BorderSide(color: AppColorsDark().border, width: 1)),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.control)),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(

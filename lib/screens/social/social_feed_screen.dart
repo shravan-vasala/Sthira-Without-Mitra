@@ -113,7 +113,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
             if (snapshot.hasError) {
               return SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(Spacing.screen),
                   child: Text(
                     'Error loading requests: ${snapshot.error}',
                     style: context.text.body.copyWith(
@@ -194,9 +194,12 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                                     ),
                                   ),
                                 )
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
+                              : SizedBox(
+                                  width: 96,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
                                     IconButton(
                                       icon: Icon(
                                         Icons.check_circle_rounded,
@@ -256,6 +259,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                                     ),
                                   ],
                                 ),
+                              ),
                         ),
                       );
                     },
@@ -287,7 +291,10 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  return FriendStatusCard(friend: friends[index]);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: Spacing.section),
+                    child: FriendStatusCard(friend: friends[index]),
+                  );
                 }, childCount: friends.length),
               ),
             );
@@ -298,7 +305,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
           error: (err, st) => SliverFillRemaining(
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(Spacing.section),
+                padding: const EdgeInsets.all(Spacing.screen),
                 child: Text(
                   'Error: $err',
                   textAlign: TextAlign.center,
@@ -647,21 +654,21 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
 
     Widget? rankWidget;
     if (rank != null) {
-      if (rank == 1) {
-        rankWidget = Icon(Icons.workspace_premium_rounded, color: context.colors.gold);
-      } else if (rank == 2) {
-        rankWidget = Icon(
-          Icons.workspace_premium_rounded,
-          color: context.colors.silver,
-        );
-      } else if (rank == 3) {
-        rankWidget = Icon(
-          Icons.workspace_premium_rounded,
-          color: context.colors.bronze,
+      if (rank <= 3) {
+        final Map<int, Color> colors = {
+          1: context.colors.gold,
+          2: context.colors.silver,
+          3: context.colors.bronze,
+        };
+        rankWidget = SizedBox(
+          width: 32,
+          child: Center(
+            child: Icon(Icons.workspace_premium_rounded, color: colors[rank]),
+          ),
         );
       } else {
         rankWidget = SizedBox(
-          width: 24,
+          width: 32,
           child: Center(
             child: Text(
               '#$rank',
@@ -711,7 +718,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
             Text(
               primaryText,
               style: AppTheme.numeric(
-                context.text.cardTitle.copyWith(
+                context.text.bodyStrong.copyWith(
                   color: isInactive
                       ? context.colors.textMedium.withValues(alpha: 0.5)
                       : context.colors.textDark,
