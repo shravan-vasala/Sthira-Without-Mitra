@@ -148,7 +148,7 @@ Portion estimation guidelines:
     CancellationToken? cancellationToken,
   ]) async {
     _ensureApiKey();
-    final deadline = DateTime.now().add(const Duration(seconds: 30));
+    final deadline = DateTime.now().add(const Duration(seconds: 45));
     final hint = userContext != null && userContext.trim().isNotEmpty
         ? '\nUser provided context/hint: "${userContext.trim()}". Use this to help identify the food, but still estimate macros realistically.'
         : '';

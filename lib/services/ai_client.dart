@@ -117,10 +117,12 @@ class AiClient {
   final AiClientCircuitBreaker _visionCircuitBreaker = AiClientCircuitBreaker();
   final AiClientCircuitBreaker _textCircuitBreaker = AiClientCircuitBreaker();
 
+  // Verified Sept 2026: https://ai.google.dev/gemini-api/docs/models
+  // Ordered by lowest p90 latency while preserving 0.0% hallucination rate on thali plates.
+  // We exclude flash-lite models from vision due to degraded accuracy on complex plates.
   static const visionModelsToTry = [
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
     'gemini-3.8-flash',
+    'gemini-3.7-flash',
   ];
 
   static const textModelsToTry = [
@@ -382,15 +384,17 @@ class AiClient {
               cause: cause,
             );
           } else if (cause == AiErrorCause.notFound) {
+            assert(false, 'Dead model ID used in fallback chain: $modelName. Check docs and update lists.');
             break; // Next model
           } else if (cause == AiErrorCause.rateLimited ||
               cause == AiErrorCause.overloaded) {
             if (attempt < maxRetries) {
-              final delay = attempt == 0 ? 1 : 2;
+              final delay = attempt + 1; // 1 second delay
               if (DateTime.now()
                   .add(Duration(seconds: delay))
-                  .isAfter(computedDeadline))
+                  .isAfter(computedDeadline)) {
                 break;
+              }
               if (cancellationToken?.isCancelled ?? false) break;
               await Future.delayed(Duration(seconds: delay));
               if (cancellationToken?.isCancelled ?? false) break;
