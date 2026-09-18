@@ -87,7 +87,7 @@ class JourneyStatsStrip extends ConsumerWidget {
                 value: currentStreak,
                 unit: 'Days',
                 icon: Icons.local_fire_department_rounded,
-                color: context.colors.orange,
+                color: context.colors.primary,
               ),
             ),
             const SizedBox(width: Spacing.stack),
@@ -111,7 +111,7 @@ class JourneyStatsStrip extends ConsumerWidget {
                 value: daysTracked,
                 unit: 'Days',
                 icon: Icons.calendar_month_rounded,
-                color: context.colors.mint,
+                color: context.colors.primary,
               ),
             ),
             const SizedBox(width: Spacing.stack),
@@ -121,7 +121,7 @@ class JourneyStatsStrip extends ConsumerWidget {
                 value: earnedBadges,
                 unit: 'Earned',
                 icon: Icons.military_tech_rounded,
-                color: context.colors.pink,
+                color: context.colors.primary,
               ),
             ),
           ],
@@ -154,10 +154,9 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mimic the faded appearance in the screenshot for lower-tier stats when zero
+    // Mimic the faded appearance in the screenshot for stats when zero
     final bool isZero = value == 0;
-    final bool isTopTier = title == 'Streak' || title == 'Workouts';
-    final Color effectiveColor = (!isTopTier && isZero)
+    final Color effectiveColor = isZero
         ? color.withValues(alpha: 0.3)
         : color;
 

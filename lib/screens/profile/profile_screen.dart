@@ -158,7 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Height: ${profile.height?.toStringAsFixed(0) ?? "Not set"} cm',
+                      'Height: ${profile.height != null ? "${profile.height!.toStringAsFixed(0)} cm" : "Not set"}',
                       style: context.text.body.copyWith(
                         color: context.colors.textMedium,
                       ),
@@ -792,7 +792,11 @@ class _CloudSyncCardState extends ConsumerState<_CloudSyncCard> {
         children: [
           Row(
             children: [
-              Icon(Icons.cloud_sync_rounded, color: context.colors.primary),
+              Icon(
+                Icons.cloud_sync_rounded, 
+                color: context.colors.primary,
+                size: IconSize.inline,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Cloud Sync',

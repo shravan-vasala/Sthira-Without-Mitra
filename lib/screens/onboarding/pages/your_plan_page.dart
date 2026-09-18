@@ -3,6 +3,7 @@ import '../../../theme/app_colors.dart';
 import '../../../models/habit.dart';
 import '../../../utils/habit_icons.dart';
 import '../../../utils/target_calculator.dart';
+import '../../../widgets/section_header.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
@@ -151,12 +152,13 @@ class _YourPlanPageState extends State<YourPlanPage>
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 32),
           _buildAnimEntrance(
             0,
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.track_changes_outlined,
@@ -166,7 +168,6 @@ class _YourPlanPageState extends State<YourPlanPage>
                 const SizedBox(height: 24),
                 Text(
                   'Your Plan',
-                  textAlign: TextAlign.center,
                   style: context.text.display.copyWith(color: context.colors.textDark),
                 ),
               ],
@@ -176,6 +177,7 @@ class _YourPlanPageState extends State<YourPlanPage>
           _buildAnimEntrance(
             1,
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '${_currentCalories.round()} kcal',
@@ -200,27 +202,19 @@ class _YourPlanPageState extends State<YourPlanPage>
                     ),
                   ),
                 const SizedBox(height: 12),
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: context.colors.primary,
-                    thumbColor: context.colors.primary,
-                    inactiveTrackColor: context.colors.textLight.withValues(alpha: 0.1),
-                    trackHeight: 2,
-                  ),
-                  child: Slider(
-                    value: _currentCalories,
-                    min: 1200,
-                    max: 4000,
-                    divisions: (4000 - 1200) ~/ 50,
-                    onChanged: (v) {
-                      setState(() => _currentCalories = v);
-                      widget.onCaloriesChanged(v, true);
-                      final dynamicMacros = _getDynamicMacrosForCalories(v);
-                      if (dynamicMacros != null) {
-                        widget.onMacrosChanged?.call(dynamicMacros);
-                      }
-                    },
-                  ),
+                Slider(
+                  value: _currentCalories,
+                  min: 1200,
+                  max: 4000,
+                  divisions: (4000 - 1200) ~/ 50,
+                  onChanged: (v) {
+                    setState(() => _currentCalories = v);
+                    widget.onCaloriesChanged(v, true);
+                    final dynamicMacros = _getDynamicMacrosForCalories(v);
+                    if (dynamicMacros != null) {
+                      widget.onMacrosChanged?.call(dynamicMacros);
+                    }
+                  },
                 ),
                 if (dynamicMacros != null)
                   Padding(
@@ -228,7 +222,7 @@ class _YourPlanPageState extends State<YourPlanPage>
                     child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             _MacroChip(
                               value: dynamicMacros.proteinG,
@@ -257,7 +251,7 @@ class _YourPlanPageState extends State<YourPlanPage>
                               style: context.text.micro.copyWith(
                                 color: context.colors.textMedium.withValues(alpha: 0.5),
                               ),
-                              textAlign: TextAlign.center,
+                              textAlign: TextAlign.left,
                             );
                           },
                         ),
@@ -271,13 +265,9 @@ class _YourPlanPageState extends State<YourPlanPage>
           _buildAnimEntrance(
             2,
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Select Habits',
-                  style: context.text.cardTitle.copyWith(
-                    color: context.colors.textDark,
-                  ),
-                ),
+                const SectionHeader(title: 'Select Habits'),
                 const SizedBox(height: 16),
                 ...Habit.defaults.map((habit) {
                   final selected = widget.selectedHabitIds.contains(habit.id);
@@ -352,10 +342,11 @@ class _HabitTile extends StatelessWidget {
       curve: Curves.easeOutCubic,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: selected
-            ? context.colors.primary.withValues(alpha: 0.15)
-            : context.colors.card,
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(20),
+        border: selected 
+            ? Border.all(color: context.colors.primary.withValues(alpha: 0.3))
+            : null,
       ),
       child: Row(
         children: [

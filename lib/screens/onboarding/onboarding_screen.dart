@@ -422,7 +422,7 @@ class _NavButtons extends StatelessWidget {
                     ),
                     child: Icon(
                       Icons.arrow_back_rounded,
-                      color: context.colors.onPrimary.withValues(alpha: 0.7),
+                      color: context.colors.textMedium,
                     ),
                   ),
                 )

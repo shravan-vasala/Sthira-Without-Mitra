@@ -99,7 +99,7 @@ class NumericEntrySheet extends StatelessWidget {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: context.colors.inputFill,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 hintText: hintText,
                 hintStyle: context.text.display.copyWith(
                   color: context.colors.textLight,

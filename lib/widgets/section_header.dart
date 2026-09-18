@@ -37,8 +37,8 @@ class SectionHeader extends StatelessWidget {
         style: child.style,
       );
     }
-    return SizedBox(
-      height: 24,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 24),
       child: IconTheme(
         data: const IconThemeData(size: IconSize.inline),
         child: child,

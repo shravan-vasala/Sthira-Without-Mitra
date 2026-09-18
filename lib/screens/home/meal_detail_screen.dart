@@ -80,6 +80,7 @@ class MealDetailScreen extends ConsumerWidget {
     }
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
         title: Column(
@@ -102,11 +103,11 @@ class MealDetailScreen extends ConsumerWidget {
       ),
       body: ListView.builder(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(
+        padding: const EdgeInsets.fromLTRB(
           20,
           20,
           20,
-          kShellScrollBottomPadding + MediaQuery.paddingOf(context).bottom,
+          kShellScrollBottomPadding,
         ),
         itemCount: slotsToDisplay.length + 4,
         itemBuilder: (context, index) {
@@ -575,6 +576,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: SurfaceCard(
+        margin: EdgeInsets.zero,
         child: AnimatedSize(
           duration: shouldAnimate ? 300.ms : 0.ms,
           curve: Curves.easeOutCubic,
@@ -1050,34 +1052,76 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
           ),
           if (_showSuggestions) ...[
             const SizedBox(height: 16),
-            ...planned.suggestions.map((suggestion) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6, right: 12),
-                      child: Container(
-                        width: 4,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: context.colors.primary.withValues(alpha: 0.6),
-                          shape: BoxShape.circle,
+            ...planned.suggestions.expand((suggestion) {
+              final items = suggestion
+                  .split('•')
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty);
+                  
+              return items.map((item) {
+                String qty = '';
+                String name = item;
+                final words = item.split(' ');
+                int splitIndex = -1;
+                for (int i = 0; i < words.length; i++) {
+                  final w = words[i];
+                  // Find first capitalized word that isn't just numbers/symbols
+                  if (w.isNotEmpty && 
+                      w[0] == w[0].toUpperCase() && 
+                      w[0] != w[0].toLowerCase() && 
+                      !w.contains(RegExp(r'[0-9]'))) {
+                    splitIndex = i;
+                    break;
+                  }
+                }
+                
+                if (splitIndex > 0) {
+                  qty = words.sublist(0, splitIndex).join(' ');
+                  name = words.sublist(splitIndex).join(' ');
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, right: 12),
+                        child: Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: context.colors.primary.withValues(alpha: 0.6),
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        suggestion,
-                        style: context.text.caption.copyWith(
-                          color: context.colors.textMedium,
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              if (qty.isNotEmpty)
+                                TextSpan(
+                                  text: '$qty  ',
+                                  style: context.text.caption.copyWith(
+                                    color: context.colors.primary.withValues(alpha: 0.9),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              TextSpan(
+                                text: name,
+                                style: context.text.caption.copyWith(
+                                  color: context.colors.textMedium,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
+                    ],
+                  ),
+                );
+              });
             }),
           ],
         ],
@@ -1187,8 +1231,18 @@ class _ProvenanceBadge extends StatelessWidget {
         color = context.colors.textMedium;
         break;
       case 'estimated':
+      case 'ai_estimate':
         iconData = Icons.auto_awesome_rounded;
         color = context.colors.primary.withValues(alpha: 0.8);
+        label = 'estimated';
+        break;
+      case 'database':
+        iconData = Icons.storage_rounded;
+        color = context.colors.textMedium;
+        break;
+      case 'legacy':
+        iconData = Icons.history_rounded;
+        color = context.colors.textLight;
         break;
       case 'yours':
         iconData = Icons.edit_outlined;
@@ -1252,12 +1306,24 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
       headerColor = context.colors.textMedium;
       desc =
           'This item was matched against your personal food database. The base macros are exact, but the consumed portion may vary.';
-    } else if (validProvenance == 'estimated') {
+    } else if (validProvenance == 'estimated' || validProvenance == 'ai_estimate') {
       title = 'AI Estimated';
       headerIcon = Icons.auto_awesome_rounded;
       headerColor = context.colors.primary.withValues(alpha: 0.8);
       desc =
           'Gemini estimated the macros for this food based on its nutritional profile. The values are an AI approximation and not exact.';
+    } else if (validProvenance == 'database') {
+      title = 'Database Match';
+      headerIcon = Icons.storage_rounded;
+      headerColor = context.colors.textMedium;
+      desc =
+          'This item was matched against standard food databases for precise macros.';
+    } else if (validProvenance == 'legacy') {
+      title = 'Legacy Item';
+      headerIcon = Icons.history_rounded;
+      headerColor = context.colors.textLight;
+      desc =
+          'This item was recorded before provenance tracking was introduced.';
     } else if (validProvenance == 'yours') {
       title = 'Yours';
       headerIcon = Icons.edit_outlined;

@@ -92,11 +92,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Scaffold(
           backgroundColor: context.colors.scaffoldBg,
-          body: SafeArea(
-            bottom: false,
-            child: RefreshIndicator(
-              color: context.colors.primary,
-              onRefresh: () => ref
+          body: RefreshIndicator(
+            color: context.colors.primary,
+            onRefresh: () => ref
                   .read(syncControllerProvider.notifier)
                   .sync(isManualRefresh: true),
               child: CustomScrollView(
@@ -216,19 +214,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             index: 6,
                             child: CoachNotesCard(),
                           ),
-
-                        // Explicit bottom clearance for floating nav constraints
-                        const SizedBox(height: kShellScrollBottomPadding),
                       ],
                     ),
+                  ),
+                  const SliverPadding(
+                    padding: EdgeInsets.only(bottom: kShellScrollBottomPadding),
                   ),
                 ],
               ),
             ),
           ),
         ),
-      ],
-    );
   }
 }
 
@@ -579,9 +575,7 @@ class _WorkoutsSection extends ConsumerWidget {
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
-                        value:
-                            (phaseProgress.currentWeek - 1) /
-                            phaseProgress.totalWeeks,
+                        value: (phaseProgress.currentWeek / phaseProgress.totalWeeks).clamp(0.0, 1.0),
                         strokeWidth: 2,
                         backgroundColor: context.colors.primary.withValues(
                           alpha: 0.2,

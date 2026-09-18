@@ -184,6 +184,12 @@ class AppTheme {
         shape: const CircleBorder(),
         side: BorderSide(color: AppColorsLight().border, width: 2),
       ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: AppColorsLight().primary,
+        inactiveTrackColor: AppColorsLight().insetSurface,
+        trackHeight: 6,
+        thumbColor: AppColorsLight().primary,
+      ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsLight().card,
         surfaceTintColor: Colors.transparent,
@@ -394,6 +400,12 @@ class AppTheme {
         }),
         shape: const CircleBorder(),
         side: BorderSide(color: AppColorsDark().border, width: 2),
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: AppColorsDark().primary,
+        inactiveTrackColor: AppColorsDark().insetSurface,
+        trackHeight: 6,
+        thumbColor: AppColorsDark().primary,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColorsDark().card,

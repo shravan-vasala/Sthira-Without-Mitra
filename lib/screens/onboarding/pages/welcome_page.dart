@@ -62,7 +62,7 @@ class _WelcomePageState extends State<WelcomePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.major),
           // Logo Entrance
           AnimatedBuilder(
             animation: _staggerController,
@@ -95,7 +95,7 @@ class _WelcomePageState extends State<WelcomePage>
               );
             },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.section),
           // Title
           AnimatedBuilder(
             animation: _staggerController,
@@ -112,7 +112,7 @@ class _WelcomePageState extends State<WelcomePage>
                       'Sthira',
                       style: context.text.display.copyWith(color: context.colors.textDark),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: Spacing.stack),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -145,7 +145,7 @@ class _WelcomePageState extends State<WelcomePage>
               );
             },
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: Spacing.major),
 
           // Pillars
           _buildAnimPill(
@@ -167,7 +167,7 @@ class _WelcomePageState extends State<WelcomePage>
             subtitle: 'Export or encrypted backup anytime.',
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.major),
 
           // 2:47 Easter Egg
           AnimatedBuilder(
@@ -195,7 +195,7 @@ class _WelcomePageState extends State<WelcomePage>
               );
             },
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: Spacing.textPair),
           // Dedication
           AnimatedBuilder(
             animation: _staggerController,
@@ -207,7 +207,7 @@ class _WelcomePageState extends State<WelcomePage>
               return Opacity(opacity: fade, child: const _DedicationLine());
             },
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.major),
         ],
       ),
     ),

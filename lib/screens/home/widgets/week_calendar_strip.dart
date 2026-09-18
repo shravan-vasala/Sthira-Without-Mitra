@@ -549,7 +549,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
                 );
               },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: Gap.x4),
           decoration: BoxDecoration(
             gradient: gradientColors == null
                 ? null
@@ -578,7 +578,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
                 builder: (context, value, child) {
                   return Text(
                     isFuture ? '--' : value.toString(),
-                    style: context.text.body.copyWith(color: textColor),
+                    style: context.text.micro.copyWith(color: textColor),
                   );
                 },
               ),

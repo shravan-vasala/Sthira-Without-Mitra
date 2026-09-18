@@ -274,9 +274,9 @@ class _PhysiquePicturesScreenState
                           subtitle:
                               'Add your first photo to track your journey.',
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: Spacing.section),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: Spacing.screen),
+                          padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
                           child: PrimaryButton(
                             label: 'Take First Photo',
                             onPressed: _openCamera,

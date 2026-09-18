@@ -9,6 +9,7 @@ class SurfaceCard extends StatefulWidget {
   const SurfaceCard({
     super.key,
     required this.child,
+    /// The container owns the horizontal inset. Cards inside a padded scrollable pass `margin: EdgeInsets.zero`.
     this.margin = const EdgeInsets.symmetric(horizontal: Spacing.screen),
     this.padding,
     this.dense = false,

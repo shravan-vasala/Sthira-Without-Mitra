@@ -480,7 +480,6 @@ class _MinimalAction extends StatelessWidget {
       child: Container(
         constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        alignment: Alignment.center,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

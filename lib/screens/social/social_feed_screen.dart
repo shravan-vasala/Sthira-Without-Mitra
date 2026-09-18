@@ -462,20 +462,44 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
     inactiveProfiles.sort((a, b) => b.lastUpdatedAt.compareTo(a.lastUpdatedAt));
 
     if (friends.isEmpty && allProfiles.length == 1) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const EmptyStateView(
-            icon: Icons.leaderboard_outlined,
-            title: 'Board is empty',
-            subtitle: 'Add friends to compete on the leaderboard!',
-          ),
-          const SizedBox(height: 24),
-          PrimaryButton(
-            label: 'Add Friends',
-            onPressed: () => context.push('/social/connect'),
-          ),
-        ],
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: context.colors.inputFill,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.leaderboard_outlined,
+                size: 40,
+                color: context.colors.textMedium.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: Gap.x24),
+            Text(
+              'Board is empty',
+              textAlign: TextAlign.center,
+              style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+            ),
+            const SizedBox(height: Gap.x8),
+            Text(
+              'Add friends to compete on the leaderboard!',
+              textAlign: TextAlign.center,
+              style: context.text.body.copyWith(color: context.colors.textMedium),
+            ),
+            const SizedBox(height: Gap.x32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+              child: PrimaryButton(
+                label: 'Add Friends',
+                onPressed: () => context.push('/social/connect'),
+              ),
+            ),
+          ],
+        ),
       );
     }
 

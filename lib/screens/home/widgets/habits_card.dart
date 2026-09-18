@@ -126,9 +126,7 @@ class _HabitItem extends ConsumerWidget {
                           Text(
                             habit.name,
                             style: context.text.body.copyWith(
-                              color: isCompleted
-                                  ? context.colors.textLight
-                                  : context.colors.textDark,
+                              color: context.colors.textDark,
                             ),
                           ),
                           if (habit.type == HabitType.checkbox &&

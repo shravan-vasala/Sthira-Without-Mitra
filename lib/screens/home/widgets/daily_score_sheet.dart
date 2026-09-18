@@ -147,6 +147,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
 
           // 2.3 Breakdown as progress bars (Staggered)
           SurfaceCard(
+            margin: EdgeInsets.zero,
             padding: const EdgeInsets.all(12),
             border: null,
             child: Column(

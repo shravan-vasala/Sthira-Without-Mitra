@@ -47,7 +47,7 @@ class TrophyRoomCard extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: Spacing.stack),
+          padding: const EdgeInsets.only(bottom: Spacing.stack),
           child: TweenAnimationBuilder<int>(
             tween: IntTween(begin: 0, end: unlocked),
             duration: MediaQuery.disableAnimationsOf(context)

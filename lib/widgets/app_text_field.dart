@@ -59,7 +59,7 @@ class AppTextField extends StatelessWidget {
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: context.text.bodyStrong.copyWith(
+            hintStyle: context.text.body.copyWith(
               color: context.colors.textLight,
             ),
             prefixIcon: prefixIcon != null

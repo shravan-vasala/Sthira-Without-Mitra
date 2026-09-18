@@ -152,10 +152,10 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, kShellScrollBottomPadding),
+        padding: const EdgeInsets.fromLTRB(Spacing.screen, Spacing.screen, Spacing.screen, kShellScrollBottomPadding),
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 16),
+            padding: const EdgeInsets.only(bottom: Spacing.section),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -262,16 +262,18 @@ class _BodyStatsScreenState extends ConsumerState<BodyStatsScreen> {
                             : context.colors.textDark,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Text(
-                        'cm',
-                        style: context.text.micro.copyWith(
-                          color: context.colors.textMedium,
+                    if (_controllers[field]!.text.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Text(
+                          'cm',
+                          style: context.text.micro.copyWith(
+                            color: context.colors.textMedium,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
         ],

@@ -146,12 +146,16 @@ class _AboutYouPageState extends State<AboutYouPage>
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 32),
+    return CustomScrollView(
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(flex: 2),
           _buildAnimEntrance(
             0,
             Column(
@@ -170,7 +174,7 @@ class _AboutYouPageState extends State<AboutYouPage>
               ],
             ),
           ),
-          const SizedBox(height: 32),
+          const Spacer(flex: 3),
           _buildAnimEntrance(
             1,
             Column(
@@ -197,7 +201,7 @@ class _AboutYouPageState extends State<AboutYouPage>
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const Spacer(flex: 2),
           _buildAnimEntrance(
             2,
             Column(
@@ -222,7 +226,7 @@ class _AboutYouPageState extends State<AboutYouPage>
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const Spacer(flex: 2),
           _buildAnimEntrance(
             3,
             Row(
@@ -280,7 +284,7 @@ class _AboutYouPageState extends State<AboutYouPage>
               ],
             ),
           ),
-          const SizedBox(height: 32),
+          const Spacer(flex: 3),
           _buildAnimEntrance(
             4,
             Center(
@@ -317,9 +321,12 @@ class _AboutYouPageState extends State<AboutYouPage>
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const Spacer(flex: 4),
         ],
       ),
+    ),
+  ),
+],
     );
   }
 }
