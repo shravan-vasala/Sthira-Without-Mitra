@@ -22,12 +22,26 @@ class WidgetCoordinator {
   final Ref _ref;
   Timer? _debounceTimer;
   final List<StreamSubscription> _subs = [];
+  Timer? _midnightTimer;
   int _updateGeneration = 0;
 
   WidgetCoordinator(this._ref) {
     _initListeners();
     // Schedule an initial update on boot
     _scheduleUpdate();
+    _scheduleMidnightRefresh();
+  }
+
+  void _scheduleMidnightRefresh() {
+    _midnightTimer?.cancel();
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final timeUntilMidnight = tomorrow.difference(now);
+    
+    _midnightTimer = Timer(timeUntilMidnight, () {
+      _scheduleUpdate();
+      _scheduleMidnightRefresh(); // Reschedule for the next midnight
+    });
   }
 
   void _initListeners() {
@@ -221,6 +235,7 @@ class WidgetCoordinator {
 
   void dispose() {
     _debounceTimer?.cancel();
+    _midnightTimer?.cancel();
     for (var sub in _subs) {
       sub.cancel();
     }

@@ -20,7 +20,7 @@
             android:text="TODAY"
             android:textColor="@color/sthira_peach"
             android:fontFamily="@font/general_sans_semibold"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:letterSpacing="0.1" />
         
         <TextView
@@ -30,7 +30,7 @@
             android:text="Updated --:--"
             android:textColor="@color/sthira_text_secondary"
             android:fontFamily="@font/general_sans"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:alpha="0.7" />
     </LinearLayout>
 
@@ -62,7 +62,7 @@
                 android:text="--"
                 android:textColor="@color/sthira_text_main"
                 android:fontFamily="@font/cabinet_grotesk_extrabold"
-                android:textSize="36sp"
+                android:textSize="32sp"
                 android:includeFontPadding="false" />
 
             <LinearLayout
@@ -77,7 +77,7 @@
                     android:text="steps"
                     android:textColor="@color/sthira_text_secondary"
                     android:fontFamily="@font/general_sans"
-                    android:textSize="12sp" />
+                    android:textSize="13sp" />
                 
                 <TextView
                     android:id="@+id/tv_steps_goal"
@@ -86,7 +86,7 @@
                     android:text=" / --"
                     android:textColor="@color/sthira_text_secondary"
                     android:fontFamily="@font/general_sans"
-                    android:textSize="12sp"
+                    android:textSize="13sp"
                     android:visibility="gone" />
             </LinearLayout>
 
@@ -131,14 +131,14 @@
                         android:text="-/-"
                         android:textColor="@color/sthira_text_main"
                         android:fontFamily="@font/general_sans_semibold"
-                        android:textSize="14sp" />
+                        android:textSize="15sp" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Meals logged"
                         android:textColor="@color/sthira_text_secondary"
                         android:fontFamily="@font/general_sans"
-                        android:textSize="10sp" />
+                        android:textSize="11sp" />
                 </LinearLayout>
 
                 <ImageView
@@ -172,14 +172,14 @@
                         android:text="-/-"
                         android:textColor="@color/sthira_text_main"
                         android:fontFamily="@font/general_sans_semibold"
-                        android:textSize="14sp" />
+                        android:textSize="15sp" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Habits done"
                         android:textColor="@color/sthira_text_secondary"
                         android:fontFamily="@font/general_sans"
-                        android:textSize="10sp" />
+                        android:textSize="11sp" />
                 </LinearLayout>
 
                 <ImageView

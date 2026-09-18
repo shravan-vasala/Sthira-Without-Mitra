@@ -11,3 +11,8 @@
 
 # Dart
 -keep class dart.** { *; }
+
+# Home screen widget
+-keep class es.antonborri.home_widget.** { *; }
+-keep class com.trufit.trufit_bodamma.TrufitWidgetProvider { *; }
+-keep class * extends android.appwidget.AppWidgetProvider { *; }

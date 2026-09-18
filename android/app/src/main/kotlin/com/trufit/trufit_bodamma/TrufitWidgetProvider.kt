@@ -47,8 +47,8 @@ class TrufitWidgetProvider : HomeWidgetProvider() {
         var energy: Double? = null
         var protein: Double? = null
         var isRest = false
-        var workoutTitle = "Workout"
-        var workoutStatus = "Pending"
+        var workoutTitle = "Open app"
+        var workoutStatus = "to refresh"
 
         try {
             val json = JSONObject(jsonStr)
@@ -71,13 +71,11 @@ class TrufitWidgetProvider : HomeWidgetProvider() {
             Log.e("TrufitWidgetProvider", "Error parsing widget data", e)
         }
 
-        fun populateViews(views: RemoteViews) {
-            // Freshness
+        fun populateShared(views: RemoteViews) {
             views.setTextViewText(R.id.tv_updated_at, "Updated $updatedAt")
 
-            // Steps
             if (steps == null) {
-                views.setTextViewText(R.id.tv_steps_value, "--")
+                views.setTextViewText(R.id.tv_steps_value, if (date == todayStr) "0" else "-")
                 views.setViewVisibility(R.id.tv_steps_goal, View.GONE)
                 views.setProgressBar(R.id.pb_steps, 100, 0, false)
             } else {
@@ -93,14 +91,46 @@ class TrufitWidgetProvider : HomeWidgetProvider() {
                     views.setProgressBar(R.id.pb_steps, 100, 100, false)
                 }
             }
+        }
 
-            // Meals
-            views.setTextViewText(R.id.tv_meals_value, "$mealsLogged/$totalMeals")
+        fun populateCompact(views: RemoteViews, reqBase: Int) {
+            populateShared(views)
+            val baseIntent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: Intent()
+            val rootPi = PendingIntent.getActivity(context, reqBase, baseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            views.setOnClickPendingIntent(R.id.widget_root_compact, rootPi)
+        }
 
-            // Habits
-            views.setTextViewText(R.id.tv_habits_value, "$habitsDone/$totalHabits")
+        fun populateStandard(views: RemoteViews, reqBase: Int) {
+            populateShared(views)
+            if (date == todayStr) {
+                views.setTextViewText(R.id.tv_meals_value, "$mealsLogged/$totalMeals")
+                views.setTextViewText(R.id.tv_habits_value, "$habitsDone/$totalHabits")
+            } else {
+                views.setTextViewText(R.id.tv_meals_value, "-/-")
+                views.setTextViewText(R.id.tv_habits_value, "-/-")
+            }
 
-            // Nutrition
+            val baseIntent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: Intent()
+            
+            val stepsIntent = Intent(baseIntent).apply { data = Uri.parse("trufit://progress?metric=steps") }
+            val stepsPi = PendingIntent.getActivity(context, reqBase + 1, stepsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            views.setOnClickPendingIntent(R.id.widget_steps_area, stepsPi)
+
+            val mealsIntent = Intent(baseIntent).apply { data = Uri.parse("trufit://home/meals") }
+            val mealsPi = PendingIntent.getActivity(context, reqBase + 2, mealsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            views.setOnClickPendingIntent(R.id.widget_meals_area, mealsPi)
+
+            val habitsIntent = Intent(baseIntent).apply { data = Uri.parse("trufit://home") }
+            val habitsPi = PendingIntent.getActivity(context, reqBase + 3, habitsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            views.setOnClickPendingIntent(R.id.widget_habits_area, habitsPi)
+
+            val rootPi = PendingIntent.getActivity(context, reqBase, baseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            views.setOnClickPendingIntent(R.id.widget_root_standard, rootPi)
+        }
+
+        fun populateExpanded(views: RemoteViews, reqBase: Int) {
+            populateStandard(views, reqBase)
+
             if (energy != null || protein != null) {
                 views.setViewVisibility(R.id.widget_nutrition_area, View.VISIBLE)
                 views.setTextViewText(R.id.tv_nutrition_energy, if (energy != null) "${energy.toInt()} kcal" else "-- kcal")
@@ -109,44 +139,23 @@ class TrufitWidgetProvider : HomeWidgetProvider() {
                 views.setViewVisibility(R.id.widget_nutrition_area, View.GONE)
             }
 
-            // Workout
             views.setTextViewText(R.id.tv_workout_title, workoutTitle)
             views.setTextViewText(R.id.tv_workout_sub, workoutStatus)
 
-            // Intents
             val baseIntent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: Intent()
             
-            // Steps tap
-            val stepsIntent = Intent(baseIntent).apply { data = Uri.parse("trufit://progress?metric=steps") }
-            val stepsPi = PendingIntent.getActivity(context, 1, stepsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            views.setOnClickPendingIntent(R.id.widget_steps_area, stepsPi)
-
-            // Meals tap
-            val mealsIntent = Intent(baseIntent).apply { data = Uri.parse("trufit://home/meals") }
-            val mealsPi = PendingIntent.getActivity(context, 2, mealsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            views.setOnClickPendingIntent(R.id.widget_meals_area, mealsPi)
-
-            // Habits tap
-            val habitsIntent = Intent(baseIntent).apply { data = Uri.parse("trufit://home") }
-            val habitsPi = PendingIntent.getActivity(context, 3, habitsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            views.setOnClickPendingIntent(R.id.widget_habits_area, habitsPi)
-
-            // Workout tap
             val workoutIntent = Intent(baseIntent).apply { data = Uri.parse("trufit://home/workout/today") }
-            val workoutPi = PendingIntent.getActivity(context, 4, workoutIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            val workoutPi = PendingIntent.getActivity(context, reqBase + 4, workoutIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             views.setOnClickPendingIntent(R.id.widget_workout_area, workoutPi)
-            
-            // Root tap fallback
-            val rootPi = PendingIntent.getActivity(context, 0, baseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            views.setOnClickPendingIntent(R.id.widget_root_compact, rootPi)
-            views.setOnClickPendingIntent(R.id.widget_root_standard, rootPi)
+
+            val rootPi = PendingIntent.getActivity(context, reqBase, baseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             views.setOnClickPendingIntent(R.id.widget_root_expanded, rootPi)
         }
 
         val remoteViews: RemoteViews = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val compact = RemoteViews(context.packageName, R.layout.widget_layout_compact).apply { populateViews(this) }
-            val standard = RemoteViews(context.packageName, R.layout.widget_layout_standard).apply { populateViews(this) }
-            val expanded = RemoteViews(context.packageName, R.layout.widget_layout_expanded).apply { populateViews(this) }
+            val compact = RemoteViews(context.packageName, R.layout.widget_layout_compact).apply { populateCompact(this, 100) }
+            val standard = RemoteViews(context.packageName, R.layout.widget_layout_standard).apply { populateStandard(this, 200) }
+            val expanded = RemoteViews(context.packageName, R.layout.widget_layout_expanded).apply { populateExpanded(this, 300) }
             
             val viewMapping = mapOf(
                 SizeF(110f, 110f) to compact,
@@ -159,12 +168,13 @@ class TrufitWidgetProvider : HomeWidgetProvider() {
             val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
             val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
 
-            val layoutId = when {
-                minHeight >= 180 && minWidth >= 250 -> R.layout.widget_layout_expanded
-                minWidth >= 250 -> R.layout.widget_layout_standard
-                else -> R.layout.widget_layout_compact
+            if (minHeight >= 180 && minWidth >= 250) {
+                RemoteViews(context.packageName, R.layout.widget_layout_expanded).apply { populateExpanded(this, 300) }
+            } else if (minWidth >= 250) {
+                RemoteViews(context.packageName, R.layout.widget_layout_standard).apply { populateStandard(this, 200) }
+            } else {
+                RemoteViews(context.packageName, R.layout.widget_layout_compact).apply { populateCompact(this, 100) }
             }
-            RemoteViews(context.packageName, layoutId).apply { populateViews(this) }
         }
 
         appWidgetManager.updateAppWidget(widgetId, remoteViews)
