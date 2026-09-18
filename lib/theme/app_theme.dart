@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
+import 'layout_insets.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class AppTheme {
@@ -144,6 +145,11 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 12,
+        insetPadding: const EdgeInsets.only(
+          bottom: kFloatingNavClearance,
+          left: Spacing.screen,
+          right: Spacing.screen,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -359,6 +365,11 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 12,
+        insetPadding: const EdgeInsets.only(
+          bottom: kFloatingNavClearance,
+          left: Spacing.screen,
+          right: Spacing.screen,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
