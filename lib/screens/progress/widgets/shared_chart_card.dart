@@ -296,6 +296,24 @@ class SharedChartCard extends StatelessWidget {
   }) {
     final lines = <HorizontalLine>[];
 
+    final averageValue = (spots != null && spots.isNotEmpty)
+        ? spots.map((s) => s.y).reduce((a, b) => a + b) / spots.length
+        : null;
+
+    final referenceValue = targetValue ?? averageValue;
+
+    if (referenceValue != null) {
+      lines.add(
+        HorizontalLine(
+          y: referenceValue,
+          color: targetValue != null
+              ? context.colors.orange.withValues(alpha: 0.05)
+              : context.colors.textMedium.withValues(alpha: 0.05),
+          strokeWidth: 40,
+        ),
+      );
+    }
+
     if (targetValue != null) {
       lines.add(
         HorizontalLine(
@@ -526,15 +544,7 @@ class SharedChartCard extends StatelessWidget {
         minY: minY,
         maxY: maxY,
         alignment: BarChartAlignment.spaceAround,
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: context.colors.border,
-            strokeWidth: 1,
-            dashArray: [4, 4],
-          ),
-        ),
+        gridData: const FlGridData(show: false),
         extraLinesData: _buildExtraLines(context),
         titlesData: _titlesData(context),
         borderData: FlBorderData(show: false),
@@ -710,15 +720,7 @@ class SharedChartCard extends StatelessWidget {
         maxX: maxXValue,
         minY: minY,
         maxY: maxY,
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: context.colors.border,
-            strokeWidth: 1,
-            dashArray: [4, 4],
-          ),
-        ),
+        gridData: const FlGridData(show: false),
         extraLinesData: _buildExtraLines(context, spots: spots),
         titlesData: _titlesData(context),
         borderData: FlBorderData(show: false),

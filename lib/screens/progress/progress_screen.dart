@@ -19,6 +19,9 @@ import '../../theme/app_spacing.dart';
 import 'widgets/chart_drilldown_sheet.dart';
 import '../../providers/progress_chart_provider.dart';
 import '../../services/progress_aggregation_service.dart';
+import '../../services/progress_insight_service.dart';
+import '../../providers/habit_providers.dart';
+import '../../models/habit.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../theme/layout_insets.dart';
 
@@ -138,6 +141,22 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         return DateTime(m.year, m.month, m.day + 1);
       case TimeRange.twelveMonths:
         return DateTime(d.year, d.month - 11, 1);
+    }
+  }
+
+  DateTime _calcPrevStartDate(DateTime currentStart, TimeRange range) {
+    final prevEndDate = currentStart.subtract(const Duration(days: 1));
+    switch (range) {
+      case TimeRange.weekly:
+        return prevEndDate.subtract(const Duration(days: 6));
+      case TimeRange.oneMonth:
+        return _clampMonth(prevEndDate, 1).add(const Duration(days: 1));
+      case TimeRange.threeMonths:
+        return _clampMonth(prevEndDate, 3).add(const Duration(days: 1));
+      case TimeRange.sixMonths:
+        return _clampMonth(prevEndDate, 6).add(const Duration(days: 1));
+      case TimeRange.twelveMonths:
+        return DateTime(prevEndDate.year, prevEndDate.month - 11, 1);
     }
   }
 
@@ -433,12 +452,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               Icons.directions_walk_rounded,
             ),
             _buildCircularStat(
-              'days logged',
+              'days logged\n(this period)',
               '$totalDays',
               Icons.fact_check_rounded,
             ),
             _buildCircularStat(
-              'best single day',
+              'best single day\n(this period)',
               NumberFormat('#,###').format(maxVal.toInt()),
               Icons.emoji_events_rounded,
             ),
@@ -526,9 +545,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   Widget _buildChart(
     List<ChartDataPoint> data,
     bool useKg,
-    dynamic profile,
+    MetricInsight profile,
     DateTime startDate,
     DateTime endDate,
+    double? targetValue,
   ) {
     final daysWithData = data.where((d) => d.value != null).length;
     final isEmpty = daysWithData == 0;
@@ -572,28 +592,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         .where((d) => d.value != null && d.value!.isFinite)
         .toList();
 
-    double avgValue = 0;
-    if (validData.isNotEmpty) {
-      double sum = 0;
-      int days = 0;
-      for (final d in validData) {
-        final c = d.bucket?.validDaysCount ?? 1;
-        sum += d.value! * c;
-        days += c;
-      }
-      avgValue = days > 0 ? sum / days : 0;
-    }
-
-    final subtitleText = _overviewSubtitle(data, _selectedMetric, useKg);
-    final unitText = _overviewUnit(_selectedMetric, useKg);
-
-    var chartDataList = isEmpty ? <ChartDataPoint>[] : data.toList();
-    // Trim leading nulls to clamp the domain for ranges that are partially empty
-    while (chartDataList.isNotEmpty && chartDataList.first.value == null) {
-      chartDataList.removeAt(0);
-    }
-    final clampedStartDate = chartDataList.isNotEmpty ? chartDataList.first.date : startDate;
-
     String? chartSubtitle;
     if (chartDataList.isNotEmpty) {
       final startStr = DateFormat('MMM').format(clampedStartDate);
@@ -629,25 +627,26 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 TweenAnimationBuilder<double>(
                   key: ValueKey('$_selectedMetric-$_selectedRange'),
                   tween: Tween<double>(
-                    begin: avgValue,
-                    end: avgValue,
+                    begin: profile.heroValue ?? 0,
+                    end: profile.heroValue ?? 0,
                   ), // Disable 1200ms count-up
                   duration: const Duration(milliseconds: 200),
                   builder: (context, value, child) {
-                    final displayValue = data.isNotEmpty
+                    final displayValue = data.isNotEmpty && profile.heroValue != null
                         ? _formatOverviewValue(value, _selectedMetric, useKg)
                         : '—';
                     return Text(
                       displayValue,
-                      style: context.text.metric.copyWith(
+                      style: context.text.h1.copyWith(
                         color: context.colors.textDark,
+                        fontSize: 48,
                       ),
                     );
                   },
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Text(
-                  unitText,
+                  profile.heroLabel,
                   style: context.text.cardTitle.copyWith(
                     color: context.colors.textMedium,
                   ),
@@ -656,13 +655,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
           ),
           const SizedBox(height: Spacing.stack),
-          Text(
-            subtitleText,
-            textAlign: TextAlign.center,
-            style: context.text.body.copyWith(
-              color: context.colors.textMedium,
+          if (profile.insightText != null)
+            Text(
+              profile.insightText!,
+              textAlign: TextAlign.center,
+              style: context.text.body.copyWith(
+                color: context.colors.textMedium,
+              ),
             ),
-          ),
           const SizedBox(height: Spacing.section),
         ],
 
@@ -706,15 +706,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               timeFormat: format,
               emptyMessage: emptyMessage,
               // ignore: avoid_dynamic_calls
-              targetValue:
-                  _selectedMetric == MetricType.weight &&
-                      profile.targetWeight != null
-                  ? (useKg
-                        // ignore: avoid_dynamic_calls
-                        ? profile.targetWeight as double
-                        // ignore: avoid_dynamic_calls
-                        : (profile.targetWeight as double) * 2.20462)
-                  : null,
+              targetValue: targetValue,
               onPointLongPress: null,
               onPointTap: (point) {
                 if (_selectedRange == TimeRange.threeMonths ||
@@ -790,6 +782,44 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         .map((b) => ChartDataPoint(b.startDate, b.average, bucket: b))
         .toList();
 
+    double? targetValue;
+    if (_selectedMetric == MetricType.weight && profile.targetWeight != null) {
+      targetValue = useKg ? profile.targetWeight as double : (profile.targetWeight as double) * 2.20462;
+    } else if (_selectedMetric == MetricType.calories) {
+      targetValue = profile.targetCalories.toDouble();
+    } else if (_selectedMetric == MetricType.protein) {
+      targetValue = profile.targetProteinG.toDouble();
+    } else if (_selectedMetric == MetricType.steps || _selectedMetric == MetricType.sleep) {
+      final habits = ref.watch(habitsProvider);
+      final habitType = _selectedMetric == MetricType.steps ? HabitType.autoSteps : HabitType.autoSleep;
+      for (final h in habits) {
+        if (h.type == habitType) {
+          targetValue = h.target;
+          break;
+        }
+      }
+    }
+
+    final prevStartDate = _calcPrevStartDate(startDate, _selectedRange);
+    final prevEndDate = startDate.subtract(const Duration(days: 1));
+    final prevBuckets = ref.watch(
+      aggregatedChartProvider((
+        metric: _selectedMetric,
+        range: _selectedRange,
+        start: prevStartDate,
+        end: prevEndDate,
+      )),
+    );
+
+    final insight = ProgressInsightService.buildInsight(
+      metric: _selectedMetric,
+      range: _selectedRange,
+      currentBuckets: buckets,
+      previousBuckets: prevBuckets,
+      useKg: useKg,
+      targetValue: targetValue,
+    );
+
     return Scaffold(
       backgroundColor: context.colors.scaffoldBg,
       appBar: AppBar(
@@ -847,7 +877,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           },
           child: KeyedSubtree(
             key: ValueKey('$_selectedMetric-$_selectedRange'),
-            child: _buildChart(data, useKg, profile, startDate, endDate),
+            child: _buildChart(data, useKg, insight, startDate, endDate, targetValue),
           ),
         ),
         ),
