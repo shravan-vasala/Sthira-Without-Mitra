@@ -59,23 +59,9 @@ class _PhotoCalorieScannerSheetState
   bool _isSavingMeal = false;
 
   int _analysisSessionToken = 0;
-  Timer? _statusTimer;
-  final ValueNotifier<int> _elapsedSeconds = ValueNotifier<int>(0);
   Timer? _countdownTimer;
   int _cooldownSeconds = 0;
   CancellationToken? _cancellationToken;
-
-  void _startStatusTimer() {
-    _elapsedSeconds.value = 0;
-    _statusTimer?.cancel();
-    _statusTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      _elapsedSeconds.value++;
-    });
-  }
 
   void _startCooldown(int seconds) {
     _cooldownSeconds = seconds;
@@ -98,7 +84,6 @@ class _PhotoCalorieScannerSheetState
   void _cancelAnalysis() {
     _analysisSessionToken++;
     _cancellationToken?.cancel();
-    _statusTimer?.cancel();
     setState(() {
       _isAnalyzing = false;
     });
@@ -137,9 +122,7 @@ class _PhotoCalorieScannerSheetState
   @override
   void dispose() {
     _cancellationToken?.cancel();
-    _statusTimer?.cancel();
     _countdownTimer?.cancel();
-    _elapsedSeconds.dispose();
     _descriptionCtrl.dispose();
     super.dispose();
   }
@@ -1493,53 +1476,55 @@ class _PhotoCalorieScannerSheetState
                   if (_isAnalyzing)
                     Container(
                       margin: const EdgeInsets.only(top: 16),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: context.colors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Column(
                         children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: context.colors.primary,
-                              strokeWidth: 2.5,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ValueListenableBuilder<int>(
-                              valueListenable: _elapsedSeconds,
-                              builder: (context, seconds, child) {
-                                return Text(
-                                  seconds < 2
-                                      ? 'Preparing image...'
-                                      : seconds < 6
-                                      ? 'AI is analyzing your meal...'
-                                      : seconds < 12
-                                      ? 'Looking up nutrition details...'
-                                      : 'Still working — big plates take a moment...',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: context.colors.primary,
+                                  strokeWidth: 2.5,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  'Analyzing meal...',
                                   style: context.text.caption.copyWith(
                                     color: context.colors.textDark,
                                   ),
                                   maxLines: 2,
-                                );
-                              },
-                            ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.cancel_rounded,
+                                  color: context.colors.textMedium,
+                                ),
+                                onPressed: _cancelAnalysis,
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.cancel_rounded,
-                              color: context.colors.textMedium,
+                          const SizedBox(height: 16),
+                          for (int i = 0; i < 2; i++)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Container(
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: context.colors.surfaceLight.withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
-                            onPressed: _cancelAnalysis,
-                          ),
                         ],
                       ),
                     ),
@@ -1869,6 +1854,7 @@ class _PhotoCalorieScannerSheetState
               label: 'Save Log',
               icon: Icons.check_circle_rounded,
               onPressed: _saveMeal,
+              isLoading: _isSavingMeal,
             ),
           ],
         ],
