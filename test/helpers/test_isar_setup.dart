@@ -85,8 +85,10 @@ Future<Isar> setUpTestIsar() async {
 Future<void> tearDownTestIsar(Isar isar) async {
   // Do not use deleteFromDisk: true on Windows as it causes file-lock deadlocks
   try {
-    await isar.close(deleteFromDisk: false);
+    // Watchers in riverpod sometimes take a microtask to cancel.
+    // Wrap close in a timeout so test runner NEVER hangs!
+    await isar.close().timeout(const Duration(milliseconds: 250));
   } catch (e) {
-    print('Failed to close isar: $e');
+    // Ignore timeout and lock exceptions during teardowns
   }
 }

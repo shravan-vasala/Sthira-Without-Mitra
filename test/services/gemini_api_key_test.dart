@@ -241,6 +241,10 @@ void main() {
       );
     });
 
+    tearDown(() {
+      HttpOverrides.global = null;
+    });
+
     test('1. Successful verification', () async {
       HttpOverrides.global = MockHttpOverrides((req) async {
         return MockHttpClientResponse(200, '{"candidates": [{"content": {"parts": [{"text": "pong"}]}}]}');
