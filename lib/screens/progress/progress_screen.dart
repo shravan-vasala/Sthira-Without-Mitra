@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import '../../services/haptics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +14,7 @@ import 'widgets/shared_chart_card.dart';
 import '../home/steps_entry_dialog.dart';
 import '../home/sleep_entry_dialog.dart';
 import '../home/body_fat_entry_dialog.dart';
+import '../home/weight_entry_dialog.dart';
 import '../../theme/app_spacing.dart';
 import 'widgets/chart_drilldown_sheet.dart';
 import '../../providers/progress_chart_provider.dart';
@@ -158,7 +162,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         _selectedMetric == MetricType.bmi) {
       showAppBottomSheet(
         context: context,
-        builder: (_) => const WeightEntryDialog(),
+        builder: (_) => WeightEntryDialog(),
       );
     } else if (_selectedMetric == MetricType.bodyFat) {
       showAppBottomSheet(
@@ -715,7 +719,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 _openDrilldownSheet(_selectedBucket!);
               },
               icon: const Icon(Icons.calendar_view_day_rounded, size: 20),
-              label: const Text('View Daily Details', style: context.text.body),
+              label: Text('View Daily Details', style: context.text.body),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.colors.primary,
                 foregroundColor: context.colors.onPrimary,

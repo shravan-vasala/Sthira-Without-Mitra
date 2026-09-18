@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -246,7 +249,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.screen, vertical: Spacing.stack),
+                  padding: EdgeInsets.symmetric(horizontal: Spacing.screen, vertical: Spacing.stack),
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
@@ -349,6 +352,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
                   ),
                 ),
               ],
+            ),
             ),
           );
         }

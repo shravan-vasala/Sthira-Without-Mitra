@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +14,7 @@ import 'past_day_summary_sheet.dart';
 import 'daily_score_sheet.dart';
 import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../widgets/section_header.dart';
 
 /// Activity flags for each day in a week (keyed by yyyy-MM-dd).
 /// Rebuilds when selected-day logs/habits/meals or exercise logs change, then

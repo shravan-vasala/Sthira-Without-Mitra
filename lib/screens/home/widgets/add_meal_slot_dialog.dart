@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -137,7 +140,7 @@ class _AddMealSlotDialogState extends ConsumerState<AddMealSlotDialog> {
       backgroundColor: context.colors.card,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.sheet)),
-      title: const Text('Add Meal Slot', style: context.text.screenTitle),
+      title: Text('Add Meal Slot', style: context.text.screenTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

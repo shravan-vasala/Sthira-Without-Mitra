@@ -1,9 +1,13 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../providers/app_providers.dart';
+import 'package:trufit_bodamma/theme/app_typography.dart';
 
 import '../../widgets/numeric_entry_sheet.dart';
 
@@ -120,7 +124,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
                   const SizedBox(height: 4),
                   if (hasTarget)
                     Text(
-                      'Goal: ${targetInMl.toInt()} ml',
+                      'Goal: ${targetInMl?.toInt()} ml',
                       style: context.text.body.copyWith(
                         color: context.colors.textMedium,
                       ),

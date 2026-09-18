@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -273,7 +276,7 @@ class _PhysiquePicturesScreenState
                         ),
                         const SizedBox(height: 16),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: Spacing.screen),
+                          padding: EdgeInsets.symmetric(horizontal: Spacing.screen),
                           child: PrimaryButton(
                             label: 'Take First Photo',
                             onPressed: _openCamera,
@@ -293,7 +296,7 @@ class _PhysiquePicturesScreenState
                   )
                 : ListView.builder(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(Spacing.screen, Spacing.stack, Spacing.screen, kShellScrollBottomPadding),
+                    padding: EdgeInsets.fromLTRB(Spacing.screen, Spacing.stack, Spacing.screen, kShellScrollBottomPadding),
                     itemCount: allPhotos.length,
                     itemBuilder: (context, index) {
                       final entry = allPhotos[index];

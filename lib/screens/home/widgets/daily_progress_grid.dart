@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +17,7 @@ import '../../../widgets/app_bottom_sheet.dart';
 import '../weight_entry_dialog.dart';
 import '../steps_entry_dialog.dart';
 import 'sync_status_sheet.dart';
+import '../../../widgets/surface_card.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 class DailyProgressGrid extends ConsumerWidget {
@@ -386,8 +390,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
             ],
           ],
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -508,8 +511,7 @@ class _ProgressCard extends ConsumerWidget {
             ]
           ],
         ),
-      ),
-    );
+      );
   }
 }
 

@@ -34,6 +34,7 @@ class AppSheet extends StatelessWidget {
     this.maxHeightFactor = 0.9,
     this.scrollable = true,
     this.draggable = false,
+    this.titleAction,
   });
 
   final Widget child;
@@ -42,6 +43,7 @@ class AppSheet extends StatelessWidget {
   final double maxHeightFactor;
   final bool scrollable;
   final bool draggable;
+  final Widget? titleAction;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +77,10 @@ class AppSheet extends StatelessWidget {
                 color: context.colors.textMedium,
               ),
             ),
+          ],
+          if (titleAction != null) ...[
+            const SizedBox(height: Spacing.inline),
+            Align(alignment: Alignment.centerRight, child: titleAction),
           ],
           const SizedBox(height: 20),
         ] else

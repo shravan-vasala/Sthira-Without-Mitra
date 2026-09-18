@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +13,7 @@ import '../../../router/app_router.dart';
 import '../../../utils/workout_completion.dart';
 import '../../../utils/meal_icons.dart';
 import '../../../models/daily_stats_snapshot.dart';
+import '../../../widgets/app_bottom_sheet.dart';
 
 class PastDaySummarySheet extends ConsumerWidget {
   final DateTime date;
@@ -345,8 +349,7 @@ class PastDaySummarySheet extends ConsumerWidget {
             const SizedBox(height: 8),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 

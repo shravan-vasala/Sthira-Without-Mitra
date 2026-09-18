@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/app_text_field.dart';
@@ -159,7 +162,7 @@ class _AboutYouPageState extends State<AboutYouPage>
                   color: context.colors.primary,
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'About You',
                   textAlign: TextAlign.center,
                   style: context.text.display.copyWith(color: context.colors.textDark),

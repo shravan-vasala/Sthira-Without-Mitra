@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import '../services/notification_service.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -218,7 +221,7 @@ class RestTimerNotifier extends Notifier<RestTimerState> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Rest Complete',
                       style: context.text.body,
                     ),

@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 // TODO: Flagged for relocation! This file currently lives in home/widgets/
 // but its only consumer is `lib/screens/home/meal_detail_screen.dart`.
 // It should likely be moved to a shared location.
@@ -301,7 +304,6 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
             ],
           ],
         ),
-      ),
-    );
+      );
   }
 }

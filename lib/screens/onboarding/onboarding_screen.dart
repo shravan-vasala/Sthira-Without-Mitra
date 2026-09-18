@@ -347,8 +347,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   bool _canGoNext() {
     if (_currentPage == 1) {

@@ -1,3 +1,6 @@
+import 'package:trufit_bodamma/theme/app_typography.dart';
+import 'package:trufit_bodamma/theme/app_colors.dart';
+import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
@@ -177,7 +180,7 @@ class MealDetailScreen extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _openAddSlotDialog(context),
                     icon: const Icon(Icons.add_rounded, size: 20),
-                    label: const Text(
+                    label: Text(
                       'Add another meal',
                       style: context.text.bodyStrong,
                     ),
@@ -199,7 +202,7 @@ class MealDetailScreen extends ConsumerWidget {
                       builder: (_) => const PlateCalculatorSheet(),
                     ),
                     icon: const Icon(Icons.pie_chart_outline_rounded, size: 20),
-                    label: const Text(
+                    label: Text(
                       'Visual Plate Calculator',
                       style: context.text.bodyStrong,
                     ),
@@ -946,19 +949,33 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           Row(
                             children: [
                               Expanded(
-                                child: CompactButton(
-                                  label: 'Take photo',
-                                  icon: Icons.camera_alt_outlined,
-                                  filled: true,
-                                  onPressed: () => _openScanner(context, false),
+                                child: SizedBox(
+                                  height: 48,
+                                  child: ElevatedButton.icon(
+                                    label: Text('Take photo', style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary)),
+                                    icon: Icon(Icons.camera_alt_outlined, color: context.colors.onPrimary, size: 20),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: context.colors.primary,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                    onPressed: () => _openScanner(context, false),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: Spacing.stack),
                               Expanded(
-                                child: CompactButton(
-                                  label: 'Describe',
-                                  icon: Icons.notes_rounded,
-                                  onPressed: () => _openScanner(context, true),
+                                child: SizedBox(
+                                  height: 48,
+                                  child: OutlinedButton.icon(
+                                    label: Text('Describe', style: context.text.bodyStrong.copyWith(color: context.colors.primary)),
+                                    icon: Icon(Icons.notes_rounded, color: context.colors.primary, size: 20),
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(color: context.colors.primary),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                    onPressed: () => _openScanner(context, true),
+                                  ),
                                 ),
                               ),
                             ],
@@ -1179,7 +1196,7 @@ class _ProvenanceBadge extends StatelessWidget {
         break;
       case 'expert_plan':
         iconData = Icons.verified_user_rounded;
-        color = context.colors.purple;
+        color = context.colors.indigo;
         label = 'nutritionist';
         break;
       default:
@@ -1249,7 +1266,7 @@ class _ProvenanceExplanationSheet extends StatelessWidget {
     } else if (validProvenance == 'expert_plan') {
       title = 'Clinical Protocol';
       headerIcon = Icons.verified_user_rounded;
-      headerColor = context.colors.purple;
+      headerColor = context.colors.indigo;
       desc = 'This item is a verified clinical protocol designed by an expert nutritionist. It is highly recommended.';
     } else {
       title = 'Unknown Origin';
