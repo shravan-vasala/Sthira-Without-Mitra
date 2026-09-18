@@ -48,6 +48,7 @@ class SharedChartCard extends StatelessWidget {
   const SharedChartCard({
     super.key,
     required this.metric,
+    this.subtitle,
     required this.data,
     this.trendData,
     required this.startDate,
@@ -65,6 +66,7 @@ class SharedChartCard extends StatelessWidget {
   });
 
   final MetricSpec metric;
+  final String? subtitle;
   final List<ChartDataPoint> data;
   final List<ChartDataPoint>? trendData;
   final DateTime startDate;
@@ -87,6 +89,17 @@ class SharedChartCard extends StatelessWidget {
       (timeFormat == ChartTimeFormat.weekly ||
           timeFormat == ChartTimeFormat.oneMonth);
 
+  String _formatValue(double value, {bool compact = false}) {
+    if (_isCount) {
+      if (compact && value >= 1000) {
+        final kVal = value / 1000;
+        return '${kVal.toStringAsFixed(value % 1000 == 0 ? 0 : 1)}k';
+      }
+      return value.toInt().toString();
+    }
+    return value.toStringAsFixed(1);
+  }
+
   String _unitSuffix() {
     if (metric.showKgLbToggle) return useKg ? ' kg' : ' lb';
     return metric.unit.isEmpty ? '' : ' ${metric.unit}';
@@ -95,12 +108,20 @@ class SharedChartCard extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        Text(
-          metric.title,
-          style: context.text.cardTitle.copyWith(
-            color: context.colors.textDark,
+        if (subtitle != null && subtitle!.isNotEmpty)
+          Text(
+            subtitle!,
+            style: context.text.body.copyWith(
+              color: context.colors.textMedium,
+            ),
+          )
+        else
+          Text(
+            metric.title,
+            style: context.text.cardTitle.copyWith(
+              color: context.colors.textDark,
+            ),
           ),
-        ),
         const Spacer(),
         if (metric.showKgLbToggle)
           GestureDetector(
@@ -242,6 +263,28 @@ class SharedChartCard extends StatelessWidget {
       maxY += padding;
     }
 
+    if (_isCount) {
+      if (maxY > 5000) {
+        maxY = (maxY / 2000).ceil() * 2000.0;
+      } else if (maxY > 1000) {
+        maxY = (maxY / 1000).ceil() * 1000.0;
+      } else if (maxY > 100) {
+        maxY = (maxY / 100).ceil() * 100.0;
+      } else if (maxY > 10) {
+        maxY = (maxY / 10).ceil() * 10.0;
+      } else {
+        maxY = maxY.ceilToDouble();
+      }
+    } else {
+      if (maxY > 50) {
+        maxY = (maxY / 5).ceil() * 5.0;
+      } else if (maxY > 10) {
+        maxY = (maxY / 2).ceil() * 2.0;
+      } else {
+        maxY = (maxY * 2).ceil() / 2.0;
+      }
+    }
+
     if (_isCount && minY < 0) minY = 0;
     if (_useBars) minY = 0;
     return (minY, maxY);
@@ -265,22 +308,13 @@ class SharedChartCard extends StatelessWidget {
             alignment: Alignment.topRight,
             padding: const EdgeInsets.only(right: 4, bottom: 2),
             style: context.text.micro.copyWith(color: context.colors.orange),
-            labelResolver: (_) {
-              final t = targetValue!;
-              if (_isCount && t >= 1000) {
-                return 'Goal ${(t / 1000).toStringAsFixed(1)}k';
-              }
-              if (_isCount) return 'Goal ${t.toStringAsFixed(0)}';
-              return 'Goal ${t.toStringAsFixed(1)}';
-            },
+            labelResolver: (_) => 'Goal ${_formatValue(targetValue!, compact: true)}',
           ),
         ),
       );
     }
 
-    if (timeFormat == ChartTimeFormat.sixMonths &&
-        spots != null &&
-        spots.isNotEmpty) {
+    if (spots != null && spots.isNotEmpty) {
       final minyData = spots.map((s) => s.y).reduce(min);
       final maxyData = spots.map((s) => s.y).reduce(max);
 
@@ -294,12 +328,12 @@ class SharedChartCard extends StatelessWidget {
             alignment: Alignment.topLeft,
             padding: const EdgeInsets.only(left: 4, bottom: 2),
             style: context.text.micro.copyWith(color: context.colors.primary),
-            labelResolver: (_) => 'Max ${maxyData.toStringAsFixed(1)}',
+            labelResolver: (_) => 'Max ${_formatValue(maxyData, compact: true)}',
           ),
         ),
       );
 
-      if (minyData != maxyData) {
+      if (minyData != maxyData && !_isCount) {
         lines.add(
           HorizontalLine(
             y: minyData,
@@ -310,7 +344,7 @@ class SharedChartCard extends StatelessWidget {
               alignment: Alignment.bottomRight,
               padding: const EdgeInsets.only(right: 4, top: 2),
               style: context.text.micro.copyWith(color: context.colors.red),
-              labelResolver: (_) => 'Min ${minyData.toStringAsFixed(1)}',
+              labelResolver: (_) => 'Min ${_formatValue(minyData, compact: true)}',
             ),
           ),
         );
@@ -371,20 +405,8 @@ class SharedChartCard extends StatelessWidget {
   Widget _leftTitle(BuildContext context, double value, TitleMeta meta) {
     if (_isCount && value < 0) return const SizedBox.shrink();
 
-    String label;
-    if (_isCount) {
-      if (value >= 1000) {
-        final kVal = value / 1000;
-        label = '${kVal.toStringAsFixed(value % 1000 == 0 ? 0 : 1)}k';
-      } else {
-        label = value.toInt().toString();
-      }
-    } else {
-      label = value.toStringAsFixed(1);
-    }
-
     return Text(
-      label,
+      _formatValue(value, compact: true),
       style: context.text.micro.copyWith(color: context.colors.textLight),
     );
   }
@@ -435,18 +457,18 @@ class SharedChartCard extends StatelessWidget {
       extra += '\nCoverage: ${b.validDaysCount}/${b.eligibleDaysCount} days';
       if (b.min != null && b.max != null) {
         extra +=
-            '\nMin: ${b.min!.toStringAsFixed(1)} | Max: ${b.max!.toStringAsFixed(1)}';
+            '\nMin: ${_formatValue(b.min!)} | Max: ${_formatValue(b.max!)}';
       }
     } else {
       dateStr = DateFormat('EEE, d MMM yyyy').format(date);
     }
 
-    final valStr = value.toStringAsFixed(_isCount ? 0 : 1);
+    final valStr = _formatValue(value);
     final unit = _unitSuffix();
     if (targetValue != null) {
       final diff = value - targetValue!;
       final sign = diff >= 0 ? '+' : '';
-      extra += '\n$sign${diff.toStringAsFixed(_isCount ? 0 : 1)}$unit vs goal';
+      extra += '\n$sign${_formatValue(diff, compact: true)}$unit vs goal';
     }
     return '$dateStr\n$valStr$unit$extra';
   }
@@ -484,8 +506,10 @@ class SharedChartCard extends StatelessWidget {
               borderRadius: data[x].value != null
                   ? const BorderRadius.vertical(top: Radius.circular(4))
                   : BorderRadius.zero,
-              color: data[x].value != null ? primary : Colors.transparent,
-              gradient: data[x].value != null
+              color: data[x].value != null 
+                  ? (_isCount && data[x].value == 0 ? primary.withValues(alpha: 0.2) : primary)
+                  : Colors.transparent,
+              gradient: (data[x].value != null && !(_isCount && data[x].value == 0))
                   ? LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
@@ -605,8 +629,7 @@ class SharedChartCard extends StatelessWidget {
               return showDots || segment.length == 1;
             },
             getDotPainter: (spot, percent, bar, index) {
-              if (timeFormat == ChartTimeFormat.sixMonths &&
-                  (spot.y == dataMinY || spot.y == dataMaxY)) {
+              if (spot.y == dataMinY || spot.y == dataMaxY) {
                 final isMax = spot.y == dataMaxY;
                 return FlDotCirclePainter(
                   radius: 4.5,
@@ -621,6 +644,14 @@ class SharedChartCard extends StatelessWidget {
                   color: primary.withValues(alpha: 0.3),
                   strokeWidth: 0,
                   strokeColor: Colors.transparent,
+                );
+              }
+              if (_isCount && spot.y == 0) {
+                return FlDotCirclePainter(
+                  radius: 3.5,
+                  color: context.colors.card,
+                  strokeWidth: 1.5,
+                  strokeColor: primary.withValues(alpha: 0.5),
                 );
               }
               return FlDotCirclePainter(

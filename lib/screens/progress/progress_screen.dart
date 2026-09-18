@@ -347,17 +347,17 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             : '';
         switch (metric) {
           case MetricType.weight:
-            return 'Coverage: $validDaysCount/$eligibleDaysCount days. $sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start.';
+            return 'Based on $validDaysCount days with data. $sign${abs.toStringAsFixed(1)} ${useKg ? 'kg' : 'lb'} vs start.';
           case MetricType.bodyFat:
-            return 'Coverage: $validDaysCount/$eligibleDaysCount days. Progress: $sign${abs.toStringAsFixed(1)}% vs start.';
+            return 'Based on $validDaysCount days with data. Progress: $sign${abs.toStringAsFixed(1)}% vs start.';
           case MetricType.bmi:
-            return 'Coverage: $validDaysCount/$eligibleDaysCount days. BMI shifted $sign${abs.toStringAsFixed(1)}.';
+            return 'Based on $validDaysCount days with data. BMI shifted $sign${abs.toStringAsFixed(1)}.';
           default:
             break;
         }
       }
     }
-    return 'Coverage: $validDaysCount/$eligibleDaysCount calendar days logged.';
+    return 'Based on $validDaysCount days with data.';
   }
 
   String _overviewUnit(MetricType metric, bool useKg) {
@@ -438,7 +438,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
               Icons.fact_check_rounded,
             ),
             _buildCircularStat(
-              'best day',
+              'best single day',
               NumberFormat('#,###').format(maxVal.toInt()),
               Icons.emoji_events_rounded,
             ),
@@ -587,6 +587,35 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final subtitleText = _overviewSubtitle(data, _selectedMetric, useKg);
     final unitText = _overviewUnit(_selectedMetric, useKg);
 
+    var chartDataList = isEmpty ? <ChartDataPoint>[] : data.toList();
+    // Trim leading nulls to clamp the domain for ranges that are partially empty
+    while (chartDataList.isNotEmpty && chartDataList.first.value == null) {
+      chartDataList.removeAt(0);
+    }
+    final clampedStartDate = chartDataList.isNotEmpty ? chartDataList.first.date : startDate;
+
+    String? chartSubtitle;
+    if (chartDataList.isNotEmpty) {
+      final startStr = DateFormat('MMM').format(clampedStartDate);
+      final endStr = DateFormat('MMM').format(endDate);
+      final startStrYr = DateFormat('MMM yy').format(clampedStartDate);
+      final endStrYr = DateFormat('MMM yy').format(endDate);
+
+      switch (_selectedRange) {
+        case TimeRange.weekly:
+        case TimeRange.oneMonth:
+          chartSubtitle = 'Daily values';
+          break;
+        case TimeRange.threeMonths:
+        case TimeRange.sixMonths:
+          chartSubtitle = 'Weekly average · $startStr-$endStr';
+          break;
+        case TimeRange.twelveMonths:
+          chartSubtitle = 'Monthly average · $startStrYr-$endStrYr';
+          break;
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -665,9 +694,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             behavior: HitTestBehavior.opaque,
             child: SharedChartCard(
               metric: _getMetricSpec(_selectedMetric, useKg),
-              data: isEmpty ? [] : data,
+              subtitle: chartSubtitle,
+              data: chartDataList,
               trendData: trendData,
-              startDate: startDate,
+              startDate: clampedStartDate,
               endDate: endDate,
               useKg: useKg,
               onToggleUnit: () {},
