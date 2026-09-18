@@ -6,6 +6,7 @@ import '../../theme/app_spacing.dart';
 import '../../widgets/settings_row.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../theme/layout_insets.dart';
+import '../../theme/app_motion.dart';
 
 class RemindersScreen extends ConsumerStatefulWidget {
   const RemindersScreen({super.key});
@@ -344,15 +345,21 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
               activeTrackColor: context.colors.primary,
             ),
           ),
-          if (child != null)
-            Padding(
-              padding: const EdgeInsets.only(
-                left: Spacing.cardPad,
-                right: Spacing.cardPad,
-                bottom: Spacing.cardPad,
-              ),
-              child: child,
-            ),
+          AnimatedSize(
+            duration: Motion.standard,
+            curve: Motion.enter,
+            alignment: Alignment.topCenter,
+            child: child != null
+                ? Padding(
+                    padding: const EdgeInsets.only(
+                      left: Spacing.cardPad,
+                      right: Spacing.cardPad,
+                      bottom: Spacing.cardPad,
+                    ),
+                    child: child,
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );

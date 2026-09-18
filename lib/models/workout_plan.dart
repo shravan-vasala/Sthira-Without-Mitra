@@ -8,6 +8,8 @@ class WorkoutPlan {
 
   @Index(unique: true, replace: true)
   final String planName;
+  final int? durationWeeks;
+  final List<WorkoutWeek>? weeks;
   final List<WorkoutDay> days;
 
   /// 'seed' = shipped by an expert, managed by migration.
@@ -19,6 +21,8 @@ class WorkoutPlan {
 
   WorkoutPlan({
     required this.planName,
+    this.durationWeeks,
+    this.weeks,
     required this.days,
     this.source = 'user',
     this.seedVersion,
@@ -27,9 +31,16 @@ class WorkoutPlan {
   factory WorkoutPlan.fromJson(Map<String, dynamic> json) {
     return WorkoutPlan(
       planName: json['planName'] as String,
-      days: (json['days'] as List)
-          .map((d) => WorkoutDay.fromJson(d as Map<String, dynamic>))
-          .toList(),
+      durationWeeks: json['durationWeeks'] as int?,
+      weeks: json['weeks'] != null
+          ? (json['weeks'] as List)
+              .map((w) => WorkoutWeek.fromJson(w as Map<String, dynamic>))
+              .toList()
+          : null,
+      days: (json['days'] as List?)
+              ?.map((d) => WorkoutDay.fromJson(d as Map<String, dynamic>))
+              .toList() ??
+          [],
       source: json['source'] as String? ?? 'user',
       seedVersion: json['seedVersion'] as int?,
     );
@@ -37,19 +48,46 @@ class WorkoutPlan {
 
   Map<String, dynamic> toJson() => {
     'planName': planName,
+    if (durationWeeks != null) 'durationWeeks': durationWeeks,
+    if (weeks != null) 'weeks': weeks!.map((w) => w.toJson()).toList(),
     'days': days.map((d) => d.toJson()).toList(),
     'source': source,
     if (seedVersion != null) 'seedVersion': seedVersion,
   };
 
-  WorkoutPlan copyWith({String? planName, List<WorkoutDay>? days, String? source, int? seedVersion}) {
+  WorkoutPlan copyWith({String? planName, int? durationWeeks, List<WorkoutWeek>? weeks, List<WorkoutDay>? days, String? source, int? seedVersion}) {
     return WorkoutPlan(
       planName: planName ?? this.planName,
+      durationWeeks: durationWeeks ?? this.durationWeeks,
+      weeks: weeks ?? this.weeks,
       days: days ?? this.days,
       source: source ?? this.source,
       seedVersion: seedVersion ?? this.seedVersion,
     );
   }
+}
+
+@embedded
+class WorkoutWeek {
+  int? weekNumber;
+  List<WorkoutDay> days;
+
+  WorkoutWeek({this.weekNumber, this.days = const []});
+
+  factory WorkoutWeek.fromJson(Map<String, dynamic> json) {
+    return WorkoutWeek(
+      weekNumber: json['weekNumber'] as int?,
+      days: (json['days'] as List?)
+              ?.map((d) => WorkoutDay.fromJson(d as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    if (weekNumber != null) 'weekNumber': weekNumber,
+    'days': days.map((d) => d.toJson()).toList(),
+  };
 }
 
 @embedded

@@ -15,6 +15,8 @@ class AppTextField extends StatelessWidget {
   final bool centerText;
   final Function(String)? onChanged;
   final FocusNode? focusNode;
+  final int? minLines;
+  final int? maxLines;
 
   const AppTextField({
     super.key,
@@ -29,6 +31,8 @@ class AppTextField extends StatelessWidget {
     this.centerText = false,
     this.onChanged,
     this.focusNode,
+    this.minLines,
+    this.maxLines = 1,
   });
 
   @override
@@ -53,6 +57,8 @@ class AppTextField extends StatelessWidget {
           textCapitalization: capitalization,
           obscureText: obscureText,
           textAlign: centerText ? TextAlign.center : TextAlign.left,
+          minLines: minLines,
+          maxLines: obscureText ? 1 : maxLines,
           style: context.text.bodyStrong.copyWith(
             color: context.colors.textDark,
           ),

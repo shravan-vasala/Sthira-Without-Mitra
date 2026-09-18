@@ -16,6 +16,8 @@ import 'pages/about_you_page.dart';
 import 'pages/your_plan_page.dart';
 import 'pages/connect_page.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_motion.dart';
+
 
 String kOnboardingCompletedKey = 'onboarding_completed';
 
@@ -122,8 +124,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (_currentPage < _totalPages - 1) {
         HapticFeedback.selectionClick();
         _pageController.nextPage(
-          duration: const Duration(milliseconds: 350),
-          curve: Curves.easeInOut,
+          duration: const Motion.deliberate,
+          curve: Motion.enter,
         );
       } else {
         await _commitAllToDb();
@@ -150,8 +152,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (_currentPage > 0) {
       HapticFeedback.selectionClick();
       _pageController.previousPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
+        duration: const Motion.deliberate,
+        curve: Motion.enter,
       );
     }
   }
@@ -394,7 +396,7 @@ class _NavButtons extends StatelessWidget {
               final active = index == currentPage;
               final completed = index < currentPage;
               return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
+                duration: const Motion.standard,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 width: active ? 24 : 8,
                 height: 8,

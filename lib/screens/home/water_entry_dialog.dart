@@ -10,6 +10,8 @@ import '../../providers/app_providers.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 import '../../widgets/numeric_entry_sheet.dart';
+import '../../theme/app_motion.dart';
+
 
 class WaterEntryDialog extends ConsumerStatefulWidget {
   const WaterEntryDialog({super.key});
@@ -161,8 +163,8 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
           if (hasTarget)
             TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0.0, end: progressFraction),
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOut,
+              duration: const Motion.standard,
+              curve: Motion.enter,
               builder: (context, value, child) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(8),

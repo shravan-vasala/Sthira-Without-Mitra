@@ -8,6 +8,8 @@ import '../../../models/habit.dart';
 import '../../../providers/app_providers.dart';
 import '../../../widgets/numeric_entry_sheet.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class TimerEntryDialog extends ConsumerStatefulWidget {
   final Habit habit;
@@ -98,7 +100,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     if (_remainingSeconds <= 0) return;
     _animationController.reverse(from: _remainingSeconds / _totalSeconds);
 
-    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _timer = Timer.periodic(const Motion.instant, (timer) {
       if (!mounted) return;
       if (_lastStartTime == null) return;
 

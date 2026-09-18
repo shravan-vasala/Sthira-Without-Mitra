@@ -14,6 +14,8 @@ import 'timer_entry_dialog.dart';
 import '../../../widgets/empty_state_view.dart';
 import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class HabitsCard extends ConsumerWidget {
   const HabitsCard({super.key});
@@ -533,14 +535,14 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Motion.deliberate,
     );
     _scaleAnimation = TweenSequence([
       TweenSequenceItem(
         tween: Tween<double>(
           begin: 1.0,
           end: 1.25,
-        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        ).chain(CurveTween(curve: Motion.enter)),
         weight: 40,
       ),
       TweenSequenceItem(
@@ -573,8 +575,8 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
     return ScaleTransition(
       scale: _scaleAnimation,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+        duration: const Motion.standard,
+        curve: Motion.enter,
         width: 28,
         height: 28,
         decoration: BoxDecoration(

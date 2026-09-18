@@ -1,4 +1,6 @@
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_motion.dart';
+
 import 'package:trufit_bodamma/theme/app_colors.dart';
 import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'dart:io';
@@ -25,6 +27,8 @@ import 'widgets/ai_meal_suggestion_card.dart';
 import '../meals/widgets/plate_calculator_sheet.dart';
 import '../../theme/app_theme.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_motion.dart';
+
 
 class MealDetailScreen extends ConsumerWidget {
   const MealDetailScreen({super.key});
@@ -142,14 +146,14 @@ class MealDetailScreen extends ConsumerWidget {
                 )
                 .animate()
                 .fadeIn(
-                  duration: shouldAnimate ? 400.ms : 0.ms,
-                  curve: Curves.easeOut,
+                  duration: shouldAnimate ? Motion.deliberate : Motion.instant,
+                  curve: Motion.enter,
                 )
                 .slideY(
                   begin: 0.05,
                   end: 0,
-                  duration: shouldAnimate ? 400.ms : 0.ms,
-                  curve: Curves.easeOut,
+                  duration: shouldAnimate ? Motion.deliberate : Motion.instant,
+                  curve: Motion.enter,
                 );
           } else if (index == slotsToDisplay.length + 1) {
             final unloggedSlots = slotsToDisplay.where((s) {
@@ -272,9 +276,9 @@ class _CalorieHeader extends StatelessWidget {
                   end: eaten.toInt(),
                 ),
                 duration: shouldAnimate
-                    ? const Duration(milliseconds: 400)
+                    ? const Motion.deliberate
                     : Duration.zero,
-                curve: Curves.easeOutQuart,
+                curve: Motion.enter,
                 builder: (context, val, child) {
                   return Text(
                     '$val',
@@ -578,8 +582,8 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
       child: SurfaceCard(
         margin: EdgeInsets.zero,
         child: AnimatedSize(
-          duration: shouldAnimate ? 300.ms : 0.ms,
-          curve: Curves.easeOutCubic,
+          duration: shouldAnimate ? Motion.standard : Motion.instant,
+          curve: Motion.enter,
           alignment: Alignment.topCenter,
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -613,9 +617,9 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 end: 1.0,
                               ),
                               duration: shouldAnimate
-                                  ? const Duration(milliseconds: 400)
+                                  ? const Motion.deliberate
                                   : Duration.zero,
-                              curve: Curves.easeOutCubic,
+                              curve: Motion.enter,
                               builder: (context, val, _) {
                                 final cal = (slotLog.totalCalories * val)
                                     .toInt();
@@ -692,9 +696,9 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           end: 1.0,
                         ),
                         duration: shouldAnimate
-                            ? const Duration(milliseconds: 400)
+                            ? const Motion.deliberate
                             : Duration.zero,
-                        curve: Curves.elasticOut,
+                        curve: Motion.enter,
                         builder: (context, val, child) {
                           return Transform.scale(
                             scale: val,
@@ -711,9 +715,9 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
                 // State dependent body
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
+                  duration: const Motion.standard,
+                  switchInCurve: Motion.enter,
+                  switchOutCurve: Motion.exit,
                   child: KeyedSubtree(
                     key: ValueKey(_hasLog),
                     child: Column(
@@ -1050,80 +1054,90 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
               ],
             ),
           ),
-          if (_showSuggestions) ...[
-            const SizedBox(height: 16),
-            ...planned.suggestions.expand((suggestion) {
-              final items = suggestion
-                  .split('•')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty);
-                  
-              return items.map((item) {
-                String qty = '';
-                String name = item;
-                final words = item.split(' ');
-                int splitIndex = -1;
-                for (int i = 0; i < words.length; i++) {
-                  final w = words[i];
-                  // Find first capitalized word that isn't just numbers/symbols
-                  if (w.isNotEmpty && 
-                      w[0] == w[0].toUpperCase() && 
-                      w[0] != w[0].toLowerCase() && 
-                      !w.contains(RegExp(r'[0-9]'))) {
-                    splitIndex = i;
-                    break;
-                  }
-                }
-                
-                if (splitIndex > 0) {
-                  qty = words.sublist(0, splitIndex).join(' ');
-                  name = words.sublist(splitIndex).join(' ');
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
+          AnimatedSize(
+            duration: Motion.standard,
+            curve: Motion.enter,
+            alignment: Alignment.topCenter,
+            child: !_showSuggestions
+                ? const SizedBox.shrink()
+                : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, right: 12),
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: context.colors.primary.withValues(alpha: 0.6),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              if (qty.isNotEmpty)
-                                TextSpan(
-                                  text: '$qty  ',
-                                  style: context.text.caption.copyWith(
-                                    color: context.colors.primary.withValues(alpha: 0.9),
-                                    fontWeight: FontWeight.w600,
+                      const SizedBox(height: 16),
+                      ...planned.suggestions.expand((suggestion) {
+                        final items = suggestion
+                            .split('•')
+                            .map((s) => s.trim())
+                            .where((s) => s.isNotEmpty);
+                            
+                        return items.map((item) {
+                          String qty = '';
+                          String name = item;
+                          final words = item.split(' ');
+                          int splitIndex = -1;
+                          for (int i = 0; i < words.length; i++) {
+                            final w = words[i];
+                            // Find first capitalized word that isn't just numbers/symbols
+                            if (w.isNotEmpty && 
+                                w[0] == w[0].toUpperCase() && 
+                                w[0] != w[0].toLowerCase() && 
+                                !w.contains(RegExp(r'[0-9]'))) {
+                              splitIndex = i;
+                              break;
+                            }
+                          }
+                          
+                          if (splitIndex > 0) {
+                            qty = words.sublist(0, splitIndex).join(' ');
+                            name = words.sublist(splitIndex).join(' ');
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8, right: 12),
+                                  child: Container(
+                                    width: 4,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: context.colors.primary.withValues(alpha: 0.6),
+                                      shape: BoxShape.circle,
+                                    ),
                                   ),
                                 ),
-                              TextSpan(
-                                text: name,
-                                style: context.text.caption.copyWith(
-                                  color: context.colors.textMedium,
+                                Expanded(
+                                  child: Text.rich(
+                                    TextSpan(
+                                      children: [
+                                        if (qty.isNotEmpty)
+                                          TextSpan(
+                                            text: '$qty  ',
+                                            style: context.text.caption.copyWith(
+                                              color: context.colors.primary.withValues(alpha: 0.9),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        TextSpan(
+                                          text: name,
+                                          style: context.text.caption.copyWith(
+                                            color: context.colors.textMedium,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                              ],
+                            ),
+                          );
+                        });
+                      }),
                     ],
                   ),
-                );
-              });
-            }),
-          ],
+          ),
         ],
       ),
     );

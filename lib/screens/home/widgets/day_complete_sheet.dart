@@ -7,6 +7,9 @@ import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../services/haptics.dart';
+import '../../../theme/app_motion.dart';
+
 
 bool _isShowingDayComplete = false;
 
@@ -41,6 +44,7 @@ Future<void> maybeShowDayCompleteSheet(
       return;
     }
 
+    Haptics.success();
     await showAppBottomSheet<void>(
       context: context,
       builder: (ctx) => const DayCompleteSheet(),
@@ -82,8 +86,8 @@ class DayCompleteSheet extends ConsumerWidget {
                           : null,
                     )
                     .scale(
-                      duration: 400.ms,
-                      curve: Curves.easeOutBack,
+                      duration: Motion.deliberate,
+                      curve: Motion.enter,
                       begin: const Offset(0.5, 0.5),
                       end: const Offset(1.0, 1.0),
                     ),

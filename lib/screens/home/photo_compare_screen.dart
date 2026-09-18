@@ -1,4 +1,6 @@
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_motion.dart';
+
 import 'package:trufit_bodamma/theme/app_colors.dart';
 import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'dart:io';
@@ -15,6 +17,8 @@ import '../../services/haptics.dart';
 import '../../utils/format_units.dart';
 import '../../theme/app_theme.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_motion.dart';
+
 
 enum CompareMode { sideBySide, slider }
 
@@ -372,7 +376,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
           setStateSheet(() => _pickerFilter = tag);
         },
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Motion.standard,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? context.colors.primary : context.colors.inputFill,

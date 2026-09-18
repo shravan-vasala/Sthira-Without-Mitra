@@ -140,4 +140,27 @@ void main() {
       isTrue,
     );
   });
+
+  test('resolveWorkoutDay respects currentWeek and weeks array', () {
+    final w1d1 = WorkoutDay(dayId: 'monday', label: 'w1_d1', sections: trainingDay.sections);
+    final w2d1 = WorkoutDay(dayId: 'monday', label: 'w2_d1', sections: trainingDay.sections);
+    
+    final planWithWeeks = WorkoutPlan(
+      planName: 'Periodized Plan',
+      durationWeeks: 2,
+      weeks: [
+        WorkoutWeek(weekNumber: 1, days: [w1d1, restDay, restDay, restDay, restDay, restDay, restDay]),
+        WorkoutWeek(weekNumber: 2, days: [w2d1, restDay, restDay, restDay, restDay, restDay, restDay]),
+      ],
+      days: [], // unused when weeks is present
+    );
+
+    // Monday (day index 0)
+    expect(WorkoutCompletion.resolveWorkoutDay(planWithWeeks, monday, currentWeek: 1).label, 'w1_d1');
+    expect(WorkoutCompletion.resolveWorkoutDay(planWithWeeks, monday, currentWeek: 2).label, 'w2_d1');
+    
+    // Out of bounds defaults to last week
+    expect(WorkoutCompletion.resolveWorkoutDay(planWithWeeks, monday, currentWeek: 3).label, 'w2_d1');
+    expect(WorkoutCompletion.resolveWorkoutDay(planWithWeeks, monday, currentWeek: 5).label, 'w2_d1');
+  });
 }

@@ -10,6 +10,8 @@ import 'app_bottom_sheet.dart';
 import 'app_text_field.dart';
 import 'primary_button.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../theme/app_motion.dart';
+
 
 class AiSetupSheet extends ConsumerStatefulWidget {
   const AiSetupSheet({super.key});
@@ -112,7 +114,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
           MediaQuery.maybeOf(context)?.disableAnimations ?? false;
       if (!disableAnimations) {
         await Future.delayed(
-          const Duration(milliseconds: 600),
+          const Motion.deliberate,
         ); // Shorter delay
       }
       if (mounted) Navigator.pop(context, true);
@@ -221,9 +223,9 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
                 iconColor: _isSuccess ? const Color(0xFF4CAF50) : null,
               )
               .animate(target: _isSuccess ? 1 : 0)
-              .scaleXY(end: 1.05, duration: 200.ms, curve: Curves.easeOutBack)
-              .then(delay: 200.ms)
-              .scaleXY(end: 1.0, duration: 150.ms),
+              .scaleXY(end: 1.05, duration: Motion.standard, curve: Motion.enter)
+              .then(delay: Motion.standard)
+              .scaleXY(end: 1.0, duration: Motion.instant),
         ],
       ),
     );
@@ -270,7 +272,7 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
           setState(() {
             _status = 'Connected! Data will sync automatically.';
           });
-          Future.delayed(const Duration(milliseconds: 600), () {
+          Future.delayed(const Motion.deliberate, () {
             if (mounted) Navigator.pop(context, true);
           });
         } else {
@@ -357,7 +359,7 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
 
     ref.listen(cloudSyncControllerProvider, (prev, next) {
       if (next == CloudSyncState.success) {
-        Future.delayed(const Duration(milliseconds: 600), () {
+        Future.delayed(const Motion.deliberate, () {
           if (mounted) Navigator.pop(context, true);
         });
       }

@@ -13,6 +13,8 @@ import '../../../providers/app_providers.dart';
 import '../../../utils/format_units.dart';
 import '../photo_viewer_screen.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class AddProgressPhotoSheet extends ConsumerStatefulWidget {
   const AddProgressPhotoSheet({super.key});
@@ -423,7 +425,7 @@ class _PoseSelectorOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Motion.standard,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : context.colors.card,

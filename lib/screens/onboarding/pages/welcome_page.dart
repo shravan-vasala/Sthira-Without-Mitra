@@ -9,6 +9,8 @@ import '../../../widgets/surface_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../../widgets/gita_verse_sheet.dart';
+import '../../../theme/app_motion.dart';
+
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -26,7 +28,7 @@ class _WelcomePageState extends State<WelcomePage>
     super.initState();
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Motion.deliberate,
     );
   }
 
@@ -69,11 +71,11 @@ class _WelcomePageState extends State<WelcomePage>
             builder: (context, child) {
               final scale = CurvedAnimation(
                 parent: _staggerController,
-                curve: const Interval(0.0, 0.4, curve: Curves.easeOutBack),
+                curve: const Interval(0.0, 0.4, curve: Motion.enter),
               ).value;
               final fade = CurvedAnimation(
                 parent: _staggerController,
-                curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
+                curve: const Interval(0.0, 0.3, curve: Motion.exit),
               ).value;
               Widget logo = Image.asset(
                 'assets/icon/sunflower-foreground-1024.png',
@@ -102,7 +104,7 @@ class _WelcomePageState extends State<WelcomePage>
             builder: (context, child) {
               final fade = CurvedAnimation(
                 parent: _staggerController,
-                curve: const Interval(0.2, 0.5, curve: Curves.easeIn),
+                curve: const Interval(0.2, 0.5, curve: Motion.exit),
               ).value;
               return Opacity(
                 opacity: fade,
@@ -175,7 +177,7 @@ class _WelcomePageState extends State<WelcomePage>
             builder: (context, child) {
               final fade = CurvedAnimation(
                 parent: _staggerController,
-                curve: const Interval(0.7, 1.0, curve: Curves.easeIn),
+                curve: const Interval(0.7, 1.0, curve: Motion.exit),
               ).value;
               return Opacity(
                 opacity: fade,
@@ -202,7 +204,7 @@ class _WelcomePageState extends State<WelcomePage>
             builder: (context, child) {
               final fade = CurvedAnimation(
                 parent: _staggerController,
-                curve: const Interval(0.8, 1.0, curve: Curves.easeIn),
+                curve: const Interval(0.8, 1.0, curve: Motion.exit),
               ).value;
               return Opacity(opacity: fade, child: const _DedicationLine());
             },
@@ -227,11 +229,11 @@ class _WelcomePageState extends State<WelcomePage>
       builder: (context, child) {
         final slide = CurvedAnimation(
           parent: _staggerController,
-          curve: Interval(start, end, curve: Curves.easeOutCubic),
+          curve: Interval(start, end, curve: Motion.enter),
         ).value;
         final fade = CurvedAnimation(
           parent: _staggerController,
-          curve: Interval(start, end - 0.1, curve: Curves.easeIn),
+          curve: Interval(start, end - 0.1, curve: Motion.exit),
         ).value;
         return Opacity(
           opacity: fade,
@@ -364,7 +366,7 @@ class _CompletionScreenState extends State<CompletionScreen>
     super.initState();
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Motion.deliberate,
     );
   }
 
@@ -380,13 +382,13 @@ class _CompletionScreenState extends State<CompletionScreen>
   Future<void> _playSequence(bool disableAnim) async {
     if (disableAnim) {
       _fadeController.value = 1.0;
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Motion.instant);
       if (!mounted) return;
       widget.onComplete();
       return;
     }
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Motion.instant);
     if (!mounted) return;
     await _fadeController.forward();
     if (!mounted) return;
@@ -413,7 +415,7 @@ class _CompletionScreenState extends State<CompletionScreen>
                 Opacity(
                   opacity: CurvedAnimation(
                     parent: _fadeController,
-                    curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
+                    curve: const Interval(0.0, 0.4, curve: Motion.exit),
                   ).value,
                   child: Text(
                     widget.name.isEmpty
@@ -429,7 +431,7 @@ class _CompletionScreenState extends State<CompletionScreen>
                 Opacity(
                   opacity: CurvedAnimation(
                     parent: _fadeController,
-                    curve: const Interval(0.6, 1.0, curve: Curves.easeIn),
+                    curve: const Interval(0.6, 1.0, curve: Motion.exit),
                   ).value,
                   child: const _DedicationLine(),
                 ),

@@ -15,6 +15,8 @@ import '../../utils/time_utils.dart';
 import 'widgets/friend_status_card.dart';
 import 'package:flutter/services.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_motion.dart';
+
 
 class SocialFeedScreen extends ConsumerStatefulWidget {
   const SocialFeedScreen({super.key});
@@ -182,85 +184,90 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                               color: context.colors.textMedium,
                             ),
                           ),
-                          trailing: isProcessing
-                              ? const SizedBox(
-                                  width: 96,
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
+                          trailing: AnimatedSwitcher(
+                            duration: Motion.instant,
+                            child: isProcessing
+                                ? const SizedBox(
+                                    key: ValueKey('processing'),
+                                    width: 96,
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                              : SizedBox(
-                                  width: 96,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.check_circle_rounded,
-                                        color: context.colors.primary,
-                                      ),
-                                      onPressed: () async {
-                                        setState(
-                                          () =>
-                                              _processingRequests.add(fromUid),
-                                        );
-                                        try {
-                                          await syncService.acceptFriendRequest(
-                                            fromUid,
+                                  )
+                                : SizedBox(
+                                    key: const ValueKey('idle'),
+                                    width: 96,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.check_circle_rounded,
+                                          color: context.colors.primary,
+                                        ),
+                                        onPressed: () async {
+                                          setState(
+                                            () =>
+                                                _processingRequests.add(fromUid),
                                           );
-                                          await ref
-                                              .read(friendRepoProvider)
-                                              .addFriend(
-                                                fromUid,
-                                                name,
-                                                avatarUrl: avatarUrl,
+                                          try {
+                                            await syncService.acceptFriendRequest(
+                                              fromUid,
+                                            );
+                                            await ref
+                                                .read(friendRepoProvider)
+                                                .addFriend(
+                                                  fromUid,
+                                                  name,
+                                                  avatarUrl: avatarUrl,
+                                                );
+                                          } finally {
+                                            if (mounted) {
+                                              setState(
+                                                () => _processingRequests.remove(
+                                                  fromUid,
+                                                ),
                                               );
-                                        } finally {
-                                          if (mounted) {
-                                            setState(
-                                              () => _processingRequests.remove(
-                                                fromUid,
-                                              ),
-                                            );
+                                            }
                                           }
-                                        }
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.cancel_rounded,
-                                        color: context.colors.textMedium
-                                            .withValues(alpha: 0.5),
+                                        },
                                       ),
-                                      onPressed: () async {
-                                        setState(
-                                          () =>
-                                              _processingRequests.add(fromUid),
-                                        );
-                                        try {
-                                          await syncService
-                                              .declineFriendRequest(fromUid);
-                                        } finally {
-                                          if (mounted) {
-                                            setState(
-                                              () => _processingRequests.remove(
-                                                fromUid,
-                                              ),
-                                            );
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.cancel_rounded,
+                                          color: context.colors.textMedium
+                                              .withValues(alpha: 0.5),
+                                        ),
+                                        onPressed: () async {
+                                          setState(
+                                            () =>
+                                                _processingRequests.add(fromUid),
+                                          );
+                                          try {
+                                            await syncService
+                                                .declineFriendRequest(fromUid);
+                                          } finally {
+                                            if (mounted) {
+                                              setState(
+                                                () => _processingRequests.remove(
+                                                  fromUid,
+                                                ),
+                                              );
+                                            }
                                           }
-                                        }
-                                      },
-                                    ),
-                                  ],
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
+                          ),
                         ),
                       );
                     },
@@ -556,7 +563,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
         ),
         Expanded(
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
+            duration: const Motion.deliberate,
             child: ListView(
               key: ValueKey('${_period}_$_metric'),
               padding: const EdgeInsets.fromLTRB(
@@ -913,8 +920,8 @@ class _PodiumView extends ConsumerWidget {
             tween: IntTween(begin: 0, end: rawVal),
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
-                : const Duration(milliseconds: 1400),
-            curve: Curves.easeOutQuart,
+                : const Motion.deliberate,
+            curve: Motion.enter,
             builder: (context, val, child) {
               final displayStr = metric == LeaderboardMetric.score
                   ? val.toString()
@@ -949,42 +956,43 @@ class _SkeletonRow extends StatelessWidget {
   const _SkeletonRow();
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white10
-                  : Colors.black12,
+    final color = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white10
+        : Colors.black12;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+            ),
+          ],
+        ),
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            width: 120,
+            height: 16,
+            color: color,
+          ),
+        ),
+        subtitle: Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Container(
+              width: 80,
+              height: 12,
+              color: color,
             ),
           ),
-          const SizedBox(width: Spacing.inline),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 120,
-                height: 16,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white10
-                    : Colors.black12,
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: 80,
-                height: 12,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white10
-                    : Colors.black12,
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

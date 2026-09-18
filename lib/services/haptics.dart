@@ -1,4 +1,6 @@
 import 'package:flutter/services.dart';
+import '../theme/app_motion.dart';
+
 
 class Haptics {
   Haptics._();
@@ -24,7 +26,7 @@ class Haptics {
     if (!enabled) return;
     // Vibrate twice for a milestone
     HapticFeedback.heavyImpact();
-    Future.delayed(const Duration(milliseconds: 150), () {
+    Future.delayed(const Motion.instant, () {
       HapticFeedback.heavyImpact();
     });
   }
@@ -37,7 +39,7 @@ class Haptics {
   static void error() {
     if (!enabled) return;
     HapticFeedback.vibrate();
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Motion.instant, () {
       HapticFeedback.vibrate();
     });
   }

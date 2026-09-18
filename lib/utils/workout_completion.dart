@@ -23,16 +23,30 @@ class WorkoutCompletion {
   }
 
   /// Resolves the scheduled [WorkoutDay] for [date] using stored schedule semantics.
-  static WorkoutDay resolveWorkoutDay(WorkoutPlan plan, DateTime date) {
+  static WorkoutDay resolveWorkoutDay(WorkoutPlan plan, DateTime date, {int? currentWeek}) {
+    List<WorkoutDay> days = plan.days;
+    
+    // 0. Resolve the week
+    if (plan.weeks != null && plan.weeks!.isNotEmpty) {
+      // If currentWeek is provided, use it (clamped)
+      int weekIndex = 0;
+      if (currentWeek != null && currentWeek > 0) {
+         weekIndex = currentWeek > plan.weeks!.length 
+            ? plan.weeks!.length - 1 
+            : currentWeek - 1;
+      }
+      days = plan.weeks![weekIndex].days;
+    }
+
     // 1. Find a day matching the explicit weekday
-    for (final day in plan.days) {
+    for (final day in days) {
       if (day.weekday == date.weekday) {
         return day;
       }
     }
 
     // 2. If no weekday match, maybe fallback to 'Rest'
-    for (final day in plan.days) {
+    for (final day in days) {
       if (day.dayId?.toLowerCase() == 'rest') {
         return day;
       }

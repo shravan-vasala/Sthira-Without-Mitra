@@ -7,6 +7,8 @@ import '../../../providers/app_providers.dart';
 import '../../../providers/credential_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class ConnectPage extends ConsumerStatefulWidget {
   const ConnectPage({super.key});
@@ -25,7 +27,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage>
     super.initState();
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Motion.deliberate,
     );
     _staggerController.forward();
     _checkHealthStatus();
@@ -60,11 +62,11 @@ class _ConnectPageState extends ConsumerState<ConnectPage>
           builder: (context, animChild) {
             final slide = CurvedAnimation(
               parent: _staggerController,
-              curve: Interval(start, end, curve: Curves.easeOutCubic),
+              curve: Interval(start, end, curve: Motion.enter),
             ).value;
             final fade = CurvedAnimation(
               parent: _staggerController,
-              curve: Interval(start, end - 0.2, curve: Curves.easeIn),
+              curve: Interval(start, end - 0.2, curve: Motion.exit),
             ).value;
             return Opacity(
               opacity: fade,
@@ -254,9 +256,9 @@ class _IntegrationRow extends StatelessWidget {
             AnimatedSwitcher(
               duration: disableAnim
                   ? Duration.zero
-                  : const Duration(milliseconds: 400),
-              switchInCurve: Curves.easeOutBack,
-              switchOutCurve: Curves.easeIn,
+                  : const Motion.deliberate,
+              switchInCurve: Motion.enter,
+              switchOutCurve: Motion.exit,
               transitionBuilder: (child, animation) {
                 if (disableAnim) return child;
                 return FadeTransition(

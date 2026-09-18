@@ -7,6 +7,8 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class FriendStatusCard extends ConsumerWidget {
   final Friend friend;
@@ -346,8 +348,8 @@ class _StatBlock extends StatelessWidget {
         else
           TweenAnimationBuilder<int>(
             tween: IntTween(begin: 0, end: rawValue!),
-            duration: const Duration(milliseconds: 1000),
-            curve: Curves.easeOutQuart,
+            duration: const Motion.deliberate,
+            curve: Motion.enter,
             builder: (context, val, child) {
               final displayString = useDecimalFormat
                   ? NumberFormat.decimalPattern().format(val)
@@ -373,8 +375,8 @@ class _StatBlock extends StatelessWidget {
             height: 4,
             child: TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: progress!.clamp(0.0, 1.0)),
-              duration: const Duration(milliseconds: 1200),
-              curve: Curves.easeOutCubic,
+              duration: const Motion.deliberate,
+              curve: Motion.enter,
               builder: (context, val, child) {
                 return LinearProgressIndicator(
                   value: val,

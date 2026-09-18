@@ -1,10 +1,14 @@
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 import 'package:trufit_bodamma/theme/app_colors.dart';
 import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../widgets/app_text_field.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class AboutYouPage extends StatefulWidget {
   final TextEditingController nameController;
@@ -48,7 +52,7 @@ class _AboutYouPageState extends State<AboutYouPage>
     super.initState();
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Motion.deliberate,
     );
     _staggerController.forward();
 
@@ -126,11 +130,11 @@ class _AboutYouPageState extends State<AboutYouPage>
       builder: (context, animChild) {
         final slide = CurvedAnimation(
           parent: _staggerController,
-          curve: Interval(start, end, curve: Curves.easeOutCubic),
+          curve: Interval(start, end, curve: Motion.enter),
         ).value;
         final fade = CurvedAnimation(
           parent: _staggerController,
-          curve: Interval(start, end - 0.2, curve: Curves.easeIn),
+          curve: Interval(start, end - 0.2, curve: Motion.exit),
         ).value;
         return Opacity(
           opacity: fade,

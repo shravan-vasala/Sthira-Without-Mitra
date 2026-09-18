@@ -5,6 +5,8 @@ import '../../../theme/app_colors.dart';
 import '../../../providers/app_providers.dart';
 import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class JourneyStatsStrip extends ConsumerWidget {
   const JourneyStatsStrip({super.key});
@@ -163,7 +165,7 @@ class _StatCard extends StatelessWidget {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final duration = disableAnimations
         ? Duration.zero
-        : const Duration(milliseconds: 1200);
+        : const Motion.deliberate;
 
     return Container(
       padding: const EdgeInsets.all(Spacing.cardPadTight),
@@ -191,7 +193,7 @@ class _StatCard extends StatelessWidget {
               TweenAnimationBuilder<int>(
                 tween: IntTween(begin: 0, end: value),
                 duration: duration,
-                curve: Curves.easeOutExpo,
+                curve: Motion.enter,
                 builder: (context, val, _) {
                   return Text(
                     val.toString(),

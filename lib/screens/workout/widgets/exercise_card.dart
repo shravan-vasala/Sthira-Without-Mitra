@@ -14,6 +14,8 @@ import '../log_data_dialog.dart';
 import '../../../utils/format_units.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../../theme/app_spacing.dart';
+import '../../../theme/app_motion.dart';
+
 
 class ExerciseCard extends ConsumerWidget {
   const ExerciseCard({
@@ -310,7 +312,7 @@ class ExerciseCard extends ConsumerWidget {
                       height: 48,
                       child: Center(
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                          duration: const Motion.standard,
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
@@ -324,8 +326,8 @@ class ExerciseCard extends ConsumerWidget {
                           child: isCompleted
                               ? TweenAnimationBuilder<double>(
                                   tween: Tween<double>(begin: 0, end: 1),
-                                  duration: const Duration(milliseconds: 400),
-                                  curve: Curves.elasticOut,
+                                  duration: const Motion.deliberate,
+                                  curve: Motion.enter,
                                   builder: (context, scale, child) {
                                     return Transform.scale(
                                       scale: scale,

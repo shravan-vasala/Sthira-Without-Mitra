@@ -13,6 +13,8 @@ import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/surface_card.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class TrophyRoomCard extends ConsumerWidget {
   const TrophyRoomCard({super.key});
@@ -52,8 +54,8 @@ class TrophyRoomCard extends ConsumerWidget {
             tween: IntTween(begin: 0, end: unlocked),
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
-                : const Duration(milliseconds: 600),
-            curve: Curves.easeOutExpo,
+                : const Motion.deliberate,
+            curve: Motion.enter,
             builder: (context, val, child) {
               return Text(
                 'TROPHY ROOM ($val/${badges.length})',
@@ -125,7 +127,7 @@ class _BadgeItem extends StatelessWidget {
                     ),
                   )
                   .animate(target: (isUnlocked && !disableAnimations) ? 1 : 0)
-                  .shimmer(duration: 600.ms, color: Colors.white24),
+                  .shimmer(duration: Motion.deliberate, color: Colors.white24),
 
               const SizedBox(height: 32),
 
@@ -301,8 +303,8 @@ class _BadgeItem extends StatelessWidget {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     if (isUnlocked && !disableAnimations) {
       tile = tile.animate().shimmer(
-        delay: 200.ms,
-        duration: 800.ms,
+        delay: Motion.standard,
+        duration: Motion.deliberate,
         color: Colors.white.withValues(alpha: 0.2),
       );
     }

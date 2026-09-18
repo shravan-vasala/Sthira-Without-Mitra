@@ -18,6 +18,7 @@ import '../../providers/app_providers.dart';
 import '../../providers/badge_engine_provider.dart';
 import '../../widgets/surface_card.dart';
 import '../profile/manage_habits_screen.dart';
+import 'widgets/day_feeling_card.dart';
 import 'widgets/week_calendar_strip.dart';
 import 'widgets/meals_card.dart';
 import 'widgets/habits_card.dart';
@@ -25,6 +26,8 @@ import 'widgets/daily_progress_grid.dart';
 import 'widgets/coach_notes_card.dart';
 import 'widgets/daily_insight_card.dart';
 import 'widgets/day_complete_sheet.dart';
+import '../../theme/app_motion.dart';
+
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -214,6 +217,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             index: 6,
                             child: CoachNotesCard(),
                           ),
+
+                        const SizedBox(height: Spacing.section),
+
+                        // 8. Day Feeling Reflection
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final log = ref.watch(dailyLogProvider);
+                            return StaggeredFadeIn(
+                              key: const ValueKey('day_feeling_card'),
+                              index: 7,
+                              child: DayFeelingCard(
+                                dateStr: log.date,
+                                initialFeeling: log.dayFeeling,
+                                initialNote: log.dayNote,
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -256,12 +277,12 @@ class _StaggeredFadeInState extends State<StaggeredFadeIn> {
         ? widget.child
         : widget.child
               .animate(delay: (widget.index * 60).ms)
-              .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+              .fadeIn(duration: Motion.deliberate, curve: Motion.enter)
               .slideY(
                 begin: 0.08,
                 end: 0,
-                duration: 400.ms,
-                curve: Curves.easeOut,
+                duration: Motion.deliberate,
+                curve: Motion.enter,
               );
   }
 }
@@ -588,6 +609,69 @@ class _WorkoutsSection extends ConsumerWidget {
               : null,
         ),
         const SizedBox(height: Spacing.stack),
+        if (phaseProgress.isPhaseComplete)
+          Container(
+            margin: const EdgeInsets.only(bottom: Spacing.stack, left: Spacing.screen, right: Spacing.screen),
+            padding: const EdgeInsets.all(Spacing.major),
+            decoration: BoxDecoration(
+              color: context.colors.card,
+              borderRadius: BorderRadius.circular(Radii.card),
+              boxShadow: [
+                BoxShadow(
+                  color: context.colors.primary.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "You've completed your ${phaseProgress.totalWeeks}-week journey.",
+                  style: context.text.cardTitle.copyWith(color: context.colors.textDark),
+                ),
+                const SizedBox(height: Spacing.stack),
+                Text(
+                  "It takes steady dedication to reach the end of a protocol. Take a moment to acknowledge your consistency.",
+                  style: context.text.body.copyWith(color: context.colors.textMedium),
+                ),
+                const SizedBox(height: Spacing.block),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: context.colors.primary,
+                          side: BorderSide(color: context.colors.primary.withValues(alpha: 0.3)),
+                        ),
+                        onPressed: () {
+                          final profile = ref.read(profileProvider);
+                          ref.read(profileProvider.notifier).updateProfile(
+                            profile.copyWith(planStartDate: DateTime.now()),
+                          );
+                        },
+                        child: const Text('Repeat Plan'),
+                      ),
+                    ),
+                    const SizedBox(width: Spacing.stack),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                           backgroundColor: context.colors.primaryDark,
+                           foregroundColor: context.colors.white,
+                        ),
+                        onPressed: () {
+                          context.push('/profile/manage-plans');
+                        },
+                        child: const Text('Start New'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         Column(children: cards),
       ],
     );

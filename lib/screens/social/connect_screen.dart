@@ -13,6 +13,8 @@ import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/setup_sheets.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../theme/layout_insets.dart';
+import '../../theme/app_motion.dart';
+
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -192,18 +194,18 @@ class _MyIdTabState extends ConsumerState<_MyIdTab> {
                       .animate(target: _copied ? 1 : 0)
                       .scaleXY(
                         end: 0.95,
-                        duration: 150.ms,
-                        curve: Curves.easeOut,
+                        duration: Motion.instant,
+                        curve: Motion.enter,
                       )
                       .then()
                       .scaleXY(
                         end: 1.0,
-                        duration: 250.ms,
-                        curve: Curves.easeOutBack,
+                        duration: Motion.standard,
+                        curve: Motion.enter,
                       )
                       .tint(
                         color: context.colors.primary.withValues(alpha: 0.1),
-                        duration: 200.ms,
+                        duration: Motion.standard,
                       ),
             ),
           ),

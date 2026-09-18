@@ -11,6 +11,8 @@ import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../theme/layout_insets.dart';
+import '../../theme/app_motion.dart';
+
 
 class SharePreviewSheet extends ConsumerStatefulWidget {
   const SharePreviewSheet({super.key});
@@ -139,8 +141,8 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.fastOutSlowIn,
+                duration: const Motion.standard,
+                curve: Motion.enter,
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height * 0.45,
                 ),
@@ -191,7 +193,7 @@ class _FormatChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Motion.standard,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : context.colors.surface,

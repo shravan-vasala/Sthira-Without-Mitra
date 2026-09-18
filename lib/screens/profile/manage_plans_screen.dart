@@ -733,83 +733,157 @@ class _PlanEditorState extends State<_PlanEditor> {
       final decoded = jsonDecode(_controller.text) as Map<String, dynamic>;
       final newPlanName = decoded['planName']?.toString();
 
-      if (newPlanName != null && newPlanName != _selectedKey) {
-        final confirmRename = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Rename Plan?'),
-            content: Text(
-              'You changed the plan name from "$_selectedKey" to "$newPlanName". Do you want to save it as a new plan or rename it?\n\n(Renaming will delete "$_selectedKey")',
+      if (newPlanName == null) {
+        throw const FormatException('Missing planName');
+      }
+
+      if (decoded.containsKey('durationWeeks') && decoded.containsKey('weeks')) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Warning: Plan contains both "weeks" and "durationWeeks". "durationWeeks" will be ignored.'),
+              backgroundColor: context.colors.orange,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, null),
-                child: const Text('Cancel'),
+          );
+        }
+      }
+
+      final allKeys = widget.getKeys();
+
+      if (newPlanName != _selectedKey) {
+        if (allKeys.contains(newPlanName)) {
+          final action = await showDialog<String>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Plan Already Exists'),
+              content: Text(
+                'A plan named "$newPlanName" already exists. Do you want to replace it and delete your existing "$newPlanName" plan?',
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Save as New'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Rename'),
-              ),
-            ],
-          ),
-        );
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, 'cancel'),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, 'rename_current'),
+                  child: const Text('Rename (Delete current)'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: context.colors.red),
+                  onPressed: () => Navigator.pop(ctx, 'replace'),
+                  child: const Text('Replace existing'),
+                ),
+              ],
+            ),
+          );
 
-        if (confirmRename == null) return;
-        if (!mounted) return;
+          if (action == null || action == 'cancel') return;
+          if (!mounted) return;
 
-        if (confirmRename == true) {
-          // Rename logic
-          if (widget.type == 'workout') {
-            final repo = ProviderScope.containerOf(
-              context,
-            ).read(workoutRepoProvider);
-            final profileNotifier = ProviderScope.containerOf(
-              context,
-            ).read(profileProvider.notifier);
-            final profile = ProviderScope.containerOf(
-              context,
-            ).read(profileProvider);
+          if (action == 'rename_current') {
+            if (widget.type == 'workout') {
+              final repo = ProviderScope.containerOf(context).read(workoutRepoProvider);
+              final profileNotifier = ProviderScope.containerOf(context).read(profileProvider.notifier);
+              final profile = ProviderScope.containerOf(context).read(profileProvider);
 
-            await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
+              await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
 
-            if (profile.activeWorkoutPlan == _selectedKey) {
-              await profileNotifier.updateProfile(
-                profile.copyWith(activeWorkoutPlan: newPlanName),
-              );
+              if (profile.activeWorkoutPlan == _selectedKey) {
+                await profileNotifier.updateProfile(
+                  profile.copyWith(activeWorkoutPlan: newPlanName),
+                );
+              }
+            } else if (widget.type == 'meal') {
+              final repo = ProviderScope.containerOf(context).read(mealRepoProvider);
+              final profileNotifier = ProviderScope.containerOf(context).read(profileProvider.notifier);
+              final profile = ProviderScope.containerOf(context).read(profileProvider);
+
+              await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
+
+              if (profile.activeMealPlan == _selectedKey) {
+                await profileNotifier.updateProfile(
+                  profile.copyWith(activeMealPlan: newPlanName),
+                );
+              }
             }
-          } else if (widget.type == 'meal') {
-            final repo = ProviderScope.containerOf(
-              context,
-            ).read(mealRepoProvider);
-            final profileNotifier = ProviderScope.containerOf(
-              context,
-            ).read(profileProvider.notifier);
-            final profile = ProviderScope.containerOf(
-              context,
-            ).read(profileProvider);
 
-            await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
-
-            if (profile.activeMealPlan == _selectedKey) {
-              await profileNotifier.updateProfile(
-                profile.copyWith(activeMealPlan: newPlanName),
-              );
-            }
+            setState(() {
+              _selectedKey = newPlanName;
+            });
+          } else if (action == 'replace') {
+            await widget.saveJson(newPlanName, _controller.text);
+            setState(() {
+              _selectedKey = newPlanName;
+            });
           }
-
-          setState(() {
-            _selectedKey = newPlanName;
-          });
         } else {
-          // Save as new
-          await widget.saveJson(newPlanName, _controller.text);
-          setState(() {
-            _selectedKey = newPlanName;
-          });
+          final confirmRename = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Rename Plan?'),
+              content: Text(
+                'You changed the plan name from "$_selectedKey" to "$newPlanName". Do you want to save it as a new plan or rename it?\n\n(Renaming will delete "$_selectedKey")',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, null),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Save as New'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Rename'),
+                ),
+              ],
+            ),
+          );
+
+          if (confirmRename == null) return;
+          if (!mounted) return;
+
+          if (confirmRename == true) {
+            // Rename logic
+            if (widget.type == 'workout') {
+              final repo = ProviderScope.containerOf(context).read(workoutRepoProvider);
+              final profileNotifier = ProviderScope.containerOf(context).read(profileProvider.notifier);
+              final profile = ProviderScope.containerOf(context).read(profileProvider);
+
+              await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
+
+              if (profile.activeWorkoutPlan == _selectedKey) {
+                await profileNotifier.updateProfile(
+                  profile.copyWith(activeWorkoutPlan: newPlanName),
+                );
+              }
+            } else if (widget.type == 'meal') {
+              final repo = ProviderScope.containerOf(context).read(mealRepoProvider);
+              final profileNotifier = ProviderScope.containerOf(context).read(profileProvider.notifier);
+              final profile = ProviderScope.containerOf(context).read(profileProvider);
+
+              await repo.renamePlan(_selectedKey!, newPlanName, _controller.text);
+
+              if (profile.activeMealPlan == _selectedKey) {
+                await profileNotifier.updateProfile(
+                  profile.copyWith(activeMealPlan: newPlanName),
+                );
+              }
+            }
+
+            setState(() {
+              _selectedKey = newPlanName;
+            });
+          } else {
+            // Save as new
+            await widget.saveJson(newPlanName, _controller.text);
+            setState(() {
+              _selectedKey = newPlanName;
+            });
+          }
         }
       } else {
         await widget.saveJson(_selectedKey!, _controller.text);

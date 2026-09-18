@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../theme/app_motion.dart';
+
 
 class PhotoItem {
   final String path;
@@ -275,7 +277,7 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
     _animationController =
         AnimationController(
           vsync: this,
-          duration: const Duration(milliseconds: 200),
+          duration: const Motion.standard,
         )..addListener(() {
           if (_animation != null) {
             _transformationController.value = _animation!.value;
@@ -324,7 +326,7 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
     _animation = Matrix4Tween(
       begin: _transformationController.value,
       end: endMatrix,
-    ).animate(CurveTween(curve: Curves.easeOut).animate(_animationController));
+    ).animate(CurveTween(curve: Motion.enter).animate(_animationController));
 
     _animationController.forward(from: 0);
   }

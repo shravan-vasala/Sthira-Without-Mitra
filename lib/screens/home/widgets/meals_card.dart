@@ -14,6 +14,8 @@ import '../../../providers/app_providers.dart';
 import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import 'photo_calorie_scanner_sheet.dart';
+import '../../../theme/app_motion.dart';
+
 
 class MealsCard extends ConsumerWidget {
   const MealsCard({super.key});
@@ -140,8 +142,8 @@ class MealsCard extends ConsumerWidget {
                     tween: IntTween(begin: 0, end: completedCal),
                     duration: MediaQuery.disableAnimationsOf(context)
                         ? Duration.zero
-                        : const Duration(milliseconds: 1400),
-                    curve: Curves.easeOutQuart,
+                        : const Motion.deliberate,
+                    curve: Motion.enter,
                     builder: (context, val, child) {
                       return Text(
                         '$completedMeals/$totalMeals meals  ·  $val/$totalCal kcal',
@@ -222,8 +224,8 @@ class _MacroPill extends StatelessWidget {
         tween: Tween<double>(begin: 0, end: value),
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
-            : const Duration(milliseconds: 1400),
-        curve: Curves.easeOutQuart,
+            : const Motion.deliberate,
+        curve: Motion.enter,
         builder: (context, val, child) {
           return Text(
             '$label: ${val.toStringAsFixed(0)}g',

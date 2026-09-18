@@ -7,6 +7,8 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_spacing.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class ActivityHeatmap extends ConsumerStatefulWidget {
   const ActivityHeatmap({super.key});
@@ -49,8 +51,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
           } else {
             Scrollable.ensureVisible(
               monthKey.currentContext!,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeOutCubic,
+              duration: const Motion.deliberate,
+              curve: Motion.enter,
             );
           }
           _hasScrolledInitially = true;
@@ -62,8 +64,8 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
       } else {
         _scrollController.animateTo(
           0,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOutCubic,
+          duration: const Motion.deliberate,
+          curve: Motion.enter,
         );
       }
     }

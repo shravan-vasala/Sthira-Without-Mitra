@@ -6,6 +6,8 @@ import '../../../utils/target_calculator.dart';
 import '../../../widgets/section_header.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class YourPlanPage extends StatefulWidget {
   final double initialCalories;
@@ -45,7 +47,7 @@ class _YourPlanPageState extends State<YourPlanPage>
     _currentCalories = widget.initialCalories;
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Motion.deliberate,
     );
     _staggerController.forward();
     _updateMacroPreview();
@@ -120,11 +122,11 @@ class _YourPlanPageState extends State<YourPlanPage>
           builder: (context, animChild) {
             final slide = CurvedAnimation(
               parent: _staggerController,
-              curve: Interval(start, end, curve: Curves.easeOutCubic),
+              curve: Interval(start, end, curve: Motion.enter),
             ).value;
             final fade = CurvedAnimation(
               parent: _staggerController,
-              curve: Interval(start, end - 0.2, curve: Curves.easeIn),
+              curve: Interval(start, end - 0.2, curve: Motion.exit),
             ).value;
             return Opacity(
               opacity: fade,
@@ -338,8 +340,8 @@ class _HabitTile extends StatelessWidget {
     final disableAnim = MediaQuery.disableAnimationsOf(context);
 
     Widget tile = AnimatedContainer(
-      duration: disableAnim ? Duration.zero : const Duration(milliseconds: 200),
-      curve: Curves.easeOutCubic,
+      duration: disableAnim ? Duration.zero : const Motion.standard,
+      curve: Motion.enter,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colors.card,
@@ -388,18 +390,18 @@ class _HabitTile extends StatelessWidget {
           .scale(
             begin: const Offset(1, 1),
             end: const Offset(0.97, 0.97),
-            duration: 100.ms,
-            curve: Curves.easeOutCubic,
+            duration: Motion.instant,
+            curve: Motion.enter,
           )
           .then()
           .scale(
             begin: const Offset(0.97, 0.97),
             end: const Offset(1, 1),
-            duration: 200.ms,
-            curve: Curves.easeOutBack,
+            duration: Motion.standard,
+            curve: Motion.enter,
           )
           .shimmer(
-            duration: 500.ms,
+            duration: Motion.deliberate,
             color: context.colors.surface.withValues(alpha: 0.2),
           );
     }

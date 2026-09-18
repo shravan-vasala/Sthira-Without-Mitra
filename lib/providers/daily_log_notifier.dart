@@ -222,7 +222,6 @@ class DailyLogNotifier extends Notifier<DailyLog> {
           .updateProfile(
             profile.copyWith(
               planStartDate: DateTime(now.year, now.month, now.day),
-              currentPhaseWeek: 1,
             ),
           );
     }

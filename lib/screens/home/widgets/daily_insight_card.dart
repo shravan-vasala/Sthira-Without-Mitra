@@ -7,6 +7,8 @@ import '../../../providers/insights_provider.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class DailyInsightCard extends ConsumerWidget {
   const DailyInsightCard({super.key});
@@ -83,7 +85,7 @@ class DailyInsightCard extends ConsumerWidget {
           ),
         )
         .animate()
-        .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-        .slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOut);
+        .fadeIn(duration: Motion.deliberate, curve: Motion.enter)
+        .slideY(begin: 0.05, end: 0, duration: Motion.deliberate, curve: Motion.enter);
   }
 }

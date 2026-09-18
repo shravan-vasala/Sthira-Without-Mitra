@@ -2,6 +2,8 @@ import 'package:trufit_bodamma/theme/app_typography.dart';
 import 'package:trufit_bodamma/theme/app_colors.dart';
 import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
+import '../../../theme/app_motion.dart';
+
 
 
 class SthiraAuraBackground extends StatelessWidget {
@@ -32,8 +34,8 @@ class SthiraAuraBackground extends StatelessWidget {
       child: Stack(
         children: [
           AnimatedPositioned(
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeInOut,
+            duration: const Motion.deliberate,
+            curve: Motion.enter,
             top: currentPage == 0 ? -150 : (currentPage == 1 ? -50 : (currentPage == 2 ? 100 : -100)),
             right: currentPage == 0 ? -50 : (currentPage == 1 ? 150 : (currentPage == 2 ? -100 : 50)),
             child: Container(

@@ -15,6 +15,8 @@ import 'daily_score_sheet.dart';
 import '../../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../../widgets/section_header.dart';
+import '../../../theme/app_motion.dart';
+
 
 /// Activity flags for each day in a week (keyed by yyyy-MM-dd).
 /// Rebuilds when selected-day logs/habits/meals or exercise logs change, then
@@ -104,8 +106,8 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
         if ((currentPage - targetPage).abs() > 0.5) {
           _pageController.animateToPage(
             targetPage,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
+            duration: const Motion.standard,
+            curve: Motion.enter,
           );
         }
       }
@@ -169,8 +171,8 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     visualDensity: VisualDensity.compact,
                     onPressed: () {
                       _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
+                        duration: const Motion.standard,
+                        curve: Motion.enter,
                       );
                     },
                     icon: Container(
@@ -192,8 +194,8 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     visualDensity: VisualDensity.compact,
                     onPressed: () {
                       _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
+                        duration: const Motion.standard,
+                        curve: Motion.enter,
                       );
                     },
                     icon: Container(
@@ -313,14 +315,14 @@ class _DayCircleState extends ConsumerState<_DayCircle>
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Motion.standard,
     );
     _scaleAnim =
         TweenSequence<double>([
           TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 30),
           TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 70),
         ]).animate(
-          CurvedAnimation(parent: _pulseController, curve: Curves.easeOutBack),
+          CurvedAnimation(parent: _pulseController, curve: Motion.enter),
         );
   }
 
@@ -405,7 +407,7 @@ class _DayCircleState extends ConsumerState<_DayCircle>
             ScaleTransition(
               scale: _scaleAnim,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+                duration: const Motion.standard,
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
@@ -573,8 +575,8 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
                 tween: IntTween(begin: 0, end: isFuture ? 0 : score),
                 duration: MediaQuery.disableAnimationsOf(context)
                     ? Duration.zero
-                    : const Duration(milliseconds: 1500),
-                curve: Curves.easeOutExpo,
+                    : const Motion.deliberate,
+                curve: Motion.enter,
                 builder: (context, value, child) {
                   return Text(
                     isFuture ? '--' : value.toString(),

@@ -1,4 +1,6 @@
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 import 'package:trufit_bodamma/theme/app_colors.dart';
 import 'package:trufit_bodamma/theme/app_spacing.dart';
 // TODO: Flagged for relocation! This file currently lives in home/widgets/
@@ -14,6 +16,8 @@ import '../../../widgets/primary_button.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/ai_client.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class AIMealSuggestionCard extends ConsumerStatefulWidget {
   final int remainingCalories;
@@ -233,7 +237,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
-                    duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1200.ms,
+                    duration: MediaQuery.disableAnimationsOf(context) ? Motion.instant : Motion.deliberate,
                     color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 8),
@@ -245,7 +249,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
-                    duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1200.ms,
+                    duration: MediaQuery.disableAnimationsOf(context) ? Motion.instant : Motion.deliberate,
                     color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                   const SizedBox(height: 8),
@@ -257,7 +261,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
-                    duration: MediaQuery.disableAnimationsOf(context) ? 0.ms : 1200.ms,
+                    duration: MediaQuery.disableAnimationsOf(context) ? Motion.instant : Motion.deliberate,
                     color: context.colors.primary.withValues(alpha: 0.4),
                   ),
                 ],
@@ -273,7 +277,7 @@ class _AIMealSuggestionCardState extends ConsumerState<AIMealSuggestionCard> {
                     Text(
                       '▍',
                       style: context.text.body.copyWith(color: context.colors.primary),
-                    ).animate(onPlay: (c) => c.repeat()).fade(duration: 400.ms),
+                    ).animate(onPlay: (c) => c.repeat()).fade(duration: Motion.deliberate),
                 ]
               ),
               const SizedBox(height: 16),

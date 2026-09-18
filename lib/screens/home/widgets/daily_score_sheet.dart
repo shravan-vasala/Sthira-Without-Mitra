@@ -9,6 +9,8 @@ import '../../../widgets/app_bottom_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import '../../../widgets/section_header.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class DailyScoreSheet extends ConsumerStatefulWidget {
   const DailyScoreSheet({super.key});
@@ -59,8 +61,8 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               ),
               duration: MediaQuery.disableAnimationsOf(context)
                   ? Duration.zero
-                  : const Duration(milliseconds: 1200),
-              curve: Curves.easeOutCubic,
+                  : const Motion.deliberate,
+              curve: Motion.enter,
               builder: (context, value, child) {
                 final intScore = value.round();
 
@@ -135,7 +137,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                           ),
                         ),
                     ],
-                  ).animate().fade(delay: 400.ms),
+                  ).animate().fade(delay: Motion.deliberate),
                   const SizedBox(height: 24),
                 ],
               );
@@ -161,7 +163,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   onTap: scoreData.remainingLabels.contains('habits')
                       ? () => Navigator.pop(context)
                       : null,
-                ).animate().fade(delay: 100.ms).slideX(begin: 0.05),
+                ).animate().fade(delay: Motion.instant).slideX(begin: 0.05),
                 const SizedBox(height: 4),
                 _AnimatedProgressBarRow(
                   label: 'Workouts',
@@ -179,7 +181,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                           context.go('/workout');
                         }
                       : null,
-                ).animate().fade(delay: 180.ms).slideX(begin: 0.05),
+                ).animate().fade(delay: Motion.standard).slideX(begin: 0.05),
                 const SizedBox(height: 4),
                 _AnimatedProgressBarRow(
                   label: 'Meals',
@@ -190,7 +192,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   onTap: scoreData.remainingLabels.contains('meals')
                       ? () => Navigator.pop(context)
                       : null,
-                ).animate().fade(delay: 260.ms).slideX(begin: 0.05),
+                ).animate().fade(delay: Motion.standard).slideX(begin: 0.05),
               ],
             ),
           ),
@@ -224,7 +226,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   ),
                 ],
               ),
-            ).animate().fade(delay: 340.ms),
+            ).animate().fade(delay: Motion.deliberate),
           ]
           // 2.4 Perfect day state (retained)
           else if (scoreData.remainingLabels.isEmpty &&
@@ -255,7 +257,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
                   ),
                 ],
               ),
-            ).animate().fade(delay: 340.ms),
+            ).animate().fade(delay: Motion.deliberate),
           ],
 
           const SizedBox(height: 24),
@@ -442,8 +444,8 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                           ),
                           duration: MediaQuery.disableAnimationsOf(context)
                               ? Duration.zero
-                              : const Duration(milliseconds: 1000),
-                          curve: Curves.easeOutCubic,
+                              : const Motion.deliberate,
+                          curve: Motion.enter,
                           builder: (context, val, _) {
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(2),

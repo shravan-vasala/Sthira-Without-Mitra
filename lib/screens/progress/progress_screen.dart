@@ -24,6 +24,8 @@ import '../../providers/habit_providers.dart';
 import '../../models/habit.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../theme/layout_insets.dart';
+import '../../theme/app_motion.dart';
+
 
 enum MetricType {
   weight,
@@ -630,7 +632,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                     begin: profile.heroValue ?? 0,
                     end: profile.heroValue ?? 0,
                   ), // Disable 1200ms count-up
-                  duration: const Duration(milliseconds: 200),
+                  duration: const Motion.standard,
                   builder: (context, value, child) {
                     final displayValue = data.isNotEmpty && profile.heroValue != null
                         ? _formatOverviewValue(value, _selectedMetric, useKg)
@@ -869,9 +871,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             kShellScrollBottomPadding,
           ),
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 350),
-            switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
+            duration: const Motion.deliberate,
+            switchInCurve: Motion.enter,
+          switchOutCurve: Motion.exit,
           transitionBuilder: (child, animation) {
             return FadeTransition(opacity: animation, child: child);
           },
@@ -919,7 +921,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Motion.standard,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : Colors.transparent,

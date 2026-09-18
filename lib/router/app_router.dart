@@ -26,6 +26,8 @@ import '../screens/social/connect_screen.dart';
 import '../services/haptics.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../theme/layout_insets.dart';
+import '../theme/app_motion.dart';
+
 
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -563,8 +565,8 @@ class _NavBarItem extends StatelessWidget {
           child: AnimatedContainer(
             duration: disableAnimations
                 ? Duration.zero
-                : const Duration(milliseconds: 250),
-            curve: Curves.easeOutCubic,
+                : const Motion.standard,
+            curve: Motion.enter,
             padding: EdgeInsets.symmetric(
               horizontal: isSelected ? 24 : 12,
               vertical: 12,

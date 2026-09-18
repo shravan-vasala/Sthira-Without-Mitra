@@ -54,7 +54,6 @@ class UserProfile {
   final int targetCarbsG;
   final int targetFatG;
   final DateTime? planStartDate;
-  final int currentPhaseWeek;
   final bool screenTimeEnabled;
 
   UserProfile({
@@ -81,7 +80,6 @@ class UserProfile {
     this.targetCarbsG = 135,
     this.targetFatG = 40,
     this.planStartDate,
-    this.currentPhaseWeek = 1,
     this.screenTimeEnabled = false,
   }) : customHabits = customHabits ?? [],
        customMealSlots =
@@ -200,7 +198,6 @@ class UserProfile {
       planStartDate: json['planStartDate'] != null
           ? DateTime.parse(json['planStartDate'] as String)
           : null,
-      currentPhaseWeek: (json['currentPhaseWeek'] as num?)?.toInt() ?? 1,
       screenTimeEnabled: json['screenTimeEnabled'] as bool? ?? false,
     );
   }
@@ -229,7 +226,6 @@ class UserProfile {
     'targetFatG': targetFatG,
     if (planStartDate != null)
       'planStartDate': planStartDate!.toIso8601String(),
-    'currentPhaseWeek': currentPhaseWeek,
     'screenTimeEnabled': screenTimeEnabled,
   };
 
@@ -257,7 +253,6 @@ class UserProfile {
     int? targetCarbsG,
     int? targetFatG,
     DateTime? planStartDate,
-    int? currentPhaseWeek,
     bool? screenTimeEnabled,
     bool clearPhoto = false,
     bool clearPlanStart = false,
@@ -299,7 +294,6 @@ class UserProfile {
       planStartDate: clearPlanStart
           ? null
           : (planStartDate ?? this.planStartDate),
-      currentPhaseWeek: currentPhaseWeek ?? this.currentPhaseWeek,
       screenTimeEnabled: screenTimeEnabled ?? this.screenTimeEnabled,
     );
     updated.id = id;

@@ -16,6 +16,8 @@ import '../../theme/app_spacing.dart';
 import '../../utils/workout_formatting.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../theme/layout_insets.dart';
+import '../../theme/app_motion.dart';
+
 
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({
@@ -114,6 +116,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
     final isFuture = selectedDay.isAfter(today);
 
+    final phaseProgress = ref.watch(phaseProgressProvider);
+
     // Determine which sections to display
     final bool isFiltered =
         _activeSectionIndex != null &&
@@ -173,11 +177,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               ),
             TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: viewCompleted),
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutQuart,
+              duration: const Motion.deliberate,
+              curve: Motion.enter,
               builder: (context, value, child) {
+                final weekText = phaseProgress.isPhaseActive 
+                   ? 'Week ${phaseProgress.currentWeek} of ${phaseProgress.totalWeeks} • ' 
+                   : '';
                 return Text(
-                  '$value/$viewExercises exercises done',
+                  '$weekText$value/$viewExercises exercises done',
                   style: AppTheme.numeric(
                     context.text.caption.copyWith(
                       color: context.colors.textMedium,
@@ -332,12 +339,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                             : null,
                       )
                       .animate(delay: (listIndex * 100).ms)
-                      .fadeIn(duration: 400.ms, curve: Curves.easeOut)
+                      .fadeIn(duration: Motion.deliberate, curve: Motion.enter)
                       .slideY(
                         begin: 0.1,
                         end: 0,
-                        duration: 400.ms,
-                        curve: Curves.easeOutCubic,
+                        duration: Motion.deliberate,
+                        curve: Motion.enter,
                       );
                 },
               ),
@@ -488,7 +495,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     if (!isPartial) {
       await _persistWorkoutFinished(ref, dayId, status: 'completed');
     }
-    Haptics.toggle();
+    Haptics.success();
 
     final name = ref.read(profileProvider).name.trim();
     final title = isPartial
@@ -722,8 +729,8 @@ class _SectionWidgetState extends State<_SectionWidget> {
         if (_jumpKey.currentContext != null) {
           Scrollable.ensureVisible(
             _jumpKey.currentContext!,
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutCubic,
+            duration: const Motion.deliberate,
+            curve: Motion.enter,
             alignment: 0.2,
           );
         }

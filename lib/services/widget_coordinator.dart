@@ -9,6 +9,8 @@ import '../providers/app_providers.dart';
 import '../models/daily_log.dart';
 import '../models/habit.dart';
 import '../utils/workout_completion.dart';
+import '../theme/app_motion.dart';
+
 
 final widgetCoordinatorProvider = Provider<WidgetCoordinator>((ref) {
   final coordinator = WidgetCoordinator(ref);
@@ -66,7 +68,7 @@ class WidgetCoordinator {
 
   void _scheduleUpdate() {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+    _debounceTimer = Timer(const Motion.deliberate, () {
       _updateGeneration++;
       _pushSnapshot(_updateGeneration);
     });

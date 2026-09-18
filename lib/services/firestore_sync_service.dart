@@ -7,6 +7,8 @@ import 'package:isar/isar.dart';
 import '../interfaces/i_auth_service.dart';
 import '../interfaces/i_cloud_sync_service.dart';
 import '../models/sync_queue_item.dart';
+import '../theme/app_motion.dart';
+
 
 /// Handles all Firestore cloud sync operations.
 ///
@@ -60,7 +62,7 @@ class FirestoreSyncService implements ICloudSyncService {
   Future<void> pauseAndDrainSync() async {
     _isSyncPaused = true;
     while (_isFlushing) {
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Motion.instant);
     }
   }
 

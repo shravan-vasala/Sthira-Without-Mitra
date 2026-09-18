@@ -14,6 +14,7 @@ import '../../../utils/workout_completion.dart';
 import '../../../utils/meal_icons.dart';
 import '../../../models/daily_stats_snapshot.dart';
 import '../../../widgets/app_bottom_sheet.dart';
+import 'day_feeling_card.dart';
 
 class PastDaySummarySheet extends ConsumerWidget {
   final DateTime date;
@@ -258,7 +259,18 @@ class PastDaySummarySheet extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: Spacing.section),
+
+            // Day Feeling Reflection
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: DayFeelingCard(
+                dateStr: dateStr,
+                initialFeeling: dailyLog.dayFeeling,
+                initialNote: dailyLog.dayNote,
+              ),
+            ),
+            const SizedBox(height: Spacing.section),
 
             // Metrics 2x2 Grid
             Padding(

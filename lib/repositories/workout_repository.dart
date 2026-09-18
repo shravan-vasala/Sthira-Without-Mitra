@@ -129,12 +129,59 @@ class WorkoutRepository {
     }
 
     final days = map['days'];
-    if (days is! List) {
+    final weeks = map['weeks'];
+    
+    if (days == null && weeks == null) {
+      throw const FormatException('Must contain either "days" or "weeks"');
+    }
+    
+    if (days != null && days is! List) {
       throw const FormatException('"days" must be an array');
     }
 
-    for (int i = 0; i < days.length; i++) {
-      final day = days[i];
+    if (weeks != null) {
+      if (weeks is! List) {
+        throw const FormatException('"weeks" must be an array');
+      }
+      if (weeks.isEmpty) {
+        throw const FormatException('"weeks" cannot be empty');
+      }
+      
+      int expectedWeekNumber = 1;
+      for (int i = 0; i < weeks.length; i++) {
+        final w = weeks[i];
+        if (w is! Map<String, dynamic>) {
+          throw FormatException('Week at index $i is not an object');
+        }
+        
+        final wn = w['weekNumber'];
+        if (wn != null) {
+           if (wn != expectedWeekNumber) {
+             throw FormatException('Expected weekNumber $expectedWeekNumber but got $wn');
+           }
+        } else {
+           w['weekNumber'] = expectedWeekNumber;
+        }
+        expectedWeekNumber++;
+        
+        final weekDays = w['days'];
+        if (weekDays == null || weekDays is! List) {
+           throw FormatException('Week ${w['weekNumber']} must have a "days" array');
+        }
+      }
+    }
+
+    // Validation for days structure - we'll collect all days from weeks or root days
+    final List<dynamic> allDaysToValidate = [];
+    if (days != null) allDaysToValidate.addAll(days);
+    if (weeks != null) {
+      for (final w in weeks) {
+        allDaysToValidate.addAll(w['days']);
+      }
+    }
+
+    for (int i = 0; i < allDaysToValidate.length; i++) {
+      final day = allDaysToValidate[i];
       if (day is! Map<String, dynamic>) {
         throw FormatException('Day at index $i is not an object');
       }

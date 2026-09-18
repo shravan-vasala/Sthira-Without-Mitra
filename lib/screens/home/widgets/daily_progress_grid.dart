@@ -1,4 +1,6 @@
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 import 'package:trufit_bodamma/theme/app_colors.dart';
 import 'package:trufit_bodamma/theme/app_spacing.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +21,8 @@ import '../steps_entry_dialog.dart';
 import 'sync_status_sheet.dart';
 import '../../../widgets/surface_card.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../../../theme/app_motion.dart';
+
 
 class DailyProgressGrid extends ConsumerWidget {
   const DailyProgressGrid({super.key});
@@ -304,8 +308,8 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                       if (steps != null)
                         TweenAnimationBuilder<int>(
                           tween: IntTween(begin: 0, end: steps),
-                          duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 1400),
-                          curve: Curves.easeOutQuart,
+                          duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Motion.deliberate,
+                          curve: Motion.enter,
                           builder: (context, val, child) {
                             return Text(
                               '${NumberFormat.decimalPattern().format(val)} steps',

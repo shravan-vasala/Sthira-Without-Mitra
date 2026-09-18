@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import '../theme/app_motion.dart';
+
 
 enum SurfaceCardElevation { home, nested }
 
@@ -106,8 +108,8 @@ class _SurfaceCardState extends State<SurfaceCard> {
       behavior: HitTestBehavior.opaque,
       child: AnimatedScale(
         scale: _isPressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeInOut,
+        duration: const Motion.instant,
+        curve: Motion.enter,
         child: card,
       ),
     );

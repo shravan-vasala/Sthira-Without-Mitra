@@ -60,24 +60,22 @@ class _PhotoCalorieScannerSheetState
 
   int _analysisSessionToken = 0;
   Timer? _countdownTimer;
-  int _cooldownSeconds = 0;
+  final _cooldownSeconds = ValueNotifier<int>(0);
   CancellationToken? _cancellationToken;
 
   void _startCooldown(int seconds) {
-    _cooldownSeconds = seconds;
+    _cooldownSeconds.value = seconds;
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
-      setState(() {
-        _cooldownSeconds--;
-        if (_cooldownSeconds <= 0) {
-          _cooldownSeconds = 0;
-          timer.cancel();
-        }
-      });
+      _cooldownSeconds.value--;
+      if (_cooldownSeconds.value <= 0) {
+        _cooldownSeconds.value = 0;
+        timer.cancel();
+      }
     });
   }
 
@@ -124,6 +122,7 @@ class _PhotoCalorieScannerSheetState
     _cancellationToken?.cancel();
     _countdownTimer?.cancel();
     _descriptionCtrl.dispose();
+    _cooldownSeconds.dispose();
     super.dispose();
   }
 
@@ -377,6 +376,7 @@ class _PhotoCalorieScannerSheetState
       humanMsg = 'OFFLINE_FALLBACK';
     }
 
+    Haptics.error();
     setState(() {
       _isAnalyzing = false;
       _errorMessage = humanMsg;
@@ -388,6 +388,7 @@ class _PhotoCalorieScannerSheetState
   void _showError(String message, int token) {
     if (token != _analysisSessionToken) return;
     _statusTimer?.cancel();
+    Haptics.error();
     setState(() {
       _isAnalyzing = false;
       _errorMessage = message;
@@ -912,7 +913,7 @@ class _PhotoCalorieScannerSheetState
 
       if (mounted) {
         // ignore: unawaited_futures
-        Haptics.toggle();
+        Haptics.success();
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -926,6 +927,7 @@ class _PhotoCalorieScannerSheetState
       }
     } catch (e) {
       if (mounted) {
+        Haptics.error();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Failed to save meal. Please try again.'),
@@ -1320,35 +1322,40 @@ class _PhotoCalorieScannerSheetState
                     ),
                   ],
                   const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: _cooldownSeconds > 0
-                        ? null
-                        : () {
-                            setState(() => _errorMessage = null);
-                            if (_describeMode) {
-                              _analyzeDescription();
-                            } else if (_selectedImages.isNotEmpty) {
-                              _analyzeImage(skipCache: true);
-                            } else {
-                              _pickImage(ImageSource.gallery);
-                            }
-                          },
-                    icon: _cooldownSeconds > 0
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.refresh_rounded, size: 18),
-                    label: Text(
-                      _cooldownSeconds > 0
-                          ? 'Wait $_cooldownSeconds s...'
-                          : 'Try again',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.colors.red,
-                      foregroundColor: context.colors.onPrimary,
-                    ),
+                  ValueListenableBuilder<int>(
+                    valueListenable: _cooldownSeconds,
+                    builder: (context, cooldown, child) {
+                      return ElevatedButton.icon(
+                        onPressed: cooldown > 0
+                            ? null
+                            : () {
+                                setState(() => _errorMessage = null);
+                                if (_describeMode) {
+                                  _analyzeDescription();
+                                } else if (_selectedImages.isNotEmpty) {
+                                  _analyzeImage(skipCache: true);
+                                } else {
+                                  _pickImage(ImageSource.gallery);
+                                }
+                              },
+                        icon: cooldown > 0
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.refresh_rounded, size: 18),
+                        label: Text(
+                          cooldown > 0
+                              ? 'Wait $cooldown s...'
+                              : 'Try again',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.colors.red,
+                          foregroundColor: context.colors.onPrimary,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -1519,10 +1526,52 @@ class _PhotoCalorieScannerSheetState
                               padding: const EdgeInsets.only(bottom: 12),
                               child: Container(
                                 height: 80,
+                                padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: context.colors.surfaceLight.withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            height: 16,
+                                            width: 140,
+                                            decoration: BoxDecoration(
+                                              color: context.colors.textMedium.withValues(alpha: 0.2),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            height: 12,
+                                            width: 80,
+                                            decoration: BoxDecoration(
+                                              color: context.colors.textMedium.withValues(alpha: 0.2),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 48,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color: context.colors.textMedium.withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ).animate(onPlay: MediaQuery.disableAnimationsOf(context) ? (c) => c.stop() : (c) => c.repeat()).shimmer(
+                                duration: MediaQuery.disableAnimationsOf(context) ? Motion.instant : Motion.deliberate,
+                                color: Colors.white.withValues(alpha: 0.1),
                               ),
                             ),
                         ],

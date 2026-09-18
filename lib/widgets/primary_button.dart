@@ -4,6 +4,8 @@ import '../theme/layout_insets.dart';
 import '../theme/app_typography.dart';
 
 import 'package:flutter_animate/flutter_animate.dart';
+import '../theme/app_motion.dart';
+
 
 /// Full-width primary save CTA (52dp, flat primary).
 class PrimaryButton extends StatefulWidget {
@@ -96,13 +98,13 @@ class _PrimaryButtonState extends State<PrimaryButton> {
         scale: _isPressed ? 0.97 : 1.0,
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
-            : const Duration(milliseconds: 150),
-        curve: Curves.easeInOut,
+            : const Motion.instant,
+        curve: Motion.enter,
         child: widget.isLoading && !MediaQuery.disableAnimationsOf(context)
             ? btn
                   .animate(onPlay: (c) => c.repeat())
                   .shimmer(
-                    duration: 1500.ms,
+                    duration: Motion.deliberate,
                     color: Colors.white.withValues(alpha: 0.2),
                   )
             : btn,
@@ -195,8 +197,8 @@ class _CompactButtonState extends State<CompactButton> {
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(
         scale: _isPressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInOut,
+        duration: const Motion.instant,
+        curve: Motion.enter,
         child: btn,
       ),
     );

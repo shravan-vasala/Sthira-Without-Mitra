@@ -16,6 +16,8 @@ import '../../../widgets/primary_button.dart';
 import '../../theme/app_spacing.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 import '../../theme/layout_insets.dart';
+import '../../theme/app_motion.dart';
+
 
 class WeeklySummaryScreen extends ConsumerWidget {
   const WeeklySummaryScreen({super.key});
@@ -67,13 +69,13 @@ class WeeklySummaryScreen extends ConsumerWidget {
                     dailyScores: summary.dailyScores,
                   )
                   .animate()
-                  .fade(delay: 100.ms)
+                  .fade(delay: Motion.instant)
                   .scale(begin: const Offset(0.95, 0.95)),
 
               const SizedBox(height: Spacing.major),
 
               // 3.4 Insights Strip
-              _InsightsStrip(summary: summary).animate().fade(delay: 200.ms),
+              _InsightsStrip(summary: summary).animate().fade(delay: Motion.standard),
 
               const SizedBox(height: Spacing.section),
 
@@ -81,7 +83,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
               _DailyScoresChartCard(
                 dailyScores: summary.dailyScores,
                 startOfWeek: startOfWeek,
-              ).animate().fade(delay: 300.ms).slideY(begin: 0.1),
+              ).animate().fade(delay: Motion.standard).slideY(begin: 0.1),
 
               // Secondary Habit Chart
               if (summary.habitCompletionRate > 0) ...[
@@ -90,7 +92,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
                   rates: summary.dailyHabitRates,
                   totals: summary.dailyHabitsTotal,
                   startOfWeek: startOfWeek,
-                ).animate().fade(delay: 400.ms).slideY(begin: 0.1),
+                ).animate().fade(delay: Motion.deliberate).slideY(begin: 0.1),
               ],
 
               const SizedBox(height: Spacing.section),
@@ -98,7 +100,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
               const SectionHeader(
                 'STATS OVERVIEW',
                 horizontalPadding: 0,
-              ).animate().fade(delay: 500.ms),
+              ).animate().fade(delay: Motion.deliberate),
               const SizedBox(height: Spacing.section),
 
               // 3.3 Grid Stats with Trend Deltas
@@ -183,8 +185,8 @@ class WeeklySummaryScreen extends ConsumerWidget {
                             ),
                           ),
                         ]
-                        .animate(interval: 50.ms)
-                        .fade(delay: 600.ms)
+                        .animate(interval: Motion.instant)
+                        .fade(delay: Motion.deliberate)
                         .scale(begin: const Offset(0.9, 0.9)),
               ),
               const SizedBox(height: Spacing.section),
@@ -192,7 +194,7 @@ class WeeklySummaryScreen extends ConsumerWidget {
               _WeeklyShareSection(
                 summary: summary,
                 titleText: titleText,
-              ).animate().fade(delay: 800.ms),
+              ).animate().fade(delay: Motion.deliberate),
               const SizedBox(height: Spacing.section),
             ],
           ),

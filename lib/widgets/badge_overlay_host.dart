@@ -9,6 +9,8 @@ import '../providers/badge_engine_provider.dart';
 import '../models/badge.dart';
 import '../theme/app_colors.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
+import '../theme/app_motion.dart';
+
 
 class BadgeOverlayHost extends ConsumerStatefulWidget {
   const BadgeOverlayHost({super.key});
@@ -31,13 +33,13 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
-      reverseDuration: const Duration(milliseconds: 250),
+      duration: const Motion.deliberate,
+      reverseDuration: const Motion.standard,
     );
     _slideAnimation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.elasticOut,
-      reverseCurve: Curves.easeInCubic,
+      curve: Motion.enter,
+      reverseCurve: Motion.exit,
     );
   }
 
@@ -77,7 +79,7 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
       _isShowing = false;
 
       // Wait 400ms before showing the next one
-      Future.delayed(const Duration(milliseconds: 400), () {
+      Future.delayed(const Motion.deliberate, () {
         if (mounted && ref.read(badgeUnlockEventProvider).isNotEmpty) {
           _processQueue();
         }
@@ -193,8 +195,8 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                                         )
                                         .scale(
                                           begin: const Offset(0.4, 0.4),
-                                          curve: Curves.easeOutBack,
-                                          duration: 600.ms,
+                                          curve: Motion.enter,
+                                          duration: Motion.deliberate,
                                         ),
                                   ],
                                 ),
@@ -249,8 +251,8 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
                         )
                         .shimmer(
                           duration: MediaQuery.disableAnimationsOf(context)
-                              ? 0.ms
-                              : 600.ms,
+                              ? Motion.instant
+                              : Motion.deliberate,
                           color: Colors.white.withValues(alpha: 0.3),
                         ),
               ),
