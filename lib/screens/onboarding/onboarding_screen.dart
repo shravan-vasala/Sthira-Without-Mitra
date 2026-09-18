@@ -436,6 +436,8 @@ class _NavButtons extends StatelessWidget {
                   label: _isLastPage ? 'Start my journey' : 'Next',
                 ),
               ),
+              const SizedBox(width: 16),
+              const SizedBox(width: 48), // Balancing spacer on the right
             ],
           ),
         ],
