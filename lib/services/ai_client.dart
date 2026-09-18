@@ -167,6 +167,7 @@ class AiClient {
     String? mimeType,
     required String apiKey,
     bool skipCache = false,
+    bool isAlreadyProcessed = false,
     Map<String, dynamic>? responseSchema,
     CancellationToken? cancellationToken,
     DateTime? overallDeadline,
@@ -187,23 +188,37 @@ class AiClient {
     if (imageBytesList != null && imageBytesList.isNotEmpty) {
       final prepSw = Stopwatch()..start();
       
-      final processFutures = imageBytesList.map((bytes) => 
-        ImagePreprocessor.processImage(bytes, mimeType ?? 'image/jpeg')
-      );
-      
-      final processedResults = await Future.wait(processFutures).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw AiException('Image processing took too long', cause: AiErrorCause.cancelled),
-      );
-      
-      final hashes = <String>[];
-      for (var processed in processedResults) {
-        processedImages.add(processed.$1);
-        actualMimeType = processed.$2;
-        hashes.add(processed.$3);
+      if (isAlreadyProcessed) {
+        for (var bytes in imageBytesList) {
+          processedImages.add(bytes);
+        }
+        
+        // Fast hash for cache key since we don't have ImagePreprocessor hashes
+        final b = BytesBuilder();
+        for (var bytes in imageBytesList) b.add(bytes);
+        AiProfiler().startPhase('hashMs');
+        imageContext = sha256.convert(b.toBytes()).toString();
+        AiProfiler().endPhase('hashMs');
+      } else {
+        final processFutures = imageBytesList.map((bytes) => 
+          ImagePreprocessor.processImage(bytes, mimeType ?? 'image/jpeg')
+        );
+        
+        final processedResults = await Future.wait(processFutures).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () => throw AiException('Image processing took too long', cause: AiErrorCause.cancelled),
+        );
+        
+        final hashes = <String>[];
+        for (var processed in processedResults) {
+          processedImages.add(processed.$1);
+          actualMimeType = processed.$2;
+          hashes.add(processed.$3);
+        }
+        
+        imageContext = hashes.join('_');
       }
       
-      imageContext = hashes.join('_');
       prepSw.stop();
       preprocessMs = prepSw.elapsedMilliseconds;
     }

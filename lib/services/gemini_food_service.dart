@@ -161,6 +161,7 @@ Portion estimation guidelines:
     String mimeType, [
     String? userContext,
     bool skipCache = false,
+    bool isAlreadyProcessed = false,
     CancellationToken? cancellationToken,
   ]) async {
     _ensureApiKey();
@@ -182,9 +183,9 @@ $_jsonShape
       mimeType: mimeType,
       apiKey: apiKey ?? '',
       skipCache: skipCache,
+      isAlreadyProcessed: isAlreadyProcessed,
       responseSchema: _foodAnalysisSchema,
       cancellationToken: cancellationToken,
-      overallDeadline: deadline,
     );
     return _processAiResponse(response, cancellationToken: cancellationToken);
   }

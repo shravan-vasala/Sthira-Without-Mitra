@@ -251,8 +251,8 @@ class _PhotoCalorieScannerSheetState
     AiProfiler().startPhase('pickMs');
     final picked = await _picker.pickImage(
       source: source,
-      maxWidth: 1600,
-      imageQuality: 90,
+      maxWidth: 1024,
+      imageQuality: 85,
     );
     AiProfiler().endPhase('pickMs');
     if (picked == null) return;
@@ -293,12 +293,7 @@ class _PhotoCalorieScannerSheetState
       );
       AiProfiler().endPhase('fileReadMs');
 
-      String mimeType = 'image/jpeg';
-      if (_selectedImages.first.path.toLowerCase().endsWith('.png')) {
-        mimeType = 'image/png';
-      } else if (_selectedImages.first.path.toLowerCase().endsWith('.webp')) {
-        mimeType = 'image/webp';
-      }
+      final String mimeType = 'image/jpeg';
 
       final result = await ref
           .read(geminiFoodServiceProvider)
@@ -307,6 +302,7 @@ class _PhotoCalorieScannerSheetState
             mimeType,
             _descriptionCtrl.text,
             skipCache,
+            true, // isAlreadyProcessed
             _cancellationToken,
           );
 

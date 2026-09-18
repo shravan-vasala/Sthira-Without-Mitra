@@ -7,6 +7,7 @@ abstract class IAiFoodService {
     String mimeType, [
     String? userContext,
     bool skipCache = false,
+    bool isAlreadyProcessed = false,
     CancellationToken? cancellationToken,
   ]);
 
