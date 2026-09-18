@@ -76,9 +76,17 @@ Future<Isar> setUpTestIsar() async {
     FoodSearchCacheSchema,
     FriendSchema,
     SyncQueueItemSchema,
-  ], directory: tempDir.path);
+  ], 
+    directory: tempDir.path, 
+    name: 'test_${DateTime.now().microsecondsSinceEpoch}_${tempDir.hashCode}',
+  );
 }
 
 Future<void> tearDownTestIsar(Isar isar) async {
-  await isar.close(deleteFromDisk: true);
+  // Do not use deleteFromDisk: true on Windows as it causes file-lock deadlocks
+  try {
+    await isar.close(deleteFromDisk: false);
+  } catch (e) {
+    print('Failed to close isar: $e');
+  }
 }
