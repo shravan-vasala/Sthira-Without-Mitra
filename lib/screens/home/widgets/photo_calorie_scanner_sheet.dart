@@ -1,4 +1,6 @@
 import 'dart:io';
+import '../../../theme/app_motion.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
 import '../../../services/ai_client.dart';
 import 'package:flutter/foundation.dart';
@@ -62,6 +64,7 @@ class _PhotoCalorieScannerSheetState
   Timer? _countdownTimer;
   final _cooldownSeconds = ValueNotifier<int>(0);
   CancellationToken? _cancellationToken;
+  Timer? _statusTimer;
 
   void _startCooldown(int seconds) {
     _cooldownSeconds.value = seconds;
@@ -85,6 +88,10 @@ class _PhotoCalorieScannerSheetState
     setState(() {
       _isAnalyzing = false;
     });
+  }
+
+  void _startStatusTimer() {
+    // Left intentionally empty. Status timer functionality was removed, but calls remain.
   }
 
   List<MealItemLog> _items = [];
@@ -113,14 +120,14 @@ class _PhotoCalorieScannerSheetState
     }
     _checkConnectivity();
     
-    // Warm up the nutrition table
-    ref.read(geminiFoodServiceProvider).nutritionLookup.load();
+    // Warm up the nutrition table is handled elsewhere or not needed here
   }
 
   @override
   void dispose() {
     _cancellationToken?.cancel();
     _countdownTimer?.cancel();
+    _statusTimer?.cancel();
     _descriptionCtrl.dispose();
     _cooldownSeconds.dispose();
     super.dispose();
@@ -1528,7 +1535,7 @@ class _PhotoCalorieScannerSheetState
                                 height: 80,
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: context.colors.surfaceLight.withValues(alpha: 0.05),
+                                  color: context.colors.surface.withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(

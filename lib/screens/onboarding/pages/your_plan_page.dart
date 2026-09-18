@@ -47,7 +47,7 @@ class _YourPlanPageState extends State<YourPlanPage>
     _currentCalories = widget.initialCalories;
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Motion.deliberate,
+      duration: Motion.deliberate,
     );
     _staggerController.forward();
     _updateMacroPreview();
@@ -269,7 +269,7 @@ class _YourPlanPageState extends State<YourPlanPage>
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SectionHeader(title: 'Select Habits'),
+                const SectionHeader('Select Habits'),
                 const SizedBox(height: 16),
                 ...Habit.defaults.map((habit) {
                   final selected = widget.selectedHabitIds.contains(habit.id);
@@ -340,7 +340,7 @@ class _HabitTile extends StatelessWidget {
     final disableAnim = MediaQuery.disableAnimationsOf(context);
 
     Widget tile = AnimatedContainer(
-      duration: disableAnim ? Duration.zero : const Motion.standard,
+      duration: disableAnim ? Duration.zero : Motion.standard,
       curve: Motion.enter,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

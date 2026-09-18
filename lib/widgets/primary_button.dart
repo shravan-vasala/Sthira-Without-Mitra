@@ -98,7 +98,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
         scale: _isPressed ? 0.97 : 1.0,
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
-            : const Motion.instant,
+            : Motion.instant,
         curve: Motion.enter,
         child: widget.isLoading && !MediaQuery.disableAnimationsOf(context)
             ? btn
@@ -198,7 +198,7 @@ class _CompactButtonState extends State<CompactButton> {
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(
         scale: _isPressed ? 0.95 : 1.0,
-        duration: const Motion.instant,
+        duration: Motion.instant,
         curve: Motion.enter,
         child: btn,
       ),

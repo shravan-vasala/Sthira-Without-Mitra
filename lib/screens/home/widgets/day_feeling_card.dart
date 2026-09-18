@@ -8,7 +8,7 @@ import '../../../theme/app_motion.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/haptics.dart';
 import '../../../widgets/app_text_field.dart';
-
+import '../../../models/daily_log.dart';
 class DayFeelingCard extends ConsumerStatefulWidget {
   final String dateStr;
   final String? initialFeeling;
@@ -138,8 +138,8 @@ class _DayFeelingCardState extends ConsumerState<DayFeelingCard> {
                     duration: Motion.instant,
                     height: 6,
                     margin: EdgeInsets.only(
-                      left: index == 0 ? 0 : Spacing.x4,
-                      right: index == 4 ? 0 : Spacing.x4,
+                      left: index == 0 ? 0 : Gap.x4,
+                      right: index == 4 ? 0 : Gap.x4,
                     ),
                     decoration: BoxDecoration(
                       color: isFilled ? context.colors.primary : context.colors.insetSurface,

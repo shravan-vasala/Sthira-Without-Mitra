@@ -547,7 +547,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   Widget _buildChart(
     List<ChartDataPoint> data,
     bool useKg,
-    MetricInsight profile,
+    MetricInsight insight,
+    UserProfile userProfile,
     DateTime startDate,
     DateTime endDate,
     double? targetValue,
@@ -595,10 +596,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         .toList();
 
     String? chartSubtitle;
-    if (chartDataList.isNotEmpty) {
-      final startStr = DateFormat('MMM').format(clampedStartDate);
+    if (data.isNotEmpty) {
+      final startStr = DateFormat('MMM').format(startDate);
       final endStr = DateFormat('MMM').format(endDate);
-      final startStrYr = DateFormat('MMM yy').format(clampedStartDate);
+      final startStrYr = DateFormat('MMM yy').format(startDate);
       final endStrYr = DateFormat('MMM yy').format(endDate);
 
       switch (_selectedRange) {
@@ -629,26 +630,25 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 TweenAnimationBuilder<double>(
                   key: ValueKey('$_selectedMetric-$_selectedRange'),
                   tween: Tween<double>(
-                    begin: profile.heroValue ?? 0,
-                    end: profile.heroValue ?? 0,
+                    begin: insight.heroValue ?? 0,
+                    end: insight.heroValue ?? 0,
                   ), // Disable 1200ms count-up
-                  duration: const Motion.standard,
+                  duration: Motion.standard,
                   builder: (context, value, child) {
-                    final displayValue = data.isNotEmpty && profile.heroValue != null
+                    final displayValue = data.isNotEmpty && insight.heroValue != null
                         ? _formatOverviewValue(value, _selectedMetric, useKg)
                         : '—';
                     return Text(
                       displayValue,
-                      style: context.text.h1.copyWith(
+                      style: context.text.metric.copyWith(
                         color: context.colors.textDark,
-                        fontSize: 48,
                       ),
                     );
                   },
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  profile.heroLabel,
+                  insight.heroLabel,
                   style: context.text.cardTitle.copyWith(
                     color: context.colors.textMedium,
                   ),
@@ -657,9 +657,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
           ),
           const SizedBox(height: Spacing.stack),
-          if (profile.insightText != null)
+          if (insight.insightText != null)
             Text(
-              profile.insightText!,
+              insight.insightText!,
               textAlign: TextAlign.center,
               style: context.text.body.copyWith(
                 color: context.colors.textMedium,
@@ -697,9 +697,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             child: SharedChartCard(
               metric: _getMetricSpec(_selectedMetric, useKg),
               subtitle: chartSubtitle,
-              data: chartDataList,
+              data: data,
               trendData: trendData,
-              startDate: clampedStartDate,
+              startDate: startDate,
               endDate: endDate,
               useKg: useKg,
               onToggleUnit: () {},
@@ -757,7 +757,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
         // Bottom Sesireka styled cards
         // Pass data if needed, or update _buildStatCards logic
-        _buildStatCards(data, _selectedMetric, useKg, profile as UserProfile),
+        _buildStatCards(data, _selectedMetric, useKg, userProfile),
       ],
     );
   }
@@ -871,7 +871,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             kShellScrollBottomPadding,
           ),
           child: AnimatedSwitcher(
-            duration: const Motion.deliberate,
+            duration: Motion.deliberate,
             switchInCurve: Motion.enter,
           switchOutCurve: Motion.exit,
           transitionBuilder: (child, animation) {
@@ -879,7 +879,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           },
           child: KeyedSubtree(
             key: ValueKey('$_selectedMetric-$_selectedRange'),
-            child: _buildChart(data, useKg, insight, startDate, endDate, targetValue),
+            child: _buildChart(data, useKg, insight, profile, startDate, endDate, targetValue),
           ),
         ),
         ),
@@ -921,7 +921,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Motion.standard,
+        duration: Motion.standard,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : Colors.transparent,

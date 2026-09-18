@@ -61,7 +61,7 @@ class _DailyScoreSheetState extends ConsumerState<DailyScoreSheet> {
               ),
               duration: MediaQuery.disableAnimationsOf(context)
                   ? Duration.zero
-                  : const Motion.deliberate,
+                  : Motion.deliberate,
               curve: Motion.enter,
               builder: (context, value, child) {
                 final intScore = value.round();
@@ -444,7 +444,7 @@ class _AnimatedProgressBarRow extends StatelessWidget {
                           ),
                           duration: MediaQuery.disableAnimationsOf(context)
                               ? Duration.zero
-                              : const Motion.deliberate,
+                              : Motion.deliberate,
                           curve: Motion.enter,
                           builder: (context, val, _) {
                             return ClipRRect(

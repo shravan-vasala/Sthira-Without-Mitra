@@ -124,7 +124,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (_currentPage < _totalPages - 1) {
         HapticFeedback.selectionClick();
         _pageController.nextPage(
-          duration: const Motion.deliberate,
+          duration: Motion.deliberate,
           curve: Motion.enter,
         );
       } else {
@@ -152,7 +152,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (_currentPage > 0) {
       HapticFeedback.selectionClick();
       _pageController.previousPage(
-        duration: const Motion.deliberate,
+        duration: Motion.deliberate,
         curve: Motion.enter,
       );
     }
@@ -396,7 +396,7 @@ class _NavButtons extends StatelessWidget {
               final active = index == currentPage;
               final completed = index < currentPage;
               return AnimatedContainer(
-                duration: const Motion.standard,
+                duration: Motion.standard,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 width: active ? 24 : 8,
                 height: 8,

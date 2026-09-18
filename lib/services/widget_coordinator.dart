@@ -82,7 +82,7 @@ class WidgetCoordinator {
 
   void _scheduleUpdate() {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Motion.deliberate, () {
+    _debounceTimer = Timer(Motion.deliberate, () {
       _updateGeneration++;
       _pushSnapshot(_updateGeneration);
     });

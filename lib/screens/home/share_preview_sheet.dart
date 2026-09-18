@@ -141,7 +141,7 @@ class _SharePreviewSheetState extends ConsumerState<SharePreviewSheet> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: AnimatedContainer(
-                duration: const Motion.standard,
+                duration: Motion.standard,
                 curve: Motion.enter,
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height * 0.45,
@@ -193,7 +193,7 @@ class _FormatChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Motion.standard,
+        duration: Motion.standard,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : context.colors.surface,

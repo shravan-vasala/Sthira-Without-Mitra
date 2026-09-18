@@ -96,7 +96,6 @@ class ManagePlansScreen extends ConsumerWidget {
                                   .updateProfile(
                                     profile.copyWith(
                                       clearPlanStart: true,
-                                      currentPhaseWeek: 1,
                                     ),
                                   );
                             },

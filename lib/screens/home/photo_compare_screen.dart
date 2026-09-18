@@ -376,7 +376,7 @@ class _PhotoCompareScreenState extends ConsumerState<PhotoCompareScreen> {
           setStateSheet(() => _pickerFilter = tag);
         },
         child: AnimatedContainer(
-          duration: const Motion.standard,
+          duration: Motion.standard,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? context.colors.primary : context.colors.inputFill,

@@ -285,7 +285,7 @@ class _CalorieHeader extends StatelessWidget {
                   end: eaten.toInt(),
                 ),
                 duration: shouldAnimate
-                    ? const Motion.deliberate
+                    ? Motion.deliberate
                     : Duration.zero,
                 curve: Motion.enter,
                 builder: (context, val, child) {
@@ -624,7 +624,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                                 end: 1.0,
                               ),
                               duration: shouldAnimate
-                                  ? const Motion.deliberate
+                                  ? Motion.deliberate
                                   : Duration.zero,
                               curve: Motion.enter,
                               builder: (context, val, _) {
@@ -703,7 +703,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           end: 1.0,
                         ),
                         duration: shouldAnimate
-                            ? const Motion.deliberate
+                            ? Motion.deliberate
                             : Duration.zero,
                         curve: Motion.enter,
                         builder: (context, val, child) {
@@ -722,7 +722,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
 
                 // State dependent body
                 AnimatedSwitcher(
-                  duration: const Motion.standard,
+                  duration: Motion.standard,
                   switchInCurve: Motion.enter,
                   switchOutCurve: Motion.exit,
                   child: KeyedSubtree(
@@ -1007,8 +1007,7 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSuggestions(BuildContext context, Meal planned) {

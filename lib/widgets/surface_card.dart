@@ -108,7 +108,7 @@ class _SurfaceCardState extends State<SurfaceCard> {
       behavior: HitTestBehavior.opaque,
       child: AnimatedScale(
         scale: _isPressed ? 0.97 : 1.0,
-        duration: const Motion.instant,
+        duration: Motion.instant,
         curve: Motion.enter,
         child: card,
       ),

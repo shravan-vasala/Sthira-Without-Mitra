@@ -277,7 +277,7 @@ class _ZoomablePhotoState extends ConsumerState<_ZoomablePhoto>
     _animationController =
         AnimationController(
           vsync: this,
-          duration: const Motion.standard,
+          duration: Motion.standard,
         )..addListener(() {
           if (_animation != null) {
             _transformationController.value = _animation!.value;

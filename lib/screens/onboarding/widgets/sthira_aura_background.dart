@@ -34,7 +34,7 @@ class SthiraAuraBackground extends StatelessWidget {
       child: Stack(
         children: [
           AnimatedPositioned(
-            duration: const Motion.deliberate,
+            duration: Motion.deliberate,
             curve: Motion.enter,
             top: currentPage == 0 ? -150 : (currentPage == 1 ? -50 : (currentPage == 2 ? 100 : -100)),
             right: currentPage == 0 ? -50 : (currentPage == 1 ? 150 : (currentPage == 2 ? -100 : 50)),

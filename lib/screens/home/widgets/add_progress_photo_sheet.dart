@@ -425,7 +425,7 @@ class _PoseSelectorOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Motion.standard,
+        duration: Motion.standard,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? context.colors.primary : context.colors.card,

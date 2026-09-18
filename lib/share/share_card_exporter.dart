@@ -70,7 +70,7 @@ class ShareCardExporter {
 
       // Poll until the boundary is fully painted or timeout (max 2 seconds)
       for (int i = 0; i < 40; i++) {
-        await Future.delayed(const Motion.instant);
+        await Future.delayed(Motion.instant);
         boundary =
             boundaryKey.currentContext?.findRenderObject()
                 as RenderRepaintBoundary?;

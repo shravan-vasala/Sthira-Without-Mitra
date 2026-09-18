@@ -142,7 +142,7 @@ class MealsCard extends ConsumerWidget {
                     tween: IntTween(begin: 0, end: completedCal),
                     duration: MediaQuery.disableAnimationsOf(context)
                         ? Duration.zero
-                        : const Motion.deliberate,
+                        : Motion.deliberate,
                     curve: Motion.enter,
                     builder: (context, val, child) {
                       return Text(
@@ -224,7 +224,7 @@ class _MacroPill extends StatelessWidget {
         tween: Tween<double>(begin: 0, end: value),
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
-            : const Motion.deliberate,
+            : Motion.deliberate,
         curve: Motion.enter,
         builder: (context, val, child) {
           return Text(

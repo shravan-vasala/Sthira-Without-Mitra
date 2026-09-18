@@ -163,7 +163,7 @@ class _WaterEntryDialogState extends ConsumerState<WaterEntryDialog> {
           if (hasTarget)
             TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0.0, end: progressFraction),
-              duration: const Motion.standard,
+              duration: Motion.standard,
               curve: Motion.enter,
               builder: (context, value, child) {
                 return ClipRRect(

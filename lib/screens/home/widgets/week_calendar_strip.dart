@@ -106,7 +106,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
         if ((currentPage - targetPage).abs() > 0.5) {
           _pageController.animateToPage(
             targetPage,
-            duration: const Motion.standard,
+            duration: Motion.standard,
             curve: Motion.enter,
           );
         }
@@ -171,7 +171,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     visualDensity: VisualDensity.compact,
                     onPressed: () {
                       _pageController.previousPage(
-                        duration: const Motion.standard,
+                        duration: Motion.standard,
                         curve: Motion.enter,
                       );
                     },
@@ -194,7 +194,7 @@ class _WeekCalendarStripState extends ConsumerState<WeekCalendarStrip> {
                     visualDensity: VisualDensity.compact,
                     onPressed: () {
                       _pageController.nextPage(
-                        duration: const Motion.standard,
+                        duration: Motion.standard,
                         curve: Motion.enter,
                       );
                     },
@@ -315,7 +315,7 @@ class _DayCircleState extends ConsumerState<_DayCircle>
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Motion.standard,
+      duration: Motion.standard,
     );
     _scaleAnim =
         TweenSequence<double>([
@@ -407,7 +407,7 @@ class _DayCircleState extends ConsumerState<_DayCircle>
             ScaleTransition(
               scale: _scaleAnim,
               child: AnimatedContainer(
-                duration: const Motion.standard,
+                duration: Motion.standard,
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
@@ -575,7 +575,7 @@ class _DailyScoreBadgeState extends ConsumerState<_DailyScoreBadge> {
                 tween: IntTween(begin: 0, end: isFuture ? 0 : score),
                 duration: MediaQuery.disableAnimationsOf(context)
                     ? Duration.zero
-                    : const Motion.deliberate,
+                    : Motion.deliberate,
                 curve: Motion.enter,
                 builder: (context, value, child) {
                   return Text(

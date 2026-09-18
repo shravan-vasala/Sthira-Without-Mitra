@@ -23,20 +23,31 @@ const WorkoutPlanSchema = CollectionSchema(
       type: IsarType.objectList,
       target: r'WorkoutDay',
     ),
-    r'planName': PropertySchema(
+    r'durationWeeks': PropertySchema(
       id: 1,
+      name: r'durationWeeks',
+      type: IsarType.long,
+    ),
+    r'planName': PropertySchema(
+      id: 2,
       name: r'planName',
       type: IsarType.string,
     ),
     r'seedVersion': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'seedVersion',
       type: IsarType.long,
     ),
     r'source': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'source',
       type: IsarType.string,
+    ),
+    r'weeks': PropertySchema(
+      id: 5,
+      name: r'weeks',
+      type: IsarType.objectList,
+      target: r'WorkoutWeek',
     )
   },
   estimateSize: _workoutPlanEstimateSize,
@@ -61,6 +72,7 @@ const WorkoutPlanSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {
+    r'WorkoutWeek': WorkoutWeekSchema,
     r'WorkoutDay': WorkoutDaySchema,
     r'WorkoutSection': WorkoutSectionSchema,
     r'Exercise': ExerciseSchema
@@ -87,6 +99,20 @@ int _workoutPlanEstimateSize(
   }
   bytesCount += 3 + object.planName.length * 3;
   bytesCount += 3 + object.source.length * 3;
+  {
+    final list = object.weeks;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        final offsets = allOffsets[WorkoutWeek]!;
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount +=
+              WorkoutWeekSchema.estimateSize(value, offsets, allOffsets);
+        }
+      }
+    }
+  }
   return bytesCount;
 }
 
@@ -102,9 +128,16 @@ void _workoutPlanSerialize(
     WorkoutDaySchema.serialize,
     object.days,
   );
-  writer.writeString(offsets[1], object.planName);
-  writer.writeLong(offsets[2], object.seedVersion);
-  writer.writeString(offsets[3], object.source);
+  writer.writeLong(offsets[1], object.durationWeeks);
+  writer.writeString(offsets[2], object.planName);
+  writer.writeLong(offsets[3], object.seedVersion);
+  writer.writeString(offsets[4], object.source);
+  writer.writeObjectList<WorkoutWeek>(
+    offsets[5],
+    allOffsets,
+    WorkoutWeekSchema.serialize,
+    object.weeks,
+  );
 }
 
 WorkoutPlan _workoutPlanDeserialize(
@@ -121,9 +154,16 @@ WorkoutPlan _workoutPlanDeserialize(
           WorkoutDay(),
         ) ??
         [],
-    planName: reader.readString(offsets[1]),
-    seedVersion: reader.readLongOrNull(offsets[2]),
-    source: reader.readStringOrNull(offsets[3]) ?? 'user',
+    durationWeeks: reader.readLongOrNull(offsets[1]),
+    planName: reader.readString(offsets[2]),
+    seedVersion: reader.readLongOrNull(offsets[3]),
+    source: reader.readStringOrNull(offsets[4]) ?? 'user',
+    weeks: reader.readObjectList<WorkoutWeek>(
+      offsets[5],
+      WorkoutWeekSchema.deserialize,
+      allOffsets,
+      WorkoutWeek(),
+    ),
   );
   object.id = id;
   return object;
@@ -145,11 +185,20 @@ P _workoutPlanDeserializeProp<P>(
           ) ??
           []) as P;
     case 1:
-      return (reader.readString(offset)) as P;
-    case 2:
       return (reader.readLongOrNull(offset)) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
     case 3:
+      return (reader.readLongOrNull(offset)) as P;
+    case 4:
       return (reader.readStringOrNull(offset) ?? 'user') as P;
+    case 5:
+      return (reader.readObjectList<WorkoutWeek>(
+        offset,
+        WorkoutWeekSchema.deserialize,
+        allOffsets,
+        WorkoutWeek(),
+      )) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -433,6 +482,80 @@ extension WorkoutPlanQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      durationWeeksIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'durationWeeks',
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      durationWeeksIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'durationWeeks',
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      durationWeeksEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'durationWeeks',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      durationWeeksGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'durationWeeks',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      durationWeeksLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'durationWeeks',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      durationWeeksBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'durationWeeks',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
@@ -831,6 +954,111 @@ extension WorkoutPlanQueryFilter
       ));
     });
   }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition> weeksIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'weeks',
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      weeksIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'weeks',
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      weeksLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'weeks',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition> weeksIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'weeks',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      weeksIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'weeks',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      weeksLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'weeks',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      weeksLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'weeks',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition>
+      weeksLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'weeks',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
 }
 
 extension WorkoutPlanQueryObject
@@ -841,6 +1069,13 @@ extension WorkoutPlanQueryObject
       return query.object(q, r'days');
     });
   }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterFilterCondition> weeksElement(
+      FilterQuery<WorkoutWeek> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'weeks');
+    });
+  }
 }
 
 extension WorkoutPlanQueryLinks
@@ -848,6 +1083,19 @@ extension WorkoutPlanQueryLinks
 
 extension WorkoutPlanQuerySortBy
     on QueryBuilder<WorkoutPlan, WorkoutPlan, QSortBy> {
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterSortBy> sortByDurationWeeks() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationWeeks', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterSortBy>
+      sortByDurationWeeksDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationWeeks', Sort.desc);
+    });
+  }
+
   QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterSortBy> sortByPlanName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'planName', Sort.asc);
@@ -887,6 +1135,19 @@ extension WorkoutPlanQuerySortBy
 
 extension WorkoutPlanQuerySortThenBy
     on QueryBuilder<WorkoutPlan, WorkoutPlan, QSortThenBy> {
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterSortBy> thenByDurationWeeks() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationWeeks', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterSortBy>
+      thenByDurationWeeksDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'durationWeeks', Sort.desc);
+    });
+  }
+
   QueryBuilder<WorkoutPlan, WorkoutPlan, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -938,6 +1199,12 @@ extension WorkoutPlanQuerySortThenBy
 
 extension WorkoutPlanQueryWhereDistinct
     on QueryBuilder<WorkoutPlan, WorkoutPlan, QDistinct> {
+  QueryBuilder<WorkoutPlan, WorkoutPlan, QDistinct> distinctByDurationWeeks() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'durationWeeks');
+    });
+  }
+
   QueryBuilder<WorkoutPlan, WorkoutPlan, QDistinct> distinctByPlanName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -973,6 +1240,12 @@ extension WorkoutPlanQueryProperty
     });
   }
 
+  QueryBuilder<WorkoutPlan, int?, QQueryOperations> durationWeeksProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'durationWeeks');
+    });
+  }
+
   QueryBuilder<WorkoutPlan, String, QQueryOperations> planNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'planName');
@@ -990,11 +1263,291 @@ extension WorkoutPlanQueryProperty
       return query.addPropertyName(r'source');
     });
   }
+
+  QueryBuilder<WorkoutPlan, List<WorkoutWeek>?, QQueryOperations>
+      weeksProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'weeks');
+    });
+  }
 }
 
 // **************************************************************************
 // IsarEmbeddedGenerator
 // **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const WorkoutWeekSchema = Schema(
+  name: r'WorkoutWeek',
+  id: 4728696235322809906,
+  properties: {
+    r'days': PropertySchema(
+      id: 0,
+      name: r'days',
+      type: IsarType.objectList,
+      target: r'WorkoutDay',
+    ),
+    r'weekNumber': PropertySchema(
+      id: 1,
+      name: r'weekNumber',
+      type: IsarType.long,
+    )
+  },
+  estimateSize: _workoutWeekEstimateSize,
+  serialize: _workoutWeekSerialize,
+  deserialize: _workoutWeekDeserialize,
+  deserializeProp: _workoutWeekDeserializeProp,
+);
+
+int _workoutWeekEstimateSize(
+  WorkoutWeek object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.days.length * 3;
+  {
+    final offsets = allOffsets[WorkoutDay]!;
+    for (var i = 0; i < object.days.length; i++) {
+      final value = object.days[i];
+      bytesCount += WorkoutDaySchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
+  return bytesCount;
+}
+
+void _workoutWeekSerialize(
+  WorkoutWeek object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeObjectList<WorkoutDay>(
+    offsets[0],
+    allOffsets,
+    WorkoutDaySchema.serialize,
+    object.days,
+  );
+  writer.writeLong(offsets[1], object.weekNumber);
+}
+
+WorkoutWeek _workoutWeekDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = WorkoutWeek(
+    days: reader.readObjectList<WorkoutDay>(
+          offsets[0],
+          WorkoutDaySchema.deserialize,
+          allOffsets,
+          WorkoutDay(),
+        ) ??
+        const [],
+    weekNumber: reader.readLongOrNull(offsets[1]),
+  );
+  return object;
+}
+
+P _workoutWeekDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readObjectList<WorkoutDay>(
+            offset,
+            WorkoutDaySchema.deserialize,
+            allOffsets,
+            WorkoutDay(),
+          ) ??
+          const []) as P;
+    case 1:
+      return (reader.readLongOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension WorkoutWeekQueryFilter
+    on QueryBuilder<WorkoutWeek, WorkoutWeek, QFilterCondition> {
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      daysLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'days',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition> daysIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'days',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      daysIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'days',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      daysLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'days',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      daysLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'days',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      daysLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'days',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      weekNumberIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'weekNumber',
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      weekNumberIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'weekNumber',
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      weekNumberEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'weekNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      weekNumberGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'weekNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      weekNumberLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'weekNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition>
+      weekNumberBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'weekNumber',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension WorkoutWeekQueryObject
+    on QueryBuilder<WorkoutWeek, WorkoutWeek, QFilterCondition> {
+  QueryBuilder<WorkoutWeek, WorkoutWeek, QAfterFilterCondition> daysElement(
+      FilterQuery<WorkoutDay> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'days');
+    });
+  }
+}
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types

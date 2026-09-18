@@ -348,7 +348,7 @@ class _StatBlock extends StatelessWidget {
         else
           TweenAnimationBuilder<int>(
             tween: IntTween(begin: 0, end: rawValue!),
-            duration: const Motion.deliberate,
+            duration: Motion.deliberate,
             curve: Motion.enter,
             builder: (context, val, child) {
               final displayString = useDecimalFormat
@@ -375,7 +375,7 @@ class _StatBlock extends StatelessWidget {
             height: 4,
             child: TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: progress!.clamp(0.0, 1.0)),
-              duration: const Motion.deliberate,
+              duration: Motion.deliberate,
               curve: Motion.enter,
               builder: (context, val, child) {
                 return LinearProgressIndicator(

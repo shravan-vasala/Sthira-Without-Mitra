@@ -563,7 +563,7 @@ class _LeaderboardTabState extends ConsumerState<_LeaderboardTab> {
         ),
         Expanded(
           child: AnimatedSwitcher(
-            duration: const Motion.deliberate,
+            duration: Motion.deliberate,
             child: ListView(
               key: ValueKey('${_period}_$_metric'),
               padding: const EdgeInsets.fromLTRB(
@@ -920,7 +920,7 @@ class _PodiumView extends ConsumerWidget {
             tween: IntTween(begin: 0, end: rawVal),
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
-                : const Motion.deliberate,
+                : Motion.deliberate,
             curve: Motion.enter,
             builder: (context, val, child) {
               final displayStr = metric == LeaderboardMetric.score

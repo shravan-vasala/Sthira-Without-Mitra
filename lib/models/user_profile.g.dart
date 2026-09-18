@@ -42,113 +42,108 @@ const UserProfileSchema = CollectionSchema(
       name: r'coachName',
       type: IsarType.string,
     ),
-    r'currentPhaseWeek': PropertySchema(
-      id: 5,
-      name: r'currentPhaseWeek',
-      type: IsarType.long,
-    ),
     r'currentWeight': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'currentWeight',
       type: IsarType.double,
     ),
     r'gender': PropertySchema(
-      id: 7,
+      id: 6,
       name: r'gender',
       type: IsarType.string,
     ),
     r'height': PropertySchema(
-      id: 8,
+      id: 7,
       name: r'height',
       type: IsarType.double,
     ),
     r'heightInMeters': PropertySchema(
-      id: 9,
+      id: 8,
       name: r'heightInMeters',
       type: IsarType.double,
     ),
     r'isarCustomHabits': PropertySchema(
-      id: 10,
+      id: 9,
       name: r'isarCustomHabits',
       type: IsarType.string,
     ),
     r'isarCustomMealSlots': PropertySchema(
-      id: 11,
+      id: 10,
       name: r'isarCustomMealSlots',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 12,
+      id: 11,
       name: r'name',
       type: IsarType.string,
     ),
     r'photoPath': PropertySchema(
-      id: 13,
+      id: 12,
       name: r'photoPath',
       type: IsarType.string,
     ),
     r'planStartDate': PropertySchema(
-      id: 14,
+      id: 13,
       name: r'planStartDate',
       type: IsarType.dateTime,
     ),
     r'primaryGoal': PropertySchema(
-      id: 15,
+      id: 14,
       name: r'primaryGoal',
       type: IsarType.string,
     ),
     r'restTimerNotification': PropertySchema(
-      id: 16,
+      id: 15,
       name: r'restTimerNotification',
       type: IsarType.bool,
     ),
     r'restTimerSound': PropertySchema(
-      id: 17,
+      id: 16,
       name: r'restTimerSound',
       type: IsarType.bool,
     ),
     r'restTimerVibration': PropertySchema(
-      id: 18,
+      id: 17,
       name: r'restTimerVibration',
       type: IsarType.bool,
     ),
     r'screenTimeEnabled': PropertySchema(
-      id: 19,
+      id: 18,
       name: r'screenTimeEnabled',
       type: IsarType.bool,
     ),
     r'targetCalories': PropertySchema(
-      id: 20,
+      id: 19,
       name: r'targetCalories',
       type: IsarType.long,
     ),
     r'targetCarbsG': PropertySchema(
-      id: 21,
+      id: 20,
       name: r'targetCarbsG',
       type: IsarType.long,
     ),
     r'targetFatG': PropertySchema(
-      id: 22,
+      id: 21,
       name: r'targetFatG',
       type: IsarType.long,
     ),
     r'targetProteinG': PropertySchema(
-      id: 23,
+      id: 22,
       name: r'targetProteinG',
       type: IsarType.long,
     ),
     r'targetWeight': PropertySchema(
-      id: 24,
+      id: 23,
       name: r'targetWeight',
       type: IsarType.double,
     ),
     r'useKg': PropertySchema(
-      id: 25,
+      id: 24,
       name: r'useKg',
       type: IsarType.bool,
     ),
     r'weightUnit': PropertySchema(
-      id: 26,
+      id: 25,
       name: r'weightUnit',
       type: IsarType.string,
     )
@@ -223,28 +218,27 @@ void _userProfileSerialize(
   writer.writeLong(offsets[2], object.age);
   writer.writeString(offsets[3], object.coachDisplayName);
   writer.writeString(offsets[4], object.coachName);
-  writer.writeLong(offsets[5], object.currentPhaseWeek);
-  writer.writeDouble(offsets[6], object.currentWeight);
-  writer.writeString(offsets[7], object.gender);
-  writer.writeDouble(offsets[8], object.height);
-  writer.writeDouble(offsets[9], object.heightInMeters);
-  writer.writeString(offsets[10], object.isarCustomHabits);
-  writer.writeString(offsets[11], object.isarCustomMealSlots);
-  writer.writeString(offsets[12], object.name);
-  writer.writeString(offsets[13], object.photoPath);
-  writer.writeDateTime(offsets[14], object.planStartDate);
-  writer.writeString(offsets[15], object.primaryGoal);
-  writer.writeBool(offsets[16], object.restTimerNotification);
-  writer.writeBool(offsets[17], object.restTimerSound);
-  writer.writeBool(offsets[18], object.restTimerVibration);
-  writer.writeBool(offsets[19], object.screenTimeEnabled);
-  writer.writeLong(offsets[20], object.targetCalories);
-  writer.writeLong(offsets[21], object.targetCarbsG);
-  writer.writeLong(offsets[22], object.targetFatG);
-  writer.writeLong(offsets[23], object.targetProteinG);
-  writer.writeDouble(offsets[24], object.targetWeight);
-  writer.writeBool(offsets[25], object.useKg);
-  writer.writeString(offsets[26], object.weightUnit);
+  writer.writeDouble(offsets[5], object.currentWeight);
+  writer.writeString(offsets[6], object.gender);
+  writer.writeDouble(offsets[7], object.height);
+  writer.writeDouble(offsets[8], object.heightInMeters);
+  writer.writeString(offsets[9], object.isarCustomHabits);
+  writer.writeString(offsets[10], object.isarCustomMealSlots);
+  writer.writeString(offsets[11], object.name);
+  writer.writeString(offsets[12], object.photoPath);
+  writer.writeDateTime(offsets[13], object.planStartDate);
+  writer.writeString(offsets[14], object.primaryGoal);
+  writer.writeBool(offsets[15], object.restTimerNotification);
+  writer.writeBool(offsets[16], object.restTimerSound);
+  writer.writeBool(offsets[17], object.restTimerVibration);
+  writer.writeBool(offsets[18], object.screenTimeEnabled);
+  writer.writeLong(offsets[19], object.targetCalories);
+  writer.writeLong(offsets[20], object.targetCarbsG);
+  writer.writeLong(offsets[21], object.targetFatG);
+  writer.writeLong(offsets[22], object.targetProteinG);
+  writer.writeDouble(offsets[23], object.targetWeight);
+  writer.writeBool(offsets[24], object.useKg);
+  writer.writeString(offsets[25], object.weightUnit);
 }
 
 UserProfile _userProfileDeserialize(
@@ -258,28 +252,27 @@ UserProfile _userProfileDeserialize(
     activeWorkoutPlan: reader.readStringOrNull(offsets[1]),
     age: reader.readLongOrNull(offsets[2]),
     coachName: reader.readStringOrNull(offsets[4]) ?? '',
-    currentPhaseWeek: reader.readLongOrNull(offsets[5]) ?? 1,
-    currentWeight: reader.readDoubleOrNull(offsets[6]),
-    gender: reader.readStringOrNull(offsets[7]),
-    height: reader.readDoubleOrNull(offsets[8]),
-    name: reader.readStringOrNull(offsets[12]) ?? '',
-    photoPath: reader.readStringOrNull(offsets[13]),
-    planStartDate: reader.readDateTimeOrNull(offsets[14]),
-    primaryGoal: reader.readStringOrNull(offsets[15]),
-    restTimerNotification: reader.readBoolOrNull(offsets[16]) ?? true,
-    restTimerSound: reader.readBoolOrNull(offsets[17]) ?? true,
-    restTimerVibration: reader.readBoolOrNull(offsets[18]) ?? true,
-    screenTimeEnabled: reader.readBoolOrNull(offsets[19]) ?? false,
-    targetCalories: reader.readLongOrNull(offsets[20]) ?? 1250,
-    targetCarbsG: reader.readLongOrNull(offsets[21]) ?? 135,
-    targetFatG: reader.readLongOrNull(offsets[22]) ?? 40,
-    targetProteinG: reader.readLongOrNull(offsets[23]) ?? 85,
-    targetWeight: reader.readDoubleOrNull(offsets[24]),
-    useKg: reader.readBoolOrNull(offsets[25]) ?? true,
+    currentWeight: reader.readDoubleOrNull(offsets[5]),
+    gender: reader.readStringOrNull(offsets[6]),
+    height: reader.readDoubleOrNull(offsets[7]),
+    name: reader.readStringOrNull(offsets[11]) ?? '',
+    photoPath: reader.readStringOrNull(offsets[12]),
+    planStartDate: reader.readDateTimeOrNull(offsets[13]),
+    primaryGoal: reader.readStringOrNull(offsets[14]),
+    restTimerNotification: reader.readBoolOrNull(offsets[15]) ?? true,
+    restTimerSound: reader.readBoolOrNull(offsets[16]) ?? true,
+    restTimerVibration: reader.readBoolOrNull(offsets[17]) ?? true,
+    screenTimeEnabled: reader.readBoolOrNull(offsets[18]) ?? false,
+    targetCalories: reader.readLongOrNull(offsets[19]) ?? 1250,
+    targetCarbsG: reader.readLongOrNull(offsets[20]) ?? 135,
+    targetFatG: reader.readLongOrNull(offsets[21]) ?? 40,
+    targetProteinG: reader.readLongOrNull(offsets[22]) ?? 85,
+    targetWeight: reader.readDoubleOrNull(offsets[23]),
+    useKg: reader.readBoolOrNull(offsets[24]) ?? true,
   );
   object.id = id;
-  object.isarCustomHabits = reader.readString(offsets[10]);
-  object.isarCustomMealSlots = reader.readString(offsets[11]);
+  object.isarCustomHabits = reader.readString(offsets[9]);
+  object.isarCustomMealSlots = reader.readString(offsets[10]);
   return object;
 }
 
@@ -301,48 +294,46 @@ P _userProfileDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 5:
-      return (reader.readLongOrNull(offset) ?? 1) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 6:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 7:
       return (reader.readStringOrNull(offset)) as P;
-    case 8:
+    case 7:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 9:
+    case 8:
       return (reader.readDouble(offset)) as P;
+    case 9:
+      return (reader.readString(offset)) as P;
     case 10:
       return (reader.readString(offset)) as P;
     case 11:
-      return (reader.readString(offset)) as P;
-    case 12:
       return (reader.readStringOrNull(offset) ?? '') as P;
+    case 12:
+      return (reader.readStringOrNull(offset)) as P;
     case 13:
-      return (reader.readStringOrNull(offset)) as P;
-    case 14:
       return (reader.readDateTimeOrNull(offset)) as P;
-    case 15:
+    case 14:
       return (reader.readStringOrNull(offset)) as P;
+    case 15:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 16:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 17:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 18:
-      return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 19:
       return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 20:
+    case 19:
       return (reader.readLongOrNull(offset) ?? 1250) as P;
-    case 21:
+    case 20:
       return (reader.readLongOrNull(offset) ?? 135) as P;
-    case 22:
+    case 21:
       return (reader.readLongOrNull(offset) ?? 40) as P;
-    case 23:
+    case 22:
       return (reader.readLongOrNull(offset) ?? 85) as P;
-    case 24:
+    case 23:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 25:
+    case 24:
       return (reader.readBoolOrNull(offset) ?? true) as P;
-    case 26:
+    case 25:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1087,62 +1078,6 @@ extension UserProfileQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'coachName',
         value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      currentPhaseWeekEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'currentPhaseWeek',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      currentPhaseWeekGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'currentPhaseWeek',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      currentPhaseWeekLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'currentPhaseWeek',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
-      currentPhaseWeekBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'currentPhaseWeek',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
       ));
     });
   }
@@ -2934,20 +2869,6 @@ extension UserProfileQuerySortBy
     });
   }
 
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
-      sortByCurrentPhaseWeek() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'currentPhaseWeek', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
-      sortByCurrentPhaseWeekDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'currentPhaseWeek', Sort.desc);
-    });
-  }
-
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByCurrentWeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentWeight', Sort.asc);
@@ -3286,20 +3207,6 @@ extension UserProfileQuerySortThenBy
     });
   }
 
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
-      thenByCurrentPhaseWeek() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'currentPhaseWeek', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
-      thenByCurrentPhaseWeekDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'currentPhaseWeek', Sort.desc);
-    });
-  }
-
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByCurrentWeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentWeight', Sort.asc);
@@ -3622,13 +3529,6 @@ extension UserProfileQueryWhereDistinct
     });
   }
 
-  QueryBuilder<UserProfile, UserProfile, QDistinct>
-      distinctByCurrentPhaseWeek() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'currentPhaseWeek');
-    });
-  }
-
   QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByCurrentWeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentWeight');
@@ -3806,12 +3706,6 @@ extension UserProfileQueryProperty
   QueryBuilder<UserProfile, String, QQueryOperations> coachNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'coachName');
-    });
-  }
-
-  QueryBuilder<UserProfile, int, QQueryOperations> currentPhaseWeekProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'currentPhaseWeek');
     });
   }
 

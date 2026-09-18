@@ -535,7 +535,7 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Motion.deliberate,
+      duration: Motion.deliberate,
     );
     _scaleAnimation = TweenSequence([
       TweenSequenceItem(
@@ -575,7 +575,7 @@ class _LivelyHabitCircleState extends State<_LivelyHabitCircle>
     return ScaleTransition(
       scale: _scaleAnimation,
       child: AnimatedContainer(
-        duration: const Motion.standard,
+        duration: Motion.standard,
         curve: Motion.enter,
         width: 28,
         height: 28,

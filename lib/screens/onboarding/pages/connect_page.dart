@@ -27,7 +27,7 @@ class _ConnectPageState extends ConsumerState<ConnectPage>
     super.initState();
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Motion.deliberate,
+      duration: Motion.deliberate,
     );
     _staggerController.forward();
     _checkHealthStatus();
@@ -256,7 +256,7 @@ class _IntegrationRow extends StatelessWidget {
             AnimatedSwitcher(
               duration: disableAnim
                   ? Duration.zero
-                  : const Motion.deliberate,
+                  : Motion.deliberate,
               switchInCurve: Motion.enter,
               switchOutCurve: Motion.exit,
               transitionBuilder: (child, animation) {

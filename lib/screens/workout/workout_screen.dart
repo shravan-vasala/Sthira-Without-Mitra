@@ -177,7 +177,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               ),
             TweenAnimationBuilder<int>(
               tween: IntTween(begin: 0, end: viewCompleted),
-              duration: const Motion.deliberate,
+              duration: Motion.deliberate,
               curve: Motion.enter,
               builder: (context, value, child) {
                 final weekText = phaseProgress.isPhaseActive 
@@ -729,7 +729,7 @@ class _SectionWidgetState extends State<_SectionWidget> {
         if (_jumpKey.currentContext != null) {
           Scrollable.ensureVisible(
             _jumpKey.currentContext!,
-            duration: const Motion.deliberate,
+            duration: Motion.deliberate,
             curve: Motion.enter,
             alignment: 0.2,
           );

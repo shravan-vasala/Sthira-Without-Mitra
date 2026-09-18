@@ -54,7 +54,7 @@ class TrophyRoomCard extends ConsumerWidget {
             tween: IntTween(begin: 0, end: unlocked),
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
-                : const Motion.deliberate,
+                : Motion.deliberate,
             curve: Motion.enter,
             builder: (context, val, child) {
               return Text(

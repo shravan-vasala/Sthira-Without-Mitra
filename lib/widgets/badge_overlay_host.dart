@@ -33,8 +33,8 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Motion.deliberate,
-      reverseDuration: const Motion.standard,
+      duration: Motion.deliberate,
+      reverseDuration: Motion.standard,
     );
     _slideAnimation = CurvedAnimation(
       parent: _controller,
@@ -79,7 +79,7 @@ class _BadgeOverlayHostState extends ConsumerState<BadgeOverlayHost>
       _isShowing = false;
 
       // Wait 400ms before showing the next one
-      Future.delayed(const Motion.deliberate, () {
+      Future.delayed(Motion.deliberate, () {
         if (mounted && ref.read(badgeUnlockEventProvider).isNotEmpty) {
           _processQueue();
         }

@@ -28,7 +28,7 @@ class _WelcomePageState extends State<WelcomePage>
     super.initState();
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Motion.deliberate,
+      duration: Motion.deliberate,
     );
   }
 
@@ -366,7 +366,7 @@ class _CompletionScreenState extends State<CompletionScreen>
     super.initState();
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Motion.deliberate,
+      duration: Motion.deliberate,
     );
   }
 
@@ -382,13 +382,13 @@ class _CompletionScreenState extends State<CompletionScreen>
   Future<void> _playSequence(bool disableAnim) async {
     if (disableAnim) {
       _fadeController.value = 1.0;
-      await Future.delayed(const Motion.instant);
+      await Future.delayed(Motion.instant);
       if (!mounted) return;
       widget.onComplete();
       return;
     }
 
-    await Future.delayed(const Motion.instant);
+    await Future.delayed(Motion.instant);
     if (!mounted) return;
     await _fadeController.forward();
     if (!mounted) return;

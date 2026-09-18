@@ -308,7 +308,7 @@ class _StepsCardState extends ConsumerState<_StepsCard> {
                       if (steps != null)
                         TweenAnimationBuilder<int>(
                           tween: IntTween(begin: 0, end: steps),
-                          duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Motion.deliberate,
+                          duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : Motion.deliberate,
                           curve: Motion.enter,
                           builder: (context, val, child) {
                             return Text(

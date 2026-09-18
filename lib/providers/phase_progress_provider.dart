@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'app_providers.dart';
 import '../models/daily_log.dart';
 import '../utils/workout_completion.dart';
+import '../models/workout_plan.dart';
 
 class PhaseProgress {
   final int currentWeek;

@@ -312,7 +312,7 @@ class ExerciseCard extends ConsumerWidget {
                       height: 48,
                       child: Center(
                         child: AnimatedContainer(
-                          duration: const Motion.standard,
+                          duration: Motion.standard,
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
@@ -326,7 +326,7 @@ class ExerciseCard extends ConsumerWidget {
                           child: isCompleted
                               ? TweenAnimationBuilder<double>(
                                   tween: Tween<double>(begin: 0, end: 1),
-                                  duration: const Motion.deliberate,
+                                  duration: Motion.deliberate,
                                   curve: Motion.enter,
                                   builder: (context, scale, child) {
                                     return Transform.scale(

@@ -51,7 +51,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
           } else {
             Scrollable.ensureVisible(
               monthKey.currentContext!,
-              duration: const Motion.deliberate,
+              duration: Motion.deliberate,
               curve: Motion.enter,
             );
           }
@@ -64,7 +64,7 @@ class _ActivityHeatmapState extends ConsumerState<ActivityHeatmap> {
       } else {
         _scrollController.animateTo(
           0,
-          duration: const Motion.deliberate,
+          duration: Motion.deliberate,
           curve: Motion.enter,
         );
       }

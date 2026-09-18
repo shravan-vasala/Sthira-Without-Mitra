@@ -165,7 +165,7 @@ class _StatCard extends StatelessWidget {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final duration = disableAnimations
         ? Duration.zero
-        : const Motion.deliberate;
+        : Motion.deliberate;
 
     return Container(
       padding: const EdgeInsets.all(Spacing.cardPadTight),

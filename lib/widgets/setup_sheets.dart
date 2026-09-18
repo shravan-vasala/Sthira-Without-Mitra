@@ -114,7 +114,7 @@ class _AiSetupSheetState extends ConsumerState<AiSetupSheet> {
           MediaQuery.maybeOf(context)?.disableAnimations ?? false;
       if (!disableAnimations) {
         await Future.delayed(
-          const Motion.deliberate,
+          Motion.deliberate,
         ); // Shorter delay
       }
       if (mounted) Navigator.pop(context, true);
@@ -272,7 +272,7 @@ class _HealthConnectSheetState extends ConsumerState<HealthConnectSheet> {
           setState(() {
             _status = 'Connected! Data will sync automatically.';
           });
-          Future.delayed(const Motion.deliberate, () {
+          Future.delayed(Motion.deliberate, () {
             if (mounted) Navigator.pop(context, true);
           });
         } else {
@@ -359,7 +359,7 @@ class _CloudSyncSheetState extends ConsumerState<CloudSyncSheet> {
 
     ref.listen(cloudSyncControllerProvider, (prev, next) {
       if (next == CloudSyncState.success) {
-        Future.delayed(const Motion.deliberate, () {
+        Future.delayed(Motion.deliberate, () {
           if (mounted) Navigator.pop(context, true);
         });
       }

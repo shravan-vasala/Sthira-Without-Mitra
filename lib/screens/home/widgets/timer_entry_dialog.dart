@@ -100,7 +100,7 @@ class _TimerEntryDialogState extends ConsumerState<TimerEntryDialog>
     if (_remainingSeconds <= 0) return;
     _animationController.reverse(from: _remainingSeconds / _totalSeconds);
 
-    _timer = Timer.periodic(const Motion.instant, (timer) {
+    _timer = Timer.periodic(Motion.instant, (timer) {
       if (!mounted) return;
       if (_lastStartTime == null) return;
 

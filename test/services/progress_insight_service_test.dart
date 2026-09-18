@@ -76,7 +76,10 @@ void main() {
         useKg: true,
       );
 
-      expect(insight.insightText, "Your best stretch was 12 Aug-18 Aug at 11,200 steps/day.");
+      expect(
+        insight.insightText,
+        'Your best stretch was 12 Aug-18 at 11,200 steps/day.',
+      );
     });
 
     test('Trend comparison when previous data exists', () {

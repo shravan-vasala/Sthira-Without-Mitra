@@ -52,7 +52,7 @@ class _AboutYouPageState extends State<AboutYouPage>
     super.initState();
     _staggerController = AnimationController(
       vsync: this,
-      duration: const Motion.deliberate,
+      duration: Motion.deliberate,
     );
     _staggerController.forward();
 

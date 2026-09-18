@@ -565,7 +565,7 @@ class _NavBarItem extends StatelessWidget {
           child: AnimatedContainer(
             duration: disableAnimations
                 ? Duration.zero
-                : const Motion.standard,
+                : Motion.standard,
             curve: Motion.enter,
             padding: EdgeInsets.symmetric(
               horizontal: isSelected ? 24 : 12,

@@ -16,7 +16,7 @@ class ImagePreprocessor {
       // pass it through without expensive pixel decoding.
       if (bytes.length < 1024 * 1024) {
         try {
-          final info = img.JpegDecoder().decodeInfo(bytes);
+          final info = img.decodeImage(bytes);
           if (info != null && info.width <= 1024 && info.height <= 1024) {
             AiProfiler().startPhase('hashMs');
             final hash = sha256.convert(bytes).toString();
