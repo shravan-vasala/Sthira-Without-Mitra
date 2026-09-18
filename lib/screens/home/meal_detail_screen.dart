@@ -20,6 +20,7 @@ import '../../models/meal_plan.dart';
 import '../../utils/meal_plan_complete.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../widgets/surface_card.dart';
+import '../../widgets/primary_button.dart';
 import '../../utils/meal_icons.dart';
 import 'widgets/photo_calorie_scanner_sheet.dart';
 import 'widgets/add_meal_slot_dialog.dart';
@@ -185,9 +186,13 @@ class MealDetailScreen extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _openAddSlotDialog(context),
                     icon: const Icon(Icons.add_rounded, size: 20),
-                    label: Text(
-                      'Add another meal',
-                      style: context.text.bodyStrong,
+                    label: Flexible(
+                      child: Text(
+                        'Add another meal',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.bodyStrong,
+                      ),
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.primary,
@@ -207,9 +212,13 @@ class MealDetailScreen extends ConsumerWidget {
                       builder: (_) => const PlateCalculatorSheet(),
                     ),
                     icon: const Icon(Icons.pie_chart_outline_rounded, size: 20),
-                    label: Text(
-                      'Visual Plate Calculator',
-                      style: context.text.bodyStrong,
+                    label: Flexible(
+                      child: Text(
+                        'Visual Plate Calculator',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.text.bodyStrong,
+                      ),
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.colors.indigo,
@@ -585,11 +594,9 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
           duration: shouldAnimate ? Motion.standard : Motion.instant,
           curve: Motion.enter,
           alignment: Alignment.topCenter,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
                 // Header Row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -955,33 +962,20 @@ class _MealSlotCardState extends ConsumerState<_MealSlotCard> {
                           Row(
                             children: [
                               Expanded(
-                                child: SizedBox(
-                                  height: 48,
-                                  child: ElevatedButton.icon(
-                                    label: Text('Take photo', style: context.text.bodyStrong.copyWith(color: context.colors.onPrimary)),
-                                    icon: Icon(Icons.camera_alt_outlined, color: context.colors.onPrimary, size: 20),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: context.colors.primary,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    ),
-                                    onPressed: () => _openScanner(context, false),
-                                  ),
+                                child: CompactButton(
+                                  label: 'Take photo',
+                                  icon: Icons.camera_alt_outlined,
+                                  filled: true,
+                                  onPressed: () => _openScanner(context, false),
                                 ),
                               ),
                               const SizedBox(width: Spacing.stack),
                               Expanded(
-                                child: SizedBox(
-                                  height: 48,
-                                  child: OutlinedButton.icon(
-                                    label: Text('Describe', style: context.text.bodyStrong.copyWith(color: context.colors.primary)),
-                                    icon: Icon(Icons.notes_rounded, color: context.colors.primary, size: 20),
-                                    style: OutlinedButton.styleFrom(
-                                      side: BorderSide(color: context.colors.primary),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    ),
-                                    onPressed: () => _openScanner(context, true),
-                                  ),
+                                child: CompactButton(
+                                  label: 'Describe',
+                                  icon: Icons.notes_rounded,
+                                  filled: false,
+                                  onPressed: () => _openScanner(context, true),
                                 ),
                               ),
                             ],

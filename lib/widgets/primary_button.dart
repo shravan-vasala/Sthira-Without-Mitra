@@ -151,6 +151,7 @@ class _CompactButtonState extends State<CompactButton> {
               Flexible(
                 child: Text(
                   widget.label,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: textStyle,
                 ),
