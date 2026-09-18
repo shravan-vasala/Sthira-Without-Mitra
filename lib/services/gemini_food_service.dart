@@ -11,6 +11,7 @@ import '../utils/time_utils.dart';
 import 'package:crypto/crypto.dart';
 
 import 'ai_client.dart';
+import 'ai_profiler.dart';
 import '../models/food_nutrition.dart';
 import '../models/nutrition_lookup_result.dart';
 
@@ -438,7 +439,9 @@ $_jsonShape
     CancellationToken? cancellationToken,
   }) async {
     if (aiResponse == null) return null;
+    AiProfiler().startPhase('nutritionLoadMs');
     await nutritionLookup.load();
+    AiProfiler().endPhase('nutritionLoadMs');
 
     double totalCal = 0;
     double totalP = 0;
@@ -455,7 +458,10 @@ $_jsonShape
       grams = grams.clamp(1.0, 1500.0);
       item['estimated_grams'] = grams;
 
+      AiProfiler().startPhase('nutritionMatchMs');
       final NutritionLookupResult? match = nutritionLookup.match(name);
+      AiProfiler().endPhase('nutritionMatchMs');
+      
       FoodNutrition baseNut;
       bool isPer100g = true;
       double? servingGrams;
@@ -505,8 +511,6 @@ $_jsonShape
       item['protein_g'] = double.parse(computed.proteinG.toStringAsFixed(1));
       item['carbs_g'] = double.parse(computed.carbsG.toStringAsFixed(1));
       item['fat_g'] = double.parse(computed.fatG.toStringAsFixed(1));
-      item['baseNutrition'] = baseNut.toJson();
-      item['computedNutrition'] = computed.toJson();
       item['is_per_100g'] = isPer100g;
       item['serving_grams'] = servingGrams;
       item['provenance'] = provenance;
@@ -542,7 +546,6 @@ $_jsonShape
       } else if (currentConfidence == 'medium') {
         aiResponse['confidence'] = 'low';
       }
-      aiResponse['lookup'] = 'partial';
     }
 
     return aiResponse;

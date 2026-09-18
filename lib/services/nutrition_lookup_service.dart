@@ -7,17 +7,35 @@ import '../models/nutrition_lookup_result.dart';
 import '../models/food_nutrition.dart';
 
 class NutritionLookupService {
-  List<Map<String, dynamic>> _nutritionTable = [];
+  final Map<String, NutritionLookupResult> _index = {};
   bool _isLoaded = false;
+  Future<void>? _loadFuture;
 
   Future<void> load() async {
     if (_isLoaded) return;
+    if (_loadFuture != null) return _loadFuture;
+    _loadFuture = _doLoad();
+    return _loadFuture;
+  }
+
+  Future<void> _doLoad() async {
     try {
       final jsonString = await rootBundle.loadString(
         'assets/data/nutrition_table.json',
       );
       final List<dynamic> jsonList = jsonDecode(jsonString);
-      _nutritionTable = List<Map<String, dynamic>>.from(jsonList);
+      for (var item in jsonList) {
+        final mapItem = item as Map<String, dynamic>;
+        final result = _mapToResult(mapItem);
+        
+        final name = _normalize(mapItem['name'] as String);
+        _index[name] = result;
+        
+        final aliases = List<String>.from(mapItem['aliases'] ?? []);
+        for (var alias in aliases) {
+          _index[_normalize(alias)] = result;
+        }
+      }
       _isLoaded = true;
     } catch (e) {
       // ignore: avoid_print
@@ -54,21 +72,10 @@ class NutritionLookupService {
       }
     }
 
-    // 1. Exact match on static table name
-    for (var item in _nutritionTable) {
-      if (_normalize(item['name'] as String) == queryStr) {
-        return _mapToResult(item);
-      }
-    }
-
-    // 2. Exact match on aliases
-    for (var item in _nutritionTable) {
-      final aliases = List<String>.from(item['aliases'] ?? []);
-      for (var alias in aliases) {
-        if (_normalize(alias) == queryStr) {
-          return _mapToResult(item);
-        }
-      }
+    // 1. O(1) Index lookup
+    final match = _index[queryStr];
+    if (match != null) {
+      return match;
     }
 
     // Subsets are dangerous (e.g. "fried rice" matching "rice"); exact/alias only.

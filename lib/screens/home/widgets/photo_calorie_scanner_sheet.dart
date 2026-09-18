@@ -18,6 +18,8 @@ import '../../../widgets/surface_card.dart';
 import '../../../models/food_nutrition.dart';
 import '../../../widgets/offline_banner.dart';
 import '../../../widgets/primary_button.dart';
+import '../../../services/ai_logger.dart';
+import '../../../services/ai_profiler.dart';
 import 'package:trufit_bodamma/theme/app_typography.dart';
 
 /// Opens with photo-first capture, or describe-in-text when [isManualEntry] is true.
@@ -58,22 +60,20 @@ class _PhotoCalorieScannerSheetState
 
   int _analysisSessionToken = 0;
   Timer? _statusTimer;
-  int _elapsedSeconds = 0;
+  final ValueNotifier<int> _elapsedSeconds = ValueNotifier<int>(0);
   Timer? _countdownTimer;
   int _cooldownSeconds = 0;
   CancellationToken? _cancellationToken;
 
   void _startStatusTimer() {
-    _elapsedSeconds = 0;
+    _elapsedSeconds.value = 0;
     _statusTimer?.cancel();
     _statusTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
-      setState(() {
-        _elapsedSeconds++;
-      });
+      _elapsedSeconds.value++;
     });
   }
 
@@ -129,6 +129,9 @@ class _PhotoCalorieScannerSheetState
       _analysisComplete = false;
     }
     _checkConnectivity();
+    
+    // Warm up the nutrition table
+    ref.read(geminiFoodServiceProvider).nutritionLookup.load();
   }
 
   @override
@@ -136,6 +139,7 @@ class _PhotoCalorieScannerSheetState
     _cancellationToken?.cancel();
     _statusTimer?.cancel();
     _countdownTimer?.cancel();
+    _elapsedSeconds.dispose();
     _descriptionCtrl.dispose();
     super.dispose();
   }
@@ -149,6 +153,7 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _applyResult(Map<String, dynamic> result) {
+    AiProfiler().endSession();
     if (!mounted) return;
 
     final itemsData = result['items'] as List?;
@@ -243,12 +248,16 @@ class _PhotoCalorieScannerSheetState
 
   Future<void> _pickImage(ImageSource source) async {
     if (_selectedImages.length >= 3) return;
+    AiProfiler().startPhase('pickMs');
     final picked = await _picker.pickImage(
       source: source,
       maxWidth: 1600,
       imageQuality: 90,
     );
+    AiProfiler().endPhase('pickMs');
     if (picked == null) return;
+    
+    AiProfiler().startSession();
 
     _analysisSessionToken++;
     setState(() {
@@ -278,10 +287,11 @@ class _PhotoCalorieScannerSheetState
     _startStatusTimer();
 
     try {
-      final List<Uint8List> allBytes = [];
-      for (var f in _selectedImages) {
-        allBytes.add(await f.readAsBytes());
-      }
+      AiProfiler().startPhase('fileReadMs');
+      final allBytes = await Future.wait(
+        _selectedImages.map((f) => f.readAsBytes()),
+      );
+      AiProfiler().endPhase('fileReadMs');
 
       String mimeType = 'image/jpeg';
       if (_selectedImages.first.path.toLowerCase().endsWith('.png')) {
@@ -1508,18 +1518,23 @@ class _PhotoCalorieScannerSheetState
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: Text(
-                              _elapsedSeconds < 2
-                                  ? 'Preparing image...'
-                                  : _elapsedSeconds < 6
-                                  ? 'AI is analyzing your meal...'
-                                  : _elapsedSeconds < 12
-                                  ? 'Looking up nutrition details...'
-                                  : 'Still working — big plates take a moment...',
-                              style: context.text.caption.copyWith(
-                                color: context.colors.textDark,
-                              ),
-                              maxLines: 2,
+                            child: ValueListenableBuilder<int>(
+                              valueListenable: _elapsedSeconds,
+                              builder: (context, seconds, child) {
+                                return Text(
+                                  seconds < 2
+                                      ? 'Preparing image...'
+                                      : seconds < 6
+                                      ? 'AI is analyzing your meal...'
+                                      : seconds < 12
+                                      ? 'Looking up nutrition details...'
+                                      : 'Still working — big plates take a moment...',
+                                  style: context.text.caption.copyWith(
+                                    color: context.colors.textDark,
+                                  ),
+                                  maxLines: 2,
+                                );
+                              },
                             ),
                           ),
                           IconButton(

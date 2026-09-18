@@ -7,13 +7,18 @@ import 'ai_cache.dart';
 import 'dart:async';
 import 'dart:io';
 import 'image_preprocessor.dart';
+import 'ai_profiler.dart';
 
 class CancellationToken {
   bool _isCancelled = false;
   bool get isCancelled => _isCancelled;
+  final _completer = Completer<void>();
+  Future<void> get onCancelled => _completer.future;
 
   void cancel() {
+    if (_isCancelled) return;
     _isCancelled = true;
+    _completer.complete();
   }
 }
 
@@ -181,28 +186,37 @@ class AiClient {
     String? actualMimeType = mimeType;
     if (imageBytesList != null && imageBytesList.isNotEmpty) {
       final prepSw = Stopwatch()..start();
-      final b = BytesBuilder();
-      for (var imageBytes in imageBytesList) {
-        final processed = await ImagePreprocessor.processImage(
-          imageBytes,
-          mimeType ?? 'image/jpeg',
-        );
+      
+      final processFutures = imageBytesList.map((bytes) => 
+        ImagePreprocessor.processImage(bytes, mimeType ?? 'image/jpeg')
+      );
+      
+      final processedResults = await Future.wait(processFutures).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw AiException('Image processing took too long', cause: AiErrorCause.cancelled),
+      );
+      
+      final hashes = <String>[];
+      for (var processed in processedResults) {
         processedImages.add(processed.$1);
         actualMimeType = processed.$2;
-        b.add(processed.$1);
+        hashes.add(processed.$3);
       }
-      imageContext = sha256.convert(b.toBytes()).toString();
+      
+      imageContext = hashes.join('_');
       prepSw.stop();
       preprocessMs = prepSw.elapsedMilliseconds;
     }
 
     if (cache != null && !skipCache) {
+      AiProfiler().startPhase('cacheLookupMs');
       final cachedResult = cache!.get(
         prompt,
         systemInstruction,
         imageContext,
         responseSchema?.toString(),
       );
+      AiProfiler().endPhase('cacheLookupMs');
       if (cachedResult != null) return cachedResult;
     }
 
@@ -224,14 +238,14 @@ class AiClient {
     }
 
     final modelsToUse = isVision ? visionModelsToTry : textModelsToTry;
-    // We expect the cancellationToken to carry its own deadline logic if needed, but we give a sensible max here
-    final computedDeadline =
-        overallDeadline ??
-        DateTime.now().add(Duration(seconds: isVision ? 30 : 20));
     final perAttemptTimeout = Duration(seconds: isVision ? 20 : 15);
 
     AiErrorCause? lastCause;
     String lastErrorMsg = '';
+
+    // Deadline starts right before we actually hit the network.
+    final computedDeadline = overallDeadline ??
+        DateTime.now().add(Duration(seconds: isVision ? 30 : 20));
 
     for (int i = 0; i < modelsToUse.length; i++) {
       if (DateTime.now().isAfter(computedDeadline)) break;
@@ -270,39 +284,27 @@ class AiClient {
             responseSchema: responseSchema,
           );
 
-          // Poll cancellation while waiting
+          // Listen to cancellation without leaking timers
           String? response;
-          bool localCancel = false;
-          while (true) {
-            final test = await Future.any([
+          if (cancellationToken != null) {
+            response = await Future.any([
               waitFuture,
-              Future.delayed(
-                const Duration(milliseconds: 500),
-                () => 'CANCEL_POLL',
+              cancellationToken.onCancelled.then<String?>((_) => 
+                throw AiException('Operation was cancelled.', cause: AiErrorCause.cancelled)
               ),
             ]);
-            if (cancellationToken?.isCancelled ?? false) {
-              localCancel = true;
-              break;
-            }
-            if (test != 'CANCEL_POLL') {
-              response = test;
-              break;
-            }
+          } else {
+            response = await waitFuture;
           }
-          if (localCancel) {
-            throw AiException(
-              'Operation was cancelled.',
-              cause: AiErrorCause.cancelled,
-            );
-          }
+          
           sw.stop();
 
           if (response == null || response.isEmpty)
             throw AiException("Empty response", cause: AiErrorCause.unknown);
 
+          AiProfiler().startPhase('parseMs');
           final json = _parseJson(response);
-          if (i > 0) json['modelUsed'] = modelName;
+          AiProfiler().endPhase('parseMs');
 
           AiLogger.log(
             purpose: isVision ? 'scan plate (vision)' : 'scan description',
@@ -313,14 +315,24 @@ class AiClient {
           );
 
           breaker.recordSuccess();
-          if (cache != null)
-            await cache!.set(
-              prompt,
-              systemInstruction,
-              json,
-              imageContext,
-              responseSchema?.toString(),
-            );
+          if (cache != null) {
+            unawaited(Future(() async {
+              try {
+                AiProfiler().startPhase('cacheWriteMs');
+                await cache!.set(
+                  prompt,
+                  systemInstruction,
+                  json,
+                  imageContext,
+                  responseSchema?.toString(),
+                );
+              } catch (e) {
+                debugPrint('Cache write failed: $e');
+              } finally {
+                AiProfiler().endPhase('cacheWriteMs');
+              }
+            }));
+          }
           return json;
         } catch (e) {
           sw.stop();
@@ -466,9 +478,29 @@ class AiClient {
       ],
     );
 
+    AiProfiler().startPhase('networkMs');
     final response = await _cachedClient!.models
         .generateContent(model: modelName, request: request)
         .timeout(timeout);
+    AiProfiler().endPhase('networkMs');
+    
+    // Attempt to extract thoughtsTokenCount if the SDK supports it (via toJson or fields)
+    int? thoughtsTokens;
+    try {
+      final usageJson = response.usageMetadata?.toJson();
+      if (usageJson != null && usageJson.containsKey('thoughtsTokenCount')) {
+        thoughtsTokens = usageJson['thoughtsTokenCount'] as int?;
+      }
+    } catch (_) {}
+
+    AiProfiler().recordMetadata(
+      modelUsed: modelName,
+      promptTokenCount: response.usageMetadata?.promptTokenCount,
+      candidatesTokenCount: response.usageMetadata?.candidatesTokenCount,
+      thoughtsTokenCount: thoughtsTokens,
+      cachedContentTokenCount: response.usageMetadata?.cachedContentTokenCount,
+    );
+
     return response.text;
   }
 
