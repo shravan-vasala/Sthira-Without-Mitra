@@ -480,6 +480,9 @@ class AiClient {
         responseMimeType: 'application/json',
         responseSchema: responseSchema,
         temperature: 0.1,
+        topK: 1,
+        topP: 0.1,
+        candidateCount: 1,
       ),
       contents: [
         if (imageBytesList != null && imageBytesList.isNotEmpty)

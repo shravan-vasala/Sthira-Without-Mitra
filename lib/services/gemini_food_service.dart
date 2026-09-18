@@ -26,26 +26,7 @@ class GeminiFoodService implements IAiFoodService {
     required this.nutritionLookup,
   });
 
-  static const _jsonShape = '''
-Return ONLY a JSON object with the exact following structure and types. Do NOT include markdown blocks or any other text.
-{
-  "items": [
-    {
-      "name": "Name of the dish (string)",
-      "portion": "Estimated portion size (e.g. 1 bowl, 2 pieces)",
-      "estimated_grams": 0,
-      "estimated_nutrition_if_unknown": {
-        "kcal": 0,
-        "protein_g": 0.0,
-        "carbs_g": 0.0,
-        "fat_g": 0.0
-      }
-    }
-  ],
-  "confidence": "high|medium|low"
-}
-If you cannot identify the food, provide a generic "Unknown Food" response with 0 values and low confidence.
-''';
+
 
   static const _cuisineHint = '''
 IMPORTANT: The cuisine is predominantly Telugu / South Indian home cooking (Andhra Pradesh & Telangana style), but may also include urban restaurant and café food.
@@ -78,19 +59,19 @@ The user typically orders moderate, single-person portions (not family-style or 
 - If the portion looks small-to-medium, estimate conservatively rather than generously
 
 Portion estimation guidelines:
-- 1 plate of rice = ~200g cooked (~250 kcal)
-- 1 bowl of sambar/rasam = ~150ml (~80-100 kcal)
-- 1 bowl of pappu (dal) = ~150ml (~120-150 kcal)
-- 1 idli = ~40g (~60 kcal), typical serving is 3-4
-- 1 plain dosa = ~100g (~120 kcal), masala dosa = ~180 kcal
-- 1 chapati/roti = ~30g (~80 kcal), butter naan = ~150 kcal
-- 1 piece chicken curry = ~100g (~180 kcal)
-- Curd/yogurt serving = ~100g (~60 kcal)
-- 1 tandoori chicken leg = ~150g (~250 kcal)
-- 1 salad bowl (restaurant, single serving) = ~250-300g (~200-350 kcal depending on dressing)
-- 1 rice bowl (restaurant, single serving) = ~350-400g (~400-550 kcal)
-- 1 smoothie bowl = ~300ml (~250-400 kcal)
-- 1 soup bowl = ~250ml (~100-200 kcal)
+- 1 plate of rice = ~200g cooked
+- 1 bowl of sambar/rasam = ~150ml
+- 1 bowl of pappu (dal) = ~150ml
+- 1 idli = ~40g, typical serving is 3-4
+- 1 plain dosa = ~100g, masala dosa = ~150g
+- 1 chapati/roti = ~30g, butter naan = ~80g
+- 1 piece chicken curry = ~100g
+- Curd/yogurt serving = ~100g
+- 1 tandoori chicken leg = ~150g
+- 1 salad bowl (restaurant, single serving) = ~250-300g (depending on dressing)
+- 1 rice bowl (restaurant, single serving) = ~350-400g
+- 1 smoothie bowl = ~300ml
+- 1 soup bowl = ~250ml
 - Telugu meals often use generous amounts of oil and ghee — account for this
 - Restaurant food typically has more oil/butter than home cooking — factor this in
 - AIR FRYER AVAILABLE AT HOME: The user has an air fryer and sometimes uses it for fried items (chicken fry, fish fry, french fries, snacks). Not everything is air-fried though — look for visual cues: if the food looks dry/crispy with little visible oil, assume air-fried (lower fat). If it looks oily/glistening, assume traditional frying. When uncertain, estimate a moderate amount of oil (between air-fried and deep-fried).
@@ -101,7 +82,9 @@ Portion estimation guidelines:
       'You are an expert clinical dietitian and nutritionist specializing in Indian and Telugu cuisine. '
       'You accurately identify specific regional dishes, cooking methods (especially the heavy use of oil/ghee in Indian cooking), '
       'and you are highly skilled at estimating single-person portion sizes visually. Provide unbiased estimates based on standard recipes. '
-      'You strictly output only valid JSON data.\n\n'
+      'You strictly output only valid JSON data.';
+      
+  static const _systemInstructionText = '$_systemInstruction\n\n'
       'EXAMPLE:\n'
       'User: I had 2 idlis with coconut chutney and a small bowl of sambar.\n'
       'JSON Output:\n'
@@ -170,12 +153,9 @@ Portion estimation guidelines:
         ? '\nUser provided context/hint: "${userContext.trim()}". Use this to help identify the food, but still estimate macros realistically.'
         : '';
     final prompt =
-        '''
+        '''$_cuisineHint
 Analyze these food images (different angles of the SAME meal) and estimate its nutritional content.
-IMPORTANT: Since these are different angles of the same meal, do NOT double count the dishes. Identify the unique items present.
-$_cuisineHint$hint
-$_jsonShape
-''';
+IMPORTANT: Since these are different angles of the same meal, do NOT double count the dishes. Identify the unique items present.$hint''';
     final response = await aiClient.generateJson(
       prompt: prompt,
       systemInstruction: _systemInstruction,
@@ -361,18 +341,15 @@ $_jsonShape
     final aiTargetText = unresolvedParts.join(" and ");
 
     final prompt =
-        '''
+        '''$_cuisineHint
 Estimate nutritional content for this home-cooked meal description.
-$_cuisineHint
 Meal description:
 """
 $aiTargetText
-"""
-$_jsonShape
-''';
+"""''';
     final response = await aiClient.generateJson(
       prompt: prompt,
-      systemInstruction: _systemInstruction,
+      systemInstruction: _systemInstructionText,
       apiKey: apiKey ?? '',
       responseSchema: _foodAnalysisSchema,
       cancellationToken: cancellationToken,
