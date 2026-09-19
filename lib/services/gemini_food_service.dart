@@ -146,6 +146,7 @@ Portion estimation guidelines:
     bool skipCache = false,
     bool isAlreadyProcessed = false,
     CancellationToken? cancellationToken,
+    AiProfileSession? profiler,
   ]) async {
     _ensureApiKey();
     final deadline = DateTime.now().add(const Duration(seconds: 45));
@@ -157,6 +158,7 @@ Portion estimation guidelines:
 Analyze these food images (different angles of the SAME meal) and estimate its nutritional content.
 IMPORTANT: Since these are different angles of the same meal, do NOT double count the dishes. Identify the unique items present.$hint''';
     final response = await aiClient.generateJson(
+      profiler: profiler,
       prompt: prompt,
       systemInstruction: _systemInstruction,
       imageBytesList: imageBytesList,
@@ -167,7 +169,7 @@ IMPORTANT: Since these are different angles of the same meal, do NOT double coun
       responseSchema: _foodAnalysisSchema,
       cancellationToken: cancellationToken,
     );
-    return _processAiResponse(response, cancellationToken: cancellationToken);
+    return _processAiResponse(response, cancellationToken: cancellationToken, profiler: profiler);
   }
 
   /// Estimate macros from a free-text description of what was eaten at home.
@@ -175,6 +177,7 @@ IMPORTANT: Since these are different angles of the same meal, do NOT double coun
   Future<Map<String, dynamic>?> analyzeFoodText(
     String description, [
     CancellationToken? cancellationToken,
+    AiProfileSession? profiler,
   ]) async {
     final deadline = DateTime.now().add(const Duration(seconds: 20));
     final trimmed = description.trim();
@@ -417,9 +420,9 @@ $aiTargetText
     CancellationToken? cancellationToken,
   }) async {
     if (aiResponse == null) return null;
-    AiProfiler().startPhase('nutritionLoadMs');
+    profiler?.startPhase('nutritionLoadMs');
     await nutritionLookup.load();
-    AiProfiler().endPhase('nutritionLoadMs');
+    profiler?.endPhase('nutritionLoadMs');
 
     double totalCal = 0;
     double totalP = 0;
@@ -436,9 +439,9 @@ $aiTargetText
       grams = grams.clamp(1.0, 1500.0);
       item['estimated_grams'] = grams;
 
-      AiProfiler().startPhase('nutritionMatchMs');
+      profiler?.startPhase('nutritionMatchMs');
       final NutritionLookupResult? match = nutritionLookup.match(name);
-      AiProfiler().endPhase('nutritionMatchMs');
+      profiler?.endPhase('nutritionMatchMs');
       
       FoodNutrition baseNut;
       bool isPer100g = true;

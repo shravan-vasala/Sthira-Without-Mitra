@@ -163,6 +163,7 @@ class AiClient {
   }
 
   Future<Map<String, dynamic>?> generateJson({
+    AiProfileSession? profiler,
     required String prompt,
     required String systemInstruction,
     List<Uint8List>? imageBytesList,
@@ -198,9 +199,9 @@ class AiClient {
         // Fast hash for cache key since we don't have ImagePreprocessor hashes
         final b = BytesBuilder();
         for (var bytes in imageBytesList) b.add(bytes);
-        AiProfiler().startPhase('hashMs');
+        profiler?.startPhase('hashMs');
         imageContext = sha256.convert(b.toBytes()).toString();
-        AiProfiler().endPhase('hashMs');
+        profiler?.endPhase('hashMs');
       } else {
         final processFutures = imageBytesList.map((bytes) => 
           ImagePreprocessor.processImage(bytes, mimeType ?? 'image/jpeg')
@@ -226,14 +227,14 @@ class AiClient {
     }
 
     if (cache != null && !skipCache) {
-      AiProfiler().startPhase('cacheLookupMs');
+      profiler?.startPhase('cacheLookupMs');
       final cachedResult = cache!.get(
         prompt,
         systemInstruction,
         imageContext,
         responseSchema?.toString(),
       );
-      AiProfiler().endPhase('cacheLookupMs');
+      profiler?.endPhase('cacheLookupMs');
       if (cachedResult != null) return cachedResult;
     }
 
@@ -291,6 +292,7 @@ class AiClient {
           );
 
           final waitFuture = _callModel(
+          profiler: profiler,
             modelName: modelName,
             prompt: prompt,
             systemInstruction: systemInstruction,
@@ -319,9 +321,9 @@ class AiClient {
           if (response == null || response.isEmpty)
             throw AiException("Empty response", cause: AiErrorCause.unknown);
 
-          AiProfiler().startPhase('parseMs');
+          profiler?.startPhase('parseMs');
           final json = _parseJson(response);
-          AiProfiler().endPhase('parseMs');
+          profiler?.endPhase('parseMs');
 
           AiLogger.log(
             purpose: isVision ? 'scan plate (vision)' : 'scan description',
@@ -335,7 +337,7 @@ class AiClient {
           if (cache != null) {
             unawaited(Future(() async {
               try {
-                AiProfiler().startPhase('cacheWriteMs');
+                profiler?.startPhase('cacheWriteMs');
                 await cache!.set(
                   prompt,
                   systemInstruction,
@@ -346,7 +348,7 @@ class AiClient {
               } catch (e) {
                 debugPrint('Cache write failed: $e');
               } finally {
-                AiProfiler().endPhase('cacheWriteMs');
+                profiler?.endPhase('cacheWriteMs');
               }
             }));
           }
@@ -443,14 +445,15 @@ class AiClient {
   }
 
   Future<String?> _callModel({
+    AiProfileSession? profiler,
     required String modelName,
     required String prompt,
     String? systemInstruction,
     String? apiKey,
     List<Uint8List>? imageBytesList,
     String? mimeType,
-    Duration timeout = const Duration(seconds: 30),
     Map<String, dynamic>? responseSchema,
+    Duration timeout = const Duration(seconds: 30),
   }) async {
     if (mockCallModel != null) {
       return mockCallModel!(
@@ -507,7 +510,7 @@ class AiClient {
       ]
     };
 
-    AiProfiler().startPhase('networkMs');
+    profiler?.startPhase('networkMs');
     final client = HttpClient();
     try {
       final req = await client.postUrl(url).timeout(timeout);
@@ -515,7 +518,7 @@ class AiClient {
       req.write(jsonEncode(payload));
       final res = await req.close().timeout(timeout);
       final resStr = await res.transform(utf8.decoder).join();
-      AiProfiler().endPhase('networkMs');
+      profiler?.endPhase('networkMs');
 
       final resJson = jsonDecode(resStr);
       if (res.statusCode != 200) {
@@ -530,7 +533,7 @@ class AiClient {
         thoughtsTokens = usage['thoughtsTokenCount'] as int?;
       }
 
-      AiProfiler().recordMetadata(
+      profiler?.recordMetadata(
         modelUsed: modelName,
         promptTokenCount: usage?['promptTokenCount'],
         candidatesTokenCount: usage?['candidatesTokenCount'],

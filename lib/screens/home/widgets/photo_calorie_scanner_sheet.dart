@@ -50,6 +50,9 @@ class _PhotoCalorieScannerSheetState
   final _descriptionCtrl = TextEditingController();
 
   List<File> _selectedImages = [];
+  // AI Measurement Profiler
+  AiProfileSession? profiler;
+
   bool _isAnalyzing = false;
   bool _analysisComplete = false;
   bool _describeMode = false;
@@ -142,7 +145,9 @@ class _PhotoCalorieScannerSheetState
   }
 
   void _applyResult(Map<String, dynamic> result) {
-    AiProfiler().endSession();
+    profiler?.endPhase('totalMs');
+    // TODO: log session somewhere if needed
+    profiler = null;
     if (!mounted) return;
 
     final itemsData = result['items'] as List?;
@@ -236,17 +241,22 @@ class _PhotoCalorieScannerSheetState
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    profiler = AiProfileSession();
+    profiler!.startPhase('totalMs');
+    profiler!.startPhase('uiTapMs');
+
     if (_selectedImages.length >= 3) return;
-    AiProfiler().startPhase('pickMs');
+    profiler!.startPhase('pickMs');
     final picked = await _picker.pickImage(
       source: source,
       maxWidth: 1024,
       imageQuality: 85,
     );
-    AiProfiler().endPhase('pickMs');
+    profiler?.endPhase('pickMs');
+    profiler?.endPhase('uiTapMs');
     if (picked == null) return;
     
-    AiProfiler().startSession();
+    profiler?.startPhase('selectionDwellMs');
 
     _analysisSessionToken++;
     setState(() {
@@ -273,14 +283,15 @@ class _PhotoCalorieScannerSheetState
     _cancellationToken?.cancel();
     _cancellationToken = CancellationToken();
 
+    profiler?.endPhase('selectionDwellMs');
     _startStatusTimer();
 
     try {
-      AiProfiler().startPhase('fileReadMs');
+      profiler?.startPhase('fileReadMs');
       final allBytes = await Future.wait(
         _selectedImages.map((f) => f.readAsBytes()),
       );
-      AiProfiler().endPhase('fileReadMs');
+      profiler?.endPhase('fileReadMs');
 
       final String mimeType = 'image/jpeg';
 
@@ -293,6 +304,7 @@ class _PhotoCalorieScannerSheetState
             skipCache,
             true, // isAlreadyProcessed
             _cancellationToken,
+            profiler,
           );
 
       if (!mounted) return;
@@ -321,6 +333,9 @@ class _PhotoCalorieScannerSheetState
       return;
     }
 
+    profiler = AiProfileSession();
+    profiler!.startPhase('totalMs');
+
     setState(() {
       _isAnalyzing = true;
       _analysisComplete = false;
@@ -338,7 +353,7 @@ class _PhotoCalorieScannerSheetState
     try {
       final result = await ref
           .read(geminiFoodServiceProvider)
-          .analyzeFoodText(text, _cancellationToken);
+          .analyzeFoodText(text, _cancellationToken, profiler);
 
       if (!mounted) return;
 

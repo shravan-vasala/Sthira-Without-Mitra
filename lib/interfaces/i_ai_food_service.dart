@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import '../services/ai_client.dart';
+import '../services/ai_profiler.dart';
 
 abstract class IAiFoodService {
   Future<Map<String, dynamic>?> analyzeFoodImage(
@@ -9,11 +10,13 @@ abstract class IAiFoodService {
     bool skipCache = false,
     bool isAlreadyProcessed = false,
     CancellationToken? cancellationToken,
+    AiProfileSession? profiler,
   ]);
 
   Future<Map<String, dynamic>?> analyzeFoodText(
     String description, [
     CancellationToken? cancellationToken,
+    AiProfileSession? profiler,
   ]);
 
   Stream<String> suggestMealStream({

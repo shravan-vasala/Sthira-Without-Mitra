@@ -8,15 +8,24 @@ import 'package:trufit_bodamma/services/gemini_food_service.dart';
 import 'package:trufit_bodamma/services/nutrition_lookup_service.dart';
 import 'package:googleai_dart/googleai_dart.dart';
 
-// Helper for F1 Score
+// Helper for F1 Score with 1-to-1 matching
 double calculateF1(List<String> trueNames, List<String> predNames) {
   if (trueNames.isEmpty && predNames.isEmpty) return 1.0;
   if (trueNames.isEmpty || predNames.isEmpty) return 0.0;
 
   int truePositives = 0;
+  final Set<int> matchedTrueIdx = {};
+
   for (var pred in predNames) {
-    if (trueNames.any((t) => t.toLowerCase().contains(pred.toLowerCase()) || pred.toLowerCase().contains(t.toLowerCase()))) {
-      truePositives++;
+    for (int i = 0; i < trueNames.length; i++) {
+      if (!matchedTrueIdx.contains(i)) {
+        final t = trueNames[i];
+        if (t.toLowerCase().contains(pred.toLowerCase()) || pred.toLowerCase().contains(t.toLowerCase())) {
+          truePositives++;
+          matchedTrueIdx.add(i);
+          break; // move to next pred once matched
+        }
+      }
     }
   }
 
@@ -112,10 +121,11 @@ void main() {
       }
 
       for (int i = 0; i < iterations; i++) {
-        AiProfiler().startSession();
-        AiProfiler().startPhase('fileReadMs'); // Fake fileReadMs to keep profile complete
+        final profiler = AiProfileSession();
+        profiler.startPhase('totalMs');
+        profiler.startPhase('fileReadMs'); // Fake fileReadMs to keep profile complete
         await Future.delayed(const Duration(milliseconds: 10)); // simulated read
-        AiProfiler().endPhase('fileReadMs');
+        profiler.endPhase('fileReadMs');
         
         Map<String, dynamic>? result;
         try {
@@ -124,14 +134,19 @@ void main() {
             'image/jpeg',
             '',
             true, // skip cache
+            false,
+            null,
+            profiler,
           );
+          profiler.recordMetadata(terminalOutcome: TerminalOutcome.success);
         } catch (e) {
           print('Schema/API failure on $id iter $i: $e');
+          profiler.recordMetadata(terminalOutcome: TerminalOutcome.error, failureReason: e.toString());
           schemaFailures++;
         }
         
-        AiProfiler().endSession();
-        final session = AiProfiler().currentSession!.toMap();
+        profiler.endPhase('totalMs');
+        final session = profiler.toMap();
         
         allTotalMs.add(session['totalMs'] ?? 0);
         allNetworkMs.add(session['networkMs'] ?? 0);
